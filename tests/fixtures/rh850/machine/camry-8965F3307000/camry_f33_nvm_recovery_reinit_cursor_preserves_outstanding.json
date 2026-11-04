@@ -1,0 +1,144 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_nvm_recovery_reinit_cursor_preserves_outstanding",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe1000"
+  },
+  "max_instructions": 12000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1e00",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack scratch, not persistent/object RAM initialization."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Synthetic priority-mask nesting depth0; PMR=FF00, no outer frame."
+    },
+    {
+      "address": "0xfebf0308",
+      "hex": "3131313131213131313131313131313131313131313131313131313131313131",
+      "evidence": "Synthetic family0 public statuses, exactly32 counted entries;31 terminal rather than outstanding20."
+    },
+    {
+      "address": "0xfebf0328",
+      "hex": "31313131313131313131313131313131",
+      "evidence": "Synthetic family1 public raw statuses, exactly16 counted entries."
+    },
+    {
+      "address": "0xfebf1088",
+      "hex": "64646464646464646464646464646464",
+      "evidence": "Synthetic family1 encoded55 status replicas."
+    },
+    {
+      "address": "0xfebf10ac",
+      "hex": "9b9b9b9b9b9b9b9b9b9b9b9b9b9b9b9b",
+      "evidence": "Synthetic family1 encodedAA status replicas."
+    },
+    {
+      "address": "0xfebf0690",
+      "hex": "ff00",
+      "evidence": "Synthetic family0/family1 acquisition busy bytes, original getters68924/68A4A."
+    },
+    {
+      "address": "0xfebf0673",
+      "hex": "00",
+      "evidence": "Synthetic extra readiness gate GP+4E73 with actualGP FEBEB800."
+    },
+    {
+      "address": "0xfebf0372",
+      "hex": "4000",
+      "evidence": "Synthetic object5 prior selected handle64."
+    },
+    {
+      "address": "0xfebf033d",
+      "hex": "ff",
+      "evidence": "Synthetic object5 pending completion."
+    },
+    {
+      "address": "0xfebf0680",
+      "hex": "33000500",
+      "evidence": "Synthetic family0 phase33, padding0, active object5."
+    },
+    {
+      "address": "0xfebf067c",
+      "hex": "00",
+      "evidence": "Synthetic family0 sticky failure latch."
+    },
+    {
+      "address": "0xfebf0488",
+      "hex": "ffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffff",
+      "evidence": "Synthetic 65 empty family0 request cells."
+    },
+    {
+      "address": "0xfebf0676",
+      "hex": "05000600",
+      "evidence": "Synthetic family0 scan5/probe6 cursors."
+    },
+    {
+      "address": "0xfebe1000",
+      "hex": "3f060e10befe21064673060061003f061c10befe21061e6f060061002106980700006100",
+      "evidence": "Synthetic transparent call-only RAM sequencer: MOV imm32,Rn encoded (0620|n):u16 + immediate:u32 little-endian; JMP[r1]=6100; lp is next instruction. Calls intact 67346(), 66F1E(). Arguments are explicit software/media callback inputs; no state edits or firmware overlays."
+    }
+  ],
+  "checks": [
+    {
+      "name": "PC",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "r10",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0x0"
+    },
+    {
+      "name": "Only scan/probe cursors reset",
+      "kind": "memory",
+      "address": "0xfebf0676",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "Outstanding public status retained",
+      "kind": "memory",
+      "address": "0xfebf030d",
+      "size": 1,
+      "equals_hex": "21"
+    },
+    {
+      "name": "Busy remains outstanding",
+      "kind": "memory",
+      "address": "0xfebf0690",
+      "size": 1,
+      "equals_hex": "ff"
+    },
+    {
+      "name": "Active transaction remains",
+      "kind": "memory",
+      "address": "0xfebf0680",
+      "size": 4,
+      "equals_hex": "33000500"
+    }
+  ]
+}

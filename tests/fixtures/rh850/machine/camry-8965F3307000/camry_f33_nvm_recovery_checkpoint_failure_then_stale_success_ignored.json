@@ -1,0 +1,86 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_nvm_recovery_checkpoint_failure_then_stale_success_ignored",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe1000"
+  },
+  "max_instructions": 12000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1e00",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack scratch, not persistent/object RAM initialization."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Synthetic priority-mask nesting depth0; PMR=FF00, no outer frame."
+    },
+    {
+      "address": "0xfebf0372",
+      "hex": "4000",
+      "evidence": "Synthetic selected prior ring slot64."
+    },
+    {
+      "address": "0xfebf033d",
+      "hex": "ff",
+      "evidence": "Synthetic pending object5 completion."
+    },
+    {
+      "address": "0xfebf0690",
+      "hex": "ff",
+      "evidence": "Synthetic outstanding acquisition busy."
+    },
+    {
+      "address": "0xfebe1000",
+      "hex": "2606070000002706410000002806010000003f062010befe21069e8e060061002606070000002706410000002806000000003f064010befe21069e8e060061002106980700006100",
+      "evidence": "Synthetic transparent call-only RAM sequencer: MOV imm32,Rn encoded (0620|n):u16 + immediate:u32 little-endian; JMP[r1]=6100; lp is next instruction. Calls intact 68E9E(r6=7,r7=41,r8=1), 68E9E(r6=7,r7=41,r8=0). Arguments are explicit software/media callback inputs; no state edits or firmware overlays."
+    }
+  ],
+  "checks": [
+    {
+      "name": "PC",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Late result cannot replace failure without a new pending operation",
+      "kind": "memory",
+      "address": "0xfebf033d",
+      "size": 1,
+      "equals_hex": "a5"
+    },
+    {
+      "name": "Late success cannot advance selected slot",
+      "kind": "memory",
+      "address": "0xfebf0372",
+      "size": 2,
+      "equals_hex": "4000"
+    },
+    {
+      "name": "Busy released by first completion",
+      "kind": "memory",
+      "address": "0xfebf0690",
+      "size": 1,
+      "equals_hex": "00"
+    }
+  ]
+}

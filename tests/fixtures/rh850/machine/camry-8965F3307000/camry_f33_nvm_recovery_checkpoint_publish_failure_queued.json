@@ -1,0 +1,146 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_nvm_recovery_checkpoint_publish_failure_queued",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe1000"
+  },
+  "max_instructions": 12000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1e00",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack scratch, not persistent/object RAM initialization."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Synthetic priority-mask nesting depth0; PMR=FF00, no outer frame."
+    },
+    {
+      "address": "0xfebf0308",
+      "hex": "3131313131213131313131313131313131313131313131313131313131313131",
+      "evidence": "Synthetic family0 public statuses, exactly32 counted entries;31 terminal rather than outstanding20."
+    },
+    {
+      "address": "0xfebf0328",
+      "hex": "31313131313131313131313131313131",
+      "evidence": "Synthetic family1 public raw statuses, exactly16 counted entries."
+    },
+    {
+      "address": "0xfebf1088",
+      "hex": "64646464646464646464646464646464",
+      "evidence": "Synthetic family1 encoded55 status replicas."
+    },
+    {
+      "address": "0xfebf10ac",
+      "hex": "9b9b9b9b9b9b9b9b9b9b9b9b9b9b9b9b",
+      "evidence": "Synthetic family1 encodedAA status replicas."
+    },
+    {
+      "address": "0xfebf0690",
+      "hex": "ff00",
+      "evidence": "Synthetic family0/family1 acquisition busy bytes, original getters68924/68A4A."
+    },
+    {
+      "address": "0xfebf0673",
+      "hex": "00",
+      "evidence": "Synthetic extra readiness gate GP+4E73 with actualGP FEBEB800."
+    },
+    {
+      "address": "0xfebf0372",
+      "hex": "4000",
+      "evidence": "Synthetic object5 previous committed slot64; expected next65."
+    },
+    {
+      "address": "0xfebf033d",
+      "hex": "ff",
+      "evidence": "Synthetic object5 lower completion pendingFF."
+    },
+    {
+      "address": "0xfebf0680",
+      "hex": "33000500",
+      "evidence": "Synthetic family0 write phase33 and active object5; padding00."
+    },
+    {
+      "address": "0xfebf067c",
+      "hex": "00",
+      "evidence": "Synthetic write-failure sticky latch initially clear."
+    },
+    {
+      "address": "0xfebf0488",
+      "hex": "22a50500ffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffff",
+      "evidence": "Synthetic 65 request cells; first is another object5 request, remaining64 empty."
+    },
+    {
+      "address": "0xfebe1000",
+      "hex": "2606070000002706410000002806010000003f062010befe21069e8e060061003f062e10befe2106dc74060061003f063c10befe21061e6f060061002106980700006100",
+      "evidence": "Synthetic transparent call-only RAM sequencer: MOV imm32,Rn encoded (0620|n):u16 + immediate:u32 little-endian; JMP[r1]=6100; lp is next instruction. Calls intact 68E9E(r6=7,r7=41,r8=1), 674DC(), 66F1E(). Arguments are explicit software/media callback inputs; no state edits or firmware overlays."
+    }
+  ],
+  "checks": [
+    {
+      "name": "PC",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "r10",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0x0"
+    },
+    {
+      "name": "Public terminal10/31 or outstanding20 chosen by original queue scan",
+      "kind": "memory",
+      "address": "0xfebf030d",
+      "size": 1,
+      "equals_hex": "20"
+    },
+    {
+      "name": "Lower callback result retained",
+      "kind": "memory",
+      "address": "0xfebf033d",
+      "size": 1,
+      "equals_hex": "a5"
+    },
+    {
+      "name": "Original router releases busy",
+      "kind": "memory",
+      "address": "0xfebf0690",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "Original completion clears phase/active object",
+      "kind": "memory",
+      "address": "0xfebf0680",
+      "size": 4,
+      "equals_hex": "0000ffff"
+    },
+    {
+      "name": "Failure latch records failure, not readiness",
+      "kind": "memory",
+      "address": "0xfebf067c",
+      "size": 1,
+      "equals_hex": "5a"
+    }
+  ]
+}

@@ -1,0 +1,182 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_nvm_recovery_checkpoint_failure_rearm_later_success",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe1000"
+  },
+  "max_instructions": 150000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1e00",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack scratch, not persistent/object RAM initialization."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Synthetic priority-mask nesting depth0; PMR=FF00, no outer frame."
+    },
+    {
+      "address": "0xfebf0308",
+      "hex": "3131313131313131313131313131313131313131313131313131313131313131",
+      "evidence": "Synthetic family0 public statuses, exactly32 counted entries;31 terminal rather than outstanding20."
+    },
+    {
+      "address": "0xfebf0328",
+      "hex": "31313131313131313131313131313131",
+      "evidence": "Synthetic family1 public raw statuses, exactly16 counted entries."
+    },
+    {
+      "address": "0xfebf1088",
+      "hex": "64646464646464646464646464646464",
+      "evidence": "Synthetic family1 encoded55 status replicas."
+    },
+    {
+      "address": "0xfebf10ac",
+      "hex": "9b9b9b9b9b9b9b9b9b9b9b9b9b9b9b9b",
+      "evidence": "Synthetic family1 encodedAA status replicas."
+    },
+    {
+      "address": "0xfebf0690",
+      "hex": "0000",
+      "evidence": "Synthetic family0/family1 acquisition busy bytes, original getters68924/68A4A."
+    },
+    {
+      "address": "0xfebf0673",
+      "hex": "00",
+      "evidence": "Synthetic extra readiness gate GP+4E73 with actualGP FEBEB800."
+    },
+    {
+      "address": "0xfebf0672",
+      "hex": "00",
+      "evidence": "Synthetic public-request hold gate0, matching original66BC8 software initialization before any lower hardware calls; original66D6E reads/reconciles this gate."
+    },
+    {
+      "address": "0xfebf10aa",
+      "hex": "55",
+      "evidence": "Synthetic XOR55 replica of public-request hold gate0; no hardware status is supplied."
+    },
+    {
+      "address": "0xfebf10ce",
+      "hex": "aa",
+      "evidence": "Synthetic XORAA replica of public-request hold gate0; original66C24 executes reconciliation."
+    },
+    {
+      "address": "0xfebe1400",
+      "hex": "1122334455667788",
+      "evidence": "Synthetic first changed object5 request payload."
+    },
+    {
+      "address": "0xfebe1410",
+      "hex": "99aabbccddeeff00",
+      "evidence": "Synthetic later changed object5 request payload."
+    },
+    {
+      "address": "0xfebf0372",
+      "hex": "ffff",
+      "evidence": "Synthetic object5 acquisition context initially has no selected ring handle; no lower hardware initialization is assumed."
+    },
+    {
+      "address": "0xfebf03bc",
+      "hex": "00000000",
+      "evidence": "Synthetic object5 initial generation0; both request arms and all later updates execute original firmware."
+    },
+    {
+      "address": "0xfebf033d",
+      "hex": "00",
+      "evidence": "Synthetic object5 initial idle acquisition completion0; original writer changes this to pendingFF."
+    },
+    {
+      "address": "0xfebe1000",
+      "hex": "3f060e10befe2106c072060061003f061c10befe21060a3f0700610026060500000027060014befe3f063610befe21066e6d060061003f064410befe21060a74060061002606400000002706368aaa222806010000003f066410befe21060a1d070061003f067210befe2106dc740600610026060500000027061014befe3f068c10befe21066e6d060061003f069a10befe21060a74060061002606400000002706368aaa222806000000003f06ba10befe21060a1d070061003f06c810befe2106dc74060061003f06d610befe21061e6f060061002106980700006100",
+      "evidence": "Synthetic transparent call-only RAM sequencer: MOV imm32,Rn encoded (0620|n):u16 + immediate:u32 little-endian; JMP[r1]=6100; lp is next instruction. Calls intact 672C0(), software-only logical initialization73F0A(), 66D6E(r6=5,r7=FEBE1400), 6740A(), 71D0A(r6=40,r7=22AA8A36,r8=1), 674DC(), 66D6E(r6=5,r7=FEBE1410), 6740A(), 71D0A(r6=40,r7=22AA8A36,r8=0), 674DC(), 66F1E(). Arguments are explicit software/media callback inputs; no state edits or firmware overlays. Full681F8 initialization is not bypassed or called: that separate path needs undocumented ICUSREG20 input."
+    }
+  ],
+  "checks": [
+    {
+      "name": "PC",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "r10",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0x1"
+    },
+    {
+      "name": "Later successful native request publishes status10",
+      "kind": "memory",
+      "address": "0xfebf030d",
+      "size": 1,
+      "equals_hex": "10"
+    },
+    {
+      "name": "First failed request left original sticky failure latch5A",
+      "kind": "memory",
+      "address": "0xfebf067c",
+      "size": 1,
+      "equals_hex": "5a"
+    },
+    {
+      "name": "Later completion result5A",
+      "kind": "memory",
+      "address": "0xfebf033d",
+      "size": 1,
+      "equals_hex": "5a"
+    },
+    {
+      "name": "Failure did not advance ring; later accepted expected first slot64",
+      "kind": "memory",
+      "address": "0xfebf0372",
+      "size": 2,
+      "equals_hex": "4000"
+    },
+    {
+      "name": "Each original arm advances generation, including failed attempt",
+      "kind": "memory",
+      "address": "0xfebf03bc",
+      "size": 4,
+      "equals_hex": "02000000"
+    },
+    {
+      "name": "Second public request updates mirror",
+      "kind": "memory",
+      "address": "0xfebef430",
+      "size": 8,
+      "equals_hex": "99aabbccddeeff00"
+    },
+    {
+      "name": "Exact native writer generation/payload/pad/complement encoding",
+      "kind": "memory",
+      "address": "0xfebf0708",
+      "size": 64,
+      "equals_hex": "0200000099aabbccddeeff00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000fdffffff"
+    },
+    {
+      "name": "Native logical result publication reflects supplied callback success0",
+      "kind": "memory",
+      "address": "0xfebf6080",
+      "size": 1,
+      "equals_hex": "00"
+    }
+  ]
+}

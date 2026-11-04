@@ -1,0 +1,158 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_nvm_recovery_reinit_family0_clears_public_not_acquisition",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe1000"
+  },
+  "max_instructions": 30000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1e00",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack scratch, not persistent/object RAM initialization."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Synthetic priority-mask nesting depth0; PMR=FF00, no outer frame."
+    },
+    {
+      "address": "0xfebf0308",
+      "hex": "3131313131213131313131313131313131313131313131313131313131313131",
+      "evidence": "Synthetic family0 public statuses, exactly32 counted entries;31 terminal rather than outstanding20."
+    },
+    {
+      "address": "0xfebf0328",
+      "hex": "31313131313131313131313131313131",
+      "evidence": "Synthetic family1 public raw statuses, exactly16 counted entries."
+    },
+    {
+      "address": "0xfebf1088",
+      "hex": "64646464646464646464646464646464",
+      "evidence": "Synthetic family1 encoded55 status replicas."
+    },
+    {
+      "address": "0xfebf10ac",
+      "hex": "9b9b9b9b9b9b9b9b9b9b9b9b9b9b9b9b",
+      "evidence": "Synthetic family1 encodedAA status replicas."
+    },
+    {
+      "address": "0xfebf0690",
+      "hex": "ff00",
+      "evidence": "Synthetic family0/family1 acquisition busy bytes, original getters68924/68A4A."
+    },
+    {
+      "address": "0xfebf0673",
+      "hex": "00",
+      "evidence": "Synthetic extra readiness gate GP+4E73 with actualGP FEBEB800."
+    },
+    {
+      "address": "0xfebf0372",
+      "hex": "4000",
+      "evidence": "Synthetic object5 prior selected handle64."
+    },
+    {
+      "address": "0xfebf033d",
+      "hex": "ff",
+      "evidence": "Synthetic object5 pending completion."
+    },
+    {
+      "address": "0xfebf0680",
+      "hex": "33000500",
+      "evidence": "Synthetic family0 phase33, padding0, active object5."
+    },
+    {
+      "address": "0xfebf067c",
+      "hex": "00",
+      "evidence": "Synthetic family0 sticky failure latch."
+    },
+    {
+      "address": "0xfebf0488",
+      "hex": "ffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffff",
+      "evidence": "Synthetic 65 empty family0 request cells."
+    },
+    {
+      "address": "0xfebef430",
+      "hex": "1122334455667788",
+      "evidence": "Synthetic object5 mirror before application-family reinitialization."
+    },
+    {
+      "address": "0xfebe1000",
+      "hex": "3f060e10befe2106c072060061003f061c10befe21061e6f060061002106980700006100",
+      "evidence": "Synthetic transparent call-only RAM sequencer: MOV imm32,Rn encoded (0620|n):u16 + immediate:u32 little-endian; JMP[r1]=6100; lp is next instruction. Calls intact 672C0(), 66F1E(). Arguments are explicit software/media callback inputs; no state edits or firmware overlays."
+    }
+  ],
+  "checks": [
+    {
+      "name": "PC",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "r10",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0x0"
+    },
+    {
+      "name": "Application initializer clears exactly32 public statuses",
+      "kind": "memory",
+      "address": "0xfebf0308",
+      "size": 32,
+      "equals_hex": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "name": "Application initializer clears mirror",
+      "kind": "memory",
+      "address": "0xfebef430",
+      "size": 8,
+      "equals_hex": "0000000000000000"
+    },
+    {
+      "name": "Acquisition completion remains pending",
+      "kind": "memory",
+      "address": "0xfebf033d",
+      "size": 1,
+      "equals_hex": "ff"
+    },
+    {
+      "name": "Acquisition selected slot retained",
+      "kind": "memory",
+      "address": "0xfebf0372",
+      "size": 2,
+      "equals_hex": "4000"
+    },
+    {
+      "name": "Acquisition busy retained; ready stays false",
+      "kind": "memory",
+      "address": "0xfebf0690",
+      "size": 1,
+      "equals_hex": "ff"
+    },
+    {
+      "name": "Application phase and active object reset",
+      "kind": "memory",
+      "address": "0xfebf0680",
+      "size": 4,
+      "equals_hex": "0000ffff"
+    }
+  ]
+}

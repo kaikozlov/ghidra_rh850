@@ -1,0 +1,112 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_nvm_recovery_checkpoint_restore_bad_complement_keeps_prior",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0x68b2e"
+  },
+  "max_instructions": 12000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00",
+    "r6": "0x0",
+    "r7": "0x45",
+    "r8": "0xfebf0c88"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1e00",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack scratch, not persistent/object RAM initialization."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Synthetic priority-mask nesting depth0; PMR=FF00, no outer frame."
+    },
+    {
+      "address": "0xfebf0c88",
+      "hex": "7b00000011223344556677887e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7e7b000000",
+      "evidence": "Synthetic 64-byte object5 read staging record: generation:u32, payload8, padding48, complement:u32 at+3C."
+    },
+    {
+      "address": "0xfebf03bc",
+      "hex": "63000000",
+      "evidence": "Synthetic object5 previously selected generation."
+    },
+    {
+      "address": "0xfebf0372",
+      "hex": "4000",
+      "evidence": "Synthetic object5 selected handleFFFF or prior64."
+    },
+    {
+      "address": "0xfebef430",
+      "hex": "99aabbccddeeff00",
+      "evidence": "Synthetic object5 mirror canary before restore."
+    },
+    {
+      "address": "0xfebf0694",
+      "hex": "02",
+      "evidence": "Synthetic lower-media callback retry already exhausted2; failing callback must classify rather than enqueue."
+    },
+    {
+      "address": "0xfebf033d",
+      "hex": "ff",
+      "evidence": "Synthetic object5 pending completion."
+    }
+  ],
+  "checks": [
+    {
+      "name": "PC",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "r10",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0x5a"
+    },
+    {
+      "name": "Mirror changes only for valid selected candidate",
+      "kind": "memory",
+      "address": "0xfebef430",
+      "size": 8,
+      "equals_hex": "99aabbccddeeff00"
+    },
+    {
+      "name": "Selected handle disposition",
+      "kind": "memory",
+      "address": "0xfebf0372",
+      "size": 2,
+      "equals_hex": "4000"
+    },
+    {
+      "name": "Generation disposition",
+      "kind": "memory",
+      "address": "0xfebf03bc",
+      "size": 4,
+      "equals_hex": "63000000"
+    },
+    {
+      "name": "Final ring read result reflects existence of any selected candidate",
+      "kind": "memory",
+      "address": "0xfebf033d",
+      "size": 1,
+      "equals_hex": "5a"
+    }
+  ]
+}

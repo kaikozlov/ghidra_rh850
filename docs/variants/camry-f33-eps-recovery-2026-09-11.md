@@ -1272,6 +1272,119 @@ busy values in both families, non-rejecting busy values, the extra gate, and
 family-0 rejection short-circuiting family-1 repair. Thus a failed terminal
 operation can coexist with readiness; outstanding class-`20` work cannot.
 
+**Ordinary checkpoint completion.** The native descriptor table is `2AD8C`,
+not the related Sienna table. Object 5 has eight data bytes at `FEBEF430`
+and six ring handles `64..69`. `0x68C5E` accepts result zero only for the
+expected next handle: first handle when unselected (`FFFF`), next handle
+otherwise, wrapping after the last handle. It publishes acquisition result
+`5A` and advances the selected handle only on that accepted completion;
+failure, stale slot, and mismatched slot publish `A5` without advancement.
+The result router `0x68E9E` admits callbacks only while the object's acquisition
+result is `FF` and its descriptor is enabled. A later success callback cannot
+replace an already published failure without a new pending operation.
+
+`0x674DC` converts completed write phase `33` into public `10` or `31`,
+sets sticky failure latch `FEBF067C=5A` on failure, and clears active object
+and phase. Another queued request for the object overrides that public result
+with `20`. The 11 retained `checkpoint_write_*`, `checkpoint_publish_*`, and
+`checkpoint_failure_then_stale_success_ignored` scenarios passed exact-machine
+execution: both drained success and drained failure become ready; either
+outcome with another queued request remains unready.
+
+**Ordinary restore selection.** `0x68B2E` reads generation from shared staging
+`FEBF0C88`, checks the complement at record offset `max(length,56)+4`, and
+copies the payload only for an accepted candidate. With no prior selection,
+any valid pair is eligible. Otherwise the exact unsigned comparison is
+`(new_generation - selected_generation) <= C0000000`; equal generations
+replace the earlier candidate, difference `C0000000` is accepted, and
+`C0000001` is rejected. This is the compiled window, not an assumed
+half-range generation comparator. `FFFFFFFF -> 0` is accepted; the reverse
+is rejected. A bad complement or exhausted read failure preserves the prior
+candidate. At the final ring handle, completion is `5A` if any candidate
+exists and `A5` otherwise.
+
+**Triplicate restore.** The native descriptor table is `2AF0C`; object 0
+uses handles `2/6/10`, 16 bytes at `FEBEF468`, and three 32-byte staging
+lanes at `FEBF0B08`. `0x68CCA` votes each byte after XOR55/XORAA decoding.
+A pair is eligible only when neither copy has a failure-mask byte `5A`.
+Raw+AA is checked first, then raw+55, then 55+AA; the last case repairs the
+raw staging byte. Every byte needs an eligible agreeing pair, but the pair
+may differ between bytes. Any unresolved byte prevents the whole mirror
+copy and publishes `A5`; complete consensus publishes `5A`. The 22 retained
+`checkpoint_restore_*` and `triplicate_restore_*` scenarios passed
+exact-machine execution, including tie/window/wrap boundaries, invalid
+complements, unusable matching copies, a failed final copy, and changing
+per-byte majority pairs.
+
+**Consumer acceptance and rearming.** `0x67948` and `0x68144` copy the
+configured RAM mirror before returning public status; consumers decide
+whether to accept those bytes. `0x4825C` accepts the object-5 pair only
+with public `10`, otherwise substitutes `32000` for both values.
+`0x355F6` publishes four object-0 halfwords only with public `10`;
+`0x68144` also checks the native RAM checksum on that status.
+The four `consumer_*` fixtures chain genuine callback routing and public
+completion into these consumers with identical buffered bytes for the
+success/failure comparison; all four passed exact-machine execution.
+
+The `checkpoint_failure_rearm_later_success` fixture additionally uses
+original public request `0x66D6E`, request selection `0x6740A`, writer
+`0x6853E`, logical result publication `0x71D0A`, and completion `0x674DC`.
+ROM `26BFC=00068E9E` wires logical publication to the application router;
+the operation lookup at `275CC` maps write operation `22AA8A36` to event 7.
+Its two lower-result inputs are explicitly synthetic failure then success.
+Its lower queue is initialized by intact software-only `0x73F0A`; selected
+handle `FFFF`, generation zero, and idle completion zero are explicit synthetic
+starting acquisition scalars. It does not assume hardware initialization returned.
+The sequence passed exact-machine execution in 18,899 instructions. Its final
+state is public `10`, selected first slot 64, generation 2, the second payload,
+and the original sticky failure latch still `5A`. This distinguishes a new
+pending request from an ignored stale success.
+The native serialized payload is generation, eight payload bytes, 48 zero
+padding bytes, then complemented generation.
+
+**Reinitialization scope.** Original cursor reset `0x67346` clears only
+family-0 scan/probe cursors. Application initialization `0x672C0` clears
+family-0 requests, statuses, mirrors, phase, and active object; `0x679B8`
+does the corresponding family-1 work. Neither clears acquisition busy or
+completion results. Acquisition initialization `0x681F8` clears both busy
+bytes, acquisition completion arrays, selected handles/generations, and
+staging before entering its lower initialization chain. It leaves application
+public statuses untouched. These are distinct callable initialization scopes,
+not a host-modeled ECU power cycle.
+
+All six `reinit_*` fixtures passed their bounded exact-machine checks.
+Application-only initialization preserves acquisition `FF`, so a late
+successful callback can advance the selected slot and clear busy even
+though the application mirror was cleared and public status remains zero.
+The independent `reinit_result0_late_callback_gate` scenario exercises original
+callback rejection and readiness with explicit acquisition result zero and
+surviving application class `20`. It does not splice execution across a hardware
+initialization boundary.
+
+The full `0x681F8` sequence reaches an exact hardware-input prerequisite:
+`0x792FC` calls `0x78AE0` twice to read `FFC5D020` and uses the second
+read's bit 0. At the first original load, PC `78AE2`, registers
+`r6=ep=FFC5D020`. Model register `ICUSREG20` deliberately has no reset
+value or assigned bit meaning (`data/devices/p1me.rdl`). Renesas
+R01UH0585EJ0120 p.64 directs Security-function specification requests to
+the agent/distributor; it supplies no value for this register. The retained
+`reinit_acquisition_icus_input_boundary` scenario stops before that load
+and asserts the already executed software-state reset. Completing this
+hardware-dependent initialization requires authoritative `ICUSREG20`
+input/reset semantics; no success value is supplied.
+
+All 63 retained `camry_f33_nvm_recovery_*.json` scenarios passed their
+exact-machine checks, including this deliberately bounded hardware-input
+checkpoint. Run them with
+`tools/rh850 test firmware camry-8965F3307000 tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_nvm_recovery_*.json`.
+
+All media-result arguments and staged record bytes in these fixtures are
+explicitly synthetic inputs to original completion functions. No fixture
+supplies flash-success flags, overlays CodeFlash, or substitutes callbacks.
+The related-image structural description in [DataFlash](../storage/dataflash.md)
+was a navigation lead; the tables and branches above were independently read
+from the exact F33 source, original disassembly, and immutable ROM bytes.
+
 ### Why the ordinary reset and initial-setting ideas do not repair CodeFlash
 
 Cold-start recovery was rechecked from reset rather than inferred from the main

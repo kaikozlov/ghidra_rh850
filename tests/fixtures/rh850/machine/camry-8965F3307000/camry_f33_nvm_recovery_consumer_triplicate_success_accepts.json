@@ -1,0 +1,138 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_nvm_recovery_consumer_triplicate_success_accepts",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe1000"
+  },
+  "max_instructions": 12000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1e00",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack scratch, not persistent/object RAM initialization."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Synthetic priority-mask nesting depth0; PMR=FF00, no outer frame."
+    },
+    {
+      "address": "0xfebf0308",
+      "hex": "3131313131313131313131313131313131313131313131313131313131313131",
+      "evidence": "Synthetic family0 public statuses, exactly32 counted entries;31 terminal rather than outstanding20."
+    },
+    {
+      "address": "0xfebf0328",
+      "hex": "21313131313131313131313131313131",
+      "evidence": "Synthetic family1 public raw statuses, exactly16 counted entries."
+    },
+    {
+      "address": "0xfebf1088",
+      "hex": "74646464646464646464646464646464",
+      "evidence": "Synthetic family1 encoded55 status replicas."
+    },
+    {
+      "address": "0xfebf10ac",
+      "hex": "8b9b9b9b9b9b9b9b9b9b9b9b9b9b9b9b",
+      "evidence": "Synthetic family1 encodedAA status replicas."
+    },
+    {
+      "address": "0xfebf0690",
+      "hex": "00ff",
+      "evidence": "Synthetic family0/family1 acquisition busy bytes, original getters68924/68A4A."
+    },
+    {
+      "address": "0xfebf0673",
+      "hex": "00",
+      "evidence": "Synthetic extra readiness gate GP+4E73 with actualGP FEBEB800."
+    },
+    {
+      "address": "0xfebf0358",
+      "hex": "ff",
+      "evidence": "Synthetic object0 pending triplicate write completion."
+    },
+    {
+      "address": "0xfebf0698",
+      "hex": "00000000",
+      "evidence": "Synthetic copy result mask before first callback."
+    },
+    {
+      "address": "0xfebf0686",
+      "hex": "0000003302000000",
+      "evidence": "Synthetic family1 producer0/consumer0/span0/phase33/retry2/padding0/active object0."
+    },
+    {
+      "address": "0xfebf058c",
+      "hex": "ffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffff",
+      "evidence": "Synthetic 49 empty family1 request cells."
+    },
+    {
+      "address": "0xfebef468",
+      "hex": "a55a5aa5111122223333444400000000",
+      "evidence": "Synthetic object0 synthetic buffered learned-quad payload."
+    },
+    {
+      "address": "0xfebe6ae6",
+      "hex": "777788889999aaaa",
+      "evidence": "Synthetic application learned-quad output canary."
+    },
+    {
+      "address": "0xfebe1000",
+      "hex": "2606070000002706020000002806000000003f062010befe21069e8e060061002606070000002706060000002806000000003f064010befe21069e8e0600610026060700000027060a0000002806000000003f066010befe21069e8e060061003f066e10befe2106ca7c060061003f067c10befe2106f655030061002106980700006100",
+      "evidence": "Synthetic transparent call-only RAM sequencer: MOV imm32,Rn encoded (0620|n):u16 + immediate:u32 little-endian; JMP[r1]=6100; lp is next instruction. Calls intact 68E9E(r6=7,r7=2,r8=0), 68E9E(r6=7,r7=6,r8=0), 68E9E(r6=7,r7=A,r8=0), 67CCA(), 355F6(). Arguments are explicit software/media callback inputs; no state edits or firmware overlays."
+    }
+  ],
+  "checks": [
+    {
+      "name": "PC",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Original terminal public status",
+      "kind": "memory",
+      "address": "0xfebf0328",
+      "size": 1,
+      "equals_hex": "10"
+    },
+    {
+      "name": "Consumer copies buffered values only with accepted public status and native checksum",
+      "kind": "memory",
+      "address": "0xfebe6ae6",
+      "size": 8,
+      "equals_hex": "1111222233334444"
+    },
+    {
+      "name": "Buffered payload persists independently of public acceptance",
+      "kind": "memory",
+      "address": "0xfebef468",
+      "size": 16,
+      "equals_hex": "a55a5aa5111122223333444400000000"
+    },
+    {
+      "name": "Final callback releases family1 busy",
+      "kind": "memory",
+      "address": "0xfebf0691",
+      "size": 1,
+      "equals_hex": "00"
+    }
+  ]
+}

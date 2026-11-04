@@ -1,0 +1,99 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_nvm_recovery_triplicate_restore_per_byte_different_pairs",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0x68cca"
+  },
+  "max_instructions": 12000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00",
+    "r6": "0x0",
+    "r7": "0xa"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1e00",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack scratch, not persistent/object RAM initialization."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Synthetic priority-mask nesting depth0; PMR=FF00, no outer frame."
+    },
+    {
+      "address": "0xfebf0b08",
+      "hex": "101112131415161718191a1b1c1d1e1f0000000000000000000000000000000045444746414043426d6c6f6e69686b6a000000000000000000000000000000009a9b98999e9f9c9db2b3b0b1b6b7b4b500000000000000000000000000000000",
+      "evidence": "Synthetic object0 copy stage, three32-byte lanes raw/XOR55/XORAA; only first16 bytes configured."
+    },
+    {
+      "address": "0xfebf0698",
+      "hex": "00000000",
+      "evidence": "Synthetic copy failure mask from earlier callbacks; byte masks5A mark unusable copies."
+    },
+    {
+      "address": "0xfebf0694",
+      "hex": "00",
+      "evidence": "Synthetic shared retry counter before final original read callback."
+    },
+    {
+      "address": "0xfebef468",
+      "hex": "c7c7c7c7c7c7c7c7c7c7c7c7c7c7c7c7",
+      "evidence": "Synthetic object0 mirror canary."
+    },
+    {
+      "address": "0xfebf0358",
+      "hex": "ff",
+      "evidence": "Synthetic object0 pending lower completion."
+    }
+  ],
+  "checks": [
+    {
+      "name": "PC",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "r10",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0x5a"
+    },
+    {
+      "name": "Mirror accepted only when every byte has two usable agreeing copies",
+      "kind": "memory",
+      "address": "0xfebef468",
+      "size": 16,
+      "equals_hex": "101112131415161718191a1b1c1d1e1f"
+    },
+    {
+      "name": "Copy consensus completion",
+      "kind": "memory",
+      "address": "0xfebf0358",
+      "size": 1,
+      "equals_hex": "5a"
+    },
+    {
+      "name": "Exact failed-copy mask retained",
+      "kind": "memory",
+      "address": "0xfebf0698",
+      "size": 4,
+      "equals_hex": "00000000"
+    }
+  ]
+}
