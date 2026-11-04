@@ -170,8 +170,8 @@
     },
     "0x04C1C0": {
       "body_size": 86,
-      "decompiled_c_sha256": "c8ebea1a4cd8f25c4f38280f94286d1b61b46f3b2cce45e401b676feff8e98a5",
-      "role": "0x351 debounce/state preparation"
+      "decompiled_c_sha256": "7b1e662532061bebf84fc6fdb180873fdbe1e7fde12933aca085588065e7f3bb",
+      "role": "0x351 generation-bounded base-status hold"
     },
     "0x04C216": {
       "body_size": 34,
@@ -195,17 +195,17 @@
     },
     "0x04C380": {
       "body_size": 82,
-      "decompiled_c_sha256": "cf671426223f3bcfa3ffe0c5f2f26446fb9c05f62b9df6cc1436860779316872",
+      "decompiled_c_sha256": "5035d290e809673e740779b7e46793ce2d4fae73e15767c31d199ec58f4b847d",
       "role": "0x030 signed feedback scaling"
     },
     "0x04C3D2": {
       "body_size": 190,
-      "decompiled_c_sha256": "5fbd3ab6f386803ee07d6503734e796d3013307b180cee021cac468549c2696f",
+      "decompiled_c_sha256": "fb4613e6168eb16bbbd67edb007df7cd4deb89765ac5c9fbb7b26b4942249107",
       "role": "0x030 position/status projection"
     },
     "0x04C490": {
       "body_size": 256,
-      "decompiled_c_sha256": "4f6a0b41f5e2f390553cf714797fcaf9c1c5ba4973abf1e1aa3500acb8a0cdee",
+      "decompiled_c_sha256": "9431a0ef4ded545cb1575e430a352f6b83537e8dd59bee348e2df63e2fc6f1e0",
       "role": "0x030 torque/current staging"
     },
     "0x04C738": {
@@ -250,32 +250,32 @@
     },
     "0x07BF60": {
       "body_size": 176,
-      "decompiled_c_sha256": "b0a3af1129f6b81cccd824ee84c50a35d0b5f5dc8ef07851b68156302cae981f",
+      "decompiled_c_sha256": "df295acd885045f21153db7434495373c8ba599fc46a0fdbbce21ce7f817b648",
       "role": "generated-COM group-mask distributor"
     },
     "0x07D1DC": {
       "body_size": 322,
-      "decompiled_c_sha256": "cc196edbef921be1960488241d06b93cd5de04abb7cc7c3bdf6a3309ef700b9d",
+      "decompiled_c_sha256": "6952f92600bbb4584fb2f410c3da6473772a574d4ac2208c3f541d23a6925d82",
       "role": "generated-COM change-aware pack helper"
     },
     "0x07D31E": {
       "body_size": 184,
-      "decompiled_c_sha256": "65b43831150b467658fde173531b03c8bfb48cd0d90e464e840c3e4c213d36dc",
+      "decompiled_c_sha256": "0a9023895274c23da7b16d4d089439119d37944869ad27847035fbc3c34c32e9",
       "role": "generated-COM raw pack helper"
     },
     "0x07D8AE": {
       "body_size": 520,
-      "decompiled_c_sha256": "f3f7f7aa2793e45a1464ba6e89d41f6ea80e9fc50596c9c2a5a8cfc06c712b96",
+      "decompiled_c_sha256": "efdb3b566650b05bbe3fa3001891e1b2a8b58693de1cc4508cbad527b96eb9af",
       "role": "generated-COM group activation / timer arming"
     },
     "0x07DB0C": {
       "body_size": 404,
-      "decompiled_c_sha256": "d3d94a10d00a5809f799d3ddb95c244dc27bc7bf04d6633bd6787a9f26bce5a6",
+      "decompiled_c_sha256": "97b51e90c11a413412ac37272a656d6ef58191530c7d75b1a8a8a2c5b435c14d",
       "role": "generated-COM cyclic timer service"
     },
     "0x07DF14": {
       "body_size": 306,
-      "decompiled_c_sha256": "4b9576c6d121f02ba17112d0da18d9f9c5ac831b657573698f98c88f743624fe",
+      "decompiled_c_sha256": "36fdbd6823b9c850ee0326c7ab95514bbf8238f93fd0b7b25d21c66b9f260d9a",
       "role": "generated-COM transmit dispatcher"
     },
     "0x07E13A": {
@@ -285,12 +285,12 @@
     },
     "0x07FEF8": {
       "body_size": 160,
-      "decompiled_c_sha256": "b812c248e87afaedc08420addab8d32d3f0ce6a591d46fb5600f062b448887ef",
+      "decompiled_c_sha256": "ec601f6e3b59ac3441a4363a8b01c6ea4c5bfe0bd0b17d9f940c4c87af3af1a7",
       "role": "direct CanIf transmit class dispatcher"
     },
     "0x0805C6": {
       "body_size": 222,
-      "decompiled_c_sha256": "57fe701242e0b1acdf23607072922974cc042bde6e306ac56ac9b8dc37d5892e",
+      "decompiled_c_sha256": "1455e1cb673175062822d53d310ffd9174adc5c0cb6f3569ade68aba1c4fe753",
       "role": "CanIf HTH runtime initialization"
     },
     "0x081A7E": {
@@ -300,7 +300,7 @@
     },
     "0x081AB2": {
       "body_size": 112,
-      "decompiled_c_sha256": "ae3fcbfd436bb86cfbf1d3b17705bf43ea635463e6cecf99b9ec9ddcfb6587b6",
+      "decompiled_c_sha256": "ae472a17a817bad335d739ff2218564e0923dfde829d135f55ca0d807b17c55c",
       "role": "PduR lower-route dispatcher"
     },
     "0x085112": {
@@ -320,7 +320,7 @@
     },
     "0x08ED8E": {
       "body_size": 88,
-      "decompiled_c_sha256": "92fc77cc654aee84cb19902dbc9d675e808f80aaaeed5f7d469100961690bc89",
+      "decompiled_c_sha256": "d70eb93801cb050ab7cf3f329cd05b65bba414bcd7aa6e0f3d43ed5658cf34b1",
       "role": "SecOC transmit ingress"
     }
   },
@@ -1135,10 +1135,64 @@
         39
       ],
       "fault_join": {
-        "base_monitor_state": "FEBEBDE4 -> FEBEE82B -> 0x4C1C0 -> FEBE8100",
-        "boundary": "the force-7 path is a distinct broad status override; do not rename it C159B49 or temporary/permanent",
-        "debounce_count": 7,
-        "force_path": "0x4C216 writes code 7 and flag 1 when (FEBE6764&3)!=0 and FEBE8143!=0",
+        "ancillary_force": {
+          "banks": "0x3C116 retains then clears current and selects retained; 0x3C184 selects current",
+          "byte": "FEBE8143",
+          "clear": "0x4BFFA on mode crossing <0x100 to >=0x100 in 0x5F464; 0x59448 initializes both producer states",
+          "consumer_comparator": "any nonzero byte, not exact 0x5A",
+          "monitor_producers": [
+            {
+              "class_mask": 1,
+              "function": "0x400D0",
+              "kinds": [
+                "0x1D",
+                "0x32"
+              ],
+              "slot": 10,
+              "terminal": "FEBE7654 == 0x22"
+            },
+            {
+              "class_mask": 2,
+              "function": "0x402B0",
+              "kinds": [
+                "0x1E",
+                "0x32"
+              ],
+              "slot": 11,
+              "terminal": "FEBE765C == 0x22"
+            }
+          ],
+          "producer": "0x3C008 record +6 -> 0x3C6A8 -> 0x4C5E8",
+          "recompute": "every router call writes 0x5A iff ancillary aggregate & 0x8000, otherwise 0"
+        },
+        "base_monitor_state": "FEBEBDE4 -> FEBEE82B -> 0x4C1C0 -> 0x4C216 -> FEBE8100",
+        "boundary": "the related C159B49 label does not name the independent force predicate or the firmware class bits",
+        "evidence": {
+          "report": "docs/variants/camry-f33-eps-tx.md#5-0x351-base-status-and-qualified-action-override",
+          "retained_oracle_prefix": "camry_f33_forced351_"
+        },
+        "force_path": "0x4C216 recomputes FEBE8100/8101: code 7/flag 1 iff (FEBE6764&3)!=0 and FEBE8143!=0; otherwise supplied base/flag 0",
+        "hold": {
+          "calibration_address": "0x2FBF8",
+          "counter": "FEBE812B",
+          "function": "0x4C1C0",
+          "generation": "FEBE812A == FEBE5339",
+          "latch": "FEBE812C == 0x5A",
+          "override_clear": "active hold can retain code 7 with flag 0; without hold, restore current base input",
+          "release": "count >= hold_count or changed generation: clear latch/count, return current input; always save current generation",
+          "retain": "exact-5A latch, matching generation and count < hold_count: increment count, retain previous projected code",
+          "start": "projected FEBE8100 == 1 and input FEBEE82B == 0: return 0, reset count before generation check"
+        },
+        "hold_count": 7,
+        "qualified_class": {
+          "escalation": "multiple current bits or ROM[0x317DA]=0x3E1C match reduce to 0x8000; qualification bit15 is independent of ancillary bit15",
+          "low_bits": "bits 0/1 latch across empty input; disjoint 1->2 publishes 0x8001, 2->1 publishes 0x8002",
+          "producer": "0x3C008 record +8 -> 0x3BFCE -> 0x3BE88 -> 0x3BEDA -> 0x3BDC6",
+          "reset": "0x3BE52 on mode crossing <0x103 to >=0x103 in 0x5E444; aggregation follows, snapshot changes at next copy",
+          "snapshot": "FEBE6764",
+          "snapshot_writer": "0x5D6DC at 0x5DA46/0x5DA4A",
+          "word": "FEBE71EC"
+        },
         "related_techstream_dtc": {
           "code": "C159B49",
           "description": "Power Steering Motor \"B\" Terminal Voltage Detect Circuit",
@@ -1149,7 +1203,7 @@
         {
           "grade": "firmware",
           "producer": "0x4C1C0/0x4C216",
-          "role": "debounced electrical-monitor/status code; force path writes 7",
+          "role": "base status after generation-bounded hold, or forced code 7",
           "signal": 38,
           "source": "0xFEBE8100",
           "wire": "B2[7:5]"
@@ -1157,7 +1211,7 @@
         {
           "grade": "firmware",
           "producer": "0x4C216",
-          "role": "companion force/special-status flag",
+          "role": "force predicate at the last status refresh",
           "signal": 39,
           "source": "0xFEBE8101",
           "wire": "B2[4]"

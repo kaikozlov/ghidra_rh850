@@ -53,7 +53,7 @@ PACKERS = {
 FUNCTIONS = {
     0x4C000: "0x030/0x4A3 inhibit and feedback preparation",
     0x4C14E: "0x4A3 application staging",
-    0x4C1C0: "0x351 debounce/state preparation",
+    0x4C1C0: "0x351 generation-bounded base-status hold",
     0x4C216: "0x351 status/force producer",
     0x4C24A: "0x394 classifier projection",
     0x4C294: "0x030 status snapshot",
@@ -128,8 +128,8 @@ FIELDS: dict[int, list[dict[str, Any]]] = {
         {"signal": 35, "wire": "B27[0]", "source": "0xFEBE8151", "producer": "0x4C490", "role": "constant-clear in normal producer", "grade": "firmware"},
     ],
     1: [
-        {"signal": 38, "wire": "B2[7:5]", "source": "0xFEBE8100", "producer": "0x4C1C0/0x4C216", "role": "debounced electrical-monitor/status code; force path writes 7", "grade": "firmware"},
-        {"signal": 39, "wire": "B2[4]", "source": "0xFEBE8101", "producer": "0x4C216", "role": "companion force/special-status flag", "grade": "firmware"},
+        {"signal": 38, "wire": "B2[7:5]", "source": "0xFEBE8100", "producer": "0x4C1C0/0x4C216", "role": "base status after generation-bounded hold, or forced code 7", "grade": "firmware"},
+        {"signal": 39, "wire": "B2[4]", "source": "0xFEBE8101", "producer": "0x4C216", "role": "force predicate at the last status refresh", "grade": "firmware"},
     ],
     2: [
         {"signal": 40, "wire": "B1[7:6]", "source": "0xFEBE8105", "producer": "0x4C24A", "role": "classifier table column 4", "grade": "firmware"},
@@ -310,9 +310,9 @@ def analyze() -> dict[str, Any]:
         raise RuntimeError("missing C159B49 Techstream join")
 
     classifier = [list(image[0x2A19C + 5 * i:0x2A19C + 5 * (i + 1)]) for i in range(17)]
-    debounce_count = u32(0x2FBF8)
-    if debounce_count != 7:
-        raise RuntimeError(f"0x351 debounce calibration drift: {debounce_count}")
+    hold_count = image[0x2FBF8]
+    if hold_count != 7:
+        raise RuntimeError(f"0x351 hold calibration drift: {hold_count}")
 
     # One generated-COM Tx group owns all five normal PDUs.  The live RAM
     # snapshot is useful because it proves the group and all periodic timers
@@ -420,11 +420,47 @@ def analyze() -> dict[str, Any]:
         f"signals 36, 37 and 283 are assigned to PDU0 by the exact signal->PDU table but no literal call to either generated pack helper exists anywhere in the {len(rows):,}-function canonical corpus; no wire field is invented for them"
     )
     messages[1]["fault_join"] = {
-        "base_monitor_state": "FEBEBDE4 -> FEBEE82B -> 0x4C1C0 -> FEBE8100",
-        "debounce_count": debounce_count,
-        "force_path": "0x4C216 writes code 7 and flag 1 when (FEBE6764&3)!=0 and FEBE8143!=0",
+        "base_monitor_state": "FEBEBDE4 -> FEBEE82B -> 0x4C1C0 -> 0x4C216 -> FEBE8100",
+        "hold_count": hold_count,
+        "hold": {
+            "function": "0x4C1C0",
+            "calibration_address": "0x2FBF8",
+            "latch": "FEBE812C == 0x5A",
+            "generation": "FEBE812A == FEBE5339",
+            "counter": "FEBE812B",
+            "start": "projected FEBE8100 == 1 and input FEBEE82B == 0: return 0, reset count before generation check",
+            "retain": "exact-5A latch, matching generation and count < hold_count: increment count, retain previous projected code",
+            "release": "count >= hold_count or changed generation: clear latch/count, return current input; always save current generation",
+            "override_clear": "active hold can retain code 7 with flag 0; without hold, restore current base input",
+        },
+        "force_path": "0x4C216 recomputes FEBE8100/8101: code 7/flag 1 iff (FEBE6764&3)!=0 and FEBE8143!=0; otherwise supplied base/flag 0",
+        "qualified_class": {
+            "word": "FEBE71EC",
+            "snapshot": "FEBE6764",
+            "snapshot_writer": "0x5D6DC at 0x5DA46/0x5DA4A",
+            "producer": "0x3C008 record +8 -> 0x3BFCE -> 0x3BE88 -> 0x3BEDA -> 0x3BDC6",
+            "low_bits": "bits 0/1 latch across empty input; disjoint 1->2 publishes 0x8001, 2->1 publishes 0x8002",
+            "escalation": "multiple current bits or ROM[0x317DA]=0x3E1C match reduce to 0x8000; qualification bit15 is independent of ancillary bit15",
+            "reset": "0x3BE52 on mode crossing <0x103 to >=0x103 in 0x5E444; aggregation follows, snapshot changes at next copy",
+        },
+        "ancillary_force": {
+            "producer": "0x3C008 record +6 -> 0x3C6A8 -> 0x4C5E8",
+            "byte": "FEBE8143",
+            "recompute": "every router call writes 0x5A iff ancillary aggregate & 0x8000, otherwise 0",
+            "consumer_comparator": "any nonzero byte, not exact 0x5A",
+            "clear": "0x4BFFA on mode crossing <0x100 to >=0x100 in 0x5F464; 0x59448 initializes both producer states",
+            "banks": "0x3C116 retains then clears current and selects retained; 0x3C184 selects current",
+            "monitor_producers": [
+                {"function": "0x400D0", "terminal": "FEBE7654 == 0x22", "slot": 10, "kinds": ["0x1D", "0x32"], "class_mask": 1},
+                {"function": "0x402B0", "terminal": "FEBE765C == 0x22", "slot": 11, "kinds": ["0x1E", "0x32"], "class_mask": 2},
+            ],
+        },
         "related_techstream_dtc": dtc,
-        "boundary": "the force-7 path is a distinct broad status override; do not rename it C159B49 or temporary/permanent",
+        "boundary": "the related C159B49 label does not name the independent force predicate or the firmware class bits",
+        "evidence": {
+            "report": "docs/variants/camry-f33-eps-tx.md#5-0x351-base-status-and-qualified-action-override",
+            "retained_oracle_prefix": "camry_f33_forced351_",
+        },
     }
     messages[2]["classifier"] = {
         "internal_state_count": 17,

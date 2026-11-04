@@ -67,7 +67,7 @@ def main() -> int:
 
   p351 = msgs["0x351"]
   assert [r["wire"] for r in p351["fields"]] == ["B2[7:5]", "B2[4]"]
-  assert p351["fault_join"]["debounce_count"] == 7
+  assert p351["fault_join"]["hold_count"] == 7
 
   p394 = msgs["0x394"]
   assert [r["wire"] for r in p394["fields"]] == ["B1[7:6]", "B1[5:3]", "B2[3:1]", "B2[0]"]

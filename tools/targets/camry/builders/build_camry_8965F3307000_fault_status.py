@@ -124,8 +124,8 @@ def build() -> dict:
     need(projection[(0,0,0,0)] == [0], "all-zero 0x394 projection no longer uniquely state0")
     need(projection[(0,3,0,0)] == [1,3,4] and projection[(0,7,0,0)] == [2,16], "expected lossy projections drift")
 
-    # Target-native calibration words.  0x30E46 is the primary-clear enable age
-    # consumed by 0x5110A; 0x30E48/4A are the two startup holds in 0x512E4.
+    # Exact words span bank ages, an owner-4 request gate, startup holds and
+    # diagnostic-capture eligibility; their consumers have distinct comparisons.
     cal = [struct.unpack_from("<H", image, CAL + i)[0] for i in range(0, 14, 2)]
     need(cal == [200, 200, 600, 22170, 200, 200, 1000], f"F33 classifier calibration drift: {cal}")
 
@@ -251,12 +251,83 @@ def build() -> dict:
             "primary_latch_bank_355d_age": 200,
             "aggregate_latch_bank_355c_age": 200,
             "class2_class4_secondary_latch_age": 600,
-            "primary_clear_enable_age": 22170,
+            "request_level_clear_enable_threshold": cal[3],
+            "request_level_clear_enable_gate": {
+                "owner": "0x0005110A",
+                "threshold_address": "0x00030E46",
+                "snapshot_address": "0xFEBEE8B0",
+                "request_owner_index": 4,
+                "request_address": "0xFEBEBCC2",
+                "request_updater": "0x000BACA8",
+                "snapshot_publisher": "0x000BF3AA",
+                "comparison": ">=",
+                "unsigned_bits": 16,
+                "flag_banks": ["0xFEBE82A3", "0xFEBE82A4"],
+            },
             "startup_hold_a": 200,
             "startup_hold_b": 200,
-            "unnamed_following_word": 1000,
-            "comparison_to_h": {"h_primary_clear_enable_age": 17736, "f33_primary_clear_enable_age": 22170},
-            "boundary": "These are exact classifier/latch counter thresholds. No wall-clock or openpilot temporary/permanent meaning is inferred from the counters alone.",
+            "bank_dispatcher": "0x000511B6",
+            "banks": [
+                {"flags": "0xFEBE82A3", "activity": "0xFEBE82A6", "age": "0xFEBE82CA",
+                 "threshold_address": "0x00030E40", "threshold": cal[0], "owner": "0x0005110A", "request_gate": True},
+                {"flags": "0xFEBE82A4", "activity": "0xFEBE82A7", "age": "0xFEBE82CC",
+                 "threshold_address": "0x00030E42", "threshold": cal[1], "owner": "0x0005110A", "request_gate": True},
+                {"flags": "0xFEBE82A5", "activity": "0xFEBE82A8", "age": "0xFEBE82CE",
+                 "threshold_address": "0x00030E44", "threshold": cal[2], "owner": "0x0005116C", "request_gate": False},
+            ],
+            "bank_age_comparison": ">",
+            "bank_increment_comparison": "<=",
+            "bank_activity_reset_value": 0x5A,
+            "bank_update": "Only nonzero flag banks run. Consume activity 5A and reset age, then increment if age <= threshold. Clear the whole flag byte if resulting age > threshold and any request gate permits.",
+            "bank_hold": "Zero flag banks freeze age/activity. Already-over-threshold ages hold unchanged; normally advancing ages stop at 201/601, including when the request gate blocks clear.",
+            "startup_owner": "0x000512E4",
+            "startup_phases": [
+                {"row": 1, "flag": "0xFEBE82A1", "age": "0xFEBE82B6",
+                 "threshold_address": "0x00030E48", "threshold": cal[4], "clear_comparison": ">"},
+                {"row": 2, "flag": "0xFEBE82A2", "age": "0xFEBE82B8",
+                 "threshold_address": "0x00030E4A", "threshold": cal[5], "clear_comparison": ">="},
+            ],
+            "startup_update": "After injection/aging/input predicates, increment the active phase unsigned16 and publish its startup row before clearing its flag. Crossing calls retain that row; inactive phase counters hold.",
+            "bank_reset_owner": "0x00051592",
+            "bank_reset": "Clear active class counts and flag banks; load ages 200/200/600; preserve pending activity and startup flags/counters.",
+            "startup_rearm_owner": "0x000515D4",
+            "injection_latch": {
+                "owner": "0x000510B6",
+                "address": "0xFEBE82AF",
+                "source_address": "0xFEBE6764",
+                "source_mask": 0x8000,
+                "behavior": "Inject class02 only if latch != 5A and source bit15 is high; latch 5A holds for either source level.",
+                "reset_owner": "0x00059448",
+                "reset_store": "0x00059EB6",
+                "reset_value": 0,
+            },
+            "boundary": "Bank ages and startup holds count eligible classifier invocations; 22170 gates the owner-4 request level.",
+        },
+        "capture_eligibility": {
+            "owner": "0x00052DA4",
+            "threshold_address": "0x00030E4C",
+            "threshold_load": "0x00052DC0",
+            "threshold": cal[6],
+            "age_address": "0xFEBE6166",
+            "latch_address": "0xFEBE615A",
+            "increment_comparison": "<",
+            "eligible_comparison": ">=",
+            "unsigned_bits": 16,
+            "eligible_value": 0x5A,
+            "update": "When latch is zero, age < threshold increments; age >= threshold sets latch 5A and resets age to zero. Any nonzero latch holds both fields.",
+            "consumer": "0x00052E18",
+            "latch_clear_store": "0x00052EF4",
+            "capture_rule": "Second non-qualified capture requires latch 5A and a distinct nonzero DTC; accepted slot2/3 clears latch without resetting age. Qualified captures bypass this gate; the first non-qualified slot can be written before it.",
+            "initialization": "Capture initialization including 0x52F32 and 0x53092 sets latch 5A and age zero.",
+        },
+        "counter_scheduling": {
+            "foreground_chain": ["0x00066062", "0x000667E6", "0x00058B5E"],
+            "dispatchers": ["0x0005F464", "0x0005F91C"],
+            "minimum_mode": 0x102,
+            "classifier_generation_mask": 2,
+            "classifier_cadence": "Every other completed foreground generation when mode-qualified.",
+            "capture_cadence": "Every mode-qualified foreground generation through 0x52DE4.",
+            "boundary": "EIC136 pending requests are polled and can coalesce during delayed foreground work; no elapsed-time guarantee.",
         },
         "dem": {
             "event_table": f"0x{EVENT_TABLE:08X}",

@@ -1,14 +1,56 @@
 {
   "aging": {
     "aggregate_latch_bank_355c_age": 200,
-    "boundary": "These are exact classifier/latch counter thresholds. No wall-clock or openpilot temporary/permanent meaning is inferred from the counters alone.",
+    "bank_activity_reset_value": 90,
+    "bank_age_comparison": ">",
+    "bank_dispatcher": "0x000511B6",
+    "bank_hold": "Zero flag banks freeze age/activity. Already-over-threshold ages hold unchanged; normally advancing ages stop at 201/601, including when the request gate blocks clear.",
+    "bank_increment_comparison": "<=",
+    "bank_reset": "Clear active class counts and flag banks; load ages 200/200/600; preserve pending activity and startup flags/counters.",
+    "bank_reset_owner": "0x00051592",
+    "bank_update": "Only nonzero flag banks run. Consume activity 5A and reset age, then increment if age <= threshold. Clear the whole flag byte if resulting age > threshold and any request gate permits.",
+    "banks": [
+      {
+        "activity": "0xFEBE82A6",
+        "age": "0xFEBE82CA",
+        "flags": "0xFEBE82A3",
+        "owner": "0x0005110A",
+        "request_gate": true,
+        "threshold": 200,
+        "threshold_address": "0x00030E40"
+      },
+      {
+        "activity": "0xFEBE82A7",
+        "age": "0xFEBE82CC",
+        "flags": "0xFEBE82A4",
+        "owner": "0x0005110A",
+        "request_gate": true,
+        "threshold": 200,
+        "threshold_address": "0x00030E42"
+      },
+      {
+        "activity": "0xFEBE82A8",
+        "age": "0xFEBE82CE",
+        "flags": "0xFEBE82A5",
+        "owner": "0x0005116C",
+        "request_gate": false,
+        "threshold": 600,
+        "threshold_address": "0x00030E44"
+      }
+    ],
+    "boundary": "Bank ages and startup holds count eligible classifier invocations; 22170 gates the owner-4 request level.",
     "calibration_address": "0x00030E40",
     "class2_class4_secondary_latch_age": 600,
-    "comparison_to_h": {
-      "f33_primary_clear_enable_age": 22170,
-      "h_primary_clear_enable_age": 17736
+    "injection_latch": {
+      "address": "0xFEBE82AF",
+      "behavior": "Inject class02 only if latch != 5A and source bit15 is high; latch 5A holds for either source level.",
+      "owner": "0x000510B6",
+      "reset_owner": "0x00059448",
+      "reset_store": "0x00059EB6",
+      "reset_value": 0,
+      "source_address": "0xFEBE6764",
+      "source_mask": 32768
     },
-    "primary_clear_enable_age": 22170,
     "primary_latch_bank_355d_age": 200,
     "raw_u16": [
       200,
@@ -19,11 +61,64 @@
       200,
       1000
     ],
+    "request_level_clear_enable_gate": {
+      "comparison": ">=",
+      "flag_banks": [
+        "0xFEBE82A3",
+        "0xFEBE82A4"
+      ],
+      "owner": "0x0005110A",
+      "request_address": "0xFEBEBCC2",
+      "request_owner_index": 4,
+      "request_updater": "0x000BACA8",
+      "snapshot_address": "0xFEBEE8B0",
+      "snapshot_publisher": "0x000BF3AA",
+      "threshold_address": "0x00030E46",
+      "unsigned_bits": 16
+    },
+    "request_level_clear_enable_threshold": 22170,
     "startup_hold_a": 200,
     "startup_hold_b": 200,
-    "unnamed_following_word": 1000
+    "startup_owner": "0x000512E4",
+    "startup_phases": [
+      {
+        "age": "0xFEBE82B6",
+        "clear_comparison": ">",
+        "flag": "0xFEBE82A1",
+        "row": 1,
+        "threshold": 200,
+        "threshold_address": "0x00030E48"
+      },
+      {
+        "age": "0xFEBE82B8",
+        "clear_comparison": ">=",
+        "flag": "0xFEBE82A2",
+        "row": 2,
+        "threshold": 200,
+        "threshold_address": "0x00030E4A"
+      }
+    ],
+    "startup_rearm_owner": "0x000515D4",
+    "startup_update": "After injection/aging/input predicates, increment the active phase unsigned16 and publish its startup row before clearing its flag. Crossing calls retain that row; inactive phase counters hold."
   },
   "boundary": "Exact-F33 firmware closes 0x394 classifier structure, wire-state candidate mapping, DEM class census, DTC-record join, and aging constants. It does not convert those OEM internal states into openpilot temporary/permanent faults or prove 0x394 availability on the final relay-correct route.",
+  "capture_eligibility": {
+    "age_address": "0xFEBE6166",
+    "capture_rule": "Second non-qualified capture requires latch 5A and a distinct nonzero DTC; accepted slot2/3 clears latch without resetting age. Qualified captures bypass this gate; the first non-qualified slot can be written before it.",
+    "consumer": "0x00052E18",
+    "eligible_comparison": ">=",
+    "eligible_value": 90,
+    "increment_comparison": "<",
+    "initialization": "Capture initialization including 0x52F32 and 0x53092 sets latch 5A and age zero.",
+    "latch_address": "0xFEBE615A",
+    "latch_clear_store": "0x00052EF4",
+    "owner": "0x00052DA4",
+    "threshold": 1000,
+    "threshold_address": "0x00030E4C",
+    "threshold_load": "0x00052DC0",
+    "unsigned_bits": 16,
+    "update": "When latch is zero, age < threshold increments; age >= threshold sets latch 5A and resets age to zero. Any nonzero latch holds both fields."
+  },
   "classifier": {
     "class2_additional_injection": "0x000510B6",
     "class_accumulator": "0x00050FC8",
@@ -173,6 +268,22 @@
         0
       ]
     ]
+  },
+  "counter_scheduling": {
+    "boundary": "EIC136 pending requests are polled and can coalesce during delayed foreground work; no elapsed-time guarantee.",
+    "capture_cadence": "Every mode-qualified foreground generation through 0x52DE4.",
+    "classifier_cadence": "Every other completed foreground generation when mode-qualified.",
+    "classifier_generation_mask": 2,
+    "dispatchers": [
+      "0x0005F464",
+      "0x0005F91C"
+    ],
+    "foreground_chain": [
+      "0x00066062",
+      "0x000667E6",
+      "0x00058B5E"
+    ],
+    "minimum_mode": 258
   },
   "dem": {
     "class_byte_offset": 1,
@@ -4040,7 +4151,7 @@
     },
     "h_techstream_vocabulary": {
       "path": "data/generated/corolla_8965H1202000_techstream_correlations.json",
-      "sha256": "96c86a91ac85d209bcbc1072582f38b523fd25e899af800b55b84d48ce951ba1"
+      "sha256": "e16b546c68149f82ac67a6e61ab109b879c77bd780d32b331c75ce778a20293e"
     },
     "tx_contract": {
       "path": "data/generated/camry_8965F3307000_tss3_opendbc_port.json",

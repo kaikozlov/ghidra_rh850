@@ -74,7 +74,40 @@ def section_fault_status() -> int:
     check("calibration address exact", a["calibration_address"] == "0x00030E40")
     check("raw calibration words exact", a["raw_u16"] == [200, 200, 600, 22170, 200, 200, 1000])
     check("primary/aggregate/secondary ages exact", (a["primary_latch_bank_355d_age"], a["aggregate_latch_bank_355c_age"], a["class2_class4_secondary_latch_age"]) == (200, 200, 600))
-    check("F33 clear-enable age is target-specific", a["primary_clear_enable_age"] == 22170 and a["comparison_to_h"] == {"h_primary_clear_enable_age": 17736, "f33_primary_clear_enable_age": 22170})
+    check("owner4 request-level clear threshold exact", a["request_level_clear_enable_threshold"] == 22170)
+    gate = a["request_level_clear_enable_gate"]
+    check("request gate consumer and comparison exact", (
+        gate["owner"], gate["threshold_address"], gate["snapshot_address"],
+        gate["request_owner_index"], gate["request_address"], gate["comparison"], gate["unsigned_bits"],
+    ) == ("0x0005110A", "0x00030E46", "0xFEBEE8B0", 4, "0xFEBEBCC2", ">=", 16))
+    check("request gate applies to both 200 banks", gate["flag_banks"] == ["0xFEBE82A3", "0xFEBE82A4"])
+    check("bank state and consumers exact", [
+        (b["flags"], b["activity"], b["age"], b["threshold_address"], b["threshold"], b["owner"], b["request_gate"])
+        for b in a["banks"]
+    ] == [
+        ("0xFEBE82A3", "0xFEBE82A6", "0xFEBE82CA", "0x00030E40", 200, "0x0005110A", True),
+        ("0xFEBE82A4", "0xFEBE82A7", "0xFEBE82CC", "0x00030E42", 200, "0x0005110A", True),
+        ("0xFEBE82A5", "0xFEBE82A8", "0xFEBE82CE", "0x00030E44", 600, "0x0005116C", False),
+    ])
+    check("bank comparisons and activity reset exact", (
+        a["bank_dispatcher"], a["bank_age_comparison"], a["bank_increment_comparison"], a["bank_activity_reset_value"],
+    ) == ("0x000511B6", ">", "<=", 0x5A))
+    check("startup consumers and comparisons exact", a["startup_owner"] == "0x000512E4" and [
+        (p["row"], p["flag"], p["age"], p["threshold_address"], p["threshold"], p["clear_comparison"])
+        for p in a["startup_phases"]
+    ] == [
+        (1, "0xFEBE82A1", "0xFEBE82B6", "0x00030E48", 200, ">"),
+        (2, "0xFEBE82A2", "0xFEBE82B8", "0x00030E4A", 200, ">="),
+    ])
+    capture = art["capture_eligibility"]
+    check("capture eligibility counter owner exact", (
+        capture["owner"], capture["threshold_address"], capture["threshold_load"],
+        capture["threshold"], capture["age_address"], capture["latch_address"],
+    ) == ("0x00052DA4", "0x00030E4C", "0x00052DC0", 1000, "0xFEBE6166", "0xFEBE615A"))
+    check("capture comparisons and consumer exact", (
+        capture["increment_comparison"], capture["eligible_comparison"], capture["unsigned_bits"],
+        capture["eligible_value"], capture["consumer"], capture["latch_clear_store"],
+    ) == ("<", ">=", 16, 0x5A, "0x00052E18", "0x00052EF4"))
 
     print("\n== target-native DEM/DTC census ==")
     d = art["dem"]

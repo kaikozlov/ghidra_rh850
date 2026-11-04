@@ -174,45 +174,93 @@ is the value. In the retained Camry `f700fd007c00a9000000` response that
 support bit is clear, so this monitor is unavailable. See the
 [GTS length/support contract](../tooling/techstream.md#brake-monitor-response-length-and-field-support).
 
-## 5. F33 latch/aging constants are not H constants
+## 5. Exact-F33 classifier ages, request gate and capture eligibility
 
-The classifier calibration words at exact F33 **`0x30E40`** are:
+The seven unsigned words at **`0x30E40`** are
+`[200, 200, 600, 22170, 200, 200, 1000]`, with distinct consumers:
 
-`[200, 200, 600, 22170, 200, 200, 1000]`.
+| ROM word | Owner | State / comparison |
+|---|---|---|
+| `0x30E40=200` | `0x5110A`, called by `0x511B6` | primary flags `FEBE82A3`, activity `FEBE82A6`, age `FEBE82CA`; clear when age **>200** and request gate permits |
+| `0x30E42=200` | `0x5110A`, called by `0x511B6` | aggregate flags `FEBE82A4`, activity `FEBE82A7`, age `FEBE82CC`; same clear rule |
+| `0x30E44=600` | `0x5116C`, called by `0x511B6` | retained class-02/04 flags `FEBE82A5`, activity `FEBE82A8`, age `FEBE82CE`; clear when age **>600** |
+| `0x30E46=22170` | `0x5110A` | unsigned owner-4 request snapshot **`FEBEE8B0 >= 22170`**, enabling A3/A4 clear |
+| `0x30E48=200` | `0x512E4` | startup A: `FEBE82B6 >200` |
+| `0x30E4A=200` | `0x512E4` | startup B: `FEBE82B8 >=200` |
+| `0x30E4C=1000` | `0x52DA4` | separate diagnostic-capture eligibility counter `FEBE6166` |
 
-Target-native use establishes:
+**Bank aging.** `0x511B6` calls the helpers only for nonzero flag banks;
+zero banks freeze both age and pending activity. Activity exactly `0x5A` is
+consumed and resets age before increment, producing age **1**. The helpers
+increment only while age is at or below its threshold, then clear the entire
+flag byte only when the resulting age is strictly above it. Thus 199→200 and
+599→600 retain flags; 200→201 and 600→601 can clear them. A3/A4 also require
+the request gate; A5 does not. A blocked gate holds a normally advancing age
+at 201; supplied already-over-threshold ages, including 65535, hold unchanged.
+Cleared banks freeze on subsequent calls. Decisive comparisons are
+`0x5113E..0x51154` and `0x5119A..0x511A6`.
 
-- primary class-latch age: `200`;
-- aggregate class-latch age: `200`;
-- class-`0x02`/`0x04` secondary-latch age: `600`;
-- primary-clear enable age: **`22,170`**;
-- two startup/settling holds: `200` and `200`.
+The request is published by `0xBF3AA` (`0xBF5CC..0xBF5D0` copies owner-4
+request `FEBEBCC2` to `FEBEE8B0`), after `0xBACA8` updates owner 4 through
+`0xBB736`. **22170 is a request-level threshold.**
+`0x50FC8` asserts class flags/activity and increments active class reference
+counts; `0x514BC` releases those counts without clearing the latched banks.
+Count increments are unsigned16; releases hold at zero. `0x51266` adds the
+status-22 edge contribution after bank aging, for consumption on the next call.
 
-The following `1000` word remains unnamed here. Most importantly, the F33
-primary-clear threshold is **22,170**, whereas the H calibration used **17,736**.
-The H number must not be transferred to Camry.
+**Startup and reset.** `0x512E4` runs injection, aging and input predicates
+before startup selection. With both startup flags `FEBE82A1/A2=5A`, it
+increments B6 and publishes row 1, then clears A1 only above 200. With A2=5A
+and A1 clear, it increments B8 and publishes row 2, then clears A2 at 200.
+From zero these take 201 and 200 eligible calls; each crossing call still
+publishes its startup row. Ordinary selection begins on the following call.
+Inactive phase counters hold; synthetic 65535 increments wrap to zero.
+`0x51592` clears class counts/banks and loads ages 200/200/600, preserving
+activity and startup state. `0x50FAE` only reloads those ages on mode entry.
+`0x515D4` separately rearms startup flags/counters; `0x515E6` composes both
+initializations.
 
-These are classifier counter thresholds. Without an independently proved counter
-period/context they are not promoted to a wall-clock temporary/permanent-fault
-policy.
+The class-02 source helper `0x510B6` injects only when `FEBE82AF !=5A`
+and source `FEBE6764` bit15 is high. Once set, **82AF stays 5A for either
+high or low input** (`0x510BA..0x510D8`); it does not refresh activity.
+Application-work-state initializer `0x59448` clears it at `0x59EB6`.
+Neither `0x51592` nor startup rearm `0x515D4` clears it.
+
+**Capture eligibility.** `0x52DA4` reads 1000 at `0x52DC0`. With latch
+`FEBE615A=0`, age below 1000 increments; age at or above 1000 resets to zero
+and sets the latch to 5A. Thus 999→1000 leaves the latch zero until the next
+call. Any nonzero latch freezes both fields. `capture_diagnostic_event`
+at `0x52E18` uses latch 5A and a distinct nonzero DTC to admit a second
+non-qualified capture; accepted slot-2/3 paths clear the latch at `0x52EF4`
+without resetting age. Qualified captures bypass this eligibility check;
+the first non-qualified slot can be written before it. Capture initialization
+paths including `0x52F32` and `0x53092` set latch 5A/age zero.
+
+**Scheduling and evidence.** The EIC136-polled foreground chain is
+`0x66062 -> 0x667E6 -> 0x58B5E -> (0x5F464 | 0x5F91C)`.
+Mode >=`0x102` dispatches capture aging every foreground generation and
+classifier aging only with generation-mask bit1, selected every other completed
+generation. The loop polls a pending request, so delayed work can coalesce
+timer requests. These are invocation counts, without elapsed-time guarantees.
+
+The 20 retained **`camry_f33_recovery_`** scenarios in
+`decomp/camry-8965F3307000/oracles.jsonl` reproduce bank/gate boundaries,
+capture eligibility, startup crossing and next-row behavior, sticky input
+interruption and reset scope. All executed as `verified-local-execution`:
+**2106 original instructions**, with no overlays or stubs. Inputs are synthetic,
+explicitly bounded owner state, external predicates and a 256-byte stack;
+no clocks or blanket-RAM initialization are supplied.
 
 ## 6. `0x351` force-status boundary
 
-Target-native F33 `0x3C008` walks 24 records and ORs several verified ushort
-fields. Its fourth aggregate flows to `0x3C6A8`; **aggregate bit15** causes
-`0x3C6A8 -> 0x4C5E8` to write `0x5A` into `GP-0x36BD`. F33 `0x4C216` then forces
-`0x351` status code **7** and sets its companion flag iff:
+The canonical [EPS Tx §5](camry-f33-eps-tx.md#5-0x351-base-status-and-qualified-action-override)
+owns the recovered qualification, snapshot, ancillary router, override and hold behavior.
+`FEBE6764` snapshots qualified action-class word `FEBE71EC`.
+Qualification bit15 is separate from bit15 of the selected records' fourth, ancillary aggregate.
+The latter recomputes `FEBE8143` as `5A` or zero.
 
-`(GP-0x509C & 3) != 0 && GP-0x36BD != 0`.
-
-Thus the force-7 topology is target-native and independent of the base status
-producer. What remains unnamed is the broad 16-bit status object at
-`GP-0x509C`: exact F33 references test bits 0, 1, and 15, but current evidence
-does not recover unique Toyota names for bits0/1. It is also **not** F33 DID
-`0x1156`; target DID1156 callback `0x4E4CE` reads `GP-0x5074` instead. No
-diagnostic name is transplanted onto `GP-0x509C`.
-
-If observed, `0x351` code7/flag identifies a distinct forced/special status input.
+F33 DID `0x1156` is a separate object: callback `0x4E4CE` reads `GP-0x5074`
+(`FEBE678C`), not the qualification snapshot at `GP-0x509C` (`FEBE6764`).
 
 ## 7. Openpilot mapping
 

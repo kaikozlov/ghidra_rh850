@@ -13,7 +13,7 @@ The exact F33 EPS has **five normal generated-COM transmit I-PDUs**:
 | PDU | CAN ID | Format | Bytes | Cycle | Role recovered from exact firmware | Protection |
 | ---: | ---: | --- | ---: | ---: | --- | --- |
 | 0 | `0x030` | CAN-FD | 32 | 10 ms / 100 Hz | protected EPS status, feedback, and cooperative-control state | inner additive checksum + SecOC `FV4 || MAC28` |
-| 1 | `0x351` | classic CAN | 4 | 1000 ms / 1 Hz | electrical-monitor/status projection | direct CanIf, no configured SecOC |
+| 1 | `0x351` | classic CAN | 4 | 1000 ms / 1 Hz | base status with generation-bounded hold and qualified-action override | direct CanIf, no configured SecOC |
 | 2 | `0x394` | classic CAN | 3 | 300 ms / 3.333 Hz | lossy projection of a 17-state internal fault/state classifier | direct CanIf, no configured SecOC |
 | 3 | `0x4A3` | classic CAN | 8 | 500 ms / 2 Hz | redundant steering-angle, driver-torque, motor-feedback, and status PDU | direct CanIf, no configured SecOC |
 | 4 | `0x4C8` | classic CAN | 8 | 980 ms / 1.0204 Hz | mostly constant compatibility/status template; exact OEM role unresolved | direct CanIf, no configured SecOC |
@@ -281,26 +281,87 @@ B27[7:2]
 
 Signals 36, 37 and 283 are assigned to PDU0 by the exact signal-to-PDU table but have no literal call to either generated pack helper anywhere in the complete 6,065-function canonical decompiler corpus. We therefore do not invent a wire position for them. This is a bounded negative: an opaque computed call, DMA, or code outside the recovered corpus would be a different mechanism.
 
-## 5. `0x351`: electrical-monitor/status projection
+## 5. `0x351`: base status and qualified-action override
 
-Wire-visible application fields:
-
-| Sig | Wire | Meaning |
+| Sig | Wire | Firmware role |
 | ---: | --- | --- |
-| 38 | B2[7:5] | debounced electrical-monitor/status code |
-| 39 | B2[4] | companion force/special-status flag |
+| 38 | B2[7:5] | base status after the generation-bounded hold, or forced code7 |
+| 39 | B2[4] | force predicate at the last status refresh |
 
-The base state follows:
+The base follows `FEBEBDE4 -> FEBEE82B -> 0x4C1C0 -> 0x4C216 -> FEBE8100`.
+`0xBF3AA` publishes the base snapshot at `0xBF5BA/0xBF5BE`.
+`0x4C238` calls the hold helper before the override helper.
+`0x4CED0` packs code/flag bytes `FEBE8100/8101` into signals38/39.
+B0, B1, B2[3:0], and B3 remain at their initial zero image absent another mechanism.
 
-```text
-FEBEBDE4 -> FEBEE82B -> 0x4C1C0 -> FEBE8100 -> signal 38
-```
+**Force predicate:** `(FEBE6764 & 3) != 0 && FEBE8143 != 0`.
+`0x4C216` recomputes both output bytes on every call: code7/flag1 when true, supplied base byte/flag0 otherwise.
+The upstream producer uses `5A`, but the comparison accepts **any nonzero byte**, including `01` and `A5`.
+Native anchors are `4C21E de9a` (low-two-bit test), `4C222 e009` (zero-byte comparison), and `4C226 0732` (forced7).
 
-`0x4C1C0` applies a calibration count of 7 before updating the projected state. `0x4C216` has a separate broad force path that writes code 7 and flag 1 when `(FEBE6764 & 3) != 0 && FEBE8143 != 0`.
+**Qualified classes and snapshot.** `FEBE6764` snapshots the 16-bit qualified action-class word `FEBE71EC`.
+`0x5D6DC` copies it at `5DA46 e40fedb9` and `5DA4A 800c`.
+`0x3C008` aggregates 24 selected records: selector `5A` chooses current `FEBE7200+12*i`, while `A5` chooses retained `FEBE7320+12*i`.
+Other selectors exclude the record.
+Only complement-valid `+8` class masks feed `0x3BFCE -> 0x3BE88 -> 0x3BEDA -> 0x3BDC6`.
+The `+6` ancillary masks aggregate independently without that complement check.
 
-This family is related to Toyota Techstream DTC `C159B49`, **Power Steering Motor "B" Terminal Voltage Detect Circuit / Internal Electronic Failure**, but the broad force-7 state is not equivalent to the DTC and should not be renamed after it.
+Let `Q` be the previous voted qualification and `C` the reduced current class.
+`0x3BE88` reduces zero to zero, one set bit to itself, and multiple set bits to `8000`.
+`0x3BEDA` then applies these rules:
 
-B0, B1, B2[3:0], and B3 remain at the initial zero image absent another mechanism.
+1. If `C & 3E1C` is nonzero, replace C with `8000` (ROM mask `317DA`).
+2. If C and Q are nonzero and disjoint, replace C with `8000`.
+3. If C is nonzero, publish `Q | C`.
+4. Otherwise retain Q, except clear bit14 when bit15 is clear.
+
+Thus class bit0 (`0001`) and class bit1 (`0002`) **remain latched across empty current input**.
+A disjoint change `Q=0001, C=0002` publishes `8001`.
+The reverse publishes `8002`, retaining the older low identity.
+Simultaneous current bits0/1 with Q=0 publish `8000`, without either low bit.
+
+**Independent ancillary force input.** `0x3C008` routes its fourth aggregate, the selected records' `+6` masks, through `0x3C6A8`.
+Every router call recomputes `FEBE8143`: `5A` when aggregate bit15 is set, zero otherwise.
+Native anchors `3C7EC dd360080`, `3C7F2 20365a00`, and `3C7F6 80fff2fd` reach unconditional setter `0x4C5E8`.
+The byte retains its value between router calls.
+Qualification bit15 and ancillary bit15 belong to different words.
+Qualification bit15 alone cannot satisfy the projection's low-bit test.
+
+Concrete producers `0x400D0/0x402B0` use terminal states `FEBE7654/765C`.
+At terminal status `22`, they emit action kinds `1D/1E` plus kind `32` into slots10/11 through `0x3C7FE -> 0x3C19C`.
+Kinds `1D/1E` emit class bit0/bit1 respectively.
+Kind `32` emits only ancillary `8000`.
+The retained synthetic cases execute terminal helper `0x6A6BA` with an admitted state and failing count201.
+These are firmware classes, not assigned Toyota diagnostic names.
+
+**Reset and republication.** `0x3BE52` clears qualification when `0x5E444` crosses from previous mode `<0x103` to current mode `>=0x103`.
+Real aggregation follows immediately and can republish a selected class.
+`FEBE6764` changes only on the next snapshot copy.
+`0x4BFFA` clears `FEBE8143` when `0x5F464` crosses from previous mode `<0x100` to current mode `>=0x100`.
+Initializer `0x59448` also clears both producer states.
+Later aggregation recomputes the ancillary byte from the selected bank.
+`0x3C116` retains the current record, selects retained, and clears current data/complements.
+`0x3C184` selects current again.
+Clearing current data alone therefore leaves selected retained actions eligible.
+
+**Generation-bounded hold.** `0x4C1C0` activates the hold only for previous projected code1 and current input0.
+That invocation returns0 immediately and resets the count before the generation check.
+The hold requires latch `FEBE812C` **exactly `5A`**.
+With matching saved/current generations (`FEBE812A == FEBE5339`) and count `FEBE812B < ROM[2FBF8]=7`, it increments the count.
+An existing hold returns the previous projected code.
+Count `>=7` or a generation change clears latch/count and returns current `FEBEE82B`.
+Without the exact-5A hold, it returns current input directly.
+Every invocation records the current generation.
+
+Consequently, clearing force can leave **code7/flag0** while an active hold retains a previously projected7.
+Without that hold, clearing either force predicate restores the base input immediately.
+The flag, rather than code7 alone, identifies force at that invocation.
+The prior Techstream relation remains `C159B49`, **Power Steering Motor "B" Terminal Voltage Detect Circuit / Internal Electronic Failure**.
+That relation does not name the independent force predicate.
+
+Evidence: exact registered CodeFlash, the native instruction anchors above, and retained **`camry_f33_forced351_`** oracles in `decomp/camry-8965F3307000/oracles.jsonl`.
+The parent-verified runs use original instructions, explicit synthetic inputs, and real callees, with no stubs or overlays.
+They establish finite-state transitions at those inputs, not physical causes, elapsed-time thresholds, or OEM fault classes.
 
 ## 6. `0x394`: internal fault/state classifier projection
 
