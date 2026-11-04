@@ -1799,6 +1799,7 @@ public class RunP1MEMachine extends GhidraScript {
                     || "faci-area-selector".equals(register.trigger)
                     || "faci-clock-notify".equals(register.trigger)
                     || "ecc-protected-control".equals(register.trigger)
+                    || "rscfd-fd-status".equals(register.trigger)
                     || "flmd-control".equals(register.trigger)) {
                 registerBeforeWrite = unsigned(memory(thread, register.address, register.size));
             }
@@ -2326,7 +2327,12 @@ public class RunP1MEMachine extends GhidraScript {
                 if (icusStartupStub != null && icusStartupStub.handles(word)) {
                     icusStartupStub.validateCommand(thread, register, word);
                 }
-                else if ((word & 0xffff) != 5) {
+                // Exact F33 8A8E4 issues (slot<<16)|7 for slots0..14;
+                // 8ACA8 issues the bare abort word3F. Accept writes only:
+                // neither operation has a simulated hardware reply.
+                else if ((word & 0xffff) != 5
+                        && !((word & 0xffff) == 7 && (word >>> 16) < 15)
+                        && word != 0x3f) {
                     throw fault("unsupported-icus-command", thread, register.address,
                         value.length, "write", register.evidence,
                         String.format("ICU-S command 0x%04X has no recovered state transition",
@@ -5963,6 +5969,10 @@ public class RunP1MEMachine extends GhidraScript {
             event.addProperty("command", word & 0xffff);
             event.addProperty("evidence", register.source_ref);
             trace.deviceEvents.add(event);
+            // Command7 and abort admission preserve every explicit hardware
+            // input. BUSY, STS2, errors and output are supplied by the scenario;
+            // a command write cannot create a completion or clear a reply.
+            if ((word & 0xffff) == 7 || word == 0x3f) return;
             RegisterDef status = requiredRegister(register.name, "status", register.status_register);
             RegisterDef secondary = requiredRegister(
                 register.name, "secondary-status", register.secondary_status_register);
@@ -6551,6 +6561,24 @@ public class RunP1MEMachine extends GhidraScript {
                     break;
                 case "dcra-input": handleDcraInput(register, value); break;
                 case "rscfd-transmit": handleRscfdWrite(thread, register, value); break;
+                case "rscfd-fd-counter-clear": {
+                    // Section17.2.2: classical mode maps this address to a rule word.
+                    if ((registerValue(registersByName.get("GRMCFG")) & 1) == 0) break;
+                    // Table17.103: requests clear only their counter and always read zero.
+                    long request = registerValue(register);
+                    RegisterDef status = requiredRegister(register.name, "status", register.status_register);
+                    long clear = ((request & 2) != 0 ? 0xff000000L : 0)
+                        | ((request & 1) != 0 ? 0x00ff0000L : 0);
+                    setRegisterValue(status.name, registerValue(status) & ~clear);
+                    setRegisterValue(register.name, 0);
+                    break;
+                }
+                case "rscfd-fd-status":
+                    if ((registerValue(registersByName.get("GRMCFG")) & 1) == 0) break;
+                    // Table17.104: only flags9:7 are W0C; counters/result are read-only.
+                    setRegisterValue(register.name, registerBeforeWrite
+                        & ~(register.writable_mask & ~registerValue(register)));
+                    break;
                 case "faci-command": handleFaciWrite(thread, register, value); break;
                 case "faci-access-status": {
                     long next = registerBeforeWrite

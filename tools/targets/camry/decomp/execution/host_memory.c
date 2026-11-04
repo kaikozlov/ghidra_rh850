@@ -768,6 +768,29 @@ static void camry_faci_command(uint32_t command) {
 static uint32_t camry_flash_write(uint32_t address, uint32_t value, uint32_t width) {
     if (camry_peripheral_file)
         return value;
+    /* R01UH0585EJ0120 Tables17.103-17.104: no counter progression is inferred. */
+    if (address >= 0xFFD20508u && address < 0xFFD20550u
+        && (camry_stored_value(0xFFD204FCu, 4) & 1u) != 0) {
+        uint32_t base = address & ~3u;
+        uint32_t channel = (base - 0xFFD20500u) / 0x20u;
+        uint32_t offset = (base - 0xFFD20500u) % 0x20u;
+        uint32_t shift = (address - base) * 8u;
+        if (channel < 3u && offset == 8u) {
+            uint32_t request = value << shift;
+            uint32_t status_address = base + 4u;
+            uint32_t clear = ((request & 2u) != 0 ? 0xFF000000u : 0)
+                | ((request & 1u) != 0 ? 0x00FF0000u : 0);
+            camry_store_value(status_address,
+                camry_stored_value(status_address, 4) & ~clear, 4);
+            return 0;
+        }
+        if (channel < 3u && offset == 12u) {
+            uint32_t written = width == 4u ? UINT32_MAX
+                : ((1u << (width * 8u)) - 1u) << shift;
+            uint32_t clear = ~(value << shift) & written & 0x380u;
+            return (camry_stored_value(base, 4) & ~clear) >> shift;
+        }
+    }
     if (address == 0xFFD51000u || address == 0xFFD51004u || address == 0xFFD51020u) {
         uint32_t mode = address == 0xFFD51020u ? value : camry_stored_value(0xFFD51020u, 1);
         if (mode != 0)

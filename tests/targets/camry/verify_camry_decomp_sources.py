@@ -262,6 +262,40 @@ int main(void) {
         camry_host_add_register(0xffd51004u, 4, 1u << 4, 3, 15);
         camry_write32(0xffd51004u, 0);
         assert(camry_read32(0xffd51004u) == 0xffffffffu);
+        camry_host_add_register(0xffd204fcu, 4, (1u << 1) | (1u << 2) | (1u << 4), 3, 15);
+        camry_write32(0xffd204fcu, 1); /* Explicit CAN FD register map. */
+        /* Same FD status vectors as the original-store machine scenarios. */
+        for (index = 0; index < 3; index += 1) {
+            uint32_t control = 0xffd20508u + (uint32_t)index * 0x20u;
+            uint32_t status = control + 4u;
+            uint32_t widths = (1u << 1) | (1u << 2) | (1u << 4);
+            camry_host_add_register(control, 4, widths, 3, 15);
+            camry_host_add_register(status, 4, widths, 3, 15);
+            camry_store_value(status, 0xaabb03ffu, 4);
+            camry_write32(control, 2);
+            assert(camry_read32(control) == 0);
+            assert(camry_read32(status) == 0x00bb03ffu);
+            camry_store_value(status, 0xaabb03ffu, 4);
+            camry_write32(control, 1);
+            assert(camry_read32(status) == 0xaa0003ffu);
+            camry_store_value(status, 0xaabb03ffu, 4);
+            camry_write32(control, 3);
+            assert(camry_read32(status) == 0x000003ffu);
+            camry_store_value(status, 0xaabb03ffu, 4);
+            camry_write32(status, 0x280u);
+            assert(camry_read32(status) == 0xaabb02ffu);
+            camry_write32(status, 0);
+            assert(camry_read32(status) == 0xaabb007fu);
+            camry_store_value(status, 0xaabb03ffu, 4);
+            camry_write8(status, 0); /* Only TDCVF7 is in the written byte. */
+            assert(camry_read32(status) == 0xaabb037fu);
+            camry_write16(status + 2u, 0);
+            assert(camry_read32(status) == 0xaabb037fu);
+        }
+        camry_write32(0xffd204fcu, 0); /* Classical GAFLP1_0 address alias. */
+        camry_store_value(0xffd2050cu, 0xaabb03ffu, 4);
+        camry_write32(0xffd2050cu, 0x280u);
+        assert(camry_read32(0xffd2050cu) == 0x280u);
         regions = camry_host_regions;
         registers = camry_host_registers;
         region_capacity = camry_host_region_capacity;
