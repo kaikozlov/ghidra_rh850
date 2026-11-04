@@ -312,6 +312,8 @@ def _update(path: Path, content: str, *, check: bool) -> bool:
 
 
 def generate(*, check: bool) -> list[Path]:
+    from tools.emulation.generate_p1me_faci import OUTPUT as FACI_OUTPUT, generate as generate_faci
+
     machine, registers, memory = _model()
     outputs = {
         MACHINE_OUTPUT: _json_text(machine),
@@ -319,6 +321,8 @@ def generate(*, check: bool) -> list[Path]:
         MEMORY_OUTPUT: _json_text(memory),
     }
     changed = [path for path, content in outputs.items() if _update(path, content, check=check)]
+    if generate_faci(check=check):
+        changed.append(FACI_OUTPUT)
     return changed
 
 

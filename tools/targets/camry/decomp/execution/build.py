@@ -21,6 +21,7 @@ INCLUDE = ROOT / "include"
 
 HOST_MEM = Path(__file__).with_name("host_memory.c")
 HOST_CPU = Path(__file__).with_name("host_cpu.c")
+FACI_HEADER = REPO_ROOT / "data/generated/p1me_faci.h"
 C_FLAGS = (
     "-std=c11", "-Wall", "-Wextra", "-Werror", "-fwrapv",
     "-ferror-limit=0",
@@ -62,6 +63,8 @@ def _compile_object(source: Path, flags: list[str], stamp: bytes) -> tuple[Path 
     digest.update(b"\0".join(item.encode() for item in flags))
     digest.update(stamp)
     digest.update(source.read_bytes())
+    if source == HOST_MEM:
+        digest.update(FACI_HEADER.read_bytes())
     key = digest.hexdigest()[:24]
     cache = REPO_ROOT / "build" / "cache" / "camry-verify"
     cache.mkdir(parents=True, exist_ok=True)

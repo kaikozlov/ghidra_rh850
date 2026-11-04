@@ -328,6 +328,7 @@ timeout = 1800
 tests = [
   "tests/targets/camry/verify_camry_decomp.py",
   "tests/targets/camry/verify_camry_decomp_sources.py",
+  "tests/tooling/verify_p1me_faci_shared.py",
 ]
 # Event-driven retained scenarios replay Ghidra timing when the local cache is absent.
 modes = ["local"]

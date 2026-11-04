@@ -5604,32 +5604,20 @@ public class RunP1MEMachine extends GhidraScript {
             if (command == 0x71) return;
             RegisterDef start = requiredRegister(register.name, "start-address", register.start_address_register);
             RegisterDef end = requiredRegister(register.name, "end-address", register.end_address_register);
-            long first = unsigned(memory(thread, start.address, start.size)) & 0x7fffc;
-            long last = unsigned(memory(thread, end.address, end.size)) & 0x7fffc;
+            long first = unsigned(memory(thread, start.address, start.size));
+            long last = unsigned(memory(thread, end.address, end.size));
             if (dataFlash == null) throw new IllegalStateException("FACI blank check lacks DataFlash region");
-            boolean decrement = (registerValue(mode) & 1) != 0;
-            if ((decrement ? first < last : first > last)
-                    || Math.max(first, last) + 4 > dataFlash.size || Math.abs(last - first) + 4 > 0x10000)
+            int decrement = (int)(registerValue(mode) & 1);
+            long[] result = new long[4];
+            P1MEFaci.blankCheck(dataFlashCells, first, last, dataFlash.size, decrement, result);
+            if (result[0] == 1)
                 throw fault("unsupported-faci-range", thread, register.address, value.length, "write",
                     register.evidence, "blank-check range must be ordered and contained in the registered DataFlash region");
-            faciBlankFirst = -1;
-            long scanned = 0;
-            for (long offset = first;; offset += decrement ? -4 : 4) {
-                int state = dataFlashCells == null ? 0 : dataFlashCells[(int)(offset / 4)];
-                if (state == 0 || state == 3)
-                    throw fault("missing-dataflash-cell-state", thread, dataFlash.start + offset, 4,
-                        "device", "scenario", "blank checking requires known erased/programmed cells; interrupted cells require erase");
-                scanned += 4;
-                if (state == 1) {
-                    faciBlankFirst = offset;
-                    break;
-                }
-                if (offset == last) break;
-            }
-            // Functional upper envelope: partial64B groups cost100us except a lone4B word (30us).
-            long remainder = scanned % 64;
-            faciBlankCycles = faciCycles((scanned / 64) * 100
-                + (remainder == 0 ? 0 : remainder == 4 ? 30 : 100));
+            faciBlankFirst = result[1];
+            if (result[0] == 2)
+                throw fault("missing-dataflash-cell-state", thread, dataFlash.start + result[3], 4,
+                    "device", "scenario", "blank checking requires known erased/programmed cells; interrupted cells require erase");
+            faciBlankCycles = faciCycles(result[2]);
         }
 
         void faciTransition(PcodeThread<byte[]> thread, RegisterDef register, int command,
@@ -5795,14 +5783,13 @@ public class RunP1MEMachine extends GhidraScript {
             faciDeadline = Long.MAX_VALUE;
             long access = registerValue(registersByName.get("FASTAT"));
             long previousStatus = registerValue(registersByName.get("FSTATR"));
-            long status = previousStatus | FSTATR_FRDY;
-            if ((access & FASTAT_ACCESS_ERROR_MASK) != 0) {
-                status |= FSTATR_ILGLERR;
-                access |= FASTAT_CMDLK;
-            }
-            if (faciOperation == 0x71) {
-                setRegisterValue("FBCSTAT", faciBlankFirst < 0 ? 0 : 1);
-                if (faciBlankFirst >= 0) setRegisterValue("FPSADDR", faciBlankFirst);
+            long[] result = new long[5];
+            P1MEFaci.complete(previousStatus, access, faciOperation, faciBlankFirst, result);
+            long status = result[0];
+            access = result[1];
+            if (result[2] >= 0) {
+                setRegisterValue("FBCSTAT", result[2]);
+                if (result[3] >= 0) setRegisterValue("FPSADDR", result[3]);
             }
             else if (faciOperation == 0x20 || faciOperation == 0xe8) {
                 if ((status & FSTATR_COMMAND_LOCK_MASK) != 0 || (access & FASTAT_CMDLK) != 0)
@@ -5828,7 +5815,7 @@ public class RunP1MEMachine extends GhidraScript {
             event.addProperty("evidence", "R01UH0615EJ0120 Tables4.7,4.15,6.2,sections6.3.8-6.3.15,9,Tables10.1,10.2; R01UH0585EJ0120 Table37.14,Table6.11");
             trace.deviceEvents.add(event);
             // FRDY's physical 0->1 completion edge, routed through the existing INTC.
-            if ((previousStatus & FSTATR_FRDY) == 0) requestInterrupt(executionThread, 379);
+            if (result[4] != 0) requestInterrupt(executionThread, 379);
             faciOperation = 0;
             faciTargetSize = 0;
         }
@@ -7674,6 +7661,30 @@ public class RunP1MEMachine extends GhidraScript {
         return report;
     }
 
+    static class InitializedBytesState extends BytesPcodeExecutorState {
+        InitializedBytesState(SleighLanguage language, PcodeStateCallbacks callbacks) {
+            super(new ghidra.pcode.exec.BytesPcodeExecutorStatePiece(language, callbacks) {
+                @Override
+                protected ghidra.pcode.exec.BytesPcodeExecutorStateSpace newSpace(AddressSpace space) {
+                    return new ghidra.pcode.exec.BytesPcodeExecutorStateSpace(language, space, this) {
+                        @Override
+                        public byte[] read(long offset, int size, Reason reason, PcodeStateCallbacks cb) {
+                            long end = offset + size - 1L;
+                            // The common fully initialized read needs no complement-range allocation.
+                            // Partial, empty and wrapping ranges retain Ghidra's callbacks and faults.
+                            if (size > 0 && Long.compareUnsigned(offset, end) <= 0
+                                    && Long.compareUnsigned(end, space.getMaxAddress().getOffset()) <= 0
+                                    && bytes.isInitialized(offset, end)) {
+                                return readBytes(offset, size, reason);
+                            }
+                            return super.read(offset, size, reason, cb);
+                        }
+                    };
+                }
+            });
+        }
+    }
+
     private JsonObject runScenario(
             RunContract contract, MachineSpec machineSpec, SleighLanguage language,
             Scenario scenario, byte[] codeflash, byte[] dataflash, Trace trace) throws Exception {
@@ -7687,7 +7698,7 @@ public class RunP1MEMachine extends GhidraScript {
         PcodeEmulator emulator = new PcodeEmulator(language, callbacks) {
             @Override
             protected PcodeExecutorState<byte[]> createSharedState() {
-                return new BytesPcodeExecutorState(language, callbacks.wrapFor(null)) {
+                return new InitializedBytesState(language, callbacks.wrapFor(null)) {
                     @Override
                     public void setVar(AddressSpace space, byte[] offset, int size,
                                        boolean quantize, byte[] value) {
@@ -7698,6 +7709,10 @@ public class RunP1MEMachine extends GhidraScript {
                         super.setVar(space, offset, size, quantize, value);
                     }
                 };
+            }
+            @Override
+            protected PcodeExecutorState<byte[]> createLocalState(PcodeThread<byte[]> thread) {
+                return new InitializedBytesState(language, callbacks.wrapFor(thread));
             }
             @Override
             protected PcodeUseropLibrary<byte[]> createUseropLibrary() {

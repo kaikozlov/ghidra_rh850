@@ -498,7 +498,9 @@ def _native_timing_identity(scenario: dict, code_sha: str) -> dict:
         "input_sha256": hashlib.sha256(canonical.encode("utf-8")).hexdigest(),
         "codeflash_sha256": code_sha,
         "model_sha256": MEMORY_MODEL_SHA256,
-        "primary_sha256": hashlib.sha256(SCRIPT.read_bytes()).hexdigest(),
+        "primary_sha256": hashlib.sha256(
+            SCRIPT.read_bytes() + b"\0" + SCRIPT.with_name("P1MEFaci.java").read_bytes()
+        ).hexdigest(),
     }
 
 

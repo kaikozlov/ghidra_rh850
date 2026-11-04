@@ -182,6 +182,11 @@ def check_fault_check_error_boundary(output_root: Path) -> None:
     check inspect uninitialized RAM. The report must retain the execution fault
     and publish each structured inspection error without fabricating equal bytes.
     """
+    partial_reads = [
+        ("0xFEBE00FF", 2, "0xFEBE00FF"),  # Initialized suffix.
+        ("0xFEBE0100", 2, "0xFEBE0101"),  # Initialized prefix.
+        ("0xFEBE0FFF", 3, "0xFEBE1000"),  # Hole across a storage-page boundary.
+    ]
     scenario = {
         "schema": "rh850-p1me-machine-scenario-v2",
         "name": "unmapped-write-preserves-fault-with-failing-checks",
@@ -202,6 +207,12 @@ def check_fault_check_error_boundary(output_root: Path) -> None:
         "memory": [{
             "address": "0xFEBE0100", "hex": "5a",
             "evidence": "initialized first operand; comparison source remains uninitialized",
+        }, {
+            "address": "0xFEBE0FFF", "hex": "5a",
+            "evidence": "initialized byte before a one-byte hole at the storage-page boundary",
+        }, {
+            "address": "0xFEBE1001", "hex": "a5",
+            "evidence": "initialized byte after the one-byte hole",
         }],
         "artifacts": [],
         "checks": [
@@ -226,6 +237,11 @@ def check_fault_check_error_boundary(output_root: Path) -> None:
                 "source_address": "0xFEBE0104",
                 "size": 1,
             },
+            *({
+                "name": f"partial RAM range {address}",
+                "kind": "memory", "address": address, "size": size,
+                "equals_hex": "00" * size,
+            } for address, size, _ in partial_reads),
         ],
         "expected_fault": {
             "kind": "unmapped-write",
@@ -269,6 +285,11 @@ def check_fault_check_error_boundary(output_root: Path) -> None:
             raise AssertionError(f"check must carry structured inspection fault: {row!r}")
         if row.get("actual") != "unavailable":
             raise AssertionError(f"failed inspection must not fabricate a value: {row!r}")
+    checks_by_name = {row["name"]: row for row in report["checks"]}
+    for address, _, missing in partial_reads:
+        error = checks_by_name[f"partial RAM range {address}"]["error"]
+        if error.get("address") != missing:
+            raise AssertionError(f"partial read lost its first uninitialized byte: {error!r}")
     for fragment in ("expected-fault", "fault=unmapped-write", "address=0xFF000000"):
         if fragment not in proc.stderr:
             raise AssertionError(

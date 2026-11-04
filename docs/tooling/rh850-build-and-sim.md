@@ -251,6 +251,9 @@ The machine has one owner for each layer:
    machine with `PcodeEmulator`, and enforces execute/read/write policy before
    each operation. One target session loads immutable images and model data
    once, then runs each scenario with fresh emulator state.
+   The concrete byte state uses Ghidra's initialized-range lookup for fully
+   initialized reads, avoiding complement-range allocation. Partial, empty
+   and wrapping reads use Ghidra's normal unknown-state callback path.
 6. Reports embed the resolved run contract, external inputs, explicit termination
    reason, check results, fault provenance, and a bounded recent-PC window.
    An output-inspection fault becomes a failed check with a structured `error`
@@ -541,12 +544,19 @@ keep newest-region overlay precedence and coherent LocalRAM aliases; device
 width, access, initialization and unmapped-address faults remain enforced.
 Clocked retained scenarios advance native FACI from the primary execution's bus
 identity/order and retired-instruction positions, even without external events.
-Read values and completion results are computed independently from declared
+Read values and completion results are computed from declared
 physical cells and the HSB quantum. Timing caches bind the complete retained
-scenario content, CodeFlash/model hashes and primary runner source hash; obsolete
+scenario content, CodeFlash/model hashes and primary runner/shared FACI source hash; obsolete
 name-only caches are not consumed. Native clock quanta must fit unsigned32.
 The native model supports clocked blank checks and forced stop; program/erase
 execution remains owned by the strict primary machine.
+
+`ghidra/scripts/emulate/P1MEFaci.java` owns the physical-cell scan, blank-check
+latency and completion decisions used by both paths. `tools/rh850 model update`
+mechanically emits its primitive integer method bodies as `data/generated/p1me_faci.h`;
+`model check` rejects stale output. Memory writes, scheduling and interrupt delivery
+stay with each caller. `camry_decomp` compares Java and generated C with `javac`,
+`java` and the existing host C compiler, including regeneration and syntax rejection.
 
 Each report embeds the resolved run contract: unique candidate count or
 dump-contract source, resolved entry, exact entry-instruction hash,

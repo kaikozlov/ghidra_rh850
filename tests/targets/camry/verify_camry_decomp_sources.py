@@ -525,6 +525,38 @@ const char *confirm_fault(void) {
             assert read_register("FBCSTAT") == 1
             assert read_register("FPSADDR") == (4 if decrement else 0)
 
+        # Exact word/group latency and the final physical cell in both directions.
+        for first, last, dirty, deadline, expected in (
+            (0, 0, None, 2400, None),
+            (0, 60, None, 8000, None),
+            (0, 64, None, 10400, None),
+            (0, 68, None, 16000, None),
+            (0, 68, 64, 10400, 64),
+            (68, 0, 4, 10400, 4),
+            (0x7FFC, 0x7FFC, None, 2400, None),
+            (0x7FFC, 0x7FF8, 0x7FF8, 8000, 0x7FF8),
+        ):
+            case = scenario(1, None, first > last)
+            values = {"FSADDR": first, "FEADDR": last}
+            for row in case["memory"]:
+                for name, value in values.items():
+                    if int(row["address"], 0) == int(registers[name]["address"]):
+                        row["hex"] = value.to_bytes(4, "little").hex()
+            case["dataflash_cells"] = [
+                {"address": hex(0xFF200000 + offset), "size": 4,
+                 "state": "programmed" if offset == dirty else "erased", "evidence": "Synthetic boundary cells"}
+                for offset in range(min(first, last), max(first, last) + 4, 4)
+            ]
+            install(case)
+            library.camry_write8(command, 0x71)
+            assert library.confirm_fault() is None
+            library.camry_native_advance(deadline - 1)
+            assert read_register("FSTATR") & ready == 0
+            library.camry_native_advance(deadline)
+            assert read_register("FSTATR") & ready == ready
+            assert read_register("FBCSTAT") == int(expected is not None)
+            assert read_register("FPSADDR") == (0x1234 if expected is None else expected)
+
         for quantum in (0, -1, True, 0x100000000):
             try:
                 memory.native_model_inputs(scenario(quantum))

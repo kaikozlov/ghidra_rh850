@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include "../../../../../data/generated/p1me_faci.h"
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -640,21 +641,21 @@ static uint64_t camry_faci_after(uint64_t cycles) {
 static void camry_faci_complete(void) {
     uint32_t access = camry_stored_value(0xFFA10010u, 1);
     uint32_t previous_status = camry_stored_value(0xFFA10080u, 4);
-    uint32_t status = previous_status | 0x8000u;
+    int64_t result[5];
+    p1me_faci_complete(previous_status, access, camry_faci_operation,
+        camry_faci_blank_first == UINT32_MAX ? -1 : (int64_t)camry_faci_blank_first, result);
+    uint32_t status = (uint32_t)result[0];
+    access = (uint32_t)result[1];
     camry_faci_deadline = UINT64_MAX;
-    if ((access & 0x88u) != 0) {
-        status |= 0x4000u;
-        access |= 0x10u;
-    }
-    if (camry_faci_operation == 0x71u) {
-        camry_store_value(0xFFA100D4u, camry_faci_blank_first == UINT32_MAX ? 0 : 1, 1);
-        if (camry_faci_blank_first != UINT32_MAX)
-            camry_store_value(0xFFA100D8u, camry_faci_blank_first, 4);
+    if (result[2] >= 0) {
+        camry_store_value(0xFFA100D4u, (uint32_t)result[2], 1);
+        if (result[3] >= 0)
+            camry_store_value(0xFFA100D8u, (uint32_t)result[3], 4);
     }
     camry_store_value(0xFFA10080u, status, 4);
     camry_store_value(0xFFA10010u, access, 1);
     /* INTFLENDNM is a synchronous edge request, even when EIMK masks delivery. */
-    if ((previous_status & 0x8000u) == 0)
+    if (result[4] != 0)
         camry_store_value(0xFFFFB2F6u, camry_stored_value(0xFFFFB2F6u, 2) | 0x1000u, 2);
     camry_faci_operation = 0;
 }
@@ -692,36 +693,20 @@ static void camry_faci_command(uint32_t command) {
             camry_faci_pending_command = command;
             return;
         }
-        first = camry_stored_value(0xFFA10030u, 4) & 0x7FFFCu;
-        last = camry_stored_value(0xFFA10034u, 4) & 0x7FFFCu;
+        first = camry_stored_value(0xFFA10030u, 4);
+        last = camry_stored_value(0xFFA10034u, 4);
         {
             int decrement = (camry_stored_value(0xFFA100D0u, 1) & 1u) != 0;
-            uint32_t low = first < last ? first : last;
-            uint32_t high = first > last ? first : last;
-            uint32_t offset;
-            uint32_t scanned = 0;
-            uint32_t remainder;
-            if ((decrement ? first < last : first > last)
-                || high >= CAMRY_DATAFLASH_SIZE || high - low + 4u > 0x10000u)
+            int64_t result[4];
+            p1me_faci_blankCheck(camry_dataflash_cells, first, last,
+                CAMRY_DATAFLASH_SIZE, decrement, result);
+            if (result[0] == 1)
                 camry_device_fault("unsupported-faci-range", 0xFFA20000u, 1, 1);
-            camry_faci_blank_first = UINT32_MAX;
-            for (offset = first;; offset = decrement ? offset - 4u : offset + 4u) {
-                uint8_t state = camry_dataflash_cells[offset / 4u];
-                if (state == 0)
-                    camry_device_fault("missing-dataflash-cell-state",
-                        CAMRY_DATAFLASH_BASE + offset, 4, 0);
-                scanned += 4u;
-                if (state == 1) {
-                    camry_faci_blank_first = offset;
-                    break;
-                }
-                if (offset == last)
-                    break;
-            }
-            /* Hardware manual Table37.14's functional upper envelope at 80MHz. */
-            remainder = scanned % 64u;
-            blank_cycles = ((uint64_t)(scanned / 64u) * 100u
-                + (remainder == 0 ? 0u : remainder == 4u ? 30u : 100u)) * 80u;
+            camry_faci_blank_first = (uint32_t)result[1];
+            if (result[0] == 2)
+                camry_device_fault("missing-dataflash-cell-state",
+                    CAMRY_DATAFLASH_BASE + (uint32_t)result[3], 4, 0);
+            blank_cycles = (uint64_t)result[2] * 80u;
         }
     }
     if (command == 0xD0u) {
