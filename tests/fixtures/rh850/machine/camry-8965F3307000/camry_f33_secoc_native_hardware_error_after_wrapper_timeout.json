@@ -1,0 +1,350 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_secoc_native_hardware_error_after_wrapper_timeout",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0x8f148"
+  },
+  "max_instructions": 300000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0xfebf2000",
+    "PSW": "0x20",
+    "PMR": "0xff00",
+    "r6": "0x0",
+    "r7": "0xfebf3000"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller-stack scratch; no persistent/global RAM initialization."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Synthetic priority-mask depth0; original push/pop thunks execute."
+    },
+    {
+      "address": "0xfebf1378",
+      "hex": "e1",
+      "evidence": "Synthetic idle tag-generation service marker read by original aggregate89E72."
+    },
+    {
+      "address": "0xfebf1390",
+      "hex": "e1",
+      "evidence": "Synthetic idle block-crypto service marker read by original aggregate89E72."
+    },
+    {
+      "address": "0xfebf139c",
+      "hex": "e1",
+      "evidence": "Synthetic idle key-update service marker read by original aggregate89E72."
+    },
+    {
+      "address": "0xfebf116c",
+      "hex": "d2",
+      "evidence": "Synthetic unlocked scheduler; original88362/88436 own acquisition/release."
+    },
+    {
+      "address": "0xfebf1170",
+      "hex": "000000000000000000000000",
+      "evidence": "Synthetic zero waiting/prepared/running invocation counters; original ticks advance them."
+    },
+    {
+      "address": "0xfebf1190",
+      "hex": "e100",
+      "evidence": "Synthetic initialized idle scheduler and clear pointer-corruption latch; callbacks are installed only by original891CC/89170."
+    },
+    {
+      "address": "0xfebf136c",
+      "hex": "e100",
+      "evidence": "Synthetic initialized idle ICU channel and clear corruption latch; no successful startup/key qualification is asserted."
+    },
+    {
+      "address": "0xfebf1328",
+      "hex": "00000000",
+      "evidence": "Synthetic no prior tracked command; original8A8E4 must install command7 on accepted staging."
+    },
+    {
+      "address": "0xfebf6cb0",
+      "hex": "00000e00",
+      "evidence": "Synthetic idle initialized DataFlash state0E, no active P/E operation (mode0). Original789E2 returns10 without FACI mutation."
+    },
+    {
+      "address": "0xfebf6ccd",
+      "hex": "0101ff",
+      "evidence": "Synthetic NvM service guard/paired guard/deferred bytes. Native7995C and, when deferred,79A94 produce suspension callbacks."
+    },
+    {
+      "address": "0xfebf6cd0",
+      "hex": "0000000000",
+      "evidence": "Synthetic NvM suspend state/mirror/notification inputs, no pending suspend notification."
+    },
+    {
+      "address": "0xfebe5528",
+      "hex": "24000000",
+      "evidence": "Synthetic authentication-input capacity36, matching original8F746 before8ECB2 serialization."
+    },
+    {
+      "address": "0xfebe5550",
+      "hex": "1c000000",
+      "evidence": "Synthetic B6 MAC bit-length28 from immutable ROM258EA; received tag bytes are produced by original8F434."
+    },
+    {
+      "address": "0xfebe5564",
+      "hex": "a7",
+      "evidence": "Synthetic caller-result canary; never supplied as an authentication verdict."
+    },
+    {
+      "address": "0xfebf3000",
+      "hex": "0100000004000000000000000000000000000000",
+      "evidence": "Synthetic software descriptor: type1, ICU selector4, twelve unused zero bytes. No key material or installed ICU key is supplied. Original8F148 stores and8F19A copies it."
+    },
+    {
+      "address": "0xfebf3020",
+      "hex": "11223344abcdef12",
+      "evidence": "Synthetic eight-byte B6 PDU: four payload bytes, freshness nibbleA, received tagBCDEF12 (28 bits)."
+    },
+    {
+      "address": "0xfebf3030",
+      "hex": "2030bffe08000000",
+      "evidence": "Synthetic native received-PDU pointer/length descriptor for profile2 extractor8F434."
+    },
+    {
+      "address": "0xfebf3040",
+      "hex": "cc",
+      "evidence": "Synthetic extracted freshness-byte canary; original8F434 produces AB, whose upper nibble is freshnessA."
+    },
+    {
+      "address": "0xfebf3050",
+      "hex": "34120000debc0a009a00022e",
+      "evidence": "Synthetic reconstructed freshness record trip1234/resetABCDE/message9A/reset-low2=2/length46; original90566 packs it. Reconstruction is covered by transition fixtures."
+    },
+    {
+      "address": "0xfebf3070",
+      "hex": "2e000000",
+      "evidence": "Synthetic full-freshness packing capacity46."
+    },
+    {
+      "address": "0xfebf3080",
+      "hex": "2030bffe6030bffeb600040006000000",
+      "evidence": "Synthetic serializer descriptor: DataID00B6, four original payload bytes and six native packed-freshness bytes."
+    },
+    {
+      "address": "0xffc5d000",
+      "hex": "00000000",
+      "evidence": "Synthetic no prior ICU command latch."
+    },
+    {
+      "address": "0xffc5d00c",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic initial ICU BUSY input; no reset value or execution inferred."
+    },
+    {
+      "address": "0xffc5d014",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic initial ICU companion-status input."
+    },
+    {
+      "address": "0xffc5d010",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic initial ICU error-word input0."
+    },
+    {
+      "address": "0xffc5d020",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic ICU offset20 bit0=0 permits native NvM suspend/resume software path; physical meaning remains unspecified."
+    },
+    {
+      "address": "0xfff82410",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic FHVE3 bit0=0 saved/restored by original87EF6/87EDC."
+    },
+    {
+      "address": "0xfff8a430",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic FHVE15 bit0=0 saved/restored by original87EF6/87EDC."
+    },
+    {
+      "address": "0xffffb248",
+      "hex": "8000",
+      "evidence": "Explicit masked EIC292 input for original completion acknowledgement."
+    },
+    {
+      "address": "0xffffb24a",
+      "hex": "8000",
+      "evidence": "Explicit masked EIC293 input for original completion acknowledgement."
+    },
+    {
+      "address": "0xfebf2000",
+      "hex": "2606000000002706a030bffe3f061a20bffe21069af1080061003f062820bffe2106928f080061003f063620bffe2106a4950800610026060200000027063030bffe28064030bffe3f065620bffe210634f40800610026065030bffe27066030bffe28067030bffe3f067620bffe210666050900610026068030bffe27062c55befe28062855befe3f069620bffe2106b2ec080061002606000000002706a030bffe3f06b020bffe210676f6080061000aa026060032bffe2706be13bffe2806020000003f06d220bffe21062e9f0800610026060432bffe27069011bffe2806010000003f06f220bffe21062e9f0800610026060832bffe27067c13bffe2806090000003f061221bffe21062e9f0800610026061432bffe27066c13bffe2806010000003f063221bffe21062e9f080061003f064021bffe21061491080061002106980700006100",
+      "evidence": "Synthetic call-only RAM sequencer: MOV argument registers/LP, JMP to intact original functions; preserves RAM across submit/start/poll/service ticks. MOV r10 to callee-saved r20/r21 retains native return codes. Snapshots use original memcpy89F2E. No callback injection, target-state stores, ROM overlays, or crypto substitutes."
+    }
+  ],
+  "checks": [
+    {
+      "name": "PC",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Original8F676 return2 is a polling timeout, not a verdict",
+      "kind": "register",
+      "register": "r20",
+      "equals": "0x2"
+    },
+    {
+      "name": "Original8ECB2 composes DataID/payload/full freshness",
+      "kind": "memory",
+      "address": "0xfebe552c",
+      "size": 12,
+      "equals_hex": "00b6112233441234abcde9a8"
+    },
+    {
+      "name": "Native input composition length12 bytes",
+      "kind": "memory",
+      "address": "0xfebe5528",
+      "size": 4,
+      "equals_hex": "0c000000"
+    },
+    {
+      "name": "Original8F434 extracts and left-aligns the received 28-bit tag",
+      "kind": "memory",
+      "address": "0xfebe5554",
+      "size": 4,
+      "equals_hex": "bcdef120"
+    },
+    {
+      "name": "No native failure/pending path creates a verifier result",
+      "kind": "memory",
+      "address": "0xfebe5564",
+      "size": 1,
+      "equals_hex": "a7"
+    },
+    {
+      "name": "Before subsequent ticks the synchronous wrapper has no completion",
+      "kind": "memory",
+      "address": "0xfebf3200",
+      "size": 2,
+      "equals_hex": "0001"
+    },
+    {
+      "name": "Wrapper timeout retains original selected handle0 owner",
+      "kind": "memory",
+      "address": "0xfebf3208",
+      "size": 9,
+      "equals_hex": "e87d02001782fdffa5"
+    },
+    {
+      "name": "Request remains running after synchronous timeout",
+      "kind": "memory",
+      "address": "0xfebf3204",
+      "size": 1,
+      "equals_hex": "b4"
+    },
+    {
+      "name": "Channel remains pending after synchronous timeout",
+      "kind": "memory",
+      "address": "0xfebf3214",
+      "size": 1,
+      "equals_hex": "d2"
+    },
+    {
+      "name": "Original error encoder retains explicit ICU error bit0 as1001",
+      "kind": "memory",
+      "address": "0xfebf1184",
+      "size": 4,
+      "equals_hex": "01100000"
+    },
+    {
+      "name": "Late native polling completes retained request with transport error",
+      "kind": "memory",
+      "address": "0xfebf13be",
+      "size": 2,
+      "equals_hex": "0101"
+    },
+    {
+      "name": "Native error releases scheduler",
+      "kind": "memory",
+      "address": "0xfebf1190",
+      "size": 1,
+      "equals_hex": "e1"
+    },
+    {
+      "name": "Native finalizer releases channel",
+      "kind": "memory",
+      "address": "0xfebf136c",
+      "size": 1,
+      "equals_hex": "e1"
+    },
+    {
+      "name": "Native error consumes service selection",
+      "kind": "memory",
+      "address": "0xfebf137c",
+      "size": 9,
+      "equals_hex": "00000000ffffffffe1"
+    },
+    {
+      "name": "Original8A600 acknowledgement executes",
+      "kind": "memory",
+      "address": "0xffc5d024",
+      "size": 4,
+      "equals_hex": "03000000"
+    },
+    {
+      "name": "Command issue and acknowledgement do not clear explicit error input",
+      "kind": "memory",
+      "address": "0xffc5d010",
+      "size": 4,
+      "equals_hex": "01000000"
+    },
+    {
+      "name": "Error completion consumes no MAC output",
+      "kind": "memory",
+      "address": "0xfebf1338",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "Original release resumes idle DataFlash state",
+      "kind": "memory",
+      "address": "0xfebf6cb2",
+      "size": 1,
+      "equals_hex": "0e"
+    },
+    {
+      "name": "Original release clears suspension state and mirror",
+      "kind": "memory",
+      "address": "0xfebf6cd0",
+      "size": 2,
+      "equals_hex": "0000"
+    }
+  ],
+  "events": [
+    {
+      "kind": "register-input",
+      "after_instructions": 10000,
+      "register": "ICUSSTS2",
+      "value": "0x2",
+      "evidence": "Explicit synthetic ICU-S register input, not a hardware observation, crypto output, or authentication verdict."
+    },
+    {
+      "kind": "register-input",
+      "after_instructions": 10000,
+      "register": "ICUSREG10",
+      "value": "0x1",
+      "evidence": "Explicit synthetic ICU-S register input, not a hardware observation, crypto output, or authentication verdict."
+    }
+  ]
+}

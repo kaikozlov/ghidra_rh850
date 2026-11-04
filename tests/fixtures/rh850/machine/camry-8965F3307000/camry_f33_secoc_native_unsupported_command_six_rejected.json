@@ -1,0 +1,83 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_secoc_native_unsupported_command_six_rejected",
+  "entry": {
+    "role": "retained-original-register-store",
+    "scope": "resolved-address",
+    "address": "0x8a9fc"
+  },
+  "max_instructions": 10,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "gp": "0xfebeb800",
+    "lp": "0x798",
+    "r1": "0x6"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xffc5d000",
+      "hex": "34120000",
+      "evidence": "Synthetic previous command latch; unsupported writes must be rejected before mutation."
+    },
+    {
+      "address": "0xffc5d00c",
+      "hex": "01000000",
+      "evidence": "Explicit synthetic BUSY input."
+    },
+    {
+      "address": "0xffc5d014",
+      "hex": "02000000",
+      "evidence": "Explicit synthetic STS2 input."
+    },
+    {
+      "address": "0xffc5d010",
+      "hex": "23010000",
+      "evidence": "Explicit synthetic error input."
+    }
+  ],
+  "expected_fault": {
+    "kind": "unsupported-icus-command",
+    "address": "0xffc5d000",
+    "access": "write"
+  },
+  "checks": [
+    {
+      "name": "Unsupported command does not overwrite previous latch",
+      "kind": "memory",
+      "address": "0xffc5d000",
+      "size": 4,
+      "equals_hex": "34120000"
+    },
+    {
+      "name": "Unsupported command does not mutate BUSY input",
+      "kind": "memory",
+      "address": "0xffc5d00c",
+      "size": 4,
+      "equals_hex": "01000000"
+    },
+    {
+      "name": "Unsupported command does not mutate STS2 input",
+      "kind": "memory",
+      "address": "0xffc5d014",
+      "size": 4,
+      "equals_hex": "02000000"
+    },
+    {
+      "name": "Unsupported command does not mutate error input",
+      "kind": "memory",
+      "address": "0xffc5d010",
+      "size": 4,
+      "equals_hex": "23010000"
+    },
+    {
+      "name": "Unsupported command does not record an admitted issue",
+      "kind": "event-count",
+      "operation": "icus-command",
+      "equals": "0"
+    }
+  ]
+}

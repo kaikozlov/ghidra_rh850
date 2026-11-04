@@ -398,6 +398,61 @@ the transport completion and MAC verdict are separate values. SecOC
 and readiness pointer `27DE4` (byte1). Handle1 at `27E08` instead uses
 test-bank callback `6A2DC` and readiness pointer `27DE5` (byte0).
 
+#### Input composition and admission
+
+B6's original profile2 record supplies DataID`00B6`, trailer length4,
+received MAC length28 bits, and reconstructed freshness length46 bits
+(`258E8..2591F`). `8F434` extracts the trailer's high freshness nibble and
+left-aligns the remaining28 tag bits at `FEBE5554`. `8ECB2` builds
+`BE16(DataID) || payload_without_trailer || packed_full_freshness` at
+`FEBE552C`; `5528` is its **byte** length. For an eight-byte B6 PDU this
+is2+4+6=12 bytes. `8F676` forwards that length and the28-bit tag length
+from `5550`; it does not inspect tag content.
+
+`88FC0` requires descriptor word0=`1`, nonnull input/tag/result pointers,
+input length≤`50` bytes and tag length1..`80` bits. It copies the input
+to `FEBF12B8`, zero-pads it to a16-byte boundary, and copies
+`ceil(tag_bits/8)` received-tag bytes to `1308`. Its descriptor at `12A0`
+is `{input_pointer, input_bits, tag_pointer, tag_bits&7F, descriptor_byte4}`;
+`1298/129C` point to that descriptor and output word`12B4`. The selector
+is runtime software-descriptor byte4, copied by `8F19A`; its configured
+value and the corresponding installed ICU key require provenance.
+`88F92` initially clears the full tag staging area; `88FC0` itself does
+not clear the unused tail of a shorter replacement tag.
+
+On accepted staging, `8A8E4` writes ICU parameter words
+`{0, byte_swap32(input_bits), tag_bits&7F, 0}` and then
+`ICUSCMD=(selector<<16)|7`. It requires channel`136C=E1`, BUSY=0,
+`STS2&3=0`, selector≤14 and staged tag length<128. The command-register
+store at `8A9FC` also executes when that readiness gate returns2; it is
+not evidence that the input/callbacks were staged. `8A832` subsequently
+feeds `ceil(input_bits/128)` padded input blocks, then one16-byte block
+from the received-tag staging pointer. Each block is four unchanged
+little-endian RAM words written to `ICUSDAT`. `8A898` is the separate
+four-word output reader.
+
+Upstream admission is also stateful: `89C5A -> 89E72` requires all four
+service markers (`1378/1384/1390/139C`, prefix`FEBF`) to aggregate as
+idle`E1`. Service lock`1386` and scheduler lock`116C` must be unlocked`D2`;
+service selection must be`E1`, and scheduler state must be`E1` or prepared`C3`.
+An active owner makes a new `8F676` return2 before replacing its descriptor.
+
+NvM service/paired guards at `FEBF6CCD/6CCE` must both be nonzero for
+`7995C` to attempt suspension. Otherwise it records deferred0 and produces
+wait input1 itself. Original guard exit`79A94` drains that deferred request
+through `7990E -> 7812A -> 789E2`; no injected suspension callback is needed.
+With explicit offset20 bit0=0, initialized DataFlash phase`6CB2=0E` and
+no active P/E operation (`6CB0!=2`), the native request returns10, changes
+phase to`10`, sets suspend state/mirror2, and produces readiness input0.
+An active P/E operation additionally needs the selected FACI suspension
+policy and completion; suspension result2 remains waiting. `87EF6` saves
+FHVE3/FHVE15 on readiness0 and `87EDC` restores them before native NvM
+resume. These are required software/hardware inputs, not inferred reset
+values.
+
+#### Ownership and completion
+
+
 `891CC` installs guarded scheduler start/completion callbacks
 `FEBF117C=89170` / `1180=890BA`; the starter installs guarded ISR/poll
 callback `1194=89114`. The NVM suspension result travels through
@@ -435,12 +490,14 @@ coexist; a transport error preserves the previous caller result byte.
 |---|---|
 | Invalid handle/request, unavailable job, busy descriptor/lock | Return1/2 without producing a MAC verdict. `89C98` resets `13BE=0,13BF=1` even before a busy return. |
 | Accepted request but no callback within `E07` polling iterations | Return2; the polling wrapper neither cancels the job nor releases its selected descriptor. |
+| Poll-only timeout followed by native service | `89C98` only reads its completion flag; it does not call the ICU poller. Later `89114` still owns the command and can feed it, remain pending, or finalize an explicitly indicated hardware error through the original callback chain. |
 | `89114` receives poll result0 or `12` | Retain pending wrapper state `FEBF1190=B4`; no completion. A channel-validation error such as `10` instead releases the wrapper and reports transport error1. |
 | Deferred completion | `890BA` queues status at `1294=E1/1295` when readiness is not1. `892CC` consumes that queue on its next invocation without rechecking readiness. |
 | Waiting/prepared/running deadlines | `892CC` expires `D2` at tick7, `C3` at tick12, or `B4` when either running counter reaches12; reports transport error1. The running case invokes bounded abort/reinitialization `88574`; the prepared case requires no crypto execution. |
 | Abort | `8ACA8` replaces streaming callbacks with null, retains finalizer `8A600`, tracks command`3F`, and sets channel`C3`. An abort request alone supplies no reply. Finalizer return`20` is cancellation, not verified MAC output. |
 | Service owner and duplicate notification | `896E0` requires selection state`A5` and a complemented pointer, then resets selection **before** invoking the configured callback. A duplicate at this boundary is ignored. |
 | Late low-level output callback | `8906C` copies the output **before** `896E0` checks selection ownership. Resetting selection alone does not revoke the result pointer; `88F92` clears it and the staging buffers, making a late callback report error instead. |
+| Reuse after selection-only reset | `8961A` clears service selection but leaves scheduler`B4`, channel`D2`, and the result pointer intact. A replacement submit still returns2 at the scheduler and issues no new command. Reuse is not a generation-based cancellation mechanism. |
 
 There is no generation/token check at the selected-service callback boundary:
 ownership is its current state and complemented pointer. Retain both ownership
@@ -467,6 +524,37 @@ output FIFO words, completion/error indications, and uninterrupted propagation
 through `89114/89C98` into SecOC. All eighteen scenarios passed original-byte
 execution (`secoc-crypto-wave1`, with the two completed suspension preconditions
 verified in `secoc-crypto-wave2`, under `build/out/firmware-question-campaign/`).
+
+Fifteen strict standalone `camry_f33_secoc_native_*.json` scenarios retain
+the continuous producer/submission path and pending-only register admission.
+Eleven execute original `8F148/8F19A`, `8F434`, `90566`, `8ECB2`, then
+`8F676 -> 89C98 -> 89646 -> 891CC`; subsequent original poll/service calls
+share the same RAM. Their checkpoints cover command issue without a reply,
+two native input-block feeds, BUSY/STS2 staging rejection, deferred NvM
+guard exit, the waiting deadline, a running deadline with bounded abort,
+an explicit hardware error after wrapper timeout, resubmission, and both
+selection-only and buffer-reset ownership boundaries. Four focused
+register-store scenarios cover admitted status/error preservation and
+unsupported command/selector rejection. They contain no output-FIFO
+input and no injected callbacks.
+
+The retained synthetic example is PDU`11 22 33 44 AB CD EF 12`,
+freshness record`1234/ABCDE/9A/2`: native serialization produces
+`00 B6 11 22 33 44 12 34 AB CD E9 A8`, and native extraction produces
+tag`BC DE F1 20` with28 significant bits. Software selector4 is an explicit
+fixture input, not a recovered key or observed installed-slot value.
+
+The strict model accepts exact command7 words for selectors0..14 and bare
+abort`3F` as **pending register writes only**, retaining existing width checks
+and preserving supplied BUSY/STS2/error words. It creates no hardware
+transition or output. Error scenarios explicitly supply BUSY=0, STS2=2
+and error bit0; original `8AF10 -> 8A600 -> 89114` then produces transport
+error1 and preserves the caller-result canary. The running deadline supplies
+BUSY=1 and no abort reply; native bounded polling/reset revokes the result
+pointer and reports failure. The acceptance boundary remains the real ICU-S
+transaction: key/slot provenance, input consumption, output FIFO words,
+and completion/error indications. All fifteen scenarios passed exact-image
+execution in `build/out/firmware-question-campaign/secoc-native-wave1`.
 
 ## 8. Boundaries and open questions
 

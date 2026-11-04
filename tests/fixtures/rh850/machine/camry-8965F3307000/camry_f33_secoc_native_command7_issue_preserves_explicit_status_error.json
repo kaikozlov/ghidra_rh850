@@ -1,0 +1,85 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_secoc_native_command7_issue_preserves_explicit_status_error",
+  "entry": {
+    "role": "retained-original-register-store",
+    "scope": "resolved-address",
+    "address": "0x8a9fc"
+  },
+  "max_instructions": 10,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "gp": "0xfebeb800",
+    "lp": "0x798",
+    "r1": "0x40007"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xffc5d000",
+      "hex": "34120000",
+      "evidence": "Synthetic previous command latch."
+    },
+    {
+      "address": "0xffc5d00c",
+      "hex": "01000000",
+      "evidence": "Explicit synthetic BUSY input, preserved at pending-only command admission."
+    },
+    {
+      "address": "0xffc5d014",
+      "hex": "03000000",
+      "evidence": "Explicit synthetic STS2 input, preserved at pending-only command admission."
+    },
+    {
+      "address": "0xffc5d010",
+      "hex": "23010000",
+      "evidence": "Explicit synthetic ICU error input, preserved at pending-only command admission."
+    }
+  ],
+  "checks": [
+    {
+      "name": "PC",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Exact original store admits command7 selector4",
+      "kind": "memory",
+      "address": "0xffc5d000",
+      "size": 4,
+      "equals_hex": "07000400"
+    },
+    {
+      "name": "Admitted command cannot synthesize BUSY or idle",
+      "kind": "memory",
+      "address": "0xffc5d00c",
+      "size": 4,
+      "equals_hex": "01000000"
+    },
+    {
+      "name": "Admitted command cannot clear explicit STS2",
+      "kind": "memory",
+      "address": "0xffc5d014",
+      "size": 4,
+      "equals_hex": "03000000"
+    },
+    {
+      "name": "Admitted command cannot clear explicit error",
+      "kind": "memory",
+      "address": "0xffc5d010",
+      "size": 4,
+      "equals_hex": "23010000"
+    },
+    {
+      "name": "Exactly one pending-only issue",
+      "kind": "event-count",
+      "operation": "icus-command",
+      "equals": "1"
+    }
+  ]
+}
