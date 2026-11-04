@@ -1555,10 +1555,17 @@ seeded ones.
 
 | Mechanism | Exact site | Trigger | Reachability | Consequence |
 |---|---|---|---|---|
-| Missing subfunction read | `dcm_resolve_subfunction @ 0x9105A`, PC `0x91078` | 1-byte request (SID only) for a subfunction service | **Proven through `cantp_receive_can_frame @ 0x7A57A`** | Reads one byte past the declared request; consumed as the subfunction |
+| Missing subfunction read | `dcm_resolve_subfunction @ 0x9105A`, PC `0x91078` | 1-byte request (SID only) for a subfunction service | **Proven through `cantp_receive_can_frame @ 0x7A57A`** | The hoisted read occurs, but the declared-length branch returns NRC `13` independently of the stale byte |
 | Zero-length first-byte reads | `dcm_begin_service_request @ 0x91566` (PCs `0x91586/0x9158C/0x915A2/0x9161C`), `dcm_resolve_service @ 0x90F98` (PC `0x90FC6`) | 0-length direct-injected request | Direct entry only; not demonstrated through CanTp | Reads the absent SID byte; no write effect |
-| RoutineControl retained-tail read | `unpack_routine_arguments_and_zero_response_payload @ 0x974B0`, PCs `0x9758A/0x9758C` | Short `31 01 10 04` followed by poll/pending-completion | Scheduled dispatcher (DCM-lifecycle) | Stale bytes assemble into the routine callback **argument words** (`0x975C2–0x975D2` store them to the argument array at `ctx+4*n`); per-RID semantic impact not traced |
+| RoutineControl retained-tail read | `unpack_routine_arguments_and_zero_response_payload @ 0x974B0`, PCs `0x9758A/0x9758C` | Short `31 01 10 04` followed by operation-status continuation | Scheduled dispatcher (DCM lifecycle) | Only RID `1004` can turn the stale scalar into an action; exact consequences are closed below |
 | BA stale selector/token read | `dispatch_ba_configured_start @ 0x34DD4` PC `0x34DE4`, `compare_ba_token_bytes @ 0x34D7A` PC `0x34D8E` | 1-byte `BA` reusing a slot holding `F7 BAENA` | Scheduled DCM; not yet through CanTp | Up to **six** stale bytes consumed (maximal case `ba_stale_selector_token_reuse`, now a permanent seed); action dispatch blocked — see below |
+
+**The missing-subfunction consequence is closed through transport.** Two
+exact-machine cases run original CanTp timeout cleanup, SF re-admission on route
+`0804`, transport foreground, and scheduled DCM dispatch. A one-byte SID `10`
+overwrites only the declared byte while stale adjacent values `00` and `A5`
+survive; both produce exact negative object `7F 10 13`. The subfunction byte is
+loaded at `0x91078`, but the `<2` request-length arm determines the result.
 
 **BA consequence is closed by the configured length gate.** The BA operation
 table (`0x27EC4`, ten rows of 16 bytes, count at `0x27EC0`) requires
@@ -1568,6 +1575,33 @@ does read the selector and the five `BAENA` token bytes before that check, so
 short requests consume stale bytes through the token gate — but a length other
 than 6 cannot reach any action. The stale token replay passes the
 authorization-token gate and still stops at the per-operation length equality.
+
+**RoutineControl has one argument-taint action path.** The exact 19-row table
+contains only two startRoutine input descriptors: RID `1004` takes one two-byte
+scalar and RID `1010` takes one 64-byte pointer field. The other 17 start
+callbacks take no request argument; no stopRoutine or requestResults descriptor
+takes one. The initial short RID-`1004` request still fails
+`reject_routine_request_length_mismatch @ 0x9733A` with NRC `13`.
+Operation-status 3 reaches the reset arm in `0x97F24/0x9806A`, so cancellation
+does not act on the stale words.
+
+Operation-status 1 is different: `resume_routine_control_callback @ 0x97B12`
+re-enters `0x974B0` without repeating the length check. Stale `FF FF` passes
+`diag_routine_1004_admit @ 0x501D0`, reaches
+`diag_routine_1004_request_history_rewrite @ 0x50214`, and changes the
+operation-5 state to `5` before entering the original capture initializer at
+`0x5551A`. Stale `12 34` is rejected with NRC `31` before the action. A
+separate valid six-byte `31 01 10 04 FF FF` control reaches the same action.
+RID `1010` has no application callback row in the exact 19-row precondition
+table; its stale pointer is not dereferenced by an action and cannot establish
+a pending continuation.
+
+The retained `camry_f33_rc_consequence_*.json` cases execute the original
+scheduled dispatch, operation-status 1/3 continuations, both scalar values, the
+RID-`1010` pointer form, and the valid-length control. Inputs are explicit
+synthetic receive-slot state. The action case stops at original `0x5551A` after
+the operation-5 state write; it does not claim capture-media behavior.
+
 
 **A latent null function-pointer call exists in the WDBI length path.**
 `dcm_did_class_length @ 0x9449E` bounds its row index with `cmp 0x6` (indices
@@ -1585,12 +1619,14 @@ attacker write path to `0xFEBE5D2C` is known. The every-configured-WDBI-DID
 campaign (§13.11) exercised this path with zero abnormal terminations. Graded
 latent, matching MEM-SAFE-004's treatment of the Sienna command-8 defect.
 
-**Disposition:** the application declares lengths it does not enforce at read
-time in four distinct places — the memory-safety defect class is real on this
-image — but each currently terminates in a bounded read with no write effect,
-no demonstrated information disclosure, and (for BA) a downstream configured
-length gate that blocks action dispatch. The RoutineControl argument-taint path
-is the one with unexplored downstream semantics.
+**Disposition:** the four read mechanisms are bounded but not equivalent. BA
+stops at its configured length gate; the WDBI row-5 call is not request
+reachable; zero-length direct injection has no demonstrated write effect; and
+the missing-subfunction byte does not change the length-error result. The
+RoutineControl operation-status-1 path can convert a stale RID-`1004` `FF FF`
+tail into an operation-5 state change. Its exact software consequence is now
+retained; external creation of the required slot/lifecycle state is a separate
+reachability question.
 
 ## 14. Exact F33 persistent Gate-2 development patch
 
