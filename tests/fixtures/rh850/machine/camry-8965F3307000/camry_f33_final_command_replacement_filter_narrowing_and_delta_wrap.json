@@ -1,0 +1,141 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_final_command_replacement_filter_narrowing_and_delta_wrap",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe0000"
+  },
+  "max_instructions": 500000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe7800",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebecc70",
+      "hex": "20250700",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebecc74",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebecc78",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebecc7c",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebecc88",
+      "hex": "0000",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebecc8a",
+      "hex": "ff7f",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebecc90",
+      "hex": "00",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebecc98",
+      "hex": "00",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac48",
+      "hex": "0000",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac46",
+      "hex": "0000",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac4a",
+      "hex": "0105",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebe7600",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Bounded synthetic original-call stack; no peripheral initialization."
+    },
+    {
+      "address": "0xfebe8ffc",
+      "size": 14,
+      "fill": 165,
+      "evidence": "Observation-only scratch with four-byte A5 canaries; intact original memcpy copies out only."
+    },
+    {
+      "address": "0xfebe0000",
+      "hex": "3f060e00befe2106b4050d00610026060090befe270688ccbefe2806060000003f062e00befe21062e9f080061003f063c00befe2106b4050d0061002106980700006100",
+      "evidence": "Synthetic transparent MOV/JMP call-only sequencer; no stores, computed firmware decisions, code overlays, or callback substitutions. Original D05B4 signed16 CC88 narrowing and CC8C delta wrap, followed by retained feedback using narrowed CC88. AC4A1281 excludes direction detection so arithmetic is isolated without suppressing any callback. Calls: 0xd05b4, 0x89f2e, 0xd05b4"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Original-byte sequence returns",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Quotient32768 narrows to-32768; -65535 delta wraps to+1",
+      "kind": "memory",
+      "address": "0xfebe9000",
+      "size": 6,
+      "equals_hex": "008000800100"
+    },
+    {
+      "name": "Next original accumulator subtracts narrowed negative previous output",
+      "kind": "memory",
+      "address": "0xfebecc70",
+      "size": 4,
+      "equals_hex": "20a50700"
+    },
+    {
+      "name": "Retained narrow feedback and delta on second call",
+      "kind": "memory",
+      "address": "0xfebecc88",
+      "size": 6,
+      "equals_hex": "f588f588f508"
+    },
+    {
+      "name": "Observation lower canary",
+      "kind": "memory",
+      "address": "0xfebe8ffc",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    },
+    {
+      "name": "Observation upper canary",
+      "kind": "memory",
+      "address": "0xfebe9006",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    }
+  ]
+}

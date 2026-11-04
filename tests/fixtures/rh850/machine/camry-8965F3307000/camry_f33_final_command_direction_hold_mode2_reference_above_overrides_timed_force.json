@@ -1,0 +1,98 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_final_command_direction_hold_mode2_reference_above_overrides_timed_force",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe0000"
+  },
+  "max_instructions": 500000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe7800",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebecc98",
+      "hex": "02",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebecc91",
+      "hex": "01",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebecc7c",
+      "hex": "01d8ffff",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebecc78",
+      "hex": "d2040000",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebecc66",
+      "hex": "204e",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebe7600",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Bounded synthetic original-call stack; no peripheral initialization."
+    },
+    {
+      "address": "0xfebe0000",
+      "hex": "3f060e00befe210674060d0061003f061c00befe21067c040d0061002106980700006100",
+      "evidence": "Synthetic transparent MOV/JMP call-only sequencer; no stores, computed firmware decisions, code overlays, or callback substitutions. Original D0674 directional hold boundary: timer force only bypasses comparison against negated CC66, never reference magnitude \u00b110240; equality is admitted. Explicit synthetic initial retained mode/reference only, no reinitialization between original calls. Calls: 0xd0674, 0xd047c"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Original-byte sequence returns",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Original hold/release mode",
+      "kind": "memory",
+      "address": "0xfebecc98",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "Held reference versus released live reference, and pre-negation value",
+      "kind": "memory",
+      "address": "0xfebecc7c",
+      "size": 8,
+      "equals_hex": "d2040000e0b1ffff"
+    },
+    {
+      "name": "Replacement producer publishes exact negated value",
+      "kind": "memory",
+      "address": "0xfebecc94",
+      "size": 4,
+      "equals_hex": "204e0000"
+    },
+    {
+      "name": "Selected result after hold/release",
+      "kind": "memory",
+      "address": "0xfebecc64",
+      "size": 2,
+      "equals_hex": "204e"
+    }
+  ]
+}

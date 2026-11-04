@@ -1,0 +1,148 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_final_command_attenuation_hold_counter_boundary",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe0000"
+  },
+  "max_instructions": 500000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe7800",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebeb1f8",
+      "hex": "0004",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeb208",
+      "hex": "00000004",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeb1f6",
+      "hex": "9f8c",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeb1cf",
+      "hex": "00",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeb1d0",
+      "hex": "00",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeb054",
+      "hex": "00fd",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebecc50",
+      "hex": "1027",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac4c",
+      "hex": "204e",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac29",
+      "hex": "01",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac2a",
+      "hex": "00",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebecc98",
+      "hex": "00",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebe7600",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Bounded synthetic original-call stack; no peripheral initialization."
+    },
+    {
+      "address": "0xfebe8ffc",
+      "size": 16,
+      "fill": 165,
+      "evidence": "Observation-only scratch with four-byte A5 canaries; intact original memcpy copies out only."
+    },
+    {
+      "address": "0xfebe0000",
+      "hex": "3f060e00befe21066c4b0b00610026065aacbefe2706f8b1befe2806020000003f062e00befe21062e9f080061003f063c00befe21062c040d0061003f064a00befe21067c040d00610026060090befe2706f6b1befe2806040000003f066a00befe21062e9f0800610026060490befe270608b2befe2806040000003f068a00befe21062e9f080061003f069800befe21066c4b0b00610026065aacbefe2706f8b1befe2806020000003f06b800befe21062e9f080061003f06c600befe21062c040d0061003f06d400befe21067c040d0061002106980700006100",
+      "evidence": "Synthetic transparent MOV/JMP call-only sequencer; no stores, computed firmware decisions, code overlays, or callback substitutions. Original B4B6C holds unity while |B054|<=768 and count<36000; first call reaches36000 without attenuation, next call applies original103 coefficient. Exact invocation boundary, not physical timing. Calls: 0xb4b6c, 0x89f2e, 0xd042c, 0xd047c, 0x89f2e, 0x89f2e, 0xb4b6c, 0x89f2e, 0xd042c, 0xd047c"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Original-byte sequence returns",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "At count35999 sample equality holds current output and increments counter",
+      "kind": "memory",
+      "address": "0xfebe9000",
+      "size": 4,
+      "equals_hex": "a08c0004"
+    },
+    {
+      "name": "Hold preserves fractional state",
+      "kind": "memory",
+      "address": "0xfebe9004",
+      "size": 4,
+      "equals_hex": "00000004"
+    },
+    {
+      "name": "At count36000 decay starts even at low-torque equality",
+      "kind": "memory",
+      "address": "0xfebeb1f6",
+      "size": 4,
+      "equals_hex": "a08cfe03"
+    },
+    {
+      "name": "Exact first decay state",
+      "kind": "memory",
+      "address": "0xfebeb208",
+      "size": 4,
+      "equals_hex": "0064fe03"
+    },
+    {
+      "name": "Observation lower canary",
+      "kind": "memory",
+      "address": "0xfebe8ffc",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    },
+    {
+      "name": "Observation upper canary",
+      "kind": "memory",
+      "address": "0xfebe9008",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    }
+  ]
+}

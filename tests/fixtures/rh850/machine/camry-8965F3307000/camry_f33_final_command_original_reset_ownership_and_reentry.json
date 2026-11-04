@@ -1,0 +1,257 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_final_command_original_reset_ownership_and_reentry",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe0000"
+  },
+  "max_instructions": 500000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe7800",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebecc30",
+      "hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "evidence": "Exactly D01B4-owned command/history span, initialized nonzero to make original reset observable."
+    },
+    {
+      "address": "0xfebecc70",
+      "hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "evidence": "Bounded replacement state/reset output span; A5 marks bytes not owned by D04F0."
+    },
+    {
+      "address": "0xfebecc9c",
+      "hex": "0100",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebecc9e",
+      "hex": "0200",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac28",
+      "hex": "00",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac29",
+      "hex": "01",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac2a",
+      "hex": "00",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac2b",
+      "hex": "00",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac4c",
+      "hex": "e803",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac52",
+      "hex": "e803",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac5a",
+      "hex": "0004",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac64",
+      "hex": "0080",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebec797",
+      "hex": "00",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebec7a0",
+      "hex": "0001",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebec7aa",
+      "hex": "fffe",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebec7bc",
+      "hex": "0001",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebec7ac",
+      "hex": "fffe",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebec81a",
+      "hex": "0000",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac46",
+      "hex": "0000",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac48",
+      "hex": "0000",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac4a",
+      "hex": "0105",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebebf3c",
+      "hex": "20030000",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebec4c0",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebec3ba",
+      "hex": "0000",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebec43c",
+      "hex": "0000",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebecc2c",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebecb38",
+      "hex": "0000",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebec5ee",
+      "hex": "0000",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebecbe8",
+      "hex": "0000",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebec7bf",
+      "hex": "00",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebe7600",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Bounded synthetic original-call stack; no peripheral initialization."
+    },
+    {
+      "address": "0xfebe8ffc",
+      "size": 288,
+      "fill": 165,
+      "evidence": "Observation-only scratch with four-byte A5 canaries; intact original memcpy copies out only."
+    },
+    {
+      "address": "0xfebe0000",
+      "hex": "3f060e00befe2106b4010d0061003f061c00befe2106f0040d00610026060090befe270630ccbefe28063e0000003f063c00befe21062e9f080061003f064a00befe210618020d0061003f065800befe210684020d0061003f066600befe2106da020d0061003f067400befe210682030d0061003f068200befe21069e030d0061003f069000befe21062c040d0061003f069e00befe2106d6060d0061003f06ac00befe21067c040d0061003f06ba00befe210618020d0061003f06c800befe210684020d0061003f06d600befe2106da020d0061003f06e400befe210682030d0061003f06f200befe21069e030d0061003f060001befe21062c040d0061003f060e01befe2106d6060d0061003f061c01befe21067c040d00610026063e90befe270630ccbefe28063e0000003f063c01befe21062e9f080061003f064a01befe2106b4010d00610026067c90befe270630ccbefe28063e0000003f066a01befe21062e9f080061002606ba90befe270670ccbefe2806200000003f068a01befe21062e9f080061003f069801befe210618020d0061003f06a601befe210684020d0061003f06b401befe2106da020d0061003f06c201befe210682030d0061003f06d001befe21069e030d0061003f06de01befe21062c040d0061003f06ec01befe2106d6060d0061003f06fa01befe21067c040d0061002606da90befe270630ccbefe28063e0000003f061a02befe21062e9f080061002106980700006100",
+      "evidence": "Synthetic transparent MOV/JMP call-only sequencer; no stores, computed firmware decisions, code overlays, or callback substitutions. Original D01B4 clears its entire CC30..CC6D span after active history; does not own CC70 replacement state or CC9C/CC9E controls. No source/history injection after reset; D0218 reconstructs source. Calls: 0xd01b4, 0xd04f0, 0x89f2e, 0xd0218, 0xd0284, 0xd02da, 0xd0382, 0xd039e, 0xd042c, 0xd06d6, 0xd047c, 0xd0218, 0xd0284, 0xd02da, 0xd0382, 0xd039e, 0xd042c, 0xd06d6, 0xd047c, 0x89f2e, 0xd01b4, 0x89f2e, 0x89f2e, 0xd0218, 0xd0284, 0xd02da, 0xd0382, 0xd039e, 0xd042c, 0xd06d6, 0xd047c, 0x89f2e"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Original-byte sequence returns",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Original D01B4 exact zeroed command span",
+      "kind": "memory",
+      "address": "0xfebe9000",
+      "size": 62,
+      "equals_hex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "name": "Retained history before reset",
+      "kind": "memory",
+      "address": "0xfebe903e",
+      "size": 62,
+      "equals_hex": "2003000000000000c80000009001000090010000200300002003000020039001900190019001000000000000900100009001900190019001e80300000000"
+    },
+    {
+      "name": "Original reset clears live history and all command publications",
+      "kind": "memory",
+      "address": "0xfebe907c",
+      "size": 62,
+      "equals_hex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "name": "D01B4 leaves independently owned filter controls intact",
+      "kind": "memory",
+      "address": "0xfebecc9c",
+      "size": 4,
+      "equals_hex": "01000200"
+    },
+    {
+      "name": "D01B4 leaves independently reset replacement histories unchanged",
+      "kind": "memory",
+      "address": "0xfebe90ba",
+      "size": 32,
+      "equals_hex": "0000000000000000000000000000000070feffff000000000000000000000000"
+    },
+    {
+      "name": "Reentry starts from reset, not held pre-reset output",
+      "kind": "memory",
+      "address": "0xfebe90da",
+      "size": 62,
+      "equals_hex": "2003000000000000c8000000c8000000c800000020030000200300002003c800c800c800c800000000000000c8000000c800c800c800c800e80300000000"
+    },
+    {
+      "name": "Observation lower canary",
+      "kind": "memory",
+      "address": "0xfebe8ffc",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    },
+    {
+      "name": "Observation upper canary",
+      "kind": "memory",
+      "address": "0xfebe9118",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    }
+  ]
+}

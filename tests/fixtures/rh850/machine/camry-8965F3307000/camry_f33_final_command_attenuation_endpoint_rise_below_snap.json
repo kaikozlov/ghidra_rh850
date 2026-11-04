@@ -1,0 +1,121 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_final_command_attenuation_endpoint_rise_below_snap",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe0000"
+  },
+  "max_instructions": 500000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe7800",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebeb1f8",
+      "hex": "eb03",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeb208",
+      "hex": "0000eb03",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeb1f6",
+      "hex": "a08c",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeb1cf",
+      "hex": "00",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeb1d0",
+      "hex": "01",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeb054",
+      "hex": "0103",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebecc50",
+      "hex": "1027",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac4c",
+      "hex": "204e",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac29",
+      "hex": "01",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac2a",
+      "hex": "00",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebecc98",
+      "hex": "00",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebe7600",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Bounded synthetic original-call stack; no peripheral initialization."
+    },
+    {
+      "address": "0xfebe0000",
+      "hex": "3f060e00befe21066c4b0b00610026065aacbefe2706f8b1befe2806020000003f062e00befe21062e9f080061003f063c00befe21062c040d0061003f064a00befe21067c040d0061002106980700006100",
+      "evidence": "Synthetic transparent MOV/JMP call-only sequencer; no stores, computed firmware decisions, code overlays, or callback substitutions. Original B4B6C endpoint snap after original D12D2 recurrence: rising output>=1004\u21921024/B208=0x04000000; falling output<=20\u21920/B208=0. Synthetic initial fractional state is not reinjected. Calls: 0xb4b6c, 0x89f2e, 0xd042c, 0xd047c"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Original-byte sequence returns",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Exact endpoint output",
+      "kind": "memory",
+      "address": "0xfebeb1f8",
+      "size": 2,
+      "equals_hex": "eb03"
+    },
+    {
+      "name": "Snap owns fractional accumulator reset too",
+      "kind": "memory",
+      "address": "0xfebeb208",
+      "size": 4,
+      "equals_hex": "7308eb03"
+    },
+    {
+      "name": "Actual gate consumes producer snapshot, not an invented ramp",
+      "kind": "memory",
+      "address": "0xfebecc64",
+      "size": 2,
+      "equals_hex": "4226"
+    }
+  ]
+}

@@ -1,0 +1,181 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_final_command_compose_fraction_history_and_addend_inhibit",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe0000"
+  },
+  "max_instructions": 500000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe7800",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebeac28",
+      "hex": "01",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebec797",
+      "hex": "00",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebecc5a",
+      "hex": "fdff",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebecc60",
+      "hex": "1127",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebec81a",
+      "hex": "fdff",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebec7a0",
+      "hex": "8000",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebec7aa",
+      "hex": "7fff",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebec7bc",
+      "hex": "8000",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebec7ac",
+      "hex": "7fff",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebe4000",
+      "hex": "01",
+      "evidence": "External scalar transition; never an injected internal history."
+    },
+    {
+      "address": "0xfebe4001",
+      "hex": "02",
+      "evidence": "External scalar transition; never an injected internal history."
+    },
+    {
+      "address": "0xfebe4002",
+      "hex": "00",
+      "evidence": "External scalar transition; never an injected internal history."
+    },
+    {
+      "address": "0xfebe7600",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Bounded synthetic original-call stack; no peripheral initialization."
+    },
+    {
+      "address": "0xfebe8ffc",
+      "size": 24,
+      "fill": 165,
+      "evidence": "Observation-only scratch with four-byte A5 canaries; intact original memcpy copies out only."
+    },
+    {
+      "address": "0xfebe0000",
+      "hex": "3f060e00befe21069e030d00610026060090befe270652ccbefe2806020000003f062e00befe21062e9f0800610026060290befe27065cccbefe2806020000003f064e00befe21062e9f0800610026060490befe27066cccbefe2806020000003f066e00befe21062e9f0800610026060690befe270640ccbefe2806040000003f068e00befe21062e9f0800610026060a90befe270650ccbefe2806020000003f06ae00befe21062e9f08006100260697c7befe27060040befe2806010000003f06ce00befe21062e9f080061003f06dc00befe21069e030d00610026060c90befe270650ccbefe2806020000003f06fc00befe21062e9f0800610026060e90befe27066cccbefe2806020000003f061c01befe21062e9f08006100260628acbefe27060140befe2806010000003f063c01befe21062e9f08006100260697c7befe27060240befe2806010000003f065c01befe21062e9f080061003f066a01befe21069e030d0061002106980700006100",
+      "evidence": "Synthetic transparent MOV/JMP call-only sequencer; no stores, computed firmware decisions, code overlays, or callback substitutions. Original D039E selects CC5A only for literal AC28==1; signed truncation happens separately before addition. C797 suppresses addend but still publishes its narrowed intermediate. Calls: 0xd039e, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0xd039e, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0xd039e"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Original-byte sequence returns",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "History base and independent signed truncation 0xfebecc52",
+      "kind": "memory",
+      "address": "0xfebe9000",
+      "size": 2,
+      "equals_hex": "fdff"
+    },
+    {
+      "name": "History base and independent signed truncation 0xfebecc5c",
+      "kind": "memory",
+      "address": "0xfebe9002",
+      "size": 2,
+      "equals_hex": "ffff"
+    },
+    {
+      "name": "History base and independent signed truncation 0xfebecc6c",
+      "kind": "memory",
+      "address": "0xfebe9004",
+      "size": 2,
+      "equals_hex": "ffff"
+    },
+    {
+      "name": "History base and independent signed truncation 0xfebecc40",
+      "kind": "memory",
+      "address": "0xfebe9006",
+      "size": 4,
+      "equals_hex": "feffffff"
+    },
+    {
+      "name": "History base and independent signed truncation 0xfebecc50",
+      "kind": "memory",
+      "address": "0xfebe900a",
+      "size": 2,
+      "equals_hex": "feff"
+    },
+    {
+      "name": "C797 inhibits addend, not base or diagnostic addend publication",
+      "kind": "memory",
+      "address": "0xfebe900c",
+      "size": 2,
+      "equals_hex": "ffff"
+    },
+    {
+      "name": "Omitted addend still published",
+      "kind": "memory",
+      "address": "0xfebe900e",
+      "size": 2,
+      "equals_hex": "ffff"
+    },
+    {
+      "name": "Nonliteral AC28=2 uses current CC60, not history",
+      "kind": "memory",
+      "address": "0xfebecc50",
+      "size": 4,
+      "equals_hex": "87131127"
+    },
+    {
+      "name": "Observation lower canary",
+      "kind": "memory",
+      "address": "0xfebe8ffc",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    },
+    {
+      "name": "Observation upper canary",
+      "kind": "memory",
+      "address": "0xfebe9010",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    }
+  ]
+}

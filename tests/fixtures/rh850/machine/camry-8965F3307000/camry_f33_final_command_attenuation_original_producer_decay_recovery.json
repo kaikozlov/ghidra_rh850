@@ -1,0 +1,258 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_final_command_attenuation_original_producer_decay_recovery",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe0000"
+  },
+  "max_instructions": 500000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe7800",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebeb1f8",
+      "hex": "0004",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeb208",
+      "hex": "00000004",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeb1f6",
+      "hex": "a08c",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeb1cf",
+      "hex": "00",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeb1d0",
+      "hex": "00",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeb054",
+      "hex": "0103",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebecc50",
+      "hex": "1027",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac4c",
+      "hex": "204e",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac29",
+      "hex": "01",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac2a",
+      "hex": "00",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebecc98",
+      "hex": "00",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebe4000",
+      "hex": "01",
+      "evidence": "External scalar transition; never an injected internal history."
+    },
+    {
+      "address": "0xfebe7600",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Bounded synthetic original-call stack; no peripheral initialization."
+    },
+    {
+      "address": "0xfebe8ffc",
+      "size": 80,
+      "fill": 165,
+      "evidence": "Observation-only scratch with four-byte A5 canaries; intact original memcpy copies out only."
+    },
+    {
+      "address": "0xfebe0000",
+      "hex": "3f060e00befe21066c4b0b00610026065aacbefe2706f8b1befe2806020000003f062e00befe21062e9f080061003f063c00befe21062c040d0061003f064a00befe21067c040d00610026060090befe2706f8b1befe2806020000003f066a00befe21062e9f0800610026060290befe270608b2befe2806040000003f068a00befe21062e9f0800610026060690befe270662ccbefe2806060000003f06aa00befe21062e9f080061003f06b800befe21066c4b0b00610026065aacbefe2706f8b1befe2806020000003f06d800befe21062e9f080061003f06e600befe21062c040d0061003f06f400befe21067c040d00610026060c90befe2706f8b1befe2806020000003f061401befe21062e9f0800610026060e90befe270608b2befe2806040000003f063401befe21062e9f0800610026061290befe270662ccbefe2806060000003f065401befe21062e9f080061003f066201befe21066c4b0b00610026065aacbefe2706f8b1befe2806020000003f068201befe21062e9f080061003f069001befe21062c040d0061003f069e01befe21067c040d0061003f06ac01befe21066c4b0b00610026065aacbefe2706f8b1befe2806020000003f06cc01befe21062e9f080061003f06da01befe21062c040d0061003f06e801befe21067c040d0061003f06f601befe21066c4b0b00610026065aacbefe2706f8b1befe2806020000003f061602befe21062e9f080061003f062402befe21062c040d0061003f063202befe21067c040d0061003f064002befe21066c4b0b00610026065aacbefe2706f8b1befe2806020000003f066002befe21062e9f080061003f066e02befe21062c040d0061003f067c02befe21067c040d0061003f068a02befe21066c4b0b00610026065aacbefe2706f8b1befe2806020000003f06aa02befe21062e9f080061003f06b802befe21062c040d0061003f06c602befe21067c040d0061003f06d402befe21066c4b0b00610026065aacbefe2706f8b1befe2806020000003f06f402befe21062e9f080061003f060203befe21062c040d0061003f061003befe21067c040d0061003f061e03befe21066c4b0b00610026065aacbefe2706f8b1befe2806020000003f063e03befe21062e9f080061003f064c03befe21062c040d0061003f065a03befe21067c040d0061003f066803befe21066c4b0b00610026065aacbefe2706f8b1befe2806020000003f068803befe21062e9f080061003f069603befe21062c040d0061003f06a403befe21067c040d0061003f06b203befe21066c4b0b00610026065aacbefe2706f8b1befe2806020000003f06d203befe21062e9f080061003f06e003befe21062c040d0061003f06ee03befe21067c040d0061003f06fc03befe21066c4b0b00610026065aacbefe2706f8b1befe2806020000003f061c04befe21062e9f080061003f062a04befe21062c040d0061003f063804befe21067c040d0061003f064604befe21066c4b0b00610026065aacbefe2706f8b1befe2806020000003f066604befe21062e9f080061003f067404befe21062c040d0061003f068204befe21067c040d0061003f069004befe21066c4b0b00610026065aacbefe2706f8b1befe2806020000003f06b004befe21062e9f080061003f06be04befe21062c040d0061003f06cc04befe21067c040d00610026061890befe2706f8b1befe2806020000003f06ec04befe21062e9f0800610026061a90befe270608b2befe2806040000003f060c05befe21062e9f0800610026061e90befe270662ccbefe2806060000003f062c05befe21062e9f080061002606d0b1befe27060040befe2806010000003f064c05befe21062e9f080061003f065a05befe21066c4b0b00610026065aacbefe2706f8b1befe2806020000003f067a05befe21062e9f080061003f068805befe21062c040d0061003f069605befe21067c040d00610026062490befe2706f8b1befe2806020000003f06b605befe21062e9f0800610026062690befe270608b2befe2806040000003f06d605befe21062e9f0800610026062a90befe270662ccbefe2806060000003f06f605befe21062e9f080061003f060406befe21066c4b0b00610026065aacbefe2706f8b1befe2806020000003f062406befe21062e9f080061003f063206befe21062c040d0061003f064006befe21067c040d00610026063090befe2706f8b1befe2806020000003f066006befe21062e9f0800610026063290befe270608b2befe2806040000003f068006befe21062e9f0800610026063690befe270662ccbefe2806060000003f06a006befe21062e9f080061003f06ae06befe21066c4b0b00610026065aacbefe2706f8b1befe2806020000003f06ce06befe21062e9f080061003f06dc06befe21062c040d0061003f06ea06befe21067c040d00610026063c90befe2706f8b1befe2806020000003f060a07befe21062e9f0800610026063e90befe270608b2befe2806040000003f062a07befe21062e9f0800610026064290befe270662ccbefe2806060000003f064a07befe21062e9f080061002106980700006100",
+      "evidence": "Synthetic transparent MOV/JMP call-only sequencer; no stores, computed firmware decisions, code overlays, or callback substitutions. Retained original B4B6C/D12D2 decay from unity through14 invocations to1001, below rising snap threshold1004; only then external B1D0 changes to1. Original memcpy snapshots B1F8 into AC5A for D042C/D047C. No history reinjection; below-threshold recovery preserves fractional state instead of snapping unity. Calls: 0xb4b6c, 0x89f2e, 0xd042c, 0xd047c, 0x89f2e, 0x89f2e, 0x89f2e, 0xb4b6c, 0x89f2e, 0xd042c, 0xd047c, 0x89f2e, 0x89f2e, 0x89f2e, 0xb4b6c, 0x89f2e, 0xd042c, 0xd047c, 0xb4b6c, 0x89f2e, 0xd042c, 0xd047c, 0xb4b6c, 0x89f2e, 0xd042c, 0xd047c, 0xb4b6c, 0x89f2e, 0xd042c, 0xd047c, 0xb4b6c, 0x89f2e, 0xd042c, 0xd047c, 0xb4b6c, 0x89f2e, 0xd042c, 0xd047c, 0xb4b6c, 0x89f2e, 0xd042c, 0xd047c, 0xb4b6c, 0x89f2e, 0xd042c, 0xd047c, 0xb4b6c, 0x89f2e, 0xd042c, 0xd047c, 0xb4b6c, 0x89f2e, 0xd042c, 0xd047c, 0xb4b6c, 0x89f2e, 0xd042c, 0xd047c, 0xb4b6c, 0x89f2e, 0xd042c, 0xd047c, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0xb4b6c, 0x89f2e, 0xd042c, 0xd047c, 0x89f2e, 0x89f2e, 0x89f2e, 0xb4b6c, 0x89f2e, 0xd042c, 0xd047c, 0x89f2e, 0x89f2e, 0x89f2e, 0xb4b6c, 0x89f2e, 0xd042c, 0xd047c, 0x89f2e, 0x89f2e, 0x89f2e"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Original-byte sequence returns",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Producer ramp output cycle 1",
+      "kind": "memory",
+      "address": "0xfebe9000",
+      "size": 2,
+      "equals_hex": "fe03"
+    },
+    {
+      "name": "Retained fractional accumulator cycle 1",
+      "kind": "memory",
+      "address": "0xfebe9002",
+      "size": 4,
+      "equals_hex": "0064fe03"
+    },
+    {
+      "name": "Attenuated pre-gate/selected/ordinary output cycle 1",
+      "kind": "memory",
+      "address": "0xfebe9006",
+      "size": 6,
+      "equals_hex": "fc26fc26fc26"
+    },
+    {
+      "name": "Producer ramp output cycle 2",
+      "kind": "memory",
+      "address": "0xfebe900c",
+      "size": 2,
+      "equals_hex": "fc03"
+    },
+    {
+      "name": "Retained fractional accumulator cycle 2",
+      "kind": "memory",
+      "address": "0xfebe900e",
+      "size": 4,
+      "equals_hex": "cec8fc03"
+    },
+    {
+      "name": "Attenuated pre-gate/selected/ordinary output cycle 2",
+      "kind": "memory",
+      "address": "0xfebe9012",
+      "size": 6,
+      "equals_hex": "e826e826e826"
+    },
+    {
+      "name": "Producer ramp output cycle 14",
+      "kind": "memory",
+      "address": "0xfebe9018",
+      "size": 2,
+      "equals_hex": "e903"
+    },
+    {
+      "name": "Retained fractional accumulator cycle 14",
+      "kind": "memory",
+      "address": "0xfebe901a",
+      "size": 4,
+      "equals_hex": "28b5e903"
+    },
+    {
+      "name": "Attenuated pre-gate/selected/ordinary output cycle 14",
+      "kind": "memory",
+      "address": "0xfebe901e",
+      "size": 6,
+      "equals_hex": "2f262f262f26"
+    },
+    {
+      "name": "Producer ramp output cycle 15",
+      "kind": "memory",
+      "address": "0xfebe9024",
+      "size": 2,
+      "equals_hex": "e903"
+    },
+    {
+      "name": "Retained fractional accumulator cycle 15",
+      "kind": "memory",
+      "address": "0xfebe9026",
+      "size": 4,
+      "equals_hex": "69bee903"
+    },
+    {
+      "name": "Attenuated pre-gate/selected/ordinary output cycle 15",
+      "kind": "memory",
+      "address": "0xfebe902a",
+      "size": 6,
+      "equals_hex": "2f262f262f26"
+    },
+    {
+      "name": "Producer ramp output cycle 16",
+      "kind": "memory",
+      "address": "0xfebe9030",
+      "size": 2,
+      "equals_hex": "e903"
+    },
+    {
+      "name": "Retained fractional accumulator cycle 16",
+      "kind": "memory",
+      "address": "0xfebe9032",
+      "size": 4,
+      "equals_hex": "aac7e903"
+    },
+    {
+      "name": "Attenuated pre-gate/selected/ordinary output cycle 16",
+      "kind": "memory",
+      "address": "0xfebe9036",
+      "size": 6,
+      "equals_hex": "2f262f262f26"
+    },
+    {
+      "name": "Producer ramp output cycle 17",
+      "kind": "memory",
+      "address": "0xfebe903c",
+      "size": 2,
+      "equals_hex": "e903"
+    },
+    {
+      "name": "Retained fractional accumulator cycle 17",
+      "kind": "memory",
+      "address": "0xfebe903e",
+      "size": 4,
+      "equals_hex": "ebd0e903"
+    },
+    {
+      "name": "Attenuated pre-gate/selected/ordinary output cycle 17",
+      "kind": "memory",
+      "address": "0xfebe9042",
+      "size": 6,
+      "equals_hex": "2f262f262f26"
+    },
+    {
+      "name": "Rising branch clears decline hold counter",
+      "kind": "memory",
+      "address": "0xfebeb1f6",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "Observation lower canary",
+      "kind": "memory",
+      "address": "0xfebe8ffc",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    },
+    {
+      "name": "Observation upper canary",
+      "kind": "memory",
+      "address": "0xfebe9048",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    }
+  ]
+}

@@ -1,0 +1,274 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_final_command_retained_chain_limits_inhibit_release_no_observation_copy",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe0000"
+  },
+  "max_instructions": 500000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe7800",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebecc30",
+      "hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "evidence": "Exactly D01B4-owned command/history span, initialized nonzero to make original reset observable."
+    },
+    {
+      "address": "0xfebecc70",
+      "hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "evidence": "Bounded replacement state/reset output span; A5 marks bytes not owned by D04F0."
+    },
+    {
+      "address": "0xfebecc9c",
+      "hex": "0100",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebecc9e",
+      "hex": "0200",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac28",
+      "hex": "00",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac29",
+      "hex": "01",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac2a",
+      "hex": "00",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac2b",
+      "hex": "00",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac4c",
+      "hex": "e803",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac52",
+      "hex": "e803",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac5a",
+      "hex": "0004",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac64",
+      "hex": "0080",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebec797",
+      "hex": "00",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebec7a0",
+      "hex": "0001",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebec7aa",
+      "hex": "fffe",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebec7bc",
+      "hex": "0001",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebec7ac",
+      "hex": "fffe",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebec81a",
+      "hex": "0000",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac46",
+      "hex": "0000",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac48",
+      "hex": "0000",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac4a",
+      "hex": "0105",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebebf3c",
+      "hex": "20030000",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebec4c0",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebec3ba",
+      "hex": "0000",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebec43c",
+      "hex": "0000",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebecc2c",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebecb38",
+      "hex": "0000",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebec5ee",
+      "hex": "0000",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebecbe8",
+      "hex": "0000",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebec7bf",
+      "hex": "00",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebe4000",
+      "hex": "6400",
+      "evidence": "External scalar transition; never an injected internal history."
+    },
+    {
+      "address": "0xfebe4002",
+      "hex": "4b00",
+      "evidence": "External scalar transition; never an injected internal history."
+    },
+    {
+      "address": "0xfebe4004",
+      "hex": "00",
+      "evidence": "External scalar transition; never an injected internal history."
+    },
+    {
+      "address": "0xfebe4005",
+      "hex": "e803",
+      "evidence": "External scalar transition; never an injected internal history."
+    },
+    {
+      "address": "0xfebe4007",
+      "hex": "e803",
+      "evidence": "External scalar transition; never an injected internal history."
+    },
+    {
+      "address": "0xfebe4009",
+      "hex": "01",
+      "evidence": "External scalar transition; never an injected internal history."
+    },
+    {
+      "address": "0xfebe400a",
+      "hex": "01",
+      "evidence": "External scalar transition; never an injected internal history."
+    },
+    {
+      "address": "0xfebe400b",
+      "hex": "0002",
+      "evidence": "External scalar transition; never an injected internal history."
+    },
+    {
+      "address": "0xfebe400d",
+      "hex": "00",
+      "evidence": "External scalar transition; never an injected internal history."
+    },
+    {
+      "address": "0xfebe400e",
+      "hex": "0004",
+      "evidence": "External scalar transition; never an injected internal history."
+    },
+    {
+      "address": "0xfebe4010",
+      "hex": "e0fcffff",
+      "evidence": "External scalar transition; never an injected internal history."
+    },
+    {
+      "address": "0xfebe4014",
+      "hex": "00",
+      "evidence": "External scalar transition; never an injected internal history."
+    },
+    {
+      "address": "0xfebe4015",
+      "hex": "01",
+      "evidence": "External scalar transition; never an injected internal history."
+    },
+    {
+      "address": "0xfebe7600",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Bounded synthetic original-call stack; no peripheral initialization."
+    },
+    {
+      "address": "0xfebe0000",
+      "hex": "3f060e00befe2106b4010d0061003f061c00befe2106f0040d0061003f062a00befe210618020d0061003f063800befe210684020d0061003f064600befe2106da020d0061003f065400befe210682030d0061003f066200befe21069e030d0061003f067000befe21062c040d0061003f067e00befe2106d6060d0061003f068c00befe21067c040d006100260652acbefe27060040befe2806020000003f06ac00befe21062e9f0800610026064cacbefe27060240befe2806020000003f06cc00befe21062e9f08006100260629acbefe27060440befe2806010000003f06ec00befe21062e9f080061003f06fa00befe210618020d0061003f060801befe210684020d0061003f061601befe2106da020d0061003f062401befe210682030d0061003f063201befe21069e030d0061003f064001befe21062c040d0061003f064e01befe2106d6060d0061003f065c01befe21067c040d006100260652acbefe27060540befe2806020000003f067c01befe21062e9f0800610026064cacbefe27060740befe2806020000003f069c01befe21062e9f08006100260629acbefe27060940befe2806010000003f06bc01befe21062e9f0800610026062aacbefe27060a40befe2806010000003f06dc01befe21062e9f0800610026065aacbefe27060b40befe2806020000003f06fc01befe21062e9f080061003f060a02befe210618020d0061003f061802befe210684020d0061003f062602befe2106da020d0061003f063402befe210682030d0061003f064202befe21069e030d0061003f065002befe21062c040d0061003f065e02befe2106d6060d0061003f066c02befe21067c040d00610026062aacbefe27060d40befe2806010000003f068c02befe21062e9f0800610026065aacbefe27060e40befe2806020000003f06ac02befe21062e9f080061003f06ba02befe210618020d0061003f06c802befe210684020d0061003f06d602befe2106da020d0061003f06e402befe210682030d0061003f06f202befe21069e030d0061003f060003befe21062c040d0061003f060e03befe2106d6060d0061003f061c03befe21067c040d0061003f062a03befe210618020d0061003f063803befe210684020d0061003f064603befe2106da020d0061003f065403befe210682030d0061003f066203befe21069e030d0061003f067003befe21062c040d0061003f067e03befe2106d6060d0061003f068c03befe21067c040d00610026063cbfbefe27061040befe2806040000003f06ac03befe21062e9f08006100260629acbefe27061440befe2806010000003f06cc03befe21062e9f080061003f06da03befe210618020d0061003f06e803befe210684020d0061003f06f603befe2106da020d0061003f060404befe210682030d0061003f061204befe21069e030d0061003f062004befe21062c040d0061003f062e04befe2106d6060d0061003f063c04befe21067c040d0061003f064a04befe210618020d0061003f065804befe210684020d0061003f066604befe2106da020d0061003f067404befe210682030d0061003f068204befe21069e030d0061003f069004befe21062c040d0061003f069e04befe2106d6060d0061003f06ac04befe21067c040d006100260629acbefe27061540befe2806010000003f06cc04befe21062e9f080061003f06da04befe210618020d0061003f06e804befe210684020d0061003f06f604befe2106da020d0061003f060405befe210682030d0061003f061205befe21069e030d0061003f062005befe21062c040d0061003f062e05befe2106d6060d0061003f063c05befe21067c040d0061003f064a05befe210618020d0061003f065805befe210684020d0061003f066605befe2106da020d0061003f067405befe210682030d0061003f068205befe21069e030d0061003f069005befe21062c040d0061003f069e05befe2106d6060d0061003f06ac05befe21067c040d0061003f06ba05befe210618020d0061003f06c805befe210684020d0061003f06d605befe2106da020d0061003f06e405befe210682030d0061003f06f205befe21069e030d0061003f060006befe21062c040d0061003f060e06befe2106d6060d0061003f061c06befe21067c040d0061002106980700006100",
+      "evidence": "Synthetic transparent MOV/JMP call-only sequencer; no stores, computed firmware decisions, code overlays, or callback substitutions. Full original D0218\u2192D0284\u2192D02DA\u2192D0382\u2192D039E\u2192D042C\u2192D06D6\u2192D047C, retained history across changing external limits, attenuation, both hard gates, and source sign reversal; CC9C=1/CC9E=2 explicitly selects the filter output. Calls: 0xd01b4, 0xd04f0, 0xd0218, 0xd0284, 0xd02da, 0xd0382, 0xd039e, 0xd042c, 0xd06d6, 0xd047c, 0x89f2e, 0x89f2e, 0x89f2e, 0xd0218, 0xd0284, 0xd02da, 0xd0382, 0xd039e, 0xd042c, 0xd06d6, 0xd047c, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0xd0218, 0xd0284, 0xd02da, 0xd0382, 0xd039e, 0xd042c, 0xd06d6, 0xd047c, 0x89f2e, 0x89f2e, 0xd0218, 0xd0284, 0xd02da, 0xd0382, 0xd039e, 0xd042c, 0xd06d6, 0xd047c, 0xd0218, 0xd0284, 0xd02da, 0xd0382, 0xd039e, 0xd042c, 0xd06d6, 0xd047c, 0x89f2e, 0x89f2e, 0xd0218, 0xd0284, 0xd02da, 0xd0382, 0xd039e, 0xd042c, 0xd06d6, 0xd047c, 0xd0218, 0xd0284, 0xd02da, 0xd0382, 0xd039e, 0xd042c, 0xd06d6, 0xd047c, 0x89f2e, 0xd0218, 0xd0284, 0xd02da, 0xd0382, 0xd039e, 0xd042c, 0xd06d6, 0xd047c, 0xd0218, 0xd0284, 0xd02da, 0xd0382, 0xd039e, 0xd042c, 0xd06d6, 0xd047c, 0xd0218, 0xd0284, 0xd02da, 0xd0382, 0xd039e, 0xd042c, 0xd06d6, 0xd047c"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Original-byte sequence returns",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Final retained state without any history reinjection",
+      "kind": "memory",
+      "address": "0xfebecc30",
+      "size": 62,
+      "equals_hex": "e0fcffffe0fcffff00000000e0fcffffe0fcffffe0fcffffe0fcffffe0fce0fce0fce0fce0fc000000000000e0fc0000e0fce0fce0fce0fce80300000000"
+    },
+    {
+      "name": "Filter controls unchanged by reset, inhibit, release",
+      "kind": "memory",
+      "address": "0xfebecc9c",
+      "size": 4,
+      "equals_hex": "01000200"
+    }
+  ]
+}

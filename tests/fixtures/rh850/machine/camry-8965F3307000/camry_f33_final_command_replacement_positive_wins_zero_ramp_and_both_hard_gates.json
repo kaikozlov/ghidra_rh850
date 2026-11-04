@@ -1,0 +1,115 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_final_command_replacement_positive_wins_zero_ramp_and_both_hard_gates",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe0000"
+  },
+  "max_instructions": 500000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe7800",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebecc50",
+      "hex": "1027",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac5a",
+      "hex": "0000",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac4c",
+      "hex": "0100",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac29",
+      "hex": "00",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac2a",
+      "hex": "01",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebecc98",
+      "hex": "01",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebecc94",
+      "hex": "ffffff7f",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebe7600",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Bounded synthetic original-call stack; no peripheral initialization."
+    },
+    {
+      "address": "0xfebe0000",
+      "hex": "3f060e00befe21062c040d0061003f061c00befe21067c040d0061002106980700006100",
+      "evidence": "Synthetic transparent MOV/JMP call-only sequencer; no stores, computed firmware decisions, code overlays, or callback substitutions. Simultaneous attenuation zero, AC29=0, AC2A=1, and nonzero replacement mode: D047C replacement is after D042C hard gates and has its own fixed \u00b122170 bound, not AC4C. Calls: 0xd042c, 0xd047c"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Original-byte sequence returns",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Precedence with simultaneous conditions 0xfebecc62",
+      "kind": "memory",
+      "address": "0xfebecc62",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "Precedence with simultaneous conditions 0xfebecc54",
+      "kind": "memory",
+      "address": "0xfebecc54",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "Precedence with simultaneous conditions 0xfebecc66",
+      "kind": "memory",
+      "address": "0xfebecc66",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "Precedence with simultaneous conditions 0xfebecc64",
+      "kind": "memory",
+      "address": "0xfebecc64",
+      "size": 2,
+      "equals_hex": "9a56"
+    },
+    {
+      "name": "Precedence with simultaneous conditions 0xfebecc68",
+      "kind": "memory",
+      "address": "0xfebecc68",
+      "size": 2,
+      "equals_hex": "0100"
+    }
+  ]
+}

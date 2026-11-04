@@ -1,0 +1,266 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_final_command_replacement_retained_positive_reference_mode1",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe0000"
+  },
+  "max_instructions": 500000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe7800",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebecc70",
+      "hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "evidence": "Exactly bounded replacement state including A5 bytes outside D04F0 reset ownership."
+    },
+    {
+      "address": "0xfebecc50",
+      "hex": "e803",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac5a",
+      "hex": "0004",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac4c",
+      "hex": "204e",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac29",
+      "hex": "01",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac2a",
+      "hex": "00",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac46",
+      "hex": "ff7f",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac48",
+      "hex": "ff7f",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac4a",
+      "hex": "0005",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac44",
+      "hex": "7ffc",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebeac42",
+      "hex": "ffff",
+      "evidence": "Explicit synthetic signed/unsigned scalar input; firmware and ROM calibration remain original."
+    },
+    {
+      "address": "0xfebe4000",
+      "hex": "0080",
+      "evidence": "External scalar transition; never an injected internal history."
+    },
+    {
+      "address": "0xfebe4002",
+      "hex": "01",
+      "evidence": "External scalar transition; never an injected internal history."
+    },
+    {
+      "address": "0xfebe4003",
+      "hex": "00",
+      "evidence": "External scalar transition; never an injected internal history."
+    },
+    {
+      "address": "0xfebe4004",
+      "hex": "0105",
+      "evidence": "External scalar transition; never an injected internal history."
+    },
+    {
+      "address": "0xfebe7600",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Bounded synthetic original-call stack; no peripheral initialization."
+    },
+    {
+      "address": "0xfebe8ffc",
+      "size": 181,
+      "fill": 165,
+      "evidence": "Observation-only scratch with four-byte A5 canaries; intact original memcpy copies out only."
+    },
+    {
+      "address": "0xfebe0000",
+      "hex": "3f060e00befe2106f0040d00610026060090befe270670ccbefe2806200000003f062e00befe21062e9f0800610026062090befe270690ccbefe2806020000003f064e00befe21062e9f0800610026062290befe270694ccbefe2806050000003f066e00befe21062e9f080061003f067c00befe21062c040d0061003f068a00befe2106d6060d0061003f069800befe21067c040d00610026062790befe270670ccbefe2806200000003f06b800befe21062e9f080061003f06c600befe21062c040d0061003f06d400befe2106d6060d0061003f06e200befe21067c040d0061003f06f000befe21062c040d0061003f06fe00befe2106d6060d0061003f060c01befe21067c040d0061003f061a01befe21062c040d0061003f062801befe2106d6060d0061003f063601befe21067c040d0061003f064401befe21062c040d0061003f065201befe2106d6060d0061003f066001befe21067c040d0061003f066e01befe21062c040d0061003f067c01befe2106d6060d0061003f068a01befe21067c040d00610026064790befe270670ccbefe2806200000003f06aa01befe21062e9f0800610026066790befe270698ccbefe2806010000003f06ca01befe21062e9f08006100260648acbefe27060040befe2806020000003f06ea01befe21062e9f0800610026062aacbefe27060240befe2806010000003f060a02befe21062e9f080061003f061802befe21062c040d0061003f062602befe2106d6060d0061003f063402befe21067c040d00610026066890befe270670ccbefe2806200000003f065402befe21062e9f0800610026068890befe270690ccbefe2806020000003f067402befe21062e9f0800610026068a90befe270694ccbefe2806050000003f069402befe21062e9f0800610026068f90befe270662ccbefe2806060000003f06b402befe21062e9f080061003f06c202befe21064c060d0061003f06d002befe21064c060d0061003f06de02befe21064c060d0061003f06ec02befe21064c060d0061003f06fa02befe21064c060d0061003f060803befe21064c060d0061003f061603befe21064c060d0061003f062403befe21064c060d0061003f063203befe21064c060d0061003f064003befe21064c060d0061003f064e03befe21064c060d0061003f065c03befe21064c060d0061003f066a03befe21064c060d0061003f067803befe21064c060d0061003f068603befe21064c060d0061003f069403befe21064c060d0061003f06a203befe21064c060d0061003f06b003befe21064c060d0061003f06be03befe21064c060d0061003f06cc03befe21064c060d0061003f06da03befe21064c060d0061003f06e803befe21064c060d0061003f06f603befe21064c060d0061003f060404befe21064c060d0061003f061204befe21064c060d0061003f062004befe21064c060d0061003f062e04befe21064c060d0061003f063c04befe21064c060d0061003f064a04befe21064c060d0061003f065804befe21064c060d0061003f066604befe21064c060d0061003f067404befe21064c060d0061003f068204befe21064c060d0061003f069004befe21064c060d0061003f069e04befe21064c060d0061003f06ac04befe21064c060d0061003f06ba04befe21064c060d00610026069590befe27068eccbefe2806040000003f06da04befe21062e9f080061003f06e804befe21064c060d00610026069990befe27068eccbefe2806040000003f060805befe21062e9f0800610026069d90befe270698ccbefe2806010000003f062805befe21062e9f080061003f063605befe210674060d0061003f064405befe21067c040d00610026069e90befe27067cccbefe2806080000003f066405befe21062e9f080061002606a690befe270694ccbefe2806050000003f068405befe21062e9f080061002606ab90befe270664ccbefe2806020000003f06a405befe21062e9f0800610026062aacbefe27060340befe2806010000003f06c405befe21062e9f0800610026064aacbefe27060440befe2806020000003f06e405befe21062e9f080061003f06f205befe21062c040d0061003f060006befe2106d6060d0061003f060e06befe21067c040d0061002106980700006100",
+      "evidence": "Synthetic transparent MOV/JMP call-only sequencer; no stores, computed firmware decisions, code overlays, or callback substitutions. Original D04F0 reset\u2192six D042C/D06D6/D047C warm/tracking calls\u2192source sign reversal latches direction through original D05B4/D0528, D064C and D0674 while hard gate inhibits; 38 further original timer calls expose expiry ownership before D0674 releases. No internal histories injected between calls; timer calls are invocations, not a wall-clock claim. Calls: 0xd04f0, 0x89f2e, 0x89f2e, 0x89f2e, 0xd042c, 0xd06d6, 0xd047c, 0x89f2e, 0xd042c, 0xd06d6, 0xd047c, 0xd042c, 0xd06d6, 0xd047c, 0xd042c, 0xd06d6, 0xd047c, 0xd042c, 0xd06d6, 0xd047c, 0xd042c, 0xd06d6, 0xd047c, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0xd042c, 0xd06d6, 0xd047c, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0xd064c, 0xd064c, 0xd064c, 0xd064c, 0xd064c, 0xd064c, 0xd064c, 0xd064c, 0xd064c, 0xd064c, 0xd064c, 0xd064c, 0xd064c, 0xd064c, 0xd064c, 0xd064c, 0xd064c, 0xd064c, 0xd064c, 0xd064c, 0xd064c, 0xd064c, 0xd064c, 0xd064c, 0xd064c, 0xd064c, 0xd064c, 0xd064c, 0xd064c, 0xd064c, 0xd064c, 0xd064c, 0xd064c, 0xd064c, 0xd064c, 0xd064c, 0xd064c, 0x89f2e, 0xd064c, 0x89f2e, 0x89f2e, 0xd0674, 0xd047c, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0xd042c, 0xd06d6, 0xd047c"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Original-byte sequence returns",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Original replacement reset clears exactly its accumulator/reference/history span",
+      "kind": "memory",
+      "address": "0xfebe9000",
+      "size": 32,
+      "equals_hex": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "name": "Original replacement reset arms warm-up, clears timed latch",
+      "kind": "memory",
+      "address": "0xfebe9020",
+      "size": 2,
+      "equals_hex": "0100"
+    },
+    {
+      "name": "D04F0 leaves CC94 untouched while clearing CC98",
+      "kind": "memory",
+      "address": "0xfebe9022",
+      "size": 5,
+      "equals_hex": "a5a5a5a500"
+    },
+    {
+      "name": "First filter call only warms previous input; does not latch on reset delta",
+      "kind": "memory",
+      "address": "0xfebe9027",
+      "size": 32,
+      "equals_hex": "ff7f0000ff7f0000f4080000f408000018fcffff00000000f408f40800000000"
+    },
+    {
+      "name": "Six retained calls establish reference without injected state",
+      "kind": "memory",
+      "address": "0xfebe9047",
+      "size": 32,
+      "equals_hex": "88850200888502002c2d00002c2d000018fcffff3c0600002c2d2c2d3c060000"
+    },
+    {
+      "name": "Steady same-sign growth does not select replacement",
+      "kind": "memory",
+      "address": "0xfebe9067",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "Original sign reversal latches and holds prior reference; timer becomes one immediately",
+      "kind": "memory",
+      "address": "0xfebe9068",
+      "size": 32,
+      "equals_hex": "5cd801005bd80200f83200002c2d00002c2d0000cc0500000e210e21e2f30100"
+    },
+    {
+      "name": "Warm-up cleared, timed direction latch set",
+      "kind": "memory",
+      "address": "0xfebe9088",
+      "size": 2,
+      "equals_hex": "0001"
+    },
+    {
+      "name": "Replacement producer publishes negated held reference and selected direction",
+      "kind": "memory",
+      "address": "0xfebe908a",
+      "size": 5,
+      "equals_hex": "d4d2ffff01"
+    },
+    {
+      "name": "Valid pre-gate command, replacement selected, hard-gated normal command zero",
+      "kind": "memory",
+      "address": "0xfebe908f",
+      "size": 6,
+      "equals_hex": "e803d4d20000"
+    },
+    {
+      "name": "Counter reaches exact ROM38 with latch still asserted",
+      "kind": "memory",
+      "address": "0xfebe9095",
+      "size": 4,
+      "equals_hex": "26000001"
+    },
+    {
+      "name": "Following invocation expires timed latch, not replacement mode",
+      "kind": "memory",
+      "address": "0xfebe9099",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "D064C does not own mode release",
+      "kind": "memory",
+      "address": "0xfebe909d",
+      "size": 1,
+      "equals_hex": "01"
+    },
+    {
+      "name": "D0674 releases when zero normal command no longer satisfies directional hold",
+      "kind": "memory",
+      "address": "0xfebe909e",
+      "size": 8,
+      "equals_hex": "f832000000000000"
+    },
+    {
+      "name": "Release republishes ordinary command and clears mode",
+      "kind": "memory",
+      "address": "0xfebe90a6",
+      "size": 5,
+      "equals_hex": "0000000000"
+    },
+    {
+      "name": "Leaving replacement returns to still-inhibited ordinary result",
+      "kind": "memory",
+      "address": "0xfebe90ab",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "Gate release restores ordinary command without resetting filter histories",
+      "kind": "memory",
+      "address": "0xfebecc64",
+      "size": 4,
+      "equals_hex": "e803e803"
+    },
+    {
+      "name": "Qualifier one above1280 prevents immediate relatch despite retained histories",
+      "kind": "memory",
+      "address": "0xfebecc98",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "Observation lower canary",
+      "kind": "memory",
+      "address": "0xfebe8ffc",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    },
+    {
+      "name": "Observation upper canary",
+      "kind": "memory",
+      "address": "0xfebe90ad",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    }
+  ]
+}

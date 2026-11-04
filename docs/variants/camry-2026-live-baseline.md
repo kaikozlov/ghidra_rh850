@@ -6071,6 +6071,65 @@ known reset/init writer(s).  The gate-source censuses similarly close `AC2B/B112
 `AC5A/B1F8`, `AC29/AC2A`, `8B28/EEF90`, and `CC98/CC94`.  This is why another generic
 xref sweep of the same CodeFlash is no longer the correct next action.
 
+#### Native final-command transitions
+
+Fifty standalone `camry_f33_final_command_*.json` scenarios execute the original
+command producers with retained histories. All passed in
+`build/out/firmware-question-campaign/command-mode-wave1`, with the corrected
+attenuation-recovery sequence passing in `assist-command-wave4`. Inputs are
+bounded synthetic software snapshots; original `89F2E` copies observations
+out, and a no-observation-copy control checks the same final state directly.
+
+**Order matters.** `D0284` clamps the signed32 sum to ±29125, multiplies by
+unsigned `AC64`, divides toward zero by32768, then clamps to ±22170.
+`D0382` applies the signed `AC52` limit after `D02DA` has updated its history.
+`D039E` separately scales and narrows its two contributions to signed16 before
+adding and clamping the sum. `AC28==1` selects its historical base; `C797!=0`
+omits the damping contribution.
+
+`D042C` likewise narrows the attenuation quotient to signed16 **before**
+amplitude limiting. It preserves `CC62` and pre-gate `CC54` even when the hard
+gates zero `CC66`. `D047C` selects replacement afterward: an active replacement
+can publish nonzero `CC64` while attenuation is zero and both ordinary hard
+gates inhibit `CC66`. Replacement has its own fixed ±22170 bound.
+Decisive arithmetic/store order is `D03D8..D0424` and `D0438..D04A6`.
+
+**Filtering continues during inhibition.** `D02DA` retains previous target
+`CC30`, anchor `CC34`, step `CC38` and output `CC3C`. A changed target or
+wrong-sign step rebases the anchor; a repeated same-direction target reuses
+it. The new step is the unsigned anchor-distance shifted by `CC9E&31`, with
+minimum magnitude1. Nonzero `CC9C` selects the stepped output; zero bypasses
+it while still updating target/anchor/step. Original initializer `D06EA`
+sets `CC9C=0,CC9E=1`; active-filter fixtures explicitly select that alternative.
+The full-chain sequence reaches 200/400/600/800 for target800 despite
+intervening ordinary-output inhibition, then follows 400/0/−400/−800 on
+reversal. Releasing inhibition exposes the current retained progression.
+
+**Reset ownership is split.** `D01B4` clears all `CC30..CC6D` command/history
+bytes, but not replacement state or filter controls. `D04F0` clears replacement
+mode/history and sets its warm-up flag, retaining `CC94`; mode0 prevents that
+old magnitude from being selected. `D06EA` owns the separate filter controls.
+
+**Replacement is produced, not just injected.** `D05B4` updates two retained
+channels using exact denominator14633. `D0528` admits detection only with
+unsigned `AC4A<=1280` and mode0. Mode1 requires reference≥10240,
+derivative>320, opposite-sign halfword delta, negated torque>896 and a second
+negated input>0; mode2 reverses those inequalities. Negation narrows to
+signed16, so −32768 remains −32768. Six original filter calls establish
+references ±11564; the seventh can enter replacement while `CC66=0`.
+`D064C` clears its timed force on the call entering with count38, but
+`D0674` owns mode release through the directional/reference conditions.
+Timer expiration alone does not clear `CC98`.
+
+**Attenuation recurrence.** Original `B4B6C -> D12D2` carries fractional
+accumulator `B208` with coefficient103, publishing its unsigned high16 as
+`B1F8`. Low-torque decay can hold through counter36000; falling output≤20
+snaps to zero, rising output≥1004 snaps to1024. After fourteen decay calls,
+output1001 remains1001 during three recovery calls while the accumulator
+advances `65650281 → 65652650 → 65655019`. The original zero-output path
+also sets `B1CF=5A` on a subsequent call, which enables rising on the next.
+The snapshot from `B1F8` to `AC5A` is explicit in these isolated sequences.
+
 ### 66.4 One stationary capture can now identify the first failing rung
 
 The useful experiment captures adjacent rungs.
