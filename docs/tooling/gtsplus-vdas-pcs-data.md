@@ -117,20 +117,19 @@ The CSV is therefore a presentation/export derivative. **Preserve the original `
 
 ## 5. Relationship to TSE/GTSE and PCS Data Viewer
 
-The three host layers now form two parallel persistence paths:
+The executable lifecycle distinguishes legacy storage from the current viewer handoff:
 
 ```text
-FRC_P5 AB/EB Operation/Image FFD acquisition
-                 |
-          per-feature *.log files
-             /         \
-            /           \
-       TSE saved data    VDAS builder
-            |               |
-       TSE/GTSE path       json.log
-            |               |
- PCS Data Viewer decoder   .vdas ZIP
+legacy TSE recorder sections -> configured TSEConverter -> GTSE (PCS/RoB skipped)
+current recorder acquisition -> per-feature logs -> json.log -> .vdas ZIP
+                                                          |       |
+                                                          |       +-> PCS Data Viewer
+                                                          +-> VDAS-to-CSV derivative
 ```
+
+The current browser launches PCS Data Viewer with the `.vdas` path through external-app
+slot 3. Schema overlap with legacy TSE sections does not establish a raw-TSE viewer
+launch path.
 
 For our TSS3 work, VDAS has an important practical advantage over **GTSE**. Current
 `TSEConverter.exe.config` deliberately skips `RecordOnBehavior共通`,
@@ -154,6 +153,30 @@ tools/gts vdas capture.vdas --path Gts.PcsImg.Data
 
 The default view reports archive entries, format version, and which recorder payload
 sections are populated. `--path` is case-insensitive and can return any dotted JSON field.
+
+### 6.1 Acquisition cleanup and viewer exit
+
+The authenticated `img_ope_ddr_worker.js` and materialized viewer/manager bodies are
+pinned in `data/generated/gtsplus_2026/lifecycle_persistence.json`:
+
+- Recorder completion obtains absolute time/header data, calls `createVdasFile`, then
+  deletes the per-feature input logs **before** optional CSV conversion. The VDAS-create
+  catch resolves `false`, so this cleanup can also follow a caught creation failure.
+  Optional CSV requires successful VDAS creation and the configured SHA-256 feature.
+- Interruption requests cancellation, deletes input logs and attempted VDAS/CSV outputs,
+  and polls until the VDAS processing flag finishes. A later conversion can re-extract
+  `json.log`; deletion of acquisition inputs does not mean every intermediate stays absent.
+- `PCS Data Viewer.exe` starts through its configuration/port/challenge/authentication/
+  licensing/mutex gates. The file consumer requires a single-entry ZIP and parses its
+  JSON. The reader selects code page 1252 before UTF-8 re-encoding; this is the observed
+  implementation, not an assumption that arbitrary ZIP contents are valid VDAS.
+- The viewer clears `%TEMP%/PcsDataViewerTemp` at startup and registers process-exit
+  recursive cleanup. Cleanup exceptions are caught; deletion is best-effort, not a
+  guaranteed retention bound after a crash.
+
+These are offline code findings. No viewer authentication, vehicle acquisition or
+network service was exercised.
+
 
 ## 7. Evidence boundary and next specimen
 
