@@ -42,6 +42,36 @@ FACTORIES = (
         "default_case_va": 0x10088D48,
     },
 )
+DS4_FACTORIES = (
+    {
+        "format_version": 1, "factory_va": 0x1007B8A0,
+        "jump_table_va": 0x1007DF28, "maximum_type": 91,
+        "body_size": 0x2688, "default_case_va": 0x1007DEA6,
+    },
+    {
+        "format_version": 2, "factory_va": 0x1007E0A0,
+        "jump_table_va": 0x10082098, "maximum_type": 150,
+        "body_size": 0x3FF8, "default_case_va": 0x10082014,
+    },
+)
+DS4_VIEWER_FACTORY = {
+    "format_version": 3, "factory_va": 0x1000FAF0,
+    "jump_table_va": 0x100100A0, "maximum_type": 18,
+    "body_size": 0x5B0, "default_case_va": 0x10010047,
+}
+MAIN_VIEWER_FACTORY = {
+    "format_version": 3, "factory_va": 0x1000FAC0,
+    "jump_table_va": 0x10010070, "maximum_type": 18,
+    "body_size": 0x5B0, "default_case_va": 0x10010017,
+}
+UTILITY_FACTORIES = (
+    {"format_version": 6, "factory_va": 0x10008CB0,
+     "jump_table_va": 0x10008E60, "maximum_type": 3,
+     "body_size": 0x1B0, "default_case_va": 0x10008E06},
+    {"format_version": 7, "factory_va": 0x10008AF0,
+     "jump_table_va": 0x10008CA0, "maximum_type": 3,
+     "body_size": 0x1B0, "default_case_va": 0x10008C46},
+)
 
 CTOR_RE = re.compile(r"^\?\?0([^@]+)@@QAE@EE@Z$")
 
@@ -58,7 +88,7 @@ def exported_constructors(pe: pefile.PE) -> dict[int, dict[str, str]]:
     pe.parse_data_directories()
     base = pe.OPTIONAL_HEADER.ImageBase
     out: dict[int, dict[str, str]] = {}
-    for symbol in pe.DIRECTORY_ENTRY_EXPORT.symbols:
+    for symbol in getattr(pe, "DIRECTORY_ENTRY_EXPORT").symbols:
         if not symbol.name:
             continue
         decorated = symbol.name.decode("ascii", errors="strict")
@@ -119,11 +149,24 @@ def extract_factory(pe: pefile.PE, spec: dict[str, int]) -> dict:
             }
         )
     body = va_data(pe, spec["factory_va"], spec["body_size"])
+    default_call = constructor_call(pe, spec["default_case_va"], constructors)
+    if default_call is None:
+        raise RuntimeError(f"no native default constructor at {spec['default_case_va']:08X}")
+    default_call_va, default_target_va, default_constructor = default_call
     return {
         "format_version": spec["format_version"],
         "factory_va": f"0x{spec['factory_va']:08X}",
         "factory_body_size": spec["body_size"],
         "factory_body_sha256": sha256(body),
+        "factory_prefix96_hex": body[:96].hex(),
+        "default": {
+            "case_va": f"0x{spec['default_case_va']:08X}",
+            "constructor_call_va": f"0x{default_call_va:08X}",
+            "constructor_va": f"0x{default_target_va:08X}",
+            "constructor_export": default_constructor["decorated_export"],
+            "class_name": default_constructor["class_name"],
+            "status": "generic-base/default",
+        },
         "jump_table_va": f"0x{spec['jump_table_va']:08X}",
         "jump_table_sha256": sha256(table),
         "maximum_type": spec["maximum_type"],
@@ -131,6 +174,84 @@ def extract_factory(pe: pefile.PE, spec: dict[str, int]) -> dict:
         "generic_base_count": sum(r["status"] == "generic-base/default" for r in records),
         "records": records,
     }
+
+
+def _direct_string_factory(pe: pefile.PE, version: int, va: int, size: int) -> dict:
+    constructors = exported_constructors(pe)
+    body = va_data(pe, va, size)
+    calls = {}
+    for offset in range(len(body) - 4):
+        if body[offset] == 0xE8:
+            target = va + offset + 5 + struct.unpack_from("<i", body, offset + 1)[0]
+            if target in constructors:
+                constructor = constructors[target]
+                calls.setdefault(constructor["class_name"], {
+                    "constructor_call_va": f"0x{va + offset:08X}",
+                    "constructor_va": f"0x{target:08X}",
+                    "constructor_export": constructor["decorated_export"],
+                    "class_name": constructor["class_name"],
+                })
+    return {
+        "format_version": version, "factory_va": f"0x{va:08X}",
+        "factory_body_sha256": sha256(body),
+        "factory_prefix96_hex": body[:96].hex(),
+        "records": [{"table_type": 0, "status": "constructed", **calls["CDbStringTable"]}],
+        "default": {"status": "generic-base/default", **calls["CDbTableBase"]},
+    }
+
+
+def _supplemental_sources(root: Path, ds4: bool) -> dict:
+    result = {}
+    for name, specs, make_va, make_size, direct in (
+        ("KgpDataCtrl.dll", DS4_FACTORIES if ds4 else (),
+         0x1007B830 if ds4 else 0x10081C10, 0x63,
+         (4, 0x10082300 if ds4 else 0x10089080, 0x100)),
+        ("ViewerDb.dll", (DS4_VIEWER_FACTORY if ds4 else MAIN_VIEWER_FACTORY,),
+         0x10010130 if ds4 else 0x10010100, 0xF2,
+         (5, 0x10010130 if ds4 else 0x10010100, 0xF2)),
+        ("UtilityDB.dll", UTILITY_FACTORIES, 0x10008EB0, 0x2F, None),
+    ):
+        path = root / "bin" / name
+        data = path.read_bytes()
+        pe = pefile.PE(data=data)
+        contracts = []
+        for symbol in getattr(pe, "DIRECTORY_ENTRY_EXPORT").symbols:
+            if not symbol.name:
+                continue
+            export = symbol.name.decode("ascii")
+            if export.startswith((
+                "?GetRecordAddress@", "?GetVariable@CDbVariableTable",
+                "?SetOriginalData@CDbVariableTable", "?GetAddrItemSize@",
+                "?SetRecString@CDbViewerResourceResRecords", "?GetAddrListSize@",
+                "?FindDbItem1@CDbDllTable",
+                "?GetExceptahandFlag@CDbDllTable", "?GetExceptahandId@CDbDllTable",
+                "?GetExceptahandFlag@CDbEcuCategoryTable", "?GetExceptahandId@CDbEcuCategoryTable",
+            )):
+                va = pe.OPTIONAL_HEADER.ImageBase + symbol.address
+                contracts.append({
+                    "export": export, "va": f"0x{va:08X}",
+                    "prefix64_hex": va_data(pe, va, 64).hex(),
+                })
+        factories = [extract_factory(pe, spec) for spec in specs]
+        if direct:
+            factories.append(_direct_string_factory(pe, *direct))
+        result[name] = {
+            "artifact": {
+                "relative_path": path.relative_to(REPO_ROOT).as_posix(),
+                "size": len(data), "sha256": sha256(data),
+            },
+            "make_table": {
+                "va": f"0x{make_va:08X}",
+                "body_sha256": sha256(va_data(pe, make_va, make_size)),
+                "prefix64_hex": va_data(pe, make_va, 64).hex(),
+            },
+            "factories": factories, "field_contract_exports": contracts,
+        }
+    return result
+
+
+def _ds4_sources(ds4_root: Path) -> dict:
+    return _supplemental_sources(ds4_root, True)
 
 
 def build(pe_path: Path) -> dict:
@@ -155,6 +276,8 @@ def build(pe_path: Path) -> dict:
             "body_sha256": sha256(va_data(pe, 0x10081C10, 0x63)),
         },
         "factories": [extract_factory(pe, spec) for spec in FACTORIES],
+        "ds4": _ds4_sources(pe_path.parent.parent.parent / "DS-4"),
+        "supplemental": _supplemental_sources(pe_path.parent.parent, False),
     }
 
 

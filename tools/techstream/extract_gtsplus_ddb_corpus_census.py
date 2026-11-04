@@ -21,6 +21,9 @@ import pefile
 from tools.techstream.ddb_semantics import monitor_rows
 from tools.techstream.ddb_strings import load_string_db
 from tools.techstream.parse_ddb import DDBParser, ECU_TABLE_CLASS_NAMES
+from tools.techstream.extract_gtsplus_factory_table_map import (
+    FACTORIES, _supplemental_sources, extract_factory,
+)
 from tools.techstream.techstream_paths import resolve_gts_root
 from tools import REPO_ROOT
 
@@ -264,6 +267,182 @@ def req_limit_eps_boundary(parser: DDBParser, root: Path) -> dict[str, Any]:
     }
 
 
+
+
+def _format_corpus(root: Path, ds4: bool) -> dict[str, Any]:
+    """Decode every input; retain compact geometry and selection-contract rows."""
+    parser = DDBParser()
+    native = _supplemental_sources(root, ds4)
+    factories = {
+        f["format_version"]: (source["artifact"], f)
+        for source in native.values() for f in source["factories"]
+    }
+    inputs: list[dict[str, Any]] = []
+    formats: Counter[int] = Counter()
+    groups: Counter[str] = Counter()
+    section_count = fixed_rows = variable_sections = string_entries = metadata_entries = 0
+    for product in (("DM", "OS") if ds4 else REGIONS):
+        for family in FAMILIES:
+            for path in sorted((root / product / "DB" / family).glob("*.ddb")):
+                data = path.read_bytes()
+                version = data[8]
+                if not ds4 and version in (1, 2):
+                    continue
+                row = {
+                    "id": path.relative_to(root).as_posix(),
+                    "path": path.relative_to(REPO_ROOT).as_posix(),
+                    "product": "DS-4" if ds4 else "GTSPlus", "region": product, "family": family,
+                    "sha256": hashlib.sha256(data).hexdigest(), "size": len(data),
+                    "header8": data[:8].hex(), "format_version": version,
+                }
+                formats[version] += 1
+                groups[f"{product}/{family}"] += 1
+                if version in (1, 2, 3):
+                    parse = {1: parser.parse_master_db, 2: parser.parse_ecu_db,
+                             3: parser.parse_viewer_db}[version]
+                    db = parse(path)
+                    source, factory = factories[version]
+                    cases = {r["table_type"]: r for r in factory["records"]}
+                    sections = []
+                    for table, section in db.sections.items():
+                        decoded = section.decoded_data
+                        item = {
+                            "table_type": table, "data_offset": section.data_offset,
+                            "compression": section.header.compression,
+                            "record_count": section.header.record_count,
+                            "disk_payload_size": section.header.payload_size,
+                            "decoded_size": len(decoded),
+                            "decoded_sha256": hashlib.sha256(decoded).hexdigest(),
+                            "native_source_sha256": source["sha256"],
+                            "native_factory_va": factory["factory_va"],
+                            "native_factory_case": cases[table],
+                        }
+                        if section.variable_layout:
+                            section.variable_records()
+                            variable_sections += 1
+                            item.update({
+                                "layout": "u32-pool-offset/u16-byte-length",
+                                "pool_offset": section.header.record_count * 6,
+                                "offset_directory_sha256": hashlib.sha256(
+                                    decoded[:section.header.record_count * 6]
+                                ).hexdigest(),
+                            })
+                        else:
+                            size = section.decoded_record_size
+                            fixed_rows += section.header.record_count
+                            item.update({"record_size": size, "layout": "fixed"})
+                            if version == 1 and table in (16, 19):
+                                item["raw_rows"] = [
+                                    decoded[i * size:(i + 1) * size].hex()
+                                    for i in range(section.header.record_count)
+                                ]
+                        sections.append(item)
+                    row["sections"] = sections
+                    if version in (1, 2):
+                        section_count += len(sections)
+                elif version in (4, 5, 6):
+                    db = parser.load_string_db(path)
+                    source, factory = factories[version]
+                    cases = {r["table_type"]: r for r in factory["records"]}
+                    string_entries += db.entry_count
+                    metadata_entries += len(db.metadata or ())
+                    row["strings"] = {
+                        "entry_count": db.entry_count, "pool_offset": db.pool_offset,
+                        "metadata_count": len(db.metadata or ()),
+                        "sections": [{
+                            "table_type": table, "data_offset": section.data_offset,
+                            "record_count": section.header.record_count,
+                            "compression": section.header.compression,
+                            "disk_payload_size": section.header.payload_size,
+                            "layout": "u32-pool-offset/u16-byte-length" if table == 0 else "fixed",
+                            "record_size": None if table == 0 else 164,
+                            "decoded_size": len(section.decoded_data),
+                            "decoded_sha256": hashlib.sha256(section.decoded_data).hexdigest(),
+                            "native_source_sha256": source["sha256"],
+                            "native_factory_va": factory["factory_va"],
+                            "native_factory_case": cases[table],
+                        } for table, section in db.sections.items()],
+                        "layout": "u32-pool-offset/u16-byte-length; UTF-16LE byte pool",
+                        "metadata_layout": "80-byte key;80-byte secondary key;u32 text index" if db.metadata is not None else None,
+                    }
+                else:
+                    raise ValueError(f"unimplemented database format {version}: {path}")
+                row["schema_family"] = db.schema_family
+                inputs.append(row)
+    return {
+        "source_root": root.relative_to(REPO_ROOT).as_posix(),
+        "native_sources": native,
+        "counts": {
+            "ddb_files": len(inputs),
+            "formats": {str(k): v for k, v in sorted(formats.items())},
+            "groups": dict(sorted(groups.items())),
+            "sectioned_files": formats[1] + formats[2],
+            "section_instances": section_count,
+            "viewer_section_instances": sum(len(r["sections"]) for r in inputs if r["format_version"] == 3),
+            "fixed_raw_rows_including_viewer": fixed_rows,
+            "variable_sections": variable_sections,
+            "string_entries": string_entries, "metadata_entries": metadata_entries,
+        },
+        "inputs": inputs,
+    }
+
+def _master_corpus(root: Path) -> dict[str, Any]:
+    parser = DDBParser()
+    native_path = root / "bin/KgpDataCtrl.dll"
+    native_hash = sha256_file(native_path)
+    native = pefile.PE(str(native_path))
+    factory = extract_factory(native, FACTORIES[0])
+    cases = {r["table_type"]: r for r in factory["records"]}
+    inputs: list[dict[str, Any]] = []
+    for region in REGIONS:
+        for family in FAMILIES:
+            path = root / region / "DB" / family / "Toyota.ddb"
+            data = path.read_bytes()
+            db = parser.parse_master_db(path)
+            sections = []
+            for table, section in db.sections.items():
+                decoded = section.decoded_data
+                if section.variable_layout:
+                    section.variable_records()
+                sections.append({
+                    "table_type": table, "data_offset": section.data_offset,
+                    "compression": section.header.compression,
+                    "record_count": section.header.record_count,
+                    "record_size": None if section.variable_layout else section.decoded_record_size,
+                    "layout": "u32-pool-offset/u16-byte-length" if section.variable_layout else "fixed",
+                    "disk_payload_size": section.header.payload_size,
+                    "decoded_size": len(decoded),
+                    "decoded_sha256": hashlib.sha256(decoded).hexdigest(),
+                    "native_source_sha256": native_hash,
+                    "native_factory_va": factory["factory_va"],
+                    "native_factory_case": cases[table],
+                })
+                if table in (16, 19):
+                    size = section.decoded_record_size
+                    sections[-1]["raw_rows"] = [
+                        decoded[i * size:(i + 1) * size].hex()
+                        for i in range(section.header.record_count)
+                    ]
+            inputs.append({
+                "id": path.relative_to(root).as_posix(),
+                "path": path.relative_to(REPO_ROOT).as_posix(),
+                "product": "GTSPlus", "region": region, "family": family,
+                "sha256": hashlib.sha256(data).hexdigest(), "size": len(data),
+                "header8": data[:8].hex(), "format_version": 1,
+                "schema_family": db.schema_family, "sections": sections,
+            })
+    return {
+        "counts": {
+            "ddb_files": len(inputs),
+            "section_instances": sum(len(r["sections"]) for r in inputs),
+            "declared_records": sum(s["record_count"] for r in inputs for s in r["sections"]),
+            "variable_sections": sum(s["record_size"] is None for r in inputs for s in r["sections"]),
+        },
+        "inputs": inputs,
+    }
+
+
+
 def build(root: Path | None = None) -> dict[str, Any]:
     root = (root or resolve_gts_root()).resolve()
     parser = DDBParser()
@@ -294,10 +473,10 @@ def build(root: Path | None = None) -> dict[str, Any]:
             for path in paths:
                 total_files += 1
                 region_total += 1
-                try:
-                    db = parser.parse_ecu_db(path)
-                except Exception:
+                version = path.read_bytes()[8]
+                if version != 2:
                     continue
+                db = parser.parse_ecu_db(path)
                 family_ecu += 1
                 ecu_count += 1
                 region_ecu += 1
@@ -398,10 +577,15 @@ def build(root: Path | None = None) -> dict[str, Any]:
             "psc_factor_data": psc_factor_data(parser, root),
         },
         "req_limit_eps_boundary": req_limit_eps_boundary(parser, root),
+        "ds4": _format_corpus(root.parent / "DS-4", True),
+        "supplemental": _format_corpus(root, False),
+        "main_masters": _master_corpus(root),
     }
     # Normalize tuples from shared signal-info helpers so an in-memory rebuild
     # compares byte-for-byte with JSON reloaded from disk.
     return json.loads(json.dumps(result))
+
+
 
 
 def main() -> None:

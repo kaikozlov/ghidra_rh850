@@ -7,7 +7,8 @@
 >
 > **Status:** active — DDB parser and catalog extractor implemented
 >
-> **Evidence source:** external-source (Techstream V18.00.003 DLL decompilation)
+> **Evidence source:** external-source (exact Techstream V18.00.003 and
+> GTS+ 2026.03.002.02 main/DS-4 DLLs and database bytes)
 >
 > **Verification:** deterministic catalog generation
 > (`tools/techstream/extract_catalog.py`)
@@ -22,13 +23,15 @@ It lacks code addresses, but contains diagnostic vocabulary useful for naming
 services, DTCs, and freeze-data monitor values. The runtime factory establishes
 table identity.
 
-Three new tools implement the extraction pipeline:
+The existing extraction owners are:
 
 | Tool | Purpose |
 |---|---|
 | `tools/techstream/parse_ddb.py` | Parse `.ddb` binary format: sections, LZSS decompression, string resolution |
 | `tools/techstream/extract_catalog.py` | Build `diagnostic_annotations.json` from DDB corpus |
 | `tools/techstream/extract_factory_table_map.py` | Derive both table-class maps from PE switch targets and constructor exports |
+| `tools/techstream/extract_gtsplus_factory_table_map.py` | Derive separate current main/DS-4 master, ECU, Viewer and string/resource factory provenance |
+| `tools/techstream/extract_gtsplus_ddb_corpus_census.py` | Census every current main ECU and every DS-4 input; retain complete Viewer/string supplemental payloads |
 | `tools/techstream/extract_toyota_master_routes.py` | Join priority master categories to regional DLL/function/detail rows |
 | `tools/techstream/extract_priority_ddb_semantics.py` | Emit consumer-proven priority fields while retaining all raw bytes |
 | `tools/techstream/extract_application_interface_correlations.py` | Join targeted EMPS_P5 monitor metadata to recovered Sienna interface concepts with explicit accepted/ambiguous/rejected dispositions |
@@ -52,27 +55,116 @@ not by themselves bind a string to this ECU or to a firmware routine.
 
 ## .ddb file format
 
-Modern formats 1–5 share the six-byte prefix `40 00 0C 16 0C 08`; bytes 6–7
-vary by region. Format 6 uses the seven-byte prefix
-`39 00 0C 16 0B 15 0F`; byte 7 is a language tag (`0x16` English through
-`0x1A` Turkish in this corpus). Both families carry the null-terminated
-signature `"DiagTool DataCtrl"`, and byte 8 encodes the format variant:
+All admitted families carry the null-terminated signature `"DiagTool DataCtrl"`.
+V18 standard files use prefix `40000c160c08`; its type-6 family is
+`39000c160b150f`, with byte-7 tags `16..1a`. Current main standard families are
+`40000c1a0610`, `49000c1a0311` and `01020a1a0610`; its type-6 family is
+`48000c1a05120b`, with tags `09..0d`.
+
+Current DS-4 standard families are `0d00a41a0508`, `0d00a41a0306`,
+`01020a1a0508` and `0400a4180310`. DS-4 type-6 seven-byte families and exact
+observed byte-7 tags are:
+
+| Family | Tags (hex) |
+|---|---|
+| `3c000c1a04080a` | `35,37,38,3a,3b` |
+| `3c000c1a04080b` | `00,2c` |
+| `3c000c1a050d0f` | `0d` |
+| `3c000c1a051510` | `26..2a` |
+
+Byte 8 selects the format; byte 9 is the directory slot count:
 
 | Byte 8 | Type | Example files |
 |---|---|---|
 | `0x01` | Toyota master routing/enumeration database | `Toyota.ddb` |
 | `0x02` | ECU database (uncompressed sections) | `EPS_P4DK3.ddb` |
+| `0x03` | Viewer tables, separate ViewerDb.dll namespace | `Viewer.ddb` |
 | `0x04` | OEM description string database | `M_English.ddb` |
 | `0x05` | UI string database | `V_English.ddb` |
 | `0x06` | Dealer wizard/dialog string database (different header) | `U_English.ddb` |
 
-Coverage is explicit rather than silent: `parse_master_db()` structurally
-parses all three regional `Toyota.ddb` directories (67 NA, 67 EU, and 76 JP
-sections), `parse_ecu_db()` handles all 1,368
-format-`0x02` ECU databases (25,361 sections), and `load_string_db()` handles
-the modern sectioned format-`0x04/05/06` string databases. Type-`0x03`
-`Viewer.ddb` and nine legacy type-`0x04` files have distinct schemas and are
-rejected rather than misrepresented as parsed ECU/string content.
+`parse_master_db()` and `parse_ecu_db()` retain complete section directories.
+`parse_viewer_db()` handles the current Viewer namespace, including compressed
+tables. `load_string_db()` handles modern type-4/5/6 offset-and-pool layouts.
+The V18 census remains 1,368 ECU files / 25,361 sections and three regional
+masters / 210 sections. Legacy type-4 layouts retain their separate format
+boundary.
+
+### Current main and DS-4 coverage
+
+`data/generated/gtsplus_2026/ddb_corpus_census.json` separates main current
+ECU statistics, `main_masters`, `supplemental` main Viewer/string inputs,
+and the full `ds4` corpus. Main masters retain all six files, 248 sections,
+4,079,510 declared records and six variable table-0 payloads. DS-4 covers
+**301 files**: DM Gen/Spe **181/4**, OS Gen/Spe **112/4**;
+formats 1/2/3/4/5/6 have **4/199/2/24/24/48** files. All **203** master/ECU
+files retain **2,519** section instances, **301,550** fixed rows, and four
+variable master-table-0 payloads. The two Viewer files retain all eight
+sections and 145,262 fixed rows. The 96 string/resource inputs contain
+3,421,680 text entries and 394,416 resource rows.
+
+Main supplemental coverage is all **six** Viewer files (26 sections,
+920,200 rows) and all **90** string/resource files (14,382,390 text entries,
+788,730 resource rows). Every source keeps its exact path, product,
+region/product-root, Gen/Spe family, header bytes and SHA-256. The compact
+census records every table's count, layout, decoded size/hash and native
+factory provenance. Only master category/DLL selection-contract rows are
+inlined as ordered `raw_rows`.
+
+Complete rows remain available through `Section.iter_records()`, including
+string/resource sections returned by `load_string_db()`. Each `RawRecord`
+retains its source path, table type, zero-based source row index, encoded
+payload file offset, decoded row offset and complete raw bytes. Variable
+rows also retain the exact six-byte offset/length directory entry;
+zero-length rows have a null decoded offset. `Section.decoded_data` retains
+the complete payload, including padding and shared pool bytes. Corpus
+regeneration decodes/hashes every source; the regression gate walks every
+row on demand without tracking a second copy of the databases.
+
+`ddb_factory_table_map.json` keeps native identities separate. Main
+KgpDataCtrl has 94 master / 172 ECU cases; DS-4 has **92 master / 151 ECU**
+cases. In particular master type 90 is main
+`CDbExceptionProcessIdGroupTable` but DS-4 `CDbTableBase`. Each product's
+ViewerDb factory has all 19 slots; formats 4 and 5 route type 0 to their own
+`CDbStringTable` constructor and other types to the generic base. Each
+UtilityDB factory has four cases for formats 6 and 7. Format 7 has current
+native code but no packaged database input. Every section records its
+exact native source hash, factory VA and constructor case.
+
+Current DS-4 native anchors are KgpDataCtrl MakeTable `1007b830`,
+master/ECU switches `1007b8a0` / `1007e0a0`, ViewerDb MakeTable
+`10010130` / type-3 switch `1000faf0`, and UtilityDB MakeTable
+`10008eb0` / type-6/7 switches `10008cb0` / `10008af0`.
+Main ViewerDb's corresponding addresses are `10010100` / `1000fac0`;
+main UtilityDB addresses match the listed VAs but have their own source
+hashes. Constructors establish class identity. Native `GetRecordAddress`
+strides establish Viewer row widths: types 0/16=164, 1=20, 2=12, 3/14=8,
+5=112, 17/18=4 bytes. Field meanings are assigned only by their consumers.
+
+Parsed `Section.schema_family` selects type-19 role layout explicitly:
+main current u16 at `+0x54`; DS-4 u8 at `+0x56`; V18 u8 at `+0x56`.
+Current category rows expose handling ID u16 `+0x46`, generation **byte**
+`+0x48`, and exception flag byte `+0x49`. Current DLL rows expose handling
+ID u16 `+0x52`, with handling flag main `+0x56` / DS-4 `+0x57`.
+The native category flag/ID getters are main `100ad7a0` / `100ad7e0`
+and DS-4 `100a34d0` / `100a3510`; DLL flag/ID getters are main
+`100ab4c0` / `100ab500` and DS-4 `100a11f0` / `100a1230`.
+Raw rows and duplicate occurrences remain untouched; selection and index
+precedence belong to the master-domain owner.
+
+Regenerate through the existing owners:
+
+```sh
+uv run python -m tools.techstream.extract_gtsplus_factory_table_map
+uv run python -m tools.techstream.extract_gtsplus_ddb_corpus_census
+```
+
+Parent verification selectors are `tools/test techstream_ddb_header_families`,
+`tools/test gtsplus_ddb_factory_table_map` and
+`tools/test gtsplus_ddb_corpus_census`. Their regressions cover every
+retained payload and exact corpus counts, plus negative header tags,
+directory/slot/payload/compression boundaries, variable-pool bounds and
+source-specific role/generation layouts.
 
 The 2026-08-10 high-value residual audit further narrows the security-relevant
 unknowns. All 35 regional `EPS*`/`EMPS*` type-2 files are structurally covered
@@ -101,21 +193,23 @@ establishes a family route.
 
 ### ECU databases
 
-ECU `.ddb` files expose a type-indexed directory of little-endian `u32` section
-offsets beginning at `0x24` and ending at the first section payload. Every
+Sectioned files expose a type-indexed directory of little-endian `u32`
+offsets beginning at `0x24`, with byte 9 declaring its slot count. Every
 nonzero directory slot points to a section beginning with a 10-byte
-`TABLE_DATA_HEAD`; section payloads are not discovered by assuming they were
-appended in type order:
+`TABLE_DATA_HEAD`; payloads are not discovered by assuming type order:
 
 ```
 [u8 table_type] [u8 compression] [u32 record_count] [u32 payload_size]
 ```
 
-A section directory at file offset `0x24` lists `u32` offsets indexed by
-section type and extends to the first section payload (`0x280` in the V18 ECU
-files). The former parser stopped at slot 16 and silently dropped 10,659 of
-25,361 sections across the type-2 corpus. The parser now follows the complete
-directory and checks that each pointed header's type equals its slot.
+The parser follows the complete declared directory and checks slot/type
+identity, compression mode and payload bounds. Native DS-4
+`CDbFileBase::GetAddrListSize` at `1005d580` multiplies the stored slot count
+by four. Variable master table 0 uses a six-byte
+`[u32 pool_offset, u16 byte_length]` directory followed by a byte pool;
+native `CDbVariableTable::GetVariable` at `1005fb30` consumes those two
+fields. It has no fixed record size even when its total size happens to
+divide evenly by its entry count.
 
 Section types observed in EPS databases:
 
@@ -214,6 +308,12 @@ offsets therefore fails independently.
 
 String databases (`M_English.ddb`, `V_English.ddb`) store one LZSS-compressed
 block. The section header at offset `0x28` specifies `compression=1`.
+Type-6 U/UT files put text section 0 at `0x34` and point to compressed
+resource section 1 from `0x28`. Each resource row is 164 bytes:
+two 80-byte UTF-16LE keys and a u32 text index at `+0xa0`.
+Current UtilityDB `CDbViewerResourceResRecords::SetRecString` at `10009c40`
+uses that explicit link; `GetRecordAddress` at `10009ef0` has stride `0xa4`.
+The parser preserves raw metadata rows and validates string-pool boundaries.
 
 **Critical:** ECU databases reference three separate string databases with the
 same index space but different content. DTC names and monitor names resolve

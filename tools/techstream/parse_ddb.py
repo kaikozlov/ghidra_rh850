@@ -15,8 +15,8 @@ The supported modern layouts carry the "DiagTool DataCtrl" signature:
    strings referenced by ECU records. M/V carry one LZSS-compressed section;
    U carries strings plus a parallel compressed resource-metadata section.
 
-Type-3 Viewer and legacy type-4 layouts are distinct and intentionally rejected
-by these APIs rather than silently misparsed.
+Type-3 Viewer databases use their own ViewerDb.dll factory namespace. Legacy
+type-4 layouts remain distinct and are rejected by the modern string API.
 
 Format details recovered by decompiling DataCompress_DT.DLL!_DataDecode@12
 (LZSS algorithm) and KgpDataCtrl.dll!CDbTableRead::CreateTable (file format).
@@ -40,6 +40,7 @@ from __future__ import annotations
 
 import functools
 import struct
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -52,9 +53,16 @@ STANDARD_HEADER_PREFIXES = frozenset({
     bytes.fromhex("49 00 0c 1a 03 11"),  # GTS+ Spe regional DBs
     bytes.fromhex("01 02 0a 1a 06 10"),  # GTS+ Gen P6/P6F ECU DBs
 })
+DS4_HEADER_PREFIXES = frozenset(bytes.fromhex(value) for value in (
+    "0d00a41a0508", "0d00a41a0306", "01020a1a0508", "0400a4180310",
+))
 U_HEADER_FAMILIES = {
     bytes.fromhex("39 00 0c 16 0b 15 0f"): frozenset(range(0x16, 0x1B)),
     bytes.fromhex("48 00 0c 1a 05 12 0b"): frozenset(range(0x09, 0x0E)),
+    bytes.fromhex("3c000c1a04080a"): frozenset((0x35, 0x37, 0x38, 0x3A, 0x3B)),
+    bytes.fromhex("3c000c1a04080b"): frozenset((0x00, 0x2C)),
+    bytes.fromhex("3c000c1a050d0f"): frozenset((0x0D,)),
+    bytes.fromhex("3c000c1a051510"): frozenset(range(0x26, 0x2B)),
 }
 SIGNATURE = b"DiagTool DataCtrl\x00"
 
@@ -356,6 +364,38 @@ _CURRENT_GTSPLUS_MASTER_TABLE_CLASS_NAMES = {
 for _table_type, _class_name in _CURRENT_GTSPLUS_MASTER_TABLE_CLASS_NAMES.items():
     MASTER_TABLE_CLASS_NAMES.setdefault(_table_type, _class_name)
 
+# Independently matched to every current DS4 constructor case. Keep this
+# namespace separate: master type 90 is a generic base in DS4.
+DS4_MASTER_TABLE_CLASS_NAMES = {
+    key: ("CDbTableBase" if key == 90 else value)
+    for key, value in MASTER_TABLE_CLASS_NAMES.items() if key <= 91
+}
+DS4_ECU_TABLE_CLASS_NAMES = {
+    key: value for key, value in ECU_TABLE_CLASS_NAMES.items() if key <= 150
+}
+DS4_VIEWER_TABLE_CLASS_NAMES = dict(enumerate((
+    "CDbViewerResourceTable", "CDbUnitChgTable", "CDbHelpInfoTable",
+    "CDbErrorCodeTable", "CDbTableBase", "CDbCustomListTable",
+    "CDbKeyinJudgmentTable", "CDbKeyinOrderTable", "CDbPasswordTable",
+    "CDbBCheckFuncListTable", "CDbBCheckDMSignalsTable",
+    "CDbBCheckTriggerListTable", "CDbBCheckJudgeListTable",
+    "CDbBCheckACTSignalsTable", "CDbEcuCategoryNameTable",
+    "CDbBCheckDrivePatternTable", "CDbViewerResourceTable",
+    "CDbHideUtilityTable", "CDbHideAlldataTable",
+)))
+VIEWER_RECORD_SIZES = {
+    0: 164, 1: 20, 2: 12, 3: 8, 5: 112, 14: 8,
+    16: 164, 17: 4, 18: 4,
+}
+
+
+def _schema_family(data: bytes) -> str:
+    if data[:6] in DS4_HEADER_PREFIXES or data[:2] == b"\x3c\x00":
+        return "ds4"
+    if data[:6] == bytes.fromhex("40000c160c08") or data[:2] == b"\x39\x00":
+        return "v18"
+    return "gtsplus"
+
 
 # ── LZSS decompression ────────────────────────────────────────────────────────
 
@@ -437,6 +477,18 @@ class TableDataHead:
         payload_size = struct.unpack_from("<I", data, offset + 6)[0]
         return cls(table_type, compression, record_count, payload_size)
 
+@dataclass(frozen=True)
+class RawRecord:
+    """An ordered logical row tied to its source file and encoded payload."""
+    index: int
+    table_type: int
+    source_path: Path | None
+    source_payload_offset: int
+    decoded_offset: int | None
+    raw: bytes
+    directory_raw: bytes = b""
+
+
 
 @dataclass
 class Section:
@@ -444,6 +496,9 @@ class Section:
     header: TableDataHead
     data_offset: int      # offset of payload in the file
     raw_data: bytes       # the payload bytes
+    schema_family: str = "v18"
+    variable_layout: bool = False
+    source_path: Path | None = None
 
     @functools.cached_property
     def decoded_data(self) -> bytes:
@@ -452,6 +507,8 @@ class Section:
 
     @property
     def record_size(self) -> int:
+        if self.variable_layout:
+            raise ValueError("variable offset/length table has no fixed record size")
         if self.header.compression != 0:
             raise ValueError(
                 f"section {self.header.table_type} is compressed; record size "
@@ -473,6 +530,8 @@ class Section:
     @property
     def decoded_record_size(self) -> int:
         """Record size after decompression, with integral-shape validation."""
+        if self.variable_layout:
+            raise ValueError("variable offset/length table has no fixed record size")
         if self.header.record_count == 0:
             return 0
         size, remainder = divmod(len(self.decoded_data), self.header.record_count)
@@ -483,6 +542,43 @@ class Section:
                 f"{self.header.record_count}"
             )
         return size
+
+    def variable_records(self) -> list[bytes]:
+        """Decode the native six-byte offset/length directory and byte pool."""
+        if not self.variable_layout:
+            raise ValueError("section is not a variable offset/length table")
+        return [record.raw for record in self.iter_records()]
+
+    def iter_records(self) -> Iterator[RawRecord]:
+        """Yield every raw row, retaining source order and logical offsets.
+
+        Compressed rows identify the encoded source payload separately from
+        their decoded offset. Variable rows also retain the exact address row.
+        """
+        data = self.decoded_data
+        if self.variable_layout:
+            pool = self.header.record_count * 6
+            if pool > len(data):
+                raise ValueError("variable offset directory extends past decoded payload")
+            for index in range(self.header.record_count):
+                directory_raw = data[index * 6:(index + 1) * 6]
+                offset, length = struct.unpack("<IH", directory_raw)
+                if length and pool + offset + length > len(data):
+                    raise ValueError(f"variable record {index} extends past decoded payload")
+                yield RawRecord(
+                    index, self.header.table_type, self.source_path, self.data_offset,
+                    pool + offset if length else None,
+                    data[pool + offset:pool + offset + length] if length else b"",
+                    directory_raw,
+                )
+        else:
+            size = self.decoded_record_size
+            for index in range(self.header.record_count):
+                offset = index * size
+                yield RawRecord(
+                    index, self.header.table_type, self.source_path, self.data_offset,
+                    offset, data[offset:offset + size],
+                )
 
 
 @dataclass
@@ -527,6 +623,8 @@ class MasterEcuCategoryEntry:
     category_id: int
     generation: int
     raw: bytes
+    handling_id: int | None = None
+    exception_flag: int | None = None
 
 
 @dataclass
@@ -535,6 +633,8 @@ class MasterDllEntry:
     category_id: int
     dll_role_id: int
     raw: bytes
+    handling_id: int | None = None
+    handling_flag: int | None = None
 
 
 @dataclass
@@ -614,6 +714,7 @@ class ECUDataBase:
     path: Path
     format_version: int   # byte 8 of the file (0x02 for EPS, 0x05 for string DBs)
     sections: dict[int, Section] = field(default_factory=dict)
+    schema_family: str = "v18"
 
     @property
     def name(self) -> str:
@@ -627,6 +728,7 @@ class StringMetadataEntry:
     identifier: str
     string_index: int
     secondary_identifier: str = ""
+    raw: bytes = b""
 
 
 @dataclass
@@ -637,6 +739,9 @@ class StringDataBase:
     decompressed: bytes
     pool_offset: int      # byte offset where string data begins (after offset table)
     metadata: list[StringMetadataEntry] | None = None
+    format_version: int = 0
+    schema_family: str = "v18"
+    sections: dict[int, Section] = field(default_factory=dict)
     _metadata_by_string_index: dict[int, StringMetadataEntry] = field(
         init=False, repr=False, compare=False, default_factory=dict
     )
@@ -759,6 +864,10 @@ class DDBParser:
         """
         return self._parse_sectioned_db(path, expected_format=0x01, label="master")
 
+    def parse_viewer_db(self, path: str | Path) -> ECUDataBase:
+        """Parse current ViewerDb.dll type-3 tables without ECU semantics."""
+        return self._parse_sectioned_db(path, expected_format=0x03, label="Viewer")
+
     def _parse_sectioned_db(
         self, path: str | Path, expected_format: int, label: str
     ) -> ECUDataBase:
@@ -772,30 +881,23 @@ class DDBParser:
                 f"expected {label} database format 0x{expected_format:02X}, "
                 f"got 0x{format_version:02X}"
             )
-        db = ECUDataBase(path=path, format_version=format_version)
+        family = _schema_family(data)
+        if expected_format == 3 and family == "v18":
+            raise ValueError("Viewer schema is only established for current main/DS4")
+        db = ECUDataBase(path=path, format_version=format_version, schema_family=family)
 
-        # Section directory: u32 offsets starting at file offset 0x24.
-        # The slot index is the section type. The directory extends to the
-        # first section payload (0x280 in V18).
-        # Newer schemas use types as high as 91.
-        directory_end = None
-        for i in range(0x24, len(data) - 3, 4):
-            offset = struct.unpack_from("<I", data, i)[0]
-            if offset:
-                directory_end = offset
-                break
-        if directory_end is None:
-            raise ValueError(f"no section offsets in {path.name}")
+        # Native GetAddrListSize consumes header byte 9, not the first nonzero
+        # pointer. This also bounds empty directories and sparse Viewer tables.
+        directory_end = 0x24 + data[9] * 4
         if directory_end <= 0x24 or directory_end > len(data):
-            raise ValueError(
-                f"invalid section-directory boundary in {path.name}: "
-                f"0x{directory_end:X}"
-            )
+            raise ValueError(f"invalid section-directory boundary in {path.name}")
 
         for i in range(0x24, directory_end, 4):
             offset = struct.unpack_from("<I", data, i)[0]
             if offset == 0:
                 continue
+            if offset < directory_end:
+                raise ValueError(f"section offset overlaps directory in {path.name}")
             if offset + TableDataHead.HEADER_SIZE > len(data):
                 raise ValueError(
                     f"section directory entry at 0x{i:X} points outside "
@@ -809,6 +911,8 @@ class DDBParser:
                     f"section type {header.table_type}"
                 )
             data_start = offset + TableDataHead.HEADER_SIZE
+            if header.compression not in (0, 1):
+                raise ValueError(f"unsupported compression {header.compression}")
             data_end = data_start + header.payload_size
             if data_end > len(data):
                 raise ValueError(
@@ -822,7 +926,14 @@ class DDBParser:
             raw = data[data_start:data_end]
             db.sections[header.table_type] = Section(
                 header=header, data_offset=data_start, raw_data=raw,
+                schema_family=family,
+                variable_layout=(expected_format == 1 and header.table_type == 0),
+                source_path=path,
             )
+            if expected_format == 3 and header.table_type in VIEWER_RECORD_SIZES:
+                expected_size = VIEWER_RECORD_SIZES[header.table_type]
+                if db.sections[header.table_type].decoded_record_size != expected_size:
+                    raise ValueError(f"Viewer type {header.table_type} requires {expected_size}-byte rows")
         return db
 
     def load_string_db(self, path: str | Path) -> StringDataBase:
@@ -841,8 +952,13 @@ class DDBParser:
                 f"0x{format_version:02X}"
             )
         section_offset = 0x34 if format_version == 0x06 else 0x28
+        expected_slots = 4 if format_version == 6 else 1
+        if data[9] != expected_slots or struct.unpack_from("<I", data, 0x24)[0] != section_offset:
+            raise ValueError(f"invalid modern string directory in {path.name}")
 
         header = TableDataHead.read(data, section_offset)
+        if header.table_type != 0:
+            raise ValueError(f"expected text section type 0, got {header.table_type}")
         if header.compression != 1:
             raise ValueError(
                 f"expected LZSS string section, got compression={header.compression}"
@@ -855,7 +971,11 @@ class DDBParser:
                 f"compressed string block in {path.name} extends past EOF"
             )
         compressed = data[block_offset : block_offset + header.payload_size]
-        decompressed = lzss_decompress(compressed)
+        text_section = Section(
+            header, block_offset, compressed, _schema_family(data), True, source_path=path,
+        )
+        decompressed = text_section.decoded_data
+        sections = {0: text_section}
 
         entry_count = header.record_count
         pool_offset = entry_count * 6
@@ -863,6 +983,10 @@ class DDBParser:
             raise ValueError(
                 f"string offset table in {path.name} is larger than decoded data"
             )
+        for index in range(entry_count):
+            offset, length = struct.unpack_from("<IH", decompressed, index * 6)
+            if length % 2 or (length and pool_offset + offset + length > len(decompressed)):
+                raise ValueError(f"invalid UTF-16 string boundary at entry {index}")
 
         metadata = None
         if format_version == 0x06:
@@ -885,7 +1009,13 @@ class DDBParser:
                 raise ValueError(
                     f"U_English metadata block in {path.name} extends past EOF"
                 )
-            metadata_data = lzss_decompress(data[metadata_block:metadata_end])
+            metadata_section = Section(
+                metadata_header, metadata_block,
+                data[metadata_block:metadata_end], _schema_family(data),
+                source_path=path,
+            )
+            metadata_data = metadata_section.decoded_data
+            sections[1] = metadata_section
             record_size, remainder = divmod(len(metadata_data), entry_count)
             if remainder or record_size != 164:
                 raise ValueError(
@@ -900,6 +1030,7 @@ class DDBParser:
                         identifier=_fixed_utf16le(record[:80]),
                         secondary_identifier=_fixed_utf16le(record[80:160]),
                         string_index=struct.unpack_from("<I", record, 160)[0],
+                        raw=record,
                     )
                 )
 
@@ -909,6 +1040,9 @@ class DDBParser:
             decompressed=decompressed,
             pool_offset=pool_offset,
             metadata=metadata,
+            format_version=format_version,
+            schema_family=_schema_family(data),
+            sections=sections,
         )
 
     @staticmethod
@@ -919,7 +1053,7 @@ class DDBParser:
             tags = U_HEADER_FAMILIES.get(data[0:7])
             valid_magic = tags is not None and data[7] in tags
         else:
-            valid_magic = data[0:6] in STANDARD_HEADER_PREFIXES
+            valid_magic = data[0:6] in STANDARD_HEADER_PREFIXES | DS4_HEADER_PREFIXES
         if not valid_magic:
             raise ValueError(f"bad magic prefix: {data[0:8].hex()}")
         sig_end = data.find(b"\x00", 0x0A)
@@ -940,25 +1074,29 @@ class DDBParser:
                 ecu_short_name=_fixed_utf16le(raw[40:60]),
                 ecu_name_string_index=struct.unpack_from("<I", raw, 60)[0],
                 category_id=struct.unpack_from("<H", raw, 68)[0],
-                generation=struct.unpack_from("<I", raw, 72)[0],
+                generation=(
+                    raw[72] if section.schema_family in ("ds4", "gtsplus")
+                    else struct.unpack_from("<I", raw, 72)[0]
+                ),
                 raw=raw,
+                handling_id=(
+                    struct.unpack_from("<H", raw, 70)[0]
+                    if section.schema_family in ("ds4", "gtsplus") else None
+                ),
+                exception_flag=raw[73] if section.schema_family in ("ds4", "gtsplus") else None,
             )
             for raw in _records(section, 16, 76)
         ]
 
     @staticmethod
     def extract_master_dlls(section: Section) -> list[MasterDllEntry]:
-        """Decode type-19 plugin filename/category/role across V18 and GTS+.
+        """Decode native source-family-specific filename/category/role fields.
 
-        The record remains 88 bytes, but Toyota moved the role key between the
-        two pinned generations.  V18 ``CDbDllTable::FindDbItem1`` consumes a
-        u8 at +0x56 and every V18 type-19 row has u16(+0x54)==0.  Current GTS+
-        consumes a u16 at +0x54; its +0x56 byte is a separate field/flag and is
-        nonzero on a small subset.  Detect the table generation from the whole
-        section rather than interpreting the GTS+ flag as a role.
+        DS4 and V18 consume u8+0x56; main current consumes u16+0x54.
+        Select from the admitted header, never from record contents.
         """
         rows = _records(section, 19, 88)
-        role_at_54 = any(struct.unpack_from("<H", raw, 0x54)[0] != 0 for raw in rows)
+        role_at_54 = section.schema_family == "gtsplus"
         return [
             MasterDllEntry(
                 dll_name=_fixed_utf16le(raw[0:80]),
@@ -969,6 +1107,14 @@ class DDBParser:
                     else raw[0x56]
                 ),
                 raw=raw,
+                handling_id=(
+                    struct.unpack_from("<H", raw, 0x52)[0]
+                    if section.schema_family in ("ds4", "gtsplus") else None
+                ),
+                handling_flag=(
+                    raw[0x57] if section.schema_family == "ds4"
+                    else raw[0x56] if section.schema_family == "gtsplus" else None
+                ),
             )
             for raw in rows
         ]
