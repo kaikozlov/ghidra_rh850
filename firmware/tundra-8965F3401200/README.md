@@ -110,7 +110,33 @@ implementation remain to be traced.
 The CUW's separate `CPU11`/`CPU12` logical address ranges are host-side proof
 of how programming requests are *formed*. The application images do not contain
 the bootloader's `0x0203`, RequestDownload `0x34`, or RoutineControl `0x31`
-CPU-selection dispatch. In particular, the related Sienna bootloader ignores
-all five `0x0203` data bytes; for Tundra the exact selection mechanism among
-`0x0203`, the six-byte RequestDownload address, and CPU-to-CPU forwarding must
-be verified against Tundra bootloader bytes or a real programming trace.
+CPU-selection dispatch. The exact Tundra selection mechanism among `0x0203`,
+the six-byte RequestDownload address, and CPU-to-CPU forwarding requires the
+Tundra bootloader or a programming trace.
+
+## CPU11 application: entry to programming mode
+
+The Tundra CPU11 application has an independent `10 02` programming-session
+handoff. The application SID `10` service at `0x25B10` uses a subfunction table
+at `0x258A8`; its `02` callback is `0x8DCE6`. Decompilation and disassembly
+recover this chain:
+
+- `0x8DCE6 -> 0x8DC1C -> 0x8DA10 -> 0x8DCC8 -> 0x83D82 ->
+  0x45AAE`: a request for session 2 is rejected when the application speed
+  snapshot `uint16(GP+0x3092)` exceeds `uint16(CodeFlash[0x2D290]) = 0x0180`.
+  The policy returns internal code `0x0B` on that branch.
+- The asynchronous handoff at `0x83BC6` and `0x83C76` uses system operations
+  `0x08000200` and `0x08000201`. `0x83B92 -> 0x45ACC` admits it only if the
+  system-transition snapshot `GP+0x301F` is not `0x11`, the supply snapshot
+  `uint16(GP-0x4B4A)` is at least `uint16(CodeFlash[0x2D292]) = 0x0A00`,
+  and `GP-0x3372` is clear. Rejection returns internal 1; the application
+  session worker at `0x8DB5A` maps that path to NRC `0x22`.
+- On acceptance `0x45AF8` queues system event 9, while the session handler
+  can remain pending (`0x78`), so disappearance or a client timeout during the
+  transition is not a SecurityAccess lockout observation.
+
+These are **application system-state gates**, not a failed-key counter or a
+CAN-traffic-volume gate. The effect of missing or additional CAN messages on
+the underlying status/speed snapshots is a separate dependency to trace. A
+Tundra bootloader SecurityAccess anti-bruteforce policy cannot be read from the
+CUW's application images because its first `0x18000` CodeFlash bytes are absent.
