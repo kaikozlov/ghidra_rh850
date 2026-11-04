@@ -142,8 +142,6 @@ def run_check(candidates: dict[int, list[dict]], names: dict[int, str], validate
             try:
                 if mapped is None:
                     regions = scenario_regions(scenario)
-                    if 1 + len(regions) + 1 > 8:
-                        return "region cap"
                     held = install_regions(library, code_view, len(codeflash), regions)
                     dcra, dcra_view = attach_dcra_force(library)
                     returned = call_lifted(library, address, registers, limit)

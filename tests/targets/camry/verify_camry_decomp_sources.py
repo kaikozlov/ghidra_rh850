@@ -153,10 +153,150 @@ def check_promotion_declarations() -> None:
     print("PASS promotion declarations: retained ABI compiles and header/source rollback is exact")
 
 
+def check_host_memory_tables() -> None:
+    harness = r"""
+#include <assert.h>
+#include "host_memory.c"
+
+uint8_t camry_fill;
+uint32_t camry_SR[14][32];
+int camry_code_address(const void *pointer, uint32_t *address) {
+    (void)pointer;
+    (void)address;
+    return 0;
+}
+
+static void probe_read(uintptr_t address, uintptr_t width) {
+    if (width == 1)
+        (void)camry_read8((uint32_t)address);
+    else if (width == 2)
+        (void)camry_read16((uint32_t)address);
+    else
+        (void)camry_read32((uint32_t)address);
+}
+
+static void probe_write(uintptr_t address, uintptr_t width) {
+    if (width == 1)
+        camry_write8((uint32_t)address, 0x5a);
+    else if (width == 2)
+        camry_write16((uint32_t)address, 0x5a5a);
+    else
+        camry_write32((uint32_t)address, 0x5a5a5a5a);
+}
+
+static void expect_fault(const char *kind, uint32_t address,
+                         uint32_t width, uint32_t write) {
+    uintptr_t args[] = {address, width};
+    camry_host_fault_call(write ? (void *)probe_write : (void *)probe_read, args, 2);
+    assert(camry_host_fault_kind != NULL);
+    assert(strcmp(camry_host_fault_kind, kind) == 0);
+    assert(camry_host_fault_address == address);
+    assert(camry_host_fault_width == width);
+    assert(camry_host_fault_write == write);
+}
+
+int main(void) {
+    uint32_t sparse[160];
+    uint32_t local[] = {0x11223344, 0x55667788, 0x99aabbcc, 0xddeeff00};
+    uint32_t overlay;
+    CamryHostRegion *regions;
+    CamryHostRegister *registers;
+    int pass, index, region_capacity, register_capacity;
+    camry_host_reset();
+    for (pass = 0; pass < 2; pass += 1) {
+        overlay = 0xa0b0c0d0u + (uint32_t)pass;
+        /* The earliest entries survive several reallocations. */
+        camry_host_add(0xfebe4000u, (uint8_t *)local, sizeof(local));
+        for (index = 0; index < 160; index += 1) {
+            sparse[index] = 0x12340000u + (uint32_t)(index + pass);
+            camry_host_add(0x01000000u + (uint32_t)index * 0x10000u,
+                (uint8_t *)&sparse[index], sizeof(sparse[index]));
+        }
+        assert(camry_read32(0xfede4004u) == local[1]);
+        camry_host_add(0xfede4004u, (uint8_t *)&overlay, sizeof(overlay));
+        for (index = 0; index < 160; index += 1)
+            assert(camry_read32(0x01000000u + (uint32_t)index * 0x10000u)
+                == sparse[index]);
+        assert(camry_read32(0xfebe4000u) == local[0]);
+        assert(camry_read32(0xfede4004u) == overlay);
+        assert(camry_read32(0xfebe4004u) == overlay);
+        assert(camry_read32(0xfebe4008u) == local[2]);
+        camry_write16(0xfede4004u, 0x9876u);
+        assert(camry_read32(0xfebe4004u) == 0xa0b09876u);
+        assert(local[1] == 0x55667788u);
+        assert(camry_host_ptr(0xfede4004u) == (uint8_t *)&overlay);
+        assert(camry_host_addr(&sparse[159]) == 0x019f0000u);
+        assert(camry_host_find(0x01000004u, 1) == NULL);
+        assert(camry_host_find(0x01000002u, 4) == NULL);
+        for (index = 0; index < 600; index += 1) {
+            uint32_t address = 0xff000000u + (uint32_t)index * 0x100u;
+            camry_host_add_register(address, 4, (1u << 2) | (1u << 4), 3, 15);
+        }
+        assert(camry_read32(0xff000000u) == 0);
+        assert(camry_read32(0xff025700u) == 0);
+        /* Exercise both ends, not just the allocated count. */
+        camry_write32(0xff000000u, 0x87654321u + (uint32_t)pass);
+        camry_write32(0xff025700u, 0xabcdef01u);
+        camry_write16(0xff025702u, 0x1234u);
+        assert(camry_read32(0xff000000u) == 0x87654321u + (uint32_t)pass);
+        assert(camry_read32(0xff025700u) == 0x1234ef01u);
+        assert(camry_read16(0xff025702u) == 0x1234u);
+        assert(camry_host_addr(camry_host_ptr(0xff025702u)) == 0xff025702u);
+        expect_fault("mmio-width", 0xff025700u, 1, 0);
+        expect_fault("misaligned-read", 0xff025701u, 2, 0);
+        expect_fault("unmapped-read", 0xff025704u, 4, 0);
+        expect_fault("unmapped-write", 0xff025704u, 4, 1);
+        camry_host_add_register(0xff080000u, 4, 1u << 4, 1, 15);
+        camry_host_add_register(0xff080100u, 4, 1u << 4, 2, 15);
+        camry_host_add_register(0xff080200u, 4, (1u << 2) | (1u << 4), 3, 0);
+        expect_fault("write-prohibited", 0xff080000u, 4, 1);
+        expect_fault("read-prohibited", 0xff080100u, 4, 0);
+        expect_fault("uninitialized-read", 0xff080200u, 4, 0);
+        camry_write16(0xff080202u, 0x4321u);
+        assert(camry_read16(0xff080202u) == 0x4321u);
+        expect_fault("uninitialized-read", 0xff080200u, 4, 0);
+        expect_fault("unmapped-write", 0xffd51004u, 4, 1);
+        camry_host_add_register(0xffd51004u, 4, 1u << 4, 3, 15);
+        camry_write32(0xffd51004u, 0);
+        assert(camry_read32(0xffd51004u) == 0xffffffffu);
+        regions = camry_host_regions;
+        registers = camry_host_registers;
+        region_capacity = camry_host_region_capacity;
+        register_capacity = camry_host_register_capacity;
+        camry_host_reset();
+        assert(camry_host_regions == regions);
+        assert(camry_host_registers == registers);
+        assert(camry_host_region_capacity == region_capacity);
+        assert(camry_host_register_capacity == register_capacity);
+        assert(camry_host_find(0x01000000u, 4) == NULL);
+        assert(camry_host_find(0xfebe4004u, 4) == NULL);
+        assert(camry_host_find(0xff025700u, 4) == NULL);
+        assert(camry_read32(0xffd51004u) == 0);
+        assert(camry_dcra1_seeded == 0);
+    }
+    return 0;
+}
+"""
+    with tempfile.TemporaryDirectory(prefix="camry-host-tables-") as directory:
+        executable = Path(directory) / "host-tables"
+        result = subprocess.run(
+            [
+                "cc", "-std=c11", "-Werror", "-I", str(Path(link.__file__).parent),
+                "-x", "c", "-", "-o", str(executable),
+            ],
+            input=harness, text=True, capture_output=True,
+        )
+        assert result.returncode == 0, result.stderr
+        result = subprocess.run([str(executable)], text=True, capture_output=True)
+        assert result.returncode == 0, result.stderr
+    print("PASS host tables: sparse growth, overlays, aliases, register guards, reset/reuse")
+
+
 def main() -> int:
     check_source_lookup()
     check_c_token_matching()
     check_promotion_declarations()
+    check_host_memory_tables()
     symbols = [
         {"name": "lower", "addr": "0xfff"},
         {"name": "upper", "addr": "0x1000"},

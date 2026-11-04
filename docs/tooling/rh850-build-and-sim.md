@@ -535,6 +535,10 @@ registered signer target: Camry, Crown, Corolla F, and Corolla H.
 Camry's retained original-byte scenarios are one JSON object per line in
 `decomp/camry-8965F3307000/oracles.jsonl`. `tools/test camry_decomp` checks the
 functions whose C is listed in that tree's `matched.jsonl`.
+The native oracle grows its region and register tables during scenario
+installation and retains their allocation across resets. Sparse device pages
+keep newest-region overlay precedence and coherent LocalRAM aliases; device
+width, access, initialization and unmapped-address faults remain enforced.
 
 Each report embeds the resolved run contract: unique candidate count or
 dump-contract source, resolved entry, exact entry-instruction hash,

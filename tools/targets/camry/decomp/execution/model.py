@@ -52,13 +52,6 @@ GP = 0xFEBEB800
 TP = 0x23DFC
 
 
-# host_memory.c CAMRY_HOST_REGIONS. CodeFlash and DataFlash use two.
-HOST_REGIONS = 64
-
-
-DATA_REGIONS = HOST_REGIONS - 2
-
-
 ENTRY_SP = 0xFEBE2000
 
 
@@ -117,8 +110,7 @@ REASONS = {
     "stack-arguments": "the converted signature has more than four parameters, which the host check does not pass",
     "fallthrough": "execution leaves the function without returning through lp",
     "instruction-budget": "the closure did not return within the instruction budget",
-    "region-cap": "codeflash and dataflash already use two host regions, and the other accesses do not fit in the rest",
-    "no-observable": "the bytes do not write r10 or caller-visible memory, and the unchanged local-RAM scratch does not fit the host region cap",
+    "no-observable": "the bytes do not write r10 or caller-visible memory, and the unchanged local-RAM scratch overlaps a harness window",
     "uninitialized-read": "the machine read a byte the harness did not initialize",
     "simulator": "the P1M-E machine did not return a report for this scenario",
     "harness-drift": "the machine's result does not match the harness interpreter, so the scenario window is not trusted",
@@ -221,11 +213,3 @@ def _space(addr: int, size: int) -> str:
         if start <= addr and end <= stop:
             return name
     return "mmio"
-
-
-def _covers_mapped(start: int, end: int) -> bool:
-    for _name, left, right in _MAPPED:
-        if start < right and left < end:
-            return True
-    return False
-

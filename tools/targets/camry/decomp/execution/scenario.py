@@ -17,7 +17,6 @@ from tools.targets.camry.decomp.execution.model import (
     ARG_BASE,
     ARG_COUNT,
     ARG_STRIDE,
-    DATA_REGIONS,
     ENTRY_SP,
     Harness,
     POLL_STEP_LIMIT,
@@ -32,7 +31,6 @@ from tools.targets.camry.decomp.execution.model import (
     STACK_LO,
     STOP,
     _HOST_PTR,
-    _covers_mapped,
     _space,
 )
 from tools.targets.camry.decomp.sources import _load_bodies
@@ -275,7 +273,7 @@ def _windows(
     pointers: list[bool] | None = None,
     cover: list[int] | None = None,
 ) -> list[tuple[int, int]]:
-    """One window per RAM bank. Separate clusters overflow the host's eight regions."""
+    """Use one window per RAM bank and separate clusters for other accesses."""
     local: list[tuple[int, int]] = []
     glob: list[tuple[int, int]] = []
     other: list[tuple[int, int]] = []
@@ -334,14 +332,6 @@ def _windows(
     other = _cover_objects(other)
     windows = [window for window in (_span(local), _span(glob)) if window is not None]
     packed = _clusters(other, 0x400)
-    if len(windows) + len(packed) > DATA_REGIONS and packed:
-        start = min(addr for addr, _size in other)
-        end = max(addr + size for addr, size in other)
-        # Peripheral stores of one init sequence can span a few megabytes of MMIO.
-        if end - start <= 0x400000 and not _covers_mapped(start, end):
-            packed = [(start, end - start)]
-    if len(windows) + len(packed) > DATA_REGIONS:
-        raise Harness("region-cap")
     windows.extend(packed)
     return windows
 
@@ -360,7 +350,7 @@ def _attach_scratch(windows: list[tuple[int, int]]) -> list[tuple[int, int]]:
     cover = _cover(windows, SCRATCH, SCRATCH_SIZE)
     if cover == "full":
         return windows
-    if cover == "partial" or len(windows) >= DATA_REGIONS:
+    if cover == "partial":
         raise Harness("no-observable")
     return [*windows, (SCRATCH, SCRATCH_SIZE)]
 

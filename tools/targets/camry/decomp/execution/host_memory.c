@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,8 +15,6 @@
 /* Host stand-in for the 32-bit address space. Later regions overlay earlier
  * ones, so an oracle image can cover RAM while CodeFlash stays at VA 0.
  */
-
-#define CAMRY_HOST_REGIONS 64
 
 /* A C local is not in a firmware region. camry_host_addr assigns it a
  * firmware address, and camry_host_ptr of that address returns the local.
@@ -35,7 +34,8 @@ typedef struct {
     uint32_t firmware;
 } CamryAlias;
 
-static CamryHostRegion camry_host_regions[CAMRY_HOST_REGIONS];
+static CamryHostRegion *camry_host_regions;
+static int camry_host_region_capacity;
 static int camry_host_region_count;
 static CamryAlias camry_aliases[CAMRY_ALIAS_SLOTS];
 static int camry_alias_count;
@@ -51,15 +51,31 @@ typedef struct {
     uint8_t data[4];
 } CamryHostRegister;
 
-#define CAMRY_MODEL_REGISTERS 512
-static CamryHostRegister camry_host_registers[CAMRY_MODEL_REGISTERS];
-static uint32_t camry_host_register_count;
+static CamryHostRegister *camry_host_registers;
+static int camry_host_register_capacity;
+static int camry_host_register_count;
 static jmp_buf camry_host_fault_return;
 static int camry_host_fault_armed;
 const char *camry_host_fault_kind;
 uint32_t camry_host_fault_address;
 uint32_t camry_host_fault_width;
 uint32_t camry_host_fault_write;
+
+/* Tables grow only while installing a scenario; reset retains their storage. */
+static void *camry_host_grow(void *table, size_t item_size, int *capacity) {
+    int next;
+    void *grown;
+    if (*capacity > INT_MAX / 2)
+        abort();
+    next = *capacity != 0 ? *capacity * 2 : 64;
+    if ((size_t)next > SIZE_MAX / item_size)
+        abort();
+    grown = realloc(table, (size_t)next * item_size);
+    if (grown == NULL)
+        abort();
+    *capacity = next;
+    return grown;
+}
 
 static void camry_device_fault(const char *kind, uint32_t address,
                                uint32_t width, uint32_t write) {
@@ -95,15 +111,18 @@ void camry_host_fault_call(void *function, const uintptr_t *args, uint32_t count
 
 void camry_host_add_register(uint32_t address, uint32_t size, uint32_t widths,
                              uint32_t access, uint32_t initialized) {
-    if (camry_host_register_count == CAMRY_MODEL_REGISTERS || size > 4)
+    if (size > 4)
         abort();
+    if (camry_host_register_count == camry_host_register_capacity)
+        camry_host_registers = camry_host_grow(camry_host_registers,
+            sizeof(*camry_host_registers), &camry_host_register_capacity);
     camry_host_registers[camry_host_register_count++] = (CamryHostRegister){
         address, size, widths, access, initialized, {0},
     };
 }
 
 static CamryHostRegister *camry_host_register(uint32_t address, uint32_t width) {
-    uint32_t index;
+    int index;
     for (index = 0; index < camry_host_register_count; index += 1) {
         CamryHostRegister *reg = &camry_host_registers[index];
         if (address >= reg->address && address - reg->address < reg->size
@@ -114,7 +133,7 @@ static CamryHostRegister *camry_host_register(uint32_t address, uint32_t width) 
 }
 
 static int camry_register_firmware(uintptr_t raw, uint32_t *out) {
-    uint32_t index;
+    int index;
     for (index = 0; index < camry_host_register_count; index += 1) {
         CamryHostRegister *reg = &camry_host_registers[index];
         uintptr_t host = (uintptr_t)reg->data;
@@ -275,6 +294,9 @@ __attribute__((constructor)) static void camry_fault_install(void) {
 void camry_host_reset(void) {
     memset(camry_dcra1_words, 0, sizeof(camry_dcra1_words));
     camry_dcra1_seeded = 0;
+    if (camry_host_region_capacity == 0)
+        camry_host_regions = camry_host_grow(camry_host_regions,
+            sizeof(*camry_host_regions), &camry_host_region_capacity);
     camry_host_regions[0] = (CamryHostRegion){
         0xffd51000u, sizeof(camry_dcra1_words), (uint8_t *)camry_dcra1_words,
     };
@@ -321,11 +343,9 @@ void camry_host_add(uint32_t base, uint8_t *data, uint32_t size) {
         }
         base -= 0x200000u;
     }
-    if (camry_host_region_count >= CAMRY_HOST_REGIONS) {
-        fprintf(stderr, "camry host region cap at %#x\n", base);
-        fflush(stderr);
-        abort();
-    }
+    if (camry_host_region_count == camry_host_region_capacity)
+        camry_host_regions = camry_host_grow(camry_host_regions,
+            sizeof(*camry_host_regions), &camry_host_region_capacity);
     camry_host_regions[camry_host_region_count].base = base;
     camry_host_regions[camry_host_region_count].size = size;
     camry_host_regions[camry_host_region_count].data = data;

@@ -127,7 +127,7 @@ def main() -> int:
                     regions = scenario_regions(scenario)
                     held = install_regions(library, code_view, len(codeflash), regions)
                     dcra, dcra_view = attach_dcra(library, name)
-                    if lifted and dcra is None and 1 + len(regions) < 64:
+                    if lifted and dcra is None:
                         dcra, dcra_view = attach_dcra_window(library)
                     returned = call_matched(
                         library, form, address, name, registers, limit, signature, scenario,
