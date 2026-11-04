@@ -2548,20 +2548,142 @@ activation counter trio.
 | `FEBEC5AC` | `C9562/C956A` from `FEBEACCC/FEBEAD6F` | internal fault bitfields | verified internal |
 | `FEBEC156&3` map selector | `C54A2/C5554` ← `FEBEAC2F ← FEBEB121`; ordinary path begins at `0x51E B0[3:0]` / `FEBEB124`. Current installed Camry `HV_P5` DID `0x1004` names the matching value domain **Drive Mode Select Status** (`0=Normal`, `2=Sport`, `4=Sport S+`, `6=Eco`). | driver-selected drive-mode calibration; CAN-field name is recovered from the enum/code join pending a synchronized DID/CAN toggle | recovered |
 
-**For this C5EE moving-mode subfamily, drive-mode selection is a calibration no-op in the exact image.** All four entries of every
-`FEBEC156&3` pointer table used here alias one table: `0xD39DC→0xB018A ×4`, `0xD3A1C→0xB01D2 ×4`,
-`0xD3A5C→0xB01E6 ×4`, `0xD3A9C→0xB01FA ×4`, `0xD3ADC→0xB019A ×4`, `0xD3B1C→0xB01B2 ×4`.
-That does **not** make the selector globally inert: §31 closes a separate `C28FC/C2B64` bank in which Sport is materially distinct from Normal/Eco.
+**Exact recurrence, not a long-lived s213 integrator.** These conclusions use
+CodeFlash SHA-256 `42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7`.
+The original `D0EEC` order is `C9650 → C9CAA/C9D18 → C98AE → C9812 →
+C973A → C9A84`, then supervision and publication. The four producers here run
+on each invocation, outside the cadence-bit branches. Counts below mean producer
+calls, not elapsed milliseconds.
 
-**Consumers reach the command path; captured source values do not reveal retained output.**
-C5F4-family outputs feed nested assistance through `D0162/D0218`, and the
-shared `CC48..CC64` funnel reaches current control (§34). `D0D7C` separately
-exports the admission state and a scaled `C5EE` diagnostic proxy.
-The captured s213 source is identically zero across both retained drives
-(55,793 bus-0 `0x0D5` samples), but the captures do not establish initial `C5EC`,
-its history or the resulting `C5EE`. A zero current source can still leave
-nonzero output. Captured s212 remains in cruise
-`[−2,2]` and Class-L `[−2,2]`/`[−1,1]`, far below its monitor thresholds.
+Let `s16`/`s32` mean signed low-16/low-32 reinterpretation, and `trunc` division
+toward zero. In `C9812`, `F=FEBEC5F3`, `E=FEBEC5E6`, `H=FEBEABEC` (signed32),
+`Y=FEBEC5EC` (signed16), and `x=FEBEC5FC` (monitored s213). For `F!=1`, all
+of `E,H,Y,C5C0,C5C2` hold. Otherwise:
+
+* `C5C0 = sign(x) × floor(32 × min(|x|,600) / 25)` in the monitored ±1000 domain.
+  This is ROM `B018A`'s `(0,0),(200,256),(600,768),sentinel` curve.
+* `E'=1` at unsigned `ADF6>=13`; `E'=0` at `ADF6==0`; speeds1..12 retain `E`.
+  `u=C5C2=C5C0` only if `E'==1`, otherwise `u=0`.
+* `H'=s32(H+u−Y)`; `Y'=s16(trunc(s32(H'<<10)/1024))`.
+  The exact denominator `[B0174]=1024`, so **`Y'=s16(H+u−Y)`**.
+
+The original `C9822..C9828` gate is `F==1`, not `C5F4==1`;
+`C985C..C9876` implements the speed set/clear/hold branches.
+`C9896` (`010d`) stores `H'`, followed by shift10, signed `divq`, and
+`C98A6` (`640fec0d`) storing its low16. Consequently, after reset (`H=Y=0`)
+the low16 history remains coherent and `Y'=u` on every admitted call. Even an
+arbitrary inconsistent initial `(H,Y)` affects `Y` for **at most one admitted
+update**: after that update `H'−Y'` is a multiple of65536, so the second
+update gives `Y''=u''`, independently of initial state. High accumulator bits
+can persist but cannot alter this low16 result. With zero input, initialized
+`C5EC` is zero immediately; an inconsistent synthetic history can produce one
+nonzero sample, then zero. When `F!=1`, held `C5EC` has no call-count expiry.
+
+**Gain and final output.** `C973A` sets `C5F4` from zero only for
+`F==1,C5AC==0,ACCE==1,ACCD==0,ACBD==0`; a set sub-latch clears for
+`F==0`, `C5AC&1`, `ACCE==0`, `ACCD==1`, or `ACBD!=0`.
+Its target `T=C5BA` is1024/0 for `C5F4==1`/otherwise (`B016C/B016E`).
+Both selected denominators `B017E/B0180` are6144. With `A=C5B0` signed32,
+`G=C5B8` signed16, and previous denominator `M=C5BE`, the bit-defined update is:
+`A'=s32(trunc(s32(A×6144)/M)+T−G)`,
+`r=s16(trunc(s32(A'<<10)/6144))`, then
+`G'=T` if signed `abs_s16(r−T)<=20`, otherwise `G'=r`;
+`C5BC=C5BE=6144`. `M` is6144 after initialization and every complete call.
+Within normal nonoverflow state this reduces to `A'=A+T−G`, `r=trunc(A'/6)`.
+The endpoint histories `(A,G)=(0,0)` rising to1024 and `(6144,1024)` falling
+to0 reach the snap band on call22; 64-call fixtures retain the endpoint.
+The snap changes `G`, not `A`. This endpoint bound is not a bound for arbitrary
+inconsistent or overflowing gain state.
+
+`C9A84` uses `g=clamp(G,0,1024)`. If `F==1` or `g>0`, nonzero monitored
+s213 clears `FEBEABFA`, then `C5B4=Y+ABFA` (signed32) and
+`z=C5D2=clamp(C5B4,−2560,2560)`; otherwise `z=0` and `C5B4` holds.
+`C5EE=s16(trunc(g×z/1024))` is written on **every** call.
+The original stores are `C9AD4` (`640fb50d`), `C9AEE` (`640fd20d`),
+and `C9AFC` (`640fee0d`). Losing the sub-latch does not freeze magnitude;
+losing `F` freezes magnitude but gain still decays. Neither loss clears
+`H,Y,A` directly.
+
+**The additional zero-s213 route is `ABFA`, with its own history.**
+`C98AE` supplies it before `C9A84`. Define `p=C600` (signed8 monitored s212),
+`v=ADF0` (signed16), `q=C128` (signed16), and `opposed=(q×v<0)`.
+For `F==1`, its exact branch-defined calculation is:
+
+* `a=sign(p)×curve(B01D2,|p|)` (this exact table is all zero);
+  `b=sign(v)×curve(B01E6,|v|)`, `c=curve(B01FA,|p|)`;
+  `d=s16(trunc(b×c/1024))`, additionally scaled by179/256 with truncation
+  and signed16 narrowing when `opposed`.
+* `e=(q<0 ? −1 : 1)×curve(B019A,|p|)`,
+  `j=s16(trunc(e×curve(B01B2,|v|)/1024))`.
+  With history `K=C5CC`, `K'=j` when not opposed; when opposed,
+  `K'=0` for signed `abs_s16(K)<=26`, otherwise
+  `K'=s16(K−26)` for `K>0`, or `s16(K+26)` otherwise.
+* `C5CE=K'`, `C5D0=clamp(a+d+K',−32767,32767)`,
+  `ABFA=s16(trunc(ABF8×C5D0/1024))`.
+  `C9A5C` updates `ABF8` from the unsigned speed curve `B01C2`
+  `(0,0),(2560,0),(3840,1024),sentinel` on the cadence-bit8 branch.
+
+The `C99D0..C9A08` disassembly supplies the signed26-step history branch.
+From a normal signed16 history in ±32767, opposed-sign influence ends within
+1261 such calls; a nonopposed call replaces it immediately. For `F!=1`,
+`C98AE` holds `C5CC`, sets `a=d=C5CE=C5D0=ABFA=0`, and clears `ABF0/ABF4`.
+For example, synthetic `s213=0,p=17,v=0,q=1,ABF8=1024,g=1024,F=1`
+gives steady `C5EC=0,ABFA=C5EE=128`. This is a secondary-input example,
+not retained s213. Conversely, in the captured `p∈[−2,2]` domain,
+the p-dependent curves are zero: `d=j=0`; only a previously nonzero
+opposed-sign `C5CC` can remain until its26-step decay completes.
+
+**Complete direct writer/reset ownership for this recurrence.** The exact corpus
+WRITE-reference census, checked against the producer stores above, is:
+
+| Cells | All direct writer entries |
+|---|---|
+| `ABEC,C5EC,C5C0,C5C2,C5E6` | `C9590,C9812` |
+| `C5EE,C5B4,C5D2` | `C9590,C9A84` |
+| `C5B0,C5B8,C5BA,C5BC,C5BE,C5F4` | `C9590,C973A` |
+| `ABFA` | `C9590,C98AE,C9A84` |
+| `ABF8` | `C9590,C9A5C` |
+| `C5CC` and secondary intermediates `ABF0/2/4/6,C5C4/6/8/A/E/D0` | `C9590,C98AE` |
+| `C5E4,C5E5,C5F2,C5F3` | `C9590,C9650` |
+
+`C9590` is the explicit reset: zero histories, outputs, speed latch,
+sub-latch and pre-/main latch; set primer `C5E5=1`, denominators `C5BC/C5BE=6144`.
+Its sole direct caller is initialization `D0CE8` at `D0D20`; intact wrapper
+`D1124` calls `D0CE8`, reached through `BCD16` and `BCD22` (the latter first
+snapshots `F06A→AD5B`). Clearing `C5F3` in `C9650` consumes no new reset
+and cannot restore the already consumed primer. Restoring external gates
+alone cannot re-arm it. The reset/rearm fixture exercises39/40 debounce calls
+after the exact reset, alongside a no-reset45-call failed rearm.
+
+**Drive-mode alias boundary.** All four entries of the seven producer pointer
+tables alias: `D39DC→B018A`, `D3A1C→B01D2`, `D3A5C→B01E6`,
+`D3A9C→B01FA`, `D3ADC→B019A`, `D3B1C→B01B2`, `D3B5C→B01C2`.
+The no-copy selector0..3 fixtures use the same producer state. This is the
+moving-family calibration boundary; the independent primary assistance
+bank is covered separately in §31.
+
+**Published cells and execution boundary.** `D0D7C` copies `C5F4→ACF1` and
+sets `AE12=clamp(trunc(C5EE×unsigned(AE3C)/32768),−22170,22170)`.
+`D0162` does not read `C5EE`: it forms the independent nested `CC28→CC2C`
+sum. Ordinary `D0218` (`AC2B!=0x5A,C7BF!=1`) adds
+`clamp(C5EE+CB38,−[B132C]/2,[B132C]/2)` to that sum and other terms,
+publishing signed32 `CC48`; either alternate branch bypasses this term.
+The original `D024A` load (`249fee0d`) and `D027E` store (`640f4914`)
+fix that dataflow. `CC48..CC64` continues toward current control (§34).
+
+The 32 standalone `tests/fixtures/rh850/machine/camry-8965F3307000/`
+`camry_f33_moving_assist_*.json` fixtures encode original-byte calls, including
+no-copy controls, inconsistent/coherent history, signed/plateau inputs,
+speed hysteresis, admission loss/reentry, 64-call gain traces, opposed-sign
+secondary decay, saturation, reset/one-shot rearm, four aliases, diagnostic
+scales and final-sum bypasses. Their expected values are derived from the
+recurrences above. All 32 passed exact-image execution across
+`build/out/firmware-question-campaign/moving-assist-wave1` and the corrected
+downstream-source runs in `moving-assist-wave2`. All initial state and input
+transitions are synthetic. The RAM sequencer contains only MOV-immediate/JMP
+calls. Intact `89F2E` supplies explicitly labeled input snapshots or copies
+state to bounded observation scratch; no history is injected between calls
+and CodeFlash has no overlays.
 
 **Live pinning (deterministic, both drives).** `0x0D5` s211 is set in **100% of frames
 inside cruise-active intervals and inside Class-L intervals alike** (2,291/807 drive A;
@@ -2571,13 +2693,18 @@ ordinary moving/cruise operation. They are **not a Class-L-specific input
 discriminator**. This does not observe the complete latch, gain or retained
 magnitude state in either drive.
 
-**Boundary.** The four moving-family maps alias, but the independent drive-mode
-selector materially changes the primary `C2B64` assistance surface (§31).
-Neither that alias proof nor zero captured s213 excludes the moving family's
-retained contribution. The former conclusion that this census proved zero
-`C5EE` and ruled out the family as a contributor to the Class-L shift is
-withdrawn. Attribution requires internal-state history or a direct term
-observation; the existing source census alone does not supply either.
+**Capture requirement for attribution.** Both retained drives contain zero s213
+in55,793 bus-0 `0x0D5` samples; s212 is cruise `[−2,2]` and Class-L
+`[−2,2]`/`[−1,1]`. The exact recurrence sharply limits admitted s213-history
+influence, but unobserved held magnitude, gain and secondary history remain.
+A synchronized capture must observe `C5F3/C5F4/C5E6`, `ABEC/C5EC`,
+`C5B0/C5B8/C5BE`, `C5CC/ABF8/ABFA`, the actual `C5FC/C600/ADF0/C128`
+snapshots, reset/rearm history and producer invocation order; alternatively
+observe `C5EE` directly with its admission and downstream branch state.
+`AE12`/DID `1C3E` is a scaled proxy (§32), requiring synchronized `AE3C`
+and sufficient resolution. Physical attribution additionally needs the
+time-aligned downstream/current response and driving-state comparison;
+these synthetic fixtures make no physical-contribution or Class-L attribution.
 
 Deterministic evidence is the `eps_latch_inputs` section of
 `data/generated/camry_2026_cruise_lta_edge_census.json`, generated by

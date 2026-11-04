@@ -1,0 +1,314 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_moving_assist_downstream_c7bf_bypass",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe0000"
+  },
+  "max_instructions": 250000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe7800",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebeabec",
+      "hex": "00000000000000000000000000000000",
+      "evidence": "Explicit synthetic initial producer/history or input snapshot state; not a physical capture or whole-RAM initialization."
+    },
+    {
+      "address": "0xfebeac2b",
+      "hex": "00",
+      "evidence": "Explicit synthetic initial producer/history or input snapshot state; not a physical capture or whole-RAM initialization."
+    },
+    {
+      "address": "0xfebeacbe",
+      "hex": "01",
+      "evidence": "Explicit synthetic initial producer/history or input snapshot state; not a physical capture or whole-RAM initialization."
+    },
+    {
+      "address": "0xfebeacce",
+      "hex": "01",
+      "evidence": "Explicit synthetic initial producer/history or input snapshot state; not a physical capture or whole-RAM initialization."
+    },
+    {
+      "address": "0xfebeadf6",
+      "hex": "0d00",
+      "evidence": "Explicit synthetic initial producer/history or input snapshot state; not a physical capture or whole-RAM initialization."
+    },
+    {
+      "address": "0xfebebf3c",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic initial producer/history or input snapshot state; not a physical capture or whole-RAM initialization."
+    },
+    {
+      "address": "0xfebec39c",
+      "hex": "000000000000",
+      "evidence": "Explicit synthetic initial producer/history or input snapshot state; not a physical capture or whole-RAM initialization."
+    },
+    {
+      "address": "0xfebec3ba",
+      "hex": "0000",
+      "evidence": "Explicit synthetic initial producer/history or input snapshot state; not a physical capture or whole-RAM initialization."
+    },
+    {
+      "address": "0xfebec41e",
+      "hex": "0000",
+      "evidence": "Explicit synthetic initial producer/history or input snapshot state; not a physical capture or whole-RAM initialization."
+    },
+    {
+      "address": "0xfebec43c",
+      "hex": "0000",
+      "evidence": "Explicit synthetic initial producer/history or input snapshot state; not a physical capture or whole-RAM initialization."
+    },
+    {
+      "address": "0xfebec4c0",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic initial producer/history or input snapshot state; not a physical capture or whole-RAM initialization."
+    },
+    {
+      "address": "0xfebec53a",
+      "hex": "0000",
+      "evidence": "Explicit synthetic initial producer/history or input snapshot state; not a physical capture or whole-RAM initialization."
+    },
+    {
+      "address": "0xfebec5a8",
+      "hex": "0000",
+      "evidence": "Explicit synthetic initial producer/history or input snapshot state; not a physical capture or whole-RAM initialization."
+    },
+    {
+      "address": "0xfebec5b0",
+      "hex": "0018000000000000000400040018001800000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000001010000000000000058020000",
+      "evidence": "Explicit synthetic initial producer/history or input snapshot state; not a physical capture or whole-RAM initialization."
+    },
+    {
+      "address": "0xfebec7bf",
+      "hex": "01",
+      "evidence": "Explicit synthetic initial producer/history or input snapshot state; not a physical capture or whole-RAM initialization."
+    },
+    {
+      "address": "0xfebecb38",
+      "hex": "0000",
+      "evidence": "Explicit synthetic initial producer/history or input snapshot state; not a physical capture or whole-RAM initialization."
+    },
+    {
+      "address": "0xfebecbe8",
+      "hex": "0000",
+      "evidence": "Explicit synthetic initial producer/history or input snapshot state; not a physical capture or whole-RAM initialization."
+    },
+    {
+      "address": "0xfebecc24",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic initial producer/history or input snapshot state; not a physical capture or whole-RAM initialization."
+    },
+    {
+      "address": "0xfebecc30",
+      "hex": "5a5a5a5a",
+      "evidence": "Synthetic adjacent source canary for the16-byte CC24 observation: original D0162 owns only CC24/CC28/CC2C; memcpy must preserve this distinct neighbor."
+    },
+    {
+      "address": "0xfebe7600",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Synthetic bounded original PREPARE caller stack."
+    },
+    {
+      "address": "0xfebe8ffc",
+      "size": 124,
+      "fill": 165,
+      "evidence": "Synthetic observation-only scratch with four-byte A5 canaries on both sides; original memcpy copies out, never back."
+    },
+    {
+      "address": "0xfebeabfc",
+      "size": 2,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebeac2c",
+      "size": 3,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebeacbd",
+      "size": 1,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebeacbf",
+      "size": 2,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebeaccd",
+      "size": 1,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebeaccf",
+      "size": 3,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebeadf0",
+      "size": 4,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebeadf8",
+      "size": 2,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebec128",
+      "size": 4,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebec156",
+      "size": 4,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebec3a2",
+      "size": 2,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebec3bc",
+      "size": 2,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebec420",
+      "size": 2,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebec43e",
+      "size": 2,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebec53c",
+      "size": 2,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebec5aa",
+      "size": 6,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebec600",
+      "size": 4,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebec7c0",
+      "size": 3,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebecb3a",
+      "size": 2,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebecbea",
+      "size": 2,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebecc2c",
+      "size": 4,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebe0000",
+      "hex": "3f060e00befe2106ae980c0061003f061c00befe210612980c0061003f062a00befe21063a970c0061003f063800befe2106849a0c00610026060090befe2706ecabbefe2806100000003f065800befe21062e9f0800610026061090befe2706b0c5befe2806500000003f067800befe21062e9f080061003f068600befe210662010d0061003f069400befe210618020d00610026066090befe270624ccbefe2806100000003f06b400befe21062e9f0800610026067090befe270648ccbefe2806040000003f06d400befe21062e9f080061002106980700006100",
+      "evidence": "Synthetic transparent call-only sequencer: MOV imm32,Rn; JMP[r1], lp=next instruction. Original firmware bytes immutable. No sequencer stores, branches modeling firmware, or overlays. Calls in order: 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xd0162, 0xd0218, 0x89f2e, 0x89f2e. 89F2E calls either supply explicitly labeled input transitions or copy observations into scratch."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Original-byte sequence returns",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Producer FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9000",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Producer FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9010",
+      "size": 80,
+      "equals_hex": "0018000000030000000400040018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003000300000001010000000000000058020000"
+    },
+    {
+      "name": "Nested funnel separate from C5EE; ordinary or bypass final sum",
+      "kind": "memory",
+      "address": "0xfebe9060",
+      "size": 16,
+      "equals_hex": "0000000000000000000000005a5a5a5a"
+    },
+    {
+      "name": "Published CC48",
+      "kind": "memory",
+      "address": "0xfebe9070",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "Observation lower canary",
+      "kind": "memory",
+      "address": "0xfebe8ffc",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    },
+    {
+      "name": "Observation upper canary",
+      "kind": "memory",
+      "address": "0xfebe9074",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    }
+  ]
+}

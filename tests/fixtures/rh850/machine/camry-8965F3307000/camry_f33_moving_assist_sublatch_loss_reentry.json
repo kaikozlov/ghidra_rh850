@@ -1,0 +1,852 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_moving_assist_sublatch_loss_reentry",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe0000"
+  },
+  "max_instructions": 250000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe7800",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebeabec",
+      "hex": "00000000000000000000000000000000",
+      "evidence": "Explicit synthetic initial producer/history or input snapshot state; not a physical capture or whole-RAM initialization."
+    },
+    {
+      "address": "0xfebeacbe",
+      "hex": "01",
+      "evidence": "Explicit synthetic initial producer/history or input snapshot state; not a physical capture or whole-RAM initialization."
+    },
+    {
+      "address": "0xfebeacce",
+      "hex": "01",
+      "evidence": "Explicit synthetic initial producer/history or input snapshot state; not a physical capture or whole-RAM initialization."
+    },
+    {
+      "address": "0xfebeadf6",
+      "hex": "0d00",
+      "evidence": "Explicit synthetic initial producer/history or input snapshot state; not a physical capture or whole-RAM initialization."
+    },
+    {
+      "address": "0xfebec5b0",
+      "hex": "0018000000000000000400040018001800000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000001010000000000000058020000",
+      "evidence": "Explicit synthetic initial producer/history or input snapshot state; not a physical capture or whole-RAM initialization."
+    },
+    {
+      "address": "0xfebe7600",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Synthetic bounded original PREPARE caller stack."
+    },
+    {
+      "address": "0xfebe8ffc",
+      "size": 4712,
+      "fill": 165,
+      "evidence": "Synthetic observation-only scratch with four-byte A5 canaries on both sides; original memcpy copies out, never back."
+    },
+    {
+      "address": "0xfebe8000",
+      "hex": "00",
+      "evidence": "Synthetic harness input transition: s211 working gate lost while F3 remains set. Original89F2E copies only to the actual input snapshot cell; producer/history cells are preserved."
+    },
+    {
+      "address": "0xfebe8008",
+      "hex": "01",
+      "evidence": "Synthetic harness input transition: s211 working gate restored without modifying producer histories. Original89F2E copies only to the actual input snapshot cell; producer/history cells are preserved."
+    },
+    {
+      "address": "0xfebeabfc",
+      "size": 2,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebeacbd",
+      "size": 1,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebeacbf",
+      "size": 2,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebeaccd",
+      "size": 1,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebeaccf",
+      "size": 3,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebeadf0",
+      "size": 4,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebeadf8",
+      "size": 2,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebec128",
+      "size": 4,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebec156",
+      "size": 4,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebec5ac",
+      "size": 4,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebec600",
+      "size": 4,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebe0000",
+      "hex": "3f060e00befe2106ae980c0061003f061c00befe210612980c0061003f062a00befe21063a970c0061003f063800befe2106849a0c00610026060090befe2706ecabbefe2806100000003f065800befe21062e9f0800610026061090befe2706b0c5befe2806500000003f067800befe21062e9f080061002606ceacbefe27060080befe2806010000003f069800befe21062e9f080061003f06a600befe2106ae980c0061003f06b400befe210612980c0061003f06c200befe21063a970c0061003f06d000befe2106849a0c00610026066090befe2706ecabbefe2806100000003f06f000befe21062e9f0800610026067090befe2706b0c5befe2806500000003f061001befe21062e9f080061003f061e01befe2106ae980c0061003f062c01befe210612980c0061003f063a01befe21063a970c0061003f064801befe2106849a0c0061002606c090befe2706ecabbefe2806100000003f066801befe21062e9f080061002606d090befe2706b0c5befe2806500000003f068801befe21062e9f080061003f069601befe2106ae980c0061003f06a401befe210612980c0061003f06b201befe21063a970c0061003f06c001befe2106849a0c00610026062091befe2706ecabbefe2806100000003f06e001befe21062e9f0800610026063091befe2706b0c5befe2806500000003f060002befe21062e9f080061003f060e02befe2106ae980c0061003f061c02befe210612980c0061003f062a02befe21063a970c0061003f063802befe2106849a0c00610026068091befe2706ecabbefe2806100000003f065802befe21062e9f0800610026069091befe2706b0c5befe2806500000003f067802befe21062e9f080061003f068602befe2106ae980c0061003f069402befe210612980c0061003f06a202befe21063a970c0061003f06b002befe2106849a0c0061002606e091befe2706ecabbefe2806100000003f06d002befe21062e9f080061002606f091befe2706b0c5befe2806500000003f06f002befe21062e9f080061003f06fe02befe2106ae980c0061003f060c03befe210612980c0061003f061a03befe21063a970c0061003f062803befe2106849a0c00610026064092befe2706ecabbefe2806100000003f064803befe21062e9f0800610026065092befe2706b0c5befe2806500000003f066803befe21062e9f080061003f067603befe2106ae980c0061003f068403befe210612980c0061003f069203befe21063a970c0061003f06a003befe2106849a0c0061002606a092befe2706ecabbefe2806100000003f06c003befe21062e9f080061002606b092befe2706b0c5befe2806500000003f06e003befe21062e9f080061003f06ee03befe2106ae980c0061003f06fc03befe210612980c0061003f060a04befe21063a970c0061003f061804befe2106849a0c00610026060093befe2706ecabbefe2806100000003f063804befe21062e9f0800610026061093befe2706b0c5befe2806500000003f065804befe21062e9f080061003f066604befe2106ae980c0061003f067404befe210612980c0061003f068204befe21063a970c0061003f069004befe2106849a0c00610026066093befe2706ecabbefe2806100000003f06b004befe21062e9f0800610026067093befe2706b0c5befe2806500000003f06d004befe21062e9f080061003f06de04befe2106ae980c0061003f06ec04befe210612980c0061003f06fa04befe21063a970c0061003f060805befe2106849a0c0061002606c093befe2706ecabbefe2806100000003f062805befe21062e9f080061002606d093befe2706b0c5befe2806500000003f064805befe21062e9f080061003f065605befe2106ae980c0061003f066405befe210612980c0061003f067205befe21063a970c0061003f068005befe2106849a0c00610026062094befe2706ecabbefe2806100000003f06a005befe21062e9f0800610026063094befe2706b0c5befe2806500000003f06c005befe21062e9f080061003f06ce05befe2106ae980c0061003f06dc05befe210612980c0061003f06ea05befe21063a970c0061003f06f805befe2106849a0c00610026068094befe2706ecabbefe2806100000003f061806befe21062e9f0800610026069094befe2706b0c5befe2806500000003f063806befe21062e9f080061003f064606befe2106ae980c0061003f065406befe210612980c0061003f066206befe21063a970c0061003f067006befe2106849a0c0061002606e094befe2706ecabbefe2806100000003f069006befe21062e9f080061002606f094befe2706b0c5befe2806500000003f06b006befe21062e9f080061003f06be06befe2106ae980c0061003f06cc06befe210612980c0061003f06da06befe21063a970c0061003f06e806befe2106849a0c00610026064095befe2706ecabbefe2806100000003f060807befe21062e9f0800610026065095befe2706b0c5befe2806500000003f062807befe21062e9f080061003f063607befe2106ae980c0061003f064407befe210612980c0061003f065207befe21063a970c0061003f066007befe2106849a0c0061002606a095befe2706ecabbefe2806100000003f068007befe21062e9f080061002606b095befe2706b0c5befe2806500000003f06a007befe21062e9f080061003f06ae07befe2106ae980c0061003f06bc07befe210612980c0061003f06ca07befe21063a970c0061003f06d807befe2106849a0c00610026060096befe2706ecabbefe2806100000003f06f807befe21062e9f0800610026061096befe2706b0c5befe2806500000003f061808befe21062e9f080061003f062608befe2106ae980c0061003f063408befe210612980c0061003f064208befe21063a970c0061003f065008befe2106849a0c00610026066096befe2706ecabbefe2806100000003f067008befe21062e9f0800610026067096befe2706b0c5befe2806500000003f069008befe21062e9f080061003f069e08befe2106ae980c0061003f06ac08befe210612980c0061003f06ba08befe21063a970c0061003f06c808befe2106849a0c0061002606c096befe2706ecabbefe2806100000003f06e808befe21062e9f080061002606d096befe2706b0c5befe2806500000003f060809befe21062e9f080061003f061609befe2106ae980c0061003f062409befe210612980c0061003f063209befe21063a970c0061003f064009befe2106849a0c00610026062097befe2706ecabbefe2806100000003f066009befe21062e9f0800610026063097befe2706b0c5befe2806500000003f068009befe21062e9f080061003f068e09befe2106ae980c0061003f069c09befe210612980c0061003f06aa09befe21063a970c0061003f06b809befe2106849a0c00610026068097befe2706ecabbefe2806100000003f06d809befe21062e9f0800610026069097befe2706b0c5befe2806500000003f06f809befe21062e9f080061003f06060abefe2106ae980c0061003f06140abefe210612980c0061003f06220abefe21063a970c0061003f06300abefe2106849a0c0061002606e097befe2706ecabbefe2806100000003f06500abefe21062e9f080061002606f097befe2706b0c5befe2806500000003f06700abefe21062e9f080061003f067e0abefe2106ae980c0061003f068c0abefe210612980c0061003f069a0abefe21063a970c0061003f06a80abefe2106849a0c00610026064098befe2706ecabbefe2806100000003f06c80abefe21062e9f0800610026065098befe2706b0c5befe2806500000003f06e80abefe21062e9f080061003f06f60abefe2106ae980c0061003f06040bbefe210612980c0061003f06120bbefe21063a970c0061003f06200bbefe2106849a0c0061002606a098befe2706ecabbefe2806100000003f06400bbefe21062e9f080061002606b098befe2706b0c5befe2806500000003f06600bbefe21062e9f080061003f066e0bbefe2106ae980c0061003f067c0bbefe210612980c0061003f068a0bbefe21063a970c0061003f06980bbefe2106849a0c00610026060099befe2706ecabbefe2806100000003f06b80bbefe21062e9f0800610026061099befe2706b0c5befe2806500000003f06d80bbefe21062e9f080061002606ceacbefe27060880befe2806010000003f06f80bbefe21062e9f080061003f06060cbefe2106ae980c0061003f06140cbefe210612980c0061003f06220cbefe21063a970c0061003f06300cbefe2106849a0c00610026066099befe2706ecabbefe2806100000003f06500cbefe21062e9f0800610026067099befe2706b0c5befe2806500000003f06700cbefe21062e9f080061003f067e0cbefe2106ae980c0061003f068c0cbefe210612980c0061003f069a0cbefe21063a970c0061003f06a80cbefe2106849a0c0061002606c099befe2706ecabbefe2806100000003f06c80cbefe21062e9f080061002606d099befe2706b0c5befe2806500000003f06e80cbefe21062e9f080061003f06f60cbefe2106ae980c0061003f06040dbefe210612980c0061003f06120dbefe21063a970c0061003f06200dbefe2106849a0c0061002606209abefe2706ecabbefe2806100000003f06400dbefe21062e9f080061002606309abefe2706b0c5befe2806500000003f06600dbefe21062e9f080061003f066e0dbefe2106ae980c0061003f067c0dbefe210612980c0061003f068a0dbefe21063a970c0061003f06980dbefe2106849a0c0061002606809abefe2706ecabbefe2806100000003f06b80dbefe21062e9f080061002606909abefe2706b0c5befe2806500000003f06d80dbefe21062e9f080061003f06e60dbefe2106ae980c0061003f06f40dbefe210612980c0061003f06020ebefe21063a970c0061003f06100ebefe2106849a0c0061002606e09abefe2706ecabbefe2806100000003f06300ebefe21062e9f080061002606f09abefe2706b0c5befe2806500000003f06500ebefe21062e9f080061003f065e0ebefe2106ae980c0061003f066c0ebefe210612980c0061003f067a0ebefe21063a970c0061003f06880ebefe2106849a0c0061002606409bbefe2706ecabbefe2806100000003f06a80ebefe21062e9f080061002606509bbefe2706b0c5befe2806500000003f06c80ebefe21062e9f080061003f06d60ebefe2106ae980c0061003f06e40ebefe210612980c0061003f06f20ebefe21063a970c0061003f06000fbefe2106849a0c0061002606a09bbefe2706ecabbefe2806100000003f06200fbefe21062e9f080061002606b09bbefe2706b0c5befe2806500000003f06400fbefe21062e9f080061003f064e0fbefe2106ae980c0061003f065c0fbefe210612980c0061003f066a0fbefe21063a970c0061003f06780fbefe2106849a0c0061002606009cbefe2706ecabbefe2806100000003f06980fbefe21062e9f080061002606109cbefe2706b0c5befe2806500000003f06b80fbefe21062e9f080061003f06c60fbefe2106ae980c0061003f06d40fbefe210612980c0061003f06e20fbefe21063a970c0061003f06f00fbefe2106849a0c0061002606609cbefe2706ecabbefe2806100000003f061010befe21062e9f080061002606709cbefe2706b0c5befe2806500000003f063010befe21062e9f080061003f063e10befe2106ae980c0061003f064c10befe210612980c0061003f065a10befe21063a970c0061003f066810befe2106849a0c0061002606c09cbefe2706ecabbefe2806100000003f068810befe21062e9f080061002606d09cbefe2706b0c5befe2806500000003f06a810befe21062e9f080061003f06b610befe2106ae980c0061003f06c410befe210612980c0061003f06d210befe21063a970c0061003f06e010befe2106849a0c0061002606209dbefe2706ecabbefe2806100000003f060011befe21062e9f080061002606309dbefe2706b0c5befe2806500000003f062011befe21062e9f080061003f062e11befe2106ae980c0061003f063c11befe210612980c0061003f064a11befe21063a970c0061003f065811befe2106849a0c0061002606809dbefe2706ecabbefe2806100000003f067811befe21062e9f080061002606909dbefe2706b0c5befe2806500000003f069811befe21062e9f080061003f06a611befe2106ae980c0061003f06b411befe210612980c0061003f06c211befe21063a970c0061003f06d011befe2106849a0c0061002606e09dbefe2706ecabbefe2806100000003f06f011befe21062e9f080061002606f09dbefe2706b0c5befe2806500000003f061012befe21062e9f080061003f061e12befe2106ae980c0061003f062c12befe210612980c0061003f063a12befe21063a970c0061003f064812befe2106849a0c0061002606409ebefe2706ecabbefe2806100000003f066812befe21062e9f080061002606509ebefe2706b0c5befe2806500000003f068812befe21062e9f080061003f069612befe2106ae980c0061003f06a412befe210612980c0061003f06b212befe21063a970c0061003f06c012befe2106849a0c0061002606a09ebefe2706ecabbefe2806100000003f06e012befe21062e9f080061002606b09ebefe2706b0c5befe2806500000003f060013befe21062e9f080061003f060e13befe2106ae980c0061003f061c13befe210612980c0061003f062a13befe21063a970c0061003f063813befe2106849a0c0061002606009fbefe2706ecabbefe2806100000003f065813befe21062e9f080061002606109fbefe2706b0c5befe2806500000003f067813befe21062e9f080061003f068613befe2106ae980c0061003f069413befe210612980c0061003f06a213befe21063a970c0061003f06b013befe2106849a0c0061002606609fbefe2706ecabbefe2806100000003f06d013befe21062e9f080061002606709fbefe2706b0c5befe2806500000003f06f013befe21062e9f080061003f06fe13befe2106ae980c0061003f060c14befe210612980c0061003f061a14befe21063a970c0061003f062814befe2106849a0c0061002606c09fbefe2706ecabbefe2806100000003f064814befe21062e9f080061002606d09fbefe2706b0c5befe2806500000003f066814befe21062e9f080061003f067614befe2106ae980c0061003f068414befe210612980c0061003f069214befe21063a970c0061003f06a014befe2106849a0c006100260620a0befe2706ecabbefe2806100000003f06c014befe21062e9f08006100260630a0befe2706b0c5befe2806500000003f06e014befe21062e9f080061003f06ee14befe2106ae980c0061003f06fc14befe210612980c0061003f060a15befe21063a970c0061003f061815befe2106849a0c006100260680a0befe2706ecabbefe2806100000003f063815befe21062e9f08006100260690a0befe2706b0c5befe2806500000003f065815befe21062e9f080061003f066615befe2106ae980c0061003f067415befe210612980c0061003f068215befe21063a970c0061003f069015befe2106849a0c0061002606e0a0befe2706ecabbefe2806100000003f06b015befe21062e9f080061002606f0a0befe2706b0c5befe2806500000003f06d015befe21062e9f080061003f06de15befe2106ae980c0061003f06ec15befe210612980c0061003f06fa15befe21063a970c0061003f060816befe2106849a0c006100260640a1befe2706ecabbefe2806100000003f062816befe21062e9f08006100260650a1befe2706b0c5befe2806500000003f064816befe21062e9f080061003f065616befe2106ae980c0061003f066416befe210612980c0061003f067216befe21063a970c0061003f068016befe2106849a0c0061002606a0a1befe2706ecabbefe2806100000003f06a016befe21062e9f080061002606b0a1befe2706b0c5befe2806500000003f06c016befe21062e9f080061003f06ce16befe2106ae980c0061003f06dc16befe210612980c0061003f06ea16befe21063a970c0061003f06f816befe2106849a0c006100260600a2befe2706ecabbefe2806100000003f061817befe21062e9f08006100260610a2befe2706b0c5befe2806500000003f063817befe21062e9f080061002106980700006100",
+      "evidence": "Synthetic transparent call-only sequencer: MOV imm32,Rn; JMP[r1], lp=next instruction. Original firmware bytes immutable. No sequencer stores, branches modeling firmware, or overlays. Calls in order: 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e. 89F2E calls either supply explicitly labeled input transitions or copy observations into scratch."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Original-byte sequence returns",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Initially admitted FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9000",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Initially admitted FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9010",
+      "size": 80,
+      "equals_hex": "0018000000030000000400040018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003000300000001010000000000000058020000"
+    },
+    {
+      "name": "Sub-latch loss call 1 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9060",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch loss call 1 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9070",
+      "size": 80,
+      "equals_hex": "00140000000300005503000000180018000300030000000000040000000000000000000300000000000000000000000000000000000001000000000000037f0200000001000000000000000058020000"
+    },
+    {
+      "name": "Sub-latch loss call 2 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe90c0",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch loss call 2 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe90d0",
+      "size": 80,
+      "equals_hex": "ab10000000030000c70200000018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003150200000001000000000000000058020000"
+    },
+    {
+      "name": "Sub-latch loss call 3 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9120",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch loss call 3 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9130",
+      "size": 80,
+      "equals_hex": "e40d000000030000500200000018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003bc0100000001000000000000000058020000"
+    },
+    {
+      "name": "Sub-latch loss call 4 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9180",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch loss call 4 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9190",
+      "size": 80,
+      "equals_hex": "940b000000030000ee0100000018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003720100000001000000000000000058020000"
+    },
+    {
+      "name": "Sub-latch loss call 5 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe91e0",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch loss call 5 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe91f0",
+      "size": 80,
+      "equals_hex": "a6090000000300009b0100000018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003340100000001000000000000000058020000"
+    },
+    {
+      "name": "Sub-latch loss call 6 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9240",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch loss call 6 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9250",
+      "size": 80,
+      "equals_hex": "0b08000000030000570100000018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003010100000001000000000000000058020000"
+    },
+    {
+      "name": "Sub-latch loss call 7 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe92a0",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch loss call 7 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe92b0",
+      "size": 80,
+      "equals_hex": "b4060000000300001e0100000018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003d60000000001000000000000000058020000"
+    },
+    {
+      "name": "Sub-latch loss call 8 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9300",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch loss call 8 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9310",
+      "size": 80,
+      "equals_hex": "9605000000030000ee0000000018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003b20000000001000000000000000058020000"
+    },
+    {
+      "name": "Sub-latch loss call 9 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9360",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch loss call 9 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9370",
+      "size": 80,
+      "equals_hex": "a804000000030000c60000000018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003940000000001000000000000000058020000"
+    },
+    {
+      "name": "Sub-latch loss call 10 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe93c0",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch loss call 10 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe93d0",
+      "size": 80,
+      "equals_hex": "e203000000030000a500000000180018000300030000000000040000000000000000000300000000000000000000000000000000000001000000000000037b0000000001000000000000000058020000"
+    },
+    {
+      "name": "Sub-latch loss call 11 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9420",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch loss call 11 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9430",
+      "size": 80,
+      "equals_hex": "3d030000000300008a0000000018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003670000000001000000000000000058020000"
+    },
+    {
+      "name": "Sub-latch loss call 12 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9480",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch loss call 12 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9490",
+      "size": 80,
+      "equals_hex": "b302000000030000730000000018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003560000000001000000000000000058020000"
+    },
+    {
+      "name": "Sub-latch loss call 13 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe94e0",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch loss call 13 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe94f0",
+      "size": 80,
+      "equals_hex": "4002000000030000600000000018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003480000000001000000000000000058020000"
+    },
+    {
+      "name": "Sub-latch loss call 14 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9540",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch loss call 14 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9550",
+      "size": 80,
+      "equals_hex": "e0010000000300005000000000180018000300030000000000040000000000000000000300000000000000000000000000000000000001000000000000033c0000000001000000000000000058020000"
+    },
+    {
+      "name": "Sub-latch loss call 15 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe95a0",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch loss call 15 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe95b0",
+      "size": 80,
+      "equals_hex": "9001000000030000420000000018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003310000000001000000000000000058020000"
+    },
+    {
+      "name": "Sub-latch loss call 16 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9600",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch loss call 16 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9610",
+      "size": 80,
+      "equals_hex": "4e01000000030000370000000018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003290000000001000000000000000058020000"
+    },
+    {
+      "name": "Sub-latch loss call 17 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9660",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch loss call 17 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9670",
+      "size": 80,
+      "equals_hex": "17010000000300002e0000000018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003220000000001000000000000000058020000"
+    },
+    {
+      "name": "Sub-latch loss call 18 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe96c0",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch loss call 18 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe96d0",
+      "size": 80,
+      "equals_hex": "e9000000000300002600000000180018000300030000000000040000000000000000000300000000000000000000000000000000000001000000000000031c0000000001000000000000000058020000"
+    },
+    {
+      "name": "Sub-latch loss call 19 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9720",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch loss call 19 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9730",
+      "size": 80,
+      "equals_hex": "c300000000030000200000000018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003180000000001000000000000000058020000"
+    },
+    {
+      "name": "Sub-latch loss call 20 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9780",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch loss call 20 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9790",
+      "size": 80,
+      "equals_hex": "a3000000000300001b0000000018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003140000000001000000000000000058020000"
+    },
+    {
+      "name": "Sub-latch loss call 21 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe97e0",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch loss call 21 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe97f0",
+      "size": 80,
+      "equals_hex": "8800000000030000160000000018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003100000000001000000000000000058020000"
+    },
+    {
+      "name": "Sub-latch loss call 22 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9840",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch loss call 22 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9850",
+      "size": 80,
+      "equals_hex": "7200000000030000000000000018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003000000000001000000000000000058020000"
+    },
+    {
+      "name": "Sub-latch loss call 23 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe98a0",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch loss call 23 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe98b0",
+      "size": 80,
+      "equals_hex": "7200000000030000000000000018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003000000000001000000000000000058020000"
+    },
+    {
+      "name": "Sub-latch loss call 24 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9900",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch loss call 24 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9910",
+      "size": 80,
+      "equals_hex": "7200000000030000000000000018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003000000000001000000000000000058020000"
+    },
+    {
+      "name": "Sub-latch reentry call 1 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9960",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch reentry call 1 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9970",
+      "size": 80,
+      "equals_hex": "7204000000030000bd00000400180018000300030000000000040000000000000000000300000000000000000000000000000000000001000000000000038d0000000001010000000000000058020000"
+    },
+    {
+      "name": "Sub-latch reentry call 2 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe99c0",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch reentry call 2 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe99d0",
+      "size": 80,
+      "equals_hex": "b507000000030000480100040018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003f60000000001010000000000000058020000"
+    },
+    {
+      "name": "Sub-latch reentry call 3 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9a20",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch reentry call 3 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9a30",
+      "size": 80,
+      "equals_hex": "6d0a000000030000bc01000400180018000300030000000000040000000000000000000300000000000000000000000000000000000001000000000000034d0100000001010000000000000058020000"
+    },
+    {
+      "name": "Sub-latch reentry call 4 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9a80",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch reentry call 4 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9a90",
+      "size": 80,
+      "equals_hex": "b10c0000000300001d0200040018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003950100000001010000000000000058020000"
+    },
+    {
+      "name": "Sub-latch reentry call 5 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9ae0",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch reentry call 5 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9af0",
+      "size": 80,
+      "equals_hex": "940e0000000300006e0200040018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003d20100000001010000000000000058020000"
+    },
+    {
+      "name": "Sub-latch reentry call 6 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9b40",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch reentry call 6 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9b50",
+      "size": 80,
+      "equals_hex": "2610000000030000b10200040018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003040200000001010000000000000058020000"
+    },
+    {
+      "name": "Sub-latch reentry call 7 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9ba0",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch reentry call 7 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9bb0",
+      "size": 80,
+      "equals_hex": "7511000000030000e802000400180018000300030000000000040000000000000000000300000000000000000000000000000000000001000000000000032e0200000001010000000000000058020000"
+    },
+    {
+      "name": "Sub-latch reentry call 8 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9c00",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch reentry call 8 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9c10",
+      "size": 80,
+      "equals_hex": "8d12000000030000170300040018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003510200000001010000000000000058020000"
+    },
+    {
+      "name": "Sub-latch reentry call 9 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9c60",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch reentry call 9 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9c70",
+      "size": 80,
+      "equals_hex": "76130000000300003e03000400180018000300030000000000040000000000000000000300000000000000000000000000000000000001000000000000036e0200000001010000000000000058020000"
+    },
+    {
+      "name": "Sub-latch reentry call 10 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9cc0",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch reentry call 10 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9cd0",
+      "size": 80,
+      "equals_hex": "38140000000300005e0300040018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003860200000001010000000000000058020000"
+    },
+    {
+      "name": "Sub-latch reentry call 11 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9d20",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch reentry call 11 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9d30",
+      "size": 80,
+      "equals_hex": "da140000000300007903000400180018000300030000000000040000000000000000000300000000000000000000000000000000000001000000000000039a0200000001010000000000000058020000"
+    },
+    {
+      "name": "Sub-latch reentry call 12 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9d80",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch reentry call 12 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9d90",
+      "size": 80,
+      "equals_hex": "6115000000030000900300040018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003ac0200000001010000000000000058020000"
+    },
+    {
+      "name": "Sub-latch reentry call 13 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9de0",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch reentry call 13 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9df0",
+      "size": 80,
+      "equals_hex": "d115000000030000a20300040018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003b90200000001010000000000000058020000"
+    },
+    {
+      "name": "Sub-latch reentry call 14 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9e40",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch reentry call 14 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9e50",
+      "size": 80,
+      "equals_hex": "2f16000000030000b20300040018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003c50200000001010000000000000058020000"
+    },
+    {
+      "name": "Sub-latch reentry call 15 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9ea0",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch reentry call 15 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9eb0",
+      "size": 80,
+      "equals_hex": "7d16000000030000bf0300040018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003cf0200000001010000000000000058020000"
+    },
+    {
+      "name": "Sub-latch reentry call 16 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9f00",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch reentry call 16 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9f10",
+      "size": 80,
+      "equals_hex": "be16000000030000ca0300040018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003d70200000001010000000000000058020000"
+    },
+    {
+      "name": "Sub-latch reentry call 17 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9f60",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch reentry call 17 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9f70",
+      "size": 80,
+      "equals_hex": "f416000000030000d30300040018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003de0200000001010000000000000058020000"
+    },
+    {
+      "name": "Sub-latch reentry call 18 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9fc0",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch reentry call 18 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9fd0",
+      "size": 80,
+      "equals_hex": "2117000000030000da0300040018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003e30200000001010000000000000058020000"
+    },
+    {
+      "name": "Sub-latch reentry call 19 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebea020",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch reentry call 19 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebea030",
+      "size": 80,
+      "equals_hex": "4717000000030000e10300040018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003e80200000001010000000000000058020000"
+    },
+    {
+      "name": "Sub-latch reentry call 20 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebea080",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch reentry call 20 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebea090",
+      "size": 80,
+      "equals_hex": "6617000000030000e60300040018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003ec0200000001010000000000000058020000"
+    },
+    {
+      "name": "Sub-latch reentry call 21 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebea0e0",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch reentry call 21 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebea0f0",
+      "size": 80,
+      "equals_hex": "8017000000030000ea0300040018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003ef0200000001010000000000000058020000"
+    },
+    {
+      "name": "Sub-latch reentry call 22 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebea140",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch reentry call 22 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebea150",
+      "size": 80,
+      "equals_hex": "9617000000030000000400040018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003000300000001010000000000000058020000"
+    },
+    {
+      "name": "Sub-latch reentry call 23 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebea1a0",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch reentry call 23 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebea1b0",
+      "size": 80,
+      "equals_hex": "9617000000030000000400040018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003000300000001010000000000000058020000"
+    },
+    {
+      "name": "Sub-latch reentry call 24 FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebea200",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Sub-latch reentry call 24 FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebea210",
+      "size": 80,
+      "equals_hex": "9617000000030000000400040018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003000300000001010000000000000058020000"
+    },
+    {
+      "name": "Observation lower canary",
+      "kind": "memory",
+      "address": "0xfebe8ffc",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    },
+    {
+      "name": "Observation upper canary",
+      "kind": "memory",
+      "address": "0xfebea260",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    }
+  ]
+}

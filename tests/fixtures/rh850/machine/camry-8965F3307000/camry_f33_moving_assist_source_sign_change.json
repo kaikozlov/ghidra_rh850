@@ -1,0 +1,222 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_moving_assist_source_sign_change",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe0000"
+  },
+  "max_instructions": 250000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe7800",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebeabec",
+      "hex": "00000000000000000000000000000000",
+      "evidence": "Explicit synthetic initial producer/history or input snapshot state; not a physical capture or whole-RAM initialization."
+    },
+    {
+      "address": "0xfebeacbe",
+      "hex": "01",
+      "evidence": "Explicit synthetic initial producer/history or input snapshot state; not a physical capture or whole-RAM initialization."
+    },
+    {
+      "address": "0xfebeacce",
+      "hex": "01",
+      "evidence": "Explicit synthetic initial producer/history or input snapshot state; not a physical capture or whole-RAM initialization."
+    },
+    {
+      "address": "0xfebeadf6",
+      "hex": "0d00",
+      "evidence": "Explicit synthetic initial producer/history or input snapshot state; not a physical capture or whole-RAM initialization."
+    },
+    {
+      "address": "0xfebec5b0",
+      "hex": "0018000000000000000400040018001800000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000001010000000000000058020000",
+      "evidence": "Explicit synthetic initial producer/history or input snapshot state; not a physical capture or whole-RAM initialization."
+    },
+    {
+      "address": "0xfebe7600",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Synthetic bounded original PREPARE caller stack."
+    },
+    {
+      "address": "0xfebe8ffc",
+      "size": 392,
+      "fill": 165,
+      "evidence": "Synthetic observation-only scratch with four-byte A5 canaries on both sides; original memcpy copies out, never back."
+    },
+    {
+      "address": "0xfebe8000",
+      "hex": "a8fd",
+      "evidence": "Synthetic harness input transition: s213 working input +600 to -600. Original89F2E copies only to the actual input snapshot cell; producer/history cells are preserved."
+    },
+    {
+      "address": "0xfebe8008",
+      "hex": "0000",
+      "evidence": "Synthetic harness input transition: s213 working input -600 to zero. Original89F2E copies only to the actual input snapshot cell; producer/history cells are preserved."
+    },
+    {
+      "address": "0xfebeabfc",
+      "size": 2,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebeacbd",
+      "size": 1,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebeacbf",
+      "size": 2,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebeaccd",
+      "size": 1,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebeaccf",
+      "size": 3,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebeadf0",
+      "size": 4,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebeadf8",
+      "size": 2,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebec128",
+      "size": 4,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebec156",
+      "size": 4,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebec5ac",
+      "size": 4,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebec600",
+      "size": 4,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebe0000",
+      "hex": "3f060e00befe2106ae980c0061003f061c00befe210612980c0061003f062a00befe21063a970c0061003f063800befe2106849a0c00610026060090befe2706ecabbefe2806100000003f065800befe21062e9f0800610026061090befe2706b0c5befe2806500000003f067800befe21062e9f080061002606fcc5befe27060080befe2806020000003f069800befe21062e9f080061003f06a600befe2106ae980c0061003f06b400befe210612980c0061003f06c200befe21063a970c0061003f06d000befe2106849a0c00610026066090befe2706ecabbefe2806100000003f06f000befe21062e9f0800610026067090befe2706b0c5befe2806500000003f061001befe21062e9f080061002606fcc5befe27060880befe2806020000003f063001befe21062e9f080061003f063e01befe2106ae980c0061003f064c01befe210612980c0061003f065a01befe21063a970c0061003f066801befe2106849a0c0061002606c090befe2706ecabbefe2806100000003f068801befe21062e9f080061002606d090befe2706b0c5befe2806500000003f06a801befe21062e9f080061003f06b601befe2106ae980c0061003f06c401befe210612980c0061003f06d201befe21063a970c0061003f06e001befe2106849a0c00610026062091befe2706ecabbefe2806100000003f060002befe21062e9f0800610026063091befe2706b0c5befe2806500000003f062002befe21062e9f080061002106980700006100",
+      "evidence": "Synthetic transparent call-only sequencer: MOV imm32,Rn; JMP[r1], lp=next instruction. Original firmware bytes immutable. No sequencer stores, branches modeling firmware, or overlays. Calls in order: 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e, 0xc98ae, 0xc9812, 0xc973a, 0xc9a84, 0x89f2e, 0x89f2e. 89F2E calls either supply explicitly labeled input transitions or copy observations into scratch."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Original-byte sequence returns",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Positive input FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9000",
+      "size": 16,
+      "equals_hex": "00030000000000000000000000000000"
+    },
+    {
+      "name": "Positive input FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9010",
+      "size": 80,
+      "equals_hex": "0018000000030000000400040018001800030003000000000004000000000000000000030000000000000000000000000000000000000100000000000003000300000001010000000000000058020000"
+    },
+    {
+      "name": "Negative input FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9060",
+      "size": 16,
+      "equals_hex": "00fdffff000000000000000000000000"
+    },
+    {
+      "name": "Negative input FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9070",
+      "size": 80,
+      "equals_hex": "0018000000fdffff000400040018001800fd00fd000000000004000000000000000000fd00000000000000000000000000000000000001000000000000fd00fd000000010100000000000000a8fd0000"
+    },
+    {
+      "name": "Zero input FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe90c0",
+      "size": 16,
+      "equals_hex": "00000000000000000000000000000000"
+    },
+    {
+      "name": "Zero input FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe90d0",
+      "size": 80,
+      "equals_hex": "0018000000000000000400040018001800000000000000000004000000000000000000000000000000000000000000000000000000000100000000000000000000000001010000000000000000000000"
+    },
+    {
+      "name": "Repeated zero input FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9120",
+      "size": 16,
+      "equals_hex": "00000000000000000000000000000000"
+    },
+    {
+      "name": "Repeated zero input FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9130",
+      "size": 80,
+      "equals_hex": "0018000000000000000400040018001800000000000000000004000000000000000000000000000000000000000000000000000000000100000000000000000000000001010000000000000000000000"
+    },
+    {
+      "name": "Observation lower canary",
+      "kind": "memory",
+      "address": "0xfebe8ffc",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    },
+    {
+      "name": "Observation upper canary",
+      "kind": "memory",
+      "address": "0xfebe9180",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    }
+  ]
+}

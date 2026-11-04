@@ -1,0 +1,110 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_moving_assist_blend_nonzero_source_clears_secondary",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe0000"
+  },
+  "max_instructions": 250000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe7800",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebeabec",
+      "hex": "00000000000000000000000000008000",
+      "evidence": "Explicit synthetic initial producer/history or input snapshot state; not a physical capture or whole-RAM initialization."
+    },
+    {
+      "address": "0xfebeacbe",
+      "hex": "01",
+      "evidence": "Explicit synthetic initial producer/history or input snapshot state; not a physical capture or whole-RAM initialization."
+    },
+    {
+      "address": "0xfebeacce",
+      "hex": "01",
+      "evidence": "Explicit synthetic initial producer/history or input snapshot state; not a physical capture or whole-RAM initialization."
+    },
+    {
+      "address": "0xfebeadf6",
+      "hex": "0d00",
+      "evidence": "Explicit synthetic initial producer/history or input snapshot state; not a physical capture or whole-RAM initialization."
+    },
+    {
+      "address": "0xfebec5b0",
+      "hex": "0018000000000000000400040018001800000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000001010000000000000001000000",
+      "evidence": "Explicit synthetic initial producer/history or input snapshot state; not a physical capture or whole-RAM initialization."
+    },
+    {
+      "address": "0xfebe7600",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Synthetic bounded original PREPARE caller stack."
+    },
+    {
+      "address": "0xfebe8ffc",
+      "size": 104,
+      "fill": 165,
+      "evidence": "Synthetic observation-only scratch with four-byte A5 canaries on both sides; original memcpy copies out, never back."
+    },
+    {
+      "address": "0xfebeabfc",
+      "size": 2,
+      "fill": 0,
+      "evidence": "Explicit synthetic zero input/read dependency for the listed original software calls; at most four bytes per direct RAM-reader address, preserving all separately specified producer/history bytes."
+    },
+    {
+      "address": "0xfebe0000",
+      "hex": "3f060e00befe2106849a0c00610026060090befe2706ecabbefe2806100000003f062e00befe21062e9f0800610026061090befe2706b0c5befe2806500000003f064e00befe21062e9f080061002106980700006100",
+      "evidence": "Synthetic transparent call-only sequencer: MOV imm32,Rn; JMP[r1], lp=next instruction. Original firmware bytes immutable. No sequencer stores, branches modeling firmware, or overlays. Calls in order: 0xc9a84, 0x89f2e, 0x89f2e. 89F2E calls either supply explicitly labeled input transitions or copy observations into scratch."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Original-byte sequence returns",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Isolated blend boundary (no magnitude/gain advance) FEBEABEC",
+      "kind": "memory",
+      "address": "0xfebe9000",
+      "size": 16,
+      "equals_hex": "00000000000000000000000000000000"
+    },
+    {
+      "name": "Isolated blend boundary (no magnitude/gain advance) FEBEC5B0",
+      "kind": "memory",
+      "address": "0xfebe9010",
+      "size": 80,
+      "equals_hex": "0018000000000000000400040018001800000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000001010000000000000001000000"
+    },
+    {
+      "name": "Observation lower canary",
+      "kind": "memory",
+      "address": "0xfebe8ffc",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    },
+    {
+      "name": "Observation upper canary",
+      "kind": "memory",
+      "address": "0xfebe9060",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    }
+  ]
+}
