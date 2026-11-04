@@ -968,27 +968,145 @@ without cleanup or a diagnostic error publication.
 `1338` ignores its returned CRC. Acceptance permits `121A` to write/read
 `FFFF8000=1`, then ECM setup `1228`, interrupt setup `17C8`, CAN configuration
 `3B3C`, driver initialization `35BC`, queue/constant/region-CRC initialization,
-timers `1CA0`, and diagnostics `770`, in that order. Parent execution of the
-initial downstream scenario stopped during ECM setup with
-`missing post-reset input for ECMMESSTR2`, before reaching CAN initialization.
-The exact boundary is `132C` (`05 0D`, `SST.W r1,8[ep]`), the third protected
-write committing `ECMESSTC2(FFD6203C)=7FFFFFFF`. The model reads both status
-banks before clearing either, preserving their external pin bit31.
-`ECMMESSTR2` and `ECMCESSTR2` have reset mask `7FFFFFFF`; bit31 represents
-ERROROUT/ERROROUT_C feedback, not a reset-zero constant
-(R01UH0585EJ0120 section32.4.6, Table32.20). The revised downstream fixture
-stops immediately **before** `132C`, after the synchronized gate, ECM masks
-and earlier status clears; it supplies no pin feedback. `ECMPEM` is initially
-written `3` at `1230`, then explicitly restored to `0` at `12F6` and read back
-at `12FC`, before any status-clear sequence. Its expected value at `132C` is
-therefore `0`, while `ECMEMK0..2` retain `FFFFFFE1,FFFFFFFF,3FFFFFFF`.
+timers `1CA0`, and diagnostics `770`, in that order.
 
-After that prerequisite, the later static boundary `3B3C ->3818` waits for
-`GSTS(FFD2008C).bit3` (CAN RAM initialization) to clear. The device definition
-resets GSTS to `0D`; the inspected machine implements no completion transition
-for that bit. Later still, `35BC ->3584` sends the distinct `8800` record until
-`FFA10000.bit7` permits progress. These are subsequent prerequisites, not
-boundaries reached by the retained downstream fixture.
+**ECM post-reset contract.** The original boundary fixture stops before
+`132C` (`05 0D`, `SST.W r1,8[ep]`), the final protected write committing
+`ECMESSTC2(FFD6203C)=7FFFFFFF`. The preceding command/value/inverse sequence
+is `1322: ECMPCMD1=A5; 1324: ECMESSTC2=7FFFFFFF;
+132A: ECMESSTC2=80000000`. R01UH0585EJ0120 section32.4.23, Table32.37
+(p2825) defines a protected write-one clear of corresponding master **and**
+checker status bits30:0; bit31 is reserved in the clear trigger.
+`ECMMESSTR2` and `ECMCESSTR2` instead expose ERROROUT/ERROROUT_C feedback
+at bit31 (section32.4.6, Table32.20). The machine requires both full status
+values before mutating either, clears only the selected latched bits, and
+preserves both sampled feedback bits. Supplying just one bank is insufficient.
+The new conditional cases supply opposite high/low feedback pairs with
+synthetic latched bit27, then check that the original clear removes bit27
+while preserving each feedback value. Neither feedback polarity is tested by
+this firmware setup routine; both paths continue to `3B3C`.
+`ECMPEM` is initially written `3` at `1230`, restored to `0` at `12F6`,
+and read back at `12FC`, before the clear sequence. `ECMEMK0..2` retain
+`FFFFFFE1,FFFFFFFF,3FFFFFFF`.
+
+**CAN RAM initialization belongs to the peripheral.** `3B3C` calls `3818`
+before changing CAN control/configuration. Exact bytes
+`3818: 80 07 C9 08 01 A4` load `GSTS(FFD2008C)`;
+`381E: 84 0A` shifts four bits, putting original bit3 in carry;
+`3820: C1 FD` branches back while carry is set. There is no counter, delay,
+timeout, fallback, or software RAM-init request in this twelve-byte helper.
+R01UH0585EJ0120 section17.4.4.3, Table17.108 (pp954–955) makes GSTS
+read-only with reset `0D`: bit3 `GRAMINIT`, bit2 `GSLPSTS`, bit1 `GHLTSTS`,
+bit0 `GRSTSTS`. Section17.11.1 (pp1090–1091) specifies autonomous CAN RAM
+initialization after MCU reset, taking **3794 pclk cycles**. Hardware clears
+GRAMINIT on completion. Firmware polls this completion; it does not request it.
+
+The machine has no CAN pclk-to-instruction timebase or autonomous GRAMINIT
+completion. Scheduling completion after3794 **instructions** would substitute
+a different clock. Conditional fixtures
+declare `register-input GSTS=5` either before polling or after100 complete
+three-instruction polling iterations. Only bit3 changes; global reset/stop
+status remains asserted. The permanently busy case spends12000 instructions
+in the original loop and retains `GSTS=0D`, demonstrating bounded software
+execution with no software timeout. These instruction boundaries are synthetic
+device-input schedules, not measured RAM-initialization timing.
+
+**Native CAN transition requests.** From reset control `GCTR=5`, `3824`
+clears `GSLPR`, writes/readbacks `GCTR=1`, synchronizes, and calls `7208(8)`.
+If already out of stop and operating, its alternate path requests global
+reset (`GMDC=01`); an already nonzero mode returns unchanged.
+`3918(channel)` clears `CmCTR.CSLPR`, synchronizes, and delays with `7208(8)`.
+Only channel1 is enabled by the original table at `8978`. The subsequent
+configuration follows the manual's Figure17.16: buffer/rule initialization,
+`3908` writes/readbacks `GRMCFG=1` (CAN FD map), then global/timing
+configuration, receive rules, FIFOs and interrupts. Finally,
+`3AD6` clears `GCTR.GMDC[1:0]` and calls `7208(1)`, and `3AF4` clears
+channel1 `CHMDC[1:0]` and calls `7208(10h)`. These final operations request
+global operating and channel communication modes. They read back controls,
+not status; no GSTS/CmSTS completion acknowledgement is polled after `3818`.
+The retained machine scenarios check these original control writes and the
+software initialization flags. They do not inject status0 or claim that the
+model has completed physical CAN mode transitions.
+
+**Manual-backed register coverage.** Original `386C` first writes
+`FFD20500`, which is channel0 **DCFG in CAN FD mode**, not a RAM-init
+request (Table17.89, p916; section17.4.3.5, Table17.99). The offsets
+`0500/0504/0508/050C +20h*m` identify DCFG/FDCFG/FDCTR/FDSTS in that map;
+the same addresses alias Classical CAN receive-rule words when `GRMCFG=0`
+(section17.2.2; Tables17.17,17.94). Original `386C` writes zero at these
+offsets before `3908` requests the FD map, and also clears
+all48 Tx records at `4000..45FF`, and sixteen receive-rule windows at
+`1000..10FF`, relative to `FFD20000`. The device description now declares
+these exact registers and the subsequent GRMCFG, GAFLECTR/GAFLCFG0, GFDCFG,
+RMNB, RFCC0..7, CFCC0..8, TMIEC0/1 and CAN1 NCFG configuration words.
+These are manual RW32 registers with their documented8/16/32-bit aliases;
+new configuration storage resets to zero. No encompassing MMIO RAM region is
+added. Existing Tx aliases retain their identities.
+
+Configuration and Classical CAN aliases remain storage. FDCTR/FDSTS side
+effects apply only when `GRMCFG.RCMC=1`, explicitly selected by focused tests.
+Table17.103 (p942) defines self-clearing SOCCLR1/EOCCLR0 requests that clear
+only SOC31:24/EOC23:16 respectively and read zero; Table17.104 (pp943–944)
+makes FDSTS flags9:7 write-zero-clear while counters31:16 and result6:0
+remain read-only. The primary machine and native host replay implement these
+same rules, including partial-width writes. No counter increment, CAN bus
+result, RAM-init completion, or mode-status transition is synthesized.
+Focused original-store fixtures and host test vectors cover independent and
+combined counter clears, selective flag clear, and zero preserving counters.
+The direct `386C` fixture checks all48 Tx records and16 filter entries and
+that its zero FDCTR/FDSTS writes preserve supplied counters/results under an
+explicit CAN FD entry-map precondition. The Classical alias control case
+checks ordinary storage at the same address without applying FD W0C rules.
+
+**Next physical input: FLMD0.** The downstream fixture targets `35B2`,
+immediately before `C1 FF 00 00` (`TST1 7,0[r1]`, with `r1=FFA10000`)
+first reads `FPMON.FWE`. At this static checkpoint `35BC` has cleared38
+driver-state bytes and initialized its two bookkeeping bytes; `3584` branches
+directly to the pin test before sending anything. R01UH0615EJ0120
+section4.1, Table4.1 (p9)
+defines an8-bit read-only monitor: bit7 follows FLMD0, reset value `X0H`;
+zero disables CodeFlash P/E entry, one enables it. The manual supplies no
+reset-high value or peer-to-pin response timing. No high input is supplied.
+With an explicitly synthetic low sample, `35B6` branches to `358A`,
+constructs `8800,0000,F000,1F00`, calls the native seven-byte CRC/submit
+helper `167C` (resulting record `8800,0000,F000,1F78`), then calls
+`7208(50h)` before testing again. There is no timeout in this loop either.
+The low-input fixture stops at `35AA` before that first delay and supplies
+no further CSIH1 wire completions.
+
+#### Conditional boot-initialization scenarios
+
+Fourteen standalone `camry_f33_boot_init_*.json` scenarios reuse the proven
+eight-word synthetic boot-reply construction and bounded128-byte caller stack
+where they enter at `1398`; direct polling cases enter original helper `3818`.
+Focused FD side-effect cases execute the original `SST.W` at `132C` with an
+explicit synthetic target address, not an ECM caller context. The storage-clear
+case enters original `386C`. All fourteen passed exact-image execution in
+`build/out/firmware-question-campaign/boot-init-wave3`.
+
+| Fixture suffix | Conditional software boundary |
+| --- | --- |
+| `ecm_master_high_checker_low`, `ecm_master_low_checker_high` | Both status banks clear latched bit27, preserve opposite feedback values, and reach `3B3C` |
+| `can_ram_busy_no_timeout` | Permanent busy input exhausts the instruction budget in original polling, with no CAN control write |
+| `can_ram_complete_before_poll` | Supplied completion permits immediate native return |
+| `can_ram_complete_after_busy` | Supplied completion after100 poll iterations permits native return |
+| `accepted_reply_to_fpmon_input` | Accepted reply, ECM clear and original CAN configuration reach the first unsupplied physical FWE read at `35B2` |
+| `fpmon_low_submits_8800` | Explicit low FWE sample takes the original CRC/submit path and reaches `35AA` |
+| `fd_clear_success_counter`, `fd_clear_error_counter`, `fd_clear_both_counters` | Original word-store exercises Table17.103 requests; overflow flags and TDCR remain unchanged |
+| `fd_status_selective_w0c`, `fd_status_zero_preserves_counters` | Original word-store exercises Table17.104 flag clears with read-only counters/results retained |
+| `original_clear_all_can_storage` | Original `386C` clears all documented Tx/rule words and only writable FD status flags |
+| `classical_alias_is_storage` | Original word-store in the reset-selected Classical map does not apply FD status side effects |
+
+```sh
+tools/rh850 test firmware camry-8965F3307000 \
+  tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_boot_init_*.json
+```
+
+Physical continuation requires the actual ECM master/checker feedback,
+reset-relative CAN pclk/init completion, and a time-correlated CSIH1/FLMD0
+capture establishing whether and when the `8800` request changes the pin.
+The conditional inputs, native software requests, and unsupplied pin transition
+are separate evidence boundaries.
 
 #### Retained conditional boot-reply scenarios
 

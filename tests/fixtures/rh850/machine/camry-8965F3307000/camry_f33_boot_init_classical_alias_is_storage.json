@@ -1,0 +1,49 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_boot_init_classical_alias_is_storage",
+  "entry": {
+    "role": "original-sst-word-with-classical-can-rule-alias",
+    "scope": "resolved-address",
+    "address": "0x132c"
+  },
+  "reset": "none",
+  "max_instructions": 4,
+  "gpr_fill": "0x0",
+  "registers": {
+    "ep": "0xffd20504",
+    "r1": "0x280"
+  },
+  "stop_addresses": [
+    "0x132e"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xffd2050c",
+      "hex": "ff03bbaa",
+      "evidence": "Synthetic Classical CAN GAFLP1_0 storage canary at the FDSTS address alias; GRMCFG reset0 selects the Classical register map (section17.2.2, Table17.17). Original SST.W uses synthetic ep/r1."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Original native checkpoint",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x132e"
+    },
+    {
+      "name": "Classical alias stores the written word without FD W0C",
+      "kind": "memory",
+      "address": "0xffd2050c",
+      "size": 4,
+      "equals_hex": "80020000"
+    },
+    {
+      "name": "Classical interface remains selected",
+      "kind": "memory",
+      "address": "0xffd204fc",
+      "size": 4,
+      "equals_hex": "00000000"
+    }
+  ]
+}

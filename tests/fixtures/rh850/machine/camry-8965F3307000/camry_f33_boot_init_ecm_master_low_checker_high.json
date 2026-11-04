@@ -1,0 +1,148 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_boot_init_ecm_master_low_checker_high",
+  "entry": {
+    "role": "retained-original-boot-init-conditional-ecm-feedback",
+    "scope": "resolved-address",
+    "address": "0x1398"
+  },
+  "reset": "none",
+  "max_instructions": 200000,
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebf9800",
+    "tp": "0x869c",
+    "lp": "0x798",
+    "PSW": "0x18020",
+    "PMR": "0xffff"
+  },
+  "stop_addresses": [
+    "0x3b3c"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1f80",
+      "size": 128,
+      "fill": 165,
+      "evidence": "Synthetic bounded boot caller stack; no blanket RAM preload."
+    }
+  ],
+  "events": [
+    {
+      "kind": "register-input",
+      "register": "ECMMESSTR2",
+      "value": "0x8000000",
+      "after_instructions": 0,
+      "evidence": "Explicit synthetic post-reset ECM status: bit27 latched field-BIST status and bit31 sampled pin feedback; R01UH0585EJ0120 Tables32.20,32.37. No external line observation."
+    },
+    {
+      "kind": "register-input",
+      "register": "ECMCESSTR2",
+      "value": "0x88000000",
+      "after_instructions": 0,
+      "evidence": "Explicit synthetic post-reset ECM status: bit27 latched field-BIST status and bit31 sampled pin feedback; R01UH0585EJ0120 Tables32.20,32.37. No external line observation."
+    },
+    {
+      "kind": "csih-word",
+      "unit": 1,
+      "after_transmit_words": 1,
+      "delay_instructions": 128,
+      "value": "0xdead",
+      "evidence": "Explicit synthetic completed wire word; no captured boot ASIC reply or inferred serial timing."
+    },
+    {
+      "kind": "csih-word",
+      "unit": 1,
+      "after_transmit_words": 2,
+      "delay_instructions": 128,
+      "value": "0xbeef",
+      "evidence": "Explicit synthetic completed wire word; no captured boot ASIC reply or inferred serial timing."
+    },
+    {
+      "kind": "csih-word",
+      "unit": 1,
+      "after_transmit_words": 3,
+      "delay_instructions": 128,
+      "value": "0x1234",
+      "evidence": "Explicit synthetic completed wire word; no captured boot ASIC reply or inferred serial timing."
+    },
+    {
+      "kind": "csih-word",
+      "unit": 1,
+      "after_transmit_words": 4,
+      "delay_instructions": 128,
+      "value": "0x5678",
+      "evidence": "Explicit synthetic completed wire word; no captured boot ASIC reply or inferred serial timing."
+    },
+    {
+      "kind": "csih-word",
+      "unit": 1,
+      "after_transmit_words": 5,
+      "delay_instructions": 128,
+      "value": "0x6400",
+      "evidence": "Explicit synthetic completed wire word; no captured boot ASIC reply or inferred serial timing."
+    },
+    {
+      "kind": "csih-word",
+      "unit": 1,
+      "after_transmit_words": 6,
+      "delay_instructions": 128,
+      "value": "0x1",
+      "evidence": "Explicit synthetic completed wire word; no captured boot ASIC reply or inferred serial timing."
+    },
+    {
+      "kind": "csih-word",
+      "unit": 1,
+      "after_transmit_words": 7,
+      "delay_instructions": 128,
+      "value": "0xf000",
+      "evidence": "Explicit synthetic completed wire word; no captured boot ASIC reply or inferred serial timing."
+    },
+    {
+      "kind": "csih-word",
+      "unit": 1,
+      "after_transmit_words": 8,
+      "delay_instructions": 128,
+      "value": "0x38",
+      "evidence": "Explicit synthetic completed wire word; no captured boot ASIC reply or inferred serial timing."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Original native checkpoint",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x3b3c"
+    },
+    {
+      "name": "Master status clear preserves sampled ERROROUT",
+      "kind": "memory",
+      "address": "0xffd60010",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "Checker status clear preserves sampled ERROROUT_C",
+      "kind": "memory",
+      "address": "0xffd61010",
+      "size": 4,
+      "equals_hex": "00000080"
+    },
+    {
+      "name": "ECM protection accepted original clear sequence",
+      "kind": "memory",
+      "address": "0xffd62044",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "CAN remains in reset and stop before initialization",
+      "kind": "memory",
+      "address": "0xffd20088",
+      "size": 4,
+      "equals_hex": "05000000"
+    }
+  ]
+}

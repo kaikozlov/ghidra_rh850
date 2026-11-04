@@ -1,0 +1,2024 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_boot_init_original_clear_all_can_storage",
+  "entry": {
+    "role": "original-boot-can-storage-initialization-and-status-clear",
+    "scope": "resolved-address",
+    "address": "0x386c"
+  },
+  "reset": "none",
+  "max_instructions": 5000,
+  "gpr_fill": "0x0",
+  "registers": {
+    "lp": "0x798"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xffd204fc",
+      "hex": "01000000",
+      "evidence": "Explicit synthetic CAN FD entry map for original386C status-preservation test; section17.2.2 and Table17.94."
+    },
+    {
+      "address": "0xffd20088",
+      "hex": "01000000",
+      "evidence": "Explicit synthetic entry precondition: caller3824 has requested global reset and left global stop."
+    },
+    {
+      "address": "0xffd24000",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 0 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24004",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 1 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24008",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 2 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2400c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 3 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24010",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 4 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24014",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 5 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24018",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 6 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2401c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 7 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24020",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 8 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24024",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 9 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24028",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 10 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2402c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 11 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24030",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 12 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24034",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 13 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24038",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 14 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2403c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 15 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24040",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 16 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24044",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 17 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24048",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 18 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2404c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 19 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24050",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 20 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24054",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 21 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24058",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 22 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2405c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 23 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24060",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 24 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24064",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 25 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24068",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 26 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2406c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 27 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24070",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 28 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24074",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 29 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24078",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 30 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2407c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 31 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24080",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 32 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24084",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 33 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24088",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 34 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2408c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 35 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24090",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 36 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24094",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 37 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24098",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 38 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2409c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 39 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd240a0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 40 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd240a4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 41 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd240a8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 42 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd240ac",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 43 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd240b0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 44 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd240b4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 45 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd240b8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 46 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd240bc",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 47 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd240c0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 48 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd240c4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 49 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd240c8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 50 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd240cc",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 51 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd240d0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 52 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd240d4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 53 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd240d8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 54 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd240dc",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 55 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd240e0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 56 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd240e4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 57 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd240e8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 58 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd240ec",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 59 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd240f0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 60 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd240f4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 61 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd240f8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 62 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd240fc",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 63 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24100",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 64 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24104",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 65 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24108",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 66 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2410c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 67 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24110",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 68 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24114",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 69 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24118",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 70 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2411c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 71 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24120",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 72 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24124",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 73 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24128",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 74 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2412c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 75 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24130",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 76 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24134",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 77 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24138",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 78 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2413c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 79 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24140",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 80 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24144",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 81 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24148",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 82 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2414c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 83 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24150",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 84 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24154",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 85 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24158",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 86 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2415c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 87 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24160",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 88 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24164",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 89 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24168",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 90 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2416c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 91 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24170",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 92 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24174",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 93 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24178",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 94 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2417c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 95 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24180",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 96 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24184",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 97 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24188",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 98 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2418c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 99 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24190",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 100 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24194",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 101 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24198",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 102 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2419c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 103 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd241a0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 104 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd241a4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 105 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd241a8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 106 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd241ac",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 107 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd241b0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 108 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd241b4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 109 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd241b8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 110 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd241bc",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 111 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd241c0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 112 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd241c4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 113 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd241c8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 114 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd241cc",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 115 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd241d0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 116 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd241d4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 117 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd241d8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 118 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd241dc",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 119 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd241e0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 120 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd241e4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 121 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd241e8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 122 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd241ec",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 123 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd241f0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 124 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd241f4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 125 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd241f8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 126 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd241fc",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 127 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24200",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 128 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24204",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 129 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24208",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 130 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2420c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 131 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24210",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 132 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24214",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 133 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24218",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 134 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2421c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 135 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24220",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 136 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24224",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 137 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24228",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 138 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2422c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 139 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24230",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 140 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24234",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 141 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24238",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 142 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2423c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 143 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24240",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 144 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24244",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 145 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24248",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 146 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2424c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 147 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24250",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 148 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24254",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 149 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24258",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 150 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2425c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 151 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24260",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 152 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24264",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 153 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24268",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 154 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2426c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 155 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24270",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 156 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24274",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 157 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24278",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 158 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2427c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 159 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24280",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 160 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24284",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 161 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24288",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 162 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2428c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 163 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24290",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 164 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24294",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 165 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24298",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 166 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2429c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 167 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd242a0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 168 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd242a4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 169 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd242a8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 170 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd242ac",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 171 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd242b0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 172 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd242b4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 173 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd242b8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 174 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd242bc",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 175 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd242c0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 176 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd242c4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 177 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd242c8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 178 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd242cc",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 179 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd242d0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 180 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd242d4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 181 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd242d8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 182 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd242dc",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 183 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd242e0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 184 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd242e4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 185 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd242e8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 186 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd242ec",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 187 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd242f0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 188 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd242f4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 189 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd242f8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 190 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd242fc",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 191 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24300",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 192 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24304",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 193 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24308",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 194 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2430c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 195 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24310",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 196 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24314",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 197 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24318",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 198 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2431c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 199 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24320",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 200 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24324",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 201 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24328",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 202 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2432c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 203 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24330",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 204 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24334",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 205 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24338",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 206 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2433c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 207 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24340",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 208 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24344",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 209 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24348",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 210 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2434c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 211 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24350",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 212 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24354",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 213 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24358",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 214 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2435c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 215 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24360",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 216 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24364",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 217 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24368",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 218 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2436c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 219 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24370",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 220 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24374",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 221 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24378",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 222 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2437c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 223 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24380",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 224 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24384",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 225 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24388",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 226 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2438c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 227 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24390",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 228 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24394",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 229 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24398",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 230 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2439c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 231 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd243a0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 232 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd243a4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 233 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd243a8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 234 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd243ac",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 235 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd243b0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 236 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd243b4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 237 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd243b8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 238 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd243bc",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 239 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd243c0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 240 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd243c4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 241 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd243c8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 242 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd243cc",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 243 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd243d0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 244 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd243d4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 245 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd243d8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 246 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd243dc",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 247 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd243e0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 248 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd243e4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 249 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd243e8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 250 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd243ec",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 251 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd243f0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 252 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd243f4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 253 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd243f8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 254 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd243fc",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 255 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24400",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 256 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24404",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 257 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24408",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 258 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2440c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 259 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24410",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 260 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24414",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 261 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24418",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 262 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2441c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 263 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24420",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 264 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24424",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 265 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24428",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 266 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2442c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 267 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24430",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 268 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24434",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 269 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24438",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 270 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2443c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 271 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24440",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 272 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24444",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 273 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24448",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 274 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2444c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 275 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24450",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 276 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24454",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 277 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24458",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 278 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2445c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 279 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24460",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 280 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24464",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 281 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24468",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 282 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2446c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 283 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24470",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 284 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24474",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 285 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24478",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 286 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2447c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 287 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24480",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 288 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24484",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 289 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24488",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 290 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2448c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 291 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24490",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 292 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24494",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 293 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24498",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 294 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2449c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 295 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd244a0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 296 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd244a4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 297 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd244a8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 298 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd244ac",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 299 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd244b0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 300 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd244b4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 301 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd244b8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 302 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd244bc",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 303 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd244c0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 304 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd244c4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 305 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd244c8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 306 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd244cc",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 307 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd244d0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 308 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd244d4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 309 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd244d8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 310 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd244dc",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 311 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd244e0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 312 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd244e4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 313 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd244e8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 314 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd244ec",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 315 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd244f0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 316 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd244f4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 317 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd244f8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 318 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd244fc",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 319 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24500",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 320 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24504",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 321 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24508",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 322 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2450c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 323 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24510",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 324 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24514",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 325 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24518",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 326 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2451c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 327 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24520",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 328 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24524",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 329 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24528",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 330 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2452c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 331 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24530",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 332 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24534",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 333 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24538",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 334 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2453c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 335 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24540",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 336 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24544",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 337 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24548",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 338 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2454c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 339 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24550",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 340 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24554",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 341 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24558",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 342 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2455c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 343 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24560",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 344 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24564",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 345 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24568",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 346 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2456c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 347 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24570",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 348 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24574",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 349 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24578",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 350 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2457c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 351 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24580",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 352 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24584",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 353 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24588",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 354 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2458c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 355 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24590",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 356 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24594",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 357 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd24598",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 358 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd2459c",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 359 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd245a0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 360 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd245a4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 361 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd245a8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 362 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd245ac",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 363 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd245b0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 364 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd245b4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 365 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd245b8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 366 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd245bc",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 367 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd245c0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 368 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd245c4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 369 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd245c8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 370 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd245cc",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 371 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd245d0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 372 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd245d4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 373 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd245d8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 374 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd245dc",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 375 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd245e0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 376 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd245e4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 377 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd245e8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 378 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd245ec",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 379 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd245f0",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 380 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd245f4",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 381 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd245f8",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 382 of exactly48 documented Tx records; original386C must clear every word."
+    },
+    {
+      "address": "0xffd245fc",
+      "hex": "a5a5a5a5",
+      "evidence": "Bounded synthetic per-register canary: word 383 of exactly48 documented Tx records; original386C must clear every word."
+    }
+  ],
+  "events": [
+    {
+      "kind": "register-input",
+      "register": "C0FDSTS",
+      "value": "0xaabb03ff",
+      "after_instructions": 0,
+      "evidence": "Explicit synthetic counters/result and W0C flags; original386C writes zero FDCTR and FDSTS. Tables17.103-17.104."
+    },
+    {
+      "kind": "register-input",
+      "register": "C1FDSTS",
+      "value": "0xaabb03ff",
+      "after_instructions": 0,
+      "evidence": "Explicit synthetic counters/result and W0C flags; original386C writes zero FDCTR and FDSTS. Tables17.103-17.104."
+    },
+    {
+      "kind": "register-input",
+      "register": "C2FDSTS",
+      "value": "0xaabb03ff",
+      "after_instructions": 0,
+      "evidence": "Explicit synthetic counters/result and W0C flags; original386C writes zero FDCTR and FDSTS. Tables17.103-17.104."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Original native checkpoint",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Original routine clears exactly48 complete Tx records",
+      "kind": "memory",
+      "address": "0xffd24000",
+      "size": 1536,
+      "equals_hex": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "name": "Original routine clears16 complete receive-rule windows",
+      "kind": "memory",
+      "address": "0xffd21000",
+      "size": 256,
+      "equals_hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "name": "Original routine disables rule-table write enable",
+      "kind": "memory",
+      "address": "0xffd20098",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "CAN0 original zero status write preserves read-only counters/result",
+      "kind": "memory",
+      "address": "0xffd2050c",
+      "size": 4,
+      "equals_hex": "7f00bbaa"
+    },
+    {
+      "name": "CAN1 original zero status write preserves read-only counters/result",
+      "kind": "memory",
+      "address": "0xffd2052c",
+      "size": 4,
+      "equals_hex": "7f00bbaa"
+    },
+    {
+      "name": "CAN2 original zero status write preserves read-only counters/result",
+      "kind": "memory",
+      "address": "0xffd2054c",
+      "size": 4,
+      "equals_hex": "7f00bbaa"
+    }
+  ]
+}

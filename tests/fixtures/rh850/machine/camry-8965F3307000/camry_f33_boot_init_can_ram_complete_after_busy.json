@@ -1,0 +1,50 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_boot_init_can_ram_complete_after_busy",
+  "entry": {
+    "role": "retained-original-can-ram-initialization-poll",
+    "scope": "resolved-address",
+    "address": "0x3818"
+  },
+  "reset": "none",
+  "max_instructions": 320,
+  "gpr_fill": "0x0",
+  "registers": {
+    "lp": "0x798"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "events": [
+    {
+      "kind": "register-input",
+      "register": "GSTS",
+      "value": "0x5",
+      "after_instructions": 300,
+      "evidence": "Explicit synthetic CAN RAM-init completion snapshot, preserving GSLPSTS/GRSTSTS. Manual section17.11.1 specifies 3794 pclk cycles after MCU reset; this instruction boundary is a conditional input, not a pclk timing claim."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Original native checkpoint",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Only GRAMINIT clears; global reset and stop remain",
+      "kind": "memory",
+      "address": "0xffd2008c",
+      "size": 4,
+      "equals_hex": "05000000"
+    },
+    {
+      "name": "Polling does not issue a global mode or RAM-init request",
+      "kind": "memory",
+      "address": "0xffd20088",
+      "size": 4,
+      "equals_hex": "05000000"
+    }
+  ]
+}
