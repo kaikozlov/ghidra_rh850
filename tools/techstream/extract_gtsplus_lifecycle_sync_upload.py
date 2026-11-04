@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Extract pinned offline DataSync, proxy and ActionTool lifecycle evidence."""
+"""Extract pinned DataSync queue recovery, crash ordering, proxy and ActionTool evidence."""
 from __future__ import annotations
 
 import argparse
@@ -111,6 +111,57 @@ METHODS = [
     ('action_error_map', 'action', 0x363c, ['switch', '0x100', '0x900', 'ldc.i4.8'], 'Communication results0..5 map to result-error0,3,4,5,6,7; remaining listed/unknown statuses map to8.'),
 ]
 
+# Keep complete instruction streams for queue ordering, including compiler closures.
+# RVAs are authenticated by COMPONENTS; no business-logic transcription is executed.
+QUEUE_METHODS = {
+    'queue_model': 0x3f98, 'queue_configure': 0x3f40,
+    'queue_database_init': 0x2f90, 'queue_controller_init': 0x2a44,
+    'queue_migration_sql': 0x312f, 'queue_user_version_get': 0x4b08,
+    'queue_user_version_set': 0x4b15, 'queue_sql_execute': 0x4b74,
+    'queue_migrate': 0x6104, 'queue_move': 0x5f18,
+    'queue_insert': 0x5f74, 'queue_original_hash': 0x6030,
+    'queue_compress': 0x7c98, 'queue_gzip': 0x4448,
+    'queue_zstd': 0x4bcc, 'queue_compression_status': 0x70cd,
+    'queue_gzip_path': 0x44c0, 'queue_zstd_path': 0x4cb8,
+    'queue_validate_steps': 0x705c, 'queue_validate': 0x79d0,
+    'queue_validated_commit': 0x7610, 'queue_retry_commit': 0x7710,
+    'queue_operate': 0x6d60, 'queue_receipt': 0x71b8,
+    'queue_receipt_insert': 0x732c, 'queue_receipt_delete': 0x73b0,
+    'queue_receipt_select': 0x721c, 'queue_receipt_match': 0x72a0,
+    'queue_receipt_order': 0x9f13, 'queue_destination_order': 0x9f01,
+    'queue_receipt_predicate': 0xa15c, 'queue_receipt_trim': 0x8330,
+    'queue_duplicate': 0x7c24, 'queue_tampering': 0x7b40,
+    'queue_md5_file': 0x35cc, 'queue_md5_text': 0x3668,
+    'queue_ack_cleanup': 0x7800, 'queue_error_cleanup': 0x7838,
+    'queue_delete_files': 0x78ed, 'queue_evacuate': 0x7918,
+    'queue_delete_row': 0x75cc, 'queue_backlog': 0x6a70,
+    'queue_extract': 0x6c84, 'queue_missing': 0xa00c,
+    'queue_remove_missing': 0x9f43, 'queue_due_or_orphan': 0x9f54,
+    'queue_original_missing_predicate': 0xa06b,
+    'queue_original_match_predicate': 0xa088,
+    'queue_compressed_match_predicate': 0xa0a5,
+    'queue_live': 0x821c, 'queue_start': 0x66dc,
+    'queue_disposal_lock': 0x55b8, 'queue_disposal': 0x9694,
+    'queue_wait': 0x32b4, 'queue_wait_cancel': 0x3310,
+    'queue_release': 0x84f2, 'queue_heartbeat': 0x2ee8,
+    'queue_task_initialize': 0x516a,
+    'queue_history_insert': 0x5c38, 'queue_history_update': 0x5cc0,
+}
+
+EF_RECEIPT_METHODS = {
+    'ef_dbset_add': 0x4c745, 'ef_context_add': 0x3f59,
+    'ef_context_entry_state': 0x4050, 'ef_context_set_state': 0x3ece,
+    'ef_graph_attach': 0x57109, 'ef_graph_paint': 0x5716c,
+    'ef_entry_set_state': 0x57c60, 'ef_entry_track_state': 0x57dd4,
+    'ef_start_tracking': 0x62778, 'ef_identity_map_lookup': 0x625d4,
+    'ef_identity_key_type': 0x57bc5, 'ef_identity_factory': 0x57b68,
+    'ef_nullable_factory': 0x7759d, 'ef_is_nullable_type': 0x25f8,
+    'ef_key_factory': 0x59f30, 'ef_composite_factory': 0x5a030,
+    'ef_composite_current': 0x56741, 'ef_composite_entry': 0x567f0,
+    'ef_composite_values': 0x566c7, 'ef_composite_null_predicate': 0x76d57,
+    'ef_nullable_add': 0x5b5ec, 'ef_find_null_property': 0x5676c,
+}
+
 
 def _id(value: str) -> str:
     return f'{DOMAIN}.{value}'
@@ -151,6 +202,79 @@ def _redacted_policy(data: bytes) -> list[str]:
         elif previous == 'extensions' and re.fullmatch(r'\s*-\s+[.A-Za-z0-9*_-]+\s*', line):
             result.append(line.rstrip())
     return result
+
+
+def _queue_contract() -> dict[str, Any]:
+    """Source-order contract; prefixes assume completed calls survived the interruption."""
+    def item(prefix: str, remaining: str, recovery: str, *refs: str) -> dict[str, Any]:
+        return {'prefix': prefix, 'remaining_state': remaining,
+                'restart_or_next_scan': recovery, 'evidence': [_id(r) for r in refs]}
+
+    return {
+        'identity': {
+            'queue_key': 'process_info.id INTEGER PRIMARY KEY AUTOINCREMENT; original is work_directory/decimal(id). Filename, destination, content and unit_id are not queue uniqueness constraints.',
+            'migration_input': 'FileInfo plus configured destination from initial scan/Created event. No persistent discovery record or enqueue deduplication; a repeated stale discovery can insert a row before MoveTo fails.',
+            'receipt_key': '(original_hash_value,destination), both NOT NULL, primary key; no unit_id, original filename, compression format or request identifier in duplicate identity.',
+            'null_receipt_failure': 'Bundled EF Core 2.2.4.0 rejects NULL OriginalHashValue during DbSet.Add tracking, before SaveChanges/SQLite: composite key factory returns null when any component is null; NullableKeyIdentityMap.Add throws InvalidOperationException using InvalidKeyValue. SQLite NOT NULL is an additional independent constraint, not the first application failure.',
+            'null_receipt_evidence': [_id(x) for x in ('queue_model', 'queue_receipt_insert', 'ef_dbset_add', 'ef_context_add', 'ef_context_entry_state', 'ef_context_set_state', 'ef_graph_attach', 'ef_graph_paint', 'ef_entry_set_state', 'ef_entry_track_state', 'ef_start_tracking', 'ef_identity_map_lookup', 'ef_identity_key_type', 'ef_identity_factory', 'ef_nullable_factory', 'ef_is_nullable_type', 'ef_key_factory', 'ef_composite_factory', 'ef_composite_current', 'ef_composite_entry', 'ef_nullable_add', 'ef_find_null_property')],
+            'hash_input': 'lowercase hex MD5(UTF8(lowercase hex MD5(original bytes) + LOCAL salt)); salts are not exported. Compressed integrity uses the same construction over compressed bytes; receipt uses original_hash_value.',
+            'receipt_window': 'SelectHashInfo orders UpdatedAt ascending then filters destination. AddHashValue deletes the oldest only when count == limit, commits that deletion separately, then inserts receipt separately. Startup trims while count > limit. Equal UpdatedAt has no secondary ordering. Captured policy limit=100 per destination.',
+            'duplicate_path': 'Duplicate validation reads persisted original_hash_value, not newly computed content hash. A receipt hit enters validation-error disposal, without another upload. Receipt tracking is conditional on DoubleTransmissionValidation.DoValidation.',
+            'derivative_identity': 'Decimal-id originals have no extension: gzip appends .gz, Zstandard appends .zst. Recorded compressed_file_path owns a derivative only by exact full-path string; orphan matching does not infer ownership from an id prefix.',
+            'evidence': [_id(x) for x in ('database_schema', 'queue_migrate', 'queue_receipt', 'queue_receipt_trim', 'queue_receipt_order', 'queue_receipt_predicate', 'queue_duplicate', 'queue_md5_file', 'queue_md5_text', 'queue_validate', 'queue_gzip_path', 'queue_zstd_path', 'queue_compressed_match_predicate')],
+        },
+        'transactions': {
+            'unit': 'Each helper creates/disposes its own DatabaseContext and calls SaveChanges. Insert metadata, original hash, validation/compressed metadata, retry, receipt eviction, receipt insertion and process deletion are separate calls/contexts. No enclosing explicit application transaction joins them to files or HTTP.',
+            'files': 'MoveTo/Create/Delete and compression are outside SQLite SaveChanges. Gzip opens original Open/Read/FileShare.Read and destination FileMode.Create, CopyTo then disposes gzip/destination/original streams. Zstd also creates/truncates destination before compression and disposes streams. Neither uses temp+rename or explicit Flush(true).',
+            'schema_upgrade': 'Embedded USER_VERSION_1 = ALTER TABLE process_info ADD COLUMN retry_schedule datetimeoffset. InitializeDatabase calls EnsureCreated first. Existing lower user_version exits without DoMigration; equal accepted, greater throws. New file gets latest version1 via separate PRAGMA. DoMigration closure executes SQL then version PRAGMA separately; InitializeDatabase never invokes it.',
+            'durability_limit': 'Completed-call ordering only. EF provider commit/rollback, filesystem rename semantics, disk caches, torn writes and power-loss durability are external. Captured SQLite PRAGMAs describe the opened snapshot, not service connection settings.',
+            'evidence': [_id(x) for x in ('queue_insert', 'queue_original_hash', 'queue_validated_commit', 'queue_retry_commit', 'queue_receipt_delete', 'queue_receipt_insert', 'queue_delete_row', 'queue_gzip', 'queue_zstd', 'queue_database_init', 'queue_migration_sql', 'embedded_migration_sql')],
+        },
+        'persisted_vs_memory': {
+            'persisted': ['id/destination/unit_id/original name+extension', 'original/compressed hashes and compressed path', 'is_validated', 'is_retryable', 'retry_schedule', 'request_attempts', 'audit timestamps', 'bounded receipt window', 'logging_history System row'],
+            'memory_only': ['migration/transmission BlockingCollection queues', 'shared cancellation token', 'StopExecute', 'MSK cached string/status', 'taskStatus', 'timer/connectivity registrations', 'active request and its returned result'],
+            'restart': 'Controller constructs fresh queues/token/semaphore. Transmission backlog reconciliation runs before monitoring initial discovery. Original hash is set only by migration worker; backlog does not reconstruct a missing hash. Retryable rows bypass age disposal indefinitely; retry_schedule remains the due gate after restart. Live queued items reselect id under semaphore and skip deleted rows, but do not recheck retry_schedule before OperateFile.',
+            'retry_limit_prefix': 'Retry schedule/is_retryable/attempt count are saved before testing MaxAttempts and terminal cleanup. If interruption follows that save at the limit, restart still selects the due row and can issue another request: there is no pre-request attempt-limit gate. HTTP401 does not increment attempts.',
+            'live_backlog_overlap': 'A live queue hint can wait while backlog processes the same row first. If backlog saves a future retry_schedule, the later live worker reselects that row but ignores the due time and can send immediately. Semaphore prevents simultaneous normal requests, not this sequential retry-schedule bypass.',
+            'evidence': [_id(x) for x in ('queue_controller_init', 'queue_start', 'queue_live', 'queue_retry_commit', 'queue_operate', 'queue_disposal', 'queue_due_or_orphan')],
+        },
+        'coordination': {
+            'normal': 'Controller passes one SemaphoreSlimWrapper(1,1) to migration, transmission and disposal. Migration holds it across insert/move/hash/enqueue; live transmission across fresh-row selection and all OperateFile work; backlog across reconciliation and every destination/request; disposal across the entire selected batch. Thus slow synchronous HTTP blocks all these normal holders.',
+            'triggers': 'Timer and connectivity callback and manual ds_send call the same blocking OperateAccumulatedFiles. Timer Stop/Start reduces its own overlap, not other callbacks. Backlog waits without CancellationToken; cancellation checked per eligible item after reconciliation. Watcher discovery only enqueues, without semaphore, and initial scan precedes enabling Created notifications. Heartbeat checks taskStatus without queue recovery transaction.',
+            'exceptional_wait': 'Both ReleasableWait overloads swallow OperationCanceledException/ObjectDisposedException and return a wrapper with isReleasable=false. Callers do not test acquisition and continue into their critical section. Mutual exclusion therefore is not guaranteed after cancelled/disposed Wait; Dispose only releases when isReleasable=true.',
+            'heartbeat_limit': 'AbstractBaseTask.Initialize only calls StartProcess and logs. Transmission.StartProcess stores taskStatus=1 before IPC registration/backlog/timer/connectivity/worker setup; its catch disposes rest/network clients without resetting status. A setup failure after that store is not repaired by the heartbeat status==0 test.',
+            'limits': 'No file readiness/close handshake from Created notification, no atomic initial-scan/watch handoff, no cross-process filesystem/DB lock in this queue protocol. Actual callback scheduling, writer readiness and OS cross-volume MoveTo behavior remain external. StopExecute/MSK reset and unsent-count queries are not protected by the queue semaphore in AppCommunicationCallback.',
+            'evidence': [_id(x) for x in ('queue_controller_init', 'queue_migrate', 'queue_live', 'queue_backlog', 'queue_disposal_lock', 'queue_wait', 'queue_wait_cancel', 'queue_release', 'queue_heartbeat', 'watch_start', 'watch_enqueue', 'ipc_messages')],
+            'order_evidence': [_id(x) for x in ('queue_destination_order', 'queue_task_initialize', 'queue_start', 'queue_heartbeat')],
+        },
+        'crash_prefix_matrix': [
+            item('EnsureCreated succeeded for a new database, before version PRAGMA', 'Schema may exist with default user_version0.', 'Next startup sees an existing lower-version file and exits InitializeDatabase without migration or version repair. Existing lower-version schema is likewise not upgraded by this method.', 'queue_database_init', 'queue_user_version_set', 'embedded_migration_sql'),
+            item('Discovered/enqueued only', 'Source remains in watch root; in-memory work can vanish.', 'Next monitoring initial scan rediscovers source. Scan-to-enable gap can miss a newly created file until a later monitor restart.', 'watch_start', 'watch_enqueue'),
+            item('InsertProcessInfo SaveChanges, before successful MoveTo', 'Row without work/id, source may remain; move failure leaves row.', 'Backlog deletes missing-original row; monitoring rescans source and allocates another id. A partial external move outcome is outside managed ordering.', 'queue_insert', 'queue_move', 'queue_missing'),
+            item('MoveTo succeeded, before original-hash SaveChanges', 'work/id + row with NULL original_hash_value.', 'Backlog accepts original by decimal name, does not rehash row. Fresh validation has no tampering check; duplicate query for NULL misses receipts. After successful request, EF Core NullableKeyIdentityMap.Add rejects the null receipt primary-key component with InvalidOperationException during DbSet.Add, before SaveChanges or SQL; cleanup is skipped. Subsequent validated-original tampering check compares computed hash to NULL and disposes. These are source-derived branches, not an observed service outcome.', 'queue_move', 'queue_original_hash', 'queue_validate_steps', 'queue_validate', 'queue_receipt_insert', 'queue_model', 'ef_nullable_add', 'ef_composite_entry', 'queue_tampering', 'queue_operate'),
+            item('Original hash saved, before/during timed TryAdd', 'Durable original+row, queue hint absent; TryAdd boolean discarded.', 'Startup/timer/connectivity/manual backlog recovers by work/id, independent of lost queue hint.', 'queue_migrate', 'queue_due_or_orphan'),
+            item('Compression created/truncated output, before validation metadata SaveChanges', 'Original+row and unrecorded complete/partial suffix file.', 'Reconciliation deletes unreferenced suffix; if operated before orphan pass, FileMode.Create truncates it and compresses anew. No persisted compressed path means no reuse.', 'queue_gzip', 'queue_zstd', 'queue_compression_status', 'queue_due_or_orphan', 'queue_validated_commit'),
+            item('Validation/compressed metadata SaveChanges', 'is_validated flag plus compressed path/hash (nonzero compression); no upload outcome.', 'Reuse recorded existing compression, validate original duplicate+tampering and compressed tampering; missing compressed file recompresses. Missing original deletes row then unreferenced derivative.', 'queue_validated_commit', 'queue_compression_status', 'queue_validate_steps', 'queue_missing', 'queue_due_or_orphan'),
+            item('Request issued or server accepted, before client receipt SaveChanges', 'Files+row remain, remote outcome may be ambiguous; retry metadata may be unchanged.', 'Due backlog can resend: request metadata has no persisted idempotency token, and remote deduplication is unspecified.', 'queue_operate', 'request_body', 'queue_receipt_insert'),
+            item('Oldest receipt DeleteHashInfo SaveChanges, before new receipt insertion', 'Window temporarily shortened, new acknowledged digest absent; payload retained.', 'Oldest forgotten content can pass duplicate validation; current work can resend until a receipt is committed.', 'queue_receipt', 'queue_receipt_delete', 'queue_receipt_insert'),
+            item('New receipt SaveChanges, before any ack file cleanup', 'Receipt+original+optional compressed+row.', 'Next duplicate check invokes validation-error policy rather than HTTP; already-acknowledged original can be evacuated. Receipt primary-key failure also aborts cleanup, because insertion is not upsert.', 'queue_operate', 'queue_receipt_insert', 'queue_duplicate', 'queue_error_cleanup'),
+            item('Ack cleanup deletes compressed, before original delete', 'Receipt+original+row; compressed metadata points to missing file.', 'Duplicate validation precedes compression and disposes the original; disabled duplicate tracking permits recompress/resend.', 'queue_delete_files', 'queue_operate'),
+            item('Ack cleanup deletes original, before process Delete SaveChanges', 'Receipt+row, no original.', 'Backlog deletes row without upload. If row commit fails, next scan repeats reconciliation.', 'queue_ack_cleanup', 'queue_delete_files', 'queue_missing'),
+            item('Retry SaveChanges, before terminal-limit disposal', 'Persisted is_retryable=true/schedule/attempt count, original remains.', 'Age disposal skips row; when due, request can exceed configured maximum because limit checked only after another retry response. Cancel/restart does not clear schedule.', 'queue_retry_commit', 'queue_operate', 'queue_disposal'),
+            item('Live hint remains while backlog commits retry state for same row', 'Future retry_schedule persists, stale in-memory hint still holds row id.', 'Live worker reselects id but bypasses schedule check and may send again immediately; process restart loses hint and returns to due-time backlog gating.', 'queue_live', 'queue_backlog', 'queue_retry_commit'),
+            item('Immediate error evacuation creates id directory/deletes compressed/deletes preexisting target, before original MoveTo', 'Original+row remain; compressed and prior evacuated target may be gone.', 'Reprocess row; replacement has a delete-before-move loss window. Error deletion instead deletes compressed then original before row removal.', 'queue_evacuate', 'queue_delete_files', 'queue_error_cleanup'),
+            item('Immediate error original moved/deleted, before row removal', 'Evacuated original or no original; stale row.', 'Missing-original reconciliation removes row, deletes leftover unreferenced work files; evacuation remains for cleaning.', 'queue_evacuate', 'queue_error_cleanup', 'queue_missing', 'queue_due_or_orphan'),
+            item('Age disposal original moved/deleted, before compressed delete', 'Unlike immediate error path: original handled FIRST, compressed+row remain.', 'Backlog removes row then derivative becomes orphan and is deleted. Direct disposal retry after expiry also deletes compression/row when original missing.', 'queue_disposal', 'queue_missing', 'queue_due_or_orphan'),
+            item('Reconciliation missing-original DeleteProcessInfo SaveChanges, before in-memory list removal/orphan sweep', 'Unreferenced derivative can remain; deleted row absent from database.', 'Next scan deletes work file if no current row owns exact compressed FullName; exception aborts extraction and returns partial eligible list.', 'queue_missing', 'queue_remove_missing', 'queue_due_or_orphan', 'queue_extract'),
+            item('Optional logging work-root MoveTo, before logging_history update/source deletion', 'Watched export exists, old history/source logs can remain.', 'Repeat logging can create duplicate work; optional DSY-D01 absent in deployed policy. logging_history is not a queue receipt.', 'log_package', 'queue_history_update', 'logging_selector'),
+        ],
+        'external_limits': [
+            'Crash prefixes are source-derived reachable states assuming preceding operations completed; they are not crash-injection observations or guarantees of power-loss durability.',
+            'SQLite permits varchar length overflow and arbitrary boolean/integer values absent CHECK constraints; recorded type names are affinity declarations. No foreign keys, extra unique constraints or queue content-dedup index exist in captured schema.',
+            'Remote acceptance, exactly-once semantics and remote hash/idempotency policy require service implementation or authorized fixtures. Client receipt is a local finite history, not remote transaction evidence.',
+            'Actual-IL smoke uses original decoded method instructions with inert logger/config and SQLite/filesystem hooks. Hooks do not prove EF provider behavior or Windows event scheduling.',
+        ],
+    }
 
 
 def build(root: Path = DEFAULT_ROOT, recovered_root: Path = DEFAULT_RECOVERED) -> dict[str, Any]:
@@ -227,6 +351,97 @@ def build(root: Path = DEFAULT_ROOT, recovered_root: Path = DEFAULT_RECOVERED) -
                 raise ValueError('PostAsync overload/cancellation contract drift')
             evidence[-1]['cancellation_contract'] = 'Two-argument PostAsync(uri,content) carries no CancellationToken. Controller cancellation stops queue/backlog iteration, not this in-flight request; request timeout is30000ms, controller abort wait15000ms.'
 
+    ef_path = diagnostics / 'GTSPlus DataSync/Microsoft.EntityFrameworkCore.dll'
+    ef_source = source('ef_core', ef_path, 'installed managed EF Core dependency',
+                       '290e1c3d36f8c5ea61b627206a07bcc109f16852cd57af85e9e66199a3311e29')
+    ef = _open(ef_path)
+    version = ef.net.mdtables.Assembly.rows[0]
+    if (version.MajorVersion, version.MinorVersion, version.BuildNumber, version.RevisionNumber) != (2, 2, 4, 0):
+        raise ValueError('bundled EF Core version drift')
+    assemblies['ef_core'] = ef
+    methods['ef_core'] = {int(m.row.Rva): (type_name(td) + '::' + str(m.row.Name), m.row)
+                          for td in ef.net.mdtables.TypeDef for m in td.MethodList if m.row.Rva}
+    for eid, rva in EF_RECEIPT_METHODS.items():
+        name, row = methods['ef_core'][rva]
+        body = _body(ef, row)
+        base = body.instructions[0].offset
+        evidence.append({'id': _id(eid), 'source': ef_source, 'kind': 'managed-il-complete',
+                         'locator': name, **_method_pin(row, body), 'assembly_version': '2.2.4.0',
+                         'il_offset_origin': 'first instruction = IL_0000',
+                         'instructions': [{'offset': ins.offset - base, 'opcode': str(ins.opcode),
+                                           'operand': _operand(ef, ins.operand, base, str(ins.opcode))}
+                                          for ins in body.instructions],
+                         'exception_regions': [{'kind': h.exception_type,
+                                                'try': [h.try_start, h.try_end],
+                                                'handler': [h.handler_start, h.handler_end]}
+                                               for h in body.exception_handlers]})
+
+    # Complete streams make file/SQL prefixes auditable, not selected-call summaries.
+    pe = assemblies['sync']
+    for eid, rva in QUEUE_METHODS.items():
+        name, row = methods['sync'][rva]
+        body = _body(pe, row)
+        base = body.instructions[0].offset
+        instructions = []
+        for ins in body.instructions:
+            record = {'offset': ins.offset - base, 'opcode': str(ins.opcode),
+                      'operand': _operand(pe, ins.operand, base, str(ins.opcode))}
+            if isinstance(ins.operand, Token):
+                record['token'] = hex(ins.operand.value)
+                target = resolve_token(pe, ins.operand)
+                if isinstance(target, dnfile.mdtable.MethodSpecRow):
+                    target = target.Method.row
+                signature = getattr(target, 'Signature', None)
+                if signature:
+                    record['signature_hex'] = signature.value.hex()
+            instructions.append(record)
+        evidence.append({'id': _id(eid), 'source': _id('sync'), 'kind': 'managed-il-complete',
+                         'locator': name, **_method_pin(row, body),
+                         'il_offset_origin': 'first instruction = IL_0000',
+                         'instructions': instructions,
+                         'exception_regions': [{'kind': h.exception_type,
+                                                'try': [h.try_start, h.try_end],
+                                                'handler': [h.handler_start, h.handler_end]}
+                                               for h in body.exception_handlers]})
+    migration_resources = [r for r in pe.net.resources
+                           if str(r.name) == 'GTSPlusDataSync.Resource.MigrationSql.resources']
+    migration_sql = [{'name': e.name, 'sql': e.value} for e in migration_resources[0].data.entries]
+    if migration_sql != [{'name': 'USER_VERSION_1',
+                          'sql': 'ALTER TABLE process_info ADD COLUMN retry_schedule datetimeoffset'}]:
+        raise ValueError('embedded migration SQL drift')
+    evidence.append({'id': _id('embedded_migration_sql'), 'source': _id('sync'),
+                     'kind': 'managed-resource-sql',
+                     'locator': 'ManifestResource GTSPlusDataSync.Resource.MigrationSql.resources',
+                     'definitions': migration_sql})
+    model_properties = []
+    for mapping in pe.net.mdtables.PropertyMap:
+        owner = type_name(mapping.Parent.row)
+        if not owner.startswith('GTSPlusDataSync.Common.Database.Model.'):
+            continue
+        for prop in mapping.PropertyList:
+            annotations = []
+            for attr in pe.net.mdtables.CustomAttribute:
+                if attr.Parent.row is not prop.row:
+                    continue
+                constructor = attr.Type.row
+                annotation_type = type_name(constructor.Class.row)
+                if annotation_type.startswith('System.ComponentModel.DataAnnotations.'):
+                    entry = {'type': annotation_type, 'blob_hex': attr.Value.value.hex()}
+                    if annotation_type.endswith('.ColumnAttribute'):
+                        blob = attr.Value.value
+                        if blob[:2] != b'\x01\x00' or blob[2] >= 0x80:
+                            raise ValueError('model ColumnAttribute encoding drift')
+                        entry['column_name'] = blob[3:3 + blob[2]].decode('utf-8')
+                    annotations.append(entry)
+            model_properties.append({'owner': owner, 'property': str(prop.row.Name),
+                                     'signature_hex': prop.row.Type.value.hex(),
+                                     'annotations': annotations})
+    evidence.append({'id': _id('queue_model_attributes'), 'source': _id('sync'),
+                     'kind': 'managed-model-metadata',
+                     'locator': 'Database.Model PropertyMap/CustomAttribute tables',
+                     'properties': model_properties,
+                     'finding': 'Source Column(TypeName,Order) and Required attributes; fluent keys/defaults are pinned in queue_model and actual SQL in database_schema.'})
+
     schema_types = {'ECUSendData', 'ECUSendObject', 'ECUResultData', 'ECUResultObject', 'ECUResponseObject', 'VINData', 'RequestBodyEntity', 'ResponseBodyEntity', 'CommonResult'}
     for key in ('common', 'sync'):
         pe = assemblies[key]
@@ -278,10 +493,28 @@ def build(root: Path = DEFAULT_ROOT, recovered_root: Path = DEFAULT_RECOVERED) -
     db_path = root / 'GTSPlusDataSyncDb/GTSPlusDataSync.db'
     db_id = source('captured_db', db_path, 'captured SQLite state, opened read-only')
     with sqlite3.connect(db_path.as_uri() + '?mode=ro', uri=True) as db:
-        tables = [{'table': name, 'sql': sql, 'row_count': db.execute(f'SELECT count(*) FROM "{name}"').fetchone()[0]} for name, sql in db.execute("SELECT name,sql FROM sqlite_master WHERE type='table' AND name IN ('process_info','hash_info','logging_history') ORDER BY name")]
-    if [t['table'] for t in tables] != ['hash_info', 'logging_history', 'process_info']:
+        tables = []
+        for name, sql in db.execute("SELECT name,sql FROM sqlite_master WHERE type='table' ORDER BY name"):
+            tables.append({
+                'table': name, 'sql': sql,
+                'row_count': db.execute(f'SELECT count(*) FROM "{name}"').fetchone()[0],
+                'columns': [list(r) for r in db.execute(f'PRAGMA table_info("{name}")')],
+                'indexes': [list(r) for r in db.execute(f'PRAGMA index_list("{name}")')],
+                'foreign_keys': [list(r) for r in db.execute(f'PRAGMA foreign_key_list("{name}")')],
+            })
+        schema_objects = [{'type': kind, 'name': name, 'table': table, 'sql': sql}
+                          for kind, name, table, sql in db.execute(
+                              'SELECT type,name,tbl_name,sql FROM sqlite_master ORDER BY type,name')]
+        captured_pragmas = {name: db.execute(f'PRAGMA {name}').fetchone()[0]
+                            for name in ('user_version', 'schema_version', 'page_size', 'journal_mode')}
+        sequence = [list(r) for r in db.execute('SELECT name,seq FROM sqlite_sequence')]
+    if [t['table'] for t in tables] != ['hash_info', 'logging_history', 'process_info', 'sqlite_sequence']:
         raise ValueError('queue schema drift')
-    evidence.append({'id': _id('database_schema'), 'source': db_id, 'kind': 'sqlite-schema', 'locator': 'sqlite_master; read-only counts', 'tables': tables, 'finding': 'Captured queue, duplicate receipts and logging history are all empty; schema still records upload progression/retry/compression ownership.'})
+    evidence.append({'id': _id('database_schema'), 'source': db_id, 'kind': 'sqlite-schema',
+                     'locator': 'sqlite_master; table_info/index_list/foreign_key_list; read-only snapshot',
+                     'tables': tables, 'schema_objects': schema_objects,
+                     'captured_pragmas': captured_pragmas, 'sqlite_sequence': sequence,
+                     'finding': 'Complete captured schema including AUTOINCREMENT state and implicit primary-key indexes; varchar lengths are not CHECK constraints. No foreign keys, triggers, views or extra queue dedup index.'})
 
     states = [{'id': _id(key), 'owner': owner, 'meaning': meaning} for key, owner, meaning in [
         ('stopped', 'Windows SCM', 'service not executing'), ('initializing', 'GTSPlusDataSync.exe', 'timer/controller/database/local-policy initialization'), ('watching', 'MonitoringTask', 'destination watchers and initial scans active'), ('discovered', 'MonitoringTask', 'FileInfo+Destination queued in memory'), ('staged', 'MigrationTask/SQLite', 'persistent row with decimal-id original file'), ('eligible', 'TransmissionTask', 'due file and unpaused MSK-valid work'), ('uploading', 'RestClient', 'multipart request outstanding'), ('retry_wait', 'SQLite process_info', 'retry_schedule persisted, is_retryable true'), ('msk_blocked', 'TransmissionTask', 'MSK expired/revoked suspends upload'), ('paused', 'TransmissionTask', 'ending confirmation pauses next work'), ('disposed', 'DataSync tasks', 'original deleted/evacuated, compression removed, row removed'), ('proxy_running', 'GtsPlus-ProxyManager.exe', 'hidden current-user proxy sampler'), ('action_ready', 'ActionTool.exe', 'accepted GTSPlus parent/token and valid encrypted command XML'), ('action_running', 'ActionTool.exe', 'local diagnostic command worker'), ('action_result', 'ActionTool.exe', 'encrypted ECUResultData .rlog output attempted'),
@@ -337,6 +570,7 @@ def build(root: Path = DEFAULT_ROOT, recovered_root: Path = DEFAULT_RECOVERED) -
         {'path_pattern': '<selected inputstem>_<yyyyMMddHHmmss>[(n)].rlog or selected override', 'producer': 'ActionTool RunningPageViewModel', 'consumer': 'local user/export consumer, not established as DataSync input', 'created': 'normal/cancel/error result XML encryption attempted', 'flushed': 'CryptoStream and FileStream disposed; Encrypt false is ignored by caller', 'deleted': 'no result deletion in inspected ActionTool flow', 'evidence': [_id(x) for x in ['action_output', 'action_filename', 'action_envelope']]},
     ]
     return {'schema': 'gtsplus-lifecycle-domain-v1', 'domain': DOMAIN, 'sources': sources, 'evidence': evidence, 'states': states, 'transitions': transitions, 'handoffs': handoffs, 'persistence': persistence,
+        'queue_recovery_contract': _queue_contract(),
         'coverage': {'components': ['GTSPlusDataSync.exe service/controller/Monitoring/Migration/Transmission/Disposal/Cleaning/Logging/RestClient', 'GtsPlus-ProxyManager.exe', 'DiagMessageInput/ActionTool.exe', 'DiagMessageInput/CommonLibrary.dll package envelope', 'offline-decrypted DataSync deployment policy'], 'entrypoints': ['SCM Program.Main/OnStart/OnStop', 'OnTimer', 'Created watcher and initial scan', 'connectivity/timer/live queue workers', 'PF ending/application callbacks', 'ProxyManager Program.Main/timer', 'ActionTool WPF App.OnStartup/OnExit'], 'branches': ['fatal initialization; heartbeat task restart; migration cancellation/error; offline backlog retention; validation/tampering/duplicate; compression reuse; HTTP200/configured retry/status-specific MSK failure/terminal failure; retry delay/attempt count (401 exception); ack cleanup/evacuation/expiry/cleaning; pause/confirm/cancel shutdown; proxy singleton/direct/change; ActionTool parent/token/singleton/input validation/cancel/result-write failure']},
         'artifact_classes': {'queue_metadata': 'SQLite process_info', 'duplicate_receipts': 'SQLite hash_info', 'log_export_history': 'SQLite logging_history', 'upload_originals': 'configured watch roots -> decimal-id work files', 'transport_derivatives': 'Zstandard/GZip', 'local_policy': 'encrypted GTSPlusDataSync.yml + DSP.pp', 'authorization_material': 'LIC/msk paired with PF Env; values never exported', 'cross_user_proxy_handoff': 'encrypted ProxyInformation.csv', 'action_command_package': 'encrypted ECUSendData XML', 'action_result_package': 'encrypted ECUResultData .rlog'},
         'residuals': [{'question': 'Remote receipt durability and server-side MSK/account decisions', 'why_unclosed': 'Offline corpus includes client branch contract, not deployed server implementation or responses; no network/authentication requests made.', 'next_evidence': 'Authorized redacted response fixture/service implementation; offline feed into pinned client classifier.'}, {'question': 'Windows runtime ordering of service/watch/IPC callbacks', 'why_unclosed': 'No Windows CLR/SCM/WinForms runtime in this environment; source/IL checks and offline package decryption do not exercise OS callbacks.', 'next_evidence': 'Bounded offline Windows harness with fixture files and IPC stubs, no real endpoint/device.'}]}

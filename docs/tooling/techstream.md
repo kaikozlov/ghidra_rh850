@@ -4357,6 +4357,8 @@ The folder selector is `0x2E` (`CommonDocuments`).
 recovers the SCM service, local policy, SQLite queue, proxy helper, and
 ActionTool. DataSync starts transmission, migration, monitoring, disposal, and
 cleaning tasks; its heartbeat reinitializes inactive tasks.
+Transmission publishes status 1 before completing startup; its catch retains
+that status, so the heartbeat's inactive-task check does not repair that failure.
 
 Migration commits a `process_info` row before moving the source into
 `Work/<decimal id>`, stores a salted MD5, then queues transmission. Restart
@@ -4365,6 +4367,33 @@ accepts `.json` for GTS-C02/M02 and `.gtsr` for GTS-E02; ActionTool's `.rlog`
 is a separate output. Requests carry multipart `logInfo` JSON and `logFile`.
 HTTP 200 is acknowledged after response deserialization; success records the
 duplicate receipt and deletes the files and queue row.
+
+The artifact includes the SQLite schema and a 19-prefix interruption matrix.
+`InitializeDatabase` returns on the lower-version existing-database branch
+without applying the embedded `retry_schedule` ALTER. Schema creation and
+version-PRAGMA writes are separate operations.
+
+A stop after moving the source but before persisting its original hash leaves
+a nullable hash that backlog recovery does not rebuild. After an HTTP
+acknowledgment, `InsertHashInfo` then fails during **EF tracking**, before
+`SaveChanges`: bundled EF Core 2.2.4.0 rejects the null composite-key component.
+That failure skips acknowledgment cleanup. The receipt key is
+`(OriginalHashValue, Destination)`; a persisted duplicate independently fails
+SQLite's primary-key constraint. Receipt eviction chooses oldest `UpdatedAt`
+only when count equals the configured limit, and deletion/insertion commit
+separately.
+
+Restart has no pre-request maximum-attempt gate; a live-file hint can bypass a
+future backlog retry schedule. Immediate cleanup deletes compression first,
+while age disposal deletes the original first. Evacuation deletes an existing
+destination before moving the replacement. Canceled/disposed semaphore waits
+return a non-acquired wrapper, and callers do not check acquisition.
+
+Actual IL execution with temporary SQLite/files covered receipt eviction,
+constraints, acknowledgment cleanup, evacuation, and retained-work prefixes.
+A focused run executed `InsertHashInfo` plus the bundled EF null-key factory
+and identity-map gate, separating tracking failure from SQL failure and checking
+context disposal on both paths.
 
 Configured retry statuses are 401/500/503. The 401 delay is 24 hours without
 consuming an attempt; the periodic backlog trigger is 30 minutes. MSK
