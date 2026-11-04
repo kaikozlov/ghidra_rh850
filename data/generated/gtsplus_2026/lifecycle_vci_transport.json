@@ -217,9 +217,13 @@
         {
           "va": "0x1001A268",
           "bytes": "b802000000"
+        },
+        {
+          "va": "0x1001A35A",
+          "bytes": "ffd0"
         }
       ],
-      "finding": "Require API1/module/open/channel. Call physical PassThruDisconnect(channel); even if it fails, clear tracked filters and default-filter flag+7C, flag bytes+7E/+7F/+80 and connected+5D. Return driver status; software disconnected does not prove hardware acknowledged disconnect."
+      "finding": "Require API1/module/open/channel. Call physical PassThruDisconnect(channel); even if it fails, clear tracked filters and default-filter flag+7C, flag bytes+7E/+7F/+80 and connected+5D. Return driver status; software disconnected does not prove hardware acknowledged disconnect. Missing PassThruDisconnect export returns7 BEFORE cleanup, preserving+5D/list/flags; only a driver invocation reaches unconditional resets. Numeric channel+74 is never zeroed. Exceptional direct-DENSO path: driver status7 and+7D set resolves GetLastError; if absent, code logs FUNC_ADDRESS_FAILED but still calls null before software resets. Thus unconditional post-invocation reset describes normally returning paths, not this fault."
     },
     {
       "id": "vci_transport.j2534.close",
@@ -229,7 +233,7 @@
       "size": 464,
       "body_sha256": "5527bf782e2afccb5742cee9f63493f19a4226797e229a2a3ed9cabbfc308ff1",
       "anchors": [],
-      "finding": "Require loaded module and open+5C. If connected, disconnect via API-specific path; then PassThruClose(deviceID). Only success clears+5C and deviceID and calls save-log vtable+B0; close failure returns7 and preserves open bookkeeping until destruction."
+      "finding": "Require loaded module and open+5C. If connected, disconnect via API-specific path; then PassThruClose(deviceID). Only success clears+5C and deviceID and calls save-log vtable+B0; close failure returns7 and preserves open bookkeeping until destruction. Disconnect status is ignored. Missing disconnect export can preserve+5D even after Close success; Open then sets only+5C/+78, so API04 next Connect can still reject14. A failed Close leaves+5C=1: Open rejectsE while Connect can proceed if+5D cleared. Finalize destroys regardless and destructor attempts another physical Close while+5C remains set; repeated error does not prove hardware leak."
     },
     {
       "id": "vci_transport.j2534.device_info",
@@ -292,7 +296,7 @@
           "bytes": "66c70586c802100007"
         }
       ],
-      "finding": "Validate NIC/address pointers and two-byte logical source address. Read ethernet.connectIPTimeout from setting type1; WSAStartup2.2; UDP socket(AF_INET,SOCK_DGRAM,UDP), exclusive-address and broadcast options. Poll SIO_GET_INTERFACE_LIST for selected NIC IPv4/up state at1000ms until timeout. Vehicle-ID discovery precedes TCP bind(selectedIPv4,port0), connect(peer,13400), and15-byte routing-activation request(type0005,length7). Require response type0006,length>=5 and matching tester source-address echo; this body does not check the activation-response status byte. Many early errors return with global sockets/WSA state still allocated; caller must execute teardown."
+      "finding": "Validate NIC/address pointers and two-byte logical source address. Read ethernet.connectIPTimeout from setting type1; WSAStartup2.2; UDP socket(AF_INET,SOCK_DGRAM,UDP), exclusive-address and broadcast options. Poll SIO_GET_INTERFACE_LIST for selected NIC IPv4/up state at1000ms until timeout. Vehicle-ID discovery precedes TCP bind(selectedIPv4,port0), connect(peer,13400), and15-byte routing-activation request(type0005,length7). Require response type0006,length>=5 and matching tester source-address echo; this body does not check the activation-response status byte. Many early errors return with global sockets/WSA state still allocated; caller must execute teardown. Direct repeated NDISConnect has no existing-socket/startup guard: WSAStartup and newly created UDP/TCP handles overwrite process globals. Normal ChangeCommIF failure invokes KGP NDIS disconnect override even when+0C=0, closing partial globals; bypassing that owner is not equivalent. No allocation-liveness conclusion follows solely from omitted calls."
     },
     {
       "id": "vci_transport.j2534.ndis_disconnect",
@@ -322,7 +326,7 @@
       "size": 1188,
       "body_sha256": "ce05537cc4a70d31dee97742feb555f732f41a7531f5e412f0c6c33db493a60f",
       "anchors": [],
-      "finding": "Read TCP header then body, require type8001,length>=4 and caller capacity>=length-4. Validate source/target match last send, copy diagnostic bytes after four logical-address bytes, return actual payload length. Timeout=>0x8003, EOF/socket error=>0x8017, address mismatch=>0x8002, invalid length/type=>0x8000."
+      "finding": "Read TCP header then body, require type8001,length>=4 and caller capacity>=length-4. Validate source/target match last send, copy diagnostic bytes after four logical-address bytes, return actual payload length. Timeout=>0x8003, EOF/socket error=>0x8017, address mismatch=>0x8002, invalid length/type=>0x8000. Header and body each accumulate positive short recv results to exact requested size; WinsockLogger does not parse. Invalid type/too-small length/caller-capacity rejection consumes header only, leaving body queued; partial-body timeout consumes bytes with no persistent assembly state for next call. Neither version/inverse bytes nor fixed global scratch capacityFFFF are checked against declared length before body recv; caller payload capacity is not a scratch-buffer bound. High-bit lengths reach signed-positive helper check8005 when caller capacity passes."
     },
     {
       "id": "vci_transport.j2534.vehicle_id",
@@ -369,7 +373,7 @@
       "size": 1027,
       "body_sha256": "b35bbf9c267708bba163e25af42b163eff29cd5b98c80ddec925524b8743bc0d",
       "anchors": [],
-      "finding": "Read8-byte TCP header and declared body; allow types8002/8003 with nonzero body>=4, match reversed source/target addresses. Type8003=>0x8000;8002 succeeds. WSAETIMEDOUT10060=>0x8003, EOF/other recv errors=>0x8017; address mismatch=>0x8002."
+      "finding": "Read8-byte TCP header and declared body; allow types8002/8003 with nonzero body>=4, match reversed source/target addresses. Type8003=>0x8000;8002 succeeds. WSAETIMEDOUT10060=>0x8003, EOF/other recv errors=>0x8017; address mismatch=>0x8002. Positive short reads are accumulated separately for header/body; declared body is read into shared FFFF-byte scratch without an explicit maximum check. Version/inverse and ACK code byte are not checked. A four-byte address-only8002 body succeeds;8003 fails regardless of code. Rejected header does not drain body, and timeout/EOF does not close socket or retain partial parser state."
     },
     {
       "id": "vci_transport.j2534.filter",
@@ -390,6 +394,90 @@
       "body_sha256": "724555f67ce4725286ae4c6fa12e210e81ce2637a4b544453c0bc4fc7ea80b63",
       "anchors": [],
       "finding": "If still open call PassThruClose and clear open/channel bytes. Close communication-log handle. Non-direct-DENSO route calls PassThruUnloadLibrary, signals worker stop, waits5000ms then TerminateThread if wait is not signaled; closes four worker/event handles. FreeLibrary physical/shim module and free filter list."
+    },
+    {
+      "id": "vci_transport.j2534.connect0500",
+      "source": "vci_transport.source.j2534",
+      "kind": "native-body",
+      "locator": "0x1001A150",
+      "size": 125,
+      "body_sha256": "5b944efe2c050ceede2492ce6360f2b579c183d72d7ae5aa308721a375844e6d",
+      "anchors": [
+        {
+          "va": "0x1001A1B3",
+          "bytes": "894674"
+        },
+        {
+          "va": "0x1001A1B8",
+          "bytes": "c6465d01"
+        }
+      ],
+      "finding": "API2/module/open required, but unlike API04 there is no connected+5D rejection or default-filter setup. Forward explicit device/resource/output arguments. Success replaces last physical channel+74 and sets+5D; failure preserves prior+74/+5D. Multiple physical API05 channels are therefore not represented by a channel-count flag."
+    },
+    {
+      "id": "vci_transport.j2534.disconnect0500",
+      "source": "vci_transport.source.j2534",
+      "kind": "native-body",
+      "locator": "0x1001A3A0",
+      "size": 75,
+      "body_sha256": "3e754d0a0f99bc3ab07b8ec2d941ba50f751420dad7761d74375944585222867",
+      "anchors": [
+        {
+          "va": "0x1001A3D8",
+          "bytes": "c6465d00"
+        }
+      ],
+      "finding": "API2/module/open required; does not require connected+5D. Resolve and invoke physical disconnect for the supplied channel even when+5D=0, then clear+5D regardless of driver result. Missing export returns7 without clearing flags. Does not erase+74 or clear API04 filter list/translation flags."
+    },
+    {
+      "id": "vci_transport.j2534.read0500",
+      "source": "vci_transport.source.j2534",
+      "kind": "native-body",
+      "locator": "0x1001B630",
+      "size": 111,
+      "body_sha256": "b98c0afb6f900f0001eca75c91aad39890d02cd00540ac394d120c580a6e1fc2",
+      "anchors": [],
+      "finding": "API2/module/open required, but no connected+5D gate. Call driver ReadMsgs with original byte-count/message pointers and timeout; optional logging afterward, no DoIP reassembly. API05 stream fulfillment belongs to the selected external FunctionLibrary, not this wrapper."
+    },
+    {
+      "id": "vci_transport.j2534.address_compare",
+      "source": "vci_transport.source.j2534",
+      "kind": "native-body",
+      "locator": "0x1000F070",
+      "size": 137,
+      "body_sha256": "0cebb06a50bcd2f9de9e3cd5e301f3191d7af4056dc9e3eddcb807fb95de7884",
+      "anchors": [],
+      "finding": "Complete address-value comparator: first compare length at+8, then every byte. False means equality, true means different. ACK/diagnostic receiver compare two-byte wire source with cached sent target and wire target with cached sent source; no wildcard match."
+    },
+    {
+      "id": "vci_transport.j2534.read0404",
+      "source": "vci_transport.source.j2534",
+      "kind": "native-body",
+      "locator": "0x1001AE70",
+      "size": 1977,
+      "body_sha256": "22b1457052e7f0be5378bd744d343eeb40a730634954bae7dfd18b76e1c5cd8a",
+      "anchors": [],
+      "finding": "API1/module/open and connected+5D=1 required; failed setup or failed disconnect followed by clear flag returns2 before driver ReadMsgs. Successful read consumes sticky+7E/+7F/+80 translation flags to mask RxStatus80/100/180000; custom1000C mode+84 changes status handling. Generic connect only sets requested translation bytes, not clears unrequested ones; a failed-connect retry can inherit them until an actually executed disconnect or destruction."
+    },
+    {
+      "id": "vci_transport.j2534.logical_connect0500",
+      "source": "vci_transport.source.j2534",
+      "kind": "native-body",
+      "locator": "0x1001AD70",
+      "size": 59,
+      "body_sha256": "d3062afc887142d9ea753f6999d7d7a6abc2177c4898180795c9d5b8bdb38f51",
+      "anchors": [],
+      "finding": "API2/module/open guard then tail-dispatch physical driver LogicalConnect with caller stack unchanged. Does not update+5D/+74 or track logical IDs. KGP owns IP4/UDP/TCP slots2240/2244/2248."
+    },
+    {
+      "id": "vci_transport.j2534.logical_disconnect0500",
+      "source": "vci_transport.source.j2534",
+      "kind": "native-body",
+      "locator": "0x1001ADB0",
+      "size": 59,
+      "body_sha256": "93b568845fc5bec2c05fef622e3ffd00220e9c0bb8f7f630cffdb379a7c2b0aa",
+      "anchors": [],
+      "finding": "API2/module/open guard then tail-dispatch physical driver LogicalDisconnect, no ID/flag bookkeeping. KGP backend zeros every supplied logical slot after attempted driver teardown even on error."
     },
     {
       "id": "vci_transport.kgp.open",
@@ -436,7 +524,7 @@
           "bytes": "3c16"
         }
       ],
-      "finding": "App bus low nibble selects transport class independently of category-byte low5 support/session family. Reuse only when bus/addressing/mode/category compatibility checks pass. Incompatible CAN11/29/FD, legacy or Ethernet transitions stop communication, Disconnect and sometimes FinalizeDevice; create/reinitialize selected protocol object. P5 low5=14/15/16 gates session cleanup separately; low5=16 forces additional finalize when changing family."
+      "finding": "App bus low nibble selects transport class independently of category-byte low5 support/session family. Reuse only when bus/addressing/mode/category compatibility checks pass. Incompatible CAN11/29/FD, legacy or Ethernet transitions stop communication, Disconnect and sometimes FinalizeDevice; create/reinitialize selected protocol object. P5 low5=14/15/16 gates session cleanup separately; low5=16 forces additional finalize when changing family. Compatible reuse exits without a new physical Connect; cached bus/category, WWH and OBD-on-UDS modes and FD ECU identity gate reuse. Main nibble4 reuse explicitly backend-disconnects and clears KGP +0C before reusing the NDIS object. Any backend-connect error flows Disconnect(0): ordinary base skips physical disconnect if+0C was never set; NDIS override always calls backend teardown."
     },
     {
       "id": "vci_transport.kgp.connect_general",
@@ -681,7 +769,7 @@
       "size": 73,
       "body_sha256": "5d9cfe429a689f693d33c319327045dd3ebbc1cd6659eac099706f729ef2220e",
       "anchors": [],
-      "finding": "Set protocol object connected+0C, assign provided deviceID to+20E0, install first protocolID and channelID through vtable+128/+120; no physical PassThruConnect call in this method."
+      "finding": "Set protocol object connected+0C, assign provided deviceID to+20E0, install first protocolID and channelID through vtable+128/+120; no physical PassThruConnect call in this method. No independent owned/borrowed flag is set: adopted +0C=1 takes the same later disconnect path as newly connected channels. Adoption changes KGP fields, not J2534 singleton +5C/+5D; API04 can therefore reject later reads/disconnect with2 if caller did not also establish controller state."
     },
     {
       "id": "vci_transport.kgp.read_version",
@@ -704,6 +792,46 @@
       "finding": "Detailed version API requires null-initialized three output arrays; visits configured registry0404 and registry0500, prioritizing currently loaded API, allocates80-byte version buffers and switches device/module on second API. It returns caller-owned arrays; corresponding FreeReadVersion API is separate."
     },
     {
+      "id": "vci_transport.kgp.base_connect",
+      "source": "vci_transport.source.kgp",
+      "kind": "native-body",
+      "locator": "0x100143B0",
+      "size": 273,
+      "body_sha256": "6dd8c219b8bdc8194e0951bc76bb331b02c64dbb4f74fca2e22f99cfa27462df",
+      "anchors": [],
+      "finding": "If KGP connected+0C, dispatch disconnect first but ignore its result. Driver connect callback+2144 writes channel+8; set protocol+20D8 even on error, set+0C only on success. Failure maps91010000. KGP and CJ2534 connected flags are distinct; an API04 filter failure leaves both clear even after driver-created numeric ID."
+    },
+    {
+      "id": "vci_transport.kgp.base_disconnect",
+      "source": "vci_transport.source.kgp",
+      "kind": "native-body",
+      "locator": "0x100144D0",
+      "size": 189,
+      "body_sha256": "f26dfee363225fca029bb724f0be4116b9cf2f600aea7d9d43ab98504a8bd366",
+      "anchors": [],
+      "finding": "If KGP connected+0C=0 return0 without driver call or clearing channel+8. Otherwise stop services, invoke bound controller disconnect+2148, clear channel/ECU/service/connected fields even on nonzero result, return mapped error. Next ordinary connect can invoke driver again; an absent cleanup call does not prove external hardware allocation survives."
+    },
+    {
+      "id": "vci_transport.kgp.set_adopted_channel",
+      "source": "vci_transport.source.kgp",
+      "kind": "native-body",
+      "locator": "0x10016940",
+      "size": 13,
+      "body_sha256": "7dd3c0df92e475b5ecdbd89e4b18571bfe34961f32b51a9f9c3b8326dfd56f3c",
+      "anchors": [],
+      "finding": "Vtable+120 setter stores supplied numeric channel at protocol object+08; no driver call or ownership flag."
+    },
+    {
+      "id": "vci_transport.kgp.set_adopted_protocol",
+      "source": "vci_transport.source.kgp",
+      "kind": "native-body",
+      "locator": "0x10016D00",
+      "size": 16,
+      "body_sha256": "3c3eb59953385e180b0c3dbc6477950c5cfeeb08a6d5a4b2a1b53449be441e82",
+      "anchors": [],
+      "finding": "Vtable+128 setter stores supplied protocol at protocol object+20D8; no driver call."
+    },
+    {
       "id": "vci_transport.ds4.initialize",
       "source": "vci_transport.source.ds4",
       "kind": "native-body",
@@ -711,7 +839,7 @@
       "size": 3333,
       "body_sha256": "c873bb9d1578ea85b65c2ccccbb08eb50d54fd96b56c988d3817045040006648",
       "anchors": [],
-      "finding": "Parallel DS-4 controller has the same API1/2 selected-registry configuration and device singleton contract, protected by process-local critical section. This is a different source/build, not a byte-identical GTSPlus copy."
+      "finding": "Parallel DS-4 controller has the same API1/2 selected-registry configuration and device singleton contract, protected by process-local critical section. This is a different source/build, not a byte-identical GTSPlus copy. Unlike main, failed post-constructor API04/API05 Open returns without deleting/resetting singleton 100287E0. Next Initialize returnsE until explicit Finalize; KGP Open failure calls CloseDevice, which finalizes this retained singleton. Do not transfer main failed-open reset to DS-4."
     },
     {
       "id": "vci_transport.ds4.finalize",
@@ -722,6 +850,127 @@
       "body_sha256": "68884fb460e8a263d6f4e8932e2f72d9cfb51621c1c7730f66f561d0526d1e05",
       "anchors": [],
       "finding": "Under the DS-4 critical section, close via vtable38, retain returned status, destroy singleton and reset it; missing singleton returns8. No NDIS exports exist in this installed DS-4 controller."
+    },
+    {
+      "id": "vci_transport.ds4.connect0404",
+      "source": "vci_transport.source.ds4",
+      "kind": "native-body",
+      "locator": "0x10017320",
+      "size": 4801,
+      "body_sha256": "3fdb37a79a27853998b9859a8f63653231c99d99ac6cc7aac5f38c44fb359d24",
+      "anchors": [
+        {
+          "va": "0x100173D7",
+          "bytes": "807e5d00"
+        },
+        {
+          "va": "0x10017410",
+          "bytes": "c7868000000000000000"
+        }
+      ],
+      "finding": "DS-4 API04 shares late+5D commit and guarded rollback: physical connect success stores+74, missing/default-filter failure calls disconnect while+5D=0, so no physical disconnect occurs. Subsequent API04 connect is permitted and overwrites+74 on success. DS-4 generic flags80/100 set+7E/+7F without clearing absent bits; custom-mode dword is+80 (main uses+84). No main-only8012/8013 cases."
+    },
+    {
+      "id": "vci_transport.ds4.disconnect0404",
+      "source": "vci_transport.source.ds4",
+      "kind": "native-body",
+      "locator": "0x100186C0",
+      "size": 454,
+      "body_sha256": "02b69675db5fb4a7aa8cd893c6c744fe1bdec2c3902c117e4ac2ba18182804be",
+      "anchors": [
+        {
+          "va": "0x10018736",
+          "bytes": "807f5d01"
+        },
+        {
+          "va": "0x1001887D",
+          "bytes": "c6475d00"
+        },
+        {
+          "va": "0x1001884A",
+          "bytes": "ffd0"
+        }
+      ],
+      "finding": "DS-4 API1/module/open/channel guards; missing export preserves bookkeeping. After driver invocation, clear filter list,+7C,+7E/+7F,+5D despite driver failure, retain numeric+74 and custom-mode+80. Main additionally clears translation byte+80, whose role differs in DS-4. Exceptional direct-DENSO path: driver status7 and+7D set resolves GetLastError; if absent, code logs FUNC_ADDRESS_FAILED but still calls null before software resets. Thus unconditional post-invocation reset describes normally returning paths, not this fault."
+    },
+    {
+      "id": "vci_transport.ds4.close",
+      "source": "vci_transport.source.ds4",
+      "kind": "native-body",
+      "locator": "0x10016420",
+      "size": 464,
+      "body_sha256": "26901a1cad5176434309a0ea6457adb5e0c8975e77d446d9a0c182b6cdc6b475",
+      "anchors": [
+        {
+          "va": "0x100165D9",
+          "bytes": "c6465c00"
+        },
+        {
+          "va": "0x100165DD",
+          "bytes": "c7467800000000"
+        }
+      ],
+      "finding": "Same close ordering as main with DS-4 vtable slots: if+5D set, API04 guarded disconnect or API05 direct physical disconnect; ignore disconnect status. Then physical Close; success clears only open+5C/device+78 and calls save slot+B4; failure maps7 and preserves open/device. Missing disconnect export can leave+5D set even after successful Close. Next connect then fails open gate8, not a hardware observation."
+    },
+    {
+      "id": "vci_transport.ds4.connect0500",
+      "source": "vci_transport.source.ds4",
+      "kind": "native-body",
+      "locator": "0x10018640",
+      "size": 125,
+      "body_sha256": "d7082bb9b46d43f41faa721f90a3d87207464c01b4f86268ebd6db075e12158d",
+      "anchors": [],
+      "finding": "DS-4 API05 matches main API05: no already-connected rejection; physical Connect success replaces last+74/sets+5D, failure preserves these. No default-filter setup."
+    },
+    {
+      "id": "vci_transport.ds4.disconnect0500",
+      "source": "vci_transport.source.ds4",
+      "kind": "native-body",
+      "locator": "0x10018890",
+      "size": 75,
+      "body_sha256": "4f3c51958d69a140b1368d28af531643447c1019530ecb917a0459a59e998b9d",
+      "anchors": [],
+      "finding": "DS-4 API05 matches main: call supplied channel even if+5D=0; clear+5D after invocation regardless of status. Missing export or unopened device returns without state reset."
+    },
+    {
+      "id": "vci_transport.ds4.read0500",
+      "source": "vci_transport.source.ds4",
+      "kind": "native-body",
+      "locator": "0x10019B10",
+      "size": 111,
+      "body_sha256": "7a75e4dc60c17c120820f521b73bc39ea89d8ac626fee7ea820e6a8d071f0577",
+      "anchors": [],
+      "finding": "DS-4 API05 forwards ReadMsgs unchanged after API/module/open gates, even with+5D=0. No short-read accumulation in controller; only optional log callback. KGP requests exact stream-byte counts, so external driver must fulfill each requested block or KGP reports short response."
+    },
+    {
+      "id": "vci_transport.ds4.logical_connect0500",
+      "source": "vci_transport.source.ds4",
+      "kind": "native-body",
+      "locator": "0x10019260",
+      "size": 59,
+      "body_sha256": "f20ec1d76f3b5ffd9e5f8b57ebd7914ffe3621073ce58b0254b5f7cdae86922d",
+      "anchors": [],
+      "finding": "API2/module/open guard then tail-dispatch physical driver LogicalConnect with caller stack unchanged. Does not update+5D/+74 or track logical IDs. KGP owns IP4/UDP/TCP slots2240/2244/2248."
+    },
+    {
+      "id": "vci_transport.ds4.logical_disconnect0500",
+      "source": "vci_transport.source.ds4",
+      "kind": "native-body",
+      "locator": "0x100192A0",
+      "size": 59,
+      "body_sha256": "13753ca3eaff574ea377207446b52246045105e066a1380df3dcd142c231db86",
+      "anchors": [],
+      "finding": "API2/module/open guard then tail-dispatch physical driver LogicalDisconnect, no ID/flag bookkeeping. KGP backend zeros every supplied logical slot after attempted driver teardown even on error."
+    },
+    {
+      "id": "vci_transport.ds4.open0404",
+      "source": "vci_transport.source.ds4",
+      "kind": "native-body",
+      "locator": "0x10016B50",
+      "size": 487,
+      "body_sha256": "780f5f8ec8d7f8bc5698070c8f1a8256f72c031225e5797d8b91c76157454884",
+      "anchors": [],
+      "finding": "API1/module required. Open+5C already set returnsE; driver Open(null,&device) success sets+78/+5C but does not reset connected+5D. Following a Close whose disconnect export was absent, this reopen can succeed yet subsequent API04 Connect returns14 due to stale+5D."
     },
     {
       "id": "vci_transport.settings.file_type",
@@ -1031,7 +1280,7 @@
       "size": 2830,
       "body_sha256": "d69cd353d7a1653edc0fb57cc3b018bbd2b21a191cee647728192f5482fa6a79",
       "anchors": [],
-      "finding": "Read ACK(type8002) then diagnostic header(type8001), validate declared size/capacity and source, assemble body/chunks up to1020 each. Pass response to protocol classifier:90020323 loops pending until180000ms;90020326 requeues cached request while counter<100(hex), then exits; other classifier errors returned. ERR_BUFFER_EMPTY10 maps91010009; short/type/source errors remain distinct. Timing comes from Ethernet DB rows; no blanket infinite retry."
+      "finding": "Read ACK(type8002) then diagnostic header(type8001), validate declared size/capacity and source, assemble body/chunks up to0x1020 (4128) bytes each. Pass response to protocol classifier:90020323 loops pending until180000ms;90020326 requeues cached request while counter<100(hex), then exits; other classifier errors returned. ERR_BUFFER_EMPTY10 maps91010009; short/type/source errors remain distinct. Timing comes from Ethernet DB rows; no blanket infinite retry. Chunk limit1020 is HEX (4128 bytes), not decimal1020. ACK requests exactly13 bytes and only checks minimum13,type8002,source==requested ECU; no ACK-declared-length/status/destination check. Header requests8 bytes; body requires declared>=5 and capacity>=declared-4, then exact driver DataSize for each min(remaining,1020) block; positive short blocks are errors, not accumulated. Version/inverse and logical destination are unchecked. Classifier runs on first body block; success then source comparison precedes later raw chunk concatenation. Driver ReadMsgs and shim supply byte-stream fulfillment; host TCP fragmentation loop is absent in this DS-4 route."
     },
     {
       "id": "vci_transport.ds4_kgp.base_binding",
@@ -1042,6 +1291,16 @@
       "body_sha256": "6ee970e87384df0c0773dfda746438c383f4e1befd85ba47109a53ea8e3be4a0",
       "anchors": [],
       "finding": "Resolve PassThruConnect_v0500 at object+2170, LogicalConnect+2178, LogicalDisconnect+217C, ReadMsgs+2184, QueueMsgs+2188 and Ioctl+21A4 from the loaded J2534Ctrl. These bindings establish indirect-call roles in the DS-4 Ethernet physical/logical/message/teardown bodies."
+    },
+    {
+      "id": "vci_transport.ds4_kgp.ethernet_classifier",
+      "source": "vci_transport.source.ds4_kgp",
+      "kind": "native-body",
+      "locator": "0x100183F0",
+      "size": 81,
+      "body_sha256": "51f541c8e1f19d538f52742b58a3ee1edbaa09c35b45898b14a62270fd88c901",
+      "anchors": [],
+      "finding": "Complete classifier only inspects diagnostic data after four address bytes: payload>=7 and 7F xx 78=>90020323 pending, 7F xx 21=>90020326 retry, other 7F=>90020321 negative response. It does not validate logical destination, DoIP version/inverse, ACK code, or stream fragmentation; those checks cannot be attributed to this callee."
     },
     {
       "id": "vci_transport.shim0404.loadlibrary",
@@ -1154,6 +1413,26 @@
       "finding": "LoadLibraryW physical driver path, set loaded flag and resolve API pointers. API05 includes QueueMsgs/ScanForDevices/GetNextDevice/LogicalConnect/LogicalDisconnect/Select. Module-load success does not guarantee every resolved API is nonnull."
     },
     {
+      "id": "vci_transport.shim0500.read_stream",
+      "source": "vci_transport.source.shim0500",
+      "kind": "native-body",
+      "locator": "0x1000B900",
+      "size": 455,
+      "body_sha256": "bf36a2dd5bc9fc4cce64696566b81a92017fd2ec2b8a305b0847cdb612c62324",
+      "anchors": [],
+      "finding": "Under API critical section, reject unloaded driver7; invoke cached physical ReadMsgs exactly once with original channel/message/count/timeout arguments, then log output. Channel-table lookup only changes byte/message logging. No accumulation, DoIP length/type/address parsing or retry; selected external FunctionLibrary owns API05 byte-stream fulfillment."
+    },
+    {
+      "id": "vci_transport.shim0500.read_clock",
+      "source": "vci_transport.source.shim0500",
+      "kind": "native-body",
+      "locator": "0x1000DA30",
+      "size": 137,
+      "body_sha256": "cd8781d5704524c0e0f250250ccde3e0bcf6cc829e3b198b22bb8dec0cc2e6df",
+      "anchors": [],
+      "finding": "ReadMsgs pre-call helper only initializes/query performance frequency/counter under lock and converts timing; it does not receive message arguments or consume/assemble bytes."
+    },
+    {
       "id": "vci_transport.ds4_shim0404.savelog",
       "source": "vci_transport.source.ds4_shim0404",
       "kind": "native-body",
@@ -1202,6 +1481,26 @@
       "body_sha256": "d2ef7356873851f6ae5c74b35744b8f80f50f05990134778a2a5611f55f7b5e6",
       "anchors": [],
       "finding": "Format UTF16 log message, copy temporary buffer and call optional ER_PutLogCommunication callback from MsgDatComm.dll. No disk-write operation in this body."
+    },
+    {
+      "id": "vci_transport.ds4_shim0500.read_stream",
+      "source": "vci_transport.source.ds4_shim0500",
+      "kind": "native-body",
+      "locator": "0x1000B900",
+      "size": 455,
+      "body_sha256": "bf36a2dd5bc9fc4cce64696566b81a92017fd2ec2b8a305b0847cdb612c62324",
+      "anchors": [],
+      "finding": "Under API critical section, reject unloaded driver7; invoke cached physical ReadMsgs exactly once with original channel/message/count/timeout arguments, then log output. Channel-table lookup only changes byte/message logging. No accumulation, DoIP length/type/address parsing or retry; selected external FunctionLibrary owns API05 byte-stream fulfillment."
+    },
+    {
+      "id": "vci_transport.ds4_shim0500.read_clock",
+      "source": "vci_transport.source.ds4_shim0500",
+      "kind": "native-body",
+      "locator": "0x1000DA30",
+      "size": 137,
+      "body_sha256": "cd8781d5704524c0e0f250250ccde3e0bcf6cc829e3b198b22bb8dec0cc2e6df",
+      "anchors": [],
+      "finding": "ReadMsgs pre-call helper only initializes/query performance frequency/counter under lock and converts timing; it does not receive message arguments or consume/assemble bytes."
     },
     {
       "id": "vci_transport.nic_info",
@@ -1927,6 +2226,122 @@
         "vci_transport.shim0404.savelog",
         "vci_transport.shim0500.savelog"
       ]
+    },
+    {
+      "id": "vci_transport.filter_failure_reconnect",
+      "from": "vci_transport.fault_returned",
+      "to": "vci_transport.channel_open",
+      "trigger": "next API04 Connect after default-filter failure",
+      "guard": "open+5C=1, connected+5D=0, next driver Connect and setup succeed",
+      "action": "Overwrite last channel+74; old numeric channel not disconnected by guarded rollback; inherited translation flags can survive",
+      "evidence": [
+        "vci_transport.j2534.connect0404",
+        "vci_transport.j2534.read0404",
+        "vci_transport.kgp.base_connect",
+        "vci_transport.kgp.base_disconnect",
+        "vci_transport.ds4.connect0404"
+      ]
+    },
+    {
+      "id": "vci_transport.disconnect_driver_failure",
+      "from": "vci_transport.channel_open",
+      "to": "vci_transport.disconnected",
+      "trigger": "physical Disconnect returns nonzero",
+      "guard": "API04 export resolved and invoked; error-reporting callbacks return normally",
+      "action": "Clear software connected/filter/translation state despite error; next Connect allowed, retained ID is not proof of live hardware",
+      "evidence": [
+        "vci_transport.j2534.disconnect0404",
+        "vci_transport.ds4.disconnect0404",
+        "vci_transport.kgp.base_disconnect"
+      ]
+    },
+    {
+      "id": "vci_transport.disconnect_export_failure",
+      "from": "vci_transport.channel_open",
+      "to": "vci_transport.fault_returned",
+      "trigger": "Disconnect export missing",
+      "guard": "API04 module/open/channel gates pass",
+      "action": "Return7 without clearing controller bookkeeping; subsequent API04 Connect rejects14 until state-changing teardown",
+      "evidence": [
+        "vci_transport.j2534.disconnect0404",
+        "vci_transport.ds4.disconnect0404"
+      ]
+    },
+    {
+      "id": "vci_transport.api05_repeated_connect",
+      "from": "vci_transport.channel_open",
+      "to": "vci_transport.channel_open",
+      "trigger": "another API05 physical Connect",
+      "guard": "module/open gates pass; driver returns success",
+      "action": "No connected guard: invoke driver again and replace last physical ID; API05 logical IDs are separately KGP-owned",
+      "evidence": [
+        "vci_transport.j2534.connect0500",
+        "vci_transport.ds4.connect0500",
+        "vci_transport.ds4.logical_connect0500"
+      ]
+    },
+    {
+      "id": "vci_transport.api05_repeat_disconnect",
+      "from": "vci_transport.disconnected",
+      "to": "vci_transport.disconnected",
+      "trigger": "API05 Disconnect after software flag cleared",
+      "guard": "module/open and export present",
+      "action": "Invoke supplied physical channel again even with+5D=0; clear+5D after invocation, preserve numeric+74",
+      "evidence": [
+        "vci_transport.j2534.disconnect0500",
+        "vci_transport.ds4.disconnect0500"
+      ]
+    },
+    {
+      "id": "vci_transport.close_error_reconnect",
+      "from": "vci_transport.channel_open",
+      "to": "vci_transport.fault_returned",
+      "trigger": "Close returns driver failure",
+      "guard": "disconnect attempted before Close; Close nonzero",
+      "action": "Return7 and preserve open/device; when disconnect cleared+5D next API04 Connect is allowed, while Open rejectsE",
+      "evidence": [
+        "vci_transport.j2534.close",
+        "vci_transport.ds4.close",
+        "vci_transport.j2534.open0404"
+      ]
+    },
+    {
+      "id": "vci_transport.adopted_disconnect",
+      "from": "vci_transport.adopted",
+      "to": "vci_transport.disconnected",
+      "trigger": "ordinary KGP Disconnect",
+      "guard": "adoption set KGP+0C without separate borrowed-ownership marker",
+      "action": "Use ordinary disconnect callback for adopted channel; controller API04 may reject2 if its independent+5D is clear",
+      "evidence": [
+        "vci_transport.kgp.adopt_connection",
+        "vci_transport.kgp.base_disconnect",
+        "vci_transport.j2534.disconnect0404"
+      ]
+    },
+    {
+      "id": "vci_transport.ds4_failed_open_retry",
+      "from": "vci_transport.fault_returned",
+      "to": "vci_transport.fault_returned",
+      "trigger": "DS-4 Initialize repeated after failed Open",
+      "guard": "post-constructor singleton retained",
+      "action": "ReturnE before another Open; explicit Finalize or KGP CloseDevice is required to release singleton",
+      "evidence": [
+        "vci_transport.ds4.initialize",
+        "vci_transport.ds4.finalize",
+        "vci_transport.ds4_kgp.open"
+      ]
+    },
+    {
+      "id": "vci_transport.ndis_parser_retry",
+      "from": "vci_transport.ndis_active",
+      "to": "vci_transport.fault_returned",
+      "trigger": "invalid header or partial-body timeout",
+      "guard": "header consumed; rejected body left queued or partially consumed",
+      "action": "Return parser error without drain/socket close/persistent assembly; next receive starts a new8-byte header, not continuation",
+      "evidence": [
+        "vci_transport.j2534.ndis_receive",
+        "vci_transport.j2534.ndis_ack"
+      ]
     }
   ],
   "handoffs": [
@@ -2159,6 +2574,77 @@
       ]
     }
   ],
+  "native_state_contracts": {
+    "controller": {
+      "module": "+04",
+      "open": "+5C",
+      "connected_summary": "+5D",
+      "api_selector": "+60",
+      "last_physical_channel": "+74",
+      "device": "+78",
+      "default_filters": "+7C; linked list+64/+68/+6C/+70",
+      "translation": "main+7E/+7F/+80; DS-4+7E/+7F",
+      "custom_mode": "main dword+84; DS-4 dword+80",
+      "summary_not_channel_count": true,
+      "evidence": [
+        "vci_transport.j2534.connect0404",
+        "vci_transport.j2534.disconnect0404",
+        "vci_transport.j2534.read0404",
+        "vci_transport.j2534.connect0500",
+        "vci_transport.j2534.disconnect0500",
+        "vci_transport.j2534.read0500",
+        "vci_transport.j2534.close",
+        "vci_transport.ds4.connect0404",
+        "vci_transport.ds4.disconnect0404",
+        "vci_transport.ds4.close"
+      ]
+    },
+    "protocol_owner": {
+      "connected": "+0C",
+      "channel": "+08",
+      "device": "+20E0",
+      "protocol": "+20D8",
+      "adoption": "sets KGP connected/device/protocol/channel; no separate borrowed marker",
+      "independent_flags": "adoption does not set controller open/connected bytes",
+      "evidence": [
+        "vci_transport.kgp.base_connect",
+        "vci_transport.kgp.base_disconnect",
+        "vci_transport.kgp.adopt_connection"
+      ]
+    },
+    "physical_outcome_boundary": "Missing/guarded driver call is proven absence of a call; driver-returned failure and numeric IDs do not establish live hardware allocation or leak."
+  },
+  "receive_parser_ownership": [
+    {
+      "route": "main host NDIS",
+      "owner": "J2534Ctrl",
+      "fragmentation": "accumulate exact8-byte header then exact declared body from positive short recv results",
+      "checks": "diagnostic8001,length>=4,caller payload capacity,both reversed logical addresses; ACK8002/8003 and body>=4",
+      "not_checked": "version/inverse,ACK code,declared length against fixedFFFF-byte global scratch",
+      "failure_continuation": "no body drain on rejected header; no persistent partial frame; no parser-triggered socket teardown",
+      "evidence": [
+        "vci_transport.j2534.ndis_receive",
+        "vci_transport.j2534.ndis_ack",
+        "vci_transport.j2534.address_compare",
+        "vci_transport.winsock.receive"
+      ]
+    },
+    {
+      "route": "DS-4 API05 Ethernet",
+      "owner": "KGP DoIP framing; external FunctionLibrary fulfills each requested stream block",
+      "fragmentation": "controller and shim make one ReadMsgs call; KGP requires exact block DataSize, splits long body at0x1020=4128",
+      "checks": "ACK minimum13,type8002,ECU source; diagnostic header minimum8,type8001,length>=5,caller capacity,exact first/subsequent body sizes",
+      "not_checked": "version/inverse,logical destination,ACK declared length or code",
+      "classifier": "diagnostic7F xx78 pending;7F xx21 requeue;other7F negative response; no framing/address checks",
+      "evidence": [
+        "vci_transport.ds4_kgp.ethernet_receive",
+        "vci_transport.ds4_kgp.ethernet_classifier",
+        "vci_transport.ds4.read0500",
+        "vci_transport.ds4_shim0500.read_stream",
+        "vci_transport.ds4_shim0500.read_clock"
+      ]
+    }
+  ],
   "support_family_distinction": "GTSPlus and DS-4 are parallel application/support builds; ECU category low5 controls support/session strategy, application bus low nibble selects transport. P6 does not imply DoIP, nor P5 only CAN.",
   "coverage": {
     "components": [
@@ -2201,14 +2687,16 @@
       "next_evidence": "Authorized Windows registry/device metadata and driver-specific source/capture, without network/vehicle interaction in this pass."
     },
     {
-      "question": "Actual physical close/connect/reset acknowledgement and recovery behavior",
-      "why_unclosed": "Driver error contracts are propagated or suppressed as pinned; software state does not measure a device. No generic reconnect loop or hardware reset can be inferred from module teardown.",
-      "next_evidence": "Offline Windows driver-contract harness with preauthorized inert implementation; no live device required."
+      "question": "Actual selected-driver allocation/release acknowledgement and byte-stream fulfillment",
+      "why_unclosed": "Complete host paths prove calls, arguments, software resets and parser boundaries, not the physical FunctionLibrary implementation or VCI firmware state. No hardware leak/reset or API05 stream-fulfillment guarantee follows from numeric IDs or returned host status.",
+      "next_evidence": "Selected external FunctionLibrary source or authorized offline driver contract; host call/state/fragmentation paths are separately runnable with the prepared inert-callback Unicorn smoke."
     }
   ],
   "reproduction": {
     "command": "uv run --locked python -m tools.techstream.extract_gtsplus_lifecycle_vci_transport",
     "recovery_prerequisite": "build/out/gtsplus-unprotected with matching main recovery manifest",
-    "network_or_vehicle_access": false
+    "network_or_vehicle_access": false,
+    "parent_smoke": "PYTHONPATH=. uv run --locked --with unicorn python build/tmp/lc2_vci_transport_smoke.py",
+    "smoke_prepared_not_run_by_extractor": true
   }
 }

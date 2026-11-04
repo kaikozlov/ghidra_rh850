@@ -4165,9 +4165,29 @@ TCP through the physical channel. Wrappers retain module handles and cached
 function pointers across their reset calls.
 
 In `Connect04`, filter failure attempts disconnect before setting the connected
-flag; the disconnect guard rejects that rollback. Other disconnect paths clear
-software state despite physical errors. Close failure retains the open flag,
-while finalization still destroys the owner.
+flag; the disconnect guard rejects that rollback. A subsequent connect can
+overwrite the stored channel. A missing disconnect export preserves bookkeeping;
+a normally returning driver error clears it. Direct-DENSO error 7 with no
+`GetLastError` export instead reaches a null call before those resets. Failed
+close retains open/device state. Missing disconnect can leave the connected flag
+set across successful close/open, causing the next API-04 connect to reject.
+
+API-05 physical connect/disconnect calls do not follow the API-04 flag guard.
+Adopted channel IDs use ordinary disconnect ownership. DS-4 `Initialize`
+(`0x10011210`) retains its singleton after post-constructor open failure, so
+another initialization rejects until finalization; the main factory clears its
+failed owner.
+
+The main NDIS receiver accumulates short TCP reads. Rejected headers leave their
+body undrained, and partial-error exits retain no assembly state for the next
+call. Its declared body length controls reads into a fixed `0xFFFF`-byte scratch
+allocation before caller-payload capacity checks. DS-4 instead requires exact
+API-05 stream blocks and uses `0x1020`-byte chunks. These paths have different
+fragmentation contracts.
+
+Actual x86 execution covered API-04/05 failure/reconnect/close behavior, adopted
+KGP channel cleanup, the DS-4 singleton-admission guard, and main NDIS fragmented
+diagnostic/ACK receives with error and undrained-body prefixes.
 
 All four current `SaveLog` shim exports are `33 C0 C2 04 00`: return zero.
 Native execution with an invalid path pointer confirmed that none reads the

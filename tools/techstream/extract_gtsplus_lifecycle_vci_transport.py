@@ -6,6 +6,9 @@ were established by Ghidra decompilation and decisive disassembly; this extracto
 fails closed on source/body/branch drift and reconstructs the compact contracts.
 Recovered setting-provider bodies require the separately reproducible main
 recovery manifest. Cross-domain producers are owned by auth_settings/operations.
+Failure/reconnect contracts include independent controller/protocol flags and
+API04/API05 differences. Receive ownership follows exact native callees through
+the API05 shim; byte-stream fulfillment is not attributed to an opaque wrapper.
 """
 from __future__ import annotations
 
@@ -701,6 +704,236 @@ for _source, _functions in SHIM_PINS.items():
     FINDINGS.update({_source + "." + name: SHIM_FINDINGS[name] for name in _functions})
     BRANCH_ANCHORS[_source + ".savelog"] = [(_functions["savelog"][0], "33c0c20400")]
 
+# Failure/reconnect and parser callees: complete native bodies, not wrapper inference.
+NATIVE_PINS['j2534'].update({'connect0500': {'va': 268542288,
+                 'size': 125,
+                 'sha256': '5b944efe2c050ceede2492ce6360f2b579c183d72d7ae5aa308721a375844e6d'},
+ 'disconnect0500': {'va': 268542880,
+                    'size': 75,
+                    'sha256': '3e754d0a0f99bc3ab07b8ec2d941ba50f751420dad7761d74375944585222867'},
+ 'read0500': {'va': 268547632,
+              'size': 111,
+              'sha256': 'b98c0afb6f900f0001eca75c91aad39890d02cd00540ac394d120c580a6e1fc2'},
+ 'address_compare': {'va': 268497008,
+                     'size': 137,
+                     'sha256': '0cebb06a50bcd2f9de9e3cd5e301f3191d7af4056dc9e3eddcb807fb95de7884'},
+ 'read0404': {'va': 268545648,
+              'size': 1977,
+              'sha256': '22b1457052e7f0be5378bd744d343eeb40a730634954bae7dfd18b76e1c5cd8a'}})
+NATIVE_PINS['ds4'].update({'connect0404': {'va': 268530464,
+                 'size': 4801,
+                 'sha256': '3fdb37a79a27853998b9859a8f63653231c99d99ac6cc7aac5f38c44fb359d24'},
+ 'disconnect0404': {'va': 268535488,
+                    'size': 454,
+                    'sha256': '02b69675db5fb4a7aa8cd893c6c744fe1bdec2c3902c117e4ac2ba18182804be'},
+ 'close': {'va': 268526624,
+           'size': 464,
+           'sha256': '26901a1cad5176434309a0ea6457adb5e0c8975e77d446d9a0c182b6cdc6b475'},
+ 'connect0500': {'va': 268535360,
+                 'size': 125,
+                 'sha256': 'd7082bb9b46d43f41faa721f90a3d87207464c01b4f86268ebd6db075e12158d'},
+ 'disconnect0500': {'va': 268535952,
+                    'size': 75,
+                    'sha256': '4f3c51958d69a140b1368d28af531643447c1019530ecb917a0459a59e998b9d'},
+ 'read0500': {'va': 268540688,
+              'size': 111,
+              'sha256': '7a75e4dc60c17c120820f521b73bc39ea89d8ac626fee7ea820e6a8d071f0577'},
+ 'logical_connect0500': {'va': 268538464,
+                         'size': 59,
+                         'sha256': 'f20ec1d76f3b5ffd9e5f8b57ebd7914ffe3621073ce58b0254b5f7cdae86922d'},
+ 'logical_disconnect0500': {'va': 268538528,
+                            'size': 59,
+                            'sha256': '13753ca3eaff574ea377207446b52246045105e066a1380df3dcd142c231db86'}})
+NATIVE_PINS['kgp'].update({'base_connect': {'va': 268518320,
+                  'size': 273,
+                  'sha256': '6dd8c219b8bdc8194e0951bc76bb331b02c64dbb4f74fca2e22f99cfa27462df'},
+ 'base_disconnect': {'va': 268518608,
+                     'size': 189,
+                     'sha256': 'f26dfee363225fca029bb724f0be4116b9cf2f600aea7d9d43ab98504a8bd366'}})
+NATIVE_PINS['ds4_kgp'].update({'ethernet_classifier': {'va': 268534768,
+                         'size': 81,
+                         'sha256': '51f541c8e1f19d538f52742b58a3ee1edbaa09c35b45898b14a62270fd88c901'}})
+FINDINGS.update({'j2534.connect0500': 'API2/module/open required, but unlike API04 there is no connected+5D rejection or '
+                      'default-filter setup. Forward explicit device/resource/output arguments. Success '
+                      'replaces last physical channel+74 and sets+5D; failure preserves prior+74/+5D. '
+                      'Multiple physical API05 channels are therefore not represented by a channel-count '
+                      'flag.',
+ 'j2534.disconnect0500': 'API2/module/open required; does not require connected+5D. Resolve and invoke '
+                         'physical disconnect for the supplied channel even when+5D=0, then clear+5D '
+                         'regardless of driver result. Missing export returns7 without clearing flags. Does '
+                         'not erase+74 or clear API04 filter list/translation flags.',
+ 'j2534.read0500': 'API2/module/open required, but no connected+5D gate. Call driver ReadMsgs with original '
+                   'byte-count/message pointers and timeout; optional logging afterward, no DoIP reassembly. '
+                   'API05 stream fulfillment belongs to the selected external FunctionLibrary, not this '
+                   'wrapper.',
+ 'j2534.address_compare': 'Complete address-value comparator: first compare length at+8, then every byte. '
+                          'False means equality, true means different. ACK/diagnostic receiver compare '
+                          'two-byte wire source with cached sent target and wire target with cached sent '
+                          'source; no wildcard match.',
+ 'j2534.read0404': 'API1/module/open and connected+5D=1 required; failed setup or failed disconnect followed '
+                   'by clear flag returns2 before driver ReadMsgs. Successful read consumes '
+                   'sticky+7E/+7F/+80 translation flags to mask RxStatus80/100/180000; custom1000C mode+84 '
+                   'changes status handling. Generic connect only sets requested translation bytes, not '
+                   'clears unrequested ones; a failed-connect retry can inherit them until an actually '
+                   'executed disconnect or destruction.',
+ 'kgp.base_connect': 'If KGP connected+0C, dispatch disconnect first but ignore its result. Driver connect '
+                     'callback+2144 writes channel+8; set protocol+20D8 even on error, set+0C only on '
+                     'success. Failure maps91010000. KGP and CJ2534 connected flags are distinct; an API04 '
+                     'filter failure leaves both clear even after driver-created numeric ID.',
+ 'kgp.base_disconnect': 'If KGP connected+0C=0 return0 without driver call or clearing channel+8. Otherwise '
+                        'stop services, invoke bound controller disconnect+2148, clear '
+                        'channel/ECU/service/connected fields even on nonzero result, return mapped error. '
+                        'Next ordinary connect can invoke driver again; an absent cleanup call does not '
+                        'prove external hardware allocation survives.',
+ 'ds4_kgp.ethernet_classifier': 'Complete classifier only inspects diagnostic data after four address bytes: '
+                                'payload>=7 and 7F xx 78=>90020323 pending, 7F xx 21=>90020326 retry, other '
+                                '7F=>90020321 negative response. It does not validate logical destination, '
+                                'DoIP version/inverse, ACK code, or stream fragmentation; those checks '
+                                'cannot be attributed to this callee.',
+ 'ds4.connect0404': 'DS-4 API04 shares late+5D commit and guarded rollback: physical connect success '
+                    'stores+74, missing/default-filter failure calls disconnect while+5D=0, so no physical '
+                    'disconnect occurs. Subsequent API04 connect is permitted and overwrites+74 on success. '
+                    'DS-4 generic flags80/100 set+7E/+7F without clearing absent bits; custom-mode dword '
+                    'is+80 (main uses+84). No main-only8012/8013 cases.',
+ 'ds4.disconnect0404': 'DS-4 API1/module/open/channel guards; missing export preserves bookkeeping. After '
+                       'driver invocation, clear filter list,+7C,+7E/+7F,+5D despite driver failure, retain '
+                       'numeric+74 and custom-mode+80. Main additionally clears translation byte+80, whose '
+                       'role differs in DS-4.',
+ 'ds4.close': 'Same close ordering as main with DS-4 vtable slots: if+5D set, API04 guarded disconnect or '
+              'API05 direct physical disconnect; ignore disconnect status. Then physical Close; success '
+              'clears only open+5C/device+78 and calls save slot+B4; failure maps7 and preserves '
+              'open/device. Missing disconnect export can leave+5D set even after successful Close. Next '
+              'connect then fails open gate8, not a hardware observation.',
+ 'ds4.connect0500': 'DS-4 API05 matches main API05: no already-connected rejection; physical Connect success '
+                    'replaces last+74/sets+5D, failure preserves these. No default-filter setup.',
+ 'ds4.disconnect0500': 'DS-4 API05 matches main: call supplied channel even if+5D=0; clear+5D after '
+                       'invocation regardless of status. Missing export or unopened device returns without '
+                       'state reset.',
+ 'ds4.read0500': 'DS-4 API05 forwards ReadMsgs unchanged after API/module/open gates, even with+5D=0. No '
+                 'short-read accumulation in controller; only optional log callback. KGP requests exact '
+                 'stream-byte counts, so external driver must fulfill each requested block or KGP reports '
+                 'short response.',
+ 'ds4.logical_connect0500': 'API2/module/open guard then tail-dispatch physical driver LogicalConnect with '
+                            'caller stack unchanged. Does not update+5D/+74 or track logical IDs. KGP owns '
+                            'IP4/UDP/TCP slots2240/2244/2248.',
+ 'ds4.logical_disconnect0500': 'API2/module/open guard then tail-dispatch physical driver LogicalDisconnect, '
+                               'no ID/flag bookkeeping. KGP backend zeros every supplied logical slot after '
+                               'attempted driver teardown even on error.'})
+BRANCH_ANCHORS.update({'j2534.connect0500': [(268542387, '894674'), (268542392, 'c6465d01')],
+ 'j2534.disconnect0500': [(268542936, 'c6465d00')],
+ 'ds4.connect0404': [(268530647, '807e5d00'), (268530704, 'c7868000000000000000')],
+ 'ds4.disconnect0404': [(268535606, '807f5d01'), (268535933, 'c6475d00')],
+ 'ds4.close': [(268527065, 'c6465c00'), (268527069, 'c7467800000000')]})
+FINDINGS["j2534.disconnect0404"] += (
+    " Missing PassThruDisconnect export returns7 BEFORE cleanup, preserving+5D/list/flags; "
+    "only a driver invocation reaches unconditional resets. Numeric channel+74 is never zeroed."
+)
+FINDINGS["j2534.close"] += (
+    " Disconnect status is ignored. Missing disconnect export can preserve+5D even after Close success; "
+    "Open then sets only+5C/+78, so API04 next Connect can still reject14. A failed Close leaves+5C=1: "
+    "Open rejectsE while Connect can proceed if+5D cleared. Finalize destroys regardless and destructor "
+    "attempts another physical Close while+5C remains set; repeated error does not prove hardware leak."
+)
+FINDINGS["ds4.initialize"] += (
+    " Unlike main, failed post-constructor API04/API05 Open returns without deleting/resetting singleton "
+    "100287E0. Next Initialize returnsE until explicit Finalize; KGP Open failure calls CloseDevice, "
+    "which finalizes this retained singleton. Do not transfer main failed-open reset to DS-4."
+)
+FINDINGS["j2534.ndis_receive"] += (
+    " Header and body each accumulate positive short recv results to exact requested size; WinsockLogger "
+    "does not parse. Invalid type/too-small length/caller-capacity rejection consumes header only, leaving "
+    "body queued; partial-body timeout consumes bytes with no persistent assembly state for next call. "
+    "Neither version/inverse bytes nor fixed global scratch capacityFFFF are checked against declared "
+    "length before body recv; caller payload capacity is not a scratch-buffer bound. High-bit lengths "
+    "reach signed-positive helper check8005 when caller capacity passes."
+)
+FINDINGS["j2534.ndis_ack"] += (
+    " Positive short reads are accumulated separately for header/body; declared body is read into shared "
+    "FFFF-byte scratch without an explicit maximum check. Version/inverse and ACK code byte are not "
+    "checked. A four-byte address-only8002 body succeeds;8003 fails regardless of code. Rejected header "
+    "does not drain body, and timeout/EOF does not close socket or retain partial parser state."
+)
+FINDINGS["ds4_kgp.ethernet_receive"] += (
+    " Chunk limit1020 is HEX (4128 bytes), not decimal1020. ACK requests exactly13 bytes and only checks "
+    "minimum13,type8002,source==requested ECU; no ACK-declared-length/status/destination check. Header "
+    "requests8 bytes; body requires declared>=5 and capacity>=declared-4, then exact driver DataSize for "
+    "each min(remaining,1020) block; positive short blocks are errors, not accumulated. Version/inverse "
+    "and logical destination are unchecked. Classifier runs on first body block; success then source "
+    "comparison precedes later raw chunk concatenation. Driver ReadMsgs and shim supply byte-stream "
+    "fulfillment; host TCP fragmentation loop is absent in this DS-4 route."
+)
+
+NATIVE_PINS["j2534"].update({
+    "logical_connect0500": {"va": 0x1001AD70, "size": 59,
+        "sha256": "d3062afc887142d9ea753f6999d7d7a6abc2177c4898180795c9d5b8bdb38f51"},
+    "logical_disconnect0500": {"va": 0x1001ADB0, "size": 59,
+        "sha256": "93b568845fc5bec2c05fef622e3ffd00220e9c0bb8f7f630cffdb379a7c2b0aa"},
+})
+FINDINGS["j2534.logical_connect0500"] = FINDINGS["ds4.logical_connect0500"]
+FINDINGS["j2534.logical_disconnect0500"] = FINDINGS["ds4.logical_disconnect0500"]
+for _source in ("shim0500", "ds4_shim0500"):
+    NATIVE_PINS[_source].update({
+        "read_stream": {"va": 0x1000B900, "size": 455,
+            "sha256": "bf36a2dd5bc9fc4cce64696566b81a92017fd2ec2b8a305b0847cdb612c62324"},
+        "read_clock": {"va": 0x1000DA30, "size": 137,
+            "sha256": "cd8781d5704524c0e0f250250ccde3e0bcf6cc829e3b198b22bb8dec0cc2e6df"},
+    })
+    FINDINGS[_source + ".read_stream"] = (
+        "Under API critical section, reject unloaded driver7; invoke cached physical ReadMsgs exactly once "
+        "with original channel/message/count/timeout arguments, then log output. Channel-table lookup "
+        "only changes byte/message logging. No accumulation, DoIP length/type/address parsing or retry; "
+        "selected external FunctionLibrary owns API05 byte-stream fulfillment."
+    )
+    FINDINGS[_source + ".read_clock"] = (
+        "ReadMsgs pre-call helper only initializes/query performance frequency/counter under lock and "
+        "converts timing; it does not receive message arguments or consume/assemble bytes."
+    )
+FINDINGS["kgp.adopt_connection"] += (
+    " No independent owned/borrowed flag is set: adopted +0C=1 takes the same later disconnect path "
+    "as newly connected channels. Adoption changes KGP fields, not J2534 singleton +5C/+5D; API04 "
+    "can therefore reject later reads/disconnect with2 if caller did not also establish controller state."
+)
+FINDINGS["kgp.change_interface"] += (
+    " Compatible reuse exits without a new physical Connect; cached bus/category, WWH and OBD-on-UDS "
+    "modes and FD ECU identity gate reuse. Main nibble4 reuse explicitly backend-disconnects and clears "
+    "KGP +0C before reusing the NDIS object. Any backend-connect error flows Disconnect(0): ordinary "
+    "base skips physical disconnect if+0C was never set; NDIS override always calls backend teardown."
+)
+FINDINGS["ds4_kgp.ethernet_receive"] = FINDINGS["ds4_kgp.ethernet_receive"].replace(
+    "chunks up to1020 each", "chunks up to0x1020 (4128) bytes each"
+)
+NATIVE_PINS["kgp"].update({
+    "set_adopted_channel": {"va": 0x10016940, "size": 13,
+        "sha256": "7dd3c0df92e475b5ecdbd89e4b18571bfe34961f32b51a9f9c3b8326dfd56f3c"},
+    "set_adopted_protocol": {"va": 0x10016D00, "size": 16,
+        "sha256": "3c3eb59953385e180b0c3dbc6477950c5cfeeb08a6d5a4b2a1b53449be441e82"},
+})
+FINDINGS["kgp.set_adopted_channel"] = "Vtable+120 setter stores supplied numeric channel at protocol object+08; no driver call or ownership flag."
+FINDINGS["kgp.set_adopted_protocol"] = "Vtable+128 setter stores supplied protocol at protocol object+20D8; no driver call."
+NATIVE_PINS["ds4"]["open0404"] = {
+    "va": 0x10016B50, "size": 487,
+    "sha256": "780f5f8ec8d7f8bc5698070c8f1a8256f72c031225e5797d8b91c76157454884",
+}
+FINDINGS["ds4.open0404"] = (
+    "API1/module required. Open+5C already set returnsE; driver Open(null,&device) success sets+78/+5C "
+    "but does not reset connected+5D. Following a Close whose disconnect export was absent, this "
+    "reopen can succeed yet subsequent API04 Connect returns14 due to stale+5D."
+)
+for _source in ("j2534", "ds4"):
+    FINDINGS[_source + ".disconnect0404"] += (
+        " Exceptional direct-DENSO path: driver status7 and+7D set resolves GetLastError; "
+        "if absent, code logs FUNC_ADDRESS_FAILED but still calls null before software resets. "
+        "Thus unconditional post-invocation reset describes normally returning paths, not this fault."
+    )
+BRANCH_ANCHORS["j2534.disconnect0404"].append((0x1001A35A, "ffd0"))
+BRANCH_ANCHORS["ds4.disconnect0404"].append((0x1001884A, "ffd0"))
+FINDINGS["j2534.ndis_connect"] += (
+    " Direct repeated NDISConnect has no existing-socket/startup guard: WSAStartup and newly created "
+    "UDP/TCP handles overwrite process globals. Normal ChangeCommIF failure invokes KGP NDIS "
+    "disconnect override even when+0C=0, closing partial globals; bypassing that owner is not equivalent. "
+    "No allocation-liveness conclusion follows solely from omitted calls."
+)
+
 # Disassembled initialization windows, including conditional callback registration.
 REGISTRATION_PINS = {
     "shim0404": (0x10001150, "687c631b10ff15f8e31710a3c4f01d1085c07411689c631b1050ff15f4e31710a3c8f01d1068f0d81710e80470140059c3", 0x101B637C, 0x101B639C),
@@ -895,6 +1128,43 @@ def build(gts_root: Path = DEFAULT_GTS, ds4_root: Path = DEFAULT_DS4,
     edge("log_flush", "log_pending", "log_attempted", "SAVE_J2534_LOG_FILE_EVENT", "non-direct-DENSO shim route and worker alive",
          "Call settings-backed SaveLog hook and signal finish; current04/05 shim hook is no-op success", "j2534.save_worker", "j2534.save_log", "shim0404.savelog", "shim0500.savelog")
 
+    edge("filter_failure_reconnect", "fault_returned", "channel_open", "next API04 Connect after default-filter failure",
+         "open+5C=1, connected+5D=0, next driver Connect and setup succeed",
+         "Overwrite last channel+74; old numeric channel not disconnected by guarded rollback; inherited translation flags can survive",
+         "j2534.connect0404", "j2534.read0404", "kgp.base_connect", "kgp.base_disconnect", "ds4.connect0404")
+    edge("disconnect_driver_failure", "channel_open", "disconnected", "physical Disconnect returns nonzero",
+         "API04 export resolved and invoked; error-reporting callbacks return normally",
+         "Clear software connected/filter/translation state despite error; next Connect allowed, retained ID is not proof of live hardware",
+         "j2534.disconnect0404", "ds4.disconnect0404", "kgp.base_disconnect")
+    edge("disconnect_export_failure", "channel_open", "fault_returned", "Disconnect export missing",
+         "API04 module/open/channel gates pass",
+         "Return7 without clearing controller bookkeeping; subsequent API04 Connect rejects14 until state-changing teardown",
+         "j2534.disconnect0404", "ds4.disconnect0404")
+    edge("api05_repeated_connect", "channel_open", "channel_open", "another API05 physical Connect",
+         "module/open gates pass; driver returns success",
+         "No connected guard: invoke driver again and replace last physical ID; API05 logical IDs are separately KGP-owned",
+         "j2534.connect0500", "ds4.connect0500", "ds4.logical_connect0500")
+    edge("api05_repeat_disconnect", "disconnected", "disconnected", "API05 Disconnect after software flag cleared",
+         "module/open and export present",
+         "Invoke supplied physical channel again even with+5D=0; clear+5D after invocation, preserve numeric+74",
+         "j2534.disconnect0500", "ds4.disconnect0500")
+    edge("close_error_reconnect", "channel_open", "fault_returned", "Close returns driver failure",
+         "disconnect attempted before Close; Close nonzero",
+         "Return7 and preserve open/device; when disconnect cleared+5D next API04 Connect is allowed, while Open rejectsE",
+         "j2534.close", "ds4.close", "j2534.open0404")
+    edge("adopted_disconnect", "adopted", "disconnected", "ordinary KGP Disconnect",
+         "adoption set KGP+0C without separate borrowed-ownership marker",
+         "Use ordinary disconnect callback for adopted channel; controller API04 may reject2 if its independent+5D is clear",
+         "kgp.adopt_connection", "kgp.base_disconnect", "j2534.disconnect0404")
+    edge("ds4_failed_open_retry", "fault_returned", "fault_returned", "DS-4 Initialize repeated after failed Open",
+         "post-constructor singleton retained",
+         "ReturnE before another Open; explicit Finalize or KGP CloseDevice is required to release singleton",
+         "ds4.initialize", "ds4.finalize", "ds4_kgp.open")
+    edge("ndis_parser_retry", "ndis_active", "fault_returned", "invalid header or partial-body timeout",
+         "header consumed; rejected body left queued or partially consumed",
+         "Return parser error without drain/socket close/persistent assembly; next receive starts a new8-byte header, not continuation",
+         "j2534.ndis_receive", "j2534.ndis_ack")
+
     handoffs = [
         {"to_domain": "auth_settings", "caller": "J2534CtrlInitialize/GetDeviceInfo", "callee": "GetFileDataFromType(3)",
          "mechanism": "in-process DLL API + persisted settings", "payload": "vim.name, registry0404, registry0500; then selected HKLM FunctionLibrary/Vendor/Name",
@@ -948,14 +1218,48 @@ def build(gts_root: Path = DEFAULT_GTS, ds4_root: Path = DEFAULT_DS4,
     return {"schema": "gtsplus-lifecycle-domain-v1", "domain": DOMAIN, "sources": sources,
             "evidence": evidence, "states": states, "transitions": transitions,
             "handoffs": handoffs, "persistence": persistence, "transport_families": transports,
+            "native_state_contracts": {
+                "controller": {
+                    "module": "+04", "open": "+5C", "connected_summary": "+5D",
+                    "api_selector": "+60", "last_physical_channel": "+74", "device": "+78",
+                    "default_filters": "+7C; linked list+64/+68/+6C/+70",
+                    "translation": "main+7E/+7F/+80; DS-4+7E/+7F",
+                    "custom_mode": "main dword+84; DS-4 dword+80",
+                    "summary_not_channel_count": True,
+                    "evidence": [_id(name) for name in (
+                        "j2534.connect0404", "j2534.disconnect0404", "j2534.read0404",
+                        "j2534.connect0500", "j2534.disconnect0500", "j2534.read0500",
+                        "j2534.close", "ds4.connect0404", "ds4.disconnect0404", "ds4.close")]},
+                "protocol_owner": {
+                    "connected": "+0C", "channel": "+08", "device": "+20E0", "protocol": "+20D8",
+                    "adoption": "sets KGP connected/device/protocol/channel; no separate borrowed marker",
+                    "independent_flags": "adoption does not set controller open/connected bytes",
+                    "evidence": [_id("kgp.base_connect"), _id("kgp.base_disconnect"), _id("kgp.adopt_connection")]},
+                "physical_outcome_boundary": "Missing/guarded driver call is proven absence of a call; driver-returned failure and numeric IDs do not establish live hardware allocation or leak."},
+            "receive_parser_ownership": [
+                {"route": "main host NDIS", "owner": "J2534Ctrl",
+                 "fragmentation": "accumulate exact8-byte header then exact declared body from positive short recv results",
+                 "checks": "diagnostic8001,length>=4,caller payload capacity,both reversed logical addresses; ACK8002/8003 and body>=4",
+                 "not_checked": "version/inverse,ACK code,declared length against fixedFFFF-byte global scratch",
+                 "failure_continuation": "no body drain on rejected header; no persistent partial frame; no parser-triggered socket teardown",
+                 "evidence": [_id("j2534.ndis_receive"), _id("j2534.ndis_ack"), _id("j2534.address_compare"), _id("winsock.receive")]},
+                {"route": "DS-4 API05 Ethernet", "owner": "KGP DoIP framing; external FunctionLibrary fulfills each requested stream block",
+                 "fragmentation": "controller and shim make one ReadMsgs call; KGP requires exact block DataSize, splits long body at0x1020=4128",
+                 "checks": "ACK minimum13,type8002,ECU source; diagnostic header minimum8,type8001,length>=5,caller capacity,exact first/subsequent body sizes",
+                 "not_checked": "version/inverse,logical destination,ACK declared length or code",
+                 "classifier": "diagnostic7F xx78 pending;7F xx21 requeue;other7F negative response; no framing/address checks",
+                 "evidence": [_id("ds4_kgp.ethernet_receive"), _id("ds4_kgp.ethernet_classifier"),
+                              _id("ds4.read0500"), _id("ds4_shim0500.read_stream"), _id("ds4_shim0500.read_clock")]}],
             "support_family_distinction": "GTSPlus and DS-4 are parallel application/support builds; ECU category low5 controls support/session strategy, application bus low nibble selects transport. P6 does not imply DoIP, nor P5 only CAN.",
             "coverage": {"components": ["GTSPlus native frame controller and J2534 singleton", "DS-4 native factory and driver-mediated ISO13400", "v04.04/v05.00 loader and shim interposition", "managed NIC enumeration", "pass-through wrappers and adopted channels", "settings/config ownership"],
                          "entrypoints": ["Initialize/Finalize", "Open/Connect/Filter/Disconnect/Close", "ReadVersion fallback", "ChangeCommIF/SetConnectInfo/general adoption", "NDISConnect/Send/Receive/Disconnect", "DS-4 ISO13400 physical/logical/vehicle-ID/routing", "CommunicationAbort", "Save/Finish log events", "GetPrivateIpInfo"],
                          "branches": ["selected API04/API05 registry paths", "direct DENSO versus shim", "default-filter rollback rejected by unset connected flag", "disconnect failure bookkeeping", "two-attempt UDP identification", "TCP setup/EOF/timeout/address/type errors", "DS-4 pending180000ms/classifier requeue limit256", "same-protocol reuse versus finalize/reopen", "adopted versus newly opened IDs", "best-effort teardown and worker forced-stop5000ms", "current shim SaveLog no-ops versus MsgDatComm log callback"]},
             "residuals": [
                 {"question": "Which installed Windows registry entries and physical VCIs are actually usable?", "why_unclosed": "Offline shipped application has no target Windows registry/device state; selected FunctionLibrary implementations and VCI firmware are external transport owners.", "next_evidence": "Authorized Windows registry/device metadata and driver-specific source/capture, without network/vehicle interaction in this pass."},
-                {"question": "Actual physical close/connect/reset acknowledgement and recovery behavior", "why_unclosed": "Driver error contracts are propagated or suppressed as pinned; software state does not measure a device. No generic reconnect loop or hardware reset can be inferred from module teardown.", "next_evidence": "Offline Windows driver-contract harness with preauthorized inert implementation; no live device required."}],
-            "reproduction": {"command": "uv run --locked python -m tools.techstream.extract_gtsplus_lifecycle_vci_transport", "recovery_prerequisite": "build/out/gtsplus-unprotected with matching main recovery manifest", "network_or_vehicle_access": False}}
+                {"question": "Actual selected-driver allocation/release acknowledgement and byte-stream fulfillment", "why_unclosed": "Complete host paths prove calls, arguments, software resets and parser boundaries, not the physical FunctionLibrary implementation or VCI firmware state. No hardware leak/reset or API05 stream-fulfillment guarantee follows from numeric IDs or returned host status.", "next_evidence": "Selected external FunctionLibrary source or authorized offline driver contract; host call/state/fragmentation paths are separately runnable with the prepared inert-callback Unicorn smoke."}],
+            "reproduction": {"command": "uv run --locked python -m tools.techstream.extract_gtsplus_lifecycle_vci_transport", "recovery_prerequisite": "build/out/gtsplus-unprotected with matching main recovery manifest", "network_or_vehicle_access": False,
+                             "parent_smoke": "PYTHONPATH=. uv run --locked --with unicorn python build/tmp/lc2_vci_transport_smoke.py",
+                             "smoke_prepared_not_run_by_extractor": True}}
 
 
 def main() -> None:
