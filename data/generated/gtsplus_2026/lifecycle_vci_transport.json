@@ -1,0 +1,2214 @@
+{
+  "schema": "gtsplus-lifecycle-domain-v1",
+  "domain": "vci_transport",
+  "sources": [
+    {
+      "id": "vci_transport.source.j2534",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/J2534Ctrl.dll",
+      "sha256": "dd571d19c229dd484fe6da71280110e3362a7fe09e41a1ddb1279331fd326520",
+      "size": 197136,
+      "representation": "installed-original"
+    },
+    {
+      "id": "vci_transport.source.kgp",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/KGP_CommFrameCtrl.dll",
+      "sha256": "5366aba0f1da6ec7806cb6c8346a4429ce61b9ac7b1495be53e35ee6263b9517",
+      "size": 379920,
+      "representation": "installed-original"
+    },
+    {
+      "id": "vci_transport.source.ds4",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/DS-4/bin/J2534Ctrl.dll",
+      "sha256": "9d2e96eb9202122c43dc5c33b89dc82fc6ec3e3f93f61a29e8caf91c5deef57e",
+      "size": 182288,
+      "representation": "installed-original"
+    },
+    {
+      "id": "vci_transport.source.settings",
+      "path": "build/out/gtsplus-unprotected/bin/GTSPlusSettingFileManager.dll",
+      "sha256": "20fd47aac7d0e427f4012d9421fe039e309e5d1f704a11c40de280bf3e7c8f8d",
+      "size": 389648,
+      "representation": "installer-recovered-native-plaintext",
+      "recovery": {
+        "manifest": "build/out/gtsplus-unprotected/manifest.json",
+        "installer": "Setup_PF.exe",
+        "original_stub": "vci_transport.source.settings_stub",
+        "original_sidecar": "vci_transport.source.settings_sidecar",
+        "method": "tools.techstream.recover_gtsplus_bodies; matching installer CP stub and sidecar"
+      }
+    },
+    {
+      "id": "vci_transport.source.settings_stub",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/GTSPlusSettingFileManager.dll",
+      "sha256": "7b072b893e6f3e0a92004bed66cc5a57bf6c9c7bd608544a1dfe09230ef6ea61",
+      "size": 90128,
+      "representation": "installed-CP-stub"
+    },
+    {
+      "id": "vci_transport.source.settings_sidecar",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/GTSPlusSettingFileManager.dll._",
+      "sha256": "9e5f6431d41363baed9d88b986481f7bd79b149c8f39e29fd67a87565e5a260e",
+      "size": 363952,
+      "representation": "installed-CP-sidecar"
+    },
+    {
+      "id": "vci_transport.source.nic",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/GtsPlus-NicManager.dll",
+      "sha256": "a3ac41c87c65e48f2f7e9d5d49b91c0e22b77c06f0f1e7c9419ec08a4ee1ff6b",
+      "size": 16400,
+      "representation": "installed-original"
+    },
+    {
+      "id": "vci_transport.source.winsock",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/WinsockLogger.dll",
+      "sha256": "e310929d9a4c6ebf9c304a086dfb3535ae8c597242e7437cf75e72f207bb72a1",
+      "size": 52752,
+      "representation": "installed-original"
+    },
+    {
+      "id": "vci_transport.source.wrap",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/PassThruWrapNK.dll",
+      "sha256": "d6de0a03bc8cecd31ace44508277dddb965150c3adcace77aa850ededb3b48e3",
+      "size": 57360,
+      "representation": "installed-original"
+    },
+    {
+      "id": "vci_transport.source.front",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/PassThruWrapFrontNK.dll",
+      "sha256": "636c395728abf795ba10a7eb09504b54217b42562bfe1055d9c56e57163672c4",
+      "size": 59408,
+      "representation": "installed-original"
+    },
+    {
+      "id": "vci_transport.source.ds4_kgp",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/DS-4/bin/KGP_CommFrameCtrl.dll",
+      "sha256": "c49948cea8c84a11dffbdcdcc0606d00d95bb40c1c9c138b13d3f753aa6b1961",
+      "size": 317968,
+      "representation": "installed-original"
+    },
+    {
+      "id": "vci_transport.source.shim0404",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/ptshim32.dll",
+      "sha256": "2d420374d703d28c8a38480c808ba1d39c0bd8848956af359ba28f4f849aed6e",
+      "size": 2105872,
+      "representation": "installed-original"
+    },
+    {
+      "id": "vci_transport.source.shim0500",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/ptshim32_0500.dll",
+      "sha256": "df41cef16cae1ab5272ceffb7568eb195948b03ace3a795000d07919c4795673",
+      "size": 2119696,
+      "representation": "installed-original"
+    },
+    {
+      "id": "vci_transport.source.ds4_shim0404",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/DS-4/bin/ptshim32.dll",
+      "sha256": "1c1e61da748104032c2b3826e386b1eadd37d0f4efa1d33f8076f4766fa806c9",
+      "size": 2106384,
+      "representation": "installed-original"
+    },
+    {
+      "id": "vci_transport.source.ds4_shim0500",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/DS-4/bin/ptshim32_0500.dll",
+      "sha256": "664fa06364c0599dc9fa54d0fadd31642219d10d4f03e93cd72f7f79ff14da64",
+      "size": 2119696,
+      "representation": "installed-original"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "vci_transport.j2534.initialize",
+      "source": "vci_transport.source.j2534",
+      "kind": "native-body",
+      "locator": "0x10011D00",
+      "size": 2581,
+      "body_sha256": "a0f59f4ad17c13289b44be72e93b62c700ff0be8652f2c461e50003f8f905ab8",
+      "anchors": [],
+      "finding": "Reject null output=4, existing process singleton=0xE and API selector other than1/2=7. Read setting type3, vim.registry0404 or vim.registry0500; require matching PassThruSupport.04.04/.05.00 prefix; query HKLM selected key FunctionLibrary/Vendor/Name. Construct CJ2534v2 then vtable+34 (04.04) or+78 (05.00) open; on open failure destroy/reset singleton and return error. Registry/config/allocation failures are not an automatic device retry."
+    },
+    {
+      "id": "vci_transport.j2534.finalize",
+      "source": "vci_transport.source.j2534",
+      "kind": "native-body",
+      "locator": "0x10011C60",
+      "size": 158,
+      "body_sha256": "c222743125fef13e1b3c91bba560ca75de2b89a310ccd5d2ea6f40d1586407f2",
+      "anchors": [],
+      "finding": "No singleton=>8. Invoke vtable+38 close, obtain last error on7, then deleting destructor and singleton reset regardless of returned close status."
+    },
+    {
+      "id": "vci_transport.j2534.driver_constructor",
+      "source": "vci_transport.source.j2534",
+      "kind": "native-body",
+      "locator": "0x10015E90",
+      "size": 1253,
+      "body_sha256": "f1a7622fe2298167f356b60c58b8278d966dbf900afe9127ac717ca5aa33ef90",
+      "anchors": [
+        {
+          "va": "0x10015ED9",
+          "bytes": "c707a84f0210"
+        }
+      ],
+      "finding": "For API1 with exact Vendor DENSO CORPORATION and Name TIS Techstream VIM load physical DLL directly (LoadLibraryW). Otherwise load install-directory ptshim32.dll/API1 or ptshim32_0500.dll/API2 with LoadLibraryExW(flags8), call PassThruLoadLibrary(physical FunctionLibrary path), create save/finish/stop events and logger worker. Logger insertion is deliberate controller routing, not DLL-search-path replacement."
+    },
+    {
+      "id": "vci_transport.j2534.open0404",
+      "source": "vci_transport.source.j2534",
+      "kind": "native-body",
+      "locator": "0x100185F0",
+      "size": 504,
+      "body_sha256": "b81684ff7733dbfead28f3cdf900f70066d0962a46ed7c337b74019de8d6df14",
+      "anchors": [],
+      "finding": "Require API1 and loaded module; already-open byte+5C returns0xE. Resolve/call PassThruOpen(name,&deviceID); only success stores ID at+78 and sets open+5C. Missing DLL/export or open failure returns7 with stored last-error text."
+    },
+    {
+      "id": "vci_transport.j2534.scan_open0500",
+      "source": "vci_transport.source.j2534",
+      "kind": "native-body",
+      "locator": "0x100187F0",
+      "size": 502,
+      "body_sha256": "6e3007783cadbbc6d36b96bf94e962343f7b27c6444dc74a6197897ae8cb9d5b",
+      "anchors": [],
+      "finding": "API2 uses PassThruScanForDevices(&count), then exactly one PassThruGetNextDevice call; parses its device name and calls PassThruOpen(\"J2534-2:%s\",&deviceID). Empty parsed name returns0x22; open success stores+78 and+5C. This body does not iterate all discovered devices."
+    },
+    {
+      "id": "vci_transport.j2534.connect0404",
+      "source": "vci_transport.source.j2534",
+      "kind": "native-body",
+      "locator": "0x10018DD0",
+      "size": 4897,
+      "body_sha256": "4ddc71c90b63c7a128c0b59ef00e07b9295dbe906c3448a218d103614914a6d6",
+      "anchors": [
+        {
+          "va": "0x10018E4E",
+          "bytes": "807e5c00"
+        },
+        {
+          "va": "0x10018E87",
+          "bytes": "807e5d00"
+        },
+        {
+          "va": "0x10019055",
+          "bytes": "c7451420a10700"
+        },
+        {
+          "va": "0x10019226",
+          "bytes": "c6465d01"
+        },
+        {
+          "va": "0x100192B0",
+          "bytes": "8bceff7674e8160f0000"
+        }
+      ],
+      "finding": "Require API1/module/open+5C and channel+5D clear (8/0x14 otherwise). Validate flag masks and protocol IDs. Non-DENSO custom0x1000C becomesISO15765(6),0x1000D becomesISO9141(3); direct DENSO IDs gain0x10000. Zero baud defaults:1/3/4=10400,2=41600,5/6/0x1000B/0x8012/0x1000C=500000,0x8005=125000,0x8013=0. Call physical PassThruConnect(device,protocol,flags,baud,&channel), store+74; for applicable legacy protocols install PASS_FILTER defaults. Failure attempts controller disconnect before connected+5D is set; its guard returns2 without calling physical PassThruDisconnect. Thus a physical channel may remain despite setup failure until later driver/device close. Channel+5D is set only on successful setup."
+    },
+    {
+      "id": "vci_transport.j2534.disconnect0404",
+      "source": "vci_transport.source.j2534",
+      "kind": "native-body",
+      "locator": "0x1001A1D0",
+      "size": 461,
+      "body_sha256": "0da8e6bb4f41aca6df0fa79b1393848d554e41e4443b732bdd6c023efed3f081",
+      "anchors": [
+        {
+          "va": "0x1001A246",
+          "bytes": "807f5d017426"
+        },
+        {
+          "va": "0x1001A268",
+          "bytes": "b802000000"
+        }
+      ],
+      "finding": "Require API1/module/open/channel. Call physical PassThruDisconnect(channel); even if it fails, clear tracked filters and default-filter flag+7C, flag bytes+7E/+7F/+80 and connected+5D. Return driver status; software disconnected does not prove hardware acknowledged disconnect."
+    },
+    {
+      "id": "vci_transport.j2534.close",
+      "source": "vci_transport.source.j2534",
+      "kind": "native-body",
+      "locator": "0x10017EC0",
+      "size": 464,
+      "body_sha256": "5527bf782e2afccb5742cee9f63493f19a4226797e229a2a3ed9cabbfc308ff1",
+      "anchors": [],
+      "finding": "Require loaded module and open+5C. If connected, disconnect via API-specific path; then PassThruClose(deviceID). Only success clears+5C and deviceID and calls save-log vtable+B0; close failure returns7 and preserves open bookkeeping until destruction."
+    },
+    {
+      "id": "vci_transport.j2534.device_info",
+      "source": "vci_transport.source.j2534",
+      "kind": "native-body",
+      "locator": "0x100105C0",
+      "size": 3063,
+      "body_sha256": "1bda26afbad45558c725273bc0639033dac4a4519b384f0262336e3caf5cb643",
+      "anchors": [],
+      "finding": "Read selected API04 registry metadata. Probe up to11 registry-supported protocol IDs by connect/disconnect through live singleton. Exact DENSO/TIS pair yields device kind1 or4 (probe success); other vendors2 or8. This is a device-capability probe, not a pure registry enumeration operation."
+    },
+    {
+      "id": "vci_transport.j2534.device_info0500",
+      "source": "vci_transport.source.j2534",
+      "kind": "native-body",
+      "locator": "0x100111C0",
+      "size": 2390,
+      "body_sha256": "360d8a1465b939743dbf1b0d97879bbac42d8336e87c42f97f2921fc9986cabb",
+      "anchors": [],
+      "finding": "Read selected API05 registry metadata and ETHERNET capability; probe protocol0x800F at100000000 baud with resource parameters, disconnect afterward, return device kind8 on success else2. Registry metadata alone is not proof the channel opens."
+    },
+    {
+      "id": "vci_transport.j2534.save_worker",
+      "source": "vci_transport.source.j2534",
+      "kind": "native-body",
+      "locator": "0x10017E10",
+      "size": 134,
+      "body_sha256": "a77cbbe1df129577f1ce5902e9581082f9feb5e902d72227885108e953a52ef7",
+      "anchors": [],
+      "finding": "Wait indefinitely for stop or SAVE_J2534_LOG_FILE_EVENT; on save reset event, call save-log vtable+B0, signal FINISH_J2534_LOG_FILE_EVENT and return to wait. Finish signals completion of the attempt, not necessarily successful persistence."
+    },
+    {
+      "id": "vci_transport.j2534.save_log",
+      "source": "vci_transport.source.j2534",
+      "kind": "native-body",
+      "locator": "0x1001BFC0",
+      "size": 1581,
+      "body_sha256": "272082c84eb49dc3638424826064c4ce0dc3eb67c6ee0f45d239d447d43a64d8",
+      "anchors": [],
+      "finding": "For non-direct-DENSO route resolve PassThruSaveLog. Read common setting type1 path.productFolder; prefix CSIDL0x2E, append ErrorReport/j2534_MMDDYYYYhhmmss.log using GetLocalTime and call shim save. Current filename policy is settings-backed; hard-coded legacy Techstream directory is not the current source of truth. Provider errors return7/A0040005/C0040102. Both current shipped shim SaveLog bodies are no-op success; this requested pathname does not establish that a file is created."
+    },
+    {
+      "id": "vci_transport.j2534.ndis_connect",
+      "source": "vci_transport.source.j2534",
+      "kind": "native-body",
+      "locator": "0x10012720",
+      "size": 3488,
+      "body_sha256": "f78be125e2ca1ea1d21c4472e8b7313c32a8238e2241ae153a6e1f24f3b49fad",
+      "anchors": [
+        {
+          "va": "0x10012DD0",
+          "bytes": "6858340000"
+        },
+        {
+          "va": "0x10012F65",
+          "bytes": "c70582c8021000050000"
+        },
+        {
+          "va": "0x10012F6F",
+          "bytes": "66c70586c802100007"
+        }
+      ],
+      "finding": "Validate NIC/address pointers and two-byte logical source address. Read ethernet.connectIPTimeout from setting type1; WSAStartup2.2; UDP socket(AF_INET,SOCK_DGRAM,UDP), exclusive-address and broadcast options. Poll SIO_GET_INTERFACE_LIST for selected NIC IPv4/up state at1000ms until timeout. Vehicle-ID discovery precedes TCP bind(selectedIPv4,port0), connect(peer,13400), and15-byte routing-activation request(type0005,length7). Require response type0006,length>=5 and matching tester source-address echo; this body does not check the activation-response status byte. Many early errors return with global sockets/WSA state still allocated; caller must execute teardown."
+    },
+    {
+      "id": "vci_transport.j2534.ndis_disconnect",
+      "source": "vci_transport.source.j2534",
+      "kind": "native-body",
+      "locator": "0x100134D0",
+      "size": 289,
+      "body_sha256": "a0327b71d3aa9f29f07e3894f8c670434d12023b4a8b8385eb5914cedf101690",
+      "anchors": [],
+      "finding": "shutdown(SD_BOTH) and close TCP; close UDP; WSACleanup if startup succeeded. Log but suppress cleanup failures, invalidate socket globals, clear protocol-version/NIC/address globals, always return0."
+    },
+    {
+      "id": "vci_transport.j2534.ndis_send",
+      "source": "vci_transport.source.j2534",
+      "kind": "native-body",
+      "locator": "0x10013AB0",
+      "size": 1008,
+      "body_sha256": "526d06ad4cd4dfc498cde1f021a2af5daad198788fa231dbaf35aa58597dea64",
+      "anchors": [],
+      "finding": "Require two-byte source/target logical addresses, nonempty bounded payload and TCP socket. Clear stale TCP receive buffer, build DoIP type8001 with four address bytes and length(payload+4), send once and await diagnostic acknowledgment. Return send/ack error, no transparent resend."
+    },
+    {
+      "id": "vci_transport.j2534.ndis_receive",
+      "source": "vci_transport.source.j2534",
+      "kind": "native-body",
+      "locator": "0x10013600",
+      "size": 1188,
+      "body_sha256": "ce05537cc4a70d31dee97742feb555f732f41a7531f5e412f0c6c33db493a60f",
+      "anchors": [],
+      "finding": "Read TCP header then body, require type8001,length>=4 and caller capacity>=length-4. Validate source/target match last send, copy diagnostic bytes after four logical-address bytes, return actual payload length. Timeout=>0x8003, EOF/socket error=>0x8017, address mismatch=>0x8002, invalid length/type=>0x8000."
+    },
+    {
+      "id": "vci_transport.j2534.vehicle_id",
+      "source": "vci_transport.source.j2534",
+      "kind": "native-body",
+      "locator": "0x10010010",
+      "size": 888,
+      "body_sha256": "94d8aa66cb9feeaf4a00b8165595ba87e36d615d42bb87c208e42e0dcfe3cece",
+      "anchors": [
+        {
+          "va": "0x1001006E",
+          "bytes": "c70580c80210ff000001"
+        },
+        {
+          "va": "0x100102E9",
+          "bytes": "81ff01800000"
+        },
+        {
+          "va": "0x10010315",
+          "bytes": "83f802"
+        },
+        {
+          "va": "0x10010318",
+          "bytes": "0f8c57feffff"
+        }
+      ],
+      "finding": "Bind UDP to selected NIC and supplied source port; broadcast 8-byte vehicle-ID request FF00000100000000 to255.255.255.255 at the supplied port. Clear stale UDP input first. On ReceiveVehicleIdMessage timeout0x8001 retry once (two requests total); all other failures return immediately."
+    },
+    {
+      "id": "vci_transport.j2534.vehicle_id_receive",
+      "source": "vci_transport.source.j2534",
+      "kind": "native-body",
+      "locator": "0x1000FD20",
+      "size": 737,
+      "body_sha256": "b50937ac43c0700a776e02d1a547949f504950317fca40cf29252d4471210d25",
+      "anchors": [],
+      "finding": "select/recvfrom within supplied timeout, skip self-originated packets, accept datagram length>=40 and payload type0004; remember sender IPv4 and protocol-version byte. VIN/EID/GID identity is not checked in this function."
+    },
+    {
+      "id": "vci_transport.j2534.ndis_ack",
+      "source": "vci_transport.source.j2534",
+      "kind": "native-body",
+      "locator": "0x1000F910",
+      "size": 1027,
+      "body_sha256": "b35bbf9c267708bba163e25af42b163eff29cd5b98c80ddec925524b8743bc0d",
+      "anchors": [],
+      "finding": "Read8-byte TCP header and declared body; allow types8002/8003 with nonzero body>=4, match reversed source/target addresses. Type8003=>0x8000;8002 succeeds. WSAETIMEDOUT10060=>0x8003, EOF/other recv errors=>0x8017; address mismatch=>0x8002."
+    },
+    {
+      "id": "vci_transport.j2534.filter",
+      "source": "vci_transport.source.j2534",
+      "kind": "native-body",
+      "locator": "0x1001C840",
+      "size": 3260,
+      "body_sha256": "908ece8da0681fc30bb59fd758cf7b2dc0ea2c8b4c4b15b69e7707763d4fd49d",
+      "anchors": [],
+      "finding": "Require module/open/channel. Replace controller-created default filters with Ioctl10(CLEAR_MSG_FILTERS); invoke real PassThruStartMsgFilter with mask/pattern/flow. Track real driver filterID in an internal linked list, expose a controller-local index as returned filterID. Failures return driver/error status; no retry loop."
+    },
+    {
+      "id": "vci_transport.j2534.destructor",
+      "source": "vci_transport.source.j2534",
+      "kind": "native-body",
+      "locator": "0x100163F0",
+      "size": 354,
+      "body_sha256": "724555f67ce4725286ae4c6fa12e210e81ce2637a4b544453c0bc4fc7ea80b63",
+      "anchors": [],
+      "finding": "If still open call PassThruClose and clear open/channel bytes. Close communication-log handle. Non-direct-DENSO route calls PassThruUnloadLibrary, signals worker stop, waits5000ms then TerminateThread if wait is not signaled; closes four worker/event handles. FreeLibrary physical/shim module and free filter list."
+    },
+    {
+      "id": "vci_transport.kgp.open",
+      "source": "vci_transport.source.kgp",
+      "kind": "native-body",
+      "locator": "0x10036620",
+      "size": 366,
+      "body_sha256": "54dd7e67d5d2d0e100a6ab35030c0261aafbf6fd4caa8f28f59c6a8d6ed1794c",
+      "anchors": [],
+      "finding": "Resolve installed J2534Ctrl.dll with LoadLibraryExW(flags8), call Initialize(API,&deviceID,null), map nonzero status with0x91010000, set log-collection mode and load-version/device fields, initialize disconnected CONNECT_INFO. Load/export failures=>C0040301/C0040302."
+    },
+    {
+      "id": "vci_transport.kgp.open_j2534_2",
+      "source": "vci_transport.source.kgp",
+      "kind": "native-body",
+      "locator": "0x10036790",
+      "size": 369,
+      "body_sha256": "32eac1733860c898024d91a1c1a3f1ace8fafe3957bab5754298c5d468a0e9cf",
+      "anchors": [],
+      "finding": "Same loader, but Initialize third argument is J2534-2:. Used for Ethernet/extended bus routes; this is not equivalent to automatically selecting API05."
+    },
+    {
+      "id": "vci_transport.kgp.change_interface",
+      "source": "vci_transport.source.kgp",
+      "kind": "native-body",
+      "locator": "0x100314F0",
+      "size": 3454,
+      "body_sha256": "62b76e0b9e7cfcc9d1d2e3306e46bc2474c8cf37b5e40ae471c3cce46bc1e1cf",
+      "anchors": [
+        {
+          "va": "0x1003161D",
+          "bytes": "241f"
+        },
+        {
+          "va": "0x1003161F",
+          "bytes": "3c14"
+        },
+        {
+          "va": "0x10031623",
+          "bytes": "3c15"
+        },
+        {
+          "va": "0x10031627",
+          "bytes": "3c16"
+        }
+      ],
+      "finding": "App bus low nibble selects transport class independently of category-byte low5 support/session family. Reuse only when bus/addressing/mode/category compatibility checks pass. Incompatible CAN11/29/FD, legacy or Ethernet transitions stop communication, Disconnect and sometimes FinalizeDevice; create/reinitialize selected protocol object. P5 low5=14/15/16 gates session cleanup separately; low5=16 forces additional finalize when changing family."
+    },
+    {
+      "id": "vci_transport.kgp.connect_general",
+      "source": "vci_transport.source.kgp",
+      "kind": "native-body",
+      "locator": "0x10032F40",
+      "size": 2144,
+      "body_sha256": "64dbb7f4d531252dbc9c893c8e44f49c76c3e820c607be2d9e7184c454a7b543",
+      "anchors": [],
+      "finding": "Select same protocol class from CONNECT_INFO bus low nibble, but adopt caller-supplied device/protocol/channel state through SetConnectParameterGeneral instead of opening a new ordinary channel. Setup error calls Disconnect; special device checks reject VIM-only incompatibilities with90020204."
+    },
+    {
+      "id": "vci_transport.kgp.disconnect",
+      "source": "vci_transport.source.kgp",
+      "kind": "native-body",
+      "locator": "0x10034110",
+      "size": 448,
+      "body_sha256": "bee0fb37b8bf53393e8200bc99d2feaddff57646cacb3b60f15681f6b003a02c",
+      "anchors": [],
+      "finding": "Optionally stop keepalive first; P5/P6 cleanup invokes stop/default-session paths, then protocol disconnect and deleting destructor. Clear protocol pointer,bus,ECU,current-session and reset timeout10000. Device kinds1/4 additionally FinalizeDevice; other devices can remain open for reconnect."
+    },
+    {
+      "id": "vci_transport.kgp.finalize",
+      "source": "vci_transport.source.kgp",
+      "kind": "native-body",
+      "locator": "0x100343F0",
+      "size": 96,
+      "body_sha256": "fa18eb98d576977774a8dd42c06c82d4914e9309e39be4509fdc5faed0d32d69",
+      "anchors": [],
+      "finding": "Call J2534CtrlFinalize if export exists but ignore its result; FreeLibrary and clear module/device/load-version fields. Returns0."
+    },
+    {
+      "id": "vci_transport.kgp.close",
+      "source": "vci_transport.source.kgp",
+      "kind": "native-body",
+      "locator": "0x10032820",
+      "size": 55,
+      "body_sha256": "16015a3db0936f2ac34260e6f9ce7e751a2e0890a329a15f8893f2b90aa7071e",
+      "anchors": [],
+      "finding": "If module exists, Disconnect(1) if protocol object, then FinalizeDevice if still loaded, and reset CONNECT_INFO to no connection. Returns0."
+    },
+    {
+      "id": "vci_transport.kgp.abort",
+      "source": "vci_transport.source.kgp",
+      "kind": "native-body",
+      "locator": "0x10032AA0",
+      "size": 601,
+      "body_sha256": "e57691892732ab288c52377532ee6045d46353d6e64c7cfcfe94450a4d5363ea",
+      "anchors": [],
+      "finding": "Signal keepalive/idle worker cancellation events, wait up to185000ms for keepalive completion; stop P5/P6 session activity, protocol stop-communication and ISO9141DK stop service, clear ECU/session/timeouts. This abort preserves the protocol/device object; it is not CloseDevice."
+    },
+    {
+      "id": "vci_transport.kgp.base_constructor",
+      "source": "vci_transport.source.kgp",
+      "kind": "native-body",
+      "locator": "0x10012CE0",
+      "size": 2077,
+      "body_sha256": "76fae7e53de0996f496799c4609bcd1f252e289d400c334ee1f4e9613ca4fe33",
+      "anchors": [],
+      "finding": "Resolve both API04 and API05 function pointers plus NDISConnect/Send/Receive/Disconnect from one J2534Ctrl module; missing exports use internal stubs. ReadVersion populates API numeric version. No new process is spawned here."
+    },
+    {
+      "id": "vci_transport.kgp.ndis_constructor",
+      "source": "vci_transport.source.kgp",
+      "kind": "native-body",
+      "locator": "0x1001E5A0",
+      "size": 160,
+      "body_sha256": "398724cfe49fc1c6eb1093f67713c191e68699b338ba472dac70c1546b80b177",
+      "anchors": [
+        {
+          "va": "0x1001E5E4",
+          "bytes": "c706c4750410"
+        }
+      ],
+      "finding": "Constructor installs CCommCtrlISO13400_NDIS vtable; factory caller and protocol argument are pinned by ChangeCommIF/ConnectCommIFGeneral, not deduced from filename."
+    },
+    {
+      "id": "vci_transport.kgp.ndis_connect",
+      "source": "vci_transport.source.kgp",
+      "kind": "native-body",
+      "locator": "0x1001EB20",
+      "size": 2067,
+      "body_sha256": "152ab25d7b7fadb17440695c37f059738fb946f763fcd7b12c8e1c24b7540cfd",
+      "anchors": [],
+      "finding": "Require selected VCI capability Ioctl800C selector54 results1/1. Read common ethernet sourcePortNumberUDP/TCP defaultsC000 and connectIPTimeout default0. Open auxiliary PassThru protocol8013, poll Ioctl800F for one nonzero NIC IPv4 with1000ms waits until timeout, then call NDISConnect. Success sets connected; setup failures=>91020306. The TCP source-port setting is passed, while current J2534Ctrl NDIS implementation binds TCP port0."
+    },
+    {
+      "id": "vci_transport.kgp.ndis_disconnect",
+      "source": "vci_transport.source.kgp",
+      "kind": "native-body",
+      "locator": "0x1001F6C0",
+      "size": 100,
+      "body_sha256": "b0e4163eece3a457fc877646881674e7e77626e6b85af0ec252b0846fd598412",
+      "anchors": [],
+      "finding": "Stop communication service when connected, clear ECU/service/connected fields, then invoke vtable198 backend disconnect."
+    },
+    {
+      "id": "vci_transport.kgp.ndis_disconnect_backend",
+      "source": "vci_transport.source.kgp",
+      "kind": "native-body",
+      "locator": "0x1001F730",
+      "size": 38,
+      "body_sha256": "bb0db154d310e0733c1ca300397ace4716d0d2661c02b051182817404fe7998d",
+      "anchors": [],
+      "finding": "Call J2534CtrlNDISDisconnect first, then disconnect auxiliary PassThru channel if present and zero its ID."
+    },
+    {
+      "id": "vci_transport.kgp.ndis_db_parameters",
+      "source": "vci_transport.source.kgp",
+      "kind": "native-body",
+      "locator": "0x1001F7F0",
+      "size": 349,
+      "body_sha256": "94f122e97ff4ec7b184fa7522644f90cbf44f8a66dab165f12becfc738d73f1c",
+      "anchors": [],
+      "finding": "Resolve DB class10D(category,bus)->155(Ethernet config)->156(software ECU config). Copy logical source from software row+2, timing values+6/+8/+A. Missing row=>90020104. Ethernet route is DB-selected, not inferred from P6 support family alone."
+    },
+    {
+      "id": "vci_transport.kgp.device_capabilities",
+      "source": "vci_transport.source.kgp",
+      "kind": "native-body",
+      "locator": "0x10034A50",
+      "size": 2414,
+      "body_sha256": "b09f43f877b9ddbd4edbf9a6c96dffef69069df3d04cf11f8ca5016bc956de43",
+      "anchors": [],
+      "finding": "Selectors4D/52/54 obtain device capabilities through Ioctl800C; selector52 checks configured API05. Selector54 additionally branches on persisted VCI display-name Mongoose-Plus MFC3 and DST-010 plus version string. Vendor/support identity gates capability policy, not protocol family selection."
+    },
+    {
+      "id": "vci_transport.kgp.can_iso15765",
+      "source": "vci_transport.source.kgp",
+      "kind": "native-body",
+      "locator": "0x10020830",
+      "size": 150,
+      "body_sha256": "e526102cd1262de91cf343276bd4e767e0416e8a6167585b6248488ca8cb9912",
+      "anchors": [],
+      "finding": "Constructor installs CCommCtrlISO15765 vtable; factory caller and protocol argument are pinned by ChangeCommIF/ConnectCommIFGeneral, not deduced from filename."
+    },
+    {
+      "id": "vci_transport.kgp.can_phase5",
+      "source": "vci_transport.source.kgp",
+      "kind": "native-body",
+      "locator": "0x100283D0",
+      "size": 59,
+      "body_sha256": "f06946d886bc696648107163419a3acb9b3d999af1e9219ef771aa01406d3a13",
+      "anchors": [],
+      "finding": "Constructor installs CCommCtrlISO15765_Phase5 vtable; factory caller and protocol argument are pinned by ChangeCommIF/ConnectCommIFGeneral, not deduced from filename."
+    },
+    {
+      "id": "vci_transport.kgp.can_obd_zev",
+      "source": "vci_transport.source.kgp",
+      "kind": "native-body",
+      "locator": "0x10023BC0",
+      "size": 46,
+      "body_sha256": "38b93f941ae5c253d89e6417ce0249dec08f7ca5698042c785d778054a7ffe41",
+      "anchors": [],
+      "finding": "Constructor installs CCommCtrlISO15765_11BitOBDZEVonUDS vtable; factory caller and protocol argument are pinned by ChangeCommIF/ConnectCommIFGeneral, not deduced from filename."
+    },
+    {
+      "id": "vci_transport.kgp.can_wwh",
+      "source": "vci_transport.source.kgp",
+      "kind": "native-body",
+      "locator": "0x100299C0",
+      "size": 39,
+      "body_sha256": "35b8a37eb3db493b5386fd476e096fd378df33aad9d4ff8d85e6eab5c76b127a",
+      "anchors": [],
+      "finding": "Constructor installs CCommCtrlISO27145_Phase5 vtable; factory caller and protocol argument are pinned by ChangeCommIF/ConnectCommIFGeneral, not deduced from filename."
+    },
+    {
+      "id": "vci_transport.kgp.can_29bit",
+      "source": "vci_transport.source.kgp",
+      "kind": "native-body",
+      "locator": "0x10024690",
+      "size": 66,
+      "body_sha256": "92a8c6c94230debd461588bf40ccbbbccf43e3d57b7587451d8edf57a8e4b6f1",
+      "anchors": [],
+      "finding": "Constructor installs CCommCtrlISO15765_29BitCan vtable; factory caller and protocol argument are pinned by ChangeCommIF/ConnectCommIFGeneral, not deduced from filename."
+    },
+    {
+      "id": "vci_transport.kgp.can_fd",
+      "source": "vci_transport.source.kgp",
+      "kind": "native-body",
+      "locator": "0x1002E3B0",
+      "size": 66,
+      "body_sha256": "1b27498f83bbfe2412bca49fb2d576aaf64e20dab8ebbbbf08cce7a2dbded689",
+      "anchors": [],
+      "finding": "Constructor installs CCommCtrl_FD_ISO15765_PS vtable; factory caller and protocol argument are pinned by ChangeCommIF/ConnectCommIFGeneral, not deduced from filename."
+    },
+    {
+      "id": "vci_transport.kgp.iso9141",
+      "source": "vci_transport.source.kgp",
+      "kind": "native-body",
+      "locator": "0x1002A380",
+      "size": 48,
+      "body_sha256": "fec8cea0d92054a61d30ea90e30ada64681f1699586aadc070c20ba73e30da9a",
+      "anchors": [],
+      "finding": "Constructor installs CCommCtrlISO9141 vtable; factory caller and protocol argument are pinned by ChangeCommIF/ConnectCommIFGeneral, not deduced from filename."
+    },
+    {
+      "id": "vci_transport.kgp.iso9141dk",
+      "source": "vci_transport.source.kgp",
+      "kind": "native-body",
+      "locator": "0x1002CB00",
+      "size": 48,
+      "body_sha256": "afc35308b6423eabbfa7cac0641ab86e8f49a049642b3d1b0c32fa2dac97694f",
+      "anchors": [],
+      "finding": "Constructor installs CCommCtrlISO9141DK vtable; factory caller and protocol argument are pinned by ChangeCommIF/ConnectCommIFGeneral, not deduced from filename."
+    },
+    {
+      "id": "vci_transport.kgp.j1850",
+      "source": "vci_transport.source.kgp",
+      "kind": "native-body",
+      "locator": "0x1002D750",
+      "size": 39,
+      "body_sha256": "7326d3180a4a9cea98d0a98d0009adbf8f89662e612ed8babbc18b2c1682bc99",
+      "anchors": [],
+      "finding": "Constructor installs CCommCtrlJ1850 vtable; factory caller and protocol argument are pinned by ChangeCommIF/ConnectCommIFGeneral, not deduced from filename."
+    },
+    {
+      "id": "vci_transport.kgp.direct_can",
+      "source": "vci_transport.source.kgp",
+      "kind": "native-body",
+      "locator": "0x10018BF0",
+      "size": 39,
+      "body_sha256": "3824b7af2accbb8fed6dcd8e46f0ddde367e38627c0b254aed577f7350be614d",
+      "anchors": [],
+      "finding": "Constructor installs CCommCtrlDirectCan vtable; factory caller and protocol argument are pinned by ChangeCommIF/ConnectCommIFGeneral, not deduced from filename."
+    },
+    {
+      "id": "vci_transport.kgp.set_connect_info",
+      "source": "vci_transport.source.kgp",
+      "kind": "native-body",
+      "locator": "0x10038DC0",
+      "size": 457,
+      "body_sha256": "d499973af2a66018e570716ff1a8e99658538786c9d63ead19ad25abd782a192",
+      "anchors": [],
+      "finding": "Copy connection state, ECU, bus, DLL API version, device ID, protocol count and128 bytes of protocol/channel pairs into controller-owned storage; repoint protocol array into own copied storage. This is in-process numeric-ID handoff, not a durable handle file."
+    },
+    {
+      "id": "vci_transport.kgp.adopt_connection",
+      "source": "vci_transport.source.kgp",
+      "kind": "native-body",
+      "locator": "0x10038F90",
+      "size": 73,
+      "body_sha256": "5d9cfe429a689f693d33c319327045dd3ebbc1cd6659eac099706f729ef2220e",
+      "anchors": [],
+      "finding": "Set protocol object connected+0C, assign provided deviceID to+20E0, install first protocolID and channelID through vtable+128/+120; no physical PassThruConnect call in this method."
+    },
+    {
+      "id": "vci_transport.kgp.read_version",
+      "source": "vci_transport.source.kgp",
+      "kind": "native-body",
+      "locator": "0x10036AF0",
+      "size": 404,
+      "body_sha256": "51ba6cab926dc9e0b012e80fdce418e6502e956b2283f38a9e9b9bef9387ee57",
+      "anchors": [],
+      "finding": "Return cached API version if available; otherwise when no module, try API1 first, CloseDevice on failure, then API2, CloseDevice if that fails. Resolve version API by active load-version and encode major*256+minor; version-read error clears cached/output version."
+    },
+    {
+      "id": "vci_transport.kgp.read_versions",
+      "source": "vci_transport.source.kgp",
+      "kind": "native-body",
+      "locator": "0x10036C90",
+      "size": 2270,
+      "body_sha256": "cf1dcccc0d5893e3a8b154491e20fbf9a0738e612c30e62a03116f71fa7b5c77",
+      "anchors": [],
+      "finding": "Detailed version API requires null-initialized three output arrays; visits configured registry0404 and registry0500, prioritizing currently loaded API, allocates80-byte version buffers and switches device/module on second API. It returns caller-owned arrays; corresponding FreeReadVersion API is separate."
+    },
+    {
+      "id": "vci_transport.ds4.initialize",
+      "source": "vci_transport.source.ds4",
+      "kind": "native-body",
+      "locator": "0x10011210",
+      "size": 3333,
+      "body_sha256": "c873bb9d1578ea85b65c2ccccbb08eb50d54fd96b56c988d3817045040006648",
+      "anchors": [],
+      "finding": "Parallel DS-4 controller has the same API1/2 selected-registry configuration and device singleton contract, protected by process-local critical section. This is a different source/build, not a byte-identical GTSPlus copy."
+    },
+    {
+      "id": "vci_transport.ds4.finalize",
+      "source": "vci_transport.source.ds4",
+      "kind": "native-body",
+      "locator": "0x10011140",
+      "size": 194,
+      "body_sha256": "68884fb460e8a263d6f4e8932e2f72d9cfb51621c1c7730f66f561d0526d1e05",
+      "anchors": [],
+      "finding": "Under the DS-4 critical section, close via vtable38, retain returned status, destroy singleton and reset it; missing singleton returns8. No NDIS exports exist in this installed DS-4 controller."
+    },
+    {
+      "id": "vci_transport.settings.file_type",
+      "source": "vci_transport.source.settings",
+      "kind": "native-body",
+      "locator": "0x1000BB40",
+      "size": 1077,
+      "body_sha256": "6a9c6e070ffd3bc526aaf15286304006f3c1d06abc8792f84eabe12db4a08f48",
+      "anchors": [],
+      "finding": "Native setting-file type1 maps GTSPlusCommon.gstg, type3 maps PcSettings.gstg. Selected VCI configuration persists in type3; Ethernet and productFolder configuration are type1."
+    },
+    {
+      "id": "vci_transport.settings.get_type",
+      "source": "vci_transport.source.settings",
+      "kind": "native-body",
+      "locator": "0x10002A80",
+      "size": 353,
+      "body_sha256": "5d9e3551596abb024fbdff7b5513b42b5ef7d5913a98559c73123040d5c192da",
+      "anchors": [],
+      "finding": "GetFileDataFromType returns allocated caller-owned plaintext buffer; settings provider owns reading/decrypting serialized file and caller releases via FreeMemory."
+    },
+    {
+      "id": "vci_transport.winsock.send",
+      "source": "vci_transport.source.winsock",
+      "kind": "native-body",
+      "locator": "0x100031C0",
+      "size": 99,
+      "body_sha256": "68359f860ec6667dce2ac813a52e04c4cecde49db48f55044f92cc59f9f12107",
+      "anchors": [],
+      "finding": "Log timestamp/API arguments and outgoing bytes before calling WS2_32 send, then log result; return actual socket result unchanged."
+    },
+    {
+      "id": "vci_transport.winsock.receive",
+      "source": "vci_transport.source.winsock",
+      "kind": "native-body",
+      "locator": "0x10002EF0",
+      "size": 96,
+      "body_sha256": "15f0153c866634b807dd050e5dbb92ecf417c2dd4c2242e4bb402802ebd10879",
+      "anchors": [],
+      "finding": "Call WS2_32 recv, log received bytes only when result>0, log result and return it unchanged."
+    },
+    {
+      "id": "vci_transport.winsock.log_write",
+      "source": "vci_transport.source.winsock",
+      "kind": "native-body",
+      "locator": "0x100039C0",
+      "size": 425,
+      "body_sha256": "a1e87f54d1c38d95901da6920799a686a414d356c7a93abbea249bb1f79ca551",
+      "anchors": [],
+      "finding": "Format CRLF-terminated message and invoke configured callback only when nonnull, under critical section. This routine does not itself write a disk file."
+    },
+    {
+      "id": "vci_transport.wrap.initialize",
+      "source": "vci_transport.source.wrap",
+      "kind": "native-body",
+      "locator": "0x10001520",
+      "size": 104,
+      "body_sha256": "803bfcef15ce861e09d5c7b5cc9fb23c0c305573b71d8a4fca76a49527099e42",
+      "anchors": [],
+      "finding": "MFC module-state guard then call cached J2534CtrlInitialize function pointer with original arguments."
+    },
+    {
+      "id": "vci_transport.wrap.connect",
+      "source": "vci_transport.source.wrap",
+      "kind": "native-body",
+      "locator": "0x10001860",
+      "size": 104,
+      "body_sha256": "2d2e972e116c4f6b509bb83fe8e595fe3b0c6cdd32c0b655b8df0263c3752a35",
+      "anchors": [],
+      "finding": "MFC module-state guard then call cached PassThruConnect pointer; return status unchanged."
+    },
+    {
+      "id": "vci_transport.wrap.load_modules",
+      "source": "vci_transport.source.wrap",
+      "kind": "native-body",
+      "locator": "0x10001750",
+      "size": 261,
+      "body_sha256": "0fe87b784eebccce4f4345b48fc4d7fbd35ac64ef6e97288dad0f08c7c4a73cc",
+      "anchors": [],
+      "finding": "EbReadPara/EbGetString(0x6F) supplies install root; LoadLibraryW root/bin/J2534Ctrl.dll and MsgDatComm.dll into wrapper-owned module fields. Broker supplies configuration, not a remote PassThru channel."
+    },
+    {
+      "id": "vci_transport.wrap.bind",
+      "source": "vci_transport.source.wrap",
+      "kind": "native-body",
+      "locator": "0x10002240",
+      "size": 326,
+      "body_sha256": "a4528e984c28a8a598f3deb23dc14cbcb64a51a26f54a36be1526d0a9685107f",
+      "anchors": [],
+      "finding": "Populate cached API pointers from selected module, including NDIS APIs. Wrapper exports call these pointers; no IPC serialization appears in this dispatch body."
+    },
+    {
+      "id": "vci_transport.wrap.lookup",
+      "source": "vci_transport.source.wrap",
+      "kind": "native-body",
+      "locator": "0x10002400",
+      "size": 163,
+      "body_sha256": "6310295413dc5230424a687c3900752364f9854163c60946483021a798c2d48e",
+      "anchors": [],
+      "finding": "GetProcAddress against stored module handle; absent module returnsnull."
+    },
+    {
+      "id": "vci_transport.front.initialize",
+      "source": "vci_transport.source.front",
+      "kind": "native-body",
+      "locator": "0x10001900",
+      "size": 104,
+      "body_sha256": "41b0bc5e0d193ebdcf2f6989660fc90a8e097ac036f5795ee288e4df1ae4e60e",
+      "anchors": [],
+      "finding": "MFC module-state guard then call cached J2534CtrlInitialize pointer."
+    },
+    {
+      "id": "vci_transport.front.set_handle",
+      "source": "vci_transport.source.front",
+      "kind": "native-body",
+      "locator": "0x100028F0",
+      "size": 57,
+      "body_sha256": "0bf3758a4bf2268102e87fc62d15556cc25fd9b2baf8413dd251fe2bf2e62d69",
+      "anchors": [],
+      "finding": "Store caller module handle at wrapper object+CC and populate API pointers from it. Front wrapper does not load a second driver here."
+    },
+    {
+      "id": "vci_transport.front.reset_handle",
+      "source": "vci_transport.source.front",
+      "kind": "native-body",
+      "locator": "0x10002880",
+      "size": 42,
+      "body_sha256": "85c5a6dd2e612f32739775c1660226ad24bac086ec68d0ac2e04d097149bb4af",
+      "anchors": [],
+      "finding": "ResetDllHandle clears stored handle through reset helper; does not call FreeLibrary or disconnect."
+    },
+    {
+      "id": "vci_transport.front.bind",
+      "source": "vci_transport.source.front",
+      "kind": "native-body",
+      "locator": "0x10002930",
+      "size": 326,
+      "body_sha256": "094bda5341c149e371b398f1de27ddb851f57bc2da68bad036c3a97924f961a4",
+      "anchors": [],
+      "finding": "Resolve cached ordinary and NDIS API pointers using stored module handle."
+    },
+    {
+      "id": "vci_transport.front.lookup",
+      "source": "vci_transport.source.front",
+      "kind": "native-body",
+      "locator": "0x10002BE0",
+      "size": 163,
+      "body_sha256": "614ff42920df7b98b45eaf054edb913a6cf43cd3b40338ab495ab9f0e9627d16",
+      "anchors": [],
+      "finding": "GetProcAddress on caller-supplied stored module; absent handle returnsnull."
+    },
+    {
+      "id": "vci_transport.front.reset_storage",
+      "source": "vci_transport.source.front",
+      "kind": "native-body",
+      "locator": "0x100028B0",
+      "size": 20,
+      "body_sha256": "2d3bfd4b7c836ac61ee45396dee515716c9aeb0c4ae070905b0e93cee4a644c5",
+      "anchors": [],
+      "finding": "If stored module handle nonzero, set it to0. Cached function pointers are not cleared by this helper."
+    },
+    {
+      "id": "vci_transport.ds4_kgp.change_interface",
+      "source": "vci_transport.source.ds4_kgp",
+      "kind": "native-body",
+      "locator": "0x10027350",
+      "size": 2662,
+      "body_sha256": "1f66039b6dac54696ab095742defda6bbccce8396773b141d39694f2edac66e4",
+      "anchors": [],
+      "finding": "DS-4 app bus low-nibble4 explicitly selects API2/J2534v05.00 and CCommCtrlISO13400 with physical protocol800F. Other low-nibble cases select API1:1/9=>ISO9141(4),2=>ISO15765(6 or8005),3=>CAN(5),6=>J1850PWM(2),7=>J1850VPW(1),8=>29-bitCAN via protocol5/6 flags100 (device/custom selector dependent),A=>custom1000C,C=>custom1000D. Support-family low5 checks14/15 are separate. This installed factory has no dedicated FD8012 case; do not transfer GTSPlus NDIS/FD behavior to DS-4."
+    },
+    {
+      "id": "vci_transport.ds4_kgp.disconnect",
+      "source": "vci_transport.source.ds4_kgp",
+      "kind": "native-body",
+      "locator": "0x10029E20",
+      "size": 443,
+      "body_sha256": "837302a682900c587cc50c39780efce072fcdc96fbf186f16a17b675698f3c98",
+      "anchors": [],
+      "finding": "Stop tester/idle activity; support low5=14/15 gets session cleanup, then protocol disconnect/destruct, clear bus/ECU/session and timeout10000. Device kinds1/4 finalize module, others retained."
+    },
+    {
+      "id": "vci_transport.ds4_kgp.open",
+      "source": "vci_transport.source.ds4_kgp",
+      "kind": "native-body",
+      "locator": "0x1002BA10",
+      "size": 364,
+      "body_sha256": "bb8536fdf9598064529fe38c2d6af73f25f5aee509e26eb7b7296d459f8a1760",
+      "anchors": [],
+      "finding": "Load installed J2534Ctrl.dll, call Initialize(API,&deviceID), apply log mode, record device/API. Errors map91010000 orC0040301/C0040302."
+    },
+    {
+      "id": "vci_transport.ds4_kgp.ethernet_constructor",
+      "source": "vci_transport.source.ds4_kgp",
+      "kind": "native-body",
+      "locator": "0x10017830",
+      "size": 235,
+      "body_sha256": "b38cdaf4c0bba36a2b971537c56d50c4276c9b1ed0efd23752e28485952e84cf",
+      "anchors": [],
+      "finding": "Installs CCommCtrlISO13400 vtable, initializes physical and three logical channel slots. DS-4 Ethernet is driver-mediated J2534v05.00, not current GTSPlus NDIS."
+    },
+    {
+      "id": "vci_transport.ds4_kgp.can29_constructor",
+      "source": "vci_transport.source.ds4_kgp",
+      "kind": "native-body",
+      "locator": "0x100166C0",
+      "size": 39,
+      "body_sha256": "0ab807cf56c69f5594560e5805f2815761bd188b2caae653a35c4ef8d25fc5a2",
+      "anchors": [],
+      "finding": "Installs CCommCtrl29BitCan, selected by DS-4 factory nibble8 under device/selector guard."
+    },
+    {
+      "id": "vci_transport.ds4_kgp.can29_normal_constructor",
+      "source": "vci_transport.source.ds4_kgp",
+      "kind": "native-body",
+      "locator": "0x10016BD0",
+      "size": 39,
+      "body_sha256": "179de8885ddb695dd358efe977e84977c1c97974395b7381495482cad5aa81f1",
+      "anchors": [],
+      "finding": "Installs CCommCtrl29BitCanNormal, alternate nibble8 route using CAN protocol5 rather thanISO15765 protocol6."
+    },
+    {
+      "id": "vci_transport.ds4_kgp.ethernet_connect",
+      "source": "vci_transport.source.ds4_kgp",
+      "kind": "native-body",
+      "locator": "0x100189B0",
+      "size": 880,
+      "body_sha256": "c89f912d0aca91f688d4c9f98eccbd14d22a1e9b02eafa3ecaa0b7b56e3dbf89",
+      "anchors": [],
+      "finding": "Disconnect if already connected, obtain source parameters, read ethernet.connectEtherDelay (initial200,missing key0), create physical Ethernet then logical8203(IP4),8205(UDP); perform vehicle-ID exchange; logical8206(TCP), then routing activation. Failure=>91020306, success records protocol/connected. No socket API in this body."
+    },
+    {
+      "id": "vci_transport.ds4_kgp.ethernet_disconnect",
+      "source": "vci_transport.source.ds4_kgp",
+      "kind": "native-body",
+      "locator": "0x10019040",
+      "size": 100,
+      "body_sha256": "9a03001a2de9f6cc8bf1a502ef7f69287802a50c47a008161e88febd9dd58fe8",
+      "anchors": [],
+      "finding": "Stop communication if connected and clear service/ECU/connected fields, then backend teardown vtable198."
+    },
+    {
+      "id": "vci_transport.ds4_kgp.ethernet_physical",
+      "source": "vci_transport.source.ds4_kgp",
+      "kind": "native-body",
+      "locator": "0x10019800",
+      "size": 401,
+      "body_sha256": "de1f7ff5a93043f78d00f548e2a9d9d7d8382c1412ea19557f74880539bc0109",
+      "anchors": [],
+      "finding": "PassThruConnect_v0500(device,800F,flags0,100000000,resource parameters1/4 [3,B,C,D],&physicalID); Ioctl2 sets805F=1; ReadMsgs_v0500 verifies status flag10000. Maps driver failures with91010000; no link flag=>81020000."
+    },
+    {
+      "id": "vci_transport.ds4_kgp.ethernet_logical",
+      "source": "vci_transport.source.ds4_kgp",
+      "kind": "native-body",
+      "locator": "0x10019E10",
+      "size": 1583,
+      "body_sha256": "0cdce26adf5e0e3013eb68fc0b5a747362af887250f892a41b4cd75d7dcca4db",
+      "anchors": [],
+      "finding": "PassThruLogicalConnect_v0500 creates8203 from physical ID with connectIPTimeout,8205 from IP4 with configured UDP source port,8206 from IP4 with configured TCP source port and discovered destination address/port. Store IDs at2240/2244/2248; missing output/unknown protocol=>90020701."
+    },
+    {
+      "id": "vci_transport.ds4_kgp.ethernet_udp",
+      "source": "vci_transport.source.ds4_kgp",
+      "kind": "native-body",
+      "locator": "0x1001C840",
+      "size": 530,
+      "body_sha256": "d804b22268d1cf71767ae3d502cb28d718dd0701754e3028b693aa04310648ca",
+      "anchors": [],
+      "finding": "Clear UDP Rx via Ioctl8, form vehicle-ID payload, queue one8205 message then read response; require length>=2E and payload type0004, copy response sender data. Read errors map91010000; short=>91020324,unexpected type=>81020000."
+    },
+    {
+      "id": "vci_transport.ds4_kgp.ethernet_routing",
+      "source": "vci_transport.source.ds4_kgp",
+      "kind": "native-body",
+      "locator": "0x1001C660",
+      "size": 480,
+      "body_sha256": "29b80559f152cffc726c9bd0d73517da5a0e01ad6370ba3ed9a0f6832f617b91",
+      "anchors": [],
+      "finding": "Clear TCP Rx via Ioctl8, build routing activation type0005, queue8208 byte-stream message then read response; require length>=0D and payload type0006. This body does not check routing-activation status byte; errors map91010000/91020310/91020324/81020000."
+    },
+    {
+      "id": "vci_transport.ds4_kgp.ethernet_teardown",
+      "source": "vci_transport.source.ds4_kgp",
+      "kind": "native-body",
+      "locator": "0x100190B0",
+      "size": 1857,
+      "body_sha256": "562ca268dfa41896eab0e4fdfbaa9f325df1e156f614b4262ede03ee6f08e107",
+      "anchors": [],
+      "finding": "Disconnect TCP logicalID, UDP logicalID, IP4 logicalID with PassThruLogicalDisconnect_v0500, then physicalID with PassThruDisconnect_v0500; zero each ID. Sleep between stages using common ethernet disconnectWaitTimeTcp/Udp/Ip4/Ether (defaults0); return0 despite ignored driver disconnect results."
+    },
+    {
+      "id": "vci_transport.ds4_kgp.ethernet_send",
+      "source": "vci_transport.source.ds4_kgp",
+      "kind": "native-body",
+      "locator": "0x1001C130",
+      "size": 546,
+      "body_sha256": "9632077c8f37f48d7647f9c9b7f14acf90ad0029c4a74502569d506bdc488fbe",
+      "anchors": [],
+      "finding": "Build DoIP type8001 diagnostic frame, mark J2534 byte-stream protocol8208, optionally Ioctl8 clear, queue via PassThruQueueMsgs_v0500 on TCP logicalID. Cache sent frame and request for receive/classifier retry. Queue failure returned with91010000."
+    },
+    {
+      "id": "vci_transport.ds4_kgp.ethernet_receive",
+      "source": "vci_transport.source.ds4_kgp",
+      "kind": "native-body",
+      "locator": "0x1001A450",
+      "size": 2830,
+      "body_sha256": "d69cd353d7a1653edc0fb57cc3b018bbd2b21a191cee647728192f5482fa6a79",
+      "anchors": [],
+      "finding": "Read ACK(type8002) then diagnostic header(type8001), validate declared size/capacity and source, assemble body/chunks up to1020 each. Pass response to protocol classifier:90020323 loops pending until180000ms;90020326 requeues cached request while counter<100(hex), then exits; other classifier errors returned. ERR_BUFFER_EMPTY10 maps91010009; short/type/source errors remain distinct. Timing comes from Ethernet DB rows; no blanket infinite retry."
+    },
+    {
+      "id": "vci_transport.ds4_kgp.base_binding",
+      "source": "vci_transport.source.ds4_kgp",
+      "kind": "native-body",
+      "locator": "0x10011E50",
+      "size": 1911,
+      "body_sha256": "6ee970e87384df0c0773dfda746438c383f4e1befd85ba47109a53ea8e3be4a0",
+      "anchors": [],
+      "finding": "Resolve PassThruConnect_v0500 at object+2170, LogicalConnect+2178, LogicalDisconnect+217C, ReadMsgs+2184, QueueMsgs+2188 and Ioctl+21A4 from the loaded J2534Ctrl. These bindings establish indirect-call roles in the DS-4 Ethernet physical/logical/message/teardown bodies."
+    },
+    {
+      "id": "vci_transport.shim0404.loadlibrary",
+      "source": "vci_transport.source.shim0404",
+      "kind": "native-body",
+      "locator": "0x10009D60",
+      "size": 329,
+      "body_sha256": "f3384584fa8d57a683c41fadd1e5f5f1928f4d0327e4c9440d083f74d95f5da6",
+      "anchors": [],
+      "finding": "Serialize API access; null FunctionLibrary=>4. Convert supplied physical path then invoke DLL loader; failure=>7,success0."
+    },
+    {
+      "id": "vci_transport.shim0404.unloadlibrary",
+      "source": "vci_transport.source.shim0404",
+      "kind": "native-body",
+      "locator": "0x10009EC0",
+      "size": 480,
+      "body_sha256": "66b28ab48ebcf00ffbf56a4c1296e3ac205608252661f0eab455f69cfd8493ab",
+      "anchors": [],
+      "finding": "When loaded, clear cached API pointers and FreeLibrary real driver; return0 under API lock."
+    },
+    {
+      "id": "vci_transport.shim0404.savelog",
+      "source": "vci_transport.source.shim0404",
+      "kind": "native-body",
+      "locator": "0x1000A170",
+      "size": 5,
+      "body_sha256": "5fed5afb29946811bf02359627a94bc01d08d31b779528feaadde3866af9c855",
+      "anchors": [
+        {
+          "va": "0x1000A170",
+          "bytes": "33c0c20400"
+        }
+      ],
+      "finding": "CURRENT RELEASE: XOR EAX,EAX; RET4 returns success0 without reading path, flushing buffers or creating a file. V18 append/truncate behavior does not apply."
+    },
+    {
+      "id": "vci_transport.shim0404.log_forward",
+      "source": "vci_transport.source.shim0404",
+      "kind": "native-body",
+      "locator": "0x1000CD50",
+      "size": 299,
+      "body_sha256": "d25e1f466332ba3c15a86974b1daf97e02ada9e6260cddc957e093bf2232d9cb",
+      "anchors": [],
+      "finding": "Format UTF16 log message, copy temporary buffer and call optional ER_PutLogCommunication callback from MsgDatComm.dll. No disk-write operation in this body."
+    },
+    {
+      "id": "vci_transport.shim0404.load_driver",
+      "source": "vci_transport.source.shim0404",
+      "kind": "native-body",
+      "locator": "0x1000CB50",
+      "size": 507,
+      "body_sha256": "74bfd1871c9627b4ddbd0488d9a1ee16956e1f4f81f6c5daf554bc3a8d872172",
+      "anchors": [],
+      "finding": "LoadLibraryW physical driver path, set loaded flag and resolve API pointers. API05 includes QueueMsgs/ScanForDevices/GetNextDevice/LogicalConnect/LogicalDisconnect/Select. Module-load success does not guarantee every resolved API is nonnull."
+    },
+    {
+      "id": "vci_transport.shim0500.loadlibrary",
+      "source": "vci_transport.source.shim0500",
+      "kind": "native-body",
+      "locator": "0x1000AD90",
+      "size": 329,
+      "body_sha256": "32c216b1079123fff6186aae30e99c960540c95e74d2ee89e2fd4c0146ec64e9",
+      "anchors": [],
+      "finding": "Serialize API access; null FunctionLibrary=>4. Convert supplied physical path then invoke DLL loader; failure=>7,success0."
+    },
+    {
+      "id": "vci_transport.shim0500.unloadlibrary",
+      "source": "vci_transport.source.shim0500",
+      "kind": "native-body",
+      "locator": "0x1000AEE0",
+      "size": 420,
+      "body_sha256": "a8f295599ab5a23612b0a3f201d65ff34f1922a33f3f12d4a0e2149e91513c14",
+      "anchors": [],
+      "finding": "When loaded, clear cached API pointers and FreeLibrary real driver; return0 under API lock."
+    },
+    {
+      "id": "vci_transport.shim0500.savelog",
+      "source": "vci_transport.source.shim0500",
+      "kind": "native-body",
+      "locator": "0x1000B160",
+      "size": 5,
+      "body_sha256": "5fed5afb29946811bf02359627a94bc01d08d31b779528feaadde3866af9c855",
+      "anchors": [
+        {
+          "va": "0x1000B160",
+          "bytes": "33c0c20400"
+        }
+      ],
+      "finding": "CURRENT RELEASE: XOR EAX,EAX; RET4 returns success0 without reading path, flushing buffers or creating a file. V18 append/truncate behavior does not apply."
+    },
+    {
+      "id": "vci_transport.shim0500.log_forward",
+      "source": "vci_transport.source.shim0500",
+      "kind": "native-body",
+      "locator": "0x1000DC50",
+      "size": 294,
+      "body_sha256": "d2ef7356873851f6ae5c74b35744b8f80f50f05990134778a2a5611f55f7b5e6",
+      "anchors": [],
+      "finding": "Format UTF16 log message, copy temporary buffer and call optional ER_PutLogCommunication callback from MsgDatComm.dll. No disk-write operation in this body."
+    },
+    {
+      "id": "vci_transport.shim0500.load_driver",
+      "source": "vci_transport.source.shim0500",
+      "kind": "native-body",
+      "locator": "0x1000DAC0",
+      "size": 399,
+      "body_sha256": "cdd38f06e693701b26a2f104db1cd10d75b710a97919fcaca50be286ba7342a0",
+      "anchors": [],
+      "finding": "LoadLibraryW physical driver path, set loaded flag and resolve API pointers. API05 includes QueueMsgs/ScanForDevices/GetNextDevice/LogicalConnect/LogicalDisconnect/Select. Module-load success does not guarantee every resolved API is nonnull."
+    },
+    {
+      "id": "vci_transport.ds4_shim0404.savelog",
+      "source": "vci_transport.source.ds4_shim0404",
+      "kind": "native-body",
+      "locator": "0x1000A180",
+      "size": 5,
+      "body_sha256": "5fed5afb29946811bf02359627a94bc01d08d31b779528feaadde3866af9c855",
+      "anchors": [
+        {
+          "va": "0x1000A180",
+          "bytes": "33c0c20400"
+        }
+      ],
+      "finding": "CURRENT RELEASE: XOR EAX,EAX; RET4 returns success0 without reading path, flushing buffers or creating a file. V18 append/truncate behavior does not apply."
+    },
+    {
+      "id": "vci_transport.ds4_shim0404.log_forward",
+      "source": "vci_transport.source.ds4_shim0404",
+      "kind": "native-body",
+      "locator": "0x1000CEB0",
+      "size": 299,
+      "body_sha256": "70428b091006a752fad2665b1322ca188b6dd5092b8b082af542e23b5821941a",
+      "anchors": [],
+      "finding": "Format UTF16 log message, copy temporary buffer and call optional ER_PutLogCommunication callback from MsgDatComm.dll. No disk-write operation in this body."
+    },
+    {
+      "id": "vci_transport.ds4_shim0500.savelog",
+      "source": "vci_transport.source.ds4_shim0500",
+      "kind": "native-body",
+      "locator": "0x1000B160",
+      "size": 5,
+      "body_sha256": "5fed5afb29946811bf02359627a94bc01d08d31b779528feaadde3866af9c855",
+      "anchors": [
+        {
+          "va": "0x1000B160",
+          "bytes": "33c0c20400"
+        }
+      ],
+      "finding": "CURRENT RELEASE: XOR EAX,EAX; RET4 returns success0 without reading path, flushing buffers or creating a file. V18 append/truncate behavior does not apply."
+    },
+    {
+      "id": "vci_transport.ds4_shim0500.log_forward",
+      "source": "vci_transport.source.ds4_shim0500",
+      "kind": "native-body",
+      "locator": "0x1000DC50",
+      "size": 294,
+      "body_sha256": "d2ef7356873851f6ae5c74b35744b8f80f50f05990134778a2a5611f55f7b5e6",
+      "anchors": [],
+      "finding": "Format UTF16 log message, copy temporary buffer and call optional ER_PutLogCommunication callback from MsgDatComm.dll. No disk-write operation in this body."
+    },
+    {
+      "id": "vci_transport.nic_info",
+      "source": "vci_transport.source.nic",
+      "kind": "managed-IL",
+      "locator": "GtsPlus_NicManager.NicManager::GetPrivateIpInfo",
+      "rva": 8292,
+      "body_size": 172,
+      "body_sha256": "37f222b070eb8d952bab872e964db8df3c3660ae18fc0d51b9ba17d3ee757633",
+      "anchors": [
+        {
+          "offset": 14,
+          "opcode": "ldc.i4.6",
+          "operand": ""
+        },
+        {
+          "offset": 21,
+          "opcode": "ldc.i4.s",
+          "operand": "0x47"
+        },
+        {
+          "offset": 28,
+          "opcode": "callvirt",
+          "operand": "GetPrivateIpAdrresses"
+        },
+        {
+          "offset": 40,
+          "opcode": "brfalse.s",
+          "operand": "0x2c6"
+        },
+        {
+          "offset": 43,
+          "opcode": "ldc.i4.1",
+          "operand": ""
+        },
+        {
+          "offset": 57,
+          "opcode": "callvirt",
+          "operand": "set_PrivateIpAddress"
+        },
+        {
+          "offset": 63,
+          "opcode": "call",
+          "operand": "get_Default"
+        },
+        {
+          "offset": 68,
+          "opcode": "callvirt",
+          "operand": "get_DisplayScreenFileName"
+        },
+        {
+          "offset": 73,
+          "opcode": "callvirt",
+          "operand": "set_DisplayScreenFileName"
+        },
+        {
+          "offset": 84,
+          "opcode": "br.s",
+          "operand": "0x2de"
+        },
+        {
+          "offset": 87,
+          "opcode": "ldc.i4.0",
+          "operand": ""
+        },
+        {
+          "offset": 88,
+          "opcode": "ldc.i4.1",
+          "operand": ""
+        },
+        {
+          "offset": 98,
+          "opcode": "callvirt",
+          "operand": "System.Object::ToString"
+        },
+        {
+          "offset": 114,
+          "opcode": "ldc.i4.0",
+          "operand": ""
+        },
+        {
+          "offset": 115,
+          "opcode": "ldc.i4.0",
+          "operand": ""
+        },
+        {
+          "offset": 125,
+          "opcode": "callvirt",
+          "operand": "System.Object::ToString"
+        }
+      ],
+      "finding": "GetPrivateIpInfo requests NIC types6(Ethernet) and71(Wireless80211), returns first collected address plus display-screen setting; no addresses => Result=false/error enum1; caught exception=>false/error enum0."
+    },
+    {
+      "id": "vci_transport.nic_enumerate",
+      "source": "vci_transport.source.nic",
+      "kind": "managed-IL",
+      "locator": "GtsPlus_NicManager.Component.NicComponent::GetPrivateIpAdrresses",
+      "rva": 8656,
+      "body_size": 65,
+      "body_sha256": "a5ec595965395389ddb743b27277efb16e9c96f91a6bf6bd810eec474d4b9a9b",
+      "anchors": [
+        {
+          "offset": 24,
+          "opcode": "call",
+          "operand": "System.Net.NetworkInformation.NetworkInterface::GetAllNetworkInterfaces"
+        }
+      ],
+      "finding": "Enumerate GetAllNetworkInterfaces and collect matching addresses through closure callbacks; no socket connections or traffic are emitted by this enumeration."
+    },
+    {
+      "id": "vci_transport.nic_filter",
+      "source": "vci_transport.source.nic",
+      "kind": "managed-IL",
+      "locator": "<>c__DisplayClass0_0::<GetPrivateIpAdrresses>b__0",
+      "rva": 8740,
+      "body_size": 114,
+      "body_sha256": "87cb6678809aa74b4c8d54460fbf1246bf104466ca527df6d05586163b725482",
+      "anchors": [
+        {
+          "offset": 1,
+          "opcode": "callvirt",
+          "operand": "System.Net.NetworkInformation.NetworkInterface::GetIPProperties"
+        },
+        {
+          "offset": 8,
+          "opcode": "callvirt",
+          "operand": "System.Net.NetworkInformation.IPInterfaceProperties::get_GatewayAddresses"
+        },
+        {
+          "offset": 18,
+          "opcode": "brfalse.s",
+          "operand": "0x495"
+        },
+        {
+          "offset": 20,
+          "opcode": "ldc.i4.1",
+          "operand": ""
+        },
+        {
+          "offset": 22,
+          "opcode": "callvirt",
+          "operand": "System.Net.NetworkInformation.NetworkInterface::get_OperationalStatus"
+        },
+        {
+          "offset": 27,
+          "opcode": "beq.s",
+          "operand": "0x44e"
+        },
+        {
+          "offset": 37,
+          "opcode": "callvirt",
+          "operand": "System.Net.NetworkInformation.NetworkInterface::get_NetworkInterfaceType"
+        },
+        {
+          "offset": 47,
+          "opcode": "brfalse.s",
+          "operand": "0x495"
+        },
+        {
+          "offset": 50,
+          "opcode": "callvirt",
+          "operand": "System.Net.NetworkInformation.IPInterfaceProperties::get_UnicastAddresses"
+        },
+        {
+          "offset": 72,
+          "opcode": "brtrue.s",
+          "operand": "0x490"
+        }
+      ],
+      "finding": "Require at least one gateway, OperationalStatus.Up(1), and selected interface type; then enumerate unicast addresses. Method name private does not impose RFC1918 filtering."
+    },
+    {
+      "id": "vci_transport.nic_ipv4",
+      "source": "vci_transport.source.nic",
+      "kind": "managed-IL",
+      "locator": "<>c__DisplayClass0_0::<GetPrivateIpAdrresses>b__1",
+      "rva": 8854,
+      "body_size": 38,
+      "body_sha256": "9fca32dbda1860d7d5dd6616899953d51b4443d7128d103c3f441ebeca791cf1",
+      "anchors": [
+        {
+          "offset": 0,
+          "opcode": "ldc.i4.2",
+          "operand": ""
+        },
+        {
+          "offset": 2,
+          "opcode": "callvirt",
+          "operand": "System.Net.NetworkInformation.IPAddressInformation::get_Address"
+        },
+        {
+          "offset": 7,
+          "opcode": "callvirt",
+          "operand": "System.Net.IPAddress::get_AddressFamily"
+        },
+        {
+          "offset": 12,
+          "opcode": "bne.un.s",
+          "operand": "0x4bb"
+        },
+        {
+          "offset": 21,
+          "opcode": "callvirt",
+          "operand": "System.Net.NetworkInformation.IPAddressInformation::get_Address"
+        },
+        {
+          "offset": 26,
+          "opcode": "callvirt",
+          "operand": "System.Object::ToString"
+        }
+      ],
+      "finding": "Keep only AddressFamily.InterNetwork(2), append address.ToString; no RFC1918/subnet test occurs."
+    },
+    {
+      "id": "vci_transport.shim0404.registration",
+      "source": "vci_transport.source.shim0404",
+      "kind": "native-instruction-dataflow",
+      "locator": "0x10001150",
+      "anchors": [
+        {
+          "va": "0x10001150",
+          "bytes": "687c631b10ff15f8e31710a3c4f01d1085c07411689c631b1050ff15f4e31710a3c8f01d1068f0d81710e80470140059c3"
+        },
+        {
+          "va": "0x101B637C",
+          "bytes": "4d007300670044006100740043006f006d006d002e0064006c006c000000"
+        },
+        {
+          "va": "0x101B639C",
+          "bytes": "45525f5075744c6f67436f6d6d756e69636174696f6e00"
+        }
+      ],
+      "finding": "LoadLibraryW(MsgDatComm.dll), test returned module, GetProcAddress(ER_PutLogCommunication), store callback; no callback means forwarding is skipped."
+    },
+    {
+      "id": "vci_transport.shim0500.registration",
+      "source": "vci_transport.source.shim0500",
+      "kind": "native-instruction-dataflow",
+      "locator": "0x10001150",
+      "anchors": [
+        {
+          "va": "0x10001150",
+          "bytes": "68a4971b10ff15f8f31710a3ac201e1085c0741168c4971b1050ff15f4f31710a3b0201e106850e91710e8057f140059c3"
+        },
+        {
+          "va": "0x101B97A4",
+          "bytes": "4d007300670044006100740043006f006d006d002e0064006c006c000000"
+        },
+        {
+          "va": "0x101B97C4",
+          "bytes": "45525f5075744c6f67436f6d6d756e69636174696f6e00"
+        }
+      ],
+      "finding": "LoadLibraryW(MsgDatComm.dll), test returned module, GetProcAddress(ER_PutLogCommunication), store callback; no callback means forwarding is skipped."
+    },
+    {
+      "id": "vci_transport.winsock.registration",
+      "source": "vci_transport.source.winsock",
+      "kind": "native-instruction-dataflow",
+      "locator": "0x10001036",
+      "anchors": [
+        {
+          "va": "0x10001036",
+          "bytes": "681c840010ff1578700010a3a8b3001085c07411683c84001050ff1574700010a3acb30010"
+        },
+        {
+          "va": "0x1000841C",
+          "bytes": "4d007300670044006100740043006f006d006d002e0064006c006c000000"
+        },
+        {
+          "va": "0x1000843C",
+          "bytes": "45525f5075744c6f67436f6d6d756e69636174696f6e00"
+        }
+      ],
+      "finding": "LoadLibraryW(MsgDatComm.dll), test returned module, GetProcAddress(ER_PutLogCommunication), store callback; no callback means forwarding is skipped."
+    },
+    {
+      "id": "vci_transport.ds4_shim0404.registration",
+      "source": "vci_transport.source.ds4_shim0404",
+      "kind": "native-instruction-dataflow",
+      "locator": "0x10001150",
+      "anchors": [
+        {
+          "va": "0x10001150",
+          "bytes": "6800741b10ff15f8f31710a3cc001e1085c074116820741b1050ff15f4f31710a3d0001e106840da1710e85e71140059"
+        },
+        {
+          "va": "0x101B7400",
+          "bytes": "4d007300670044006100740043006f006d006d002e0064006c006c000000"
+        },
+        {
+          "va": "0x101B7420",
+          "bytes": "45525f5075744c6f67436f6d6d756e69636174696f6e00"
+        }
+      ],
+      "finding": "LoadLibraryW(MsgDatComm.dll), test returned module, GetProcAddress(ER_PutLogCommunication), store callback; no callback means forwarding is skipped."
+    },
+    {
+      "id": "vci_transport.ds4_shim0500.registration",
+      "source": "vci_transport.source.ds4_shim0500",
+      "kind": "native-instruction-dataflow",
+      "locator": "0x10001150",
+      "anchors": [
+        {
+          "va": "0x10001150",
+          "bytes": "68a4971b10ff15f8f31710a3ac201e1085c0741168c4971b1050ff15f4f31710a3b0201e106850e91710e8057f140059"
+        },
+        {
+          "va": "0x101B97A4",
+          "bytes": "4d007300670044006100740043006f006d006d002e0064006c006c000000"
+        },
+        {
+          "va": "0x101B97C4",
+          "bytes": "45525f5075744c6f67436f6d6d756e69636174696f6e00"
+        }
+      ],
+      "finding": "LoadLibraryW(MsgDatComm.dll), test returned module, GetProcAddress(ER_PutLogCommunication), store callback; no callback means forwarding is skipped."
+    },
+    {
+      "id": "vci_transport.ds4.export_boundary",
+      "source": "vci_transport.source.ds4",
+      "kind": "export-table",
+      "locator": "PE export directory",
+      "finding": "DS-4 controller has ordinary/v0500 PassThru APIs but no J2534CtrlNDIS exports; its Ethernet implementation is driver-mediated.",
+      "api0500_exports": [
+        "GetDeviceInfo_v0500",
+        "PassThruConnect_v0500",
+        "PassThruDisconnect_v0500",
+        "PassThruIoctl_v0500",
+        "PassThruLogicalConnect_v0500",
+        "PassThruLogicalDisconnect_v0500",
+        "PassThruQueueMsgs_v0500",
+        "PassThruReadMsgs_v0500",
+        "PassThruReadVersion_v0500",
+        "PassThruSelect_v0500",
+        "PassThruSetProgrammingVoltage_v0500",
+        "PassThruStartMsgFilter_v0500",
+        "PassThruStartPeriodicMsg_v0500",
+        "PassThruStopMsgFilter_v0500",
+        "PassThruStopPeriodicMsg_v0500"
+      ]
+    }
+  ],
+  "states": [
+    {
+      "id": "vci_transport.selected",
+      "owner": "settings provider/UI",
+      "meaning": "Selected VCI registry04/05 paths persisted; no channel assumed"
+    },
+    {
+      "id": "vci_transport.device_open",
+      "owner": "J2534Ctrl singleton",
+      "meaning": "Driver API opened, device ID stored; API version is explicit"
+    },
+    {
+      "id": "vci_transport.channel_open",
+      "owner": "CJ2534v2/KGP protocol object",
+      "meaning": "Physical protocol channel established and required filter setup succeeded"
+    },
+    {
+      "id": "vci_transport.ndis_discover",
+      "owner": "GTSPlus CCommCtrlISO13400_NDIS",
+      "meaning": "VCI supplies selected NIC; UDP identification/TCP setup in progress"
+    },
+    {
+      "id": "vci_transport.ndis_active",
+      "owner": "GTSPlus J2534Ctrl process globals",
+      "meaning": "TCP routing-activation exchange passed current checks"
+    },
+    {
+      "id": "vci_transport.ds4_ethernet_physical",
+      "owner": "DS-4 CCommCtrlISO13400",
+      "meaning": "API05 Ethernet physical channel800F open"
+    },
+    {
+      "id": "vci_transport.ds4_ethernet_logical",
+      "owner": "DS-4 CCommCtrlISO13400",
+      "meaning": "IP4/UDP/TCP logical channels established and routing response accepted"
+    },
+    {
+      "id": "vci_transport.adopted",
+      "owner": "KGP general interface caller",
+      "meaning": "In-process supplied numeric device/protocol/channel IDs copied; ownership contract is caller-dependent"
+    },
+    {
+      "id": "vci_transport.aborted",
+      "owner": "KGP CCommFrameCtrl",
+      "meaning": "Communication service stopped and ECU/session cleared; module may remain open"
+    },
+    {
+      "id": "vci_transport.fault_returned",
+      "owner": "calling diagnostic layer",
+      "meaning": "Failure returned; channel/socket cleanup must be determined from the failing path, not assumed"
+    },
+    {
+      "id": "vci_transport.disconnected",
+      "owner": "KGP CCommFrameCtrl",
+      "meaning": "Protocol object cleared; device may remain open for non-DENSO reconnect"
+    },
+    {
+      "id": "vci_transport.finalized",
+      "owner": "KGP/J2534Ctrl",
+      "meaning": "Controller singleton destroyed and module unloaded after best-effort close"
+    },
+    {
+      "id": "vci_transport.log_pending",
+      "owner": "CJ2534v2 save worker",
+      "meaning": "Save event signaled"
+    },
+    {
+      "id": "vci_transport.log_attempted",
+      "owner": "CJ2534v2 save worker",
+      "meaning": "Save hook completed and finish signaled; current shipped shim hook returns0 without persisting"
+    }
+  ],
+  "transitions": [
+    {
+      "id": "vci_transport.initialize",
+      "from": "vci_transport.selected",
+      "to": "vci_transport.device_open",
+      "trigger": "KGP OpenDevice",
+      "guard": "valid selected registry/API and open succeeds",
+      "action": "Load provider/driver or shim; initialize singleton and deviceID",
+      "evidence": [
+        "vci_transport.kgp.open",
+        "vci_transport.j2534.initialize",
+        "vci_transport.j2534.open0404",
+        "vci_transport.j2534.scan_open0500"
+      ]
+    },
+    {
+      "id": "vci_transport.initialize_failure",
+      "from": "vci_transport.selected",
+      "to": "vci_transport.fault_returned",
+      "trigger": "initialize/open fails",
+      "guard": "null/already-open/bad API/config/registry/load/open failure",
+      "action": "Return exact error; failed post-constructor open destroys singleton",
+      "evidence": [
+        "vci_transport.j2534.initialize"
+      ]
+    },
+    {
+      "id": "vci_transport.version_fallback",
+      "from": "vci_transport.fault_returned",
+      "to": "vci_transport.device_open",
+      "trigger": "ReadVersion API1 open failure",
+      "guard": "ReadVersion had no module, API2 open succeeds",
+      "action": "Close failed API1 and try API2 once",
+      "evidence": [
+        "vci_transport.kgp.read_version"
+      ]
+    },
+    {
+      "id": "vci_transport.connect",
+      "from": "vci_transport.device_open",
+      "to": "vci_transport.channel_open",
+      "trigger": "protocol selected by bus",
+      "guard": "protocol/flags valid; channel and filters succeed",
+      "action": "Choose transport class, connect real driver, install filters and mark channel connected",
+      "evidence": [
+        "vci_transport.kgp.change_interface",
+        "vci_transport.j2534.connect0404",
+        "vci_transport.j2534.filter"
+      ]
+    },
+    {
+      "id": "vci_transport.filter_failure",
+      "from": "vci_transport.device_open",
+      "to": "vci_transport.fault_returned",
+      "trigger": "default-filter installation fails",
+      "guard": "PassThruConnect succeeded but required setup fails",
+      "action": "Attempt controller disconnect, but +5D guard returns2 before physical disconnect; return setup failure with possible physical channel retained",
+      "evidence": [
+        "vci_transport.j2534.connect0404",
+        "vci_transport.j2534.disconnect0404"
+      ]
+    },
+    {
+      "id": "vci_transport.adopt",
+      "from": "vci_transport.device_open",
+      "to": "vci_transport.adopted",
+      "trigger": "SetConnectInfo + ConnectCommIFGeneral",
+      "guard": "caller supplies numeric device/protocol/channel IDs",
+      "action": "Copy128-byte protocol table and attach first existing channel, not another PassThruConnect",
+      "evidence": [
+        "vci_transport.kgp.set_connect_info",
+        "vci_transport.kgp.connect_general",
+        "vci_transport.kgp.adopt_connection"
+      ]
+    },
+    {
+      "id": "vci_transport.ndis_start",
+      "from": "vci_transport.device_open",
+      "to": "vci_transport.ndis_discover",
+      "trigger": "bus nibble4 in current GTSPlus",
+      "guard": "VCI selector54 reports1/1",
+      "action": "Open auxiliary8013 and poll selected NIC; read Ethernet DB parameters",
+      "evidence": [
+        "vci_transport.kgp.change_interface",
+        "vci_transport.kgp.ndis_connect",
+        "vci_transport.kgp.ndis_db_parameters"
+      ]
+    },
+    {
+      "id": "vci_transport.ndis_activate",
+      "from": "vci_transport.ndis_discover",
+      "to": "vci_transport.ndis_active",
+      "trigger": "NIC available and vehicle identification succeeds",
+      "guard": "routing response type6 and source echo match",
+      "action": "Bind TCP(selectedIPv4,0), connect port13400, routing activation type5",
+      "evidence": [
+        "vci_transport.j2534.ndis_connect"
+      ]
+    },
+    {
+      "id": "vci_transport.ndis_discovery_retry",
+      "from": "vci_transport.ndis_discover",
+      "to": "vci_transport.ndis_discover",
+      "trigger": "vehicle-ID receive timeout8001",
+      "guard": "fewer than2 attempts",
+      "action": "Rebroadcast once; non-timeout failures return immediately",
+      "evidence": [
+        "vci_transport.j2534.vehicle_id",
+        "vci_transport.j2534.vehicle_id_receive"
+      ]
+    },
+    {
+      "id": "vci_transport.ndis_setup_failure",
+      "from": "vci_transport.ndis_discover",
+      "to": "vci_transport.fault_returned",
+      "trigger": "NIC/UDP/TCP/routing failure",
+      "guard": "timeout, socket error, invalid response",
+      "action": "Return error without guaranteed immediate socket cleanup; use teardown",
+      "evidence": [
+        "vci_transport.j2534.ndis_connect"
+      ]
+    },
+    {
+      "id": "vci_transport.ndis_exchange",
+      "from": "vci_transport.ndis_active",
+      "to": "vci_transport.ndis_active",
+      "trigger": "diagnostic send/receive",
+      "guard": "two-byte logical addresses; bounded payload; ACK and response checks pass",
+      "action": "Send8001, validate8002 ACK, receive8001 response; no implicit resend in current NDIS send",
+      "evidence": [
+        "vci_transport.j2534.ndis_send",
+        "vci_transport.j2534.ndis_ack",
+        "vci_transport.j2534.ndis_receive"
+      ]
+    },
+    {
+      "id": "vci_transport.ndis_exchange_failure",
+      "from": "vci_transport.ndis_active",
+      "to": "vci_transport.fault_returned",
+      "trigger": "socket timeout/EOF, invalid type/length/address or negative ACK",
+      "guard": "corresponding byte checks fail",
+      "action": "Return8000/8002/8003/8017 or specific API error; do not assume reconnect",
+      "evidence": [
+        "vci_transport.j2534.ndis_ack",
+        "vci_transport.j2534.ndis_receive"
+      ]
+    },
+    {
+      "id": "vci_transport.ds4_ethernet_open",
+      "from": "vci_transport.device_open",
+      "to": "vci_transport.ds4_ethernet_physical",
+      "trigger": "DS-4 bus nibble4",
+      "guard": "API2 selected and physical setup succeeds",
+      "action": "Connect_v0500 protocol800F100Mbps, resource parameters and link flag",
+      "evidence": [
+        "vci_transport.ds4_kgp.change_interface",
+        "vci_transport.ds4_kgp.ethernet_physical"
+      ]
+    },
+    {
+      "id": "vci_transport.ds4_ethernet_activate",
+      "from": "vci_transport.ds4_ethernet_physical",
+      "to": "vci_transport.ds4_ethernet_logical",
+      "trigger": "DS-4 Ethernet setup",
+      "guard": "logical connects and type4/type6 responses accepted",
+      "action": "Logical8203->8205, vehicle-ID; logical8206, routing activation over8208 stream",
+      "evidence": [
+        "vci_transport.ds4_kgp.ethernet_connect",
+        "vci_transport.ds4_kgp.ethernet_logical",
+        "vci_transport.ds4_kgp.ethernet_udp",
+        "vci_transport.ds4_kgp.ethernet_routing"
+      ]
+    },
+    {
+      "id": "vci_transport.ds4_ethernet_exchange",
+      "from": "vci_transport.ds4_ethernet_logical",
+      "to": "vci_transport.ds4_ethernet_logical",
+      "trigger": "diagnostic send/receive",
+      "guard": "DoIP type/address/length and classifier checks pass",
+      "action": "Queue cached type8001 byte stream, receive ACK/response with bounded pending/requeue policy",
+      "evidence": [
+        "vci_transport.ds4_kgp.ethernet_send",
+        "vci_transport.ds4_kgp.ethernet_receive"
+      ]
+    },
+    {
+      "id": "vci_transport.ds4_ethernet_failure",
+      "from": "vci_transport.ds4_ethernet_physical",
+      "to": "vci_transport.fault_returned",
+      "trigger": "DS-4 logical setup fails",
+      "guard": "logical open/discovery/routing error",
+      "action": "Return91020306; owner teardown closes any established intermediate IDs",
+      "evidence": [
+        "vci_transport.ds4_kgp.ethernet_connect",
+        "vci_transport.ds4_kgp.ethernet_teardown"
+      ]
+    },
+    {
+      "id": "vci_transport.abort",
+      "from": "vci_transport.channel_open",
+      "to": "vci_transport.aborted",
+      "trigger": "CommunicationAbort",
+      "guard": "protocol object exists",
+      "action": "Signal workers and stop protocol service; clear ECU/session, retain transport object",
+      "evidence": [
+        "vci_transport.kgp.abort"
+      ]
+    },
+    {
+      "id": "vci_transport.disconnect",
+      "from": "vci_transport.channel_open",
+      "to": "vci_transport.disconnected",
+      "trigger": "Disconnect",
+      "guard": "protocol exists",
+      "action": "Stop activity, protocol disconnect/destruct and clear channel/session state",
+      "evidence": [
+        "vci_transport.kgp.disconnect",
+        "vci_transport.j2534.disconnect0404"
+      ]
+    },
+    {
+      "id": "vci_transport.ndis_stop",
+      "from": "vci_transport.ndis_active",
+      "to": "vci_transport.disconnected",
+      "trigger": "NDIS protocol disconnect",
+      "guard": "backend may be partially allocated",
+      "action": "Close TCP/UDP+WSA then auxiliary PassThru channel, suppress socket cleanup errors",
+      "evidence": [
+        "vci_transport.kgp.ndis_disconnect",
+        "vci_transport.kgp.ndis_disconnect_backend",
+        "vci_transport.j2534.ndis_disconnect"
+      ]
+    },
+    {
+      "id": "vci_transport.ndis_failed_stop",
+      "from": "vci_transport.fault_returned",
+      "to": "vci_transport.disconnected",
+      "trigger": "explicit NDIS teardown after failure",
+      "guard": "socket globals indicate partial startup",
+      "action": "Best-effort shutdown/close/WSACleanup and clear globals",
+      "evidence": [
+        "vci_transport.j2534.ndis_disconnect"
+      ]
+    },
+    {
+      "id": "vci_transport.ds4_ethernet_stop",
+      "from": "vci_transport.ds4_ethernet_logical",
+      "to": "vci_transport.disconnected",
+      "trigger": "DS-4 Ethernet disconnect",
+      "guard": "logical/physical IDs may be partial",
+      "action": "Stop service; closeTCP,UDP,IP4 logical then physical, with configured inter-stage waits",
+      "evidence": [
+        "vci_transport.ds4_kgp.ethernet_disconnect",
+        "vci_transport.ds4_kgp.ethernet_teardown"
+      ]
+    },
+    {
+      "id": "vci_transport.reconnect",
+      "from": "vci_transport.disconnected",
+      "to": "vci_transport.channel_open",
+      "trigger": "subsequent ChangeCommIF",
+      "guard": "compatible retained driver or successful reopen",
+      "action": "Rebuild selected protocol object; transport/family changes may finalize/reopen first",
+      "evidence": [
+        "vci_transport.kgp.change_interface",
+        "vci_transport.kgp.disconnect"
+      ]
+    },
+    {
+      "id": "vci_transport.close",
+      "from": "vci_transport.disconnected",
+      "to": "vci_transport.finalized",
+      "trigger": "CloseDevice/diagnostic owner destruction",
+      "guard": "module loaded",
+      "action": "Best-effort close, singleton destruction, worker stop, unload; outer status can be0 despite close error",
+      "evidence": [
+        "vci_transport.kgp.close",
+        "vci_transport.kgp.finalize",
+        "vci_transport.j2534.finalize",
+        "vci_transport.j2534.destructor"
+      ]
+    },
+    {
+      "id": "vci_transport.failed_close",
+      "from": "vci_transport.fault_returned",
+      "to": "vci_transport.finalized",
+      "trigger": "explicit CloseDevice/owner cleanup after startup failure",
+      "guard": "singleton/module remains loaded",
+      "action": "Close still-open physical device, destroy controller and unload; no automatic hardware-reset/reconnect guarantee",
+      "evidence": [
+        "vci_transport.j2534.close",
+        "vci_transport.j2534.finalize",
+        "vci_transport.j2534.destructor",
+        "vci_transport.kgp.close"
+      ]
+    },
+    {
+      "id": "vci_transport.log_flush",
+      "from": "vci_transport.log_pending",
+      "to": "vci_transport.log_attempted",
+      "trigger": "SAVE_J2534_LOG_FILE_EVENT",
+      "guard": "non-direct-DENSO shim route and worker alive",
+      "action": "Call settings-backed SaveLog hook and signal finish; current04/05 shim hook is no-op success",
+      "evidence": [
+        "vci_transport.j2534.save_worker",
+        "vci_transport.j2534.save_log",
+        "vci_transport.shim0404.savelog",
+        "vci_transport.shim0500.savelog"
+      ]
+    }
+  ],
+  "handoffs": [
+    {
+      "to_domain": "auth_settings",
+      "caller": "J2534CtrlInitialize/GetDeviceInfo",
+      "callee": "GetFileDataFromType(3)",
+      "mechanism": "in-process DLL API + persisted settings",
+      "payload": "vim.name, registry0404, registry0500; then selected HKLM FunctionLibrary/Vendor/Name",
+      "evidence": [
+        "vci_transport.j2534.initialize",
+        "vci_transport.settings.file_type"
+      ],
+      "producer_evidence": [
+        "auth_settings.vim_select",
+        "auth_settings.vim_registry0404",
+        "auth_settings.vim_registry0500"
+      ]
+    },
+    {
+      "to_domain": "operations",
+      "caller": "diagnostic CCommCtrlSub destructor",
+      "callee": "CCommFrameCtrl::Disconnect(1), CloseDevice",
+      "mechanism": "in-process destruction contract",
+      "payload": "stop service/session then dispose channel/device",
+      "evidence": [
+        "vci_transport.kgp.disconnect",
+        "vci_transport.kgp.close"
+      ],
+      "caller_evidence": [
+        "operations.diagnosis_exit",
+        "operations.adapt_cleanup",
+        "operations.aggregate_exit"
+      ]
+    },
+    {
+      "to_domain": "operations",
+      "caller": "PassThruWrapNK/PassThruWrapFrontNK",
+      "callee": "J2534Ctrl exports",
+      "mechanism": "GetProcAddress + cached function pointer in same process",
+      "payload": "raw API arguments and numeric IDs; broker installation root key6F or caller-supplied HMODULE",
+      "evidence": [
+        "vci_transport.wrap.load_modules",
+        "vci_transport.wrap.bind",
+        "vci_transport.front.set_handle",
+        "vci_transport.front.bind"
+      ]
+    },
+    {
+      "to_domain": "vci_transport",
+      "external_owner": "Windows VCI driver",
+      "caller": "CJ2534v2",
+      "callee": "registry-selected physical FunctionLibrary",
+      "mechanism": "direct DENSO DLL or ptshim04/05 dispatch",
+      "payload": "J2534 device/channel/filter/message/resource structures",
+      "evidence": [
+        "vci_transport.j2534.driver_constructor",
+        "vci_transport.j2534.connect0404",
+        "vci_transport.ds4_kgp.ethernet_physical"
+      ]
+    },
+    {
+      "to_domain": "persistence",
+      "caller": "ptshim04/05 and WinsockLogger",
+      "callee": "MsgDatComm.ER_PutLogCommunication",
+      "mechanism": "in-process UTF16 callback, then persistence-owned named-pipe IPC",
+      "payload": "API arguments, outgoing/received message bytes and status",
+      "evidence": [
+        "vci_transport.shim0404.log_forward",
+        "vci_transport.shim0500.log_forward",
+        "vci_transport.ds4_shim0404.log_forward",
+        "vci_transport.ds4_shim0500.log_forward",
+        "vci_transport.winsock.log_write",
+        "vci_transport.shim0404.registration",
+        "vci_transport.shim0500.registration",
+        "vci_transport.ds4_shim0404.registration",
+        "vci_transport.ds4_shim0500.registration",
+        "vci_transport.winsock.registration"
+      ],
+      "consumer_evidence": [
+        "persistence.comm_log_send",
+        "persistence.comm_log_pull",
+        "persistence.comm_log_clear"
+      ]
+    },
+    {
+      "to_domain": "cuw_utility",
+      "caller": "KGP/J2534Ctrl transport owner",
+      "callee": "independent CUW backend transport owner",
+      "mechanism": "ownership boundary, not a direct KGP-to-CUW call or numeric channel-handle transfer",
+      "payload": "GTS releases VIM/transport; CUW model independently supplies selected J2534 identity to its native engine",
+      "evidence": [
+        "vci_transport.kgp.close",
+        "vci_transport.kgp.base_constructor",
+        "vci_transport.kgp.set_connect_info"
+      ],
+      "counterpart_evidence": [
+        "cuw_utility.ui-admission",
+        "cuw_utility.cal-read",
+        "cuw_utility.progress",
+        "cuw_utility.native-clear"
+      ]
+    }
+  ],
+  "persistence": [
+    {
+      "path_pattern": "<setting-provider-root>/PcSettings.gstg",
+      "producer": "auth_settings ExecuteChangeSelectVim",
+      "consumer": "J2534CtrlInitialize/GetDeviceInfo; KGP version/capability queries",
+      "created": "settings subsystem SavePartialData(type3)",
+      "flushed": "settings provider save contract (auth_settings)",
+      "deleted": "not deleted by transport teardown",
+      "evidence": [
+        "vci_transport.settings.file_type",
+        "vci_transport.j2534.initialize"
+      ],
+      "producer_evidence": [
+        "auth_settings.vim_select"
+      ]
+    },
+    {
+      "path_pattern": "<setting-provider-root>/GTSPlusCommon.gstg",
+      "producer": "shipped/common settings subsystem",
+      "consumer": "NDIS/DS-4 Ethernet setup, disconnect timing, J2534 log path",
+      "created": "installation/settings owner",
+      "flushed": "settings owner; transport reads only",
+      "deleted": "not deleted by inspected transport methods",
+      "evidence": [
+        "vci_transport.settings.file_type",
+        "vci_transport.kgp.ndis_connect",
+        "vci_transport.ds4_kgp.ethernet_teardown",
+        "vci_transport.j2534.save_log"
+      ]
+    },
+    {
+      "path_pattern": "HKLM/SOFTWARE/PassThruSupport.04.04/<selected key> or .05.00/<selected key>",
+      "producer": "VCI driver installer",
+      "consumer": "J2534Ctrl selected-driver loader",
+      "created": "external installer",
+      "flushed": "Windows registry owner",
+      "deleted": "not deleted by inspected transport teardown",
+      "evidence": [
+        "vci_transport.j2534.initialize"
+      ]
+    },
+    {
+      "path_pattern": "<CSIDL0x2E><path.productFolder>/ErrorReport/j2534_MMDDYYYYhhmmss.log",
+      "producer": "J2534Ctrl save worker + selected shim",
+      "consumer": "error report/capture tooling",
+      "created": "not created by the current04/05 shim SaveLog stubs; controller constructs only the requested compatibility path",
+      "flushed": "none through PassThruSaveLog; real log forwarding goes to MsgDatComm/persistence owner",
+      "deleted": "not applicable to the no-op SaveLog hooks",
+      "evidence": [
+        "vci_transport.j2534.close",
+        "vci_transport.j2534.save_log",
+        "vci_transport.j2534.save_worker",
+        "vci_transport.shim0404.savelog",
+        "vci_transport.shim0500.savelog"
+      ]
+    }
+  ],
+  "transport_families": [
+    {
+      "application_bus_low_nibble": "1/9",
+      "transport": "ISO9141",
+      "driver_protocol": "4",
+      "evidence": [
+        "vci_transport.kgp.change_interface",
+        "vci_transport.kgp.iso9141"
+      ]
+    },
+    {
+      "application_bus_low_nibble": "2",
+      "transport": "ISO15765 CAN (ordinary, P5, WWH/ISO27145, OBD ZEV-on-UDS)",
+      "driver_protocol": "6; bus62 uses8005 and DB baud",
+      "evidence": [
+        "vci_transport.kgp.change_interface",
+        "vci_transport.kgp.can_phase5",
+        "vci_transport.kgp.can_wwh",
+        "vci_transport.kgp.can_obd_zev"
+      ]
+    },
+    {
+      "application_bus_low_nibble": "3",
+      "transport": "direct CAN",
+      "driver_protocol": "5",
+      "evidence": [
+        "vci_transport.kgp.change_interface",
+        "vci_transport.kgp.direct_can"
+      ]
+    },
+    {
+      "application_bus_low_nibble": "4",
+      "transport": "ISO13400/DoIP",
+      "driver_protocol": "GTSPlus API04 auxiliary8013 + host NDIS; DS-4 API05 physical800F + logical8203/8205/8206/8208",
+      "evidence": [
+        "vci_transport.kgp.ndis_connect",
+        "vci_transport.ds4_kgp.change_interface",
+        "vci_transport.ds4_kgp.ethernet_logical"
+      ]
+    },
+    {
+      "application_bus_low_nibble": "6/7",
+      "transport": "J1850PWM/VPW",
+      "driver_protocol": "2/1",
+      "evidence": [
+        "vci_transport.kgp.change_interface",
+        "vci_transport.kgp.j1850"
+      ]
+    },
+    {
+      "application_bus_low_nibble": "8",
+      "transport": "29-bit CAN or CAN-FD",
+      "driver_protocol": "GTSPlus18/38:6 flags800;78/88:8012 flags100800. DS-4:5/6 flags100, not this FD factory",
+      "evidence": [
+        "vci_transport.kgp.change_interface",
+        "vci_transport.kgp.can_29bit",
+        "vci_transport.kgp.can_fd",
+        "vci_transport.ds4_kgp.change_interface"
+      ]
+    },
+    {
+      "application_bus_low_nibble": "A/C",
+      "transport": "custom1000C CAN /1000D ISO9141DK",
+      "driver_protocol": "DENSO extension or generic6/3 remapping",
+      "evidence": [
+        "vci_transport.kgp.change_interface",
+        "vci_transport.j2534.connect0404",
+        "vci_transport.kgp.iso9141dk"
+      ]
+    }
+  ],
+  "support_family_distinction": "GTSPlus and DS-4 are parallel application/support builds; ECU category low5 controls support/session strategy, application bus low nibble selects transport. P6 does not imply DoIP, nor P5 only CAN.",
+  "coverage": {
+    "components": [
+      "GTSPlus native frame controller and J2534 singleton",
+      "DS-4 native factory and driver-mediated ISO13400",
+      "v04.04/v05.00 loader and shim interposition",
+      "managed NIC enumeration",
+      "pass-through wrappers and adopted channels",
+      "settings/config ownership"
+    ],
+    "entrypoints": [
+      "Initialize/Finalize",
+      "Open/Connect/Filter/Disconnect/Close",
+      "ReadVersion fallback",
+      "ChangeCommIF/SetConnectInfo/general adoption",
+      "NDISConnect/Send/Receive/Disconnect",
+      "DS-4 ISO13400 physical/logical/vehicle-ID/routing",
+      "CommunicationAbort",
+      "Save/Finish log events",
+      "GetPrivateIpInfo"
+    ],
+    "branches": [
+      "selected API04/API05 registry paths",
+      "direct DENSO versus shim",
+      "default-filter rollback rejected by unset connected flag",
+      "disconnect failure bookkeeping",
+      "two-attempt UDP identification",
+      "TCP setup/EOF/timeout/address/type errors",
+      "DS-4 pending180000ms/classifier requeue limit256",
+      "same-protocol reuse versus finalize/reopen",
+      "adopted versus newly opened IDs",
+      "best-effort teardown and worker forced-stop5000ms",
+      "current shim SaveLog no-ops versus MsgDatComm log callback"
+    ]
+  },
+  "residuals": [
+    {
+      "question": "Which installed Windows registry entries and physical VCIs are actually usable?",
+      "why_unclosed": "Offline shipped application has no target Windows registry/device state; selected FunctionLibrary implementations and VCI firmware are external transport owners.",
+      "next_evidence": "Authorized Windows registry/device metadata and driver-specific source/capture, without network/vehicle interaction in this pass."
+    },
+    {
+      "question": "Actual physical close/connect/reset acknowledgement and recovery behavior",
+      "why_unclosed": "Driver error contracts are propagated or suppressed as pinned; software state does not measure a device. No generic reconnect loop or hardware reset can be inferred from module teardown.",
+      "next_evidence": "Offline Windows driver-contract harness with preauthorized inert implementation; no live device required."
+    }
+  ],
+  "reproduction": {
+    "command": "uv run --locked python -m tools.techstream.extract_gtsplus_lifecycle_vci_transport",
+    "recovery_prerequisite": "build/out/gtsplus-unprotected with matching main recovery manifest",
+    "network_or_vehicle_access": false
+  }
+}
