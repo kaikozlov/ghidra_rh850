@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify current GTS+ MACKey transports and the UtilityPlusFront-selected flow."""
+"""Verify native MACKey backends and UtilityPlusFront's Subaru wrapper family."""
 from __future__ import annotations
 
 import hashlib
@@ -72,13 +72,13 @@ check("MACKey worker calls RID-0x1010 result helper", rel32_target(gts, 0xF9E57)
 check("MACKey worker polls RID-0x1010 result helper again", rel32_target(gts, 0xF9E9E) == 0x100F9EF0)
 check("Ex2MAC_01_ComProcess references 0x100F9740 state machine", struct.pack("<I", 0x100F9740) in gts[0x27990:0x27A48])
 
-print("\n== newer RID-0x3002 transport intentionally coexists ==")
-check("newer start helper embeds 31 01 30 02", gts[0x12C58D:0x12C591] == bytes.fromhex("31 01 30 02"))
-check("newer poll helper embeds 31 03 30 02", gts[0x12B04C:0x12B050] == bytes.fromhex("31 03 30 02"))
+print("\n== native RID-0x3002 transport intentionally coexists ==")
+check("RID-0x3002 start helper embeds 31 01 30 02", gts[0x12C58D:0x12C591] == bytes.fromhex("31 01 30 02"))
+check("RID-0x3002 poll helper embeds 31 03 30 02", gts[0x12B04C:0x12B050] == bytes.fromhex("31 03 30 02"))
 check("RID-0x3002 result helper is byte-pinned", sha256(gts[0x12B010:0x12B12C]) == "40ae4fc66a2a512a80ebbd72170a2df77a8949979ed4305b34d206e6bee41bf9")
 check("RID-0x3002 start helper is byte-pinned", sha256(gts[0x12C570:0x12C664]) == "cc2903dda7ff92b583daf8544e69069d3bff9174534cde3fd671c87b4ad0fa63")
 
-print("\n== current UtilityPlusFront -> recovered UtilityGene selected flow ==")
+print("\n== UtilityPlusFront -> UtilityGene Subaru native API family ==")
 plus_bytes = PLUS_FRONT.read_bytes()
 gene_cp_bytes = UTILITY_GENE_CP.read_bytes()
 check("UtilityPlusFrontNK.dll SHA-256 is exact", sha256(plus_bytes) == PLUS_FRONT_SHA)
@@ -95,11 +95,11 @@ check(
     {ordinal: ordinal_iat.get(ordinal) for ordinal in (98, 99, 100)}
     == {98: 0x100070AC, 99: 0x100070B0, 100: 0x100070B4},
 )
-check("frontend command path calls validation wrapper through ordinal 98",
+check("native frontend command path calls validation wrapper through ordinal 98",
       plus_bytes[0x3E37:0x3E3D] == bytes.fromhex("FF 15 AC 70 00 10"))
-check("frontend command path calls key-update-before wrapper through ordinal 99",
+check("native frontend command path calls key-update-before wrapper through ordinal 99",
       plus_bytes[0x3ED8:0x3EDE] == bytes.fromhex("FF 15 B0 70 00 10"))
-check("frontend command path calls key-update-after wrapper through ordinal 100",
+check("native frontend command path calls key-update-after wrapper through ordinal 100",
       plus_bytes[0x40A9:0x40AF] == bytes.fromhex("FF 15 B4 70 00 10"))
 
 # The installed UtilityGene image is a Crackproof hollow PE.  Toyota's exact
@@ -180,9 +180,9 @@ with tempfile.TemporaryDirectory(prefix="verify-gtsplus-mackey-") as tmp:
 print("\n== evidence boundary ==")
 check("current GTS+ retains an independent RID-1010 MACKey implementation",
       bytes.fromhex("31 01 10 10") in gts and bytes.fromhex("31 03 10 10") in gts)
-check("current UtilityPlusFront-selected network key-update implementation is RID-3002",
-      True,
-      "live FRC admission/0x1000 support state still requires target trace")
+print("Scope: the RID-3002 checks above cover UtilityPlusFront's native Subaru API family; "
+      "ordinary signed-GUI P5/P6 writers select RID1010/D904. "
+      "Frontend branch provenance is lifecycle_cuw_utility.json; live FRC admission still requires a target trace.")
 
 print(f"\nResults: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

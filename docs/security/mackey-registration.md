@@ -256,24 +256,62 @@ Its `MAC_01` helpers are exact:
 - exported `Ex2MAC_01_ComProcess @ 0x10028590` selects the `0x100F9740` state
   machine containing that worker for one supported MACKey protocol family.
 
-The same GTS+ DLL still carries the newer `0x3002` start/result helpers, so this
-is deliberate multi-generation support rather than a replacement of one
-protocol by the other.
+The same GTS+ DLL also carries `0x3002` start/result helpers. Current frontend
+selection depends on the OEM and diagnostic phase, not on which helper was
+found first.
 
-The current front-end selector is now recovered one layer higher. Current
-`UtilityPlusFrontNK.dll` (SHA-256
+The authenticated `gts.gui` source closes that selection. In
+`js/gts/ecu_security_key/ecu_security_key_worker.js`,
+`EcuSecurityKeyWorkerModel.writeSecurityKeyToEcu` directly selects:
+
+| Ordinary worker branch | Start | Result/proof handling |
+|---|---|---|
+| P4 | `3B F5 || M1 || M2`, then `3B F6 || M3` | `21 FC`; CMAC-check M4 against M5 using returned MACK4 |
+| P5 | `31 01 10 10 || M1 || M2 || M3` | `31 03 10 10`; all-zero proof polls every 100 ms; timeout rejects when elapsed time exceeds 1000 ms |
+| P6 | `31 01 D9 04 || M1 || M2 || M3` | `31 03 D9 04`; same polling and CMAC proof check |
+
+P5/P6 branches enter extended session `10 03`, accumulate failed ECU IDs on
+transport/proof errors, then attempt default-session return and
+`endGeneralComm`. The ordinary online and offline controllers both require a
+valid exchange record, matching current VIN, admitted target/status and freshly
+matched Safekey identities before calling the writer. The ordinary path therefore
+actively selects RID `0x1010` for P5; it is not merely an unused native alternate.
+
+The separate Subaru branch selects native MACKey wrappers through
+`validateSbrMac`, `prepareSbrMacUpd`, and `updateSbrMac`. Its frontend gate uses
+central ECU ID 722, checks DID-`0x1010` support and battery voltage at least 10 V,
+and checks ignition/update state before validation. `writeSecurityKeySUBARU`
+associates server exchange records with the prepared participant identities,
+returns per-ECU failure flags and ends general communication in `finally`.
+Its online data gate is different: `checkWriteDataSUBARU` requires
+`GetMACKeyInfoRequestModel.isValid()` and `resultCode === 0`.
+`isValid()` hashes the exchange record's own VIN and sorted Safekey/M1/M2/M3/MACK4
+tuples. It does **not** read or compare the current vehicle VIN. Consequently an
+internally consistent exchange carrying a different VIN can pass this specific
+Subaru data-validity gate; that is not evidence that the native updater or ECU
+will accept the supplied keys. Ordinary `checkWriteData` instead calls `getVin()`
+and compares the padded current VIN. These OEM-specific gates must not be merged.
+
+For that native API family, `UtilityPlusFrontNK.dll` (SHA-256
 `3472091a3c2f8df114fbab491dc442c3aee25a3485ce6390653413cb029d871a`)
-imports and calls only the `UtilityGene.dll` MACKey wrappers by ordinals
+imports and calls the `UtilityGene.dll` MACKey wrappers by ordinals
 98/99/100: `Ex2MAC_01_S_KeyValidation`, `...KeyUpdate_before`, and
-`...KeyUpdate_after`. The installed `UtilityGene.dll` is a Crackproof hollow PE
+`...KeyUpdate_after`.
+
+The signed frontend maps these APIs to `UG000021`, `UG000022` and `UG000023`.
+The native table initializer at `UtilityPlusFrontNK!0x10001020` maps those exact
+strings to selectors `0x15`, `0x16` and `0x17`; the selector stores are at
+`0x100014DD`, `0x1000151A` and `0x10001557`.
+
+The installed `UtilityGene.dll` is a Crackproof hollow PE
 (SHA-256 `7412d320...c007e`), but Toyota's exact same-release installer carries
 the original plaintext `GTSPlus\bin\UtilityGene.dll`; the already-verified
 body-recovery path reproduces it at SHA-256
 `a844d3045b2cb780a63e3959ec04bd27baab4ea7195080876bbdf6d2cf86c4cc`.
 Its ordinals 98/99/100 are the same RVAs `0xE510`, `0xE2C0`, and `0xDF20`.
 
-That recovered body closes the **current UtilityPlusFront-selected network key
-update** rather than merely showing two available backends:
+That recovered body closes the **Subaru native UtilityPlusFront-selected
+network key update**:
 
 - the security master is opened at diagnostic address `0x763`;
 - key-management mode is entered with `10 4F`;
@@ -286,15 +324,20 @@ update** rather than merely showing two available backends:
   **`31 01 30 02 || M1[16] || M2[32] || M3[16]`**, and polls
   **`31 03 30 02`** for state plus `M4[32] || M5[16]`.
 
-Current `UtilityExNK2.dll` still contains the independent RID-`0x1010` MACKey
-state machine described above, so RID `0x1010` remains a real supported Toyota
-protocol family. It is **not**, however, the implementation selected by the
-current `UtilityPlusFrontNK -> UtilityGene` command-`0x15/0x16/0x17` path. The
-former "wrapper bodies unavailable" boundary is withdrawn.
+Thus RID `0x3002` is selected by the native
+`UtilityPlusFrontNK -> UtilityGene` command-`0x15/0x16/0x17` family, while the
+ordinary signed-JavaScript P5 worker selects RID `0x1010` and its P6 counterpart
+selects `0xD904`. The frontend has distinct OEM/phase branches. Evidence and
+entry/return contracts are pinned by
+`tools/techstream/extract_gtsplus_lifecycle_cuw_utility.py` in
+`data/generated/gtsplus_2026/lifecycle_cuw_utility.json`:
+`key-standard-write`, `key-subaru-write`, `key-write-admission` and
+`key-write-offline` (all IDs prefixed `cuw_utility.`). The extractor authenticates
+and decodes the shipped GUI package; no loose build-directory JS is trusted.
 
 The firmware comparison is now:
 
-| Property | Techstream V18 recovered path | GTS+ 2026 `MAC_01` alternate path | Sienna `8965B4512000` | yc Venza SRS `89170-48E30` |
+| Property | Techstream V18 recovered path | GTS+ 2026 ordinary P5 worker | Sienna `8965B4512000` | yc Venza SRS `89170-48E30` |
 |---|---|---|---|---|
 | Start | `31 01 30 02 || M1 || M2 || M3` | `31 01 10 10 || M1 || M2 || M3` | `31 01 10 10 || M1 || M2 || M3` | `31 01 10 10 || M1 || M2 || M3` |
 | Poll | `31 03 30 02` | `31 03 10 10` | `31 03 10 10` | `31 03 10 10` |
@@ -310,9 +353,9 @@ provisioning operation, distinct from ordinary UDS SecurityAccess and from
 RPRG/reflash authorization.
 
 The `22 10 10` `SafekeyNumber` read remains a separate 16-byte identity read. A
-shared numeric `0x1010` does not make that DID the RoutineControl payload. What
-has changed is that current Toyota tooling now proves a genuine RoutineControl
-RID-`0x1010` MACKey transport exists.
+shared numeric `0x1010` does not make that DID the RoutineControl payload.
+Current Toyota tooling proves both a native RID-`0x1010` implementation and its
+active selection by the ordinary signed-frontend P5 worker.
 
 ## Cross-OEM corroboration: GM Global B / Renesas SHE
 
@@ -331,9 +374,9 @@ split established above for Toyota:
 | protected-message primitive | AES-128 CMAC + freshness + truncated on-wire authenticator | AES-128 CMAC + reconstructed freshness + `FV4 || MAC28` |
 | protected key storage/use | HSM/SHE key slot | exact EPS: Renesas ICU-S protected key selector; other P5 ECUs may use different HSMs |
 | replacement-key object | standard SHE `M1[16] || M2[32] || M3[16]` construction with UID, ID, AuthID, counter and flags | standard SHE `CMD_LOAD_KEY` `M1/M2/M3 -> M4/M5`, proven both in Toyota tooling and exact EPS command 8 |
-| vehicle-side carrier | UDS RoutineControl, GM example RID `0x0200` with an additional slot byte | Toyota RID `0x3002` or `0x1010`, depending protocol family |
+| vehicle-side carrier | UDS RoutineControl, GM example RID `0x0200` with an additional slot byte | Toyota RID `0x3002` in the native Subaru updater, `0x1010` in ordinary P5, `0xD904` in ordinary P6; P4 uses `3B F5/F6` |
 | backend/orchestration | ECU/HSM identity plus OEM-held authorization material | VIN, per-ECU `SafekeyNumber`, topology and Toyota server exchange records |
-| diagnostic authorization | UDS `$27` before provisioning | current Toyota network updater also performs `$27 41/42`; exact Sienna application/boot SA algorithms are separate Denso constructions |
+| diagnostic authorization | UDS `$27` before provisioning | native Subaru network updater performs `$27 41/42`; ordinary P5/P6 worker enters extended session `10 03`; exact Sienna application/boot SA algorithms remain separate Denso constructions |
 
 This is stronger than the generic observation that both OEMs "use SecOC":
 the **64-byte SHE memory-update object is the same standardized cryptographic
@@ -542,22 +585,19 @@ M1--M5 exchange-key family:
 ```
 
 Consequently the P5 FRC receives the **standard AUTOSAR SHE `CMD_LOAD_KEY`
-memory-update object**; current service tooling's selected network-wide update
-implementation carries selected ECU updates over `10 4F` + RID `0x3002` as
-shown above. The remaining FRC-specific boundary is narrower: we do **not** yet
-have a retained `0x792` key-write trace or decoded FRC application proving that
-the camera is one of the `22 1000`-admitted endpoints in that exact transaction,
-or showing its local UDS-to-HSM call ABI.
+memory-update object**. The current ordinary P5 frontend emits RID `0x1010`;
+the separate Subaru native network updater uses `10 4F` plus RID `0x3002`.
+The remaining FRC-specific boundary is a retained `0x792` key-write trace or
+decoded FRC application tying its runtime participant admission and
+UDS-to-HSM ABI to that host workflow.
 
 That distinction matters because the ordinary current `FRC_P5` diagnostic
 catalog uses DID `0x1010` for **Field FOE Origin X/Y gap / Roll Angle Gap** and
-publishes no ordinary Data-Monitor DID `0x1000`. Therefore the generic MACKey
-`22 1000`/`22 1010` discovery records must not be identified with the camera's
-ordinary application DIDs from the DDB. The key-management flow may expose a
-special namespace/context after `10 4F`, may address a security endpoint rather
-than the ordinary application catalog, or the camera may be admitted through a
-different topology path. A live Update-ECU-Security-Key trace or decoded FRC
-handler is required to choose among those mechanisms. `SafekeyNumber`, Toyota's
+publishes no ordinary Data-Monitor DID `0x1000`. The MACKey support/identity
+namespace is distinct from that ordinary diagnostic catalog. In particular,
+the Subaru native updater's `10 4F`/topology flow must not be projected onto
+the ordinary P5 camera branch. A live Update-ECU-Security-Key trace or decoded FRC
+handler must close the runtime camera-admission boundary. `SafekeyNumber`, Toyota's
 server-side MCU ID, and the SHE UID likewise remain related but not yet proven
 equal.
 
@@ -617,7 +657,7 @@ sibling's `0x08xxxxxx` serial-NOR/XIP domain). Consequently the current FRC
 software model is sharper than “some non-Renesas HSM”:
 
 ```text
-Toyota key-management UDS context (`10 4F`, selected RID `0x3002`)
+Ordinary P5 host worker (`10 03`, RID `0x1010`; exact live FRC admission open)
         |
         v
 FRC diagnostic / real-time service layer
@@ -667,9 +707,9 @@ SecOC key slot.
 - Is the raw DID `0x1010` `SafekeyNumber` the same MCU ID that the pinned
   external rekey report says Toyota requires alongside VIN? A labeled official
   transcript or target implementation is still required.
-- Which current-GTS MACKey family selector is chosen by a live 2021 Venza SRS
-  `89170-48E30`, and does the resulting trace use the statically matching
-  RID-`0x1010` path?
+- Does a live 2021 Venza SRS `89170-48E30` pass the ordinary P5 worker's target,
+  support and exchange-admission gates, and what does its statically matching
+  RID-`0x1010` execution return?
 - What exact server-produced `M1/M2/M3` package and counter/authorization state
   are used for that SRS key write?
 - What timing/retry behavior appears on a live master/slave network?

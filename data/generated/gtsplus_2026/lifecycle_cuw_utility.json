@@ -1,0 +1,4090 @@
+{
+  "schema": "gtsplus-lifecycle-domain-v1",
+  "domain": "cuw_utility",
+  "sources": [
+    {
+      "id": "cuw_utility.backend-installed",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/CUWPlus/CuwBackendService.dll",
+      "sha256": "e922b56058ce9dc23a907b20258fc8de701e23701ee104adf3d6480117cfb96a",
+      "size": 188432,
+      "representation": "installed protected PE"
+    },
+    {
+      "id": "cuw_utility.backend-sidecar",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/CUWPlus/CuwBackendService.dll._",
+      "sha256": "977882359ee8059f0d405a3172a99213bf928e0a90768946fce147cc19eba687",
+      "size": 138624,
+      "representation": "installed protected body sidecar"
+    },
+    {
+      "id": "cuw_utility.backend",
+      "path": "software/Techstream/gtsplus/gts-all-unprotected/CUWPlus/CuwBackendService.dll",
+      "sha256": "eb0177bf3a4f608b216541e1a4c088d69ef1037f486110ffa958407735c29ca5",
+      "size": 161792,
+      "representation": "recovered materialized PE"
+    },
+    {
+      "id": "cuw_utility.entry-installed",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/CUWPlus/CuwBackendServiceConsoleApp.exe",
+      "sha256": "93d079aa89ac147bebf590d186dcb8c7bd35ff73ee5d4738fa1e20a3673ee11a",
+      "size": 36880,
+      "representation": "installed protected PE"
+    },
+    {
+      "id": "cuw_utility.entry-sidecar",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/CUWPlus/CuwBackendServiceConsoleApp.exe._",
+      "sha256": "8ec2151efe5313aecb6ca27abb889133b967c1b1fe4ea80b02802d1c121991aa",
+      "size": 164144,
+      "representation": "installed protected body sidecar"
+    },
+    {
+      "id": "cuw_utility.entry",
+      "path": "build/out/gts-lifecycle-cuw-entry/CuwBackendServiceConsoleApp.exe",
+      "sha256": "6bd3c9d1d3b759f1cf95e812d29f101045194cd79c9083b7b30339905e04813d",
+      "size": 11264,
+      "representation": "recovered materialized PE"
+    },
+    {
+      "id": "cuw_utility.launcher-installed",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/CUWLauncher/CUWLauncher.exe",
+      "sha256": "32c930cac17684d752d584757fbfa5bffe0a0b7b579a16a057a9b0744174aa14",
+      "size": 85424,
+      "representation": "installed protected PE"
+    },
+    {
+      "id": "cuw_utility.launcher-sidecar",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/CUWLauncher/CUWLauncher.exe._",
+      "sha256": "9547191a275d8def1e1f7730713772f7d6e9cb3305259e9df6c2502de3486bf4",
+      "size": 175712,
+      "representation": "installed protected body sidecar"
+    },
+    {
+      "id": "cuw_utility.launcher",
+      "path": "build/out/gts-lifecycle-launcher/CUWLauncher.exe",
+      "sha256": "1bce32d2d60ebf78191f39c6231366c1248c7813f4e61191e6a5367e26ca4f79",
+      "size": 55808,
+      "representation": "recovered materialized PE"
+    },
+    {
+      "id": "cuw_utility.core-installed",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/CUWPlus/CUW.dll",
+      "sha256": "cf8473dbe587da5635d8e87eee554cdaed992cd29f30ba6250556fa2a80c7da4",
+      "size": 102416,
+      "representation": "installed protected PE"
+    },
+    {
+      "id": "cuw_utility.core-sidecar",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/CUWPlus/CUW.dll._",
+      "sha256": "e6df4960f678a6d2841cebfa06ac7bf4695bc4dd097abc64ba4fb0fbd2f2ff2a",
+      "size": 507840,
+      "representation": "installed protected body sidecar"
+    },
+    {
+      "id": "cuw_utility.core",
+      "path": "software/Techstream/gtsplus/gts-all-unprotected/CUWPlus/CUW.dll",
+      "sha256": "0e9ba6fd54b8301948309b5fb0571c0b99b40276dec3f0d229a44b7890cda603",
+      "size": 605184,
+      "representation": "recovered materialized PE"
+    },
+    {
+      "id": "cuw_utility.gene-installed",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/UtilityGene.dll",
+      "sha256": "7412d320fcde90fff48c6511e638633e123e1068a4e54399a80c63d3c11c007e",
+      "size": 192528,
+      "representation": "installed protected PE"
+    },
+    {
+      "id": "cuw_utility.gene-sidecar",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/UtilityGene.dll._",
+      "sha256": "f157f3baa06ebf5869e0a63d6ccddee1ae6e6b1502c10a4c6c9db738d6eebdbf",
+      "size": 283840,
+      "representation": "installed protected body sidecar"
+    },
+    {
+      "id": "cuw_utility.gene",
+      "path": "software/Techstream/gtsplus/gts-all-unprotected/GTSPlus/bin/UtilityGene.dll",
+      "sha256": "a844d3045b2cb780a63e3959ec04bd27baab4ea7195080876bbdf6d2cf86c4cc",
+      "size": 273936,
+      "representation": "recovered materialized PE"
+    },
+    {
+      "id": "cuw_utility.utility-front",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/UtilityPlusFrontNK.dll",
+      "sha256": "3472091a3c2f8df114fbab491dc442c3aee25a3485ce6390653413cb029d871a",
+      "size": 52240,
+      "representation": "installed native plaintext PE"
+    },
+    {
+      "id": "cuw_utility.decode-cm-installed",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/ContentServer/GtsPlus-CM.dll",
+      "sha256": "b0e8a25289d697bef0da31812d895e55f4745efd000700cfeb66c1e3135addd2",
+      "size": 540688,
+      "representation": "installed protected PE"
+    },
+    {
+      "id": "cuw_utility.decode-cm-sidecar",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/ContentServer/GtsPlus-CM.dll._",
+      "sha256": "db69e562601efdea05a06e924a9c06baf9ecee207ac3447cd0b7399e88ebce8f",
+      "size": 1350800,
+      "representation": "installed protected body sidecar"
+    },
+    {
+      "id": "cuw_utility.decode-cm",
+      "path": "build/out/gts-lifecycle-aux/ContentServer/GtsPlus-CM.dll",
+      "sha256": "ebc7c0b359c63d12a80c7fc596e93c226007b915f21032e05efa1046c2b292b2",
+      "size": 1885184,
+      "representation": "recovered materialized PE"
+    },
+    {
+      "id": "cuw_utility.decode-resource-installed",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/ContentServer/CryptgraphResource.dll",
+      "sha256": "c9d3d3c35f7af5f3fa4258cea547005846758f67fae2b3326f97b43be6da21b6",
+      "size": 32784,
+      "representation": "installed protected PE"
+    },
+    {
+      "id": "cuw_utility.decode-resource-sidecar",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/ContentServer/CryptgraphResource.dll._",
+      "sha256": "9f2d7bba218e97aacac917321711e6abaac26625b509770727e4471440c57b47",
+      "size": 114368,
+      "representation": "installed protected body sidecar"
+    },
+    {
+      "id": "cuw_utility.decode-resource",
+      "path": "build/out/gts-lifecycle-aux/ContentServer/CryptgraphResource.dll",
+      "sha256": "7a9a2c08f0055fdfed82258835ba68c4a4d41ffeb537bd27caa19ad19d1f16f6",
+      "size": 7168,
+      "representation": "recovered materialized PE"
+    },
+    {
+      "id": "cuw_utility.decode-crypt-installed",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/ContentServer/CryptgraphCommon.dll",
+      "sha256": "a70a55a78b3bea044bffa624a9c2aa668d4621e1a03c213cc0d5eb3ff302b073",
+      "size": 53264,
+      "representation": "installed protected PE"
+    },
+    {
+      "id": "cuw_utility.decode-crypt-sidecar",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/ContentServer/CryptgraphCommon.dll._",
+      "sha256": "c43577c8174b5d5c285c14f2582aaf1b84e19850b62283c6772fb711949a6176",
+      "size": 119728,
+      "representation": "installed protected body sidecar"
+    },
+    {
+      "id": "cuw_utility.decode-crypt",
+      "path": "build/out/gts-lifecycle-aux/ContentServer/CryptgraphCommon.dll",
+      "sha256": "98fc5afd362f6e28aec9f06f71c15c4d6751751a27a8325cdc143ad9f57366b0",
+      "size": 24576,
+      "representation": "recovered materialized PE"
+    },
+    {
+      "id": "cuw_utility.gui-certificate",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/ContentServer/dist.crt",
+      "sha256": "857ec034c946604c52fd845134386b5b914936962254048e8766d78fa6b3ad50",
+      "size": 1322,
+      "representation": "installed public signature certificate"
+    },
+    {
+      "id": "cuw_utility.cuw-gui",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlusGUI/cuw.gui",
+      "sha256": "c01ac058c24f125ffa2e294575b2ab9e1ce9fd7a9f728fa2e01f3dd2c783f30d",
+      "size": 2097540,
+      "representation": "installed authenticated GUI envelope"
+    },
+    {
+      "id": "cuw_utility.cuw-cpf",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlusGUI/cuw.cpf",
+      "sha256": "7889d150e5273ca5bccafde7e1487eacdf9324dd2f4ab9e877351ec1e657ed1c",
+      "size": 48,
+      "representation": "installed GUI packaging envelope"
+    },
+    {
+      "id": "cuw_utility.gts-gui",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlusGUI/gts.gui",
+      "sha256": "80ff7eed3a3a429aedc14384befb0f43b8ebd8176868b0bf41135033ce4ea37d",
+      "size": 13806180,
+      "representation": "installed authenticated GUI envelope"
+    },
+    {
+      "id": "cuw_utility.gts-cpf",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlusGUI/gts.cpf",
+      "sha256": "773becfd6fad75bfaab3d0dbdb0f4e05cdf1511646f76d77ca2c3d0a914691dc",
+      "size": 48,
+      "representation": "installed GUI packaging envelope"
+    },
+    {
+      "id": "cuw_utility.cuw-main",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlusGUI/cuw.gui",
+      "member": "js/cuw/cuw_main.js",
+      "sha256": "c493333b8dc4a4905456abe6cc153cec3fddf8dc344511a8846b01cbc32084f4",
+      "size": 14075,
+      "representation": "authenticated decoded JavaScript member",
+      "parent_source": "cuw_utility.cuw-gui"
+    },
+    {
+      "id": "cuw_utility.cuw-controller",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlusGUI/cuw.gui",
+      "member": "js/cuw/controllers/cuw_controller.js",
+      "sha256": "a620b310a4bd2ff8e2733dce1e4030b7f6380e7464a4aceb89038010f765ebc5",
+      "size": 276382,
+      "representation": "authenticated decoded JavaScript member",
+      "parent_source": "cuw_utility.cuw-gui"
+    },
+    {
+      "id": "cuw_utility.cuw-model",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlusGUI/cuw.gui",
+      "member": "js/cuw/models/cuw_model.js",
+      "sha256": "208aacad1d5d92cb2bbfbe0fc8ccf3ae6172baba376a63d245b519d2b3a4d4bd",
+      "size": 136324,
+      "representation": "authenticated decoded JavaScript member",
+      "parent_source": "cuw_utility.cuw-gui"
+    },
+    {
+      "id": "cuw_utility.key-controller",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlusGUI/gts.gui",
+      "member": "js/gts/ecu_security_key/ecu_security_key_controller.js",
+      "sha256": "4c4f4ad44158a676f12b3e122daf95ebfd85e48244667b2e8e6e5ffa21f2c64e",
+      "size": 68484,
+      "representation": "authenticated decoded JavaScript member",
+      "parent_source": "cuw_utility.gts-gui"
+    },
+    {
+      "id": "cuw_utility.key-worker",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlusGUI/gts.gui",
+      "member": "js/gts/ecu_security_key/ecu_security_key_worker.js",
+      "sha256": "1c56670de12d229122369f6673a213b73df47f956a750f7290aa1706931bee56",
+      "size": 126070,
+      "representation": "authenticated decoded JavaScript member",
+      "parent_source": "cuw_utility.gts-gui"
+    },
+    {
+      "id": "cuw_utility.gts-raw-api",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlusGUI/gts.gui",
+      "member": "js/gts/common/gts_platform_raw_interface.js",
+      "sha256": "00e737331886aade43df5102c81c643defdc566ea0461f22cfa96ded4c4d019f",
+      "size": 82091,
+      "representation": "authenticated decoded JavaScript member",
+      "parent_source": "cuw_utility.gts-gui"
+    },
+    {
+      "id": "cuw_utility.health-controller",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlusGUI/gts.gui",
+      "member": "js/gts/health_check/health_check_controller.js",
+      "sha256": "88cbe65dec27954900059113040ab5ead66b6ec0479d6353ef47ed01d133ed78",
+      "size": 75071,
+      "representation": "authenticated decoded JavaScript member",
+      "parent_source": "cuw_utility.gts-gui"
+    },
+    {
+      "id": "cuw_utility.hino-controller",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlusGUI/gts.gui",
+      "member": "js/gts/ecu_search_for_hino/ecu_search_for_hino_controller.js",
+      "sha256": "6c868d6167e4d536acc058b7f9f3e0752772f7d56be8667944d0c6cefe1737bc",
+      "size": 26339,
+      "representation": "authenticated decoded JavaScript member",
+      "parent_source": "cuw_utility.gts-gui"
+    },
+    {
+      "id": "cuw_utility.saap-controller",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlusGUI/gts.gui",
+      "member": "js/gts/software_as_a_part/software_as_a_part_controller.js",
+      "sha256": "c25a19d2b393af797195d9326da5bf1d1ec70b9f43bcb5f8b4333ce3875cb703",
+      "size": 39249,
+      "representation": "authenticated decoded JavaScript member",
+      "parent_source": "cuw_utility.gts-gui"
+    },
+    {
+      "id": "cuw_utility.saap2-controller",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlusGUI/gts.gui",
+      "member": "js/gts/software_as_a_part_aisac2/software_as_a_part_aisac2_controller.js",
+      "sha256": "99101469d9519f05c550bdf826b652aafc579bd9512f40577377ab8690b0f75f",
+      "size": 33571,
+      "representation": "authenticated decoded JavaScript member",
+      "parent_source": "cuw_utility.gts-gui"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "cuw_utility.backend-materialized",
+      "source": "cuw_utility.backend",
+      "kind": "managed-body-materialization",
+      "locator": "MethodDef RVA census",
+      "method_def_count": 1074,
+      "method_body_rva_count": 994,
+      "method_body_materialized_count": 994,
+      "finding": "Every nonzero MethodDef RVA has materialized bytes; hollow CP bodies are rejected."
+    },
+    {
+      "id": "cuw_utility.entry-materialized",
+      "source": "cuw_utility.entry",
+      "kind": "managed-body-materialization",
+      "locator": "MethodDef RVA census",
+      "method_def_count": 11,
+      "method_body_rva_count": 11,
+      "method_body_materialized_count": 11,
+      "finding": "Every nonzero MethodDef RVA has materialized bytes; hollow CP bodies are rejected."
+    },
+    {
+      "id": "cuw_utility.launcher-materialized",
+      "source": "cuw_utility.launcher",
+      "kind": "managed-body-materialization",
+      "locator": "MethodDef RVA census",
+      "method_def_count": 79,
+      "method_body_rva_count": 78,
+      "method_body_materialized_count": 78,
+      "finding": "Every nonzero MethodDef RVA has materialized bytes; hollow CP bodies are rejected."
+    },
+    {
+      "id": "cuw_utility.entry-main",
+      "source": "cuw_utility.entry",
+      "kind": "managed-il",
+      "locator": "Cuw.Program::Main",
+      "rva": 8956,
+      "body_size": 320,
+      "body_sha256": "5d85883d2254b03eb58bb6f2b847e182490e5d00d7cf574001e89bcc66a97b9c",
+      "anchors": [
+        {
+          "il_offset": 52,
+          "instruction": "callvirt System.Threading.WaitHandle::WaitOne"
+        },
+        {
+          "il_offset": 125,
+          "instruction": "callvirt Cuw.CuwBackendService::Init"
+        },
+        {
+          "il_offset": 75,
+          "instruction": "call Cuw.CExternalMethodWrapper::ER_StartApplicationCS"
+        },
+        {
+          "il_offset": 153,
+          "instruction": "call Cuw.CExternalMethodWrapper::ER_StartAliveMonitorRunningCS"
+        },
+        {
+          "il_offset": 188,
+          "instruction": "call Cuw.CExternalMethodWrapper::ER_StartWaitForEndingCS"
+        },
+        {
+          "il_offset": 211,
+          "instruction": "call System.Windows.Forms.Application::Run"
+        },
+        {
+          "il_offset": 243,
+          "instruction": "callvirt Cuw.CuwBackendService::Stop"
+        },
+        {
+          "il_offset": 276,
+          "instruction": "endfinally"
+        }
+      ],
+      "finding": "Global executable-path-derived mutex rejects duplicate backend with exit code -1; Init/Start register platform liveness and ending callbacks; hidden WinForms loop owns process; finally Stop runs after startup failure or loop return."
+    },
+    {
+      "id": "cuw_utility.entry-mutex",
+      "source": "cuw_utility.entry",
+      "kind": "managed-il",
+      "locator": "Cuw.Program::.cctor",
+      "rva": 8840,
+      "body_size": 113,
+      "body_sha256": "d73302949c493a4f438f89b94b059c3994fa1d763671082dffac6a9a62a17d9d",
+      "anchors": [
+        {
+          "il_offset": 5,
+          "instruction": "callvirt System.Reflection.Assembly::get_Location"
+        },
+        {
+          "il_offset": 11,
+          "instruction": "call System.Security.Cryptography.MD5::Create"
+        },
+        {
+          "il_offset": 34,
+          "instruction": "ldstr 'Global\\\\'"
+        },
+        {
+          "il_offset": 95,
+          "instruction": "stsfld MUTEX_NAME"
+        }
+      ],
+      "finding": "Backend instance mutex is Global plus lowercase hexadecimal MD5 of executable assembly location, not a vehicle or browser-session ID."
+    },
+    {
+      "id": "cuw_utility.form-close",
+      "source": "cuw_utility.entry",
+      "kind": "managed-il",
+      "locator": "Cuw.MainForm::MainForm_FormClosing",
+      "rva": 8529,
+      "body_size": 16,
+      "body_sha256": "e2887a6550e3830675a761f9534e133e1f43def1911c668770e80a611de3d4fa",
+      "anchors": [
+        {
+          "il_offset": 1,
+          "instruction": "ldsfld SVR_SHUTDOWN"
+        },
+        {
+          "il_offset": 7,
+          "instruction": "ceq"
+        },
+        {
+          "il_offset": 9,
+          "instruction": "callvirt System.ComponentModel.CancelEventArgs::set_Cancel"
+        }
+      ],
+      "finding": "Ordinary form close is cancelled until the service OnShutdown callback sets SVR_SHUTDOWN; power-change event only logs."
+    },
+    {
+      "id": "cuw_utility.backend-init",
+      "source": "cuw_utility.backend",
+      "kind": "managed-il",
+      "locator": "Cuw.CuwBackendService::Init",
+      "rva": 12424,
+      "body_size": 640,
+      "body_sha256": "14832931bed79eca15ee8ed18af8d97e4b94bcd6bf56949c57b7050d37d2be51",
+      "anchors": [
+        {
+          "il_offset": 251,
+          "instruction": "ldstr 'conf\\\\cuwpf.yaml'"
+        },
+        {
+          "il_offset": 274,
+          "instruction": "ldstr 'conf\\\\gtsplus.pp'"
+        },
+        {
+          "il_offset": 296,
+          "instruction": "callvirt ReadConfig"
+        },
+        {
+          "il_offset": 434,
+          "instruction": "call Microsoft.Win32.SystemEvents::add_SessionEnding"
+        },
+        {
+          "il_offset": 483,
+          "instruction": "newobj Fleck.WebSocketServer::.ctor"
+        },
+        {
+          "il_offset": 504,
+          "instruction": "callvirt Fleck.WebSocketServer::set_EnabledSslProtocols"
+        }
+      ],
+      "finding": "Backend loads encrypted CUW config beside entry assembly, installs OS session-ending handler, and creates Fleck WebSocket server with TLS protocol value 0xC00."
+    },
+    {
+      "id": "cuw_utility.backend-admit",
+      "source": "cuw_utility.backend",
+      "kind": "managed-il",
+      "locator": "Cuw.CuwBackendService::OnClientConnect",
+      "rva": 14184,
+      "body_size": 213,
+      "body_sha256": "64f510124e1f7af6af2b0f469ef6eda0e52ba5119bbded2bd441778f6e5ef42b",
+      "anchors": [
+        {
+          "il_offset": 60,
+          "instruction": "call get_IsRunning"
+        },
+        {
+          "il_offset": 65,
+          "instruction": "brtrue.s 0x1bd9"
+        },
+        {
+          "il_offset": 108,
+          "instruction": "call get_MaxConnection"
+        },
+        {
+          "il_offset": 113,
+          "instruction": "blt.s 0x1bfe"
+        },
+        {
+          "il_offset": 68,
+          "instruction": "callvirt Fleck.IWebSocketConnection::Close"
+        },
+        {
+          "il_offset": 183,
+          "instruction": "callvirt add_OnClose"
+        },
+        {
+          "il_offset": 17,
+          "instruction": "callvirt Fleck.IWebSocketConnectionInfo::get_ClientIpAddress"
+        }
+      ],
+      "finding": "Connection rejected by Close if service is not running or count reaches MaxConnection; admitted socket gets ClientSession and pool membership."
+    },
+    {
+      "id": "cuw_utility.backend-stop",
+      "source": "cuw_utility.backend",
+      "kind": "managed-il",
+      "locator": "Cuw.CuwBackendService::Stop",
+      "rva": 13152,
+      "body_size": 101,
+      "body_sha256": "f3c8c44df8ea00e2f77d2b52feba439bd7ab4d9da5d99cbdd2248e701692c9e9",
+      "anchors": [
+        {
+          "il_offset": 11,
+          "instruction": "call set_Status"
+        },
+        {
+          "il_offset": 22,
+          "instruction": "callvirt Clear"
+        },
+        {
+          "il_offset": 33,
+          "instruction": "callvirt System.Timers.Timer::Stop"
+        },
+        {
+          "il_offset": 44,
+          "instruction": "callvirt Fleck.WebSocketServer::Dispose"
+        },
+        {
+          "il_offset": 67,
+          "instruction": "callvirt Invoke"
+        }
+      ],
+      "finding": "Stop marks service stopped, clears/disconnects clients, stops timer, disposes listener and raises OnShutdown."
+    },
+    {
+      "id": "cuw_utility.can-exit",
+      "source": "cuw_utility.backend",
+      "kind": "managed-il",
+      "locator": "Cuw.CuwBackendService::CanExit",
+      "rva": 13256,
+      "body_size": 67,
+      "body_sha256": "5f2977c235a0df5f7e536b266cd0fa8ec5746522823b960c0a5134d4047d24e4",
+      "anchors": [
+        {
+          "il_offset": 1,
+          "instruction": "call get_ConnectionCount"
+        },
+        {
+          "il_offset": 19,
+          "instruction": "call get_ReprogrammingFlag"
+        },
+        {
+          "il_offset": 46,
+          "instruction": "brtrue.s 0x1809"
+        },
+        {
+          "il_offset": 50,
+          "instruction": "ceq"
+        }
+      ],
+      "finding": "CanExit requires ReprogrammingFlag false AND ConnectionCount zero; UI disconnect alone does not authorize backend exit while programming flag remains set."
+    },
+    {
+      "id": "cuw_utility.confirm-ending",
+      "source": "cuw_utility.backend",
+      "kind": "managed-il",
+      "locator": "Cuw.CuwBackendService::ConfirmEnding",
+      "rva": 14636,
+      "body_size": 81,
+      "body_sha256": "cf1c4f19d387895b8f92bb99c5d18659cc4ca42f05ee460349100211710d5fd0",
+      "anchors": [
+        {
+          "il_offset": 17,
+          "instruction": "call CanExit"
+        },
+        {
+          "il_offset": 24,
+          "instruction": "brfalse.s 0x1d58"
+        },
+        {
+          "il_offset": 27,
+          "instruction": "call Suspend"
+        },
+        {
+          "il_offset": 57,
+          "instruction": "ldstr '000'"
+        }
+      ],
+      "finding": "ConfirmEnding suspends new work on allowed exit; otherwise returns 000 veto."
+    },
+    {
+      "id": "cuw_utility.execute-ending",
+      "source": "cuw_utility.backend",
+      "kind": "managed-il",
+      "locator": "Cuw.CuwBackendService::ExecuteEnding",
+      "rva": 14720,
+      "body_size": 175,
+      "body_sha256": "a1ca9de20316e55c7458ec47bb48046cd3e1cecad83334b74843f3379579046e",
+      "anchors": [
+        {
+          "il_offset": 59,
+          "instruction": "call set_EndExecute"
+        },
+        {
+          "il_offset": 70,
+          "instruction": "callvirt System.Threading.EventWaitHandle::Set"
+        },
+        {
+          "il_offset": 87,
+          "instruction": "call ER_EndAliveMonitorRunningCS"
+        },
+        {
+          "il_offset": 93,
+          "instruction": "call ER_EndWaitForEndingCS"
+        },
+        {
+          "il_offset": 99,
+          "instruction": "call ER_EndApplicationCS"
+        },
+        {
+          "il_offset": 157,
+          "instruction": "call Resume"
+        }
+      ],
+      "finding": "Shutdown decision signals EndExecuteEvent; non-OS executed ending unregisters platform callbacks; cancelled ending resumes a suspended service."
+    },
+    {
+      "id": "cuw_utility.os-ending",
+      "source": "cuw_utility.backend",
+      "kind": "managed-il",
+      "locator": "Cuw.CuwBackendService::SessionEnding",
+      "rva": 14896,
+      "body_size": 136,
+      "body_sha256": "4b1cae117b44de64123a706ba1eab04f50ae8469cefa77240e201de18cca62c7",
+      "anchors": [
+        {
+          "il_offset": 33,
+          "instruction": "ldc.i4 0x2710"
+        },
+        {
+          "il_offset": 38,
+          "instruction": "callvirt System.Threading.WaitHandle::WaitOne"
+        },
+        {
+          "il_offset": 28,
+          "instruction": "call get_EndExecuteEvent"
+        },
+        {
+          "il_offset": 55,
+          "instruction": "callvirt Microsoft.Win32.SessionEndingEventArgs::set_Cancel"
+        },
+        {
+          "il_offset": 75,
+          "instruction": "call CanExit"
+        },
+        {
+          "il_offset": 66,
+          "instruction": "callvirt System.Threading.EventWaitHandle::Reset"
+        }
+      ],
+      "finding": "OS logoff/shutdown waits at most 10000ms for platform decision; explicit false decision cancels; timeout falls back to CanExit and cancels if busy."
+    },
+    {
+      "id": "cuw_utility.permission",
+      "source": "cuw_utility.backend",
+      "kind": "managed-il",
+      "locator": "Cuw.Command.CuwCommand::CheckPermitExecuteCommand",
+      "rva": 45964,
+      "body_size": 1985,
+      "body_sha256": "cf93f48eb6e5090ddef3b29f5f5e413d0896bfee422319f9acabefd3daa37545",
+      "anchors": [
+        {
+          "il_offset": 1,
+          "instruction": "callvirt get_HasExclusiveLock"
+        },
+        {
+          "il_offset": 6,
+          "instruction": "brfalse.s 0x97a2"
+        },
+        {
+          "il_offset": 1926,
+          "instruction": "callvirt get_IsAppAuthenticated"
+        },
+        {
+          "il_offset": 1954,
+          "instruction": "ldstr 'Unknown command. {0}'"
+        }
+      ],
+      "finding": "Existing exclusive-lock holder is immediately permitted. Otherwise bootstrap commands are public; LockExclusive/config/path require app authentication; programming/transport commands require authentication AND exclusive lock; unknown commands throw."
+    },
+    {
+      "id": "cuw_utility.command-result",
+      "source": "cuw_utility.backend",
+      "kind": "managed-il",
+      "locator": "Cuw.Command.CuwCommand::ExecuteCommand",
+      "rva": 41812,
+      "body_size": 4151,
+      "body_sha256": "0a03dfdfaa54206bb5200f6639c59efb8c3f169b17fc94f198c17489f06d249d",
+      "anchors": [
+        {
+          "il_offset": 20,
+          "instruction": "call CheckPermitExecuteCommand"
+        },
+        {
+          "il_offset": 25,
+          "instruction": "brtrue.s 0x87a2"
+        },
+        {
+          "il_offset": 40,
+          "instruction": "ldc.i4.2"
+        },
+        {
+          "il_offset": 2758,
+          "instruction": "call ExecuteStartReprogramming"
+        },
+        {
+          "il_offset": 3027,
+          "instruction": "call ExecuteClearStatusOfReprogramming"
+        }
+      ],
+      "finding": "JSON CommandName/RequestID route through admission before dispatch; permission failure returns ResultCode2, unsupported route ResultCode3; native returnValue remains separate."
+    },
+    {
+      "id": "cuw_utility.command-error",
+      "source": "cuw_utility.backend",
+      "kind": "managed-il",
+      "locator": "Cuw.Command.CuwCommand::Execute",
+      "rva": 41584,
+      "body_size": 228,
+      "body_sha256": "b8fdf55cb090fe8d7507385ccedaf545a7f7e86597d46ead4c57d868c11697c8",
+      "anchors": [
+        {
+          "il_offset": 27,
+          "instruction": "call ExecuteCommand"
+        },
+        {
+          "il_offset": 35,
+          "instruction": "callvirt Send"
+        },
+        {
+          "il_offset": 105,
+          "instruction": "callvirt GTS.Common.Entity.ErrorInfo::set_Exception"
+        },
+        {
+          "il_offset": 117,
+          "instruction": "callvirt GTS.Common.Entity.ErrorInfo::set_Message"
+        },
+        {
+          "il_offset": 129,
+          "instruction": "callvirt GTS.Common.Entity.ErrorInfo::set_Detail"
+        },
+        {
+          "il_offset": 156,
+          "instruction": "ldc.i4.3"
+        }
+      ],
+      "finding": "Execution errors become JSON error object (exception/message/detail), ResultCode1 or unknown-command3, sent to same client with request correlation."
+    },
+    {
+      "id": "cuw_utility.chap",
+      "source": "cuw_utility.backend",
+      "kind": "managed-il",
+      "locator": "ChapAuthentication::Authenticate",
+      "rva": 53480,
+      "body_size": 272,
+      "body_sha256": "f50b19a32b6590f491f2c3af893b8a499f2aa4356fe2126a48651056898d22fd",
+      "anchors": [
+        {
+          "il_offset": 1,
+          "instruction": "call System.String::IsNullOrEmpty"
+        },
+        {
+          "il_offset": 11,
+          "instruction": "call get_ChallengeCode"
+        },
+        {
+          "il_offset": 26,
+          "instruction": "call get_IsAppAuthenticated"
+        },
+        {
+          "il_offset": 76,
+          "instruction": "newobj System.Security.Cryptography.SHA256CryptoServiceProvider::.ctor"
+        },
+        {
+          "il_offset": 159,
+          "instruction": "call System.String::op_Inequality"
+        },
+        {
+          "il_offset": 192,
+          "instruction": "call set_IsAppAuthenticated"
+        },
+        {
+          "il_offset": 168,
+          "instruction": "call set_ChallengeCode"
+        }
+      ],
+      "finding": "Local application challenge-response is separate from account and ECU auth: empty/wrong response returns1, missing challenge2, already authenticated0; success marks this session authenticated and consumes challenge. Packaging/auth secret values are omitted."
+    },
+    {
+      "id": "cuw_utility.lock",
+      "source": "cuw_utility.backend",
+      "kind": "managed-il",
+      "locator": "Cuw.Model.CuwModel::LockExclusive",
+      "rva": 15792,
+      "body_size": 356,
+      "body_sha256": "945243548fe54ee37fa7d93fd5a4ef07e0cd59a8b8885fde59c03afbcfbf8854",
+      "anchors": [
+        {
+          "il_offset": 17,
+          "instruction": "callvirt get_HasExclusiveLock"
+        },
+        {
+          "il_offset": 67,
+          "instruction": "callvirt get_Clients"
+        },
+        {
+          "il_offset": 96,
+          "instruction": "callvirt get_IsConnected"
+        },
+        {
+          "il_offset": 225,
+          "instruction": "callvirt Remove"
+        },
+        {
+          "il_offset": 273,
+          "instruction": "callvirt set_HasExclusiveLock"
+        },
+        {
+          "il_offset": 295,
+          "instruction": "callvirt ResetDisconnectError"
+        }
+      ],
+      "finding": "Lock is per ClientSession: own lock returns0; connected other owner returns1; disconnected lock holders removed; success sets lock and clears ReportDisconnected."
+    },
+    {
+      "id": "cuw_utility.start-flag",
+      "source": "cuw_utility.backend",
+      "kind": "managed-il",
+      "locator": "Cuw.Command.CuwCommand::ExecuteStartReprogramming",
+      "rva": 49696,
+      "body_size": 100,
+      "body_sha256": "74e4290e62e5de53d1d36a9558f7a19f92c0df13880327e1d8981d0e612aad9d",
+      "anchors": [
+        {
+          "il_offset": 9,
+          "instruction": "callvirt StartReprogramming"
+        },
+        {
+          "il_offset": 18,
+          "instruction": "callvirt get_ReturnValue"
+        },
+        {
+          "il_offset": 23,
+          "instruction": "brtrue.s 0xa64c"
+        },
+        {
+          "il_offset": 0,
+          "instruction": "ldc.i4.1"
+        },
+        {
+          "il_offset": 27,
+          "instruction": "callvirt SetReprogrammingStatus"
+        }
+      ],
+      "finding": "Successful native StartReprogramming (returnValue0) sets global service ReprogrammingFlag true; wrapper ResultCode0 can coexist with nonzero native returnValue."
+    },
+    {
+      "id": "cuw_utility.clear-flag",
+      "source": "cuw_utility.backend",
+      "kind": "managed-il",
+      "locator": "Cuw.Command.CuwCommand::ExecuteClearStatusOfReprogramming",
+      "rva": 50388,
+      "body_size": 112,
+      "body_sha256": "efe672f478bf275b6f6b6e8b89e774d7cafee10f57d3362f8b9b6b324c60b328",
+      "anchors": [
+        {
+          "il_offset": 23,
+          "instruction": "callvirt ClearStatusOfReprogramming"
+        },
+        {
+          "il_offset": 32,
+          "instruction": "callvirt get_ReturnValue"
+        },
+        {
+          "il_offset": 37,
+          "instruction": "brtrue.s 0xa90e"
+        },
+        {
+          "il_offset": 29,
+          "instruction": "ldc.i4.0"
+        },
+        {
+          "il_offset": 41,
+          "instruction": "callvirt SetReprogrammingStatus"
+        }
+      ],
+      "finding": "Only successful native clear sets service programming flag false."
+    },
+    {
+      "id": "cuw_utility.disconnect",
+      "source": "cuw_utility.backend",
+      "kind": "managed-il",
+      "locator": "Cuw.ClientSession::Disconnect",
+      "rva": 10193,
+      "body_size": 49,
+      "body_sha256": "299bd873fda2f3a2c988c8d4822cc2dfea3be444edc5dee1f64d5c6797cae0eb",
+      "anchors": [
+        {
+          "il_offset": 24,
+          "instruction": "call set_NomallyClosed"
+        },
+        {
+          "il_offset": 31,
+          "instruction": "call set_HasExclusiveLock"
+        },
+        {
+          "il_offset": 42,
+          "instruction": "callvirt Disconnect"
+        }
+      ],
+      "finding": "Explicit client Disconnect marks normal closure, releases session lock and closes connection; it does not kill backend process or unconditionally stop native worker."
+    },
+    {
+      "id": "cuw_utility.socket-close",
+      "source": "cuw_utility.backend",
+      "kind": "managed-il",
+      "locator": "Cuw.ClientSession::Session_OnClose",
+      "rva": 10320,
+      "body_size": 172,
+      "body_sha256": "2fa1e8a7a2c9cd64935a4c3a02dc3415515f88bc6e67f7f2ce650c4aa65251a9",
+      "anchors": [
+        {
+          "il_offset": 40,
+          "instruction": "callvirt GetStatusOfReprogramming"
+        },
+        {
+          "il_offset": 45,
+          "instruction": "callvirt get_ReturnValue"
+        },
+        {
+          "il_offset": 50,
+          "instruction": "brfalse.s 0xcb8"
+        },
+        {
+          "il_offset": 59,
+          "instruction": "callvirt set_IsForced"
+        },
+        {
+          "il_offset": 67,
+          "instruction": "callvirt ClearStatusOfReprogramming"
+        },
+        {
+          "il_offset": 130,
+          "instruction": "endfinally"
+        }
+      ],
+      "finding": "Socket close queries native status; nonzero status attempts non-forced clear. Errors are logged; OnClose is raised in finally. This does not force-clear active native programming."
+    },
+    {
+      "id": "cuw_utility.pool-remove",
+      "source": "cuw_utility.backend",
+      "kind": "managed-il",
+      "locator": "Cuw.ClientSessionPool::Remove",
+      "rva": 10848,
+      "body_size": 67,
+      "body_sha256": "528346c2271ecae5bb454ac0911db5c13424747e00049e2e2476fbc89e2a309a",
+      "anchors": [
+        {
+          "il_offset": 7,
+          "instruction": "callvirt <dnfile.mdtable.TypeSpecRow object at 0x1095acb90>::ContainsKey"
+        },
+        {
+          "il_offset": 28,
+          "instruction": "callvirt get_IsConnected"
+        },
+        {
+          "il_offset": 36,
+          "instruction": "callvirt Disconnect"
+        },
+        {
+          "il_offset": 48,
+          "instruction": "callvirt <dnfile.mdtable.TypeSpecRow object at 0x1095acb90>::Remove"
+        }
+      ],
+      "finding": "Removing a live session disconnects it before deleting pool entry."
+    },
+    {
+      "id": "cuw_utility.cal-read",
+      "source": "cuw_utility.backend",
+      "kind": "managed-il",
+      "locator": "Cuw.Model.CuwCoreModel::ReadReprogrammingDataFile",
+      "rva": 17016,
+      "body_size": 312,
+      "body_sha256": "7d783642a763b221c3babf3f9a64b4759e0c57da4dc157a120b5c5d13cc2bdc4",
+      "anchors": [
+        {
+          "il_offset": 14,
+          "instruction": "callvirt get_FilePath"
+        },
+        {
+          "il_offset": 19,
+          "instruction": "call System.String::IsNullOrEmpty"
+        },
+        {
+          "il_offset": 132,
+          "instruction": "call ReadReprogrammingDataFile"
+        },
+        {
+          "il_offset": 163,
+          "instruction": "brtrue.s 0x272e"
+        },
+        {
+          "il_offset": 209,
+          "instruction": "call MarshalToCpuInfoList"
+        },
+        {
+          "il_offset": 272,
+          "instruction": "call System.Runtime.InteropServices.Marshal::FreeCoTaskMem"
+        }
+      ],
+      "finding": "Selected path/mode/destination/CPU capacity passed to CUW.dll; missing path fails; nonzero native return or invalid CPU count returns failure without calibration projection; allocated native buffers freed in finally."
+    },
+    {
+      "id": "cuw_utility.cal-search",
+      "source": "cuw_utility.backend",
+      "kind": "managed-il",
+      "locator": "Cuw.Model.CuwCoreModel::GetRewriteFilesInfo",
+      "rva": 17688,
+      "body_size": 504,
+      "body_sha256": "9ca5cc58550fb3dbb1c2b3885206b3abb00bf50ddfcea66d04a911b03d9653d3",
+      "anchors": [
+        {
+          "il_offset": 36,
+          "instruction": "callvirt get_DirList"
+        },
+        {
+          "il_offset": 119,
+          "instruction": "call ReadCuwFile"
+        },
+        {
+          "il_offset": 227,
+          "instruction": "callvirt get_IsValid"
+        },
+        {
+          "il_offset": 260,
+          "instruction": "callvirt get_InvalidCalFileList"
+        },
+        {
+          "il_offset": 374,
+          "instruction": "callvirt get_AllNewCalIds"
+        },
+        {
+          "il_offset": 347,
+          "instruction": "callvirt set_Target"
+        }
+      ],
+      "finding": "Search scans supplied directories, records invalid calibration files, maps old/new CID matches and distinguishes target0/display candidates,1/already-new CID,2/no matching target."
+    },
+    {
+      "id": "cuw_utility.progress",
+      "source": "cuw_utility.backend",
+      "kind": "managed-il",
+      "locator": "Cuw.Model.CuwCoreModel::GetStatusOfReprogramming",
+      "rva": 19664,
+      "body_size": 444,
+      "body_sha256": "125b0f185024bee01ee812cfc31b5ae3b652d3828848fb8598e9459d17e02893",
+      "anchors": [
+        {
+          "il_offset": 52,
+          "instruction": "call GetStatusOfReprogramming"
+        },
+        {
+          "il_offset": 91,
+          "instruction": "callvirt set_TragetCPUIndex"
+        },
+        {
+          "il_offset": 127,
+          "instruction": "callvirt set_RemainigTime"
+        },
+        {
+          "il_offset": 145,
+          "instruction": "callvirt set_NeedIGOffOn"
+        },
+        {
+          "il_offset": 163,
+          "instruction": "callvirt set_IGStatusChangeableType"
+        },
+        {
+          "il_offset": 191,
+          "instruction": "callvirt set_ErrorDetail"
+        },
+        {
+          "il_offset": 203,
+          "instruction": "callvirt set_UserErrorCode"
+        },
+        {
+          "il_offset": 395,
+          "instruction": "call System.Runtime.InteropServices.Marshal::FreeCoTaskMem"
+        }
+      ],
+      "finding": "Polling returns native status plus CPU progress/retry/whole-repro flags, remaining/estimated time, IG constraints and structured error detail, freeing marshalled buffer in finally."
+    },
+    {
+      "id": "cuw_utility.retry",
+      "source": "cuw_utility.backend",
+      "kind": "managed-il",
+      "locator": "Cuw.Model.CuwCoreModel::InformResultOfQueryRetry",
+      "rva": 20108,
+      "body_size": 76,
+      "body_sha256": "81a40e8e6a5101c8e2026eb6b594cc7bfddd035db3b468629dd32a6f05d70161",
+      "anchors": [
+        {
+          "il_offset": 1,
+          "instruction": "callvirt get_ResultOfQueryRetry"
+        },
+        {
+          "il_offset": 7,
+          "instruction": "callvirt get_IsWholeReproSwitched"
+        },
+        {
+          "il_offset": 12,
+          "instruction": "call InformResultOfQueryRetry"
+        }
+      ],
+      "finding": "UI owns retry/cancel decision and whole-reprogramming switch; backend forwards both values to native engine."
+    },
+    {
+      "id": "cuw_utility.recovery-read",
+      "source": "cuw_utility.backend",
+      "kind": "managed-il",
+      "locator": "Cuw.Model.CuwCoreModel::ReadRecoveryInfoFile",
+      "rva": 20184,
+      "body_size": 304,
+      "body_sha256": "1ede10b235452e860ae9418f44972de9799a19ee924d78940f510785987962c5",
+      "anchors": [
+        {
+          "il_offset": 79,
+          "instruction": "call ReadRecoveryInfoFile"
+        },
+        {
+          "il_offset": 115,
+          "instruction": "brtrue.s 0x335e"
+        },
+        {
+          "il_offset": 175,
+          "instruction": "callvirt set_DeviceId"
+        },
+        {
+          "il_offset": 187,
+          "instruction": "callvirt set_Vin"
+        },
+        {
+          "il_offset": 208,
+          "instruction": "callvirt set_CalInfo"
+        },
+        {
+          "il_offset": 225,
+          "instruction": "callvirt set_StoredData"
+        },
+        {
+          "il_offset": 267,
+          "instruction": "call System.Runtime.InteropServices.Marshal::FreeCoTaskMem"
+        }
+      ],
+      "finding": "Recovery returns saved J2534 device, VIN, calibration/CPU list and Suzuki/Daihatsu security-support storage after native success."
+    },
+    {
+      "id": "cuw_utility.clear-xml",
+      "source": "cuw_utility.backend",
+      "kind": "managed-il",
+      "locator": "Cuw.Model.CuwCoreModel::ClearStatusOfReprogramming",
+      "rva": 20536,
+      "body_size": 117,
+      "body_sha256": "dd25303f8e1cc511eca1172b13db6c2b5e16da2c0be305f33b54ee0cf4309b77",
+      "anchors": [
+        {
+          "il_offset": 1,
+          "instruction": "callvirt get_IsForced"
+        },
+        {
+          "il_offset": 6,
+          "instruction": "call ClearStatusOfReprogramming"
+        },
+        {
+          "il_offset": 49,
+          "instruction": "brtrue.s 0x34a0"
+        },
+        {
+          "il_offset": 51,
+          "instruction": "call DeleteAllXMLFileForRequestReprogrammingKey"
+        }
+      ],
+      "finding": "Native clear receives explicit isForced. Request-key XML deletion runs only when clear returns0."
+    },
+    {
+      "id": "cuw_utility.key-request",
+      "source": "cuw_utility.backend",
+      "kind": "managed-il",
+      "locator": "Cuw.Model.CuwCoreModel::StartRequestReprogrammingKey",
+      "rva": 21520,
+      "body_size": 107,
+      "body_sha256": "95f51bedf843de2648ab56df4de06b575e625771bc921c79795bf9115b8fc5a0",
+      "anchors": [
+        {
+          "il_offset": 9,
+          "instruction": "callvirt get_MethodOfRequest"
+        },
+        {
+          "il_offset": 15,
+          "instruction": "callvirt get_Url"
+        },
+        {
+          "il_offset": 22,
+          "instruction": "call StartRequestReprogrammingKey"
+        },
+        {
+          "il_offset": 47,
+          "instruction": "ldc.i4.3"
+        },
+        {
+          "il_offset": 48,
+          "instruction": "bne.un.s 0x385a"
+        },
+        {
+          "il_offset": 57,
+          "instruction": "callvirt set_RepSecInfo"
+        }
+      ],
+      "finding": "Request method and configured URL forwarded to CUW.dll; method3 returns native security seed/key-pair metadata for frontend server workflow."
+    },
+    {
+      "id": "cuw_utility.key-cancel",
+      "source": "cuw_utility.backend",
+      "kind": "managed-il",
+      "locator": "Cuw.Model.CuwCoreModel::CancelRequestReprogrammingKey",
+      "rva": 21628,
+      "body_size": 63,
+      "body_sha256": "c38284a7bb510904dc98b03418c72dd9f070028e57cf252ec7bc8032f873fc83",
+      "anchors": [
+        {
+          "il_offset": 0,
+          "instruction": "call CancelRequestReprogrammingKey"
+        },
+        {
+          "il_offset": 13,
+          "instruction": "callvirt set_ReturnValue"
+        }
+      ],
+      "finding": "Key-request cancellation has a separate native API and return code from reprogramming retry/cancel."
+    },
+    {
+      "id": "cuw_utility.last-folder",
+      "source": "cuw_utility.backend",
+      "kind": "managed-il",
+      "locator": "Cuw.Model.CuwModel::StoreLastAccessFolderPath",
+      "rva": 15342,
+      "body_size": 58,
+      "body_sha256": "385bce98c39f296a13ff43633723c8a7345e859d2f9d35fbbcd340d6d2c69236",
+      "anchors": [
+        {
+          "il_offset": 5,
+          "instruction": "ldstr 'LastAccessFolder'"
+        },
+        {
+          "il_offset": 16,
+          "instruction": "call Microsoft.Win32.Registry::SetValue"
+        }
+      ],
+      "finding": "Last selected calibration directory persists as HKCU Software/Toyota Diagnostics/Calibration Update Wizard/LastAccessFolder."
+    },
+    {
+      "id": "cuw_utility.server-data",
+      "source": "cuw_utility.backend",
+      "kind": "managed-il",
+      "locator": "Cuw.Model.CuwModel::SaveData",
+      "rva": 15644,
+      "body_size": 100,
+      "body_sha256": "12483aac654f7de0d98eeb88d1f78401fb220013ac9f4fde7716dd4acb4e93fb",
+      "anchors": [
+        {
+          "il_offset": 7,
+          "instruction": "callvirt <dnfile.mdtable.TypeSpecRow object at 0x1095ac890>::ContainsKey"
+        },
+        {
+          "il_offset": 27,
+          "instruction": "callvirt <dnfile.mdtable.TypeSpecRow object at 0x1095ac890>::set_Item"
+        },
+        {
+          "il_offset": 47,
+          "instruction": "callvirt <dnfile.mdtable.TypeSpecRow object at 0x1095ac890>::Add"
+        }
+      ],
+      "finding": "SaveData updates the backend-owned dictionary used to restore browser state; it is not a disk flush."
+    },
+    {
+      "id": "cuw_utility.launcher-start",
+      "source": "cuw_utility.launcher",
+      "kind": "managed-il",
+      "locator": "CUWLauncher.App::Application_Startup",
+      "rva": 8648,
+      "body_size": 692,
+      "body_sha256": "a54778087f2093c79891aa93bbaddafe1251e62aa03ff632b83a69b62ab06027",
+      "anchors": [
+        {
+          "il_offset": 47,
+          "instruction": "ldstr '.cuwd'"
+        },
+        {
+          "il_offset": 59,
+          "instruction": "ldstr 'SettingForDH.xml'"
+        },
+        {
+          "il_offset": 125,
+          "instruction": "newobj System.Threading.Mutex::.ctor"
+        },
+        {
+          "il_offset": 137,
+          "instruction": "callvirt System.Threading.WaitHandle::WaitOne"
+        },
+        {
+          "il_offset": 346,
+          "instruction": "ldstr '.scuw'"
+        },
+        {
+          "il_offset": 477,
+          "instruction": "call LaunchCUWPlus"
+        },
+        {
+          "il_offset": 529,
+          "instruction": "callvirt System.Threading.Mutex::ReleaseMutex"
+        },
+        {
+          "il_offset": 547,
+          "instruction": "call System.Environment::Exit"
+        }
+      ],
+      "finding": "External file association launcher routes by extension/installed brand/running legacy GTS, enforces named launcher mutex, and releases/disposes mutex before Environment.Exit(0); CUWLauncher errors are UI messages, not meaningful process exit codes."
+    },
+    {
+      "id": "cuw_utility.launcher-open",
+      "source": "cuw_utility.launcher",
+      "kind": "managed-il",
+      "locator": "<Launch>d__9::MoveNext",
+      "rva": 11884,
+      "body_size": 932,
+      "body_sha256": "b83b5fcc9287108bdc9be926ad1d066a1c6722f59fa63d95699d24856c5d332b",
+      "anchors": [
+        {
+          "il_offset": 31,
+          "instruction": "ldstr 'https://127.0.0.1:{0}/GetResource/cuw/CUWMain.html'"
+        },
+        {
+          "il_offset": 51,
+          "instruction": "ldstr '?P2='"
+        },
+        {
+          "il_offset": 62,
+          "instruction": "call System.Uri::EscapeDataString"
+        },
+        {
+          "il_offset": 72,
+          "instruction": "call System.Diagnostics.Process::Start"
+        },
+        {
+          "il_offset": 161,
+          "instruction": "call ConnectToGTSPlusPF"
+        },
+        {
+          "il_offset": 296,
+          "instruction": "call SetConnectionConditionToGTSPlusPF"
+        },
+        {
+          "il_offset": 441,
+          "instruction": "call WaitForDisconnectCUWPlusFromGTSPlusPF"
+        },
+        {
+          "il_offset": 645,
+          "instruction": "ldc.i4.3"
+        },
+        {
+          "il_offset": 594,
+          "instruction": "callvirt System.IDisposable::Dispose"
+        }
+      ],
+      "finding": "Launches local HTTPS browser URL with escaped calibration path P2, then connects to platform; failed connection registration/existence checks retry while counters <=3, except connection failure401; socket disposed after each attempt."
+    },
+    {
+      "id": "cuw_utility.launcher-connect",
+      "source": "cuw_utility.launcher",
+      "kind": "managed-il",
+      "locator": "<ConnectToGTSPlusPF>d__10::MoveNext",
+      "rva": 11200,
+      "body_size": 668,
+      "body_sha256": "cd7b2f62342b346dba1148357bd0a8c319b22e8863b23337d73157d11e350f65",
+      "anchors": [
+        {
+          "il_offset": 25,
+          "instruction": "ldc.i4 0x1388"
+        },
+        {
+          "il_offset": 104,
+          "instruction": "ldstr 'wss://127.0.0.1:{0}/'"
+        },
+        {
+          "il_offset": 185,
+          "instruction": "callvirt System.Net.WebSockets.ClientWebSocket::ConnectAsync"
+        },
+        {
+          "il_offset": 372,
+          "instruction": "ldfld mintWSSPortTo"
+        },
+        {
+          "il_offset": 46,
+          "instruction": "callvirt <dnfile.mdtable.TypeSpecRow object at 0x109f9a450>::GetEnumerator"
+        },
+        {
+          "il_offset": 331,
+          "instruction": "ldc.i4 0x191"
+        }
+      ],
+      "finding": "Tries configured platform WSS port ranges on loopback with 5000ms cancellation per connect; exhausted range/connection failure surfaces launcher error401."
+    },
+    {
+      "id": "cuw_utility.launcher-register",
+      "source": "cuw_utility.launcher",
+      "kind": "managed-il",
+      "locator": "<SetConnectionConditionToGTSPlusPF>d__11::MoveNext",
+      "rva": 13692,
+      "body_size": 552,
+      "body_sha256": "9ba2d0cbd3144d6c1364b6e8cb95db432050bacca2b032da499d0e44bb88969e",
+      "anchors": [
+        {
+          "il_offset": 49,
+          "instruction": "ldstr '{\"common\":{\"apiId\":\"CN000001\",\"ack\":0},\"apiArgs\":{\"name\":\"CUWLauncher\",\"maxNum\":2},\"free\":{\"freeMsg\":\"HELLO\"}}'"
+        },
+        {
+          "il_offset": 49,
+          "instruction": "ldstr '{\"common\":{\"apiId\":\"CN000001\",\"ack\":0},\"apiArgs\":{\"name\":\"CUWLauncher\",\"maxNum\":2},\"free\":{\"freeMsg\":\"HELLO\"}}'"
+        },
+        {
+          "il_offset": 64,
+          "instruction": "ldc.i4 0x1388"
+        },
+        {
+          "il_offset": 286,
+          "instruction": "call ReceiveSpecifiedAPIIDMsgFromWebSocket"
+        },
+        {
+          "il_offset": 389,
+          "instruction": "ldstr 'resultInfo'"
+        },
+        {
+          "il_offset": 414,
+          "instruction": "brfalse.s 0x1b33"
+        },
+        {
+          "il_offset": 430,
+          "instruction": "ldc.i4 0x192"
+        }
+      ],
+      "finding": "Registers CN000001 name CUWLauncher maxNum2 with platform; reply result nonzero or timeout produces error402."
+    },
+    {
+      "id": "cuw_utility.launcher-wait",
+      "source": "cuw_utility.launcher",
+      "kind": "managed-il",
+      "locator": "<WaitForDisconnectCUWPlusFromGTSPlusPF>d__12::MoveNext",
+      "rva": 14260,
+      "body_size": 892,
+      "body_sha256": "ebc281eb34e66229236968f28a841429e48045cced315da2456f2811b44393b3",
+      "anchors": [
+        {
+          "il_offset": 54,
+          "instruction": "ldstr '{\"common\":{\"apiId\":\"CN000004\",\"ack\":0},\"apiArgs\":{\"name\":\"CUW\"},\"free\":{\"freeMsg\":\"HELLO\"}}'"
+        },
+        {
+          "il_offset": 486,
+          "instruction": "ldstr 'existNum'"
+        },
+        {
+          "il_offset": 359,
+          "instruction": "ldc.i4.2"
+        },
+        {
+          "il_offset": 566,
+          "instruction": "ldc.r8 30000.0"
+        },
+        {
+          "il_offset": 607,
+          "instruction": "ldc.i4 0x1f4"
+        },
+        {
+          "il_offset": 744,
+          "instruction": "ldc.i4 0x193"
+        }
+      ],
+      "finding": "Polls platform CUW connection name, waits for first existNum>0 then zero to finish; first admission timeout30s ->301, poll errors403, 500ms between polls. Browser-process lifetime itself is not the return contract."
+    },
+    {
+      "id": "cuw_utility.native-clear",
+      "source": "cuw_utility.core",
+      "kind": "native-control-flow",
+      "locator": "0x10063a80",
+      "byte_window_size": 246,
+      "byte_window_sha256": "3a5f63392a3aa6d0126969ccf1ba084d28a02d717201d888af3be044bda5ca5a",
+      "anchors": [
+        {
+          "va": "0x10063b25",
+          "bytes": "803de2bf0810007527"
+        },
+        {
+          "va": "0x10063b2e",
+          "bytes": "807d0800752e"
+        },
+        {
+          "va": "0x10063b55",
+          "bytes": "b8bf0b0000"
+        },
+        {
+          "va": "0x10063b67",
+          "bytes": "e894c2fdff"
+        }
+      ],
+      "finding": "ClearStatusOfReprogramming is not unconditional: state1 or (busy-byte zero AND (forced OR completion flag OR state4/0 OR cancel flag)) calls reset and returns0; otherwise returns0xBBF (3007)."
+    },
+    {
+      "id": "cuw_utility.native-reset",
+      "source": "cuw_utility.core",
+      "kind": "native-control-flow",
+      "locator": "0x1003fe00",
+      "byte_window_size": 80,
+      "byte_window_sha256": "c5f91943b2b45b6b42eda7e2d3c4effa1422febde55a97042e10b7e7e6fbe49f",
+      "anchors": [],
+      "finding": "Reset 0x1003FE00 signals request/copy worker events, requests worker termination, waits INFINITE on running thread then Sleep(500) until worker pointer clears, resets calibration/state storage and frees buffers. No bounded join is present in this cleanup path."
+    },
+    {
+      "id": "cuw_utility.gene-before",
+      "source": "cuw_utility.gene",
+      "kind": "native-control-flow",
+      "locator": "0x1000e2c0",
+      "byte_window_size": 586,
+      "byte_window_sha256": "d23207445585b875ca353c08dabbdb3c629099e9d913f3fdf6aaa936be6b0a0a",
+      "anchors": [],
+      "finding": "KeyUpdate_before rejects unsupported protocol discriminator !=0x34 with99; auth helper25890 accepts 0xFFA/0xFFB modes, otherwise returns error; helper262D0 prepares selected topology and exports admitted identities plus M1/M2/M3 to caller on success."
+    },
+    {
+      "id": "cuw_utility.gene-validate",
+      "source": "cuw_utility.gene",
+      "kind": "native-control-flow",
+      "locator": "0x1000e510",
+      "byte_window_size": 815,
+      "byte_window_sha256": "07790f263273a5f0c7b3fd4658fa10c7dd642894ec4a92b4eb43ef748e6b19af",
+      "anchors": [],
+      "finding": "KeyValidation uses protocol0x34 gate and session auth helper25930; 0xFB8 becomes status1 with success return; helper263F0 maps key status2->0,0/1->3,other->2; returns selected ECU identities only for local_80==1."
+    },
+    {
+      "id": "cuw_utility.gene-after",
+      "source": "cuw_utility.gene",
+      "kind": "native-control-flow",
+      "locator": "0x1000df20",
+      "byte_window_size": 928,
+      "byte_window_sha256": "793695c48ad32efeabe052125fea1466e6221c690898b4aaa870f359b57e7cba",
+      "anchors": [],
+      "finding": "KeyUpdate_after binds supplied selected IDs and six update-data arrays, processes master then selected nine-entry participant table, aborts on helper result !=3, performs final helper24730 and returns per-selected ECU success booleans;0 is wrapper success, not uniform ECU success."
+    },
+    {
+      "id": "cuw_utility.utility-command-map",
+      "source": "cuw_utility.utility-front",
+      "kind": "native-control-flow",
+      "locator": "0x100014aa",
+      "byte_window_size": 183,
+      "byte_window_sha256": "6e1b890356474bf69c67d8dc6bcb4cfee04cdac7288db24d88284da9663498a9",
+      "anchors": [
+        {
+          "va": "0x100014b3",
+          "bytes": "6858730010"
+        },
+        {
+          "va": "0x100014dd",
+          "bytes": "c70594d4001015000000"
+        },
+        {
+          "va": "0x100014f0",
+          "bytes": "6864730010"
+        },
+        {
+          "va": "0x1000151a",
+          "bytes": "c705b0d4001016000000"
+        },
+        {
+          "va": "0x1000152d",
+          "bytes": "6870730010"
+        },
+        {
+          "va": "0x10001557",
+          "bytes": "c705ccd4001017000000"
+        },
+        {
+          "va": "0x10007358",
+          "bytes": "5547303030303231"
+        },
+        {
+          "va": "0x10007364",
+          "bytes": "5547303030303232"
+        },
+        {
+          "va": "0x10007370",
+          "bytes": "5547303030303233"
+        },
+        {
+          "va": "0x10002ecf",
+          "bytes": "8b048580d20010"
+        },
+        {
+          "va": "0x10002eda",
+          "bytes": "0f87181f0000"
+        },
+        {
+          "va": "0x10002ee0",
+          "bytes": "ff248570500010"
+        }
+      ],
+      "finding": "Table initializer FUN10001020 binds exact JSON API strings UG000021/22/23 to switch selectors0x15/16/17. ComUtilityFront compares parsed API ID against this28-byte-entry table then switches on its selector, closing the signed Subaru API-to-native wrapper join."
+    },
+    {
+      "id": "cuw_utility.utility-dispatch",
+      "source": "cuw_utility.utility-front",
+      "kind": "native-control-flow",
+      "locator": "ComUtilityFront @0x10002990; cases1,2,5,0x15/16/17",
+      "anchors": [
+        {
+          "va": "0x10004a37",
+          "bytes": "ff15ac7000108bf085f6740a"
+        },
+        {
+          "va": "0x10004aa5",
+          "bytes": "833dc0c10010007518"
+        },
+        {
+          "va": "0x10004ad8",
+          "bytes": "ff15b07000108bf085f6740a"
+        },
+        {
+          "va": "0x10004ca9",
+          "bytes": "ff15b4700010"
+        },
+        {
+          "va": "0x100036c9",
+          "bytes": "a8017443fec83c7e773d"
+        },
+        {
+          "va": "0x100036f6",
+          "bytes": "ff15a07000108bf085f6"
+        }
+      ],
+      "finding": "Initialization case1 sets global ready only after Ex2initialCom success. Cases0x15/16/17 require ready, call UtilityGene ordinals98/99/100 and map argument/native failures to0x90281115/16/17. Case5 SecurityAccess requires initialized communication and odd byte level1..0x7F then ordinal request. Case2 stops periodic messages, finalizes transport, resets parameters/ready, stops keepalive even on finalize failure; return restores CCommFrameCtrl connection info."
+    },
+    {
+      "id": "cuw_utility.hc-launch",
+      "source": "cuw_utility.health-controller",
+      "kind": "javascript-control-flow",
+      "locator": "onClickCalibrationToCuw",
+      "function_sha256": "2567484dc34eda6c2e9a667cc8b67ac359a39a0386cadafab4585c5555c44db1",
+      "anchors": [
+        {
+          "character_offset": 37045,
+          "expression": "../cuw/CUWMain.html?P1="
+        },
+        {
+          "character_offset": 37088,
+          "expression": "encodeURIComponent(calibrationId)"
+        },
+        {
+          "character_offset": 37122,
+          "expression": "window.open(url,'_blank')"
+        }
+      ],
+      "finding": "GTS Health Check launches a separate CUW browser page with old calibration ID P1; calibration path selection is deferred to CUW."
+    },
+    {
+      "id": "cuw_utility.ui-entry",
+      "source": "cuw_utility.cuw-main",
+      "kind": "javascript-control-flow",
+      "locator": "init",
+      "function_sha256": "93eaef85f79316da7c23fd01828657f7cfd9942dda531781aa301dea133b0c0f",
+      "anchors": [
+        {
+          "character_offset": 1185,
+          "expression": "getParam('P1')"
+        },
+        {
+          "character_offset": 1255,
+          "expression": "getParam('P2')"
+        },
+        {
+          "character_offset": 1341,
+          "expression": "getParam('P3')"
+        },
+        {
+          "character_offset": 1379,
+          "expression": "getParam('P4')"
+        },
+        {
+          "character_offset": 968,
+          "expression": "EXEC_REPROGRAMMING"
+        },
+        {
+          "character_offset": 2533,
+          "expression": "connectCuwPf()"
+        },
+        {
+          "character_offset": 2574,
+          "expression": "connectGtsPf()"
+        },
+        {
+          "character_offset": 2901,
+          "expression": "loginController.init()"
+        }
+      ],
+      "finding": "UI parses P1 old CID/P2 path/P3 file list/P4 caller application, connects independently to CUW and GTS platform, initializes settings then login; beforeunload warning exists only while EXEC_REPROGRAMMING; failed embedded init responds CANCEL when P4 nonempty."
+    },
+    {
+      "id": "cuw_utility.ui-login",
+      "source": "cuw_utility.cuw-main",
+      "kind": "javascript-control-flow",
+      "locator": "onLoggedIn",
+      "function_sha256": "b6519d22489e6d6f420149099c7d5fdfec3f49579e9d5c0c20ea02800a1e9ed6",
+      "anchors": [
+        {
+          "character_offset": 7248,
+          "expression": "model.lockExclusive()"
+        },
+        {
+          "character_offset": 7293,
+          "expression": "model.stopReceivingOfCID()"
+        },
+        {
+          "character_offset": 7391,
+          "expression": "model.stopReproDataFileCopyToUSBMemory()"
+        },
+        {
+          "character_offset": 8051,
+          "expression": "gtsApi.startDiagnosis(param)"
+        },
+        {
+          "character_offset": 8391,
+          "expression": "cuwController.initCuw()"
+        }
+      ],
+      "finding": "Login completion obtains CUW lock, attempts stop of previous CID/USB copy workers, starts platform diagnosis, initializes dealer/user settings, then CUW controller."
+    },
+    {
+      "id": "cuw_utility.ui-init",
+      "source": "cuw_utility.cuw-controller",
+      "kind": "javascript-control-flow",
+      "locator": "initCuw",
+      "function_sha256": "3da3a38cef9340c651036dde99d90945e879cb9f7b86b0b3aae5f88bb64e70c7",
+      "anchors": [
+        {
+          "character_offset": 4594,
+          "expression": "model.lockExclusive()"
+        },
+        {
+          "character_offset": 4784,
+          "expression": "result.returnValue === SUCCESS"
+        },
+        {
+          "character_offset": 5132,
+          "expression": "model.configureCuwDll()"
+        },
+        {
+          "character_offset": 6020,
+          "expression": "controller.goStartCuw()"
+        },
+        {
+          "character_offset": 6167,
+          "expression": "controller.disconnect()"
+        }
+      ],
+      "finding": "Controller requires lock success, configures native DLL and GTS identity/CID conversion map; initialization failure disconnects and shows end view."
+    },
+    {
+      "id": "cuw_utility.ui-admission",
+      "source": "cuw_utility.cuw-controller",
+      "kind": "javascript-control-flow",
+      "locator": "goStartCuw",
+      "function_sha256": "135b33bcadcdadef0a178e4d50211cdbbd66abce1a38e701ccc4a900a33d8a7a",
+      "anchors": [
+        {
+          "character_offset": 32689,
+          "expression": "getApiExclusiveControlLock()"
+        },
+        {
+          "character_offset": 32750,
+          "expression": "sendLogoutControl(true)"
+        },
+        {
+          "character_offset": 34075,
+          "expression": "REPROGRAMMING_NOT_STARTED_ERROR"
+        },
+        {
+          "character_offset": 35439,
+          "expression": "readRecoveryInfoFile"
+        },
+        {
+          "character_offset": 36772,
+          "expression": "initViewS70174"
+        },
+        {
+          "character_offset": 36840,
+          "expression": "judgmentOfReprogrammingFileSearch()"
+        },
+        {
+          "character_offset": 37269,
+          "expression": "restoreClientData()"
+        },
+        {
+          "character_offset": 38139,
+          "expression": "showS70117()"
+        }
+      ],
+      "finding": "Separate platform exclusive-control lock and logout inhibit protect session. Not-started status chooses saved recovery or fresh calibration selection; existing native activity restores backend client data and resumes progress UI instead of restarting engine."
+    },
+    {
+      "id": "cuw_utility.ui-recovery",
+      "source": "cuw_utility.cuw-controller",
+      "kind": "javascript-control-flow",
+      "locator": "onClickS70174RetryBtn",
+      "function_sha256": "08492792441584ad334de910b560b2fdaa0cc0e5142dd17b40767c95bc2d9f6c",
+      "anchors": [
+        {
+          "character_offset": 55087,
+          "expression": "checkRecoveryVin"
+        },
+        {
+          "character_offset": 55145,
+          "expression": "judgeFlashable"
+        },
+        {
+          "character_offset": 55389,
+          "expression": "startReprogramming()"
+        },
+        {
+          "character_offset": 55463,
+          "expression": "recoveryStartReprogramming"
+        }
+      ],
+      "finding": "Recovery retry verifies VIN then native flashability before restarting; failed flashability routes fatal/end flow."
+    },
+    {
+      "id": "cuw_utility.ui-recovery-delete",
+      "source": "cuw_utility.cuw-controller",
+      "kind": "javascript-control-flow",
+      "locator": "onClickS70174DeleteBtn",
+      "function_sha256": "6a9eb213bf19ddad09100d0525097295816a6330b07ddd02d03977fc14b679d2",
+      "anchors": [
+        {
+          "character_offset": 54134,
+          "expression": "deleteRecoveryInfoFile()"
+        },
+        {
+          "character_offset": 54202,
+          "expression": "DATA_KEY_VIN"
+        },
+        {
+          "character_offset": 54272,
+          "expression": "DATA_KEY_IS_EXISTS_REPRO_SECURITY"
+        }
+      ],
+      "finding": "User-confirmed discard deletes native recovery state and clears saved VIN/security metadata rather than silently resuming."
+    },
+    {
+      "id": "cuw_utility.ui-start",
+      "source": "cuw_utility.cuw-controller",
+      "kind": "javascript-control-flow",
+      "locator": "startReprogramming",
+      "function_sha256": "1db4b52a09fb5fb3f323457ed8f0a99cebf44c0c2cec126879b3cb2bc1fca3c1",
+      "anchors": [
+        {
+          "character_offset": 105678,
+          "expression": "SUCCESS || result.returnValue === REPROGRAMMING_IN_PROGRESS"
+        },
+        {
+          "character_offset": 105750,
+          "expression": "showS70117()"
+        },
+        {
+          "character_offset": 105795,
+          "expression": "FAILED_TO_REPROGRAMMING_START"
+        },
+        {
+          "character_offset": 105837,
+          "expression": "showS70181()"
+        }
+      ],
+      "finding": "Start accepts success/in-progress into status polling; native start failure or rejected Promise enters failure teardown."
+    },
+    {
+      "id": "cuw_utility.ui-progress",
+      "source": "cuw_utility.cuw-controller",
+      "kind": "javascript-control-flow",
+      "locator": "recursiveCheckStatusOfReprogramming",
+      "function_sha256": "5faebb7384c68753f1af32f2f70d9f81c771fb80ffc4ec70f91b4c88b6e824be",
+      "anchors": [
+        {
+          "character_offset": 108777,
+          "expression": "REPROGRAMMING_IN_PROGRESS"
+        },
+        {
+          "character_offset": 108972,
+          "expression": "WAITING_FOR_REPROGRAMMING"
+        },
+        {
+          "character_offset": 108731,
+          "expression": "goAfterRecv()"
+        },
+        {
+          "character_offset": 108501,
+          "expression": "extendRetryLimitFlag"
+        },
+        {
+          "character_offset": 114512,
+          "expression": "confirmationOfRewriteRetry"
+        },
+        {
+          "character_offset": 115783,
+          "expression": "GET_STATUS_OF_REPROGRAMMING_REQUIRED_REQUEST_REP_KEY"
+        },
+        {
+          "character_offset": 116216,
+          "expression": "REPROGRAMMING_INPUT_SIGNATURE_ERROR"
+        },
+        {
+          "character_offset": 116150,
+          "expression": "J2534DEVICE_AND_PC_NOT_CONNECTED){}"
+        }
+      ],
+      "finding": "Status drives progress, inter-CPU IG/battery waits, success postprocess, preparation/retry UI, key/signature request and terminal errors. PC-disconnected branch is literally empty: it neither schedules another poll nor teardown in this function."
+    },
+    {
+      "id": "cuw_utility.ui-retry",
+      "source": "cuw_utility.cuw-controller",
+      "kind": "javascript-control-flow",
+      "locator": "confirmationOfRewriteRetry",
+      "function_sha256": "f894fa527f8af7e22fc29c5090a90b9111f624e40efe21351b79ea7c9c98b3f7",
+      "anchors": [
+        {
+          "character_offset": 130929,
+          "expression": "model.checkMaxRetryCount < retryCount"
+        },
+        {
+          "character_offset": 131157,
+          "expression": "CuwModel.Retry.CANCEL"
+        },
+        {
+          "character_offset": 131213,
+          "expression": "showS70130"
+        },
+        {
+          "character_offset": 132127,
+          "expression": "wholeReproNotifyFlag"
+        },
+        {
+          "character_offset": 131835,
+          "expression": "EVENT_BTN.RETRY"
+        }
+      ],
+      "finding": "Native retry count and extended-limit flag constrain UI retries; exceeded count sends CANCEL and exit screen. Otherwise USB/battery/transport-specific retry or whole-repro choices remain caller-selected."
+    },
+    {
+      "id": "cuw_utility.ui-retry-send",
+      "source": "cuw_utility.cuw-controller",
+      "kind": "javascript-control-flow",
+      "locator": "informResultOfQueryRetry",
+      "function_sha256": "c0419d49329a646f55bb83c9887de737bc034be8add48ce7d0d3c4fc7c0e59a1",
+      "anchors": [
+        {
+          "character_offset": 128729,
+          "expression": "CuwModel.Retry.RETRY,model.isSwitchedToWholeRepro()"
+        },
+        {
+          "character_offset": 128981,
+          "expression": "RETRY_INQUIRY_NOTIFICATION_ERROR"
+        },
+        {
+          "character_offset": 129137,
+          "expression": "showS70181()"
+        },
+        {
+          "character_offset": 130240,
+          "expression": "successCallback()"
+        }
+      ],
+      "finding": "Retry/whole-repro decision crosses native API; adapter errors show reconnect/retry/cancel screens, retry notification failure tears down."
+    },
+    {
+      "id": "cuw_utility.ui-key-request",
+      "source": "cuw_utility.cuw-controller",
+      "kind": "javascript-control-flow",
+      "locator": "getReprogrammingKeyFromServer",
+      "function_sha256": "67e0996a4fc654abcfdd9d158e74f9afa497aa9af15463d0385be25cabe30182",
+      "anchors": [
+        {
+          "character_offset": 217500,
+          "expression": "model.sendSignatureRequest()"
+        },
+        {
+          "character_offset": 217604,
+          "expression": "statusCode !== 'MIR2000000'"
+        },
+        {
+          "character_offset": 217798,
+          "expression": "faultMessage"
+        },
+        {
+          "character_offset": 218150,
+          "expression": "setTimeout(controller.recursiveGetReprogrammingKey,1000"
+        }
+      ],
+      "finding": "Online method3 request requires success status and no faultMessage then polls by returned ID; errors become frontend fallback decisions, never implicit native authorization."
+    },
+    {
+      "id": "cuw_utility.ui-key-poll",
+      "source": "cuw_utility.cuw-controller",
+      "kind": "javascript-control-flow",
+      "locator": "recursiveGetReprogrammingKey",
+      "function_sha256": "044333785ac948578cec68a4502436ab44b91f4a99c3ea70a43a1703a443ed50",
+      "anchors": [
+        {
+          "character_offset": 218507,
+          "expression": "statusCode === 'MIR2020000'"
+        },
+        {
+          "character_offset": 218569,
+          "expression": "endTime - startTime > 301000"
+        },
+        {
+          "character_offset": 218797,
+          "expression": "1000,controller,def,id,startTime"
+        },
+        {
+          "character_offset": 219711,
+          "expression": "ret.result='nosignature'"
+        },
+        {
+          "character_offset": 219326,
+          "expression": "response.apiResult.Signature"
+        }
+      ],
+      "finding": "Pending signature polls every1s with301000ms cutoff; failures reject, missing signature is explicit nosignature, available signature returns to SetReprogrammingKey caller."
+    },
+    {
+      "id": "cuw_utility.ui-key-fallback",
+      "source": "cuw_utility.cuw-controller",
+      "kind": "javascript-control-flow",
+      "locator": "getRequestReprogrammingKeyByAuto",
+      "function_sha256": "f878629027e01d15fc23bafa846c7af4d501666b40d6dc3524f944c8a917e620",
+      "anchors": [
+        {
+          "character_offset": 214198,
+          "expression": "getReprogrammingKeyFromServer()"
+        },
+        {
+          "character_offset": 214255,
+          "expression": "result.result === 'nosignature'"
+        },
+        {
+          "character_offset": 214379,
+          "expression": "setReprogrammingKey(result.signature)"
+        },
+        {
+          "character_offset": 214306,
+          "expression": "getRequestReprogrammingKeyByOffline"
+        },
+        {
+          "character_offset": 215314,
+          "expression": "CONFIG_KEY_CAN_OFFLINE_REPSEC"
+        }
+      ],
+      "finding": "Online unavailable/fault/no-signature enters offline XML selection or user retry/cancel subject to allow-offline config; server-returned signature is passed to native setter."
+    },
+    {
+      "id": "cuw_utility.ui-key-offline",
+      "source": "cuw_utility.cuw-controller",
+      "kind": "javascript-control-flow",
+      "locator": "readSignature",
+      "function_sha256": "cc0412f4c1e19663709e21a7fe7af6dadc6dca48d471ea75aaf6760a62c4c14f",
+      "anchors": [
+        {
+          "character_offset": 225563,
+          "expression": "saveXMLFileForRequestReprogrammingKey()"
+        },
+        {
+          "character_offset": 224472,
+          "expression": "loadXMLFileForReprogrammingKey"
+        },
+        {
+          "character_offset": 223042,
+          "expression": "FileDialogController"
+        },
+        {
+          "character_offset": 224153,
+          "expression": "cancelRequestReprogrammingKey()"
+        }
+      ],
+      "finding": "Offline request XML is saved once/reused; selected response XML is loaded through native key parser; dialog back/retry/cancel is explicit."
+    },
+    {
+      "id": "cuw_utility.ui-cancel",
+      "source": "cuw_utility.cuw-controller",
+      "kind": "javascript-control-flow",
+      "locator": "cancelRequestReprogrammingKey",
+      "function_sha256": "c42875671864161d35599bedc4058a71561a6051728f9cb5be4e1350a9e77dac",
+      "anchors": [
+        {
+          "character_offset": 166702,
+          "expression": "model.cancelRequestReprogrammingKey()"
+        },
+        {
+          "character_offset": 166767,
+          "expression": "recursiveCheckCancelRequest"
+        }
+      ],
+      "finding": "User key cancellation first invokes native cancel then polls until native engine leaves key-required/in-progress status."
+    },
+    {
+      "id": "cuw_utility.ui-failure-exit",
+      "source": "cuw_utility.cuw-controller",
+      "kind": "javascript-control-flow",
+      "locator": "showS70181",
+      "function_sha256": "bc4240961838e81d1b561d64564f398a71b53a70130b2fc35cb3b03b22049249",
+      "anchors": [
+        {
+          "character_offset": 162285,
+          "expression": "model.clearStatusOfReprogramming(true)"
+        },
+        {
+          "character_offset": 162422,
+          "expression": "isFlashSuccess:false"
+        },
+        {
+          "character_offset": 162633,
+          "expression": "model.cancelingSleepMode()"
+        },
+        {
+          "character_offset": 162686,
+          "expression": "model.clearServerData()"
+        },
+        {
+          "character_offset": 162804,
+          "expression": "SendValue.CANCEL"
+        },
+        {
+          "character_offset": 162887,
+          "expression": "apiExclusiveControlUnlock()"
+        },
+        {
+          "character_offset": 162947,
+          "expression": "sendLogoutControl(false)"
+        },
+        {
+          "character_offset": 163036,
+          "expression": "controller.disconnect()"
+        },
+        {
+          "character_offset": 163120,
+          "expression": "showEndView()"
+        }
+      ],
+      "finding": "Fatal/cancel flow force-clears native status; on success sends failure vehicle info/report, restores sleep, clears backend dictionary, responds CANCEL to embedding caller, unlocks platform/logout inhibit and disconnects both sockets. A catch swallows earlier failure then still disconnects/end-view; later steps in rejected chain may therefore be skipped."
+    },
+    {
+      "id": "cuw_utility.ui-finish",
+      "source": "cuw_utility.cuw-controller",
+      "kind": "javascript-control-flow",
+      "locator": "onClickS70126FinishBtn",
+      "function_sha256": "a96bb7eca1dddd8ccf8f48116d1a49dc79980892a6c2a4ea90aec83bf34e86b4",
+      "anchors": [
+        {
+          "character_offset": 159254,
+          "expression": "ProgressState.END"
+        },
+        {
+          "character_offset": 159272,
+          "expression": "controller.clearServerData()"
+        }
+      ],
+      "finding": "Ordinary finish marks END and clears server data; Mazda15GA follows S701108 instead."
+    },
+    {
+      "id": "cuw_utility.ui-finish-cleanup",
+      "source": "cuw_utility.cuw-controller",
+      "kind": "javascript-control-flow",
+      "locator": "cancelingSleepMode",
+      "function_sha256": "2c17f09b5dfc53a2019364ef5c8755a3fab00628f80469dc723c2d9a574487d4",
+      "anchors": [
+        {
+          "character_offset": 163469,
+          "expression": "clearStatusOfReprogramming(true)"
+        },
+        {
+          "character_offset": 163525,
+          "expression": "model.cancelingSleepMode()"
+        },
+        {
+          "character_offset": 163577,
+          "expression": "controller.disconnect()"
+        },
+        {
+          "character_offset": 163838,
+          "expression": "showEndView()"
+        }
+      ],
+      "finding": "Normal cleanup ultimately force-clears status, cancels sleep suppression and disconnects; failure path still disconnects and finally displays end view."
+    },
+    {
+      "id": "cuw_utility.ui-disconnect",
+      "source": "cuw_utility.cuw-controller",
+      "kind": "javascript-control-flow",
+      "locator": "disconnect",
+      "function_sha256": "3ce5601d3d82ac3b04fb2f1c58a93be43df6689ed28a0ff9b55ea6d5ed826d02",
+      "anchors": [
+        {
+          "character_offset": 164046,
+          "expression": "model.gtsDisconnect().then(function(){return model.disconnect()"
+        }
+      ],
+      "finding": "UI closes GTS platform session before CUW backend session; native lifetime remains backend-owned."
+    },
+    {
+      "id": "cuw_utility.key-init",
+      "source": "cuw_utility.key-worker",
+      "kind": "javascript-control-flow",
+      "locator": "initEcuSecurityKey",
+      "function_sha256": "70c97ba8e508a4c0d2d0c56b24cc7da37498b762af8a9b4f4629d31fe764b951",
+      "anchors": [
+        {
+          "character_offset": 7838,
+          "expression": "2592000000"
+        },
+        {
+          "character_offset": 8265,
+          "expression": "getEquippedEcuList()"
+        },
+        {
+          "character_offset": 6716,
+          "expression": "subaruEcuExists"
+        },
+        {
+          "character_offset": 6401,
+          "expression": "suzukiEcuExists"
+        },
+        {
+          "character_offset": 9678,
+          "expression": "checkDisconnected:true"
+        }
+      ],
+      "finding": "MACKey UI removes saved exchange XML/JSON >=30days old, enumerates equipped ECUs and chooses ordinary, Suzuki or Subaru family; per-ECU disconnect status is refreshed."
+    },
+    {
+      "id": "cuw_utility.key-server",
+      "source": "cuw_utility.key-worker",
+      "kind": "javascript-control-flow",
+      "locator": "serverCommunication",
+      "function_sha256": "c3bc3d3f8b941a4011ed53e1f25d6e8b7c3222f590edfa9c20b558ac44d122a5",
+      "anchors": [
+        {
+          "character_offset": 83239,
+          "expression": "sendMACKey_url"
+        },
+        {
+          "character_offset": 79749,
+          "expression": "getMACKeyInfoRequest_url"
+        },
+        {
+          "character_offset": 80540,
+          "expression": "var pendingCode='MIR2020000'"
+        },
+        {
+          "character_offset": 79466,
+          "expression": "getMacKeyInfoRequest(requestData)"
+        },
+        {
+          "character_offset": 81294,
+          "expression": "1000"
+        }
+      ],
+      "finding": "Read exchange request is posted using configured service/format; pending result polls every1s and returns success/dialog/fault status. Actual URLs/account/license values are not exported."
+    },
+    {
+      "id": "cuw_utility.key-vin",
+      "source": "cuw_utility.key-worker",
+      "kind": "javascript-control-flow",
+      "locator": "checkWriteData",
+      "function_sha256": "aeeb750302a271d605e0b81b398a345b0249378277d6516d2eb239bb315ade64",
+      "anchors": [
+        {
+          "character_offset": 41954,
+          "expression": "vin === model.cache.getMACKeyInfoRequestData.vin"
+        },
+        {
+          "character_offset": 42043,
+          "expression": "resultCode === 0"
+        },
+        {
+          "character_offset": 41941,
+          "expression": "isValid()"
+        }
+      ],
+      "finding": "Ordinary writer admission requires valid server/offline exchange object, success result and matching current VIN (padded17 chars); this is not the Subaru data gate."
+    },
+    {
+      "id": "cuw_utility.key-safekey",
+      "source": "cuw_utility.key-worker",
+      "kind": "javascript-control-flow",
+      "locator": "checkSafeKeyNumber",
+      "function_sha256": "81483d491690bee948624d16a61c8f24f770f9f48bfd19e586aeb6f566111d37",
+      "anchors": [
+        {
+          "character_offset": 62998,
+          "expression": "safekeyList.length !== getMACKeyInfoResult.safekeyList.length"
+        },
+        {
+          "character_offset": 58947,
+          "expression": "safekeyValid"
+        },
+        {
+          "character_offset": 63293,
+          "expression": "writeKey=match"
+        }
+      ],
+      "finding": "Ordinary writer freshly read participant identities must match server exchange list/count; matched tuple becomes that ECU writeKey; failed ECU list is returned. Subaru has separate native-prepared matching."
+    },
+    {
+      "id": "cuw_utility.key-subaru-pre",
+      "source": "cuw_utility.key-worker",
+      "kind": "javascript-control-flow",
+      "locator": "validationPreprocess1",
+      "function_sha256": "d68dd3fa0cc9993ef641ac395120fc95741ceb6266b74b2eb7541d37de110fe1",
+      "anchors": [
+        {
+          "character_offset": 91127,
+          "expression": "ecuInfo.ecuId === 722"
+        },
+        {
+          "character_offset": 91268,
+          "expression": "startGeneralComm"
+        },
+        {
+          "character_offset": 91366,
+          "expression": "[0x22,0x10,0x00]"
+        },
+        {
+          "character_offset": 91536,
+          "expression": "isSupport(0x1010)"
+        },
+        {
+          "character_offset": 92237,
+          "expression": "battelyVoltage < 10"
+        },
+        {
+          "character_offset": 91599,
+          "expression": "endGeneralComm()"
+        }
+      ],
+      "finding": "Subaru validation admission checks central ECU722 DID1010 support and converted battery voltage>=10V; unsupported/communication/voltage failure closes general communication."
+    },
+    {
+      "id": "cuw_utility.key-subaru-ig",
+      "source": "cuw_utility.key-worker",
+      "kind": "javascript-control-flow",
+      "locator": "validationPreprocess2",
+      "function_sha256": "bfec9641cc6ce227ecf718f7aa2fd67292bbf404439929dbabe22efcb804e645",
+      "anchors": [
+        {
+          "character_offset": 93258,
+          "expression": "[0x22,0x10,0x3B]"
+        },
+        {
+          "character_offset": 93385,
+          "expression": "=== 0xFF"
+        },
+        {
+          "character_offset": 93595,
+          "expression": "[0x22,0x10,0x2F]"
+        },
+        {
+          "character_offset": 93727,
+          "expression": "& 0x01"
+        },
+        {
+          "character_offset": 93453,
+          "expression": "endGeneralComm()"
+        }
+      ],
+      "finding": "Subaru validation requires IG-ON and update-status bit0; error paths return failed ECUs and close general communication."
+    },
+    {
+      "id": "cuw_utility.key-subaru-validate",
+      "source": "cuw_utility.key-worker",
+      "kind": "javascript-control-flow",
+      "locator": "validationProcess",
+      "function_sha256": "ef726d950b5ebd2428bfd8227094ec6b0bc2d3483237fbae384fe6f0435c7d57",
+      "anchors": [
+        {
+          "character_offset": 98981,
+          "expression": "validateSbrMac()"
+        },
+        {
+          "character_offset": 95160,
+          "expression": "finally(function(){return gtsPFApi.endGeneralComm()"
+        },
+        {
+          "character_offset": 99354,
+          "expression": "statusFlg"
+        },
+        {
+          "character_offset": 96553,
+          "expression": "validationKeys()"
+        },
+        {
+          "character_offset": 95276,
+          "expression": "checkUpdateStatus(targetEcuList)"
+        }
+      ],
+      "finding": "Subaru validation delegates native MAC validation, always ends general communication, then maps status flags into validation/readback or selected ECU DTC checks."
+    },
+    {
+      "id": "cuw_utility.key-record-integrity",
+      "source": "cuw_utility.key-worker",
+      "kind": "javascript-control-flow",
+      "locator": "isValid",
+      "function_sha256": "e621bfe43021fa4bcea9d0bb7aed74ae31d3335a4181c6ceff65552221e7746e",
+      "anchors": [
+        {
+          "character_offset": 125495,
+          "expression": "new jsSHA('SHA-256','TEXT')"
+        },
+        {
+          "character_offset": 125536,
+          "expression": "data.vin + data.safekeyList.sort"
+        },
+        {
+          "character_offset": 125649,
+          "expression": "keyInfo.safekey + keyInfo.macm1 + keyInfo.macm2 + keyInfo.macm3 + keyInfo.mack4"
+        },
+        {
+          "character_offset": 125779,
+          "expression": "shaObj.getHash('HEX').toUpperCase()"
+        },
+        {
+          "character_offset": 125822,
+          "expression": "hashValue === data.hashValue"
+        }
+      ],
+      "finding": "Exchange integrity verifies required fields and SHA256(record VIN + safekey-sorted exchange tuple strings). The VIN is supplied by the exchange record itself; this method does not read the current vehicle VIN.",
+      "absent_expressions": [
+        "getVin",
+        "padEnd"
+      ]
+    },
+    {
+      "id": "cuw_utility.key-subaru-data-gate",
+      "source": "cuw_utility.key-worker",
+      "kind": "javascript-control-flow",
+      "locator": "checkWriteDataSUBARU",
+      "function_sha256": "4146f27326c077500669b1c010f8efcb2a372f7d21e988422b790c816cda42ef",
+      "anchors": [
+        {
+          "character_offset": 110861,
+          "expression": "getMACKeyInfoRequestData.isValid() && model.cache.getMACKeyInfoRequestData.resultCode === 0"
+        },
+        {
+          "character_offset": 110954,
+          "expression": "dataValid=true"
+        },
+        {
+          "character_offset": 110622,
+          "expression": "dataValid:dataValid"
+        }
+      ],
+      "finding": "Subaru data-validity admission requires only exchange internal-integrity isValid() and resultCode0. Unlike ordinary checkWriteData it does not getVin or compare a current-vehicle VIN; consistently hashed different-VIN input can pass this particular gate.",
+      "absent_expressions": [
+        "getVin",
+        "padEnd"
+      ]
+    },
+    {
+      "id": "cuw_utility.key-subaru-controller-admit",
+      "source": "cuw_utility.key-controller",
+      "kind": "javascript-control-flow",
+      "locator": "writingProcessSUBARUOnline",
+      "function_sha256": "3c1dfb53eae2e2d78ae4691b3a0e712d071ad63d692c2986ec32981e3fa35cf3",
+      "anchors": [
+        {
+          "character_offset": 51709,
+          "expression": "model.checkWriteDataSUBARU()"
+        },
+        {
+          "character_offset": 51760,
+          "expression": "if(!result.dataValid)"
+        },
+        {
+          "character_offset": 52612,
+          "expression": "model.writeSecurityKeySUBARU()"
+        },
+        {
+          "character_offset": 52714,
+          "expression": "result.commError"
+        },
+        {
+          "character_offset": 53048,
+          "expression": "result.updateFailEcuList.length"
+        },
+        {
+          "character_offset": 53487,
+          "expression": "result.failedEcuList.length"
+        },
+        {
+          "character_offset": 52121,
+          "expression": "controller.transitionPreviousScreen()"
+        }
+      ],
+      "finding": "Subaru online controller checks its own data-validity gate then invokes Subaru writer. Invalid exchange offers server retry/previous-screen return; communication/update/ECU failures have separate return dialogs before ignition postprocessing. It does not inherit ordinary VIN or SafeKey admission methods.",
+      "absent_expressions": [
+        "checkWriteData()",
+        "checkSafeKeyNumber"
+      ]
+    },
+    {
+      "id": "cuw_utility.key-exit",
+      "source": "cuw_utility.key-controller",
+      "kind": "javascript-control-flow",
+      "locator": "onClickExit",
+      "function_sha256": "9afb566b4e002185ffe6874504410e317cd9d84fe0c4abbce140d82e97615a75",
+      "anchors": [
+        {
+          "character_offset": 37098,
+          "expression": "BUTTON_YES"
+        },
+        {
+          "character_offset": 37121,
+          "expression": "transitionPreviousScreen()"
+        },
+        {
+          "character_offset": 37207,
+          "expression": "BUTTON_NO"
+        }
+      ],
+      "finding": "Exit asks yes/no and returns previous caller screen on yes; UI controller disposal alone does not perform native finalCom."
+    },
+    {
+      "id": "cuw_utility.key-controller-return",
+      "source": "cuw_utility.key-controller",
+      "kind": "javascript-control-flow",
+      "locator": "transitionPreviousScreen",
+      "function_sha256": "df3554c4b7535eafd18f43c76d30f8ed8f331f0ce22c25a27c4ae0e9809b20c3",
+      "anchors": [
+        {
+          "character_offset": 67449,
+          "expression": "ControllerTransEvent.PREV_SCREEN"
+        },
+        {
+          "character_offset": 67425,
+          "expression": "triggerEvent"
+        }
+      ],
+      "finding": "Security-key controller returns to dashboard/health-check owner by PREV_SCREEN event, not by terminating application."
+    },
+    {
+      "id": "cuw_utility.key-standard-write",
+      "source": "cuw_utility.key-worker",
+      "kind": "javascript-control-flow",
+      "locator": "writeSecurityKeyToEcu",
+      "function_sha256": "6168d49982f186f8fd879550ad690f7aec69acc208cbe0819843f66e68bc85ca",
+      "anchors": [
+        {
+          "character_offset": 63741,
+          "expression": "writeKeyPhase4"
+        },
+        {
+          "character_offset": 65242,
+          "expression": "writeKeyPhase5"
+        },
+        {
+          "character_offset": 67770,
+          "expression": "writeKeyPhase6"
+        },
+        {
+          "character_offset": 65874,
+          "expression": "[0x31,0x01,0x10,0x10]"
+        },
+        {
+          "character_offset": 68402,
+          "expression": "[0x31,0x01,0xD9,0x04]"
+        },
+        {
+          "character_offset": 66917,
+          "expression": "var maxWait=1000"
+        },
+        {
+          "character_offset": 67065,
+          "expression": "},100)"
+        },
+        {
+          "character_offset": 64962,
+          "expression": "validateValue !== macm5Str"
+        },
+        {
+          "character_offset": 65520,
+          "expression": "transitSession(apiParam)"
+        },
+        {
+          "character_offset": 65161,
+          "expression": "endGeneralComm()"
+        }
+      ],
+      "finding": "Ordinary non-Subaru ECU Security Key worker has direct phase-selected transports: P4 3BF5/F6, P5 RID1010, P6 RIDD904. P5/P6 zero proof polls100ms up to1000ms; returned M4/M5 are CMAC-checked; error/proof mismatch accumulates failed ECUs, restores default session and ends general communication. This is distinct from native UtilityGene selected RID3002 wrappers."
+    },
+    {
+      "id": "cuw_utility.key-subaru-write",
+      "source": "cuw_utility.key-worker",
+      "kind": "javascript-control-flow",
+      "locator": "writeSecurityKeySUBARU",
+      "function_sha256": "b4127ae478084e2e3424905e1788678dcaa2cdd5bfa1e8469f7c2f26b24dfd16",
+      "anchors": [
+        {
+          "character_offset": 112742,
+          "expression": "prepareSbrMacUpd()"
+        },
+        {
+          "character_offset": 111366,
+          "expression": "ecuInfo.ecuId === 722"
+        },
+        {
+          "character_offset": 114449,
+          "expression": "keyCmpFlg:1"
+        },
+        {
+          "character_offset": 114893,
+          "expression": "keyCmpFlg:0"
+        },
+        {
+          "character_offset": 115069,
+          "expression": "updateSbrMac(apiParam)"
+        },
+        {
+          "character_offset": 115199,
+          "expression": "resultFlg === 0"
+        },
+        {
+          "character_offset": 113194,
+          "expression": "finally(function(){return gtsPFApi.endGeneralComm()"
+        }
+      ],
+      "finding": "Subaru update uses prepareSbrMacUpd then maps returned identities to exchange tuples, tags absent matches keyCmpFlg0, invokes updateSbrMac and returns failed resultFlg0 IDs. Master/participant communication is ended in finally; native wrappers are this separate API family, not every ordinary MACKey write."
+    },
+    {
+      "id": "cuw_utility.key-suzuki-admission",
+      "source": "cuw_utility.key-worker",
+      "kind": "javascript-control-flow",
+      "locator": "checkWriteTargetSystemExistsForSuzuki",
+      "function_sha256": "074c775e9c6789a3bdef96757ee4e7323190e63e1e16ad04677024ee089cb332",
+      "anchors": [
+        {
+          "character_offset": 48284,
+          "expression": "targetEcuIdForSuzuki"
+        },
+        {
+          "character_offset": 48055,
+          "expression": "checkEcuConnect(apiParam)"
+        },
+        {
+          "character_offset": 48942,
+          "expression": "0xf01b"
+        },
+        {
+          "character_offset": 49835,
+          "expression": "['U131600','U131657']"
+        },
+        {
+          "character_offset": 50342,
+          "expression": "model.cache.targetEcuList=targetEcuList"
+        },
+        {
+          "character_offset": 50318,
+          "expression": "indexForSuzuki.ECGW"
+        }
+      ],
+      "finding": "Suzuki admission enumerates known connected participants, checks EVC ROB F01B and other ECU active DTC U131600/U131657; displayed no-target flag derives from fault targets, while cached write target list is then all connected participants except ECGW."
+    },
+    {
+      "id": "cuw_utility.key-suzuki-identities",
+      "source": "cuw_utility.key-worker",
+      "kind": "javascript-control-flow",
+      "locator": "checkWriteTargetSystemStatusForSuzuki",
+      "function_sha256": "0a90bcb2c42b1d908a15b7209a39b6bbabc4e39bbe9fb43a250ed46e53dc1a3c",
+      "anchors": [
+        {
+          "character_offset": 56288,
+          "expression": "getEcuInfoByEcuId(8502)"
+        },
+        {
+          "character_offset": 56522,
+          "expression": "[0x22,0x01,0x0b]"
+        },
+        {
+          "character_offset": 57990,
+          "expression": "safekeyList.length !== getMACKeyInfoResult.safekeyList.length"
+        },
+        {
+          "character_offset": 58267,
+          "expression": "readSafeKeyInfo.writeKey=match"
+        },
+        {
+          "character_offset": 56868,
+          "expression": "endGeneralComm()"
+        }
+      ],
+      "finding": "Suzuki exchange admission rereads gateway8502 and participant DID010B identities, requires server list/count match and associates tuples; failed communication produces failed IDs/dialog flag and attempts endGeneralComm."
+    },
+    {
+      "id": "cuw_utility.key-suzuki-write",
+      "source": "cuw_utility.key-worker",
+      "kind": "javascript-control-flow",
+      "locator": "writeSecurityKeyToEcuForSuzuki",
+      "function_sha256": "debbb64dbaa778c598b09e0536de38909f7cac748f075823dd7b9f4ac194a3c9",
+      "anchors": [
+        {
+          "character_offset": 75477,
+          "expression": "[0x31,0x01,0x10,0x10]"
+        },
+        {
+          "character_offset": 76247,
+          "expression": "[0x31,0x03,0x10,0x10]"
+        },
+        {
+          "character_offset": 76022,
+          "expression": "var maxWait=600"
+        },
+        {
+          "character_offset": 76389,
+          "expression": "writeStatus === 0x01"
+        },
+        {
+          "character_offset": 76440,
+          "expression": "writeStatus === 0x02"
+        },
+        {
+          "character_offset": 76893,
+          "expression": "validateValue !== macm5Str"
+        },
+        {
+          "character_offset": 78020,
+          "expression": "ecuId === 8508"
+        },
+        {
+          "character_offset": 77292,
+          "expression": "},700)"
+        },
+        {
+          "character_offset": 75924,
+          "expression": "endGeneralComm()"
+        }
+      ],
+      "finding": "Suzuki RID1010 writes ECU8508 first then remaining prepared participants, default->extended session, polls100ms with600ms deadline: status1 pending/status2 proof, rejects zero proof and CMAC mismatch. Each ECU attempts default-session/end communication even on failure. All-success clears mounted DTC/ROB; ROB retry waits700ms once then another immediate try."
+    },
+    {
+      "id": "cuw_utility.key-suzuki-postcheck",
+      "source": "cuw_utility.key-worker",
+      "kind": "javascript-control-flow",
+      "locator": "lastProcessForSuzuki",
+      "function_sha256": "ca7eacbd50459ff1d99e7639e77a9c3b4a5326bd2ad44f58056b4c4204c71ca0",
+      "anchors": [
+        {
+          "character_offset": 86765,
+          "expression": "},15000)"
+        },
+        {
+          "character_offset": 87225,
+          "expression": "0xf01b"
+        },
+        {
+          "character_offset": 88106,
+          "expression": "['U131600','U131657']"
+        },
+        {
+          "character_offset": 87372,
+          "expression": "failedEcuList.push(ecuInfo)"
+        }
+      ],
+      "finding": "Suzuki final stage waits15000ms then checks connected EVC ROB F01B and other ECU DTC U131600/U131657, returning failed IDs; status-read errors are deliberately resolved rather than promoted to write failure."
+    },
+    {
+      "id": "cuw_utility.key-write-admission",
+      "source": "cuw_utility.key-controller",
+      "kind": "javascript-control-flow",
+      "locator": "writingProcessOnline",
+      "function_sha256": "7791854ef174186243f4c7c5177807a10a00c4aa86aa96d96980880f90709c24",
+      "anchors": [
+        {
+          "character_offset": 13834,
+          "expression": "!result.canVinRead"
+        },
+        {
+          "character_offset": 14257,
+          "expression": "!result.dataValid"
+        },
+        {
+          "character_offset": 15159,
+          "expression": "!result.readTargetEcuExists"
+        },
+        {
+          "character_offset": 15513,
+          "expression": "!result.needWriteKey"
+        },
+        {
+          "character_offset": 16559,
+          "expression": "!result.isSafekryValid"
+        },
+        {
+          "character_offset": 16965,
+          "expression": "model.writeSecurityKeyToEcu()"
+        },
+        {
+          "character_offset": 17383,
+          "expression": "controller.showFirstView()"
+        },
+        {
+          "character_offset": 14138,
+          "expression": "controller.transitionPreviousScreen()"
+        }
+      ],
+      "finding": "Ordinary online writer gates current VIN, exchange validity, equipped target/status and matching safekeys before write. Each rejection exposes retry/server-requery/return choices; failed ECU write can restart first view or return; busy dialog closes in finally."
+    },
+    {
+      "id": "cuw_utility.key-write-offline",
+      "source": "cuw_utility.key-controller",
+      "kind": "javascript-control-flow",
+      "locator": "writingProcessOffline",
+      "function_sha256": "cf8d850734c6abc929eb8d3098fcd884309c9a486287324f68e15a78e16138f2",
+      "anchors": [
+        {
+          "character_offset": 22098,
+          "expression": "model.readSelectFile(selectFilePath)"
+        },
+        {
+          "character_offset": 22650,
+          "expression": "!result.dataValid"
+        },
+        {
+          "character_offset": 24842,
+          "expression": "!result.isSafekryValid"
+        },
+        {
+          "character_offset": 25214,
+          "expression": "model.writeSecurityKeyToEcu()"
+        },
+        {
+          "character_offset": 22531,
+          "expression": "controller.transitionPreviousScreen()"
+        },
+        {
+          "character_offset": 25920,
+          "expression": "finally(function(){controller.closeS33100DL003()"
+        }
+      ],
+      "finding": "Ordinary offline exchange import uses the same VIN/target/status/safekey gates as ordinary online, not a privileged bypass; user returns to choose another file or previous screen on rejection."
+    },
+    {
+      "id": "cuw_utility.key-server-timeout",
+      "source": "cuw_utility.key-worker",
+      "kind": "javascript-control-flow",
+      "locator": "serverCommunication",
+      "function_sha256": "c3bc3d3f8b941a4011ed53e1f25d6e8b7c3222f590edfa9c20b558ac44d122a5",
+      "anchors": [
+        {
+          "character_offset": 79601,
+          "expression": "var maxWait=300000"
+        },
+        {
+          "character_offset": 79623,
+          "expression": "Date.now() - startTime > maxWait"
+        },
+        {
+          "character_offset": 79657,
+          "expression": "return Promise.resolve(false)"
+        },
+        {
+          "character_offset": 80540,
+          "expression": "var pendingCode='MIR2020000'"
+        },
+        {
+          "character_offset": 81292,
+          "expression": "},1000)"
+        }
+      ],
+      "finding": "MACKey server exchange polling is separately bounded to300000ms; pending retries1s, timeout/error yields success:false and dialog/fault fields for caller retry/offline/return."
+    },
+    {
+      "id": "cuw_utility.key-subaru-validate-api",
+      "source": "cuw_utility.gts-raw-api",
+      "kind": "javascript-control-flow",
+      "locator": "validateSbrMac",
+      "function_sha256": "a5261aba5b27c435fdbcc1107daa4db63f09357f8d7e037f350c28237af7e9fc",
+      "anchors": [
+        {
+          "character_offset": 66241,
+          "expression": "this.send(PFCMD_VALIDATE_SBR_MAC,param,receiveAck)"
+        }
+      ],
+      "finding": "Subaru validation sends the platform utility command selected by PFCMD_VALIDATE_SBR_MAC."
+    },
+    {
+      "id": "cuw_utility.key-subaru-prepare-api",
+      "source": "cuw_utility.gts-raw-api",
+      "kind": "javascript-control-flow",
+      "locator": "prepareSbrMacUpd",
+      "function_sha256": "1c639e08866e8a68c35a20a5b5e3f6084ee74454af8b46d66b5f422e36c0e84e",
+      "anchors": [
+        {
+          "character_offset": 55523,
+          "expression": "this.send(PFCMD_PREPARE_SBR_MAC_UPD,param,receiveAck)"
+        }
+      ],
+      "finding": "Subaru preparation sends the platform utility command selected by PFCMD_PREPARE_SBR_MAC_UPD."
+    },
+    {
+      "id": "cuw_utility.key-subaru-update-api",
+      "source": "cuw_utility.gts-raw-api",
+      "kind": "javascript-control-flow",
+      "locator": "updateSbrMac",
+      "function_sha256": "79ad0e81749d5185c3c7b1eea6e0efaeb24e8510b125afddd9b548ea7b0667e5",
+      "anchors": [
+        {
+          "character_offset": 65987,
+          "expression": "this.send(PFCMD_UPDATE_SBR_MAC,param,receiveAck)"
+        }
+      ],
+      "finding": "Subaru write sends the platform utility command selected by PFCMD_UPDATE_SBR_MAC."
+    },
+    {
+      "id": "cuw_utility.key-subaru-command-ids",
+      "source": "cuw_utility.gts-raw-api",
+      "kind": "javascript-command-map",
+      "locator": "Subaru utility command constants",
+      "anchors": [
+        {
+          "character_offset": 7664,
+          "expression": "var PFCMD_VALIDATE_SBR_MAC='UG000021'"
+        },
+        {
+          "character_offset": 6002,
+          "expression": "var PFCMD_PREPARE_SBR_MAC_UPD='UG000022'"
+        },
+        {
+          "character_offset": 7628,
+          "expression": "var PFCMD_UPDATE_SBR_MAC='UG000023'"
+        }
+      ],
+      "finding": "Signed frontend maps validate/prepare/update Subaru MAC APIs to UG000021/22/23 respectively; decimal21/22/23 equal native selectors0x15/16/17."
+    },
+    {
+      "id": "cuw_utility.saap-cuw-call",
+      "source": "cuw_utility.saap-controller",
+      "kind": "javascript-control-flow",
+      "locator": "reprogramStart",
+      "function_sha256": "a9fd4057417692e797bcfb760663b8404e18c7363e8c387a6e37c37e6c087523",
+      "anchors": [
+        {
+          "character_offset": 23798,
+          "expression": "CUWMain.html?P3=cuwFileList.json&P4=GTS"
+        },
+        {
+          "character_offset": 23845,
+          "expression": "waitCuwResponse"
+        },
+        {
+          "character_offset": 23475,
+          "expression": "cuwResponseCode === normalCode"
+        },
+        {
+          "character_offset": 23364,
+          "expression": "win.closed"
+        },
+        {
+          "character_offset": 23514,
+          "expression": "model.initCheckCid()"
+        }
+      ],
+      "finding": "Software-as-a-Part opens CUW with P3 file list/P4 GTS, listens once for result relay, then waits for browser closure: result0 rechecks CID,1 offers retry/cancel continuation, missing result offers launch retry."
+    },
+    {
+      "id": "cuw_utility.saap2-cuw-call",
+      "source": "cuw_utility.saap2-controller",
+      "kind": "javascript-control-flow",
+      "locator": "reprogramStart",
+      "function_sha256": "9ccf3c82b8134acf10b531ae4df6496497c775a874d4f9ac01cb1c588136150e",
+      "anchors": [
+        {
+          "character_offset": 24099,
+          "expression": "CUWMain.html?P3=cuwFileList.json&P4=GTS"
+        },
+        {
+          "character_offset": 24146,
+          "expression": "waitCuwResponse"
+        },
+        {
+          "character_offset": 23728,
+          "expression": "cuwResponseCode === normalCode"
+        },
+        {
+          "character_offset": 23615,
+          "expression": "win.closed"
+        },
+        {
+          "character_offset": 23767,
+          "expression": "model.clearRob()"
+        }
+      ],
+      "finding": "AISAC2 uses absolute loopback HTTPS CUW URL and same relay-plus-window-close contract; normal0 clears ROB then resumes CBest check, cancel1 and absent result select distinct retry dialogs."
+    },
+    {
+      "id": "cuw_utility.hino-cuw-call",
+      "source": "cuw_utility.hino-controller",
+      "kind": "javascript-control-flow",
+      "locator": "executeCuwPlusFunc",
+      "function_sha256": "271c1f8430aa7f7e5ee33e4325da0f13d986aa56ca377be2bfdb3b251106fc8e",
+      "anchors": [
+        {
+          "character_offset": 23598,
+          "expression": "CUWMain.html?P5=cuwFileList.json&P4=GTS"
+        },
+        {
+          "character_offset": 23656,
+          "expression": "waitCuwResponse"
+        },
+        {
+          "character_offset": 22464,
+          "expression": "cuwResponseCode === normalCode"
+        },
+        {
+          "character_offset": 22353,
+          "expression": "win.closed"
+        },
+        {
+          "character_offset": 22502,
+          "expression": "executeInfProcess()"
+        }
+      ],
+      "finding": "Hino caller explicitly supplies P5 (not ordinary P3), subscribes to CUW result, then waits for window closure; normal0 resumes INF generation, cancel1 asks retry/continue, missing result offers retry."
+    },
+    {
+      "id": "cuw_utility.ui-success-cleanup",
+      "source": "cuw_utility.cuw-controller",
+      "kind": "javascript-control-flow",
+      "locator": "initViewS70126",
+      "function_sha256": "b8f6ed77fe17a4f42d22b2fb3f4e7255b0aaeb01fc60733612a5feab6ed8d9be",
+      "anchors": [
+        {
+          "character_offset": 180979,
+          "expression": "isFlashSuccess:true"
+        },
+        {
+          "character_offset": 181921,
+          "expression": "model.clearDTC()"
+        },
+        {
+          "character_offset": 187251,
+          "expression": "controller.sendInfoAfterReprogramming(repInfo)"
+        },
+        {
+          "character_offset": 187324,
+          "expression": "controller.sendReprogrammingReport(repReport)"
+        },
+        {
+          "character_offset": 187396,
+          "expression": "model.clearStatusOfReprogramming(false)"
+        },
+        {
+          "character_offset": 187699,
+          "expression": "SendValue.NORMAL"
+        },
+        {
+          "character_offset": 187782,
+          "expression": "apiExclusiveControlUnlock()"
+        },
+        {
+          "character_offset": 187842,
+          "expression": "sendLogoutControl(false)"
+        }
+      ],
+      "finding": "Successful post-CID flow performs configured DTC/traceability work, sends success info/report, NON-forced native clear, restores sleep and clears server data, sends caller NORMAL, unlocks platform/logout inhibit before final Finish screen. Any rejected required step prevents the later success relay."
+    },
+    {
+      "id": "cuw_utility.ui-post-cid",
+      "source": "cuw_utility.cuw-controller",
+      "kind": "javascript-control-flow",
+      "locator": "recursiveCheckStatusAfterRepro",
+      "function_sha256": "281d9403377a3cd3a0523b4b0a8abf7182af75880c0547125739e233b0b6c2ca",
+      "anchors": [
+        {
+          "character_offset": 156254,
+          "expression": "COMPLETED_CID_ACQUISITION_CANCELLATION"
+        },
+        {
+          "character_offset": 156357,
+          "expression": "initViewS70126"
+        },
+        {
+          "character_offset": 157600,
+          "expression": "CID_ACQUISITION_IN_PROGRESS"
+        },
+        {
+          "character_offset": 157629,
+          "expression": "setTimeout"
+        },
+        {
+          "character_offset": 158171,
+          "expression": "EVENT_BTN.RETRY"
+        },
+        {
+          "character_offset": 158286,
+          "expression": "EVENT_BTN.CANCEL"
+        }
+      ],
+      "finding": "Post-write CID collection has independent poll/retry/cancel states; success or completed acquisition cancellation enters report/completion, parameter/driver failure tears down."
+    },
+    {
+      "id": "cuw_utility.ui-result-relay",
+      "source": "cuw_utility.cuw-model",
+      "kind": "javascript-control-flow",
+      "locator": "sendResponseSoftwareAsAPart",
+      "function_sha256": "94071d350de7553b3bf27b92080ab39cf360bc9a6082376fc52edf3c3b86f701",
+      "anchors": [
+        {
+          "character_offset": 38036,
+          "expression": "commandId:4"
+        },
+        {
+          "character_offset": 38097,
+          "expression": "returnValue:sendValue"
+        },
+        {
+          "character_offset": 38132,
+          "expression": "name:model.appName"
+        },
+        {
+          "character_offset": 38199,
+          "expression": "relayGuiMessage(param)"
+        },
+        {
+          "character_offset": 38222,
+          "expression": "catch(function(reason){return Promise.resolve()"
+        }
+      ],
+      "finding": "Embedded result is relayGuiMessage to named P4 app: from CUW, commandId4, ResultInfo success envelope and data.returnValue NORMAL0/CANCEL1; relay failures are swallowed."
+    },
+    {
+      "id": "cuw_utility.ui-logout-relay",
+      "source": "cuw_utility.cuw-model",
+      "kind": "javascript-control-flow",
+      "locator": "sendLogoutControl",
+      "function_sha256": "38ff3b45b5f54b36fa6645573e9bb3c062de3cebed3b5a0ba033306ceeb6445b",
+      "anchors": [
+        {
+          "character_offset": 37724,
+          "expression": "commandId:6"
+        },
+        {
+          "character_offset": 37742,
+          "expression": "status:isLock?1:0"
+        },
+        {
+          "character_offset": 37773,
+          "expression": "name:'GTS'"
+        },
+        {
+          "character_offset": 37832,
+          "expression": "relayGuiMessage(param)"
+        }
+      ],
+      "finding": "Logout inhibit is separate CUW->GTS relay command6 status1/0; relay failure is swallowed."
+    },
+    {
+      "id": "cuw_utility.ui-report-persist",
+      "source": "cuw_utility.cuw-model",
+      "kind": "javascript-control-flow",
+      "locator": "sendReprogrammingReport",
+      "function_sha256": "1cbba3821d079ef8bd24cb765a91ae10d8455c1995418b92ca7d587f04453bfa",
+      "anchors": [
+        {
+          "character_offset": 34448,
+          "expression": "CONFIG_KEY_DATA_SYNC_FOLDERPATH"
+        },
+        {
+          "character_offset": 34544,
+          "expression": "createReprogrammingReportPath"
+        },
+        {
+          "character_offset": 34619,
+          "expression": "model.cuwApi.createReprogrammingReport(param)"
+        }
+      ],
+      "finding": "Completion report destination derives from configured DataSync folder and software ID; report contains before/new CID lists, success flag and session metadata, with no values exported here."
+    }
+  ],
+  "states": [
+    {
+      "id": "cuw_utility.external-launch",
+      "owner": "CUWLauncher.exe",
+      "meaning": "File association request owns launcher mutex until CUW platform-name admission then disconnect."
+    },
+    {
+      "id": "cuw_utility.backend-idle",
+      "owner": "CuwBackendServiceConsoleApp.exe",
+      "meaning": "Singleton native-session owner listening independently of browser."
+    },
+    {
+      "id": "cuw_utility.ui-connect",
+      "owner": "CUWMain browser page",
+      "meaning": "Independent CUW/GTS sockets and local challenge auth followed by user login."
+    },
+    {
+      "id": "cuw_utility.exclusive",
+      "owner": "CUW ClientSession + GTS platform",
+      "meaning": "CUW session lock plus platform API-exclusive/logout-inhibit ownership."
+    },
+    {
+      "id": "cuw_utility.select",
+      "owner": "CUW controller",
+      "meaning": "Choose/read compatible calibration or discard/retry recovery."
+    },
+    {
+      "id": "cuw_utility.recovery",
+      "owner": "CUW.dll + CUW controller",
+      "meaning": "Saved device/VIN/calibration used to validate recovery restart."
+    },
+    {
+      "id": "cuw_utility.programming",
+      "owner": "CUW.dll worker in backend process",
+      "meaning": "Native engine owns programming; UI polls structured progress."
+    },
+    {
+      "id": "cuw_utility.wait-ig",
+      "owner": "CUW controller",
+      "meaning": "User ignition/battery transition required between CPUs/retry."
+    },
+    {
+      "id": "cuw_utility.retry",
+      "owner": "CUW controller",
+      "meaning": "User retry/cancel/whole-repro decision constrained by native retry count."
+    },
+    {
+      "id": "cuw_utility.key-wait",
+      "owner": "CUW.dll + CUW controller",
+      "meaning": "Key-required native state waits online signature, offline XML, retry or cancel."
+    },
+    {
+      "id": "cuw_utility.postprocess",
+      "owner": "CUW controller",
+      "meaning": "Post-write CID/vehicle information/report/readback workflow."
+    },
+    {
+      "id": "cuw_utility.ending",
+      "owner": "CUW controller",
+      "meaning": "Clear native state, restore sleep, return caller result, unlock and disconnect."
+    },
+    {
+      "id": "cuw_utility.disconnected",
+      "owner": "CUW backend",
+      "meaning": "Socket gone; active native state may remain and can be restored by next authenticated UI."
+    },
+    {
+      "id": "cuw_utility.stopped",
+      "owner": "CUW backend process",
+      "meaning": "Allowed platform/OS ending disposes listener and leaves hidden form loop."
+    },
+    {
+      "id": "cuw_utility.utility-idle",
+      "owner": "GTS native utility dispatch",
+      "meaning": "UtilityPlusFront communication not initialized."
+    },
+    {
+      "id": "cuw_utility.utility-ready",
+      "owner": "UtilityPlusFrontNK + UtilityGene",
+      "meaning": "Utility session initialized, communication/keepalive state owned by frontend."
+    },
+    {
+      "id": "cuw_utility.utility-exchange",
+      "owner": "GTS ECU Security Key worker",
+      "meaning": "OEM-specific exchange admission: ordinary current-VIN/participant matching; Subaru internally hashed record VIN/tuples and resultCode0, without current-VIN comparison."
+    },
+    {
+      "id": "cuw_utility.utility-write",
+      "owner": "UtilityGene native wrappers",
+      "meaning": "Admitted selected identities receive returned exchange keys and per-ECU result flags."
+    },
+    {
+      "id": "cuw_utility.utility-standard-write",
+      "owner": "GTS signed JavaScript ECU Security Key worker",
+      "meaning": "Ordinary phase-selected P4/P5/P6 direct GTS communication writer, distinct from Subaru native wrapper family."
+    },
+    {
+      "id": "cuw_utility.utility-return",
+      "owner": "GTS controller owner",
+      "meaning": "Completed/error/cancel result returns via PREV_SCREEN; explicit finalCom releases native session."
+    }
+  ],
+  "transitions": [
+    {
+      "id": "cuw_utility.launch-file",
+      "from": "cuw_utility.external-launch",
+      "to": "cuw_utility.ui-connect",
+      "trigger": "Associated calibration file opened",
+      "guard": "Launcher mutex/install/extension route admits CUW+",
+      "action": "Open local CUWMain P2 URL; register platform name and wait for CUW connection lifetime.",
+      "evidence": [
+        "cuw_utility.launcher-start",
+        "cuw_utility.launcher-open",
+        "cuw_utility.launcher-register",
+        "cuw_utility.launcher-wait"
+      ]
+    },
+    {
+      "id": "cuw_utility.launch-health",
+      "from": "cuw_utility.backend-idle",
+      "to": "cuw_utility.ui-connect",
+      "trigger": "GTS Health Check calibration link",
+      "guard": "CID supplied",
+      "action": "Open separate CUW page with P1; connect/auth/login independently.",
+      "evidence": [
+        "cuw_utility.hc-launch",
+        "cuw_utility.ui-entry"
+      ]
+    },
+    {
+      "id": "cuw_utility.launch-embedded",
+      "from": "cuw_utility.backend-idle",
+      "to": "cuw_utility.ui-connect",
+      "trigger": "Software-as-a-Part/AISAC2/Hino opens CUW",
+      "guard": "Caller checks CUW availability or preparation succeeds",
+      "action": "Open P3 file list/P4 GTS (Hino P5); subscribe result relay then wait for child window close.",
+      "evidence": [
+        "cuw_utility.saap-cuw-call",
+        "cuw_utility.saap2-cuw-call",
+        "cuw_utility.hino-cuw-call"
+      ]
+    },
+    {
+      "id": "cuw_utility.login-lock",
+      "from": "cuw_utility.ui-connect",
+      "to": "cuw_utility.exclusive",
+      "trigger": "Login complete",
+      "guard": "CUW lock success and platform exclusive admission",
+      "action": "Stop prior CID/copy work; start diagnosis/configure engine; inhibit logout.",
+      "evidence": [
+        "cuw_utility.ui-login",
+        "cuw_utility.ui-init",
+        "cuw_utility.ui-admission",
+        "cuw_utility.lock",
+        "cuw_utility.permission"
+      ]
+    },
+    {
+      "id": "cuw_utility.select-fresh",
+      "from": "cuw_utility.exclusive",
+      "to": "cuw_utility.select",
+      "trigger": "Read native status",
+      "guard": "Not started and no usable saved recovery",
+      "action": "Validate configured vehicle confirmation; scan calibration directories by old CID.",
+      "evidence": [
+        "cuw_utility.ui-admission",
+        "cuw_utility.cal-search",
+        "cuw_utility.cal-read"
+      ]
+    },
+    {
+      "id": "cuw_utility.select-recovery",
+      "from": "cuw_utility.exclusive",
+      "to": "cuw_utility.recovery",
+      "trigger": "Read native recovery file",
+      "guard": "Not started and native recovery success",
+      "action": "Load saved device/VIN/calibration/security metadata; show recovery choices.",
+      "evidence": [
+        "cuw_utility.ui-admission",
+        "cuw_utility.recovery-read"
+      ]
+    },
+    {
+      "id": "cuw_utility.discard-recovery",
+      "from": "cuw_utility.recovery",
+      "to": "cuw_utility.select",
+      "trigger": "User confirms recovery deletion",
+      "guard": "Delete chosen",
+      "action": "Delete recovery file and clear saved VIN/security state.",
+      "evidence": [
+        "cuw_utility.ui-recovery-delete"
+      ]
+    },
+    {
+      "id": "cuw_utility.resume-recovery",
+      "from": "cuw_utility.recovery",
+      "to": "cuw_utility.programming",
+      "trigger": "User retries saved session",
+      "guard": "VIN check and JudgeFlashable succeed",
+      "action": "Start native engine with recovery marker; poll status.",
+      "evidence": [
+        "cuw_utility.ui-recovery",
+        "cuw_utility.start-flag"
+      ]
+    },
+    {
+      "id": "cuw_utility.start-native",
+      "from": "cuw_utility.select",
+      "to": "cuw_utility.programming",
+      "trigger": "User starts after calibration/J2534/battery checks",
+      "guard": "Native start0 or in-progress accepted by UI",
+      "action": "Set backend programming flag only for native0 and show progress.",
+      "evidence": [
+        "cuw_utility.ui-start",
+        "cuw_utility.start-flag"
+      ]
+    },
+    {
+      "id": "cuw_utility.poll-native",
+      "from": "cuw_utility.programming",
+      "to": "cuw_utility.programming",
+      "trigger": "Timer poll",
+      "guard": "REPROGRAMMING_IN_PROGRESS",
+      "action": "Update CPU/progress/remaining time then schedule next poll.",
+      "evidence": [
+        "cuw_utility.ui-progress",
+        "cuw_utility.progress"
+      ]
+    },
+    {
+      "id": "cuw_utility.ig-wait",
+      "from": "cuw_utility.programming",
+      "to": "cuw_utility.wait-ig",
+      "trigger": "Native WAITING_FOR_REPROGRAMMING",
+      "guard": "IG change/disconnect-battery required",
+      "action": "Render inter-CPU ignition/battery prompts instead of restarting.",
+      "evidence": [
+        "cuw_utility.ui-progress"
+      ]
+    },
+    {
+      "id": "cuw_utility.ig-continue",
+      "from": "cuw_utility.wait-ig",
+      "to": "cuw_utility.programming",
+      "trigger": "User finishes required ignition/battery sequence",
+      "guard": "Native/user conditions met",
+      "action": "Start next programming stage and resume status polling.",
+      "evidence": [
+        "cuw_utility.ui-progress",
+        "cuw_utility.ui-start"
+      ]
+    },
+    {
+      "id": "cuw_utility.retry-choice",
+      "from": "cuw_utility.programming",
+      "to": "cuw_utility.retry",
+      "trigger": "Native preparation/reprogramming/USB error",
+      "guard": "Retry count <= configured normal/extended limit",
+      "action": "Show appropriate adapter/USB/voltage retry/whole-repro choice.",
+      "evidence": [
+        "cuw_utility.ui-progress",
+        "cuw_utility.ui-retry"
+      ]
+    },
+    {
+      "id": "cuw_utility.retry-send",
+      "from": "cuw_utility.retry",
+      "to": "cuw_utility.programming",
+      "trigger": "User chooses Retry or Whole Repro",
+      "guard": "Retry notification succeeds",
+      "action": "InformResultOfQueryRetry(RETRY,isWholeReproSwitched), reconnect/IG prompt as required.",
+      "evidence": [
+        "cuw_utility.ui-retry-send",
+        "cuw_utility.retry"
+      ]
+    },
+    {
+      "id": "cuw_utility.retry-exhaust",
+      "from": "cuw_utility.retry",
+      "to": "cuw_utility.ending",
+      "trigger": "Retry count exceeds limit or notification fails",
+      "guard": "checkMaxRetryCount < retryCount / native failure",
+      "action": "Send CANCEL or failure flow; show terminal error and teardown.",
+      "evidence": [
+        "cuw_utility.ui-retry",
+        "cuw_utility.ui-retry-send",
+        "cuw_utility.ui-failure-exit"
+      ]
+    },
+    {
+      "id": "cuw_utility.need-key",
+      "from": "cuw_utility.programming",
+      "to": "cuw_utility.key-wait",
+      "trigger": "Native status requires reprogramming key",
+      "guard": "Configured request method2 or3",
+      "action": "Start/poll native request or frontend online signature workflow.",
+      "evidence": [
+        "cuw_utility.ui-progress",
+        "cuw_utility.key-request"
+      ]
+    },
+    {
+      "id": "cuw_utility.key-poll",
+      "from": "cuw_utility.key-wait",
+      "to": "cuw_utility.key-wait",
+      "trigger": "Server pending/no signature/fault/offline login",
+      "guard": "Pending <301000ms, or user chooses allowed fallback/retry",
+      "action": "Poll1s or export request XML/import response XML; no implicit success.",
+      "evidence": [
+        "cuw_utility.ui-key-poll",
+        "cuw_utility.ui-key-fallback",
+        "cuw_utility.ui-key-offline"
+      ]
+    },
+    {
+      "id": "cuw_utility.key-admit",
+      "from": "cuw_utility.key-wait",
+      "to": "cuw_utility.programming",
+      "trigger": "Signature or offline key accepted",
+      "guard": "Native setter/parser returns SUCCESS",
+      "action": "Pass returned signature/response XML to native engine and resume progress.",
+      "evidence": [
+        "cuw_utility.ui-key-fallback",
+        "cuw_utility.ui-key-offline"
+      ]
+    },
+    {
+      "id": "cuw_utility.key-cancel",
+      "from": "cuw_utility.key-wait",
+      "to": "cuw_utility.ending",
+      "trigger": "User confirms cancellation",
+      "guard": "Cancel chosen",
+      "action": "Cancel native request, wait until native leaves key-required/in-progress, run failure teardown.",
+      "evidence": [
+        "cuw_utility.ui-cancel",
+        "cuw_utility.key-cancel",
+        "cuw_utility.ui-failure-exit"
+      ]
+    },
+    {
+      "id": "cuw_utility.program-success",
+      "from": "cuw_utility.programming",
+      "to": "cuw_utility.postprocess",
+      "trigger": "Native GetStatus returns SUCCESS",
+      "guard": "All target stage progress complete",
+      "action": "Readback/post-write vehicle info/report flow then Finish.",
+      "evidence": [
+        "cuw_utility.ui-progress",
+        "cuw_utility.ui-finish"
+      ]
+    },
+    {
+      "id": "cuw_utility.success-return",
+      "from": "cuw_utility.postprocess",
+      "to": "cuw_utility.ending",
+      "trigger": "Post-write CID/report path succeeds",
+      "guard": "Required native non-forced clear returns0",
+      "action": "Restore sleep/dictionary, relay NORMAL0, release platform lock/logout inhibit, render Finish; calling GTS page waits browser close before resuming.",
+      "evidence": [
+        "cuw_utility.ui-post-cid",
+        "cuw_utility.ui-success-cleanup",
+        "cuw_utility.ui-result-relay",
+        "cuw_utility.saap-cuw-call",
+        "cuw_utility.saap2-cuw-call"
+      ]
+    },
+    {
+      "id": "cuw_utility.finish",
+      "from": "cuw_utility.postprocess",
+      "to": "cuw_utility.ending",
+      "trigger": "User Finish",
+      "guard": "Normal finish or OEM-specific finish stage complete",
+      "action": "Set END, clear server data; force-clear native status and restore sleep.",
+      "evidence": [
+        "cuw_utility.ui-finish",
+        "cuw_utility.ui-finish-cleanup",
+        "cuw_utility.clear-xml",
+        "cuw_utility.clear-flag"
+      ]
+    },
+    {
+      "id": "cuw_utility.fatal",
+      "from": "cuw_utility.programming",
+      "to": "cuw_utility.ending",
+      "trigger": "Native terminal error/Promise rejection/cancel",
+      "guard": "Failure end flow selected",
+      "action": "Failure report/caller CANCEL, platform unlock/logout inhibit release attempted; rejected step skips rest of chain but disconnect/end still follows.",
+      "evidence": [
+        "cuw_utility.ui-failure-exit"
+      ]
+    },
+    {
+      "id": "cuw_utility.disconnect-ui",
+      "from": "cuw_utility.ending",
+      "to": "cuw_utility.disconnected",
+      "trigger": "Cleanup completion or caught cleanup failure",
+      "guard": "UI end path",
+      "action": "Disconnect GTS then CUW session, release session lock and remove pool member.",
+      "evidence": [
+        "cuw_utility.ui-disconnect",
+        "cuw_utility.disconnect",
+        "cuw_utility.pool-remove"
+      ]
+    },
+    {
+      "id": "cuw_utility.disconnect-abnormal",
+      "from": "cuw_utility.programming",
+      "to": "cuw_utility.disconnected",
+      "trigger": "Browser/socket closes unexpectedly",
+      "guard": "Socket event; no guaranteed force-clear",
+      "action": "Attempt non-forced clear and remove pool member; native busy3007 may persist.",
+      "evidence": [
+        "cuw_utility.socket-close",
+        "cuw_utility.native-clear",
+        "cuw_utility.can-exit"
+      ]
+    },
+    {
+      "id": "cuw_utility.restore-ui",
+      "from": "cuw_utility.disconnected",
+      "to": "cuw_utility.programming",
+      "trigger": "New authenticated exclusive UI connects",
+      "guard": "Native status not not-started",
+      "action": "Restore backend dictionary and progress; do not blindly restart native operation.",
+      "evidence": [
+        "cuw_utility.ui-admission",
+        "cuw_utility.lock"
+      ]
+    },
+    {
+      "id": "cuw_utility.exit-veto",
+      "from": "cuw_utility.programming",
+      "to": "cuw_utility.programming",
+      "trigger": "Platform or OS requests shutdown",
+      "guard": "Programming flag true OR clients remain",
+      "action": "ConfirmEnding veto000 or OS Cancel; timeout uses CanExit.",
+      "evidence": [
+        "cuw_utility.can-exit",
+        "cuw_utility.confirm-ending",
+        "cuw_utility.os-ending"
+      ]
+    },
+    {
+      "id": "cuw_utility.exit-allowed",
+      "from": "cuw_utility.backend-idle",
+      "to": "cuw_utility.stopped",
+      "trigger": "Platform/OS ending accepted",
+      "guard": "No native programming flag and no connections",
+      "action": "Suspend admission, ending callbacks, OnShutdown form close, finally Stop.",
+      "evidence": [
+        "cuw_utility.can-exit",
+        "cuw_utility.execute-ending",
+        "cuw_utility.entry-main",
+        "cuw_utility.backend-stop",
+        "cuw_utility.form-close"
+      ]
+    },
+    {
+      "id": "cuw_utility.utility-init",
+      "from": "cuw_utility.utility-idle",
+      "to": "cuw_utility.utility-ready",
+      "trigger": "ComUtilityFront case1",
+      "guard": "DMGR args and Ex2initialCom succeed",
+      "action": "Set native ready flag; initialize connection/negative-response/keepalive defaults.",
+      "evidence": [
+        "cuw_utility.utility-dispatch"
+      ]
+    },
+    {
+      "id": "cuw_utility.utility-sa",
+      "from": "cuw_utility.utility-ready",
+      "to": "cuw_utility.utility-ready",
+      "trigger": "ComUtilityFront case5",
+      "guard": "Odd level1..0x7F and parsed arguments",
+      "action": "Invoke Ex2ReqSecurityAccess; native failure maps0x90281105.",
+      "evidence": [
+        "cuw_utility.utility-dispatch"
+      ]
+    },
+    {
+      "id": "cuw_utility.utility-before",
+      "from": "cuw_utility.utility-ready",
+      "to": "cuw_utility.utility-exchange",
+      "trigger": "Subaru MACKey case0x15 validation or0x16 before",
+      "guard": "Ready and supported protocol0x34; helper auth/topology succeeds",
+      "action": "Return selected identities/status/M1-M3; Subaru response integrity binds its own record VIN/tuples, not a current-vehicle VIN comparison.",
+      "evidence": [
+        "cuw_utility.utility-dispatch",
+        "cuw_utility.utility-command-map",
+        "cuw_utility.gene-before",
+        "cuw_utility.gene-validate",
+        "cuw_utility.key-server",
+        "cuw_utility.key-record-integrity",
+        "cuw_utility.key-subaru-data-gate",
+        "cuw_utility.key-subaru-command-ids"
+      ]
+    },
+    {
+      "id": "cuw_utility.utility-after",
+      "from": "cuw_utility.utility-exchange",
+      "to": "cuw_utility.utility-write",
+      "trigger": "Subaru MACKey case0x17 after",
+      "guard": "Subaru internal exchange hash valid and resultCode0; six native DMGR update-data reads succeed; no current-vehicle VIN comparison in this frontend gate",
+      "action": "Map server tuples to native-prepared participants with keyCmpFlg1 for matches or0 for missing matches; process master/selected participants and return per-ECU flags; native errors fail fast.",
+      "evidence": [
+        "cuw_utility.utility-dispatch",
+        "cuw_utility.gene-after",
+        "cuw_utility.key-record-integrity",
+        "cuw_utility.key-subaru-data-gate",
+        "cuw_utility.key-subaru-controller-admit",
+        "cuw_utility.key-subaru-write"
+      ]
+    },
+    {
+      "id": "cuw_utility.utility-subaru-data-reject",
+      "from": "cuw_utility.utility-exchange",
+      "to": "cuw_utility.utility-return",
+      "trigger": "Subaru online controller receives dataValid false",
+      "guard": "Internal record integrity false, resultCode nonzero or caught validation error",
+      "action": "Do not call Subaru writer; offer server requery or previous-screen return with result-specific dialog.",
+      "evidence": [
+        "cuw_utility.key-record-integrity",
+        "cuw_utility.key-subaru-data-gate",
+        "cuw_utility.key-subaru-controller-admit"
+      ]
+    },
+    {
+      "id": "cuw_utility.utility-ordinary-admit",
+      "from": "cuw_utility.utility-exchange",
+      "to": "cuw_utility.utility-standard-write",
+      "trigger": "Online/offline ECU Security Key user requests write",
+      "guard": "Valid VIN/exchange, admitted targets/status, fresh matching safekeys; ordinary non-Subaru/non-Suzuki branch",
+      "action": "Select P4 3BF5/F6, P5 RID1010 or P6 RIDD904 directly; not native Subaru RID3002.",
+      "evidence": [
+        "cuw_utility.key-write-admission",
+        "cuw_utility.key-write-offline",
+        "cuw_utility.key-standard-write"
+      ]
+    },
+    {
+      "id": "cuw_utility.utility-ordinary-return",
+      "from": "cuw_utility.utility-standard-write",
+      "to": "cuw_utility.utility-return",
+      "trigger": "All ordinary target writes complete or an ECU transport/proof fails",
+      "guard": "P5/P6 zero proof polls100ms up to1000ms; CMAC(MACK4,M4) must equal M5",
+      "action": "Collect failed ECU IDs; restore default session and end communication; controller offers first-view retry or previous-screen return.",
+      "evidence": [
+        "cuw_utility.key-standard-write",
+        "cuw_utility.key-write-admission",
+        "cuw_utility.key-write-offline",
+        "cuw_utility.key-controller-return"
+      ]
+    },
+    {
+      "id": "cuw_utility.utility-suzuki-admit",
+      "from": "cuw_utility.utility-exchange",
+      "to": "cuw_utility.utility-standard-write",
+      "trigger": "Suzuki family online/offline write requested",
+      "guard": "Connected/fault-status admission and DID010B identities match exchange",
+      "action": "Write8508 first then other participants with RID1010; status1 pending/status2 CMAC proof and600ms deadline, restore default session/end communication per ECU.",
+      "evidence": [
+        "cuw_utility.key-suzuki-admission",
+        "cuw_utility.key-suzuki-identities",
+        "cuw_utility.key-suzuki-write"
+      ]
+    },
+    {
+      "id": "cuw_utility.utility-suzuki-return",
+      "from": "cuw_utility.utility-standard-write",
+      "to": "cuw_utility.utility-return",
+      "trigger": "Suzuki write loop and postcheck complete",
+      "guard": "Any failed ECU retained; postcheck after15000ms",
+      "action": "Clear DTC/ROB only after all-success writes; final ROB/DTC faults add failed IDs; controller handles retry/return.",
+      "evidence": [
+        "cuw_utility.key-suzuki-write",
+        "cuw_utility.key-suzuki-postcheck",
+        "cuw_utility.key-write-admission"
+      ]
+    },
+    {
+      "id": "cuw_utility.utility-exchange-timeout",
+      "from": "cuw_utility.utility-exchange",
+      "to": "cuw_utility.utility-return",
+      "trigger": "Configured MACKey service returns fault or stays pending past300000ms",
+      "guard": "Pending poll every1000ms or explicit API failure",
+      "action": "Return failed/dialog/fault result for user retry/offline/previous-screen choice; never write unvalidated response.",
+      "evidence": [
+        "cuw_utility.key-server-timeout",
+        "cuw_utility.key-write-admission",
+        "cuw_utility.key-write-offline"
+      ]
+    },
+    {
+      "id": "cuw_utility.utility-return-screen",
+      "from": "cuw_utility.utility-write",
+      "to": "cuw_utility.utility-return",
+      "trigger": "Done/error/user exit",
+      "guard": "Caller selected return",
+      "action": "Return previous screen event; UI disposal alone is not finalCom.",
+      "evidence": [
+        "cuw_utility.key-exit",
+        "cuw_utility.key-controller-return"
+      ]
+    },
+    {
+      "id": "cuw_utility.utility-release",
+      "from": "cuw_utility.utility-ready",
+      "to": "cuw_utility.utility-idle",
+      "trigger": "ComUtilityFront case2 explicit finalize",
+      "guard": "Initialized ready session",
+      "action": "Stop periodic and keepalive, finalize/reset connection parameters and clear ready even if finalCom errors.",
+      "evidence": [
+        "cuw_utility.utility-dispatch"
+      ]
+    }
+  ],
+  "handoffs": [
+    {
+      "to_domain": "ui_ipc",
+      "caller": "GTS HealthCheckController",
+      "callee": "CUWMain.init",
+      "mechanism": "new browser page URL",
+      "payload": "P1=encoded old calibration ID; external launcher instead supplies P2=file path; P3=file list and P4=caller application are parsed.",
+      "evidence": [
+        "cuw_utility.hc-launch",
+        "cuw_utility.ui-entry",
+        "cuw_utility.launcher-open"
+      ]
+    },
+    {
+      "to_domain": "bootstrap",
+      "caller": "Cuw.Program.Main",
+      "callee": "GTSPlus error-report/lifecycle coordination",
+      "mechanism": "managed CExternalMethodWrapper callbacks",
+      "payload": "CUW+ PF liveness, ConfirmEnding veto string, ExecuteEnding shutdown/execute booleans.",
+      "evidence": [
+        "cuw_utility.entry-main",
+        "cuw_utility.can-exit",
+        "cuw_utility.execute-ending"
+      ]
+    },
+    {
+      "to_domain": "ui_ipc",
+      "caller": "CUWLauncher",
+      "callee": "GTS platform connection registry",
+      "mechanism": "loopback WSS JSON CN000001/CN000004",
+      "payload": "Register name CUWLauncher/maxNum2; poll name CUW existNum for admitted->disconnected completion.",
+      "evidence": [
+        "cuw_utility.launcher-register",
+        "cuw_utility.launcher-wait"
+      ]
+    },
+    {
+      "to_domain": "vehicle_session",
+      "caller": "CUW browser",
+      "callee": "GTS platform",
+      "mechanism": "independent JSON socket",
+      "payload": "Start diagnosis; API-exclusive lock, logout-control inhibit, release VIM/transport, report and final unlock.",
+      "evidence": [
+        "cuw_utility.ui-login",
+        "cuw_utility.ui-admission",
+        "cuw_utility.ui-failure-exit"
+      ]
+    },
+    {
+      "to_domain": "vci_transport",
+      "caller": "CuwCoreModel",
+      "callee": "CUW.dll native engine",
+      "mechanism": "P/Invoke within backend process",
+      "payload": "Calibration path/mode/destination, J2534 selection, start/status, retry and forced-clear booleans; native worker owns programming lifetime.",
+      "evidence": [
+        "cuw_utility.cal-read",
+        "cuw_utility.progress",
+        "cuw_utility.retry",
+        "cuw_utility.native-clear"
+      ]
+    },
+    {
+      "to_domain": "auth_settings",
+      "caller": "CUW controller/model",
+      "callee": "configured reprogramming signature service or offline response XML",
+      "mechanism": "platform web-service API / local file dialog",
+      "payload": "Method3 seed/keyPairID request; returned ID/status/signature, or saved request and imported response XML; no values exported.",
+      "evidence": [
+        "cuw_utility.key-request",
+        "cuw_utility.ui-key-request",
+        "cuw_utility.ui-key-poll",
+        "cuw_utility.ui-key-offline"
+      ]
+    },
+    {
+      "to_domain": "operations",
+      "caller": "GTS Subaru ECU Security Key worker",
+      "callee": "UtilityPlusFrontNK.ComUtilityFront -> UtilityGene ord98/99/100",
+      "mechanism": "signed platform UG000021/22/23 -> native initialized command table selectors0x15/16/17 and DMGR native arguments",
+      "payload": "Initialized utility session; Subaru internally hashed exchange VIN/tuples, resultCode0 and native-prepared participant matching (not ordinary current-VIN admission); wrapper status and per-ECU result array. Ordinary P5/P6 worker takes separate direct RID1010/D904 path.",
+      "evidence": [
+        "cuw_utility.utility-dispatch",
+        "cuw_utility.utility-command-map",
+        "cuw_utility.gene-before",
+        "cuw_utility.gene-after",
+        "cuw_utility.key-subaru-command-ids",
+        "cuw_utility.key-record-integrity",
+        "cuw_utility.key-subaru-data-gate",
+        "cuw_utility.key-subaru-controller-admit",
+        "cuw_utility.key-subaru-write",
+        "cuw_utility.key-standard-write"
+      ]
+    },
+    {
+      "to_domain": "ui_ipc",
+      "caller": "CUW postprocess/failure end",
+      "callee": "GTS Software-as-a-Part/AISAC2/Hino caller",
+      "mechanism": "relayGuiMessage plus browser-window-close polling",
+      "payload": "fromAppName CUW,commandId4,data.returnValue NORMAL0/CANCEL1 to P4 app; GTS waits win.closed before CID/ROB/CBest/INF continuation. Logout inhibit is command6,status1/0.",
+      "evidence": [
+        "cuw_utility.ui-result-relay",
+        "cuw_utility.ui-logout-relay",
+        "cuw_utility.saap-cuw-call",
+        "cuw_utility.saap2-cuw-call",
+        "cuw_utility.hino-cuw-call",
+        "cuw_utility.ui-success-cleanup"
+      ]
+    },
+    {
+      "to_domain": "sync_upload",
+      "caller": "CUW completion model/backend",
+      "callee": "DataSync report consumer",
+      "mechanism": "configured output path and native report create API",
+      "payload": "Before/new calibration IDs, flash success flag, session metadata; report path uses configured DataSync folder/software ID.",
+      "evidence": [
+        "cuw_utility.ui-report-persist"
+      ]
+    }
+  ],
+  "persistence": [
+    {
+      "path_pattern": "HKCU/Software/Toyota Diagnostics/Calibration Update Wizard/LastAccessFolder",
+      "producer": "CuwModel.StoreLastAccessFolderPath",
+      "consumer": "GetLastAccessFolderPath / calibration file picker",
+      "created": "User folder selection",
+      "flushed": "Registry.SetValue immediate API",
+      "deleted": "No deletion in observed folder setter/getter",
+      "evidence": [
+        "cuw_utility.last-folder"
+      ]
+    },
+    {
+      "path_pattern": "CUW backend ServerData dictionary (process memory)",
+      "producer": "SaveData / CUW model saveReprogrammingState",
+      "consumer": "restoreClientData after browser reconnect",
+      "created": "Key/value added or overwritten during CUW workflow",
+      "flushed": "No file flush in SaveData; lifetime is backend process",
+      "deleted": "ClearServerData on finish/failure; process exit",
+      "evidence": [
+        "cuw_utility.server-data",
+        "cuw_utility.ui-admission",
+        "cuw_utility.ui-failure-exit"
+      ]
+    },
+    {
+      "path_pattern": "CUW.dll recovery storage (native path list)",
+      "producer": "CUW native engine / SetInfoInStorageForRecovery",
+      "consumer": "ReadRecoveryInfoFile and recovery retry UI",
+      "created": "Programming/recovery storage lifecycle",
+      "flushed": "Native implementation owns serialization",
+      "deleted": "Explicit recovery Delete choice; not assumed deleted by every socket close",
+      "evidence": [
+        "cuw_utility.recovery-read",
+        "cuw_utility.ui-recovery-delete",
+        "cuw_utility.native-clear"
+      ]
+    },
+    {
+      "path_pattern": "Request-reprogramming-key XML (native returned requestKeyFile)",
+      "producer": "SaveXMLFileForRequestReprogrammingKey",
+      "consumer": "Offline signer exchange and LoadXMLFileForReprogrammingKey",
+      "created": "User chooses offline authorization",
+      "flushed": "Native API returns saved path; frontend reuses it",
+      "deleted": "DeleteAllXMLFileForRequestReprogrammingKey only after native clear success",
+      "evidence": [
+        "cuw_utility.ui-key-offline",
+        "cuw_utility.clear-xml"
+      ]
+    },
+    {
+      "path_pattern": "configured ecuSecurityKeySavedFile/{request XML,exchange JSON}",
+      "producer": "ECU Security Key worker",
+      "consumer": "OEM-specific exchange admission: ordinary current-VIN/SafeKey matching; Subaru internal record-hash/resultCode gate",
+      "created": "Key read and save request or imported exchange response",
+      "flushed": "Platform writeFile API in request workflow",
+      "deleted": "Initialization attempts remove files >=2592000000ms (30days)",
+      "evidence": [
+        "cuw_utility.key-init",
+        "cuw_utility.key-server",
+        "cuw_utility.key-vin",
+        "cuw_utility.key-safekey",
+        "cuw_utility.key-record-integrity",
+        "cuw_utility.key-subaru-data-gate"
+      ]
+    },
+    {
+      "path_pattern": "configured DataSync folder/{software-ID-derived reprogramming-report path}",
+      "producer": "CUW completion CuwModel/CuwBackendService",
+      "consumer": "DataSync service",
+      "created": "Post-write success/failure report stage",
+      "flushed": "CreateReprogrammingReport API",
+      "deleted": "Consumer retention/acknowledgement belongs to DataSync domain",
+      "evidence": [
+        "cuw_utility.ui-report-persist",
+        "cuw_utility.ui-success-cleanup",
+        "cuw_utility.ui-failure-exit"
+      ]
+    }
+  ],
+  "coverage": {
+    "components": [
+      "CUWLauncher external file association executable (outside previous installed-root249 count)",
+      "CuwBackendServiceConsoleApp hidden WinForms singleton",
+      "CuwBackendService session/command/auth/lock/end handlers",
+      "CUW.dll native clear/reset/recovery interface",
+      "authenticated cuw.gui UI/controller/model",
+      "authenticated gts.gui Health Check and ECU Security Key producers",
+      "UtilityPlusFrontNK ComUtilityFront and recovered UtilityGene selected wrappers"
+    ],
+    "entrypoints": [
+      "File association launcher startup",
+      "GTS HealthCheck calibration browser link",
+      "CUWMain init/login",
+      "Backend Program.Main and ClientSession JSON commands",
+      "ComUtilityFront cases1/2/5/0x15/0x16/0x17"
+    ],
+    "branches": [
+      "Normal calibration/read/flash/progress/postprocess/end",
+      "Recovery resume/discard and reconnect restore",
+      "IG/battery/USB/adapter retry and whole-repro",
+      "Online key pending/timeout/fault/missing-signature/offline XML/cancel",
+      "Session-exclusive contention and failed command dispatch",
+      "Browser abnormal disconnect versus native worker lifetime",
+      "Busy shutdown veto/OS10s fallback/cancel-resume",
+      "Utility ready/protocol/SA-level/VIN/participant admission and per-ECU result return",
+      "Subaru-specific support/battery/IG validation and cleanup",
+      "Literal empty UI PC-disconnection branch"
+    ]
+  },
+  "residuals": [
+    {
+      "question": "Vehicle- and service-specific success outcomes",
+      "why_unclosed": "Offline execution does not provide matching calibration payload, actual ECU responses, server signature, or authenticated account session; these are runtime inputs, not missing code bodies.",
+      "next_evidence": "Authorized captured transcript tied to exact calibration/ECU and configured service; never invoke from this extractor."
+    },
+    {
+      "question": "Crash/power-loss durability and native worker join completion on the target OS",
+      "why_unclosed": "Offline source/IL evidence identifies recovery reader/deletion ownership and the reset unbounded worker join, but does not observe target filesystem flush completion or an actual crashing worker.",
+      "next_evidence": "Isolated Windows harness with fake file/J2534 interfaces and interrupted native worker; no vehicle or service access."
+    }
+  ],
+  "safety": {
+    "mode": "offline static source/IL/native-byte extraction",
+    "application_executed": false,
+    "vehicle_contact": false,
+    "network_contact": false,
+    "credentials_used": false
+  },
+  "smoke_plan": [
+    "Run this extractor; it authenticates actual packaged JS and validates IL/materialized bodies/native branch bytes without loading PE code.",
+    "Use Node isolated VM with signed-source CuwController prototype and fake Promise APIs to exercise status SUCCESS/IN_PROGRESS/WAITING/key-required/error/PC-disconnected branches; ensure the last branch schedules no poll.",
+    "Use managed reflection-only/dncil decoding for CanExit/SessionEnding/lock and command ResultCode branches; do not instantiate backend listener.",
+    "Native Windows harness must stub imports/J2534, initialize only private synthetic state, and exercise UtilityPlusFront ready/level guard and CUW clear rejection before allowing worker/reset execution; never call real mutation exports."
+  ],
+  "native_projects": [
+    "lc_cuw_utility",
+    "lc_cuw_utility_gene",
+    "lc_cuw_utility_core",
+    "lc_cuw_utility_adapt"
+  ]
+}
