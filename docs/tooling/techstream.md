@@ -4091,6 +4091,41 @@ session. GUI logout disposes its controllers/workers, ends diagnosis, and
 reconnects the login view. Application exit follows arbitration's separate
 shutdown protocol.
 
+### Authentication, licensing, and settings
+
+[`lifecycle_auth_settings.json`](../../data/generated/gtsplus_2026/lifecycle_auth_settings.json)
+joins InfoCenter and its Multi helper, the signed login frontend, managed
+UserInfo/settings owners, and native license validation.
+
+| License result | Local decision |
+|---:|---|
+| 0 | Valid |
+| -1 | Missing or invalid offline artifacts/CRL |
+| -2 | License expired beyond tolerance |
+| -3 | Offline interval exceeded |
+| -4 | Read, decrypt, clock, parse, or native verification failure |
+
+The deployed policy allows 30 offline days and 10 minutes of clock tolerance.
+Online validation uses the CRL's `nextUpdate`; offline validation compares the
+current time with the latest server time plus the configured offline interval,
+then checks the certificate/JWT and license payload. Native boundary execution
+verified null/empty and one-MiB input limits.
+
+MSK persistence precedes memory publication and update broadcast. Selected
+service errors trigger one renewal/retry; revocation and file deletion have
+separate failure paths. Logout clears cached session state while retaining
+credential files. Settings use per-path mutexes and recursive object merge;
+arrays/scalars replace. Vehicle-database region and distributor region are
+separate settings. `CheckPCTime` discards the clock-write result.
+
+Missing offline profile data opens an error dialog whose OK callback closes
+the window. Relay-triggered login failure is caught and resolved, so connection,
+routing, and a result-0 relay can continue before that acknowledgement. Initial
+login ignores popup `WINDOW_CLOSED`; relay login converts it to `FAILED_LAUNCH`.
+Six offline cases executed these exact authenticated JavaScript methods.
+The Multi executable owns a separate local mutex and localized notice window;
+its Closing handler hides the window and lets the close event proceed.
+
 ### Vehicle workspace, ECU selection, and healthcheck
 
 [`lifecycle_vehicle_session.json`](../../data/generated/gtsplus_2026/lifecycle_vehicle_session.json)
