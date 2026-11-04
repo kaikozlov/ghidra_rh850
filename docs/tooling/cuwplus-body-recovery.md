@@ -24,8 +24,10 @@ the census is complete:
 
 The 16 CLR-labeled inputs comprise 12 ordinary managed images and four mixed
 native/CLR wrappers. All 143 rebuilt outputs parse as PE files.
-Every managed output must also materialize every nonzero `MethodDef` RVA.
-A zero/missing method body is a hard recovery failure.
+Managed outputs pass `inspect_dotnet_il.validate_managed_bodies`: complete IL
+headers, instructions and extra sections must fit their file-backed bodies.
+Implementation flags distinguish IL from native and legitimately bodyless
+runtime, abstract and imported methods. Invalid or missing required IL fails recovery.
 
 Run:
 
@@ -41,7 +43,24 @@ build/out/cuwplus-unprotected/
 
 `manifest.json` records each protected stub and sidecar SHA-256, the recovered
 classification, final protector section map, import/entrypoint evidence, and
-clean-output identity.
+clean-output identity. Each decoder result has its own source-relative workspace:
+`inputs/<original-relative-path>/decoded/` and `inputs/<original-relative-path>/logs/`.
+The enclosing `provenance.json` binds that input's source root, relative path and
+stub/sidecar hashes to its metadata, final-memory and log hashes. The same record
+is embedded in the output manifest even when temporary workspaces are removed.
+
+The manifest also pins the current decoder, rebuilder, managed validator and root
+resolver source hashes, `uv.lock` hash, Python executable/version and installed
+Unicorn/pefile/dnfile/dncil versions. Aggregate manifests additionally pin the
+aggregate/installer producers and the three final component manifests. Existing
+older manifests without these fields do not identify a historical producer revision.
+
+`method_def_count` counts all metadata methods, `method_body_rva_count` counts all
+nonzero implementation RVAs (including native implementations), and
+`method_body_materialized_count` counts complete validated IL bodies. Compact
+classification counts accompany them; native/mixed images need not have equal
+RVA and IL counts. Full scoped method identities are available from the shared
+`inspect_managed_bodies` inspection helper.
 
 ## Full `Toyota Diagnostics` protected-body census
 
@@ -66,6 +85,10 @@ This writes the three component corpora and an aggregate 249/249 manifest under
 `build/out/gts-all-unprotected/`. The component commands remain useful when
 only one product family is needed.
 
+The **249** count is confined to `Toyota Diagnostics`. The current outer
+`CUWLauncher.exe` protected pair is a separately recovered **250th** source;
+it is not folded into any component counter.
+
 ### Operator behavior
 
 Recovery output roots are transactional. A run builds and validates in a sibling
@@ -83,6 +106,16 @@ workspaces instead of overwriting one component's logs with the next. Decoder
 failures include the tail of the captured worker log in the raised error even
 when the temporary workspace is automatically removed.
 
+Input workspaces preserve the complete source-relative filename as a directory,
+so equal basenames, or names that become equal after dot-to-underscore conversion,
+cannot share decoded memory, metadata or logs. Rebuilding consumes the result
+returned for that exact input. This isolation applies to serial and concurrent
+workers: serial scheduling alone is insufficient when every decode precedes rebuilding.
+
+Retained `--keep-workspace` directories use fixed component names and are replaced
+on the next run of that component. Do not run two processes against the same output
+or retained workspace.
+
 The auxiliary 52 are `DS-4` 14, `ContentServer` 10,
 `GTSPlusCSVConverter` 10, `GTSPlus DataSync` 8, `GTSPlusTSEConverter` 5,
 `GTSPlusGraphViewer` 2, and one each in `DiagMessageInput`, `GTSE`, and
@@ -95,6 +128,64 @@ produces Toyota's exact original files without emulation. The generic decoder
 is used where no such plaintext packaging shortcut exists; the common CP
 mechanics below were established from CUWPlus and then verified across the
 auxiliary product families.
+
+### Qualification and source-root migration
+
+Run the existing behavior gates after changing a producer:
+
+```sh
+uv run python tests/techstream/verify_gtsplus_aux_body_recovery.py
+uv run python tests/techstream/verify_cuwplus_body_recovery.py
+uv run python tests/techstream/verify_gtsplus_managed_exe_recovery.py
+```
+
+The auxiliary gate independently decodes all eight current duplicate-basename
+inputs, then compares each serial (`workers=1`) and concurrent (`workers=8`)
+batch result against its isolated metadata, final-memory and normalized-output
+hashes. The four groups are `GTSPlusCommon.dll`, `GTSPlusErrorReportData.dll`,
+`GtsPlus-CM.dll` and `MsgDatComm.dll`, each in `ContentServer` and `GTSPlus DataSync`.
+It also injects malformed nonzero IL and decoder failure, checks complete output/
+manifest preservation, and checks that successful subset recovery replaces the
+previous root. The CUW gate retains the native, seven-range, mixed-CLR and console
+normalization contracts; the managed-EXE gate retains the five installer oracles.
+
+For separately retained real-input serial/concurrent batches:
+
+```sh
+tools/gts recover-aux-bodies --workers 1 \
+  --only GTSPlusCommon.dll --only GTSPlusErrorReportData.dll \
+  --only GtsPlus-CM.dll --only MsgDatComm.dll \
+  --output build/out/gts-collision-serial
+tools/gts recover-aux-bodies --workers 8 \
+  --only GTSPlusCommon.dll --only GTSPlusErrorReportData.dll \
+  --only GtsPlus-CM.dll --only MsgDatComm.dll \
+  --output build/out/gts-collision-concurrent
+```
+
+Regenerate the complete aggregate into a new selected root only after these gates,
+then migrate consumers and generated source references together. Join each selected
+output through its component manifest to the exact installed relative stub/sidecar
+pair and output SHA-256; resolve files beneath that selected root rather than old
+absolute manifest paths. Keep installer originals, protected installed pairs and
+normalized analysis outputs as separate representations.
+
+The retained legacy aggregate has 248 entries and omits PCS Data Viewer; its
+console representation also predates the corrected 11-body recovery. Preserve
+the separately corrected console/auxiliary representations until the replacement
+aggregate passes qualification. Do not reinterpret their hashes as interchangeable
+with legacy same-name outputs. Regenerate the outer CUWLauncher separately.
+
+Explicit current-source regeneration commands (these select new output roots):
+
+```sh
+tools/gts recover-all-bodies --workers 8 --keep-workspace \
+  --gtsplus-root "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus" \
+  --output build/out/gts-car-qualified
+tools/gts recover-cuw-bodies --workers 1 --only CUWLauncher.exe \
+  --gtsplus-root "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus" \
+  --source software/Techstream/gtsplus/unpacked/gtsplus/CUWLauncher \
+  --output build/out/gts-car-qualified-launcher
+```
 
 ## What is recovered versus regenerated
 
@@ -251,8 +342,8 @@ integrity model existed, coree-managed EXEs followed
 `A0F -> 042-023-000 -> ExitProcess`; enough CLR metadata was present to look
 plausible, but their IL remained zero. The corrected path instead continues
 through `5D0 -> 590 -> 5B0/5B1 -> 5C0 -> 5A0 -> 610 -> 655 -> 280 ->
-000-000-000`. `recover_cp_bodies.py` now independently validates every nonzero
-`MethodDef` body, so the old metadata-only state cannot be reported as recovered.
+000-000-000`. `recover_cp_bodies.py` requires complete validation of every required
+IL `MethodDef` body, so the old metadata-only state cannot be reported as recovered.
 
 ## Independent managed-EXE oracles
 

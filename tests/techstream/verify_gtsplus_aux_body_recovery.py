@@ -4,10 +4,13 @@ from __future__ import annotations
 
 import contextlib
 import io
+import hashlib
 import json
 import struct
+import shutil
 import tempfile
 from pathlib import Path
+from unittest.mock import patch
 
 import dnfile
 from dncil.cil.body import CilMethodBody
@@ -17,7 +20,9 @@ REPO = REPO_ROOT
 
 from tools.techstream.extract_pcs_data_viewer_tss3_managed_semantics import extract as extract_pcs_semantics
 from tools.techstream.inspect_dotnet_il import MethodBodyReader, format_operand, type_name
+import tools.techstream.recover_cp_bodies as recovery
 from tools.techstream.recover_cp_bodies import recover
+from tools.techstream.recover_all_gtsplus_bodies import DEFAULT_OUTPUT, qualify_recovered_source
 from tools.techstream.techstream_paths import resolve_gts_root
 
 
@@ -62,6 +67,136 @@ def contains_ordered(lines: list[str], needles: tuple[str, ...]) -> bool:
     return True
 
 
+
+def sha256(path: Path) -> str:
+    with path.open("rb") as handle:
+        return hashlib.file_digest(handle, "sha256").hexdigest()
+
+
+def verify_collision_schedules(diagnostics: Path, stubs: list[Path]) -> None:
+    groups: dict[str, list[str]] = {}
+    for stub in stubs:
+        groups.setdefault(stub.name.replace(".", "_"), []).append(stub.relative_to(diagnostics).as_posix())
+    collisions = {name: paths for name, paths in groups.items() if len(paths) > 1}
+    check(
+        "all four duplicate decoder-stem groups are qualified",
+        set(collisions) == {
+            "GTSPlusCommon_dll", "GTSPlusErrorReportData_dll", "GtsPlus-CM_dll", "MsgDatComm_dll",
+        } and all(len(paths) == 2 for paths in collisions.values()),
+    )
+    selected = sorted(path for paths in collisions.values() for path in paths)
+    with tempfile.TemporaryDirectory(prefix="verify-gtsplus-collisions-") as tmp:
+        root = Path(tmp)
+        isolated = {}
+        for index, rel in enumerate(selected):
+            manifest = recover(
+                source=diagnostics, output=root / f"isolated-{index}", only=[rel], workers=1,
+            )
+            check(f"isolated recovery selects exactly {rel}", manifest["recovered_body_count"] == 1)
+            isolated[rel] = manifest["entries"][0]
+        for name, paths in collisions.items():
+            check(
+                f"{name} inputs are two distinct protected pairs",
+                len({isolated[rel]["stub_sha256"] for rel in paths}) == 2
+                and len({isolated[rel]["sidecar_sha256"] for rel in paths}) == 2,
+            )
+        for workers in (1, 8):
+            manifest = recover(
+                source=diagnostics, output=root / f"workers-{workers}", only=selected, workers=workers,
+            )
+            check(f"workers={workers} recovers all eight collision inputs", manifest["recovered_body_count"] == 8)
+            artifact_paths: dict[str, set[str]] = {name: set() for name in ("metadata", "final_memory", "log")}
+            for entry in manifest["entries"]:
+                rel = entry["relative_path"]
+                oracle = isolated[rel]
+                provenance = entry["decoder_provenance"]
+                check(
+                    f"workers={workers} {rel} retains its exact original pair",
+                    provenance["source_root"] == str(diagnostics)
+                    and provenance["relative_path"] == rel
+                    and provenance["stub_sha256"] == entry["stub_sha256"] == sha256(diagnostics / rel)
+                    and provenance["sidecar_sha256"] == entry["sidecar_sha256"] == sha256(diagnostics / f"{rel}._"),
+                )
+                check(
+                    f"workers={workers} {rel} consumes its own isolated decode and normalized output",
+                    entry["output_sha256"] == oracle["output_sha256"]
+                    == sha256(root / f"workers-{workers}" / rel)
+                    and all(
+                        provenance["artifacts"][name]["sha256"]
+                        == oracle["decoder_provenance"]["artifacts"][name]["sha256"]
+                        for name in ("metadata", "final_memory")
+                    ),
+                )
+                for name in artifact_paths:
+                    artifact_paths[name].add(provenance["artifacts"][name]["path"])
+            check(
+                f"workers={workers} has eight independent memory/metadata/log artifacts",
+                all(len(paths) == 8 for paths in artifact_paths.values()),
+            )
+
+
+def verify_validation_transaction(diagnostics: Path, output: Path, managed_rel: str) -> None:
+    before = {path.relative_to(output): sha256(path) for path in output.rglob("*") if path.is_file()}
+    original_build = recovery._managed_build
+
+    def invalid_il_build(stub: Path, meta: Path, memory: Path, destination: Path) -> dict:
+        info = original_build(stub, meta, memory, destination)
+        with contextlib.redirect_stderr(io.StringIO()):
+            pe = dnfile.dnPE(str(destination))
+        row = next(row for row in pe.net.mdtables.MethodDef.rows if row.Rva and row.ImplFlags.miIL)
+        offset = pe.get_offset_from_rva(row.Rva)
+        data = bytearray(destination.read_bytes())
+        # A nonzero fat header whose declared code cannot fit in this file.
+        struct.pack_into("<HHII", data, offset, 0x3003, 8, len(data) + 1, 0)
+        check("invalid IL fixture retains a nonzero 16-byte prefix", any(data[offset:offset + 16]))
+        destination.write_bytes(data)
+        return info
+
+    with patch.object(recovery, "_managed_build", invalid_il_build):
+        try:
+            recover(source=diagnostics, output=output, only=[managed_rel], workers=2)
+        except RuntimeError as exc:
+            check("complete-body validator rejects nonzero malformed IL", "complete method validation" in str(exc))
+        else:
+            raise AssertionError("malformed nonzero IL was admitted")
+    check(
+        "failed managed validation preserves the complete previous output and manifest",
+        before == {path.relative_to(output): sha256(path) for path in output.rglob("*") if path.is_file()},
+    )
+    with tempfile.TemporaryDirectory(prefix="verify-gtsplus-decoder-failure-") as tmp:
+        failing = Path(tmp) / "failure.py"
+        failing.write_text("print('per-input decoder failure marker')\nraise SystemExit(7)\n")
+        with patch.object(recovery, "DECODER", failing):
+            try:
+                recover(source=diagnostics, output=output, only=[managed_rel], workers=2)
+            except RuntimeError as exc:
+                check("decoder failure preserves its own log context", "per-input decoder failure marker" in str(exc))
+            else:
+                raise AssertionError("failed decoder was admitted")
+    check(
+        "failed decoder preserves the complete previous output and manifest",
+        before == {path.relative_to(output): sha256(path) for path in output.rglob("*") if path.is_file()},
+    )
+    check("failed recoveries remove their staging outputs", not list(output.parent.glob(f".{output.name}.staging-*")))
+
+    # A successful subset replaces, rather than merges with, the previous tree.
+    isolated_source = output.parent / "subset-source"
+    isolated_source.mkdir()
+    try:
+        stub = diagnostics / managed_rel
+        shutil.copy2(stub, isolated_source / stub.name)
+        shutil.copy2(Path(str(stub) + "._"), isolated_source / f"{stub.name}._")
+        manifest = recover(source=isolated_source, output=output, workers=2)
+        check(
+            "successful replacement records the selected source root and exact subset",
+            manifest["source_root"] == str(isolated_source.resolve())
+            and manifest["recovered_body_count"] == 1
+            and {path.relative_to(output).as_posix() for path in output.rglob("*") if path.is_file()}
+            == {"manifest.json", stub.name},
+        )
+    finally:
+        shutil.rmtree(isolated_source)
+
 def main() -> int:
     diagnostics = resolve_gts_root().parent
     sidecars = sorted([
@@ -77,6 +212,7 @@ def main() -> int:
     check("full Toyota Diagnostics CP census is 249", len(sidecars) == 249)
     check("auxiliary protected-body census is 52", len(stubs) == 52)
     check("auxiliary native/CLR split is 18/34", len(stubs) - len(managed) == 18 and len(managed) == 34)
+    verify_collision_schedules(diagnostics, stubs)
 
     selected = [
         "DS-4/bin/GetActTstLstP4SA_DT.dll",
@@ -131,9 +267,27 @@ def main() -> int:
             (REPO / "data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json").read_text()
         )
         rebuilt_pcs_semantics = extract_pcs_semantics(output / selected[2])
+        canonical_auxiliary = DEFAULT_OUTPUT / "Auxiliary"
+        for label, artifact, component_root in (
+            ("fresh CP recovery", rebuilt_pcs_semantics, output),
+            ("qualified aggregate", tracked_pcs_semantics, canonical_auxiliary),
+        ):
+            qualification = qualify_recovered_source(
+                component_root / selected[2], diagnostics / selected[2], component_root=component_root
+            )
+            check(
+                f"PCS {label} links its exact manifest, output, stub and sidecar",
+                artifact["sources"]["qualification"] == qualification,
+            )
+        check(
+            "PCS original and recovered source identities agree across selected roots",
+            {key: value for key, value in rebuilt_pcs_semantics["sources"].items() if key != "qualification"}
+            == {key: value for key, value in tracked_pcs_semantics["sources"].items() if key != "qualification"},
+        )
         check(
             "PCS managed TSS3 semantics artifact regenerates from fresh CP recovery",
-            rebuilt_pcs_semantics == tracked_pcs_semantics,
+            {key: value for key, value in rebuilt_pcs_semantics.items() if key != "sources"}
+            == {key: value for key, value in tracked_pcs_semantics.items() if key != "sources"},
         )
 
         tse = by_path[selected[3]]
@@ -227,6 +381,8 @@ def main() -> int:
         )
         rename = method_lines(compression_path, "TSECompressionUtility.TSECompression", "changeExtZipToGTSE")
         check("TseCompression finalizes GTSE via File.Move", any("System.IO.File::Move" in line for line in rename))
+
+        verify_validation_transaction(diagnostics, output, selected[1])
 
     print("GTS+ auxiliary body recovery verification passed")
     return 0

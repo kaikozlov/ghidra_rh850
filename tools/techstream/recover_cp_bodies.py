@@ -4,9 +4,8 @@ from __future__ import annotations
 
 import argparse
 import concurrent.futures
-import contextlib
-import io
 import hashlib
+import importlib.metadata
 import json
 import os
 import shutil
@@ -65,6 +64,28 @@ def _sha256(path: Path) -> str:
 
 def _stem(path: Path) -> str:
     return path.name.replace(".", "_")
+
+
+def _producer_provenance(*sources: Path) -> dict[str, Any]:
+    """Identify the current producer bytes and the dependencies actually loaded."""
+    paths = {
+        Path(__file__), DECODER, Path(__file__).with_name("inspect_dotnet_il.py"),
+        Path(__file__).with_name("techstream_paths.py"), *sources,
+    }
+    return {
+        "sources": {
+            path.resolve().relative_to(REPO_ROOT).as_posix()
+            if path.resolve().is_relative_to(REPO_ROOT) else str(path.resolve()): _sha256(path)
+            for path in sorted(paths)
+        },
+        "uv_lock_sha256": _sha256(REPO_ROOT / "uv.lock"),
+        "python": sys.version,
+        "python_executable": sys.executable,
+        "dependencies": {
+            name: importlib.metadata.version(name)
+            for name in ("unicorn", "pefile", "dnfile", "dncil")
+        },
+    }
 
 
 def _protected_source(gts_root: Path, explicit: Path | None) -> Path:
@@ -510,8 +531,9 @@ def _log_tail(path: Path, lines: int = 30) -> str:
 
 
 def _run_decoder(stub: Path, decoded: Path, log_dir: Path) -> tuple[Path, Path]:
-    decoded.mkdir(parents=True, exist_ok=True)
-    log_dir.mkdir(parents=True, exist_ok=True)
+    # These directories belong exclusively to one source-relative input.
+    decoded.mkdir(parents=True, exist_ok=False)
+    log_dir.mkdir(parents=True, exist_ok=False)
     log = log_dir / f"{_stem(stub)}.log"
     try:
         with log.open("w") as handle:
@@ -542,6 +564,26 @@ def _run_decoder(stub: Path, decoded: Path, log_dir: Path) -> tuple[Path, Path]:
     return meta, memory
 
 
+def _decode_input(stub: Path, source_root: Path, workspace: Path) -> tuple[Path, Path, dict[str, Any]]:
+    rel = stub.relative_to(source_root)
+    input_root = workspace / "inputs" / rel
+    sidecar = Path(str(stub) + "._")
+    provenance: dict[str, Any] = {
+        "source_root": str(source_root),
+        "relative_path": rel.as_posix(),
+        "stub_sha256": _sha256(stub),
+        "sidecar_sha256": _sha256(sidecar),
+    }
+    meta, memory = _run_decoder(stub, input_root / "decoded", input_root / "logs")
+    log = input_root / "logs" / f"{_stem(stub)}.log"
+    provenance["artifacts"] = {
+        name: {"path": path.relative_to(workspace).as_posix(), "sha256": _sha256(path)}
+        for name, path in (("metadata", meta), ("final_memory", memory), ("log", log))
+    }
+    (input_root / "provenance.json").write_text(json.dumps(provenance, indent=2, sort_keys=True) + "\n")
+    return meta, memory, provenance
+
+
 def _validate_output(path: Path, expect_managed: bool) -> dict[str, Any]:
     pe = pefile.PE(str(path), fast_load=False)
     imports = sum(len(desc.imports) for desc in getattr(pe, "DIRECTORY_ENTRY_IMPORT", []))
@@ -554,34 +596,12 @@ def _validate_output(path: Path, expect_managed: bool) -> dict[str, Any]:
         "size": path.stat().st_size,
     }
     if expect_managed:
-        import dnfile
+        from tools.techstream.inspect_dotnet_il import validate_managed_bodies
 
-        # dnfile can emit parser diagnostics for valid mixed/obfuscated metadata.
-        # Validation below is authoritative; keep those implementation warnings out
-        # of the user-facing recovery CLI.
-        with contextlib.redirect_stderr(io.StringIO()):
-            managed = dnfile.dnPE(str(path))
-        if not (managed.net and managed.net.metadata and managed.net.mdtables):
-            raise RuntimeError(f"rebuilt managed PE has no parseable CLR metadata: {path}")
-        assembly = managed.net.mdtables.Assembly
-        if assembly and assembly.rows:
-            result["assembly_name"] = str(assembly.rows[0].Name)
-        method_rows = list(managed.net.mdtables.MethodDef.rows)
-        method_rvas = [int(row.Rva or 0) for row in method_rows if int(row.Rva or 0)]
-        materialized = 0
-        raw = path.read_bytes()
-        for rva in method_rvas:
-            offset = managed.get_offset_from_rva(rva)
-            if offset is not None and offset < len(raw) and any(raw[offset : offset + 16]):
-                materialized += 1
-        result["method_def_count"] = len(method_rows)
-        result["method_body_rva_count"] = len(method_rvas)
-        result["method_body_materialized_count"] = materialized
-        if materialized != len(method_rvas):
-            raise RuntimeError(
-                f"rebuilt managed PE has zero/unmaterialized method bodies: {path} "
-                f"({materialized}/{len(method_rvas)} nonzero prefixes)"
-            )
+        try:
+            result.update(validate_managed_bodies(path))
+        except ValueError as exc:
+            raise RuntimeError(f"rebuilt managed PE failed complete method validation: {path}: {exc}") from exc
     return result
 
 
@@ -641,13 +661,12 @@ def recover(
         else:
             temp = tempfile.TemporaryDirectory(prefix="cp-body-recovery-", dir=build_tmp)
             workspace = Path(temp.name)
-        decoded = workspace / "decoded"
-        logs = workspace / "logs"
+        producer = _producer_provenance()
 
         max_workers = max(1, min(workers or min(8, os.cpu_count() or 1), len(stubs)))
-        decoded_paths: dict[Path, tuple[Path, Path]] = {}
+        decoded_paths: dict[Path, tuple[Path, Path, dict[str, Any]]] = {}
         with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as pool:
-            futures = {pool.submit(_run_decoder, stub, decoded, logs): stub for stub in stubs}
+            futures = {pool.submit(_decode_input, stub, source_root, workspace): stub for stub in stubs}
             completed = 0
             for future in concurrent.futures.as_completed(futures):
                 stub = futures[future]
@@ -658,7 +677,7 @@ def recover(
 
         entries: list[dict[str, Any]] = []
         for stub in stubs:
-            meta_path, memory_path = decoded_paths[stub]
+            meta_path, memory_path, decoder_provenance = decoded_paths[stub]
             meta = json.loads(meta_path.read_text())
             calls = [item for item in meta["protect_calls"] if item[0]]
             managed_input = _is_managed(stub)
@@ -683,6 +702,7 @@ def recover(
                 "stub_sha256": _sha256(stub),
                 "sidecar_size": sidecar.stat().st_size,
                 "sidecar_sha256": _sha256(sidecar),
+                "decoder_provenance": decoder_provenance,
                 "output_size": destination.stat().st_size,
                 "output_sha256": _sha256(destination),
                 "lfsr_rva": meta.get("lfsr_rva"),
@@ -697,6 +717,8 @@ def recover(
         manifest = {
             "format": "gtsplus-cp-body-recovery-v1",
             "source_root": str(source_root),
+            "gtsplus_root": str(gts),
+            "producer": producer,
             "output_root": str(output),
             "protected_body_count": len(stubs),
             "recovered_body_count": len(entries),

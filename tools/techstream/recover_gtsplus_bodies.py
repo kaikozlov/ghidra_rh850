@@ -11,6 +11,11 @@ group.
 This tool extracts those original binaries without executing Windows code or
 emulating the protector.  It preserves the installed GTS+ relative paths and
 writes a manifest tying each recovered PE to its CP stub/sidecar provenance.
+
+Managed plaintext twins must pass the shared complete IL/metadata validator
+before transactional promotion. Their manifest proof distinguishes complete
+IL bodies, native implementations and legitimate bodyless methods; the
+installer's original bytes are retained unchanged.
 """
 from __future__ import annotations
 
@@ -24,6 +29,11 @@ import subprocess
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
+
+import pefile
+
+from tools.techstream.inspect_dotnet_il import validate_managed_bodies
+from tools.techstream.recover_cp_bodies import _producer_provenance
 from tools.techstream.techstream_paths import GTSPLUS_EXTERNAL_ROOT, resolve_gts_root
 from tools import REPO_ROOT
 
@@ -216,6 +226,26 @@ def _text_shape(path: Path) -> dict[str, int] | None:
             }
     return None
 
+def _managed_admission(path: Path) -> dict[str, object] | None:
+    """Validate every declared CLR image; an absent CLR directory stays native."""
+    pe = pefile.PE(str(path), fast_load=True)
+    try:
+        index = pefile.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR"]
+        directories = pe.OPTIONAL_HEADER.DATA_DIRECTORY
+        if len(directories) <= index:
+            return None
+        directory = directories[index]
+        managed = bool(directory.VirtualAddress or directory.Size)
+    finally:
+        pe.close()
+    if not managed:
+        return None
+    try:
+        return validate_managed_bodies(path)
+    except ValueError as error:
+        raise RuntimeError(f"installer managed twin failed complete method validation: {path}: {error}") from error
+
+
 
 def _installed_sidecars(installed_root: Path) -> dict[str, Path]:
     result: dict[str, Path] = {}
@@ -262,6 +292,7 @@ def recover(
     recovered: dict[str, dict] = {}
     installer_summaries: list[dict] = []
     try:
+        producer = _producer_provenance(Path(__file__))
         for installer in INSTALLERS:
             installer_dir = workspace / installer.removesuffix(".exe")
             exe = _extract_member(archive, f"{version}/{installer}", installer_dir, sevenzip)
@@ -307,6 +338,7 @@ def recover(
                 recovered_text = _text_shape(destination)
                 if recovered_text is None:
                     raise RuntimeError(f"recovered plaintext twin is not a parseable PE with .text: {relative}")
+                managed_admission = _managed_admission(destination)
                 # Native CP images are typically obvious hollow PEs (tiny raw
                 # .text, huge virtual .text).  Managed assemblies can instead
                 # gain a larger protector-loader .text than their original CLR
@@ -343,6 +375,8 @@ def recover(
                         "listed_plaintext_size": plain_entry.size,
                     },
                 }
+                if managed_admission is not None:
+                    recovered[key]["plaintext"]["managed_body_validation"] = managed_admission
 
         installed = _installed_sidecars(installed_root)
         missing = sorted(path for path in installed if path not in recovered)
@@ -362,6 +396,7 @@ def recover(
             "source_archive_sha256": _sha256(archive),
             "installed_root": str(installed_root),
             "output_root": str(output),
+            "producer": producer,
             "method": (
                 "extract the Toyota installer GTSPlus group paired with GTSPlusCP; "
                 "no runtime decryption/emulation is required"

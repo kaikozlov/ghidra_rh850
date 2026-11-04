@@ -2,13 +2,20 @@
 """Verify complete recovery of the current GTS+ CP-protected PE bodies."""
 from __future__ import annotations
 
+import hashlib
 import json
 import tempfile
+import struct
 from pathlib import Path
+from unittest.mock import patch
+
+import pefile
 
 from tools import REPO_ROOT
 REPO = REPO_ROOT
 
+from tools.techstream import recover_gtsplus_bodies as recovery
+from tools.techstream.inspect_dotnet_il import inspect_managed_bodies, validate_managed_bodies
 from tools.techstream.recover_gtsplus_bodies import recover
 
 
@@ -16,6 +23,47 @@ def check(label: str, condition: bool) -> None:
     if not condition:
         raise AssertionError(label)
     print(f"[OK] {label}")
+
+def verify_validation_transaction(output: Path) -> None:
+    """Corrupt only a staged installer copy, not its PE framing or source input."""
+    def snapshot() -> dict[Path, str]:
+        return {
+            path.relative_to(output): hashlib.sha256(path.read_bytes()).hexdigest()
+            for path in output.rglob("*") if path.is_file()
+        }
+
+    before = snapshot()
+    original_copy = recovery.shutil.copy2
+    corrupted = False
+
+    def invalid_il_copy(source: Path, destination: Path) -> str | Path:
+        nonlocal corrupted
+        result = original_copy(source, destination)
+        if destination.name == "GTSPlus.exe":
+            methods = inspect_managed_bodies(destination)["methods"]
+            method = next(row for row in methods if row["implementation"] == "il")
+            offset = method["body"]["file_offset"]
+            data = bytearray(destination.read_bytes())
+            # Keep a nonzero, parseable PE while making its IL code exceed EOF.
+            struct.pack_into("<HHII", data, offset, 0x3003, 8, len(data) + 1, 0)
+            destination.write_bytes(data)
+            check("malformed managed installer fixture retains PE .text", recovery._text_shape(destination) is not None)
+            corrupted = True
+        return result
+
+    with patch.object(recovery.shutil, "copy2", invalid_il_copy):
+        try:
+            recover(output=output)
+        except RuntimeError as error:
+            check(
+                "installer rejects a parseable PE with malformed IL before promotion",
+                corrupted and "installer managed twin failed complete method validation" in str(error),
+            )
+        else:
+            raise AssertionError("malformed managed installer twin was admitted")
+    check("failed installer admission preserves all previous binaries and manifest", snapshot() == before)
+    check("failed installer admission removes staging outputs", not list(output.parent.glob(f".{output.name}.staging-*")))
+
 
 
 def main() -> int:
@@ -74,6 +122,38 @@ def main() -> int:
             "manifest persisted with the recovered corpus",
             json.loads((output / "manifest.json").read_text(encoding="utf-8"))["coverage_complete"],
         )
+        producer = manifest["producer"]
+        for relative in (
+            "tools/techstream/recover_gtsplus_bodies.py",
+            "tools/techstream/inspect_dotnet_il.py",
+        ):
+            check(
+                f"installer provenance pins {relative}",
+                producer["sources"][relative] == hashlib.sha256((REPO / relative).read_bytes()).hexdigest(),
+            )
+        check(
+            "installer provenance includes managed reader dependencies",
+            all(producer["dependencies"][name] for name in ("dnfile", "dncil", "pefile")),
+        )
+        for row in manifest["binaries"]:
+            path = output / row["path"]
+            pe = pefile.PE(str(path), fast_load=True)
+            try:
+                index = pefile.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR"]
+                directories = pe.OPTIONAL_HEADER.DATA_DIRECTORY
+                declared_clr = len(directories) > index and bool(
+                    directories[index].VirtualAddress or directories[index].Size
+                )
+            finally:
+                pe.close()
+            plaintext = row["plaintext"]
+            if declared_clr:
+                proof = plaintext.get("managed_body_validation")
+                check(f'{row["path"]} carries the shared complete managed admission proof', proof == validate_managed_bodies(path))
+                check(f'{row["path"]} proof identifies unchanged installer bytes', proof["source_sha256"] == plaintext["sha256"])
+            else:
+                check(f'{row["path"]} remains a native installer twin', "managed_body_validation" not in plaintext)
+        verify_validation_transaction(output)
 
     print("GTS+ body recovery verification passed")
     return 0
