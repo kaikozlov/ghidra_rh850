@@ -729,7 +729,7 @@ modes = ["local"]
 
 [suite.techstream_srp]
 tests = ["tests/techstream/verify_techstream_srp.py"]
-requires_external = ["techstream_v18"]
+requires_external = ["gtsplus"]
 modes = ["local"]
 
 [suite.techstream_artifact_lock]

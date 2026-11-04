@@ -558,16 +558,31 @@ zeros that many trailing bytes. No loop compares every trailing byte to the
 count, so this is **not a strict PKCS#7 padding validator**. The live IT3 Neo
 cipher is AES-256-ECB keyed by the full 32-character string.
 
-That key also closes the formerly opaque `CONF/*.srp` UtilityNeo scripts. All
-18 pinned V18 SRPs decrypt under the recovered AES-256-ECB key; after the
-four-byte `48 02 48 02` wrapper the plaintext is BOM-marked UTF-16 XML.
-`tools/techstream/decode_srp.py` implements the decoder and
-`tests/techstream/verify_techstream_srp.py` proves every pinned file decodes plus pins the
-literal diagnostic-frame census. The decoded scripts contain service bytes
-`10/11/14/21/22/2E/2F/31/3B/50/51/54/61/62/6E/6F/71/7B/7F/A8/E8`; there is no
-literal `27`, `34`, `36`, or `37`, and no `SecurityAccess`, `SeedKey`,
-`ServiceAuthKey`, or `ECUAuthKey` vocabulary. These SRPs are therefore not a
-hidden modern reflash/boot-credential implementation in the pinned corpus.
+Current GTS+ `2026.03.002.02` uses the same full AES-256 key in
+`IT3UtilityNeoNK.dll` (SHA-256
+`0ca847b5b5fd1aa21fb73054c4c7006eb7e8615608f2710774863c7fbb626167`):
+key `0x100452BC`, ECB core `0x100268E0`, tail clearing `0x100269D0`.
+All 18 current `CONF/*.srp` payloads match their V18 counterparts byte-for-byte.
+The decoded format is a four-byte `48 02 48 02` wrapper followed by BOM-marked
+UTF-16 XML; all 3,900 nodes survive decoding.
+
+`bin/UtilityNeo.srplst` is a separate encrypted ASCII/CRLF registry: 18
+four-column registrations and a terminal `0,0,0,0` row. Column 3 selects the
+script decryption callback (`1` installs it); column 4 is parsed into an
+initialization-local byte and then unused. Current native registry lookup
+`0x10002510` and initialization `0x10013600` establish these consumers.
+`tools/techstream/decode_srp.py` defaults to strict script decoding;
+`--format registry` emits typed JSON retaining both columns, the sentinel and
+original text. Both offline paths require valid PKCS#7 padding. Native tail
+clearing instead accepts a final-byte count up to the entire plaintext length
+and clears that many bytes without checking their contents.
+
+The broker recognizes both base FunctionIDs and their `+1000` aliases.
+The wrapper subtracts 1000 only for broker region `0x74`; a mismatched alias
+therefore fails registry lookup. IDs `2765`/`3765` select `IT3UtilityNK.dll`
+instead of Neo when protocol is `0x16`. The current-source regression gate
+`tests/techstream/verify_techstream_srp.py` covers both formats, malformed
+boundaries, all registrations/script joins and the native selection gates.
 
 All twelve IT3ACNK crypto exports are classified and extent-hashed in
 `data/generated/techstream_v18/crypto_inventory.json`. Besides `EncryptAds`,
