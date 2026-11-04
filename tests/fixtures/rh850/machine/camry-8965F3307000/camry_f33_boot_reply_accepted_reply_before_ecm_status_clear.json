@@ -1,0 +1,147 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_boot_reply_accepted_reply_before_ecm_status_clear",
+  "entry": {
+    "role": "retained-original-boot-reply-conditional-input",
+    "scope": "resolved-address",
+    "address": "0x1398"
+  },
+  "reset": "none",
+  "max_instructions": 200000,
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebf9800",
+    "tp": "0x869c",
+    "lp": "0x798",
+    "PSW": "0x18020",
+    "PMR": "0xffff"
+  },
+  "stop_addresses": [
+    "0x132c"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1f80",
+      "size": 128,
+      "fill": 165,
+      "evidence": "Synthetic bounded boot caller stack; no blanket RAM preload."
+    }
+  ],
+  "events": [
+    {
+      "kind": "csih-word",
+      "unit": 1,
+      "after_transmit_words": 1,
+      "delay_instructions": 128,
+      "value": "0xdead",
+      "evidence": "Explicit synthetic completed wire word; no captured boot ASIC reply or inferred serial timing."
+    },
+    {
+      "kind": "csih-word",
+      "unit": 1,
+      "after_transmit_words": 2,
+      "delay_instructions": 128,
+      "value": "0xbeef",
+      "evidence": "Explicit synthetic completed wire word; no captured boot ASIC reply or inferred serial timing."
+    },
+    {
+      "kind": "csih-word",
+      "unit": 1,
+      "after_transmit_words": 3,
+      "delay_instructions": 128,
+      "value": "0x1234",
+      "evidence": "Explicit synthetic completed wire word; no captured boot ASIC reply or inferred serial timing."
+    },
+    {
+      "kind": "csih-word",
+      "unit": 1,
+      "after_transmit_words": 4,
+      "delay_instructions": 128,
+      "value": "0x5678",
+      "evidence": "Explicit synthetic completed wire word; no captured boot ASIC reply or inferred serial timing."
+    },
+    {
+      "kind": "csih-word",
+      "unit": 1,
+      "after_transmit_words": 5,
+      "delay_instructions": 128,
+      "value": "0x6400",
+      "evidence": "Explicit synthetic completed wire word; no captured boot ASIC reply or inferred serial timing."
+    },
+    {
+      "kind": "csih-word",
+      "unit": 1,
+      "after_transmit_words": 6,
+      "delay_instructions": 128,
+      "value": "0x1",
+      "evidence": "Explicit synthetic completed wire word; no captured boot ASIC reply or inferred serial timing."
+    },
+    {
+      "kind": "csih-word",
+      "unit": 1,
+      "after_transmit_words": 7,
+      "delay_instructions": 128,
+      "value": "0xf000",
+      "evidence": "Explicit synthetic completed wire word; no captured boot ASIC reply or inferred serial timing."
+    },
+    {
+      "kind": "csih-word",
+      "unit": 1,
+      "after_transmit_words": 8,
+      "delay_instructions": 128,
+      "value": "0x38",
+      "evidence": "Explicit synthetic completed wire word; no captured boot ASIC reply or inferred serial timing."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Native terminal boundary",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x132c"
+    },
+    {
+      "name": "Boot resident enabled before exchange",
+      "kind": "memory",
+      "address": "0xfebf2904",
+      "size": 1,
+      "equals_hex": "01"
+    },
+    {
+      "name": "Boot resident counter cleared",
+      "kind": "memory",
+      "address": "0xfebf2900",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "Post-reply synchronize gate enabled",
+      "kind": "memory",
+      "address": "0xffff8000",
+      "size": 4,
+      "equals_hex": "01000000"
+    },
+    {
+      "name": "Original ECM peripheral mask restored before status clearing",
+      "kind": "memory",
+      "address": "0xffd6207c",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "Original ECM error mask setup executed",
+      "kind": "memory",
+      "address": "0xffd62028",
+      "size": 12,
+      "equals_hex": "e1ffffffffffffffffffff3f"
+    },
+    {
+      "name": "Original status-clear value ready before unknown pin feedback dependency",
+      "kind": "register",
+      "register": "r1",
+      "equals": "0x7fffffff"
+    }
+  ]
+}

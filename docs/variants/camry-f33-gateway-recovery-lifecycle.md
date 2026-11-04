@@ -887,14 +887,11 @@ S and OV (RH850G3M R01US0123EJ0140 p.256). This arithmetic-flag change does not
 undo the context sanitization.
 
 `1398 ->1338` sets `FEBF2904=1`, clears `FEBF2900`, then enters the real CSIH1
-exchange at `16F2`, before CAN/boot-diagnostic initialization. `169C` checks
-`FFD82004` and `FFD83004`, then requires four receive halfwords from
-`FFD83014`; `16F2` limits receive polls to 201 invocations and checks the
-received record through `15C0`, with failure loop `17C2`. Central execution of
-the complete ready handoff with no serial input reaches **17C2**. A genuine
-CSIH1 peripheral reply is the remaining hardware input before boot CAN and
-diagnostic initialization can proceed. No synthetic ready status or reply is
-provided by the native-handoff scenarios.
+exchange at `16F2`, before CAN/boot-diagnostic initialization. The exact receive
+and record contract is below. Central execution of the complete ready handoff
+with no serial input reaches **17C2**. The native-handoff scenarios supply no
+serial reply. The separate boot-reply matrix supplies explicitly synthetic
+completed words to characterize conditional software acceptance.
 
 The separately labeled software-reset closures enter original `5086`, or
 sequence intact `69D2 ->6A22` after an explicit handoff-record checkpoint.
@@ -905,6 +902,142 @@ software closure, not evidence that the preceding serial/CAN hardware
 initialization completed. In particular, CPU context reset at `9F00`, record
 copy at `1398`, and diagnostic session/security reset at `5086/55AA` are
 different boundaries.
+
+### Boot CSIH1 reply acceptance contract
+
+Static evidence is the retained Camry source (`tools/toyota decomp source`
+`16F2`, `169C`, `15C0`, `167C`, `1626`, `1338`) and exact target disassembly.
+This subsection applies to CodeFlash SHA-256
+`42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7`.
+
+**Transaction order.** `16F2` zeros its eight-byte receive record, disables
+CSIH1, configures master/dual-buffer operation, clears pointers and selected
+status flags, enables transmit/receive, then waits `7208(50)`. The outgoing
+halfwords are `8C00,0000,F000,1F11`; `167C ->15C0` computes the low check byte
+before `1626` submits them on CS0. The first three TX words carry control
+`20FE0000`, the fourth `00FE0000`; `MCTL2=80040000` starts four words.
+After another `7208(50)`, it attempts the same submission again, waits
+`7208(50)`, and starts receiving. Both submission return values are ignored.
+A busy first exchange can therefore suppress the second submission; there is
+no transaction identifier tying the received record to the second attempt.
+A completed first response is normally superseded when the second submission
+clears the receive pointer.
+
+**Receive gate (`169C`).** These are literal register tests, not a decoded
+peripheral error taxonomy:
+
+| Condition | Return | Destination effect |
+| --- | --- | --- |
+| `STR0(FFD82004).bit7 != 0` | `5AA5` | No write |
+| `(MCTL2(FFD83004) & 7F) != 4` | `5AA5` | No write |
+| `((MRWP0(FFD83018) >> 16) & 7F) != 0` | `A55A` | No write |
+| All three gates pass | `0` | Four successive halfword reads of `FFD83014` fill offsets `0,2,4,6` |
+
+`MCTL2 & 7F` is the buffer start pointer, not a receive FIFO count; the
+`MRWP0` test is the read pointer. Other bits, including `MCTL2`'s high count
+field and STR0 communication-error flags outside bit7, are not inspected here.
+The exact instructions are `SHR 8; BC` at `16A4/16A6`,
+`ANDI 7F; CMP 4; BNE` at `16AE..16B4`, and
+`SHL 9; SHR 19; BNE` at `16BC..16C0` (shift operands hexadecimal).
+The model independently requires actual supplied receive-buffer entries before
+allowing any data read.
+
+**Only record validation.** `15C0` seeds DCRA0 with `FF`, `CTL=22`, and feeds
+`w0.high,w0.low,w1.high,w1.low,w2.high,w2.low,w3.high`, in that order.
+Its final XOR `FF` cancels the hardware read XOR, leaving the raw
+MSB-first polynomial-`1D` CRC8 remainder. `17BA..17C0` compares that result
+with **`w3.low` only** (`LD.BU 6[sp]; CMP r10,r1; BE 17C4`).
+There are no reply-opcode, payload, reserved-bit, status-field or request-echo
+checks. For example, synthetic `0000,0000,0000,00F5` and
+`6400,0001,F000,0038` both meet this software contract. These are conditional
+records, not observed boot-peripheral responses.
+
+**Timeout/failure.** Each poll, including a successful one, is followed by
+`7208(1)` before the byte counter increments. Return `0` ends polling;
+both `5AA5` and `A55A` retry identically, up to **201 calls**. After poll201,
+even a completion during its trailing delay is not read again.
+`7208(n)` executes 155 inner decrements per unit; its instruction count for
+positive `n` is `313*n+5`, not a measured elapsed-time bound. The loop does
+not explicitly reject timeout: it always validates the local record.
+Unsuccessful polls leave its initial zeros intact, whose required check is
+`F5` rather than the retained low byte `00`, so they reach the original
+`BR 17C2` (`85 05`). A bad received check reaches the same permanent loop,
+without cleanup or a diagnostic error publication.
+
+**Downstream consumers.** The received record remains local to `16F2`;
+`1338` ignores its returned CRC. Acceptance permits `121A` to write/read
+`FFFF8000=1`, then ECM setup `1228`, interrupt setup `17C8`, CAN configuration
+`3B3C`, driver initialization `35BC`, queue/constant/region-CRC initialization,
+timers `1CA0`, and diagnostics `770`, in that order. Parent execution of the
+initial downstream scenario stopped during ECM setup with
+`missing post-reset input for ECMMESSTR2`, before reaching CAN initialization.
+The exact boundary is `132C` (`05 0D`, `SST.W r1,8[ep]`), the third protected
+write committing `ECMESSTC2(FFD6203C)=7FFFFFFF`. The model reads both status
+banks before clearing either, preserving their external pin bit31.
+`ECMMESSTR2` and `ECMCESSTR2` have reset mask `7FFFFFFF`; bit31 represents
+ERROROUT/ERROROUT_C feedback, not a reset-zero constant
+(R01UH0585EJ0120 section32.4.6, Table32.20). The revised downstream fixture
+stops immediately **before** `132C`, after the synchronized gate, ECM masks
+and earlier status clears; it supplies no pin feedback. `ECMPEM` is initially
+written `3` at `1230`, then explicitly restored to `0` at `12F6` and read back
+at `12FC`, before any status-clear sequence. Its expected value at `132C` is
+therefore `0`, while `ECMEMK0..2` retain `FFFFFFE1,FFFFFFFF,3FFFFFFF`.
+
+After that prerequisite, the later static boundary `3B3C ->3818` waits for
+`GSTS(FFD2008C).bit3` (CAN RAM initialization) to clear. The device definition
+resets GSTS to `0D`; the inspected machine implements no completion transition
+for that bit. Later still, `35BC ->3584` sends the distinct `8800` record until
+`FFA10000.bit7` permits progress. These are subsequent prerequisites, not
+boundaries reached by the retained downstream fixture.
+
+#### Retained conditional boot-reply scenarios
+
+All sixteen standalone `camry_f33_boot_reply_*.json` fixtures passed exact-image
+execution: fifteen reply-only cases in `boot-reply-wave2`, including both
+final-poll timing cases, and the downstream `132C` checkpoint in
+`boot-reply-wave3`, under `build/out/firmware-question-campaign/`.
+They call only original firmware, with bounded stack preloads and finite
+explicit `csih-word` inputs, using the serial event
+contract in [the harness documentation](../tooling/rh850-build-and-sim.md#original-reset-without-supplied-serial-completions).
+Suffixes below share that prefix:
+
+| Fixture suffix | Consumer-visible boundary to check |
+| --- | --- |
+| `valid_zero_payload`, `valid_arbitrary_payload` | CRC-only acceptance at `17C4`; distinct first reply is superseded |
+| `invalid_check_byte`, `invalid_payload_with_stale_check` | Single-byte check/payload changes reach `17C2` |
+| `partial_second_record_0_words`, `_1_words`, `_3_words` | Pending/partial second exchange never publishes a record; 201 polls then failure |
+| `last_poll_accepts_completed_record` | Explicit final-word latency lands before poll201; record accepted with counter201 |
+| `completion_after_last_poll_is_not_repolled` | Final word completes during poll201's trailing delay; zero local record still fails |
+| `late_first_record_satisfies_poll` | Busy first exchange suppresses second submission; its late valid record is accepted |
+| `receiver_busy`, `receiver_short_start_pointer`, `receiver_long_start_pointer` | Direct original receiver returns `5AA5`, preserving caller record |
+| `receiver_read_pointer_bit16`, `receiver_read_pointer_bit22` | Low/high ends of the seven-bit read-pointer gate return `A55A`, preserving caller record |
+| `accepted_reply_before_ecm_status_clear` | Original `1398 ->1338` passes reply validation and the synchronized gate, programs ECM masks, and stops at `132C` before the clear that requires external ECM pin feedback |
+
+The status-only fixtures explicitly preload synthetic register snapshots and
+never claim an actual received word. The timed fixtures use 128-instruction
+functional word latency except their named late completion; the two final-poll
+cases declare final-word delays 91550 and 91800 from its actual launch.
+Their expected poll counts were statically derived and confirmed by parent execution.
+The existing `camry_f33_handoff_boot_first_serial_exchange_no_synthetic_reply`
+covers entirely absent input; existing `csih-partial-wire-completion-keeps-frame-pending`
+and `csih-original-frame-complete-and-poll` cover shared controller behavior and
+the separate application driver. They are reused, not copied.
+
+```sh
+tools/rh850 test firmware camry-8965F3307000 \
+  tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_boot_reply_*.json
+```
+
+No boot CSIH1 response capture was found in the tracked serial documentation,
+fixture inventory or capture references inspected for this closure. Existing
+synthetic application/reset serial inputs are not boot-peer observations.
+Physical closure requires a time-correlated CSIH1 CS0/SCK/MOSI/MISO capture
+of the original `8C00` exchange on this ECU, including both attempted frames,
+actual reply words and timing, plus the later `8800` exchange and
+`FPMON.FWE`/FLMD0 transition if continuing through `3584`. CAN readiness and
+diagnostic startup require their own subsequent observed inputs. The retained
+conditional cases do not establish completed hardware startup.
+
 
 ### Executable evidence
 

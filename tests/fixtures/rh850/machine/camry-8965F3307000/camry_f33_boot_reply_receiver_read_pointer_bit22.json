@@ -1,0 +1,57 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_boot_reply_receiver_read_pointer_bit22",
+  "entry": {
+    "role": "retained-original-boot-receiver-status-rejection",
+    "scope": "resolved-address",
+    "address": "0x169c"
+  },
+  "reset": "none",
+  "max_instructions": 64,
+  "gpr_fill": "0x0",
+  "registers": {
+    "r6": "0xfebe1000",
+    "lp": "0x798"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xffd82004",
+      "hex": "10000000",
+      "evidence": "Explicit synthetic STR0 snapshot consumed only by original receiver; no completed wire input."
+    },
+    {
+      "address": "0xffd83004",
+      "hex": "04000000",
+      "evidence": "Explicit synthetic MCTL2 start/count snapshot for original receive gate."
+    },
+    {
+      "address": "0xffd83018",
+      "hex": "00004000",
+      "evidence": "Explicit synthetic MRWP0 read-pointer snapshot for original receive gate."
+    },
+    {
+      "address": "0xfebe1000",
+      "hex": "a5a5a5a5a5a5a5a5",
+      "evidence": "Synthetic destination canary; rejected receive must not publish a record."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Native receive status result",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0xa55a"
+    },
+    {
+      "name": "Rejected receive preserves caller destination",
+      "kind": "memory",
+      "address": "0xfebe1000",
+      "size": 8,
+      "equals_hex": "a5a5a5a5a5a5a5a5"
+    }
+  ]
+}
