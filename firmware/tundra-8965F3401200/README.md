@@ -185,9 +185,25 @@ The retained blurbdust persistent writer is evidence that this failure mode was
 possible in community tooling, not evidence that it occurred on a particular
 rack. It rewrites whole `0x8000` blocks and its historical program loop used the
 wrong FACI halfword-pacing condition; Toyota's exact T-0035 manufacturer routine
-uses post-write `FSTATR & 0x400` (`DBFULL`). The exact writer and target bytes used in the reported Tundra attempt are not
-retained here, so attribution requires that patch script or a post-patch CPU11
-dump.
+uses post-write `FSTATR & 0x400` (`DBFULL`). The exact writer and target bytes
+used in the reported Tundra attempt are not retained here, so attribution
+requires that patch script or a post-patch CPU11 dump.
+
+### Reported Tundra incident context
+
+Tim clarified on Discord on 2026-11-02 that his CPU1 patch was the culmination
+of multiple earlier attempts and left the rack in a semi-bricked state; it was
+not yc's later RAV4 Prime compare-neutralization patch. He described two live
+hypotheses for the vehicle faults: the unpatched second CPU eventually faulting,
+or ICU-S becoming stuck through contention, with the observed errors occurring
+at startup. He also described yc's proposed explanation for the failed
+bootloader re-entry as a **bus-contention theory** and said that theory had not
+been tested on his rack.
+
+Accordingly, the historical incident does not establish that the clean Gate-2
+patch damages UDS, nor that SecurityAccess entered a lockout state. The exact
+historical patch bytes/writer and a post-patch CPU1 sector remain the evidence
+needed to explain that rack's recovery failure.
 
 For a rack that still answers application F181 but no longer enters EXTENDED,
 the highest-value artifact is the current CPU11 `0x88000..0x8FFFF` sector. A
