@@ -4272,23 +4272,46 @@ That reconnect branch admits a successful response even with `lowBattery=true`.
 checks connectivity through `DV000005`, discovers functions, and caches the
 results. Explicit refresh uses `DV000033`. ECU switching retains the vehicle
 workspace and its per-ECU caches.
+`hasConnected` can remain true after a disconnected refresh; a cached empty
+function list also counts as loaded. Native cache removal in shared slot 8
+matches only `(ecuId:int32, busId:uint16)` and deletes the first match;
+`ecuId=0` clears the list. Group, VIN, and OEM do not participate in that match.
 
 Healthcheck visits candidates sequentially and acquires data from connected
 ECUs. Cancellation ends wired collection, sets `cancelFlag`, and queues
 start-cancel; subsequent scheduling skips remaining work, and summary queues
 end-cancel. Acquired results remain available. The latest healthcheck JSON is
 written through the PF file API to the configured cache directory.
+`LatestHealthCheckData.json` is not vehicle-keyed. Restore copies its saved
+healthcheck ID and ECU results without comparing VIN, restoring `data.vin`,
+or rebuilding the workspace ECU map. Current VIN and older ECU results can
+therefore coexist. Initial healthcheck's equipped-list helper is empty;
+VIN-triggered end/start can continue with the retained workspace map.
 
 Workspace disposal orders feature disposal, battery-poll stop, vehicle-context
 clear, end diagnosis, stored-data reset, then fresh start diagnosis. Native
-`DV000035` instead stops/disconnects the utility and disconnects transport while
-retaining the shared instance. Managed end-diagnosis failure can also retain
-the instance and DLL handle; callers must inspect response `resultInfo`
-separately from the outer manager result.
+`DV000035` disconnects the utility and transport while retaining the shared
+instance. PF separately tracks each SessionId's diagnosis membership: another
+client attaches to an existing diagnosis, and ending a non-last client retains
+the common adaptation.
+
+On the last end, `ExecuteEndDiagAdaptation` (`GTSPlus.exe` RVA `0x11E08`)
+discards the adaptation return value and clears PF diagnosis/confirmation
+after the call returns, including returned errors. An exception thrown by that
+call bypasses those resets. The manager can retain its native instance after
+an error response, so the next start hits its duplicate-instance guard while
+ordinary PF end rejects “Not DiagnosisStarted.” Frontend restart catches can
+still set `diagnosisRestarted=true`.
+
+Confirmation checks the native vehicle ID and publishes the selection to all
+common-information entries. `IF000004` reads entry zero rather than a
+client-local copy; QDC reuses that shared confirmation.
 
 Offline execution of the actual authenticated JavaScript verified cache reuse,
 forced refresh, failed connection, cooperative cancellation, fixed-VIN prompts,
-VIM capability/reconnection branches, and workspace close/restart ordering.
+VIM capability/reconnection branches, workspace close/restart ordering,
+successive OEM/option selections, consumed restart failures, independent
+current-ECU copies, and cross-vehicle latest-file restoration.
 
 ### Diagnostic operation scheduling and teardown
 

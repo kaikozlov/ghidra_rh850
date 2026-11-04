@@ -20,6 +20,7 @@ from tools import REPO_ROOT
 from tools.techstream.extract_gtsplus_vehicle_resolver import sha256_file, va_bytes
 from tools.techstream.gtsplus_local_crypto import decode_gui
 from tools.techstream.inspect_dotnet_il import CilMethodBody, MethodBodyReader, format_operand
+from tools.techstream.extract_gtsplus_lifecycle_ui_ipc import _operand
 
 DEFAULT_INSTALLED = REPO_ROOT / "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics"
 DEFAULT_RECOVERED = REPO_ROOT / "build/out/gtsplus-unprotected"
@@ -171,8 +172,8 @@ JS_SPECS = [{'id': 'preconnect',
   'owner': 'CommonInfo',
   'method': 'setCurrentEcuId',
   'sha256': '1957318a477569d9b911ecdff9e52327ad3e80c68ee2044db1cd104e0952110b',
-  'finding': 'Selected ECU ID/name are references copied from mounted map, independent of vehicle '
-             'identity/session owner.'},
+  'finding': 'Selected ECU ID/name are scalar fields copied into per-UI currentEcuInfo from its mounted map; '
+             'worker objects and other GUI clients are not mutated.'},
  {'id': 'clear_context',
   'asset': 'js/gts/common/common_info_worker.js',
   'owner': 'CommonInfo',
@@ -198,8 +199,8 @@ JS_SPECS = [{'id': 'preconnect',
   'owner': 'HealthCheckWorkerModel',
   'method': 'healthCheckOnLoadBeforePart',
   'sha256': '7b61d8b7d64a5ecd18e6c279ecc6a64e25f85d09dc36c8e44ee269da17172550',
-  'finding': 'Initialize healthcheck flags/cache; reread equipped list when requested; sort shared mounted '
-             'candidates; finally clear isRunning.'},
+  'finding': 'Initialize scan cache/view; equipped-list nested function is a no-op. VIN mismatch attempts '
+             'end/start then consumes inner rejection and continues sorting the retained workspace ECU map; finally clears isRunning.'},
  {'id': 'hc_after',
   'asset': 'js/gts/health_check/health_check_worker.js',
   'owner': 'HealthCheckWorkerModel',
@@ -334,6 +335,314 @@ JS_SPECS.extend([
                 'disconnects J2534 then checks battery communication. No error retries admission; error '
                 'refreshes diagnosis, clears vehicle and opens S30101.'},
 ])
+
+JS_SPECS.extend([{'id': 'cache_presence',
+  'asset': 'js/gts/health_check/health_check_worker.js',
+  'owner': 'HealthCheckWorkerModel',
+  'method': 'isExistsCacheData',
+  'sha256': 'faed26d1f86dbf72a0f0403b0488ec4eff66a4fcb8a2f80cc8105fa9b7b60c9a',
+  'finding': 'Presence checks only configured latest filename in directory; neither VIN nor '
+             'vehicleId/category/OEM participates; folder/settings failures return false.'},
+ {'id': 'scan_reset',
+  'asset': 'js/gts/health_check/health_check_worker.js',
+  'owner': 'HealthCheckWorkerModel',
+  'method': 'initCache',
+  'sha256': '5dd149fe18b13c650e9611050275ab6aff197c0c7a06b7524bc193e09f42804d',
+  'finding': 'Replace healthcheck cache/viewData each scan, including ecu array and web-service results, '
+             'without replacing CommonInfo.vehicleInfo.mountedEcuMap.'},
+ {'id': 'ecu_identity',
+  'asset': 'js/gts/common/common_info_worker.js',
+  'owner': 'CommonInfo',
+  'method': 'getEcuInfoByEcuId',
+  'sha256': 'b96d296cddfc26588fb06ce07646e7dc2a360c040dfc68602a4fb30c0ccaa584',
+  'finding': 'Worker ECU lookup indexes mountedEcuMap by ecuId alone, not VIN, bus or group; duplicate '
+             'equipped IDs overwrite earlier groups during loadVehicleInformation.'},
+ {'id': 'function_identity',
+  'asset': 'js/gts/common/common_info_worker.js',
+  'owner': 'CommonInfo',
+  'method': 'getEcuFuncList',
+  'sha256': 'f72849133dcf944abcf7ca68ac08574688d9fcbc3045fc91e63e96cf61861f9d',
+  'finding': 'Function discovery list is read from the same per-worker ECU object by ecuId; no '
+             'per-current-ECU global function cache.'},
+ {'id': 'ui_clear_context',
+  'asset': 'js/gts/common/common_info.js',
+  'owner': 'CommonInfo',
+  'method': 'clearVehicleInfo',
+  'sha256': 'a49dd86b3972b317ed13abac0508531f746612442a1f125b06172cac675e8cc4',
+  'finding': 'UI context reset replaces VehicleInfo and SharedData; worker and UI resets are distinct '
+             'operations.'}])
+
+CONTROLLER_CONTEXT_SPECS = [('ExecuteStartDiagnosis',
+  70856,
+  947,
+  'f66e3b2813022c539ff523c819da00124b3186cc7558d567f0917443646ce583',
+  'Common[0].DiagnosisStarted gates native start. Fresh success marks caller SessionId and every common '
+  'entry started; already-started shared context merely marks a new caller started. Duplicate started caller '
+  'is rejected.'),
+ ('ExecuteEndDiagnosis',
+  72468,
+  753,
+  '9495225b0e1115f52624f7486fdfea5cd27aa65f4f75f26f52f2c0939a8736aa',
+  'Reject if common diagnosis not started or caller active-test/data-monitor flag set. A different started '
+  'SessionId prevents adaptation end and clears only caller flag; last-client path invokes '
+  'ExecuteEndDiagAdaptation.'),
+ ('ExecuteEndDiagAdaptation',
+  73224,
+  620,
+  'a3ffd6fb6c0ca4a678b0e56b78914bea282ca10732c3ff8f6baaeda2f617b678',
+  'After adaptation returns, clear every common diagnosis flag and replace VehicleInformation, clear '
+  'started-client flags, unlock J2534, clear disconnect polling, image/general-communication flags and '
+  'error-log vehicle. No response-result gate precedes these resets. A thrown adaptation exception skips '
+  'them; the only exception region is later error-log monitor try/finally.'),
+ ('ExecuteNotifyVehicleConfirmation',
+  76524,
+  1404,
+  '035e10475f8ac4f31f57b4ddf7aa8124fadaf31ad76372c7544bae98b3ecf4ae',
+  'SC000003 validates nonzero requested vehicleId and compares it to DV000089 native vehicle cache; matching '
+  'identity publishes entire request ApiArgs to every common entry. Mismatch returns code0x3104; no '
+  'VIN/category/options/OEM comparison.'),
+ ('ExecuteGetVehicleConfirmation',
+  77928,
+  436,
+  '2233ec55145317c80c5f67527f99eeffbc88cb53f7a7b3f89184823ec9152f9b',
+  'IF000004 reads VehicleInformation from common entry0 irrespective of requesting SessionId; nonzero '
+  'vehicleId determines available confirmation.'),
+ ('<ExecuteStartDiagnosis>b__0',
+  90770,
+  29,
+  '7395ffafc163a780460bdfc2a3975a34d45bb51be0c2521c5290b5125a3b6b6f',
+  'Caller lookup compares GuiInformation.SessionId to request SessionId.'),
+ ('<ExecuteStartDiagnosis>b__18_1',
+  90616,
+  9,
+  '981c6c4e649691f7dad81fe2d448611e03d4da685b38911a497c092f24cd916a',
+  'Set per-client DiagnosisStarted=true.'),
+ ('<ExecuteStartDiagnosis>b__18_2',
+  90625,
+  9,
+  '8891a0a5a338baad1495dff2a7e7f7fdebf8d8f0ea3b141bc33fd4370e79186f',
+  'Set common DiagnosisStarted=true.'),
+ ('<ExecuteEndDiagnosis>b__0',
+  90813,
+  39,
+  'c63da2ad54bd4e5a02dc0ec49bee63f1db5d9e28c446f4399e6208e5db95a3d9',
+  'Identify other clients by DiagnosisStarted and SessionId inequality.'),
+ ('<ExecuteEndDiagnosis>b__1',
+  90852,
+  29,
+  'f71cca87bdb47b1307e2e7631dec3d85a1bd612be69f19becb805c85ddf7e44c',
+  'Identify ending caller by SessionId equality.'),
+ ('<ExecuteEndDiagnosis>b__20_2',
+  90634,
+  9,
+  'e388c86d38e442eb550f67563868358faaf12d0b1ac7dc086b7006cbf606760d',
+  'Set caller DiagnosisStarted=false.'),
+ ('<ExecuteNotifyVehicleConfirmation>b__0',
+  90881,
+  19,
+  'b0c2fd2c12f1de5758c144276aefa250f55c1e803bf7c05d4f26dbb85efeb439',
+  'Assign request ApiArgs reference to common VehicleInformation.'),
+ ('<ExecuteEndDiagAdaptation>b__21_0',
+  90643,
+  9,
+  'fd3815e2e80baba505538f28f5115af00418a887c1c3b9b12b8b4818f6f356bc',
+  'Set common DiagnosisStarted=false.'),
+ ('<ExecuteEndDiagAdaptation>b__21_1',
+  86756,
+  8,
+  'de0a5391ae45f26510cfd9864e27fb71ee7ed21dc4c179755576809e00fa7b26',
+  'Select per-client entries whose DiagnosisStarted is true.'),
+ ('<ExecuteEndDiagAdaptation>b__21_2',
+  90634,
+  9,
+  'e388c86d38e442eb550f67563868358faaf12d0b1ac7dc086b7006cbf606760d',
+  'Set selected per-client DiagnosisStarted=false.'),
+ ('<ExecuteEndDiagAdaptation>b__21_3',
+  90652,
+  13,
+  '654d1347f860246746eeeff2aabede349fce667a09ceea3cac03166f75e1d0d3',
+  'Replace common VehicleInformation with a new empty confirmation object.'),
+ ('<ExecuteEndDiagAdaptation>b__21_4',
+  90665,
+  9,
+  'c548b20985d44d78e7a6bf4916175646cec4d9f9fd0290306704b51e1fc24aa6',
+  'Clear common ImgOpeDdrPermission.'),
+ ('<ExecuteEndDiagAdaptation>b__21_5',
+  90674,
+  9,
+  '4e391a7484b26a97d002e31ffb2dd3e57669177ed2dd78bb2d1b166b556bb0d9',
+  'Clear common GeneralCommStarted.')]
+
+CONTEXT_CACHE_MATRIX = [{'id': 'pf_identity',
+  'owner': 'PF ConnectionManager.GuiCommonInformationList',
+  'key': 'shared common[0], not SessionId; native consistency check is vehicleId only',
+  'invalidated_by': 'Last-client ExecuteEndDiagAdaptation replaces every common VehicleInformation even when '
+                    'adaptation end returns failure.',
+  'survives': 'Additional-client start/end; physical DV000035 disconnect; per-client current ECU changes.',
+  'evidence': ['vehicle_session.pf_ExecuteNotifyVehicleConfirmation',
+               'vehicle_session.pf_ExecuteGetVehicleConfirmation',
+               'vehicle_session.pf_ExecuteEndDiagAdaptation',
+               'vehicle_session.native_vehicle_identity',
+               'vehicle_session.native_disconnect_order']},
+ {'id': 'client_membership',
+  'owner': 'PF GuiInformationList',
+  'key': 'SessionId',
+  'invalidated_by': 'End with another client clears caller only; last-client end clears all started flags.',
+  'survives': 'Other client start/end while another started SessionId exists.',
+  'evidence': ['vehicle_session.pf_ExecuteStartDiagnosis',
+               'vehicle_session.pf_ExecuteEndDiagnosis',
+               'vehicle_session.pf_<ExecuteEndDiagnosis>b__0']},
+ {'id': 'selection',
+  'owner': 'VehicleConnectWorkerModel.cache (one GUI worker)',
+  'key': 'ordered selectedCategory[user selection ordinal], selectedOption[display ordinal]; native option '
+         'index stored separately',
+  'invalidated_by': 'Category change sets confirmed=false, removes dependent multi-choice categories and '
+                    'every option. Single-choice downstream categories can survive; manual-VIN brand change '
+                    'removes even single-choice downstream categories. Option change slices lists and '
+                    'deletes only later option selections.',
+  'survives': 'Unchanged earlier selections; VIN and stale vehicleId can remain while confirmed=false; no '
+              'shared confirmation publication until vehicleDecision.',
+  'evidence': ['vehicle_session.category', 'vehicle_session.option', 'vehicle_session.confirm']},
+ {'id': 'manual_selection',
+  'owner': 'VehicleConnectWorkerModel.cache',
+  'key': 'decisionMode and vinCode',
+  'invalidated_by': 'startManualMode clears vehicleId/category/options/parentPhase and decisionVin; '
+                    'mode1->2, modes3/4->0.',
+  'survives': 'vinCode, OEM decision field and PF confirmation are not reset by startManualMode itself.',
+  'evidence': ['vehicle_session.manual']},
+ {'id': 'oem_change',
+  'owner': 'GUI selection and shared PF native context',
+  'key': 'oemDecisionInfo; default versus nondefault, not an equality test against prior OEM',
+  'invalidated_by': 'Every nondefault confirmation attempts forced end/start then selectById; default only '
+                    'mode4 selectsById.',
+  'survives': 'Selection cache remains available for republishing; end/start errors are consumed and later '
+              'select/notify can still reject.',
+  'evidence': ['vehicle_session.confirm',
+               'vehicle_session.il_StartDiagnosis',
+               'vehicle_session.pf_ExecuteNotifyVehicleConfirmation']},
+ {'id': 'workspace_ecu',
+  'owner': 'CommonInfo.vehicleInfo.mountedEcuMap in worker',
+  'key': 'ecuId only; groupId and busId are object fields; later duplicate ID overwrites earlier group',
+  'invalidated_by': 'loadVehicleInformation constructs a whole new map; getEnvInfo replaces VehicleInfo; '
+                    'clearVehicleInfo replaces VehicleInfo and SharedData.',
+  'survives': 'Healthcheck initCache; current ECU switches; physical disconnect does not itself clear JS '
+              'object state.',
+  'evidence': ['vehicle_session.context',
+               'vehicle_session.ecu_identity',
+               'vehicle_session.configuration_read',
+               'vehicle_session.clear_context',
+               'vehicle_session.scan_reset',
+               'vehicle_session.disconnect_ui']},
+ {'id': 'ecu_connect',
+  'owner': 'EcuInfo instance in worker',
+  'key': 'JS ecuId object; native shared CShareData slot8 entries match ecuId int32 and busId uint16, not group/VIN/OEM',
+  'invalidated_by': 'UNCHECKED connects without clear; forced recheck removes first native (ecuId,busId) '
+                    'match; ecuId0 clears whole list. Missing match/empty list return0; absent list returns0xC0040601. '
+                    'Failed clear/connect is consumed and sets JS status0.',
+  'survives': 'hasConnected is sticky once true, even after later disconnect/failure; ecuFuncList survives '
+              'connection failure; plain calls reuse already-checked status.',
+  'evidence': ['vehicle_session.ecu_cache', 'vehicle_session.native_ecu_cache_key']},
+ {'id': 'ecu_functions',
+  'owner': 'EcuInfo.ecuFuncList',
+  'key': 'same ecuId object; system exception/function API send ecuId only',
+  'invalidated_by': 'CONNECTED and force flag or falsy list triggers discovery; function-list rejection '
+                    'stores [], which is truthy and reused until force/new object.',
+  'survives': 'checkConnected alone rechecks connection but does not force existing function list; '
+              'system-exception rejection propagates rather than being cached as [].',
+  'evidence': ['vehicle_session.ecu_cache', 'vehicle_session.function_identity']},
+ {'id': 'current_ecu',
+  'owner': 'UI CommonInfo.vehicleInfo.currentEcuInfo',
+  'key': 'per-UI ecuId/ecuName scalar copy from UI mounted map',
+  'invalidated_by': 'setCurrentEcuId replaces fields, invalid ID writes undefined; UI clearVehicleInfo '
+                    'replaces containing VehicleInfo.',
+  'survives': 'Other clients current ECU changes; no PF current-ECU setter in this path; worker map '
+              'independent from serialized UI map.',
+  'evidence': ['vehicle_session.current_ecu',
+               'vehicle_session.switch_controller',
+               'vehicle_session.context',
+               'vehicle_session.ui_clear_context']},
+ {'id': 'healthcheck_live',
+  'owner': 'HealthCheckWorkerModel.cache/viewData',
+  'key': 'new scan cache; healthCheckId is CommonInfo VIN + PC timestamp, not persistent filename',
+  'invalidated_by': 'initCache replaces scan ECU/results/web-service cache; acquired EcuInfo references '
+                    'originate from retained workspace map.',
+  'survives': 'CommonInfo ECU status/function cache; cancel retains partial acquisition; getConfiguration '
+              'cached on VehicleInfo until workspace replacement.',
+  'evidence': ['vehicle_session.scan_reset',
+               'vehicle_session.hc_before',
+               'vehicle_session.hc_scan',
+               'vehicle_session.hc_cancel_end']},
+ {'id': 'healthcheck_vin_change',
+  'owner': 'HealthCheckWorkerModel.healthCheckOnLoadBeforePart',
+  'key': 'live VIN compared against CommonInfo VIN; confirmed states1/2 treat VIN-read rejection as error; '
+         'OEM7 skips check',
+  'invalidated_by': 'Mismatch sets scan VIN undefined then awaits end/start and rejects inner configuration '
+                    'chain; surrounding catch consumes and continues building view.',
+  'survives': 'CommonInfo mounted map/vehicle identity and cached getConfiguration are not replaced by this '
+              'inner restart, so later sorted ECU view can retain prior workspace objects.',
+  'evidence': ['vehicle_session.hc_before', 'vehicle_session.scan_reset']},
+ {'id': 'healthcheck_disk',
+  'owner': 'configured user folder + HealthCheck worker',
+  'key': 'folderNo1 + configured cacheDataHealthCheck path + LatestHealthCheckData.json; no '
+         'VIN/vehicleId/category/options/OEM key',
+  'invalidated_by': 'save overwrites latest file mode1; inspected reset/end paths do not delete it. Presence '
+                    'check tests filename only.',
+  'survives': 'Vehicle and OEM changes; readCacheData reconstructs stored EcuInfo in scan cache only with '
+              'fresh settings. It copies stored healthCheckId but does not restore data.vin, compare VIN, '
+              'or repopulate workspace map; a previously set scan VIN can coexist with older stored ECU data.',
+  'evidence': ['vehicle_session.hc_path',
+               'vehicle_session.hc_cache',
+               'vehicle_session.hc_read',
+               'vehicle_session.cache_presence']},
+ {'id': 'managed_end_failure',
+  'owner': 'DiagAdaptationManager native instance vs PF flags',
+  'key': 'manager instance IntPtr, independent from common DiagnosisStarted',
+  'invalidated_by': 'PF clears flags/confirmation after adaptation returns regardless of returned result; '
+                    'a thrown adaptation exception skips that reset. Manager missing/-1 response or destroy-false retains instance.',
+  'survives': 'Following start reaches manager duplicate-instance rejection; PF parses error response and '
+              'keeps started=false. Subsequent ordinary end rejects Not DiagnosisStarted before manager. '
+              'GUI refleshDiagnosis still sets diagnosisRestarted=true after consumed failures.',
+  'evidence': ['vehicle_session.pf_ExecuteEndDiagAdaptation',
+               'vehicle_session.pf_ExecuteStartDiagnosis',
+               'vehicle_session.pf_ExecuteEndDiagnosis',
+               'vehicle_session.il_EndDiagnosis',
+               'vehicle_session.il_StartDiagnosis',
+               'vehicle_session.restart']},
+ {'id': 'managed_start_failure',
+  'owner': 'DiagAdaptationManager and PF',
+  'key': 'native instance pointer / successful response result',
+  'invalidated_by': 'Failed native start destroys, zeros instance and unloads; fresh PF start marks flags '
+                    'only on result0.',
+  'survives': 'Duplicate-instance rejection preserves existing instance; no automatic retry loop in managed '
+              'start.',
+  'evidence': ['vehicle_session.il_StartDiagnosis', 'vehicle_session.pf_ExecuteStartDiagnosis']},
+ {'id': 'qdc_reuse',
+  'owner': 'QDC GUI + same PF',
+  'key': 'IF000004 common confirmation (vinCode consumer gate belongs to UI/QDC artifact)',
+  'invalidated_by': 'Shared last-client/forced end clears PF confirmation for every consumer.',
+  'survives': 'Additional QDC/GTS client can attach to shared diagnosis; UI/worker selection and current ECU '
+              'remain local.',
+  'evidence': ['vehicle_session.pf_ExecuteStartDiagnosis',
+               'vehicle_session.pf_ExecuteEndDiagnosis',
+               'vehicle_session.pf_ExecuteGetVehicleConfirmation']}]
+
+NATIVE_CONTEXT_SPECS = [{'id': 'ecu_cache_key',
+  'file': 'DelEcuCnctCache_DT.dll',
+  'sha256': '1ba74be6f8df9a5bef3087cbb2ef6440b84c897b1e077b1727375815cd1b68cb',
+  'va': 268439600,
+  'bytes': '558bec83ec10a10040001033c58945fc53568bf18d45f8506a088975f48b4e0cff154c3000108bd885db0f859f0000008b4df885c975155eb8010604c05b8b4dfc33cde8a70100008be55dc3578b791885ff7e7a8b46048378200075188b01ff500c5f5e8bc35b8b4dfc33cde87e0100008be55dc333f6660f1f84000000000083c10856ff15003000108b4df8568b40088d49088945f0ff15003000108b4df40fb7400c8b49046639412475088b45f0394120740a463bf77d128b4df8ebc18b4df8568d4908ff15043000108bc35f8b4dfc5e33cd5be8140100008be55dc3',
+  'finding': 'CShareData slot8 holds the shared CEcuConnectBuffer list. Delete matches ECU int32 at buffer+8 '
+             'and bus uint16 at buffer+0xC against send+0x20/+0x24; group/VIN/OEM are absent. Remove first '
+             'match and return0; missing match/empty list also return0. ecuId0 invokes full-list virtual '
+             'clear; absent slot8 object returns0xC0040601.'},
+ {'id': 'vehicle_identity',
+  'file': 'GetVehicleCache_DT.dll',
+  'sha256': 'c4acf71c6a09f56e61d50c92e121788097569f03a6c782835dbd5ee42e0e055e',
+  'va': 268441237,
+  'bytes': '8b4e1085c9745d8d45f8506a09ff15a440001085c075718b45f885c0740d0fb700b9ffff0000663bc1750233c066894720',
+  'finding': 'Native DV000089 reads model/vehicleId uint16 from shared CShareData slot9, maps absent pointer '
+             'or0xFFFF to0, then invokes cached VIN extraction. There is one passed CShareData owner, not a '
+             'client/VIN-keyed lookup.'}]
 
 NATIVE_HANDLERS = [{'name': 'StartDiagnosis',
   'vtable': 269060940,
@@ -479,7 +788,7 @@ STATES = [('idle', 'PF+GUI', 'Fresh diagnostic instance; no confirmed vehicle.')
  ('vim_reconnect', 'VehicleConnectController', 'S301DL027 awaits Home or disconnect/battery-check/retry.'),
  ('workspace',
   'MainFrame/CommonInfo',
-  'Shared VehicleInfo and ECU candidate map; per-ECU status/function caches.'),
+  'Per-GUI UI/worker VehicleInfo copies and worker ECU caches; PF confirmation/native adaptation shared across clients.'),
  ('healthcheck', 'HealthCheckWorkerModel', 'Cooperative sequential ECU acquisition and enrichment.'),
  ('cancelling',
   'HealthCheckWorkerModel',
@@ -681,7 +990,7 @@ TRANSITIONS = [{'id': 'vehicle_session.precheck',
   'from': 'vehicle_session.workspace',
   'to': 'vehicle_session.ecu',
   'trigger': 'system selection/feature navigation',
-  'guard': 'ECU ID in shared mounted map',
+  'guard': 'ECU ID in this GUI mounted map',
   'action': 'Set current ECU ID/name; lazily check native connection and discover functions',
   'evidence': ['vehicle_session.current_ecu', 'vehicle_session.ecu_cache']},
  {'id': 'vehicle_session.switch_ecu',
@@ -689,8 +998,8 @@ TRANSITIONS = [{'id': 'vehicle_session.precheck',
   'to': 'vehicle_session.ecu',
   'trigger': 'select another ECU',
   'guard': 'ECU candidate exists',
-  'action': 'Update current reference only; reuse vehicle and per-ECU status/function caches; force flags '
-            'trigger clear/recheck',
+  'action': 'Copy selected ECU ID/name fields only; reuse worker vehicle and per-ECU status/function caches; '
+            'threshold flags recheck connection, separate checkEcuFuncList forces function discovery',
   'evidence': ['vehicle_session.current_ecu', 'vehicle_session.ecu_cache']},
  {'id': 'vehicle_session.scan',
   'from': 'vehicle_session.workspace',
@@ -710,9 +1019,9 @@ TRANSITIONS = [{'id': 'vehicle_session.precheck',
  {'id': 'vehicle_session.connect_failure',
   'from': 'vehicle_session.ecu',
   'to': 'vehicle_session.workspace',
-  'trigger': 'connection or function-list rejection',
-  'guard': 'getEcuStatus catches promise rejection',
-  'action': 'Connection status=0 or functions=[] cached; subsequent explicit recheck can retry',
+  'trigger': 'native clear/connect or function-list rejection',
+  'guard': 'connection catch or function-list catch; system-exception rejection instead propagates',
+  'action': 'status=0 or functions=[] cached; hasConnected and old functions survive connection failure; [] needs explicit function force to retry',
   'evidence': ['vehicle_session.ecu_cache']},
  {'id': 'vehicle_session.cancel_scan',
   'from': 'vehicle_session.healthcheck',
@@ -770,9 +1079,9 @@ TRANSITIONS = [{'id': 'vehicle_session.precheck',
   'to': 'vehicle_session.error',
   'trigger': 'native end missing response/-1 or destroy false',
   'guard': 'managed EndDiagnosis branches',
-  'action': 'Manager retains native instance/handle on failure despite already-cleared manager info; GUI '
-            'close wrapper consumes failure',
-  'evidence': ['vehicle_session.il_EndDiagnosis', 'vehicle_session.workspace_end']},
+  'action': 'Manager retains native instance/handle; PF ExecuteEndDiagAdaptation has nevertheless cleared shared diagnosis/confirmation and client flags. A subsequent PF start can reach manager duplicate-instance failure; GUI consumes restart errors',
+  'evidence': ['vehicle_session.il_EndDiagnosis', 'vehicle_session.workspace_end',
+               'vehicle_session.pf_ExecuteEndDiagAdaptation', 'vehicle_session.il_StartDiagnosis']},
  {'id': 'vehicle_session.start',
   'from': 'vehicle_session.idle',
   'to': 'vehicle_session.idle',
@@ -803,6 +1112,35 @@ TRANSITIONS = [{'id': 'vehicle_session.precheck',
   'action': 'selectVehicleById + VIN fallback, notify confirmation, vehicle exception, populate linkage '
             'VehicleInfo',
   'evidence': ['vehicle_session.by_id']}]
+
+TRANSITIONS.extend([
+    {"id": PREFIX + "attach_client", "from": PREFIX + "workspace", "to": PREFIX + "workspace",
+     "trigger": "SC000001 from another GUI SessionId", "guard": "common diagnosis started; caller not started",
+     "action": "Set caller membership only; reuse native context and shared confirmation",
+     "evidence": [PREFIX + "pf_ExecuteStartDiagnosis"]},
+    {"id": PREFIX + "detach_client", "from": PREFIX + "closing", "to": PREFIX + "workspace",
+     "trigger": "SC000002 with another started SessionId", "guard": "caller not active-test/data-monitor",
+     "action": "Clear caller started flag only; keep shared native context, confirmation and other-client caches",
+     "evidence": [PREFIX + "pf_ExecuteEndDiagnosis", PREFIX + "pf_<ExecuteEndDiagnosis>b__0"]},
+    {"id": PREFIX + "last_client_end", "from": PREFIX + "closing", "to": PREFIX + "idle",
+     "trigger": "last-client adaptation end returns", "guard": "PF adaptation call completed",
+     "action": "Unconditionally clear PF started/confirmation/client flags independent of manager end result",
+     "evidence": [PREFIX + "pf_ExecuteEndDiagAdaptation"]},
+    {"id": PREFIX + "retry_retained_manager", "from": PREFIX + "error", "to": PREFIX + "error",
+     "trigger": "SC000001 after manager-retaining end failure", "guard": "PF reset but manager instance nonzero",
+     "action": "PF attempts native start; manager rejects duplicate instance without replacing it",
+     "evidence": [PREFIX + "pf_ExecuteEndDiagAdaptation", PREFIX + "pf_ExecuteStartDiagnosis",
+                  PREFIX + "il_StartDiagnosis", PREFIX + "il_EndDiagnosis"]},
+    {"id": PREFIX + "scan_vin_restart", "from": PREFIX + "healthcheck", "to": PREFIX + "healthcheck",
+     "trigger": "healthCheckOnLoadBeforePart live VIN disagreement/read failure",
+     "guard": "OEM!=7; mismatch or VIN-read failure with decisionVin1/2",
+     "action": "Set scan VIN undefined; attempt end/start; consume inner rejection; continue with retained workspace ECU map",
+     "evidence": [PREFIX + "hc_before", PREFIX + "scan_reset"]},
+    {"id": PREFIX + "restore_latest_scan", "from": PREFIX + "workspace", "to": PREFIX + "healthcheck",
+     "trigger": "readCacheData", "guard": "latest configured JSON readable and settings load succeeds",
+     "action": "Rehydrate stored ECU objects in scan cache by ecuId; no VIN identity gate or workspace map replacement",
+     "evidence": [PREFIX + "hc_read", PREFIX + "hc_path", PREFIX + "cache_presence"]},
+])
 
 HANDOFFS = [{'to_domain': 'ui_ipc',
   'caller': 'VehicleConnectController/HealthCheckWorkerModel',
@@ -844,6 +1182,14 @@ HANDOFFS = [{'to_domain': 'ui_ipc',
   'mechanism': 'existing PF web service wrappers',
   'payload': 'vehicle configuration/initial healthcheck policy; rejection can end diagnosis and LOGOUT',
   'evidence': ['vehicle_session.postconnect', 'vehicle_session.hc_flow']}]
+
+HANDOFFS.append({
+    "to_domain": "ui_ipc", "caller": "QDC WorkerController.getCurrentInformation / GTSMain.onCheckVehicle",
+    "callee": "PF ExecuteGetVehicleConfirmation", "mechanism": "IF000004 shared confirmation read",
+    "payload": "Common[0] identity; QDC's truthy-vinCode gate and TryAgain/Exit route are UI-owned",
+    "evidence": [PREFIX + "pf_ExecuteGetVehicleConfirmation", PREFIX + "pf_ExecuteNotifyVehicleConfirmation"],
+    "consumer_evidence": ["ui_ipc.qdc.context", "ui_ipc.qdc.context_ui"],
+})
 
 PERSISTENCE = [{'path_pattern': '<specificFolder '
                   'folderNo1><DistDep.specificSubFolders.cacheDataHealthCheck>/LatestHealthCheckData.json',
@@ -946,6 +1292,14 @@ def build(installed: Path = DEFAULT_INSTALLED, recovered: Path = DEFAULT_RECOVER
         source(key + ".sidecar", installed / (rel + "._"), "installed protected sidecar", entry["sidecar_sha256"])
     resolver = REPO_ROOT / "data/generated/gtsplus_2026/vehicle_resolver_semantics.json"
     source("resolver", resolver, "existing resolver executable/database closure", EXPECTED_EXTRA["resolver"])
+    controller = recovered / "bin/GTSPlus.exe"
+    controller_entry = entries["bin/GTSPlus.exe"]
+    source("controller", controller, "materialized PF shared context ownership",
+           "31f2d0d7f77517d5336433e211d33f44e54cb65b1522fcdd22730d3f3214220d")
+    for suffix, field in (("original", "stub_sha256"), ("sidecar", "sidecar_sha256")):
+        original = installed / "GTSPlus/bin" / ("GTSPlus.exe" + ("._" if suffix == "sidecar" else ""))
+        source("controller." + suffix, original, "protected controller provenance",
+               controller_entry["protected"][field])
     assets = load_gui(installed, auxiliary)
     # Asset identities pin executable JS control flow, not a keyword census.
     for asset in sorted({spec["asset"] for spec in JS_SPECS}):
@@ -969,6 +1323,14 @@ def build(installed: Path = DEFAULT_INSTALLED, recovered: Path = DEFAULT_RECOVER
         value = re.search(re.escape(constant) + r"\s*=\s*'([^']+)'", raw).group(1)
         _check(value, api_id, name + " API id")
     native = recovered / "bin/DiagAdaptation.dll"
+    for item in NATIVE_CONTEXT_SPECS:
+        path = installed / "GTSPlus/bin" / item["file"]
+        sid = source("native_context." + item["id"], path, "installed native cache implementation", item["sha256"])
+        _check(va_bytes(path, item["va"], len(bytes.fromhex(item["bytes"]))).hex(), item["bytes"], item["id"])
+        evidence.append({"id": PREFIX + "native_" + item["id"], "source": sid,
+                         "kind": "native-decompiled-instruction-dataflow",
+                         "locator": f"{item['file']} @ 0x{item['va']:08X}; PE_PROJECT=lc2_vehicle_context_native",
+                         "bytes": item["bytes"], "finding": item["finding"]})
     for item in NATIVE_HANDLERS:
         _check(va_bytes(native, item["execute"], 16).hex(), item["entry"], item["name"] + " entry")
         _check(struct.unpack("<I", va_bytes(native, item["vtable"] + 4, 4))[0], item["execute"], item["name"] + " vtable")
@@ -1006,16 +1368,43 @@ def build(installed: Path = DEFAULT_INSTALLED, recovered: Path = DEFAULT_RECOVER
         evidence.append({"id": PREFIX + "il_" + name, "source": PREFIX + "managed", "kind": "managed-IL",
                          "locator": f"DiagAdaptationManager::{name} RVA 0x{rva:X}",
                          "body_sha256": digest, "body_size": size, "anchors": anchors, "finding": finding})
+    controller_pe = dnfile.dnPE(str(controller))
+    controller_rows = {str(row.Name): row for row in controller_pe.net.mdtables.MethodDef}
+    for name, rva, size, expected, finding in CONTROLLER_CONTEXT_SPECS:
+        row = controller_rows[name]
+        _check(row.Rva, rva, name + " controller RVA")
+        body = CilMethodBody(MethodBodyReader(controller_pe, row))
+        _check(body.size, size, name + " controller body size")
+        _check(hashlib.sha256(controller_pe.get_data(rva, size)).hexdigest(), expected, name + " controller IL")
+        start = body.instructions[0].offset
+        anchors = []
+        for instruction in body.instructions:
+            op = str(instruction.opcode)
+            anchor = {"il": f"IL_{instruction.offset - start:04X}", "opcode": op}
+            if op.startswith(("br", "beq", "bne", "bgt", "blt", "ble", "bge", "leave")):
+                anchor["target_il"] = f"IL_{int(instruction.operand) - start:04X}"
+            else:
+                anchor["operand"] = _operand(controller_pe, instruction.operand)
+            anchors.append(anchor)
+        exception_regions = [{"kind": int(handler.exception_type),
+                              "try": [f"IL_{handler.try_start:04X}", f"IL_{handler.try_end:04X}"],
+                              "handler": [f"IL_{handler.handler_start:04X}", f"IL_{handler.handler_end:04X}"]}
+                             for handler in body.exception_handlers]
+        evidence.append({"id": PREFIX + "pf_" + name, "source": PREFIX + "controller",
+                         "kind": "managed-IL-context-ownership", "locator": f"{name} RVA 0x{rva:X}",
+                         "body_size": size, "body_sha256": expected, "anchors": anchors,
+                         "exception_regions": exception_regions, "finding": finding})
     return {"schema": "gtsplus-lifecycle-domain-v1", "domain": "vehicle_session", "release": "2026.03.002.02",
             "sources": sources, "evidence": evidence,
             "states": [{"id": PREFIX + sid, "owner": owner, "meaning": meaning} for sid, owner, meaning in STATES],
             "transitions": TRANSITIONS, "handoffs": HANDOFFS, "persistence": PERSISTENCE,
             "api_ids": API_IDS,
+            "context_cache_matrix": CONTEXT_CACHE_MATRIX,
             "resolver_reuse": {"artifact": "data/generated/gtsplus_2026/vehicle_resolver_semantics.json",
                                "layers": ["VIN/type41/type59 decision", "expected installation", "category+phase route", "live connectivity", "support-family dispatch"],
                                "frontend_distinction": "DV000004 returns CGetMountEcuListNoComm candidates; EcuInfo.getEcuStatus/DV000005 independently confirms connectivity. GUI named mounted map initially contains UNCHECKED candidates."},
-            "coverage": {"components": ["authenticated gts.gui frontend", "GTSPlusDiagAdaptMng.dll", "DiagAdaptation.dll", "existing Toyota resolver closure"],
-                         "entrypoints": list(API_IDS.values()) + [spec["owner"] + "." + spec["method"] for spec in JS_SPECS],
+            "coverage": {"components": ["authenticated gts.gui frontend", "GTSPlus.exe PF shared/per-client ownership", "GTSPlusDiagAdaptMng.dll", "DiagAdaptation.dll", "existing Toyota resolver closure"],
+                         "entrypoints": list(API_IDS.values()) + [spec["owner"] + "." + spec["method"] for spec in JS_SPECS] + [spec[0] for spec in CONTROLLER_CONTEXT_SPECS],
                          "branches": ["VIM/battery continue/cancel", "PF lock failure", "fixed matching/missing VIN", "fixed mismatched VIN unconditional Yes/No prompt", "unfixed VIN prompt vs gtsOnlyConnect automatic restart", "manual VIN and category/option fallback", "default/nondefault OEM restart", "VIM Ethernet/CANFD admission/rejection", "S301DL027 Home/disconnect/battery-check/retry/reset", "initial healthcheck Optional/Required/None", "ECU cache reuse/refresh/failure", "healthcheck cooperative cancel/revoke/completion", "physical disconnect vs context destruction", "start failure cleanup and end failure retention"]},
             "residuals": [{"question": "Vehicle- and service-dependent results", "why_unclosed": "Offline corpus supplies executable request/response branches but no current live mounted list, VIN, web-service policy or timings.", "next_evidence": "Authorized capture of PF request/response and J2534 transcript, without changing extracted static model."}]}
 
