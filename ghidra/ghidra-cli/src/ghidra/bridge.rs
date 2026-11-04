@@ -278,17 +278,23 @@ pub fn ensure_bridge_running(
     start_bridge(project_path, ghidra_install_dir, mode)
 }
 
-/// Select a full JDK for Ghidra and set `JAVA_HOME` on the command. Ghidra
-/// compiles the bridge script at runtime via OSGi and needs javac/jdk.compiler,
-/// which a JRE lacks. Setting `JAVA_HOME` on the child overrides Ghidra's
-/// PATH-based auto-pick (honored by Ghidra's LaunchSupport on all platforms).
+/// Apply the CLI's resource policy and select a full JDK for headless Ghidra.
+/// Append our settings after inherited Ghidra options so config wins while
+/// retaining unrelated JVM options. Ghidra's caller options follow its own
+/// -Xmx argument, so the heap setting must also be appended here.
 /// If we can't find a JDK, proceed and let Ghidra try — the readiness failure
 /// path surfaces an actionable hint.
-fn apply_java_home(cmd: &mut Command, ghidra_install_dir: &Path) {
-    let explicit_java = crate::config::Config::load()
-        .ok()
-        .and_then(|c| c.get_java_home());
-    match super::java::resolve_for_ghidra(ghidra_install_dir, explicit_java) {
+fn configure_java(cmd: &mut Command, ghidra_install_dir: &Path) -> Result<()> {
+    let config = crate::config::Config::load()?;
+    let mut options = std::env::var_os("GHIDRA_HEADLESS_JAVA_OPTIONS").unwrap_or_default();
+    options.push(format!(
+        " -Xmx{} -Dcpu.core.override={}",
+        config.max_heap, config.cpu_workers
+    ));
+    cmd.env("GHIDRA_HEADLESS_MAXMEM", &config.max_heap)
+        .env("GHIDRA_HEADLESS_JAVA_OPTIONS", options);
+
+    match super::java::resolve_for_ghidra(ghidra_install_dir, config.get_java_home()) {
         Ok(jdk) => {
             info!(
                 "Using JDK {} at {} ({})",
@@ -305,6 +311,7 @@ fn apply_java_home(cmd: &mut Command, ghidra_install_dir: &Path) {
             );
         }
     }
+    Ok(())
 }
 
 /// Import a binary into the project using a clean, short-lived `analyzeHeadless
@@ -348,7 +355,7 @@ pub fn import_oneshot(
         .arg("-noanalysis")
         .arg("-overwrite");
 
-    apply_java_home(&mut cmd, ghidra_install_dir);
+    configure_java(&mut cmd, ghidra_install_dir)?;
 
     cmd.stdin(Stdio::null())
         .stdout(Stdio::piped())
@@ -499,7 +506,7 @@ pub fn start_bridge(
         .arg("GhidraCliBridge.java")
         .arg(port_file.to_str().unwrap());
 
-    apply_java_home(&mut cmd, ghidra_install_dir);
+    configure_java(&mut cmd, ghidra_install_dir)?;
 
     cmd.stdin(Stdio::null())
         .stdout(Stdio::piped())

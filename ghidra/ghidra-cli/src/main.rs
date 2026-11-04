@@ -2103,6 +2103,14 @@ fn handle_config_command(cmd: cli::ConfigCommands) -> anyhow::Result<()> {
                 ),
                 "ghidra_install_dir" => config.ghidra_install_dir = Some(PathBuf::from(value)),
                 "ghidra_project_dir" => config.ghidra_project_dir = Some(PathBuf::from(value)),
+                "max_heap" => config.max_heap = value,
+                "cpu_workers" => {
+                    config.cpu_workers = value.parse().map_err(|_| {
+                        GhidraError::ConfigError(
+                            "cpu_workers must be an integer from 1 to 2147483647".to_string(),
+                        )
+                    })?;
+                }
                 "default_program" => config.default_program = Some(value),
                 "default_project" => config.default_project = Some(value),
                 "launch_timeout_secs" => {

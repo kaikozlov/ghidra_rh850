@@ -40,6 +40,19 @@ partial aggregates. Batch input accepts `-` for stdin, preflights every command
 before execution, defaults to 100 commands, and offers a conservative
 `--read-only` allowlist for scripted investigation.
 
+## Headless resource configuration
+
+Defaults live in `src/config.rs`: `max_heap` is `2G`; `cpu_workers` is available
+CPUs plus one, capped at ten.
+
+Machine-local overrides via configuration commands:
+
+```bash
+build/cache/ghidra-cli/ghidra config set max_heap 4G
+build/cache/ghidra-cli/ghidra config set cpu_workers 8
+build/cache/ghidra-cli/ghidra config list
+```
+
 ## What's here
 
 Everything in this directory is the fork's source tree as of the baseline

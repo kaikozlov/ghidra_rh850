@@ -11,6 +11,12 @@ pub struct Config {
     /// ghidra-cli auto-detects a suitable JDK.
     #[serde(default)]
     pub java_home: Option<PathBuf>,
+    /// Maximum headless JVM heap, using Ghidra's integer K/M/G syntax.
+    #[serde(default = "default_max_heap")]
+    pub max_heap: String,
+    /// Ghidra CPU-bound worker-pool size (not an OS CPU quota).
+    #[serde(default = "default_cpu_workers")]
+    pub cpu_workers: u32,
     pub default_program: Option<String>,
     pub default_project: Option<String>,
     pub default_output_format: Option<String>,
@@ -24,12 +30,25 @@ pub struct Config {
     pub aliases: std::collections::HashMap<String, String>,
 }
 
+fn default_max_heap() -> String {
+    "8G".to_string()
+}
+
+fn default_cpu_workers() -> u32 {
+    // Match Ghidra's available-processors-plus-one policy, capped at ten.
+    std::thread::available_parallelism()
+        .map(|cpus| (cpus.get().min(9) + 1) as u32)
+        .unwrap_or(1)
+}
+
 impl Default for Config {
     fn default() -> Self {
         Self {
             ghidra_install_dir: None,
             ghidra_project_dir: None,
             java_home: None,
+            max_heap: default_max_heap(),
+            cpu_workers: default_cpu_workers(),
             default_program: None,
             default_project: None,
             default_output_format: Some("auto".to_string()),
@@ -50,11 +69,13 @@ impl Config {
 
         let content = fs::read_to_string(&config_path)?;
         let config: Config = serde_yaml::from_str(&content)?;
+        config.validate_resources()?;
 
         Ok(config)
     }
 
     pub fn save(&self) -> Result<()> {
+        self.validate_resources()?;
         let config_path = Self::config_path()?;
 
         if let Some(parent) = config_path.parent() {
@@ -78,6 +99,31 @@ impl Config {
         })?;
 
         Ok(config_dir.join("ghidra-cli").join("config.yaml"))
+    }
+
+    fn validate_resources(&self) -> Result<()> {
+        let valid_heap = self
+            .max_heap
+            .as_bytes()
+            .split_last()
+            .is_some_and(|(unit, amount)| {
+                matches!(unit, b'k' | b'K' | b'm' | b'M' | b'g' | b'G')
+                    && !amount.is_empty()
+                    && amount.iter().all(u8::is_ascii_digit)
+                    && amount.iter().any(|digit| *digit != b'0')
+            });
+        if !valid_heap {
+            return Err(GhidraError::ConfigError(
+                "max_heap must be a positive integer followed by K, M, or G (for example 4G)"
+                    .to_string(),
+            ));
+        }
+        if self.cpu_workers == 0 || self.cpu_workers > i32::MAX as u32 {
+            return Err(GhidraError::ConfigError(
+                "cpu_workers must be an integer from 1 to 2147483647".to_string(),
+            ));
+        }
+        Ok(())
     }
 
     pub fn get_ghidra_install_dir(&self) -> Result<PathBuf> {

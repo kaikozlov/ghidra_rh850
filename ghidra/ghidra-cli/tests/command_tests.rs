@@ -107,6 +107,38 @@ fn test_config_set_launch_timeout() {
 }
 
 #[test]
+fn invalid_resource_overrides_leave_saved_config_unchanged() {
+    let temp = tempfile::tempdir().unwrap();
+    let config_path = temp.path().join("config.yaml");
+    for (key, value) in [("max_heap", "1536m"), ("cpu_workers", "3")] {
+        assert_cmd::cargo::cargo_bin_cmd!("ghidra")
+            .env("GHIDRA_CLI_CONFIG", &config_path)
+            .args(["config", "set", key, value])
+            .assert()
+            .success();
+    }
+    let saved = std::fs::read(&config_path).unwrap();
+    for (key, value) in [
+        ("max_heap", ""),
+        ("max_heap", "0G"),
+        ("max_heap", "1.5G"),
+        ("max_heap", "4GB"),
+        ("max_heap", "2G -Xmx64G"),
+        ("cpu_workers", "0"),
+        ("cpu_workers", "-1"),
+        ("cpu_workers", "2147483648"),
+        ("cpu_workers", "many"),
+    ] {
+        assert_cmd::cargo::cargo_bin_cmd!("ghidra")
+            .env("GHIDRA_CLI_CONFIG", &config_path)
+            .args(["config", "set", key, value])
+            .assert()
+            .failure();
+        assert_eq!(std::fs::read(&config_path).unwrap(), saved, "{key}={value}");
+    }
+}
+
+#[test]
 fn test_config_reset() {
     require_ghidra!();
 
