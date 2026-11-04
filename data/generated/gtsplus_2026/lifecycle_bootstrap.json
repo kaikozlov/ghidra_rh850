@@ -5001,9 +5001,21 @@
     {
       "to_domain": "sync_upload",
       "caller": "GTSPlusArbitration.InitializeForm",
-      "callee": "GTS+ DataSync and GTS+GUIServer Windows services",
+      "callee": "GTS+ DataSync Windows service",
       "mechanism": "monitor externally-owned services; no ServiceController.Start in arbitration launch path",
-      "payload": "both EndMode0/alive2; query service Running and ER_AliveMonitor_<name>",
+      "payload": "EndMode0/alive2; query service Running and ER_AliveMonitor_<name>; excluded from normal EndMode1 ending confirmation/execution",
+      "evidence": [
+        "bootstrap.config",
+        "bootstrap.arb-initialize",
+        "bootstrap.alive-service"
+      ]
+    },
+    {
+      "to_domain": "ui_ipc",
+      "caller": "GTSPlusArbitration.InitializeForm",
+      "callee": "GTS+GUIServer Windows service",
+      "mechanism": "monitor externally-owned service; no ServiceController.Start in arbitration launch path",
+      "payload": "EndMode0/alive2; query service Running and ER_AliveMonitor_<name>; SCM OnStop owns host teardown",
       "evidence": [
         "bootstrap.config",
         "bootstrap.arb-initialize",

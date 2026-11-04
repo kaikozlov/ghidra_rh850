@@ -2041,9 +2041,9 @@ SecurityAccess grammar. The boundary is explicit: this result does not claim
 anything about future Techstream versions, undocumented ECU ROM/bootstrap
 modes, or an unobserved dynamically supplied plugin.
 
-### 6.1 Recovered log format and save lifecycle
+### 6.1 V18 logger format and save lifecycle
 
-The logger format is now statically recovered for both shipped variants and
+The V18 logger format is statically recovered for both shipped variants and
 implemented by `tools/techstream/parse_ptshim_log.py`. The important fields are
 line-oriented rather than a proprietary binary container:
 
@@ -4023,6 +4023,8 @@ table, startup/error branches, named-pipe handoffs, and teardown.
 `Global\GTSPlusMutex`. Contended invocation launches InfoCenter's Multi helper.
 The normal child order is **InfoCenter → GTSPlus → CUW backend**. DataSync and
 GTS+GUIServer are externally owned Windows services monitored by arbitration.
+Their configured `EndMode0` excludes them from arbitration's normal
+`EndMode1` ending-confirmation/execution sequence.
 Distributor-settings failure selects the InfoCenter-only fallback.
 
 Child startup waits up to 180 seconds for a matching-PID `ER_ApplicationStart`
@@ -4048,6 +4050,46 @@ timer. Several joins/process waits are unbounded. Arbitration's liveness
 monitor reports failures without automatically restarting processes. Retention
 timers fire once after 60 seconds and keep the newest 300 GTSE files or combined
 send/unsend autosaved reports, ordered by last-write time.
+
+### Browser applications, local services, and request ownership
+
+[`lifecycle_ui_ipc.json`](../../data/generated/gtsplus_2026/lifecycle_ui_ipc.json)
+joins signed HTML/JavaScript, CLR service contracts, and PF dispatch. The
+ContentServer Windows service serves packaged resources over
+`https://127.0.0.1:50005`; its eight `WebGet` route shapes support nested asset
+paths. Invalid archive/key initialization returns HTTP 500; missing assets
+return 404. Its fault callback logs without reopening the host.
+
+PF's separate WebSocket manager and browser clients scan the configured
+57-port TLS loopback list. `CN000001` HELLO requires result 0 and app name
+`GTS+`. Normal GTS, stored-file, active-test-panel, CUW, and QDC entrypoints
+have distinct initialization/worker ownership. QDC uses its three-connection
+limit and omits the normal login/menu/buffer initialization.
+Firefox scans serially and collapses candidate handshake errors to
+`CONNECTION_REFUSED`; the parallel scan preserves `CONNECTION_HANDSHAKE`.
+
+Browser-worker messages carry `requestId`, `commandId`, and `parameter`.
+PF JSON carries `common.apiId`, `common.ack`, `apiArgs`, and `free.freeMsg`.
+PF can ACK with a cancellation ID before admission checks; the frontend keeps
+the deferred request until the final response. Final result 0 resolves, 1
+marks cancellation, and other results reject.
+
+Pending cancellation (`SC000004`) and cancellation by ID (`SC000005`) have
+different queue-selection rules. In the shipped frontend,
+`sendCancelAwaiting` sends `SC000004`, then an unbound `forEach` callback
+accesses `this.requestMap`; with pending requests this throws before settling
+their promises. The raw socket-close callback is empty. Offline execution of
+the actual signed JavaScript reproduced both behaviors and exercised
+ACK/final response, relay/broadcast, and worker correlation.
+Arbitration's ordinary-exit `CN000008` broadcast ID 10 is also dropped: the
+worker handles only IDs 1–7, emits an empty command ID, and the browser returns
+without a handler. This notification does not settle pending requests or
+close the GUI through that path.
+
+Backend disconnect schedules session-scoped cleanup APIs and removes the
+session. GUI logout disposes its controllers/workers, ends diagnosis, and
+reconnects the login view. Application exit follows arbitration's separate
+shutdown protocol.
 
 ### Vehicle workspace, ECU selection, and healthcheck
 
@@ -4085,3 +4127,64 @@ separately from the outer manager result.
 Offline execution of the actual authenticated JavaScript verified cache reuse,
 forced refresh, failed connection, idempotent cooperative cancellation, and the
 workspace close/restart order.
+
+### Background synchronization, proxy state, and ActionTool
+
+[`lifecycle_sync_upload.json`](../../data/generated/gtsplus_2026/lifecycle_sync_upload.json)
+recovers the SCM service, local policy, SQLite queue, proxy helper, and
+ActionTool. DataSync starts transmission, migration, monitoring, disposal, and
+cleaning tasks; its heartbeat reinitializes inactive tasks.
+
+Migration commits a `process_info` row before moving the source into
+`Work/<decimal id>`, stores a salted MD5, then queues transmission. Restart
+scans reconcile missing originals and orphan derivatives. Installed policy
+accepts `.json` for GTS-C02/M02 and `.gtsr` for GTS-E02; ActionTool's `.rlog`
+is a separate output. Requests carry multipart `logInfo` JSON and `logFile`.
+HTTP 200 is acknowledged after response deserialization; success records the
+duplicate receipt and deletes the files and queue row.
+
+Configured retry statuses are 401/500/503. The 401 delay is 24 hours without
+consuming an attempt; the periodic backlog trigger is 30 minutes. MSK
+expiry/revocation responses block uploads until `mskupdated` clears the block.
+The ending-confirm callback pauses new work; a false final decision resumes,
+while true requests service stop. Its 15-second teardown wait is separate
+from the 30-second HTTP timeout; `PostAsync` receives no cancellation token.
+
+ProxyManager samples the current user's proxy every 60 seconds and writes
+encrypted `ProxyInformation.csv`; direct routing deletes it. DataSync supplies
+the configured handler to `HttpClient` and refreshes clients on file changes.
+
+ActionTool checks the exact GTSPlus parent executable, launch argument, and
+singleton mutex. It consumes encrypted `ECUSendData` XML, executes its local
+device wizard, and writes encrypted timestamped `.rlog` results. Its transport
+filters and cancellation/result classification are pinned separately.
+Offline execution covered 28 branches of its actual recovered IL.
+
+### Diagnostic operation scheduling and teardown
+
+[`lifecycle_operations.json`](../../data/generated/gtsplus_2026/lifecycle_operations.json)
+joins frontend operation workers, managed dispatch, native command plugins,
+monitor threads, frame retries, and teardown. The current adaptation path and
+six-pointer plugin ABI are specified in §6.2.0.
+
+Command cancellation sets cooperative state and returns without waiting for
+completion. The monitor-owner stop path is different: both P5 and P6 signal
+exit, wait 1,000 ms, then call `TerminateThread` and the stop callback for any
+nonzero wait result, including timeout and wait failure.
+
+The native monitor command queue is a single borrowed context slot. Occupancy
+returns `0xC0060601`; an accepted producer signals the worker and waits
+indefinitely for completion before releasing the slot. Frontend periodic
+operations reschedule after success; rejection removes the registration.
+Stopping their timer leaves an already-running promise in flight.
+
+Retry ownership is local: frame retry uses the communication-set bound,
+DataListIF slot 2 has its own acquisition retry, and keepalive follows its
+cadence. There is no blanket host-command retry. Simple utilities retain
+distinct start/stop/status control types and deadline/result polling.
+
+Aggregate destruction disconnects/closes transport before destroying the
+monitor controller. Managed `FinalizeAdaptation` is unload-only; normal
+end-diagnosis can retain the native instance on a failed response or destroy.
+Offline native execution covered nine result classifications and both monitor
+stop implementations with normal, timed-out, and failed waits.
