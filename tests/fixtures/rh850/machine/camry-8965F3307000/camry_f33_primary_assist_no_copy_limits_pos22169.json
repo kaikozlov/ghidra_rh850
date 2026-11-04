@@ -1,0 +1,614 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_primary_assist_no_copy_limits_pos22169",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebf0000"
+  },
+  "max_instructions": 8000000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe7800",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe7f52",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeabd0",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeabd4",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeabd8",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeabe0",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeabe2",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeac02",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeac0e",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeac2b",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeac2c",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeac3c",
+      "hex": "01",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeac44",
+      "hex": "0002",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeac50",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeac64",
+      "hex": "0080",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeac90",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeadf6",
+      "hex": "0032",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeae3a",
+      "hex": "0004",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeaf40",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeaf42",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeaf58",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeaf60",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeaf64",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeaf68",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeaf6c",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeaf70",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeb112",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeb113",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeb116",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeb120",
+      "hex": "0000000000000000000000000000000000000000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeb138",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeb13a",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeb13c",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeb13e",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeb140",
+      "hex": "0080",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeb1ce",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeb1f8",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeb24d",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeb24e",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeb354",
+      "hex": "01",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeb3fd",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeb400",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebebcf0",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebebd80",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebebd82",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebebe22",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebebe23",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebebed4",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebebede",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebebee2",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebebef0",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec128",
+      "hex": "0002",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec154",
+      "hex": "5a",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec156",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec158",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec1a2",
+      "hex": "a000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec266",
+      "hex": "8000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec2f4",
+      "hex": "0004",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec2f6",
+      "hex": "0004",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec376",
+      "hex": "0004",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec386",
+      "hex": "0004",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec3a0",
+      "hex": "5aec",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec3ba",
+      "hex": "e264",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec3f4",
+      "hex": "0004",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec400",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec40c",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec41a",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec41c",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec43c",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec44e",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec474",
+      "hex": "8000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec4c0",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec53a",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec544",
+      "hex": "0004",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec548",
+      "hex": "0004",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec584",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec596",
+      "hex": "d007",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec598",
+      "hex": "18fc",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec59a",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec59c",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec5a8",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec5ee",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec5f0",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec7bf",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebecb38",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebecbe8",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeed04",
+      "hex": "0002",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeed12",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeef80",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeef8e",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebef000",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebef04f",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebef050",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebef0a0",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebef0a1",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebef156",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebef157",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebef301",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebef304",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebef308",
+      "hex": "5aa55aa5",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebef30c",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebef310",
+      "hex": "5aa55aa5",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebef314",
+      "hex": "5aa55aa5",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebef318",
+      "hex": "5aa55aa5",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebef31c",
+      "hex": "5aa55aa5",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebe7600",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Bounded synthetic original PREPARE stack."
+    },
+    {
+      "address": "0xfebf0000",
+      "hex": "3f060e00bffe2106b8580c0061003f061c00bffe2106642b0c0061003f062a00bffe2106322c0c0061003f063800bffe210610590c0061003f064600bffe210678860c0061003f065400bffe2106866f0c0061003f066200bffe21067e6e0c0061003f067000bffe21061e6f0c0061003f067e00bffe2106586f0c0061003f068c00bffe2106686f0c0061002606003200003f06a000bffe2106b07a0c0061003f06ae00bffe2106447b0c0061003f06bc00bffe2106587c0c0061003f06ca00bffe2106f2910c0061003f06d800bffe210658920c0061003f06e600bffe210614930c0061003f06f400bffe21065e940c0061003f060201bffe2106b8940c0061003f061001bffe210662010d0061003f061e01bffe210618020d0061003f062c01bffe210684020d0061002106980700006100",
+      "evidence": "Transparent synthetic MOV imm32/Rn plus JMP[r1] call sequencer. Only original 89F2E copies declared inputs/observations; all control arithmetic and stores execute immutable original CodeFlash."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Original sequence returns",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Original primary bank value and slope",
+      "kind": "memory",
+      "address": "0xfebebf3c",
+      "size": 6,
+      "equals_hex": "ff040000680c"
+    },
+    {
+      "name": "Original nonlinear shape term",
+      "kind": "memory",
+      "address": "0xfebec39c",
+      "size": 4,
+      "equals_hex": "acffffff"
+    },
+    {
+      "name": "Original offset-filter compensation",
+      "kind": "memory",
+      "address": "0xfebec41e",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "Original second-order compensation",
+      "kind": "memory",
+      "address": "0xfebec5a8",
+      "size": 2,
+      "equals_hex": "f9ff"
+    },
+    {
+      "name": "Original primary-slope nested rate term",
+      "kind": "memory",
+      "address": "0xfebec4c0",
+      "size": 4,
+      "equals_hex": "b8000000"
+    },
+    {
+      "name": "D013E zero offset and exact nested boundary",
+      "kind": "memory",
+      "address": "0xfebecc24",
+      "size": 12,
+      "equals_hex": "00000000ffebffff00ecffff"
+    },
+    {
+      "name": "Combined terms before common sum and output limit boundaries",
+      "kind": "memory",
+      "address": "0xfebecc44",
+      "size": 10,
+      "equals_hex": "99560000995600009956"
+    }
+  ]
+}

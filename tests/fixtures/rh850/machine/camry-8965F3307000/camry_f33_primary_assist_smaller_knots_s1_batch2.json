@@ -1,0 +1,820 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_primary_assist_smaller_knots_s1_batch2",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebf0000"
+  },
+  "max_instructions": 8000000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe7800",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebeac2b",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeac3c",
+      "hex": "01",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeac64",
+      "hex": "0080",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebeae3a",
+      "hex": "0004",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec156",
+      "hex": "0100",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec158",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec2f4",
+      "hex": "0004",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec2f6",
+      "hex": "0004",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec376",
+      "hex": "0004",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec386",
+      "hex": "0004",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec3a0",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec3ba",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec3f4",
+      "hex": "0004",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec43c",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec44e",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec474",
+      "hex": "8000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec4c0",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec53a",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec5a8",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec5ee",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec5f0",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebec7bf",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebecb38",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebecbe8",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial snapshot/history for listed original consumers; not captured hardware state."
+    },
+    {
+      "address": "0xfebe7600",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Bounded synthetic original PREPARE stack."
+    },
+    {
+      "address": "0xfebe2ffc",
+      "size": 584,
+      "fill": 165,
+      "evidence": "Observation-only scratch with four-byte A5 canaries; original memcpy only copies out."
+    },
+    {
+      "address": "0xfebe0000",
+      "hex": "004b0001004b00ff014b0001014b00ffff630001ff6300ff00640001006400ff01640001016400ffff7c0001ff7c00ff007d0001007d00ff017d0001017d00ffffff0001ffff00ff",
+      "evidence": "Explicit external-input snapshots for each labeled case. No history is copied back between calls."
+    },
+    {
+      "address": "0xfebf0000",
+      "hex": "2606f6adbefe27060000befe2806020000003f062000bffe21062e9f080061002606a2c1befe27060200befe2806020000003f064000bffe21062e9f080061003f064e00bffe2106866f0c0061003f065c00bffe21067e6e0c0061003f066a00bffe21061e6f0c0061003f067800bffe2106586f0c0061003f068600bffe2106686f0c0061002606004b00003f069a00bffe2106b07a0c0061003f06a800bffe2106f2910c0061003f06b600bffe210658920c00610026060030befe27065cc3befe28060c0000003f06d600bffe21062e9f0800610026060c30befe27069cc3befe2806040000003f06f600bffe21062e9f0800610026061030befe270612c4befe2806060000003f061601bffe21062e9f0800610026061630befe270690c5befe2806060000003f063601bffe21062e9f0800610026061c30befe2706dcabbefe2806040000003f065601bffe21062e9f080061002606f6adbefe27060400befe2806020000003f067601bffe21062e9f080061002606a2c1befe27060600befe2806020000003f069601bffe21062e9f080061003f06a401bffe2106866f0c0061003f06b201bffe21067e6e0c0061003f06c001bffe21061e6f0c0061003f06ce01bffe2106586f0c0061003f06dc01bffe2106686f0c0061002606004b00003f06f001bffe2106b07a0c0061003f06fe01bffe2106f2910c0061003f060c02bffe210658920c00610026062030befe27065cc3befe28060c0000003f062c02bffe21062e9f0800610026062c30befe27069cc3befe2806040000003f064c02bffe21062e9f0800610026063030befe270612c4befe2806060000003f066c02bffe21062e9f0800610026063630befe270690c5befe2806060000003f068c02bffe21062e9f0800610026063c30befe2706dcabbefe2806040000003f06ac02bffe21062e9f080061002606f6adbefe27060800befe2806020000003f06cc02bffe21062e9f080061002606a2c1befe27060a00befe2806020000003f06ec02bffe21062e9f080061003f06fa02bffe2106866f0c0061003f060803bffe21067e6e0c0061003f061603bffe21061e6f0c0061003f062403bffe2106586f0c0061003f063203bffe2106686f0c0061002606014b00003f064603bffe2106b07a0c0061003f065403bffe2106f2910c0061003f066203bffe210658920c00610026064030befe27065cc3befe28060c0000003f068203bffe21062e9f0800610026064c30befe27069cc3befe2806040000003f06a203bffe21062e9f0800610026065030befe270612c4befe2806060000003f06c203bffe21062e9f0800610026065630befe270690c5befe2806060000003f06e203bffe21062e9f0800610026065c30befe2706dcabbefe2806040000003f060204bffe21062e9f080061002606f6adbefe27060c00befe2806020000003f062204bffe21062e9f080061002606a2c1befe27060e00befe2806020000003f064204bffe21062e9f080061003f065004bffe2106866f0c0061003f065e04bffe21067e6e0c0061003f066c04bffe21061e6f0c0061003f067a04bffe2106586f0c0061003f068804bffe2106686f0c0061002606014b00003f069c04bffe2106b07a0c0061003f06aa04bffe2106f2910c0061003f06b804bffe210658920c00610026066030befe27065cc3befe28060c0000003f06d804bffe21062e9f0800610026066c30befe27069cc3befe2806040000003f06f804bffe21062e9f0800610026067030befe270612c4befe2806060000003f061805bffe21062e9f0800610026067630befe270690c5befe2806060000003f063805bffe21062e9f0800610026067c30befe2706dcabbefe2806040000003f065805bffe21062e9f080061002606f6adbefe27061000befe2806020000003f067805bffe21062e9f080061002606a2c1befe27061200befe2806020000003f069805bffe21062e9f080061003f06a605bffe2106866f0c0061003f06b405bffe21067e6e0c0061003f06c205bffe21061e6f0c0061003f06d005bffe2106586f0c0061003f06de05bffe2106686f0c0061002606ff6300003f06f205bffe2106b07a0c0061003f060006bffe2106f2910c0061003f060e06bffe210658920c00610026068030befe27065cc3befe28060c0000003f062e06bffe21062e9f0800610026068c30befe27069cc3befe2806040000003f064e06bffe21062e9f0800610026069030befe270612c4befe2806060000003f066e06bffe21062e9f0800610026069630befe270690c5befe2806060000003f068e06bffe21062e9f0800610026069c30befe2706dcabbefe2806040000003f06ae06bffe21062e9f080061002606f6adbefe27061400befe2806020000003f06ce06bffe21062e9f080061002606a2c1befe27061600befe2806020000003f06ee06bffe21062e9f080061003f06fc06bffe2106866f0c0061003f060a07bffe21067e6e0c0061003f061807bffe21061e6f0c0061003f062607bffe2106586f0c0061003f063407bffe2106686f0c0061002606ff6300003f064807bffe2106b07a0c0061003f065607bffe2106f2910c0061003f066407bffe210658920c0061002606a030befe27065cc3befe28060c0000003f068407bffe21062e9f080061002606ac30befe27069cc3befe2806040000003f06a407bffe21062e9f080061002606b030befe270612c4befe2806060000003f06c407bffe21062e9f080061002606b630befe270690c5befe2806060000003f06e407bffe21062e9f080061002606bc30befe2706dcabbefe2806040000003f060408bffe21062e9f080061002606f6adbefe27061800befe2806020000003f062408bffe21062e9f080061002606a2c1befe27061a00befe2806020000003f064408bffe21062e9f080061003f065208bffe2106866f0c0061003f066008bffe21067e6e0c0061003f066e08bffe21061e6f0c0061003f067c08bffe2106586f0c0061003f068a08bffe2106686f0c0061002606006400003f069e08bffe2106b07a0c0061003f06ac08bffe2106f2910c0061003f06ba08bffe210658920c0061002606c030befe27065cc3befe28060c0000003f06da08bffe21062e9f080061002606cc30befe27069cc3befe2806040000003f06fa08bffe21062e9f080061002606d030befe270612c4befe2806060000003f061a09bffe21062e9f080061002606d630befe270690c5befe2806060000003f063a09bffe21062e9f080061002606dc30befe2706dcabbefe2806040000003f065a09bffe21062e9f080061002606f6adbefe27061c00befe2806020000003f067a09bffe21062e9f080061002606a2c1befe27061e00befe2806020000003f069a09bffe21062e9f080061003f06a809bffe2106866f0c0061003f06b609bffe21067e6e0c0061003f06c409bffe21061e6f0c0061003f06d209bffe2106586f0c0061003f06e009bffe2106686f0c0061002606006400003f06f409bffe2106b07a0c0061003f06020abffe2106f2910c0061003f06100abffe210658920c0061002606e030befe27065cc3befe28060c0000003f06300abffe21062e9f080061002606ec30befe27069cc3befe2806040000003f06500abffe21062e9f080061002606f030befe270612c4befe2806060000003f06700abffe21062e9f080061002606f630befe270690c5befe2806060000003f06900abffe21062e9f080061002606fc30befe2706dcabbefe2806040000003f06b00abffe21062e9f080061002606f6adbefe27062000befe2806020000003f06d00abffe21062e9f080061002606a2c1befe27062200befe2806020000003f06f00abffe21062e9f080061003f06fe0abffe2106866f0c0061003f060c0bbffe21067e6e0c0061003f061a0bbffe21061e6f0c0061003f06280bbffe2106586f0c0061003f06360bbffe2106686f0c0061002606016400003f064a0bbffe2106b07a0c0061003f06580bbffe2106f2910c0061003f06660bbffe210658920c00610026060031befe27065cc3befe28060c0000003f06860bbffe21062e9f0800610026060c31befe27069cc3befe2806040000003f06a60bbffe21062e9f0800610026061031befe270612c4befe2806060000003f06c60bbffe21062e9f0800610026061631befe270690c5befe2806060000003f06e60bbffe21062e9f0800610026061c31befe2706dcabbefe2806040000003f06060cbffe21062e9f080061002606f6adbefe27062400befe2806020000003f06260cbffe21062e9f080061002606a2c1befe27062600befe2806020000003f06460cbffe21062e9f080061003f06540cbffe2106866f0c0061003f06620cbffe21067e6e0c0061003f06700cbffe21061e6f0c0061003f067e0cbffe2106586f0c0061003f068c0cbffe2106686f0c0061002606016400003f06a00cbffe2106b07a0c0061003f06ae0cbffe2106f2910c0061003f06bc0cbffe210658920c00610026062031befe27065cc3befe28060c0000003f06dc0cbffe21062e9f0800610026062c31befe27069cc3befe2806040000003f06fc0cbffe21062e9f0800610026063031befe270612c4befe2806060000003f061c0dbffe21062e9f0800610026063631befe270690c5befe2806060000003f063c0dbffe21062e9f0800610026063c31befe2706dcabbefe2806040000003f065c0dbffe21062e9f080061002606f6adbefe27062800befe2806020000003f067c0dbffe21062e9f080061002606a2c1befe27062a00befe2806020000003f069c0dbffe21062e9f080061003f06aa0dbffe2106866f0c0061003f06b80dbffe21067e6e0c0061003f06c60dbffe21061e6f0c0061003f06d40dbffe2106586f0c0061003f06e20dbffe2106686f0c0061002606ff7c00003f06f60dbffe2106b07a0c0061003f06040ebffe2106f2910c0061003f06120ebffe210658920c00610026064031befe27065cc3befe28060c0000003f06320ebffe21062e9f0800610026064c31befe27069cc3befe2806040000003f06520ebffe21062e9f0800610026065031befe270612c4befe2806060000003f06720ebffe21062e9f0800610026065631befe270690c5befe2806060000003f06920ebffe21062e9f0800610026065c31befe2706dcabbefe2806040000003f06b20ebffe21062e9f080061002606f6adbefe27062c00befe2806020000003f06d20ebffe21062e9f080061002606a2c1befe27062e00befe2806020000003f06f20ebffe21062e9f080061003f06000fbffe2106866f0c0061003f060e0fbffe21067e6e0c0061003f061c0fbffe21061e6f0c0061003f062a0fbffe2106586f0c0061003f06380fbffe2106686f0c0061002606ff7c00003f064c0fbffe2106b07a0c0061003f065a0fbffe2106f2910c0061003f06680fbffe210658920c00610026066031befe27065cc3befe28060c0000003f06880fbffe21062e9f0800610026066c31befe27069cc3befe2806040000003f06a80fbffe21062e9f0800610026067031befe270612c4befe2806060000003f06c80fbffe21062e9f0800610026067631befe270690c5befe2806060000003f06e80fbffe21062e9f0800610026067c31befe2706dcabbefe2806040000003f060810bffe21062e9f080061002606f6adbefe27063000befe2806020000003f062810bffe21062e9f080061002606a2c1befe27063200befe2806020000003f064810bffe21062e9f080061003f065610bffe2106866f0c0061003f066410bffe21067e6e0c0061003f067210bffe21061e6f0c0061003f068010bffe2106586f0c0061003f068e10bffe2106686f0c0061002606007d00003f06a210bffe2106b07a0c0061003f06b010bffe2106f2910c0061003f06be10bffe210658920c00610026068031befe27065cc3befe28060c0000003f06de10bffe21062e9f0800610026068c31befe27069cc3befe2806040000003f06fe10bffe21062e9f0800610026069031befe270612c4befe2806060000003f061e11bffe21062e9f0800610026069631befe270690c5befe2806060000003f063e11bffe21062e9f0800610026069c31befe2706dcabbefe2806040000003f065e11bffe21062e9f080061002606f6adbefe27063400befe2806020000003f067e11bffe21062e9f080061002606a2c1befe27063600befe2806020000003f069e11bffe21062e9f080061003f06ac11bffe2106866f0c0061003f06ba11bffe21067e6e0c0061003f06c811bffe21061e6f0c0061003f06d611bffe2106586f0c0061003f06e411bffe2106686f0c0061002606007d00003f06f811bffe2106b07a0c0061003f060612bffe2106f2910c0061003f061412bffe210658920c0061002606a031befe27065cc3befe28060c0000003f063412bffe21062e9f080061002606ac31befe27069cc3befe2806040000003f065412bffe21062e9f080061002606b031befe270612c4befe2806060000003f067412bffe21062e9f080061002606b631befe270690c5befe2806060000003f069412bffe21062e9f080061002606bc31befe2706dcabbefe2806040000003f06b412bffe21062e9f080061002606f6adbefe27063800befe2806020000003f06d412bffe21062e9f080061002606a2c1befe27063a00befe2806020000003f06f412bffe21062e9f080061003f060213bffe2106866f0c0061003f061013bffe21067e6e0c0061003f061e13bffe21061e6f0c0061003f062c13bffe2106586f0c0061003f063a13bffe2106686f0c0061002606017d00003f064e13bffe2106b07a0c0061003f065c13bffe2106f2910c0061003f066a13bffe210658920c0061002606c031befe27065cc3befe28060c0000003f068a13bffe21062e9f080061002606cc31befe27069cc3befe2806040000003f06aa13bffe21062e9f080061002606d031befe270612c4befe2806060000003f06ca13bffe21062e9f080061002606d631befe270690c5befe2806060000003f06ea13bffe21062e9f080061002606dc31befe2706dcabbefe2806040000003f060a14bffe21062e9f080061002606f6adbefe27063c00befe2806020000003f062a14bffe21062e9f080061002606a2c1befe27063e00befe2806020000003f064a14bffe21062e9f080061003f065814bffe2106866f0c0061003f066614bffe21067e6e0c0061003f067414bffe21061e6f0c0061003f068214bffe2106586f0c0061003f069014bffe2106686f0c0061002606017d00003f06a414bffe2106b07a0c0061003f06b214bffe2106f2910c0061003f06c014bffe210658920c0061002606e031befe27065cc3befe28060c0000003f06e014bffe21062e9f080061002606ec31befe27069cc3befe2806040000003f060015bffe21062e9f080061002606f031befe270612c4befe2806060000003f062015bffe21062e9f080061002606f631befe270690c5befe2806060000003f064015bffe21062e9f080061002606fc31befe2706dcabbefe2806040000003f066015bffe21062e9f080061002606f6adbefe27064000befe2806020000003f068015bffe21062e9f080061002606a2c1befe27064200befe2806020000003f06a015bffe21062e9f080061003f06ae15bffe2106866f0c0061003f06bc15bffe21067e6e0c0061003f06ca15bffe21061e6f0c0061003f06d815bffe2106586f0c0061003f06e615bffe2106686f0c0061002606ffff00003f06fa15bffe2106b07a0c0061003f060816bffe2106f2910c0061003f061616bffe210658920c00610026060032befe27065cc3befe28060c0000003f063616bffe21062e9f0800610026060c32befe27069cc3befe2806040000003f065616bffe21062e9f0800610026061032befe270612c4befe2806060000003f067616bffe21062e9f0800610026061632befe270690c5befe2806060000003f069616bffe21062e9f0800610026061c32befe2706dcabbefe2806040000003f06b616bffe21062e9f080061002606f6adbefe27064400befe2806020000003f06d616bffe21062e9f080061002606a2c1befe27064600befe2806020000003f06f616bffe21062e9f080061003f060417bffe2106866f0c0061003f061217bffe21067e6e0c0061003f062017bffe21061e6f0c0061003f062e17bffe2106586f0c0061003f063c17bffe2106686f0c0061002606ffff00003f065017bffe2106b07a0c0061003f065e17bffe2106f2910c0061003f066c17bffe210658920c00610026062032befe27065cc3befe28060c0000003f068c17bffe21062e9f0800610026062c32befe27069cc3befe2806040000003f06ac17bffe21062e9f0800610026063032befe270612c4befe2806060000003f06cc17bffe21062e9f0800610026063632befe270690c5befe2806060000003f06ec17bffe21062e9f0800610026063c32befe2706dcabbefe2806040000003f060c18bffe21062e9f080061002106980700006100",
+      "evidence": "Transparent synthetic MOV imm32/Rn plus JMP[r1] call sequencer. Only original 89F2E copies declared inputs/observations; all control arithmetic and stores execute immutable original CodeFlash."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Original sequence returns",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "s1 speed=19200 shaped-torque=256 C35C/C35E/C360/C362/C364/C366",
+      "kind": "memory",
+      "address": "0xfebe3000",
+      "size": 12,
+      "equals_hex": "a2fe62fe62fe62fe05000004"
+    },
+    {
+      "name": "s1 speed=19200 shaped-torque=256 C39C nonlinear original attenuation/sum/limit",
+      "kind": "memory",
+      "address": "0xfebe300c",
+      "size": 4,
+      "equals_hex": "62feffff"
+    },
+    {
+      "name": "s1 speed=19200 shaped-torque=256 C412/C414/C416",
+      "kind": "memory",
+      "address": "0xfebe3010",
+      "size": 6,
+      "equals_hex": "000480000100"
+    },
+    {
+      "name": "s1 speed=19200 shaped-torque=256 C590/C592/C594",
+      "kind": "memory",
+      "address": "0xfebe3016",
+      "size": 6,
+      "equals_hex": "1200f10142fd"
+    },
+    {
+      "name": "s1 speed=19200 shaped-torque=256 ABDC/ABDE",
+      "kind": "memory",
+      "address": "0xfebe301c",
+      "size": 4,
+      "equals_hex": "de0141dc"
+    },
+    {
+      "name": "s1 speed=19200 shaped-torque=-256 C35C/C35E/C360/C362/C364/C366",
+      "kind": "memory",
+      "address": "0xfebe3020",
+      "size": 12,
+      "equals_hex": "a2fe62fe62fe9e0105000004"
+    },
+    {
+      "name": "s1 speed=19200 shaped-torque=-256 C39C nonlinear original attenuation/sum/limit",
+      "kind": "memory",
+      "address": "0xfebe302c",
+      "size": 4,
+      "equals_hex": "9e010000"
+    },
+    {
+      "name": "s1 speed=19200 shaped-torque=-256 C412/C414/C416",
+      "kind": "memory",
+      "address": "0xfebe3030",
+      "size": 6,
+      "equals_hex": "000480000100"
+    },
+    {
+      "name": "s1 speed=19200 shaped-torque=-256 C590/C592/C594",
+      "kind": "memory",
+      "address": "0xfebe3036",
+      "size": 6,
+      "equals_hex": "1200f10142fd"
+    },
+    {
+      "name": "s1 speed=19200 shaped-torque=-256 ABDC/ABDE",
+      "kind": "memory",
+      "address": "0xfebe303c",
+      "size": 4,
+      "equals_hex": "de0141dc"
+    },
+    {
+      "name": "s1 speed=19201 shaped-torque=256 C35C/C35E/C360/C362/C364/C366",
+      "kind": "memory",
+      "address": "0xfebe3040",
+      "size": 12,
+      "equals_hex": "62fe24fe62fe62fe06000000"
+    },
+    {
+      "name": "s1 speed=19201 shaped-torque=256 C39C nonlinear original attenuation/sum/limit",
+      "kind": "memory",
+      "address": "0xfebe304c",
+      "size": 4,
+      "equals_hex": "62feffff"
+    },
+    {
+      "name": "s1 speed=19201 shaped-torque=256 C412/C414/C416",
+      "kind": "memory",
+      "address": "0xfebe3050",
+      "size": 6,
+      "equals_hex": "000480000100"
+    },
+    {
+      "name": "s1 speed=19201 shaped-torque=256 C590/C592/C594",
+      "kind": "memory",
+      "address": "0xfebe3056",
+      "size": 6,
+      "equals_hex": "1200f10142fd"
+    },
+    {
+      "name": "s1 speed=19201 shaped-torque=256 ABDC/ABDE",
+      "kind": "memory",
+      "address": "0xfebe305c",
+      "size": 4,
+      "equals_hex": "de0141dc"
+    },
+    {
+      "name": "s1 speed=19201 shaped-torque=-256 C35C/C35E/C360/C362/C364/C366",
+      "kind": "memory",
+      "address": "0xfebe3060",
+      "size": 12,
+      "equals_hex": "62fe24fe62fe9e0106000000"
+    },
+    {
+      "name": "s1 speed=19201 shaped-torque=-256 C39C nonlinear original attenuation/sum/limit",
+      "kind": "memory",
+      "address": "0xfebe306c",
+      "size": 4,
+      "equals_hex": "9e010000"
+    },
+    {
+      "name": "s1 speed=19201 shaped-torque=-256 C412/C414/C416",
+      "kind": "memory",
+      "address": "0xfebe3070",
+      "size": 6,
+      "equals_hex": "000480000100"
+    },
+    {
+      "name": "s1 speed=19201 shaped-torque=-256 C590/C592/C594",
+      "kind": "memory",
+      "address": "0xfebe3076",
+      "size": 6,
+      "equals_hex": "1200f10142fd"
+    },
+    {
+      "name": "s1 speed=19201 shaped-torque=-256 ABDC/ABDE",
+      "kind": "memory",
+      "address": "0xfebe307c",
+      "size": 4,
+      "equals_hex": "de0141dc"
+    },
+    {
+      "name": "s1 speed=25599 shaped-torque=256 C35C/C35E/C360/C362/C364/C366",
+      "kind": "memory",
+      "address": "0xfebe3080",
+      "size": 12,
+      "equals_hex": "62fe24fe25fe25fe0600ff03"
+    },
+    {
+      "name": "s1 speed=25599 shaped-torque=256 C39C nonlinear original attenuation/sum/limit",
+      "kind": "memory",
+      "address": "0xfebe308c",
+      "size": 4,
+      "equals_hex": "25feffff"
+    },
+    {
+      "name": "s1 speed=25599 shaped-torque=256 C412/C414/C416",
+      "kind": "memory",
+      "address": "0xfebe3090",
+      "size": 6,
+      "equals_hex": "000480000100"
+    },
+    {
+      "name": "s1 speed=25599 shaped-torque=256 C590/C592/C594",
+      "kind": "memory",
+      "address": "0xfebe3096",
+      "size": 6,
+      "equals_hex": "06000e02ffff"
+    },
+    {
+      "name": "s1 speed=25599 shaped-torque=256 ABDC/ABDE",
+      "kind": "memory",
+      "address": "0xfebe309c",
+      "size": 4,
+      "equals_hex": "070241dc"
+    },
+    {
+      "name": "s1 speed=25599 shaped-torque=-256 C35C/C35E/C360/C362/C364/C366",
+      "kind": "memory",
+      "address": "0xfebe30a0",
+      "size": 12,
+      "equals_hex": "62fe24fe25fedb010600ff03"
+    },
+    {
+      "name": "s1 speed=25599 shaped-torque=-256 C39C nonlinear original attenuation/sum/limit",
+      "kind": "memory",
+      "address": "0xfebe30ac",
+      "size": 4,
+      "equals_hex": "db010000"
+    },
+    {
+      "name": "s1 speed=25599 shaped-torque=-256 C412/C414/C416",
+      "kind": "memory",
+      "address": "0xfebe30b0",
+      "size": 6,
+      "equals_hex": "000480000100"
+    },
+    {
+      "name": "s1 speed=25599 shaped-torque=-256 C590/C592/C594",
+      "kind": "memory",
+      "address": "0xfebe30b6",
+      "size": 6,
+      "equals_hex": "06000e02ffff"
+    },
+    {
+      "name": "s1 speed=25599 shaped-torque=-256 ABDC/ABDE",
+      "kind": "memory",
+      "address": "0xfebe30bc",
+      "size": 4,
+      "equals_hex": "070241dc"
+    },
+    {
+      "name": "s1 speed=25600 shaped-torque=256 C35C/C35E/C360/C362/C364/C366",
+      "kind": "memory",
+      "address": "0xfebe30c0",
+      "size": 12,
+      "equals_hex": "62fe24fe24fe24fe06000004"
+    },
+    {
+      "name": "s1 speed=25600 shaped-torque=256 C39C nonlinear original attenuation/sum/limit",
+      "kind": "memory",
+      "address": "0xfebe30cc",
+      "size": 4,
+      "equals_hex": "24feffff"
+    },
+    {
+      "name": "s1 speed=25600 shaped-torque=256 C412/C414/C416",
+      "kind": "memory",
+      "address": "0xfebe30d0",
+      "size": 6,
+      "equals_hex": "000480000100"
+    },
+    {
+      "name": "s1 speed=25600 shaped-torque=256 C590/C592/C594",
+      "kind": "memory",
+      "address": "0xfebe30d6",
+      "size": 6,
+      "equals_hex": "05000e020000"
+    },
+    {
+      "name": "s1 speed=25600 shaped-torque=256 ABDC/ABDE",
+      "kind": "memory",
+      "address": "0xfebe30dc",
+      "size": 4,
+      "equals_hex": "080241dc"
+    },
+    {
+      "name": "s1 speed=25600 shaped-torque=-256 C35C/C35E/C360/C362/C364/C366",
+      "kind": "memory",
+      "address": "0xfebe30e0",
+      "size": 12,
+      "equals_hex": "62fe24fe24fedc0106000004"
+    },
+    {
+      "name": "s1 speed=25600 shaped-torque=-256 C39C nonlinear original attenuation/sum/limit",
+      "kind": "memory",
+      "address": "0xfebe30ec",
+      "size": 4,
+      "equals_hex": "dc010000"
+    },
+    {
+      "name": "s1 speed=25600 shaped-torque=-256 C412/C414/C416",
+      "kind": "memory",
+      "address": "0xfebe30f0",
+      "size": 6,
+      "equals_hex": "000480000100"
+    },
+    {
+      "name": "s1 speed=25600 shaped-torque=-256 C590/C592/C594",
+      "kind": "memory",
+      "address": "0xfebe30f6",
+      "size": 6,
+      "equals_hex": "05000e020000"
+    },
+    {
+      "name": "s1 speed=25600 shaped-torque=-256 ABDC/ABDE",
+      "kind": "memory",
+      "address": "0xfebe30fc",
+      "size": 4,
+      "equals_hex": "080241dc"
+    },
+    {
+      "name": "s1 speed=25601 shaped-torque=256 C35C/C35E/C360/C362/C364/C366",
+      "kind": "memory",
+      "address": "0xfebe3100",
+      "size": 12,
+      "equals_hex": "62fe24fe24fe24fe06000004"
+    },
+    {
+      "name": "s1 speed=25601 shaped-torque=256 C39C nonlinear original attenuation/sum/limit",
+      "kind": "memory",
+      "address": "0xfebe310c",
+      "size": 4,
+      "equals_hex": "24feffff"
+    },
+    {
+      "name": "s1 speed=25601 shaped-torque=256 C412/C414/C416",
+      "kind": "memory",
+      "address": "0xfebe3110",
+      "size": 6,
+      "equals_hex": "000480000100"
+    },
+    {
+      "name": "s1 speed=25601 shaped-torque=256 C590/C592/C594",
+      "kind": "memory",
+      "address": "0xfebe3116",
+      "size": 6,
+      "equals_hex": "05000e020000"
+    },
+    {
+      "name": "s1 speed=25601 shaped-torque=256 ABDC/ABDE",
+      "kind": "memory",
+      "address": "0xfebe311c",
+      "size": 4,
+      "equals_hex": "080241dc"
+    },
+    {
+      "name": "s1 speed=25601 shaped-torque=-256 C35C/C35E/C360/C362/C364/C366",
+      "kind": "memory",
+      "address": "0xfebe3120",
+      "size": 12,
+      "equals_hex": "62fe24fe24fedc0106000004"
+    },
+    {
+      "name": "s1 speed=25601 shaped-torque=-256 C39C nonlinear original attenuation/sum/limit",
+      "kind": "memory",
+      "address": "0xfebe312c",
+      "size": 4,
+      "equals_hex": "dc010000"
+    },
+    {
+      "name": "s1 speed=25601 shaped-torque=-256 C412/C414/C416",
+      "kind": "memory",
+      "address": "0xfebe3130",
+      "size": 6,
+      "equals_hex": "000480000100"
+    },
+    {
+      "name": "s1 speed=25601 shaped-torque=-256 C590/C592/C594",
+      "kind": "memory",
+      "address": "0xfebe3136",
+      "size": 6,
+      "equals_hex": "05000e020000"
+    },
+    {
+      "name": "s1 speed=25601 shaped-torque=-256 ABDC/ABDE",
+      "kind": "memory",
+      "address": "0xfebe313c",
+      "size": 4,
+      "equals_hex": "080241dc"
+    },
+    {
+      "name": "s1 speed=31999 shaped-torque=256 C35C/C35E/C360/C362/C364/C366",
+      "kind": "memory",
+      "address": "0xfebe3140",
+      "size": 12,
+      "equals_hex": "62fe24fe24fe24fe06000004"
+    },
+    {
+      "name": "s1 speed=31999 shaped-torque=256 C39C nonlinear original attenuation/sum/limit",
+      "kind": "memory",
+      "address": "0xfebe314c",
+      "size": 4,
+      "equals_hex": "24feffff"
+    },
+    {
+      "name": "s1 speed=31999 shaped-torque=256 C412/C414/C416",
+      "kind": "memory",
+      "address": "0xfebe3150",
+      "size": 6,
+      "equals_hex": "000480000100"
+    },
+    {
+      "name": "s1 speed=31999 shaped-torque=256 C590/C592/C594",
+      "kind": "memory",
+      "address": "0xfebe3156",
+      "size": 6,
+      "equals_hex": "05000e020000"
+    },
+    {
+      "name": "s1 speed=31999 shaped-torque=256 ABDC/ABDE",
+      "kind": "memory",
+      "address": "0xfebe315c",
+      "size": 4,
+      "equals_hex": "080241dc"
+    },
+    {
+      "name": "s1 speed=31999 shaped-torque=-256 C35C/C35E/C360/C362/C364/C366",
+      "kind": "memory",
+      "address": "0xfebe3160",
+      "size": 12,
+      "equals_hex": "62fe24fe24fedc0106000004"
+    },
+    {
+      "name": "s1 speed=31999 shaped-torque=-256 C39C nonlinear original attenuation/sum/limit",
+      "kind": "memory",
+      "address": "0xfebe316c",
+      "size": 4,
+      "equals_hex": "dc010000"
+    },
+    {
+      "name": "s1 speed=31999 shaped-torque=-256 C412/C414/C416",
+      "kind": "memory",
+      "address": "0xfebe3170",
+      "size": 6,
+      "equals_hex": "000480000100"
+    },
+    {
+      "name": "s1 speed=31999 shaped-torque=-256 C590/C592/C594",
+      "kind": "memory",
+      "address": "0xfebe3176",
+      "size": 6,
+      "equals_hex": "05000e020000"
+    },
+    {
+      "name": "s1 speed=31999 shaped-torque=-256 ABDC/ABDE",
+      "kind": "memory",
+      "address": "0xfebe317c",
+      "size": 4,
+      "equals_hex": "080241dc"
+    },
+    {
+      "name": "s1 speed=32000 shaped-torque=256 C35C/C35E/C360/C362/C364/C366",
+      "kind": "memory",
+      "address": "0xfebe3180",
+      "size": 12,
+      "equals_hex": "62fe24fe24fe24fe06000004"
+    },
+    {
+      "name": "s1 speed=32000 shaped-torque=256 C39C nonlinear original attenuation/sum/limit",
+      "kind": "memory",
+      "address": "0xfebe318c",
+      "size": 4,
+      "equals_hex": "24feffff"
+    },
+    {
+      "name": "s1 speed=32000 shaped-torque=256 C412/C414/C416",
+      "kind": "memory",
+      "address": "0xfebe3190",
+      "size": 6,
+      "equals_hex": "000480000100"
+    },
+    {
+      "name": "s1 speed=32000 shaped-torque=256 C590/C592/C594",
+      "kind": "memory",
+      "address": "0xfebe3196",
+      "size": 6,
+      "equals_hex": "05000e020000"
+    },
+    {
+      "name": "s1 speed=32000 shaped-torque=256 ABDC/ABDE",
+      "kind": "memory",
+      "address": "0xfebe319c",
+      "size": 4,
+      "equals_hex": "080241dc"
+    },
+    {
+      "name": "s1 speed=32000 shaped-torque=-256 C35C/C35E/C360/C362/C364/C366",
+      "kind": "memory",
+      "address": "0xfebe31a0",
+      "size": 12,
+      "equals_hex": "62fe24fe24fedc0106000004"
+    },
+    {
+      "name": "s1 speed=32000 shaped-torque=-256 C39C nonlinear original attenuation/sum/limit",
+      "kind": "memory",
+      "address": "0xfebe31ac",
+      "size": 4,
+      "equals_hex": "dc010000"
+    },
+    {
+      "name": "s1 speed=32000 shaped-torque=-256 C412/C414/C416",
+      "kind": "memory",
+      "address": "0xfebe31b0",
+      "size": 6,
+      "equals_hex": "000480000100"
+    },
+    {
+      "name": "s1 speed=32000 shaped-torque=-256 C590/C592/C594",
+      "kind": "memory",
+      "address": "0xfebe31b6",
+      "size": 6,
+      "equals_hex": "05000e020000"
+    },
+    {
+      "name": "s1 speed=32000 shaped-torque=-256 ABDC/ABDE",
+      "kind": "memory",
+      "address": "0xfebe31bc",
+      "size": 4,
+      "equals_hex": "080241dc"
+    },
+    {
+      "name": "s1 speed=32001 shaped-torque=256 C35C/C35E/C360/C362/C364/C366",
+      "kind": "memory",
+      "address": "0xfebe31c0",
+      "size": 12,
+      "equals_hex": "62fe24fe24fe24fe06000004"
+    },
+    {
+      "name": "s1 speed=32001 shaped-torque=256 C39C nonlinear original attenuation/sum/limit",
+      "kind": "memory",
+      "address": "0xfebe31cc",
+      "size": 4,
+      "equals_hex": "24feffff"
+    },
+    {
+      "name": "s1 speed=32001 shaped-torque=256 C412/C414/C416",
+      "kind": "memory",
+      "address": "0xfebe31d0",
+      "size": 6,
+      "equals_hex": "000480000100"
+    },
+    {
+      "name": "s1 speed=32001 shaped-torque=256 C590/C592/C594",
+      "kind": "memory",
+      "address": "0xfebe31d6",
+      "size": 6,
+      "equals_hex": "05000e020000"
+    },
+    {
+      "name": "s1 speed=32001 shaped-torque=256 ABDC/ABDE",
+      "kind": "memory",
+      "address": "0xfebe31dc",
+      "size": 4,
+      "equals_hex": "080241dc"
+    },
+    {
+      "name": "s1 speed=32001 shaped-torque=-256 C35C/C35E/C360/C362/C364/C366",
+      "kind": "memory",
+      "address": "0xfebe31e0",
+      "size": 12,
+      "equals_hex": "62fe24fe24fedc0106000004"
+    },
+    {
+      "name": "s1 speed=32001 shaped-torque=-256 C39C nonlinear original attenuation/sum/limit",
+      "kind": "memory",
+      "address": "0xfebe31ec",
+      "size": 4,
+      "equals_hex": "dc010000"
+    },
+    {
+      "name": "s1 speed=32001 shaped-torque=-256 C412/C414/C416",
+      "kind": "memory",
+      "address": "0xfebe31f0",
+      "size": 6,
+      "equals_hex": "000480000100"
+    },
+    {
+      "name": "s1 speed=32001 shaped-torque=-256 C590/C592/C594",
+      "kind": "memory",
+      "address": "0xfebe31f6",
+      "size": 6,
+      "equals_hex": "05000e020000"
+    },
+    {
+      "name": "s1 speed=32001 shaped-torque=-256 ABDC/ABDE",
+      "kind": "memory",
+      "address": "0xfebe31fc",
+      "size": 4,
+      "equals_hex": "080241dc"
+    },
+    {
+      "name": "s1 speed=65535 shaped-torque=256 C35C/C35E/C360/C362/C364/C366",
+      "kind": "memory",
+      "address": "0xfebe3200",
+      "size": 12,
+      "equals_hex": "62fe24fe24fe24fe06000004"
+    },
+    {
+      "name": "s1 speed=65535 shaped-torque=256 C39C nonlinear original attenuation/sum/limit",
+      "kind": "memory",
+      "address": "0xfebe320c",
+      "size": 4,
+      "equals_hex": "24feffff"
+    },
+    {
+      "name": "s1 speed=65535 shaped-torque=256 C412/C414/C416",
+      "kind": "memory",
+      "address": "0xfebe3210",
+      "size": 6,
+      "equals_hex": "000480000100"
+    },
+    {
+      "name": "s1 speed=65535 shaped-torque=256 C590/C592/C594",
+      "kind": "memory",
+      "address": "0xfebe3216",
+      "size": 6,
+      "equals_hex": "05000e020000"
+    },
+    {
+      "name": "s1 speed=65535 shaped-torque=256 ABDC/ABDE",
+      "kind": "memory",
+      "address": "0xfebe321c",
+      "size": 4,
+      "equals_hex": "080241dc"
+    },
+    {
+      "name": "s1 speed=65535 shaped-torque=-256 C35C/C35E/C360/C362/C364/C366",
+      "kind": "memory",
+      "address": "0xfebe3220",
+      "size": 12,
+      "equals_hex": "62fe24fe24fedc0106000004"
+    },
+    {
+      "name": "s1 speed=65535 shaped-torque=-256 C39C nonlinear original attenuation/sum/limit",
+      "kind": "memory",
+      "address": "0xfebe322c",
+      "size": 4,
+      "equals_hex": "dc010000"
+    },
+    {
+      "name": "s1 speed=65535 shaped-torque=-256 C412/C414/C416",
+      "kind": "memory",
+      "address": "0xfebe3230",
+      "size": 6,
+      "equals_hex": "000480000100"
+    },
+    {
+      "name": "s1 speed=65535 shaped-torque=-256 C590/C592/C594",
+      "kind": "memory",
+      "address": "0xfebe3236",
+      "size": 6,
+      "equals_hex": "05000e020000"
+    },
+    {
+      "name": "s1 speed=65535 shaped-torque=-256 ABDC/ABDE",
+      "kind": "memory",
+      "address": "0xfebe323c",
+      "size": 4,
+      "equals_hex": "080241dc"
+    },
+    {
+      "name": "Lower scratch canary",
+      "kind": "memory",
+      "address": "0xfebe2ffc",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    },
+    {
+      "name": "Upper scratch canary",
+      "kind": "memory",
+      "address": "0xfebe3240",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    }
+  ]
+}
