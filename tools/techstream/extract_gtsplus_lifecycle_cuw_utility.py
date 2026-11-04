@@ -21,7 +21,7 @@ from tools.techstream.extract_gtsplus_lifecycle_ui_ipc import _operand
 from tools.techstream.extract_gtsplus_tse_managed_semantics import (
     _instructions, _method_pin, _open, _recovery_proof,
 )
-from tools.techstream.gtsplus_local_crypto import decode_gui
+from tools.techstream.gtsplus_local_crypto import decode_gui, decrypt_file
 
 DEFAULT_INSTALLED = REPO_ROOT / 'software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics'
 DEFAULT_CUW = REPO_ROOT / 'software/Techstream/gtsplus/gts-all-unprotected/CUWPlus'
@@ -36,6 +36,7 @@ JS_FILES = {
     'cuw-main': ('cuw', 'js/cuw/cuw_main.js'),
     'cuw-controller': ('cuw', 'js/cuw/controllers/cuw_controller.js'),
     'cuw-model': ('cuw', 'js/cuw/models/cuw_model.js'),
+    'cuw-utility': ('cuw', 'js/cuw/common/cuw_utility.js'),
     'key-controller': ('gts', 'js/gts/ecu_security_key/ecu_security_key_controller.js'),
     'key-worker': ('gts', 'js/gts/ecu_security_key/ecu_security_key_worker.js'),
     'gts-raw-api': ('gts', 'js/gts/common/gts_platform_raw_interface.js'),
@@ -218,6 +219,186 @@ def build(*, installed: Path = DEFAULT_INSTALLED, cuw_root: Path = DEFAULT_CUW,
            ((0x10063B25, '803de2bf0810007527'), (0x10063B2E, '807d0800752e'), (0x10063B55, 'b8bf0b0000'), (0x10063B67, 'e894c2fdff')))
     native('native-reset', 'core', 0x1003FE00, 80, 'c5f91943b2b45b6b42eda7e2d3c4effa1422febde55a97042e10b7e7e6fbe49f',
            'Reset 0x1003FE00 signals request/copy worker events, requests worker termination, waits INFINITE on running thread then Sleep(500) until worker pointer clears, resets calibration/state storage and frees buffers. No bounded join is present in this cleanup path.')
+    native('recovery-path', 'core', 0x10023540, 758, 'a7a89ac86ae072932aac762d43da3622da9a2df1292dd817e2019aa4947d1e6a',
+           'Recovery directory is GetModuleFileNameA(NULL) drive+directory+"Save", i.e. beside the backend EXE, not beside an arbitrary selected calibration or the browser. Reader appends "\\\\RecoveryInfo.ini".')
+    native('recovery-format-reader', 'core', 0x1001F2F0, 7503, '9496337bae3e41bfb8be45976b48d294832a547b9e0234072c47ccc84588ee8b',
+           'Reads entire encoded RecoveryInfo.ini via DataFile1001E8E0, decodes byte pairs1001C640, tokenizes CR/LF strings1005BEE0 and parses INI1002CDD0; typed getters1002D2C0/1002D540/1002DD90 supply empty/zero defaults except PassThruErrorCode9999 and CommPhase2. No stored browser-session/account UUID or content checksum is read.')
+    native('recovery-byte-decoder', 'core', 0x1001C640, 120, '0f5c61acead36795848f70d68f5e32cbb00063c9638cd1874e7cca1117ecbb3e',
+           'Actual checkpoint decoder allocates floor(encodedLength/2)+1 zeroed bytes and reads pairs: decoded byte=((first>>2)*16+(second>>2)+120)&255. Writer encodes each nibble n as ((n+8)<<2)|(rand()&3); low2 bits are discarded. This is reversible obfuscation, not FRC payload encryption or an integrity check; odd/truncated input is not rejected by this decoder.')
+    native('recovery-format-writer', 'core', 0x10021870, 7238, 'ad3cf3cc50a8eb88c041d8640338789d01d8f7cb02b339b6516e66be1b795e52',
+           'Builds INI section/key map, serializes [section] and key=value lines through1002DF10/1005C060, nibble-obfuscates all bytes, then DataFile1001EAE0 writes RecoveryInfo.ini. MultiCalibrationFileNum0 uses RecoveryInfo for per-file records; nonzero uses RecoveryInfo1..N plus master RecoveryInfo. InfoInStorage contains two OEM-support booleans; it is not a seed/key payload.')
+    native('recovery-file-replace', 'core', 0x1001EAE0, 525, 'e277886bcc9dba35f2479a9246db72528850e26b951ad7d11217c0e3b0624eea',
+           'DataFile save probes old file with sopen flags0, closes and remove()s it if openable, then sopen flags0x101/share0x40/mode0x180, one _write, _close, and exact write-count check. Remove/open/short-write errors throw. There is no temp-file rename, FlushFileBuffers or fsync in this body; a source-order interruption after remove can leave no checkpoint.')
+    native('recovery-copy-calibration', 'core', 0x100212D0, 1433, 'f7574f23560a4f62982203589f54007f11b4845ea89813f5ddd8387107018cdf',
+           'Constructs saved paths Save\\\\basename for single file; multi-file Save\\\\<1-based-index>_<basename>. CopyFileA(original,saved,FALSE) attempts overwrite in file order and its BOOL result is ignored; only afterward does caller publish checkpoint. Thus record publication does not prove every calibration backup succeeded.')
+    native('recovery-create-order', 'core', 0x100302B0, 382, 'b771eda1f5b4bfd14c6eb3ee0151fea4c16774bd02f4fdbeaf89b5e2f80ec33e',
+           'If requested, and neither resume-armed(+0x53) nor persistence-active(+0x94), ensure Save directory (CreateDirectory result ignored) then copy calibration backups. Set Writing(+0x50)=1, save full record, then set persistence-active=1. Resume does not recopy backups. Subsequent updates rewrite the entire checkpoint, not a journal.')
+    native('recovery-native-load', 'core', 0x10037FE0, 5920, '38c20360a0d15c3f9551d289845a359f12096c41552a19773c8e84b7d370e324',
+           'Native reader reconstructs calibration objects with10031A20(saved path,recovery=true), handles multi-file/container expansion, resolves SelectedJ2534Device by exact comparison against enumerated device names (unmatched throws), sets1000ms timeout, restores CID/node/address/assembly/blank/vehicle flags and VIN/SSMID. Sets resume-armed(+0x53)=1 only after reconstruction. Browser auth/exclusive ownership is not serialized.')
+    native('recovery-worker-restore', 'core', 0x10035E80, 1007, 'af47b91063dcc7d7be64680116a2eaba8ad3a10779f6de28965110dbdf08de40',
+           'Recovery predicate10039720 is resume-armed && !recovery-disabled. Start resets volatile counters/status, sets engine state2, restores WriteCpuIndex(+0x4C) and OffsetOfWriteCpuMultiCalIndex(+0x110 -> global1008C93C), WritingEndBlock notification and UseNewSoftwarePassword (forced true if end-block), marks earlier CPU progress100, maps divided CPU index, then CreateThread1003C7B0 or SetEvent on existing worker. The restored multi-cal CPU offset is NOT WriteTargetDividedCPUImageIndex(+0x124). It reconstructs execution state, not an old process/thread handle or byte-level writer offset.')
+    native('recovery-native-match', 'core', 0x10034490, 3387, 'a17a80f9055f769dbf19f29e3fe5f7f9f1a2cba2490412e2fe51c94c2cbb55d0',
+           'JudgeFlashable ->1005F800 ->10034490 rebuilds CPU-to-CID index map initialized -1, compares calibration CPU old-CID alternatives against restored received CID lists; applicable node-aware variants use10043220. Tracks missing/new CID tuples, CPU capacity, blank ECU/whole-repro policy and OEM conditions rather than matching a session token. Native flashability and frontend VIN gate are separate.')
+    native('recovery-cid-node-pair', 'core', 0x10043220, 249, '3e3e3e7111503b3a8c5d0dbe3cc410e7c0c4e8c22a87d1e59367d31a270ac51b',
+           'CID/node matcher first requires CID-vector count == address-record count (12-byte records), then compares both candidate CID and associated node text at the SAME index with exact byte-length equality10014C10. Returns matching index or0xFFFFFFFF. No partial-prefix, case-fold, cross-index match or session-ID fallback.')
+    native('recovery-parallel-pair', 'core', 0x10043100, 285, 'a622a06ebe880c1cdcba7a407771d625c1e43813b0f452e611ca59ef5519141f',
+           'Parallel string-vector matcher likewise requires equal counts and exact CID+type/node at same index; mismatch/empty lists return0xFFFFFFFF. It is used for deduplication of compatibility tuples, not authentication of a browser/account session.')
+    native('recovery-native-judge', 'core', 0x1005F800, 7796, 'd7cbe72481248f1f715d936700cd666167a66e84b8a1d7c98d16e83463b86b61',
+           'Native JudgeFlashable callee rejects missing calibration or unavailable CID/status preconditions with0xBBE; calls10034490, projects per-system current/new CID/type tuples, deduplicates matching new-CID/node pairs and applies100352E0 to each result. Wrapper10061680 preserves saved CalibrationFileIndex while recovery is armed. A saved file alone does not bypass this compatibility calculation.')
+    native('recovery-next-checkpoints', 'core', 0x1003E4B0, 2480, '7117124356a2d0d3e34e7359500b90182c9c7bc6f1380461039513884872b3d3',
+           'Worker continuation independently assigns+saves CalibrationFileIndex(+0x10C), WriteCpuIndex(+0x4C), OffsetOfWriteCpuMultiCalIndex(+0x110) in that order when active. The third source is worker+0x98C ->1008DCC0, NOT divided-image field+0x124. Next-CPU branch increments+saves CPU index before continuing; final-CPU/all-file branch invokes10037EA0 deletion before later browser CID/report publication. Three rewrites are not an atomic tuple update.')
+    native('recovery-divided-checkpoints', 'core', 0x1003F093, 1920, 'cd1b508199ba147cfd889bb810507f0ba67fde61901b4ca1cfa271cc58fb5685',
+           'Divided-CPU/multi-cal continuation called from1003EEA0 resets CPU counters and saves CalibrationFileIndex(+0x10C) then WriteCpuIndex(+0x4C) then OffsetOfWriteCpuMultiCalIndex(+0x110) in separate full-record writes. WriteTargetDividedCPUImageIndex remains a distinct +0x124 field. This is source-order checkpoint progress, not an atomic recovery transaction.')
+    native('recovery-discard-native', 'core', 0x10037EA0, 319, '266e4bb566f605ef74725a15d7cbda8c1d420ae6a52b0a917fdb6aaba622f4fc',
+           'Discard attempts DeleteFileA for each nonempty saved calibration path in vector order, then RecoveryInfo.ini, resets recovery object10023840 regardless of deletion results, then throws if any backup deletion or checkpoint deletion failed. Export10063150 returns0 only when this helper does not throw. A failed discard can leave orphan files but cleared in-memory path ownership.')
+    native('recovery-clear-memory', 'core', 0x1003FE00, 2304, 'd992a5462a807c8aee39651778eb2b4deb06f0322abcece3f89d57a4bf99fafe',
+           'Full reset joins worker and releases calibration/progress/native buffers, calls10023840 to reset recovery object, but does not call10037EA0/DeleteFileA. Forced status-clear on failed/cancelled postprocessing is therefore not the explicit disk-discard operation.')
+    il('report-xml-publication', 'backend', 'Cuw.Model.CuwModel', 'CreateReprogrammingReport',
+       ('ReprogramResult', 'XmlSerializerNamespaces::Add', 'set_Indent', 'set_NewLineChars', 'Path::GetTempFileName', 'ExpandEnvironmentVariables', 'XmlSerializer::Serialize', 'Substring', 'xmlnss', 'TextWriter::Write', 'File::Move'),
+       'Managed report writer serializes Cuw.Entity.ReprogrammingReport to memory, UTF8-decodes, removes first character, replaces xmlnss with xmlns, writes UTF8 temp file and disposes streams before File.Move(temp,ExpandEnvironmentVariables(OutputPath)). ReturnValue0 follows Move. No overwrite/delete/catch/finally-temp-delete surrounds Move: publication failure can leave temp file and prevents successful reply.')
+    native('recovery-whole-calibration', 'core', 0x10023D20, 1120, 'b291e1b9e7295bb0652135c8f282523bd56f3f546cdacc49cf54b08275b6ec0d',
+           'Whole-repro replacement sets per-file WholeReproCalibrationFileFlag and original path; if active, DeleteFileA(old backup) first, reconstructs Save\\\\<index>_<basename>, CopyFileA(new original,new backup,FALSE), then writes full checkpoint. Delete/Copy BOOLs are ignored. Interruption between deleting old backup and publishing new record can leave old checkpoint referencing a missing backup.')
+    native('recovery-integer-parser', 'core', 0x1002D540, 359, '52d69c0c4b4166597ad54b9ae3b330ee263582ac5be3dac4da45f2a8217b898b',
+           'Nonempty integer record uses strtol(base10); no conversion throws invalid_argument, ERANGE throws out_of_range. Empty/missing uses caller default; trailing characters are not required to be consumed.')
+    native('recovery-boolean-parser', 'core', 0x1002DD90, 360, 'bd68ac9f7b7d6a358125b1dd21eb7ba21da648a5ba2baac8882e9ac4a4dfd28c',
+           'Nonempty boolean record uses the same decimal strtol/error checks, then value>0 (not JSON true/false); missing/empty uses caller bool default.')
+    native('recovery-line-serializer', 'core', 0x1005C060, 219, '632fec420509b1fa40be9b220d190a10afc67bb8b987f70a4fbd337eab72690f',
+           'CStrings serializer concatenates lines with CRLF bytes1007C748=0D0A00 only between lines, then NUL terminator; no trailing CRLF is added. The NUL is not included in the encoded DataFile length.')
+    native('recovery-key-initializers', 'core', 0x10002C00, 2560, 'e683f27c807794ac47b891c8dc5d04fc80908ede1e7f75b8cf8b7dc87c2c504c',
+           'Exact native SSO-string initializers bind recovery section/key names. CIDNodeNum/CIDNode%d/ReproCheckResult remain initialized vocabulary but are not accessed by this release recovery reader/writer; do not import the older V18 recovery schema.')
+    core_pe = pefile.PE(str(pes['core']))
+    vocabulary = {}
+    for match in re.finditer(rb'\x68(.{4})\xb9(.{4})\xe8', core_pe.get_data(0x2C00, 2560), re.DOTALL):
+        pointer, destination = (int.from_bytes(match[n], 'little') for n in (1, 2))
+        if 0x1008BBEC <= destination <= 0x1008BF94:
+            vocabulary[hex(destination)] = core_pe.get_data(pointer - 0x10000000, 128).split(b'\0', 1)[0].decode('ascii')
+    if vocabulary.get('0x1008bd54') != 'RecoveryInfo.ini' or len(vocabulary) != 40:
+        raise ValueError('recovery vocabulary initializer drift')
+    # Derive identities from x86 operands and initialized key strings, not labels
+    # attached to the worker's visually similar progress indices.
+    progress_fields = {0x10C: 'CalibrationFileIndex', 0x4C: 'WriteCpuIndex',
+                       0x110: 'OffsetOfWriteCpuMultiCalIndex', 0x124: 'WriteTargetDividedCPUImageIndex'}
+    progress_joins = []
+    for offset, load_va, key_va in ((0x110, 0x10022C27, 0x10022C3F), (0x124, 0x10022F1C, 0x10022F34)):
+        load = core_pe.get_data(load_va - 0x10000000, 6)
+        push = core_pe.get_data(key_va - 0x10000000, 5)
+        observed_offset = int.from_bytes(load[2:], 'little')
+        key_global = int.from_bytes(push[1:], 'little')
+        if (load[:2] != b'\x8b\x86' or push[:1] != b'\x68' or observed_offset != offset
+                or vocabulary.get(hex(key_global)) != progress_fields[offset]):
+            raise ValueError('recovery progress serializer field/key dataflow drift')
+        progress_joins.append(dict(key=progress_fields[offset], object_offset=hex(observed_offset),
+                                   load_va=hex(load_va), load_bytes=load.hex(),
+                                   key_push_va=hex(key_va), key_push_bytes=push.hex(),
+                                   key_global=hex(key_global)))
+    continuation_joins = []
+    for addresses in ((0x1003E7A6, 0x1003E7CB, 0x1003E7F0), (0x1003F150, 0x1003F175, 0x1003F19A)):
+        fields = []
+        for address in addresses:
+            raw = core_pe.get_data(address - 0x10000000, 11)
+            worker_offset = int.from_bytes(raw[2:6], 'little')
+            destination = int.from_bytes(raw[7:11], 'little')
+            if raw[:2] != b'\x8b\x86' or raw[6] != 0xA3:
+                raise ValueError('recovery continuation store instruction drift')
+            fields.append(dict(key=progress_fields[destination - 0x1008DBB0],
+                               object_offset=hex(destination - 0x1008DBB0),
+                               worker_offset=hex(worker_offset), store_global=hex(destination),
+                               locator=hex(address), instruction_bytes=raw.hex()))
+        if [f['key'] for f in fields] != ['CalibrationFileIndex', 'WriteCpuIndex', 'OffsetOfWriteCpuMultiCalIndex']:
+            raise ValueError('recovery continuation field order drift')
+        continuation_joins.append(fields)
+    resume_load = core_pe.get_data(0x3604A, 5)
+    resume_store = core_pe.get_data(0x36058, 5)
+    if resume_load != bytes.fromhex('a1c0dc0810') or resume_store != bytes.fromhex('a33cc90810'):
+        raise ValueError('recovery multi-cal offset restore dataflow drift')
+    evidence.append(dict(id=q('recovery-progress-field-dataflow'), source=q('core'), kind='native-field-key-dataflow',
+                         locator='10022C27/10022F1C serializer;1003E7A6/1003F150 continuation;1003604A resume',
+                         serializer_fields=progress_joins, continuation_fields=continuation_joins,
+                         restored_field=dict(key=progress_fields[0x110], object_offset='0x110',
+                                             load_va='0x1003604a', load_bytes=resume_load.hex(),
+                                             store_va='0x10036058', store_bytes=resume_store.hex(),
+                                             worker_global='0x1008c93c'),
+                         finding='Decoded x86 operands bind +0x110 to OffsetOfWriteCpuMultiCalIndex and +0x124 to WriteTargetDividedCPUImageIndex. Both continuations update the former as their third checkpoint; resume restores that former field into1008C93C. The divided-image index is a separate serialized value.'))
+    recovery_format = dict(
+        path=r'{backend executable directory}\Save\RecoveryInfo.ini',
+        owner='Process-global native object 0x1008DBB0, size0x154; browser ServerData is a separate in-memory cache.',
+        encoding='Two obfuscated bytes per plaintext INI byte; nibbles n -> ((n+8)<<2)|(rand()&3); no MAC/checksum/version record.',
+        serializer='10021870 ->1002DF10/CStrings1005C060 ->1001EAE0; reader1001F2F0 ->1001E8E0 ->1001C640 ->1005BEE0 ->1002CDD0',
+        scalar_grammar='Plaintext [section] and key=value lines, CRLF separators without trailing CRLF; numbers decimal strtol, booleans decimal>0. Missing/empty values use getter defaults; invalid/no-conversion and ERANGE throw; trailing numeric junk is not rejected.',
+        vocabulary=vocabulary,
+        progress_field_dataflow=q('recovery-progress-field-dataflow'),
+        sections=dict(RecoveryInfo='Master fields; also per-file fields when MultiCalibrationFileNum=0',
+                      RecoveryInfoN='1-based suffix1..N when MultiCalibrationFileNum>0; per-file records',
+                      InfoInStorage=['IsSuzukiReproSecuritySupported', 'IsDaihatsuReproSecuritySupported']),
+        native_object_fields=[
+            dict(offset=offset, key=key, representation=rep)
+            for offset, key, rep in (
+                ('0x00', 'SavedCalibrationFilePath', 'vector<string>; per-file'),
+                ('0x0c', 'SelectedJ2534Device', 'string; master'),
+                ('0x24', 'CIDNum/CID1..N', 'vector<vector<string>>; per-file'),
+                ('0x30', 'VIN', 'string; master'),
+                ('0x48', 'IsCentralGWExist', 'bool'),
+                ('0x4c', 'WriteCpuIndex', 'int32'),
+                ('0x50', 'Writing', 'bool'),
+                ('0x51', 'UseNewSoftwarePassword', 'bool'),
+                ('0x52', 'WritingEndBlock', 'bool'),
+                ('0x98', '(not a record key)', 'RecoveryInfo.ini path'),
+                ('0xb0', 'PassThruErrorCode', 'int32; missing default9999'),
+                ('0xb4', 'CommPhase', 'byte; missing default2'),
+                ('0xb8', 'CIDRequestedLogicalAddress1..N / fallback CIDRequestedCanID1..N', 'per-file address pairs; logical preferred'),
+                ('0xc4', 'ReproGWNode', 'byte'),
+                ('0xc8', 'ContactTypeAtSuccessGetCID', 'string'),
+                ('0xe0', 'SequenceChangedForGetCID', 'bool'),
+                ('0xe1', 'SSMID', 'byte'),
+                ('0xe4', 'AssyNoNum/AssyNo1..N', 'per-file vector<string>'),
+                ('0xf0', 'VehicleInfoForUpdateAvailableFlagNum/VehicleInfoForUpdateAvailableFlag1..N', 'per-file vector<bool>'),
+                ('0xfc', 'BlankECUFlag/BlankECUFlag1..N', 'per-file bit vector; common flag is per-item fallback'),
+                ('0x108', 'MultiCalibrationFileNum', 'int32'),
+                ('0x10c', 'CalibrationFileIndex', 'int32'),
+                ('0x110', 'OffsetOfWriteCpuMultiCalIndex', 'int32'),
+                ('0x114', 'CanIDFromResultOfGetCIDNum/CanIDFromResultOfGetCID1..N', 'vector<string>'),
+                ('0x120', 'KindOfVehicle', 'int32'),
+                ('0x124', 'WriteTargetDividedCPUImageIndex', 'int32'),
+                ('0x128', 'HardwareID', 'string'),
+                ('0x140', 'IsSuzukiReproSecuritySupported', 'bool; InfoInStorage'),
+                ('0x141', 'IsDaihatsuReproSecuritySupported', 'bool; InfoInStorage'),
+                ('0x142', 'DHCentralGWType', 'byte'),
+                ('0x144', 'WholeReproCalibrationFileFlag', 'per-file bit vector'),
+            )],
+        volatile_fields={'0x53': 'resume-armed', '0x54': 'recovery-disabled',
+                         '0x58': 'original calibration paths', '0x94': 'persistence-active'},
+        source_order_prefixes=[
+            'ensure Save directory -> copy backup0..N (copy BOOL ignored) -> set Writing -> publish checkpoint -> active=true',
+            'each update: mutate one object field -> serialize full INI -> probe/close -> remove old checkpoint -> create -> write -> close -> count check',
+            'multi-index advance: CalibrationFileIndex(+0x10C) save -> WriteCpuIndex(+0x4C) save -> OffsetOfWriteCpuMultiCalIndex(+0x110) save; an interruption can expose a mixed tuple; the third field is not WriteTargetDividedCPUImageIndex(+0x124)',
+            'whole-repro backup replacement: set flag/original path -> delete old backup -> compute new backup name -> copy new calibration (BOOL ignored) -> publish record',
+            'discard: delete backups0..N -> delete checkpoint -> reset memory -> throw if any deletion failed',
+            'final native CPU/file completion deletes recovery before browser post-CID collection/report; a missing checkpoint is not proof of report publication',
+            'failure/cancel force-clear joins/reset memory without deleting checkpoint; browser report failure can skip later sleep/cache/unlock steps',
+        ],
+        durability='Source-level call prefixes only; no claim that close/delete/copy or File.Move survived power loss.',
+        evidence=[q(n) for n in ('recovery-key-initializers', 'recovery-format-reader', 'recovery-format-writer',
+                                  'recovery-file-replace', 'recovery-copy-calibration', 'recovery-create-order',
+                                  'recovery-native-load', 'recovery-worker-restore', 'recovery-discard-native',
+                                  'recovery-clear-memory', 'recovery-next-checkpoints', 'recovery-divided-checkpoints',
+                                  'recovery-whole-calibration', 'recovery-integer-parser', 'recovery-boolean-parser',
+                                  'recovery-line-serializer')])
+    report_attributes = []
+    backend_pe = managed['backend']
+    report_type = next(t for t in backend_pe.net.mdtables.TypeDef
+                       if str(t.TypeNamespace) == 'Cuw.Entity' and str(t.TypeName) == 'ReprogrammingReport')
+    report_properties = next(p.PropertyList for p in backend_pe.net.mdtables.PropertyMap if p.Parent.row is report_type)
+    for attribute in backend_pe.net.mdtables.CustomAttribute:
+        owner = next((str(p.row.Name) for p in report_properties if attribute.Parent.row is p.row), None)
+        if attribute.Parent.row is report_type:
+            owner = 'ReprogrammingReport'
+        if owner is not None:
+            report_attributes.append(dict(owner=owner, attribute=str(attribute.Type.row.Class.row.TypeName),
+                                          serialized_blob=attribute.Value.value.hex()))
+    evidence.append(dict(id=q('report-xml-schema'), source=q('backend'), kind='managed-custom-attributes',
+                         locator='Cuw.Entity.ReprogrammingReport TypeDef/PropertyMap CustomAttribute',
+                         attributes=report_attributes,
+                         finding='Root saveEcuProgram, namespace http://www.openuri.org/ (xmlnss workaround); DealerCode/VehicleConnectSession/Version/Vin/Date/Language/Type=ReprogramResult/SoftwareId/UserType/IsFlashSuccess and OldCalibrationId/NewCalibrationId arrays of CalibrationDataType (CalibrationType/CalibrationId). Attribute blobs pin exact report serializer names; no values exported.'))
     native('gene-before', 'gene', 0x1000E2C0, 586, 'd23207445585b875ca353c08dabbdb3c629099e9d913f3fdf6aaa936be6b0a0a',
            'KeyUpdate_before rejects unsupported protocol discriminator !=0x34 with99; auth helper25890 accepts 0xFFA/0xFFB modes, otherwise returns error; helper262D0 prepares selected topology and exports admitted identities plus M1/M2/M3 to caller on success.')
     native('gene-validate', 'gene', 0x1000E510, 815, '07790f263273a5f0c7b3fd4658fa10c7dd642894ec4a92b4eb43ef748e6b19af',
@@ -259,6 +440,56 @@ def build(*, installed: Path = DEFAULT_INSTALLED, cuw_root: Path = DEFAULT_CUW,
         ('decode-crypt', crypt, '98fc5afd362f6e28aec9f06f71c15c4d6751751a27a8325cdc143ad9f57366b0'),
     ):
         recovered(name, path, installed / 'ContentServer' / path.name, expected, aux_root / 'manifest.json')
+    report_config = installed / 'CUWPlus/conf/cuwpf.yaml'
+    report_pair = report_config.with_name('gtsplus.pp')
+    source('deployed-report-config', report_config, '7213fa3d588ec16b337cf38ca3a5f0a01871f1fca4dc1d8a461cb26fcf1999c4', 'installed encrypted CUW configuration; allowlisted report scalars only')
+    source('deployed-report-pair', report_pair, '33fe4c117ef94973249ca357a77c6318f84969b8cd77f3b97d88ee514b7b5491', 'installed configuration pairing; contents omitted')
+    report_plain = decrypt_file(report_config, report_pair, cm)
+    if digest(report_plain) != '3e77212316c86d76d6f4704c0dcca44647a7da1f2e0ae8ae0d5a759dac0e6816':
+        raise ValueError('deployed CUW report configuration drift')
+    report_text = report_plain.decode('utf-8-sig')
+    report_scalars = {}
+    for key in ('dataSyncFolderPath', 'requireSendReprogrammingReport'):
+        match = re.search(r'(?m)^\s*-\s+key:\s*' + re.escape(key) + r'\s*\r?\n\s+value:\s*([^\r\n]+)', report_text)
+        if match is None:
+            raise ValueError(f'deployed CUW report scalar missing: {key}')
+        report_scalars[key] = match[1].strip()
+    policy_file = installed / 'GTSPlus DataSync/GTSPlusDataSync.yml'
+    policy_pair = policy_file.with_name('DSP.pp')
+    source('report-join-upload-policy', policy_file, '79f7b88ac12f2b934757228ba09d0dc45c56792c46bef6a4ec35e65966c6b3a6', 'installed encrypted DataSync policy; report eligibility join only')
+    source('report-join-upload-pair', policy_pair, 'b76596dc548e23056bde89b13638c4ef5a3032257ee4a2c3c31f2f86ebbff0be', 'installed DataSync configuration pairing; contents omitted')
+    policy_plain = decrypt_file(policy_file, policy_pair, cm, key_type=1)
+    if digest(policy_plain) != '1af209d7cd72a7ecfba5c1dc0dbede86730b4cd2d09de2814de651efb125bdb1':
+        raise ValueError('deployed report/upload policy join drift')
+    policy_text = '\n'.join(policy_plain.decode('utf-8-sig').splitlines())
+    destinations = []
+    for record in re.split(r'(?m)^    - id: ', policy_text)[1:]:
+        destination_id = record.splitlines()[0].strip()
+        root = re.search(r'(?m)^        path:\s*([^\n]+)', record)
+        extension_rule = re.search(r'(?m)^        file-extension-validation:\n          do-validation: (\w+)\n          extensions:\n((?:            - [^\n]+\n)+)', record)
+        if root is None or extension_rule is None:
+            raise ValueError('deployed upload selector shape drift')
+        extensions = re.findall(r'(?m)^\s+- (\.\w+)\s*$', extension_rule[2])
+        destinations.append(dict(id=destination_id, path=root[1].strip(),
+                                 extension_validation=extension_rule[1] == 'True', extensions=extensions))
+    if ([d['id'] for d in destinations] != ['GTS-C02', 'GTS-E02', 'GTS-M02']
+            or any(not d['extension_validation'] or '.xml' in d['extensions'] for d in destinations)
+            or any(d['path'].casefold() == report_scalars['dataSyncFolderPath'].casefold() for d in destinations)):
+        raise ValueError('deployed CUW XML eligibility conclusion drift')
+    evidence.append(dict(id=q('deployed-report-policy-join'), source=q('deployed-report-config'),
+                         related_sources=[q(n) for n in ('deployed-report-pair', 'decode-cm', 'report-join-upload-policy', 'report-join-upload-pair')],
+                         kind='offline-decrypted-allowlisted-deployment-join',
+                         locator='CUWPlus/conf/cuwpf.yaml config -> DataSync GTSPlusDataSync.yml monitoring/extension rules',
+                         config_plaintext_sha256=digest(report_plain), policy_plaintext_sha256=digest(policy_plain),
+                         report_config=report_scalars, upload_destinations=destinations,
+                         canonical_consumer_evidence=['sync_upload.deployment_policy', 'sync_upload.validation'],
+                         finding='Shipped CUW report directory is public LOGS/BDC/CUW-R02, outside all three deployed DataSync watcher roots; all three enforce extension lists .json/.gtsr, not .xml. Thus CUW XML is not eligible for the shipped upload policy. Shipped requireSendReprogrammingReport=false still permits the signed controller nonFieldFixFlag exception when needSendReprogrammingReport is true. This is deployed configuration/source eligibility, not an observation of upload or a statement about runtime overrides.'))
+    il('report-config-decode', 'backend', 'Cuw.Config.ConfigReader', 'ReadConfig',
+       ('GtsPlusCM::Decrypt', 'Editor-header', 'Parse'),
+       'Backend Init selects CUWPlus/conf/cuwpf.yaml with conf/gtsplus.pp; reader decrypts, comments editor header and deserializes YAML. Only report path/enable scalars are exported here.')
+    il('report-config-lookup', 'backend', 'Cuw.Model.CuwModel', 'GetConfig',
+       ('get_Key', 'CollectionUtil::TryGet', 'set_Value'),
+       'GetConfig returns the requested dictionary value; signed model maps CONFIG_KEY_DATA_SYNC_FOLDERPATH to dataSyncFolderPath and CONFIG_KEY_SEND_REP_REPORT to requireSendReprogrammingReport.')
     certificate = installed / 'ContentServer/dist.crt'
     source('gui-certificate', certificate, '857ec034c946604c52fd845134386b5b914936962254048e8766d78fa6b3ad50', 'installed public signature certificate')
     packages = {}
@@ -418,6 +649,29 @@ def build(*, installed: Path = DEFAULT_INSTALLED, cuw_root: Path = DEFAULT_CUW,
        'Logout inhibit is separate CUW->GTS relay command6 status1/0; relay failure is swallowed.')
     js('ui-report-persist', 'cuw-model', 'sendReprogrammingReport', ('CONFIG_KEY_DATA_SYNC_FOLDERPATH', 'createReprogrammingReportPath', 'model.cuwApi.createReprogrammingReport(param)'),
        'Completion report destination derives from configured DataSync folder and software ID; report contains before/new CID lists, success flag and session metadata, with no values exported here.')
+    js('report-filename', 'cuw-model', 'createReprogrammingReportPath',
+       ("'CUW_' + softwareId", "year + month + day + hour + minutes + second + '.xml'", 'd.getFullYear()', 'd.getMonth() + 1'),
+       'Report target is <configured folder>\\\\CUW_<softwareId>_<local YYYYMMDDhhmmss>.xml, second-resolution with no unique suffix. File.Move does not overwrite an existing destination; collision/failure prevents report success and can leave temp file.')
+    js('report-enable-gate', 'cuw-controller', 'sendReprogrammingReport',
+       ('CONFIG_KEY_SEND_REP_REPORT', 'model.needSendReprogrammingReport', 'calibrationInfo.nonFieldFixFlag',
+        "result.value === 'true' || nonFieldFixFlag", 'model.sendReprogrammingReport(repReport)'),
+       'Report publication requires needSendReprogrammingReport and either enable string true or calibration.nonFieldFixFlag. Shipped enable=false therefore suppresses ordinary reports, but not the explicit nonFieldFixFlag exception; any emitted XML still lies outside shipped upload selectors.')
+    vin_comparison = 'cuw.util.isEqualVin=function(vin,vin2){if(vin?.trim() === vin2?.trim()){return true;}else {return false;}};'
+    vin_offset = texts['cuw-utility'].find(vin_comparison)
+    if vin_offset < 0:
+        raise ValueError('recovery VIN comparison drift')
+    evidence.append(dict(id=q('recovery-vin-comparison'), source=q('cuw-utility'), kind='javascript-control-flow',
+                         locator='cuw.util.isEqualVin', character_offset=vin_offset,
+                         function_sha256=digest(vin_comparison.encode()), finding='VIN equality trims both optional strings and uses strict equality; no case folding, padding, VIN checksum or ECU/session token check occurs here.'))
+    js('recovery-vin-admission', 'cuw-controller', 'checkRecoveryVin',
+       ('KindOfCentralGW.SUZUKI && !controller.commonInfo.isExistsReproSecurity', 'CONFIG_KEY_REQUIRED_GET_VIN',
+        'vins.resGetVIN,vins.dcm,vins.airbag,vins.ecgw,vins.suzukiDcm', 'new Set(allVins.filter(Boolean))',
+        'uniqueVins.length === 1', 'isEqualVin(model.vin,uniqueVins[0])', 'uniqueVins.length === 0', 'viewS70197.init(vins)'),
+       'Recovery VIN is a conditional frontend check: Suzuki without repro-security or RequiredGetVin!=true skips vehicle comparison and releases VIM. One nonempty unique VIN must match saved VIN and any confirmed VIN; zero VINs only compares confirmed VIN to saved VIN when confirmation exists; multiple distinct VINs reject. Comparison trims only, and rejection never starts worker.')
+    js('recovery-browser-restore', 'cuw-model', 'restoreClientData',
+       ('DATA_KEY_CALFILEHEADERINFO', 'DATA_KEY_BEFORECIDLIST', 'DATA_KEY_REWRITETARGETLIST',
+        'DATA_KEY_REPROGRAMMING', 'DATA_KEY_IS_RECOVERY', 'DATA_KEY_IS_USB_COPY_COMPLETE', 'DATA_KEY_VEHICLE_CONFIRMATION'),
+       'Same-process reconnect reconstructs browser state sequentially from backend dictionary: parsed calibration/before-CID/targets/progress, prior-info-sent, VIN/error, OEM/recovery/security/USB flags and confirmed vehicle. It does not read checkpoint or create/restart native worker. Missing/malformed cached JSON aborts restore and parent goStartCuw clears server state instead of silently treating it as fresh recovery.')
 
     states = [dict(id=q(n), owner=o, meaning=m) for n, o, m in (
         ('external-launch', 'CUWLauncher.exe', 'File association request owns launcher mutex until CUW platform-name admission then disconnect.'),
@@ -452,8 +706,8 @@ def build(*, installed: Path = DEFAULT_INSTALLED, cuw_root: Path = DEFAULT_CUW,
     tr('login-lock', 'ui-connect', 'exclusive', 'Login complete', 'CUW lock success and platform exclusive admission', 'Stop prior CID/copy work; start diagnosis/configure engine; inhibit logout.', 'ui-login', 'ui-init', 'ui-admission', 'lock', 'permission')
     tr('select-fresh', 'exclusive', 'select', 'Read native status', 'Not started and no usable saved recovery', 'Validate configured vehicle confirmation; scan calibration directories by old CID.', 'ui-admission', 'cal-search', 'cal-read')
     tr('select-recovery', 'exclusive', 'recovery', 'Read native recovery file', 'Not started and native recovery success', 'Load saved device/VIN/calibration/security metadata; show recovery choices.', 'ui-admission', 'recovery-read')
-    tr('discard-recovery', 'recovery', 'select', 'User confirms recovery deletion', 'Delete chosen', 'Delete recovery file and clear saved VIN/security state.', 'ui-recovery-delete')
-    tr('resume-recovery', 'recovery', 'programming', 'User retries saved session', 'VIN check and JudgeFlashable succeed', 'Start native engine with recovery marker; poll status.', 'ui-recovery', 'start-flag')
+    tr('discard-recovery', 'recovery', 'select', 'User confirms recovery deletion', 'Delete chosen; native deletions do not throw', 'Delete backup files then checkpoint, reset native object, then clear browser VIN/security cache. Native deletion failure resets memory but stops later browser cache clearing.', 'ui-recovery-delete', 'recovery-discard-native')
+    tr('resume-recovery', 'recovery', 'programming', 'User retries saved session', 'Conditional VIN gate passes and native JudgeFlashable success+flashable', 'Match saved J2534 name/calibration CID/node topology; restore CPU/end-block/password and multi-cal CPU offset(+0x110), distinct from divided-image index(+0x124); recreate or signal native worker and poll status.', 'ui-recovery', 'start-flag', 'recovery-vin-admission', 'recovery-native-load', 'recovery-native-match', 'recovery-native-judge', 'recovery-worker-restore')
     tr('start-native', 'select', 'programming', 'User starts after calibration/J2534/battery checks', 'Native start0 or in-progress accepted by UI', 'Set backend programming flag only for native0 and show progress.', 'ui-start', 'start-flag')
     tr('poll-native', 'programming', 'programming', 'Timer poll', 'REPROGRAMMING_IN_PROGRESS', 'Update CPU/progress/remaining time then schedule next poll.', 'ui-progress', 'progress')
     tr('ig-wait', 'programming', 'wait-ig', 'Native WAITING_FOR_REPROGRAMMING', 'IG change/disconnect-battery required', 'Render inter-CPU ignition/battery prompts instead of restarting.', 'ui-progress')
@@ -496,26 +750,32 @@ def build(*, installed: Path = DEFAULT_INSTALLED, cuw_root: Path = DEFAULT_CUW,
         ('auth_settings', 'CUW controller/model', 'configured reprogramming signature service or offline response XML', 'platform web-service API / local file dialog', 'Method3 seed/keyPairID request; returned ID/status/signature, or saved request and imported response XML; no values exported.', ['key-request', 'ui-key-request', 'ui-key-poll', 'ui-key-offline']),
         ('operations', 'GTS Subaru ECU Security Key worker', 'UtilityPlusFrontNK.ComUtilityFront -> UtilityGene ord98/99/100', 'signed platform UG000021/22/23 -> native initialized command table selectors0x15/16/17 and DMGR native arguments', 'Initialized utility session; Subaru internally hashed exchange VIN/tuples, resultCode0 and native-prepared participant matching (not ordinary current-VIN admission); wrapper status and per-ECU result array. Ordinary P5/P6 worker takes separate direct RID1010/D904 path.', ['utility-dispatch', 'utility-command-map', 'gene-before', 'gene-after', 'key-subaru-command-ids', 'key-record-integrity', 'key-subaru-data-gate', 'key-subaru-controller-admit', 'key-subaru-write', 'key-standard-write']),
         ('ui_ipc', 'CUW postprocess/failure end', 'GTS Software-as-a-Part/AISAC2/Hino caller', 'relayGuiMessage plus browser-window-close polling', 'fromAppName CUW,commandId4,data.returnValue NORMAL0/CANCEL1 to P4 app; GTS waits win.closed before CID/ROB/CBest/INF continuation. Logout inhibit is command6,status1/0.', ['ui-result-relay', 'ui-logout-relay', 'saap-cuw-call', 'saap2-cuw-call', 'hino-cuw-call', 'ui-success-cleanup']),
-        ('sync_upload', 'CUW completion model/backend', 'DataSync report consumer', 'configured output path and native report create API', 'Before/new calibration IDs, flash success flag, session metadata; report path uses configured DataSync folder/software ID.', ['ui-report-persist']),
+        ('sync_upload', 'CUW completion model/backend', 'Shipped CUW-R02 staging is ineligible for deployed DataSync selectors', 'signed JS filename -> managed XML serializer/temp/File.Move; freshly decoded config/policy comparison', 'CUW XML stages under public LOGS/BDC/CUW-R02, outside GTS-C02/GTS-M02/GTS-E02 watcher roots; every deployed extension list excludes .xml. Report publication is not upload.', ['ui-report-persist', 'report-filename', 'report-enable-gate', 'deployed-report-policy-join', 'report-xml-publication', 'report-xml-schema']),
     )]
     persistence = [dict(path_pattern=path, producer=producer, consumer=consumer, created=created, flushed=flushed, deleted=deleted, evidence=[q(e) for e in ev]) for path, producer, consumer, created, flushed, deleted, ev in (
         ('HKCU/Software/Toyota Diagnostics/Calibration Update Wizard/LastAccessFolder', 'CuwModel.StoreLastAccessFolderPath', 'GetLastAccessFolderPath / calibration file picker', 'User folder selection', 'Registry.SetValue immediate API', 'No deletion in observed folder setter/getter', ['last-folder']),
         ('CUW backend ServerData dictionary (process memory)', 'SaveData / CUW model saveReprogrammingState', 'restoreClientData after browser reconnect', 'Key/value added or overwritten during CUW workflow', 'No file flush in SaveData; lifetime is backend process', 'ClearServerData on finish/failure; process exit', ['server-data', 'ui-admission', 'ui-failure-exit']),
-        ('CUW.dll recovery storage (native path list)', 'CUW native engine / SetInfoInStorageForRecovery', 'ReadRecoveryInfoFile and recovery retry UI', 'Programming/recovery storage lifecycle', 'Native implementation owns serialization', 'Explicit recovery Delete choice; not assumed deleted by every socket close', ['recovery-read', 'ui-recovery-delete', 'native-clear']),
+        (r'{backend executable directory}\Save\{RecoveryInfo.ini,calibration basenames,<index>_<basename>}', 'CUW.dll process-global recovery object0x1008DBB0', 'ReadRecoveryInfoFile -> saved calibration reload -> J2534 exact-name resolution -> native compatibility/VIN gates', 'Backup copies then obfuscated INI publication; fields rewritten individually on worker transitions', 'Old file remove then create/write/close/count-check, no flush or atomic replace; see recovery_format.source_order_prefixes', 'Explicit discard: backups then checkpoint then memory reset; final native CPU/file success also deletes before browser report. Forced status-clear only resets memory.', ['recovery-path', 'recovery-copy-calibration', 'recovery-create-order', 'recovery-format-reader', 'recovery-format-writer', 'recovery-file-replace', 'recovery-native-load', 'recovery-discard-native', 'recovery-next-checkpoints', 'recovery-clear-memory']),
         ('Request-reprogramming-key XML (native returned requestKeyFile)', 'SaveXMLFileForRequestReprogrammingKey', 'Offline signer exchange and LoadXMLFileForReprogrammingKey', 'User chooses offline authorization', 'Native API returns saved path; frontend reuses it', 'DeleteAllXMLFileForRequestReprogrammingKey only after native clear success', ['ui-key-offline', 'clear-xml']),
         ('configured ecuSecurityKeySavedFile/{request XML,exchange JSON}', 'ECU Security Key worker', 'OEM-specific exchange admission: ordinary current-VIN/SafeKey matching; Subaru internal record-hash/resultCode gate', 'Key read and save request or imported exchange response', 'Platform writeFile API in request workflow', 'Initialization attempts remove files >=2592000000ms (30days)', ['key-init', 'key-server', 'key-vin', 'key-safekey', 'key-record-integrity', 'key-subaru-data-gate']),
-        ('configured DataSync folder/{software-ID-derived reprogramming-report path}', 'CUW completion CuwModel/CuwBackendService', 'DataSync service', 'Post-write success/failure report stage', 'CreateReprogrammingReport API', 'Consumer retention/acknowledgement belongs to DataSync domain', ['ui-report-persist', 'ui-success-cleanup', 'ui-failure-exit']),
+        (r'C:\Users\Public\Documents\GTSPlus\LOGS\BDC\CUW-R02\CUW_<softwareId>_<localYYYYMMDDhhmmss>.xml', 'CUW completion CuwModel/CuwBackendService', 'No eligible deployed DataSync destination: different watch roots and .xml excluded by all extension lists', 'needSendReprogrammingReport AND (enable true OR calibration.nonFieldFixFlag); shipped enable=false; report stage not coupled transactionally to recovery deletion', 'XmlSerializer -> UTF8 temp file -> dispose streams -> File.Move to expanded OutputPath; no overwrite/temp-cleanup catch', 'No producer deletion after Move; shipped policy does not enroll this XML. Move failure can strand temp file.', ['ui-report-persist', 'report-filename', 'report-enable-gate', 'deployed-report-policy-join', 'ui-success-cleanup', 'ui-failure-exit', 'report-xml-publication', 'report-xml-schema']),
     )]
     return dict(schema='gtsplus-lifecycle-domain-v1', domain=DOMAIN, sources=sources, evidence=evidence,
                 states=states, transitions=transitions, handoffs=handoffs, persistence=persistence,
+                recovery_format=recovery_format,
                 coverage=dict(components=['CUWLauncher external file association executable (outside previous installed-root249 count)', 'CuwBackendServiceConsoleApp hidden WinForms singleton', 'CuwBackendService session/command/auth/lock/end handlers', 'CUW.dll native clear/reset/recovery interface', 'authenticated cuw.gui UI/controller/model', 'authenticated gts.gui Health Check and ECU Security Key producers', 'UtilityPlusFrontNK ComUtilityFront and recovered UtilityGene selected wrappers'],
                               entrypoints=['File association launcher startup', 'GTS HealthCheck calibration browser link', 'CUWMain init/login', 'Backend Program.Main and ClientSession JSON commands', 'ComUtilityFront cases1/2/5/0x15/0x16/0x17'],
                               branches=['Normal calibration/read/flash/progress/postprocess/end', 'Recovery resume/discard and reconnect restore', 'IG/battery/USB/adapter retry and whole-repro', 'Online key pending/timeout/fault/missing-signature/offline XML/cancel', 'Session-exclusive contention and failed command dispatch', 'Browser abnormal disconnect versus native worker lifetime', 'Busy shutdown veto/OS10s fallback/cancel-resume', 'Utility ready/protocol/SA-level/VIN/participant admission and per-ECU result return', 'Subaru-specific support/battery/IG validation and cleanup', 'Literal empty UI PC-disconnection branch']),
                 residuals=[
                     dict(question='Vehicle- and service-specific success outcomes', why_unclosed='Offline execution does not provide matching calibration payload, actual ECU responses, server signature, or authenticated account session; these are runtime inputs, not missing code bodies.', next_evidence='Authorized captured transcript tied to exact calibration/ECU and configured service; never invoke from this extractor.'),
-                    dict(question='Crash/power-loss durability and native worker join completion on the target OS', why_unclosed='Offline source/IL evidence identifies recovery reader/deletion ownership and the reset unbounded worker join, but does not observe target filesystem flush completion or an actual crashing worker.', next_evidence='Isolated Windows harness with fake file/J2534 interfaces and interrupted native worker; no vehicle or service access.'),
+                    dict(question='Observed filesystem durability and worker join termination', why_unclosed='Native create/update/remove/copy/close order and power-loss prefixes are closed from supplied callees; external filesystem persistence and eventual return of the unbounded worker join are not observed. No unavailable native source is required to state the source-order contract.', next_evidence='Authorized filesystem fault-injection trace with known storage/cache policy, and synthetic worker-blocking trace; not an ECU or account prerequisite.'),
                 ],
                 safety=dict(mode='offline static source/IL/native-byte extraction', application_executed=False, vehicle_contact=False, network_contact=False, credentials_used=False),
+                depth_smoke=dict(command='uv run python build/tmp/lc2_cuw_utility_smoke.py', prepared_not_run=True,
+                                 actual_code=['CUW.dll1001C640 decoder;100302B0 fresh/resume/request-reject;10037EA0 discard/failing-delete order under Unicorn',
+                                              'Actual serializer field-to-key x86 blocks10022C27/10022F1C, both three-stage continuation blocks and resume10036044; distinct +0x110/+0x124 sentinels, synthetic decimal conversion/map sink only',
+                                              'CuwModel.CreateReprogrammingReport IL with synthetic BCL edges, normal move and failed-publication temp retention',
+                                              'Freshly authenticated cuw.gui controller fresh/disk/live reconnect, actual VIN comparator and conditional gates, flashability reject, discard, clear/report failure cleanup']),
                 smoke_plan=['Run this extractor; it authenticates actual packaged JS and validates IL/materialized bodies/native branch bytes without loading PE code.', 'Use Node isolated VM with signed-source CuwController prototype and fake Promise APIs to exercise status SUCCESS/IN_PROGRESS/WAITING/key-required/error/PC-disconnected branches; ensure the last branch schedules no poll.', 'Use managed reflection-only/dncil decoding for CanExit/SessionEnding/lock and command ResultCode branches; do not instantiate backend listener.', 'Native Windows harness must stub imports/J2534, initialize only private synthetic state, and exercise UtilityPlusFront ready/level guard and CUW clear rejection before allowing worker/reset execution; never call real mutation exports.'],
                 native_projects=['lc_cuw_utility', 'lc_cuw_utility_gene', 'lc_cuw_utility_core', 'lc_cuw_utility_adapt'])
 

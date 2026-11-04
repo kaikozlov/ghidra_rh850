@@ -178,6 +178,34 @@
       "representation": "recovered materialized PE"
     },
     {
+      "id": "cuw_utility.deployed-report-config",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/CUWPlus/conf/cuwpf.yaml",
+      "sha256": "7213fa3d588ec16b337cf38ca3a5f0a01871f1fca4dc1d8a461cb26fcf1999c4",
+      "size": 2720,
+      "representation": "installed encrypted CUW configuration; allowlisted report scalars only"
+    },
+    {
+      "id": "cuw_utility.deployed-report-pair",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/CUWPlus/conf/gtsplus.pp",
+      "sha256": "33fe4c117ef94973249ca357a77c6318f84969b8cd77f3b97d88ee514b7b5491",
+      "size": 256,
+      "representation": "installed configuration pairing; contents omitted"
+    },
+    {
+      "id": "cuw_utility.report-join-upload-policy",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus DataSync/GTSPlusDataSync.yml",
+      "sha256": "79f7b88ac12f2b934757228ba09d0dc45c56792c46bef6a4ec35e65966c6b3a6",
+      "size": 5968,
+      "representation": "installed encrypted DataSync policy; report eligibility join only"
+    },
+    {
+      "id": "cuw_utility.report-join-upload-pair",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus DataSync/DSP.pp",
+      "sha256": "b76596dc548e23056bde89b13638c4ef5a3032257ee4a2c3c31f2f86ebbff0be",
+      "size": 256,
+      "representation": "installed DataSync configuration pairing; contents omitted"
+    },
+    {
       "id": "cuw_utility.gui-certificate",
       "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/ContentServer/dist.crt",
       "sha256": "857ec034c946604c52fd845134386b5b914936962254048e8766d78fa6b3ad50",
@@ -236,6 +264,15 @@
       "member": "js/cuw/models/cuw_model.js",
       "sha256": "208aacad1d5d92cb2bbfbe0fc8ccf3ae6172baba376a63d245b519d2b3a4d4bd",
       "size": 136324,
+      "representation": "authenticated decoded JavaScript member",
+      "parent_source": "cuw_utility.cuw-gui"
+    },
+    {
+      "id": "cuw_utility.cuw-utility",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlusGUI/cuw.gui",
+      "member": "js/cuw/common/cuw_utility.js",
+      "sha256": "0d1db9d52ac449a2425cfd229e1a6761a36e792b8732c850d8a7af2f5aceaa4c",
+      "size": 6079,
       "representation": "authenticated decoded JavaScript member",
       "parent_source": "cuw_utility.cuw-gui"
     },
@@ -1540,6 +1577,461 @@
       "finding": "Reset 0x1003FE00 signals request/copy worker events, requests worker termination, waits INFINITE on running thread then Sleep(500) until worker pointer clears, resets calibration/state storage and frees buffers. No bounded join is present in this cleanup path."
     },
     {
+      "id": "cuw_utility.recovery-path",
+      "source": "cuw_utility.core",
+      "kind": "native-control-flow",
+      "locator": "0x10023540",
+      "byte_window_size": 758,
+      "byte_window_sha256": "a7a89ac86ae072932aac762d43da3622da9a2df1292dd817e2019aa4947d1e6a",
+      "anchors": [],
+      "finding": "Recovery directory is GetModuleFileNameA(NULL) drive+directory+\"Save\", i.e. beside the backend EXE, not beside an arbitrary selected calibration or the browser. Reader appends \"\\\\RecoveryInfo.ini\"."
+    },
+    {
+      "id": "cuw_utility.recovery-format-reader",
+      "source": "cuw_utility.core",
+      "kind": "native-control-flow",
+      "locator": "0x1001f2f0",
+      "byte_window_size": 7503,
+      "byte_window_sha256": "9496337bae3e41bfb8be45976b48d294832a547b9e0234072c47ccc84588ee8b",
+      "anchors": [],
+      "finding": "Reads entire encoded RecoveryInfo.ini via DataFile1001E8E0, decodes byte pairs1001C640, tokenizes CR/LF strings1005BEE0 and parses INI1002CDD0; typed getters1002D2C0/1002D540/1002DD90 supply empty/zero defaults except PassThruErrorCode9999 and CommPhase2. No stored browser-session/account UUID or content checksum is read."
+    },
+    {
+      "id": "cuw_utility.recovery-byte-decoder",
+      "source": "cuw_utility.core",
+      "kind": "native-control-flow",
+      "locator": "0x1001c640",
+      "byte_window_size": 120,
+      "byte_window_sha256": "0f5c61acead36795848f70d68f5e32cbb00063c9638cd1874e7cca1117ecbb3e",
+      "anchors": [],
+      "finding": "Actual checkpoint decoder allocates floor(encodedLength/2)+1 zeroed bytes and reads pairs: decoded byte=((first>>2)*16+(second>>2)+120)&255. Writer encodes each nibble n as ((n+8)<<2)|(rand()&3); low2 bits are discarded. This is reversible obfuscation, not FRC payload encryption or an integrity check; odd/truncated input is not rejected by this decoder."
+    },
+    {
+      "id": "cuw_utility.recovery-format-writer",
+      "source": "cuw_utility.core",
+      "kind": "native-control-flow",
+      "locator": "0x10021870",
+      "byte_window_size": 7238,
+      "byte_window_sha256": "ad3cf3cc50a8eb88c041d8640338789d01d8f7cb02b339b6516e66be1b795e52",
+      "anchors": [],
+      "finding": "Builds INI section/key map, serializes [section] and key=value lines through1002DF10/1005C060, nibble-obfuscates all bytes, then DataFile1001EAE0 writes RecoveryInfo.ini. MultiCalibrationFileNum0 uses RecoveryInfo for per-file records; nonzero uses RecoveryInfo1..N plus master RecoveryInfo. InfoInStorage contains two OEM-support booleans; it is not a seed/key payload."
+    },
+    {
+      "id": "cuw_utility.recovery-file-replace",
+      "source": "cuw_utility.core",
+      "kind": "native-control-flow",
+      "locator": "0x1001eae0",
+      "byte_window_size": 525,
+      "byte_window_sha256": "e277886bcc9dba35f2479a9246db72528850e26b951ad7d11217c0e3b0624eea",
+      "anchors": [],
+      "finding": "DataFile save probes old file with sopen flags0, closes and remove()s it if openable, then sopen flags0x101/share0x40/mode0x180, one _write, _close, and exact write-count check. Remove/open/short-write errors throw. There is no temp-file rename, FlushFileBuffers or fsync in this body; a source-order interruption after remove can leave no checkpoint."
+    },
+    {
+      "id": "cuw_utility.recovery-copy-calibration",
+      "source": "cuw_utility.core",
+      "kind": "native-control-flow",
+      "locator": "0x100212d0",
+      "byte_window_size": 1433,
+      "byte_window_sha256": "f7574f23560a4f62982203589f54007f11b4845ea89813f5ddd8387107018cdf",
+      "anchors": [],
+      "finding": "Constructs saved paths Save\\\\basename for single file; multi-file Save\\\\<1-based-index>_<basename>. CopyFileA(original,saved,FALSE) attempts overwrite in file order and its BOOL result is ignored; only afterward does caller publish checkpoint. Thus record publication does not prove every calibration backup succeeded."
+    },
+    {
+      "id": "cuw_utility.recovery-create-order",
+      "source": "cuw_utility.core",
+      "kind": "native-control-flow",
+      "locator": "0x100302b0",
+      "byte_window_size": 382,
+      "byte_window_sha256": "b771eda1f5b4bfd14c6eb3ee0151fea4c16774bd02f4fdbeaf89b5e2f80ec33e",
+      "anchors": [],
+      "finding": "If requested, and neither resume-armed(+0x53) nor persistence-active(+0x94), ensure Save directory (CreateDirectory result ignored) then copy calibration backups. Set Writing(+0x50)=1, save full record, then set persistence-active=1. Resume does not recopy backups. Subsequent updates rewrite the entire checkpoint, not a journal."
+    },
+    {
+      "id": "cuw_utility.recovery-native-load",
+      "source": "cuw_utility.core",
+      "kind": "native-control-flow",
+      "locator": "0x10037fe0",
+      "byte_window_size": 5920,
+      "byte_window_sha256": "38c20360a0d15c3f9551d289845a359f12096c41552a19773c8e84b7d370e324",
+      "anchors": [],
+      "finding": "Native reader reconstructs calibration objects with10031A20(saved path,recovery=true), handles multi-file/container expansion, resolves SelectedJ2534Device by exact comparison against enumerated device names (unmatched throws), sets1000ms timeout, restores CID/node/address/assembly/blank/vehicle flags and VIN/SSMID. Sets resume-armed(+0x53)=1 only after reconstruction. Browser auth/exclusive ownership is not serialized."
+    },
+    {
+      "id": "cuw_utility.recovery-worker-restore",
+      "source": "cuw_utility.core",
+      "kind": "native-control-flow",
+      "locator": "0x10035e80",
+      "byte_window_size": 1007,
+      "byte_window_sha256": "af47b91063dcc7d7be64680116a2eaba8ad3a10779f6de28965110dbdf08de40",
+      "anchors": [],
+      "finding": "Recovery predicate10039720 is resume-armed && !recovery-disabled. Start resets volatile counters/status, sets engine state2, restores WriteCpuIndex(+0x4C) and OffsetOfWriteCpuMultiCalIndex(+0x110 -> global1008C93C), WritingEndBlock notification and UseNewSoftwarePassword (forced true if end-block), marks earlier CPU progress100, maps divided CPU index, then CreateThread1003C7B0 or SetEvent on existing worker. The restored multi-cal CPU offset is NOT WriteTargetDividedCPUImageIndex(+0x124). It reconstructs execution state, not an old process/thread handle or byte-level writer offset."
+    },
+    {
+      "id": "cuw_utility.recovery-native-match",
+      "source": "cuw_utility.core",
+      "kind": "native-control-flow",
+      "locator": "0x10034490",
+      "byte_window_size": 3387,
+      "byte_window_sha256": "a17a80f9055f769dbf19f29e3fe5f7f9f1a2cba2490412e2fe51c94c2cbb55d0",
+      "anchors": [],
+      "finding": "JudgeFlashable ->1005F800 ->10034490 rebuilds CPU-to-CID index map initialized -1, compares calibration CPU old-CID alternatives against restored received CID lists; applicable node-aware variants use10043220. Tracks missing/new CID tuples, CPU capacity, blank ECU/whole-repro policy and OEM conditions rather than matching a session token. Native flashability and frontend VIN gate are separate."
+    },
+    {
+      "id": "cuw_utility.recovery-cid-node-pair",
+      "source": "cuw_utility.core",
+      "kind": "native-control-flow",
+      "locator": "0x10043220",
+      "byte_window_size": 249,
+      "byte_window_sha256": "3e3e3e7111503b3a8c5d0dbe3cc410e7c0c4e8c22a87d1e59367d31a270ac51b",
+      "anchors": [],
+      "finding": "CID/node matcher first requires CID-vector count == address-record count (12-byte records), then compares both candidate CID and associated node text at the SAME index with exact byte-length equality10014C10. Returns matching index or0xFFFFFFFF. No partial-prefix, case-fold, cross-index match or session-ID fallback."
+    },
+    {
+      "id": "cuw_utility.recovery-parallel-pair",
+      "source": "cuw_utility.core",
+      "kind": "native-control-flow",
+      "locator": "0x10043100",
+      "byte_window_size": 285,
+      "byte_window_sha256": "a622a06ebe880c1cdcba7a407771d625c1e43813b0f452e611ca59ef5519141f",
+      "anchors": [],
+      "finding": "Parallel string-vector matcher likewise requires equal counts and exact CID+type/node at same index; mismatch/empty lists return0xFFFFFFFF. It is used for deduplication of compatibility tuples, not authentication of a browser/account session."
+    },
+    {
+      "id": "cuw_utility.recovery-native-judge",
+      "source": "cuw_utility.core",
+      "kind": "native-control-flow",
+      "locator": "0x1005f800",
+      "byte_window_size": 7796,
+      "byte_window_sha256": "d7cbe72481248f1f715d936700cd666167a66e84b8a1d7c98d16e83463b86b61",
+      "anchors": [],
+      "finding": "Native JudgeFlashable callee rejects missing calibration or unavailable CID/status preconditions with0xBBE; calls10034490, projects per-system current/new CID/type tuples, deduplicates matching new-CID/node pairs and applies100352E0 to each result. Wrapper10061680 preserves saved CalibrationFileIndex while recovery is armed. A saved file alone does not bypass this compatibility calculation."
+    },
+    {
+      "id": "cuw_utility.recovery-next-checkpoints",
+      "source": "cuw_utility.core",
+      "kind": "native-control-flow",
+      "locator": "0x1003e4b0",
+      "byte_window_size": 2480,
+      "byte_window_sha256": "7117124356a2d0d3e34e7359500b90182c9c7bc6f1380461039513884872b3d3",
+      "anchors": [],
+      "finding": "Worker continuation independently assigns+saves CalibrationFileIndex(+0x10C), WriteCpuIndex(+0x4C), OffsetOfWriteCpuMultiCalIndex(+0x110) in that order when active. The third source is worker+0x98C ->1008DCC0, NOT divided-image field+0x124. Next-CPU branch increments+saves CPU index before continuing; final-CPU/all-file branch invokes10037EA0 deletion before later browser CID/report publication. Three rewrites are not an atomic tuple update."
+    },
+    {
+      "id": "cuw_utility.recovery-divided-checkpoints",
+      "source": "cuw_utility.core",
+      "kind": "native-control-flow",
+      "locator": "0x1003f093",
+      "byte_window_size": 1920,
+      "byte_window_sha256": "cd1b508199ba147cfd889bb810507f0ba67fde61901b4ca1cfa271cc58fb5685",
+      "anchors": [],
+      "finding": "Divided-CPU/multi-cal continuation called from1003EEA0 resets CPU counters and saves CalibrationFileIndex(+0x10C) then WriteCpuIndex(+0x4C) then OffsetOfWriteCpuMultiCalIndex(+0x110) in separate full-record writes. WriteTargetDividedCPUImageIndex remains a distinct +0x124 field. This is source-order checkpoint progress, not an atomic recovery transaction."
+    },
+    {
+      "id": "cuw_utility.recovery-discard-native",
+      "source": "cuw_utility.core",
+      "kind": "native-control-flow",
+      "locator": "0x10037ea0",
+      "byte_window_size": 319,
+      "byte_window_sha256": "266e4bb566f605ef74725a15d7cbda8c1d420ae6a52b0a917fdb6aaba622f4fc",
+      "anchors": [],
+      "finding": "Discard attempts DeleteFileA for each nonempty saved calibration path in vector order, then RecoveryInfo.ini, resets recovery object10023840 regardless of deletion results, then throws if any backup deletion or checkpoint deletion failed. Export10063150 returns0 only when this helper does not throw. A failed discard can leave orphan files but cleared in-memory path ownership."
+    },
+    {
+      "id": "cuw_utility.recovery-clear-memory",
+      "source": "cuw_utility.core",
+      "kind": "native-control-flow",
+      "locator": "0x1003fe00",
+      "byte_window_size": 2304,
+      "byte_window_sha256": "d992a5462a807c8aee39651778eb2b4deb06f0322abcece3f89d57a4bf99fafe",
+      "anchors": [],
+      "finding": "Full reset joins worker and releases calibration/progress/native buffers, calls10023840 to reset recovery object, but does not call10037EA0/DeleteFileA. Forced status-clear on failed/cancelled postprocessing is therefore not the explicit disk-discard operation."
+    },
+    {
+      "id": "cuw_utility.report-xml-publication",
+      "source": "cuw_utility.backend",
+      "kind": "managed-il",
+      "locator": "Cuw.Model.CuwModel::CreateReprogrammingReport",
+      "rva": 16148,
+      "body_size": 648,
+      "body_sha256": "f28946d6bffc656c52f8ddaac8ca3a85fb71ec6a867166803bf60b1a84a6a7fb",
+      "anchors": [
+        {
+          "il_offset": 113,
+          "instruction": "ldstr 'ReprogramResult'"
+        },
+        {
+          "il_offset": 335,
+          "instruction": "callvirt System.Xml.Serialization.XmlSerializerNamespaces::Add"
+        },
+        {
+          "il_offset": 347,
+          "instruction": "callvirt System.Xml.XmlWriterSettings::set_Indent"
+        },
+        {
+          "il_offset": 358,
+          "instruction": "callvirt System.Xml.XmlWriterSettings::set_NewLineChars"
+        },
+        {
+          "il_offset": 364,
+          "instruction": "call System.IO.Path::GetTempFileName"
+        },
+        {
+          "il_offset": 376,
+          "instruction": "call System.Environment::ExpandEnvironmentVariables"
+        },
+        {
+          "il_offset": 438,
+          "instruction": "callvirt System.Xml.Serialization.XmlSerializer::Serialize"
+        },
+        {
+          "il_offset": 461,
+          "instruction": "callvirt System.String::Substring"
+        },
+        {
+          "il_offset": 466,
+          "instruction": "ldstr 'xmlnss'"
+        },
+        {
+          "il_offset": 487,
+          "instruction": "callvirt System.IO.TextWriter::Write"
+        },
+        {
+          "il_offset": 552,
+          "instruction": "call System.IO.File::Move"
+        }
+      ],
+      "finding": "Managed report writer serializes Cuw.Entity.ReprogrammingReport to memory, UTF8-decodes, removes first character, replaces xmlnss with xmlns, writes UTF8 temp file and disposes streams before File.Move(temp,ExpandEnvironmentVariables(OutputPath)). ReturnValue0 follows Move. No overwrite/delete/catch/finally-temp-delete surrounds Move: publication failure can leave temp file and prevents successful reply."
+    },
+    {
+      "id": "cuw_utility.recovery-whole-calibration",
+      "source": "cuw_utility.core",
+      "kind": "native-control-flow",
+      "locator": "0x10023d20",
+      "byte_window_size": 1120,
+      "byte_window_sha256": "b291e1b9e7295bb0652135c8f282523bd56f3f546cdacc49cf54b08275b6ec0d",
+      "anchors": [],
+      "finding": "Whole-repro replacement sets per-file WholeReproCalibrationFileFlag and original path; if active, DeleteFileA(old backup) first, reconstructs Save\\\\<index>_<basename>, CopyFileA(new original,new backup,FALSE), then writes full checkpoint. Delete/Copy BOOLs are ignored. Interruption between deleting old backup and publishing new record can leave old checkpoint referencing a missing backup."
+    },
+    {
+      "id": "cuw_utility.recovery-integer-parser",
+      "source": "cuw_utility.core",
+      "kind": "native-control-flow",
+      "locator": "0x1002d540",
+      "byte_window_size": 359,
+      "byte_window_sha256": "52d69c0c4b4166597ad54b9ae3b330ee263582ac5be3dac4da45f2a8217b898b",
+      "anchors": [],
+      "finding": "Nonempty integer record uses strtol(base10); no conversion throws invalid_argument, ERANGE throws out_of_range. Empty/missing uses caller default; trailing characters are not required to be consumed."
+    },
+    {
+      "id": "cuw_utility.recovery-boolean-parser",
+      "source": "cuw_utility.core",
+      "kind": "native-control-flow",
+      "locator": "0x1002dd90",
+      "byte_window_size": 360,
+      "byte_window_sha256": "bd68ac9f7b7d6a358125b1dd21eb7ba21da648a5ba2baac8882e9ac4a4dfd28c",
+      "anchors": [],
+      "finding": "Nonempty boolean record uses the same decimal strtol/error checks, then value>0 (not JSON true/false); missing/empty uses caller bool default."
+    },
+    {
+      "id": "cuw_utility.recovery-line-serializer",
+      "source": "cuw_utility.core",
+      "kind": "native-control-flow",
+      "locator": "0x1005c060",
+      "byte_window_size": 219,
+      "byte_window_sha256": "632fec420509b1fa40be9b220d190a10afc67bb8b987f70a4fbd337eab72690f",
+      "anchors": [],
+      "finding": "CStrings serializer concatenates lines with CRLF bytes1007C748=0D0A00 only between lines, then NUL terminator; no trailing CRLF is added. The NUL is not included in the encoded DataFile length."
+    },
+    {
+      "id": "cuw_utility.recovery-key-initializers",
+      "source": "cuw_utility.core",
+      "kind": "native-control-flow",
+      "locator": "0x10002c00",
+      "byte_window_size": 2560,
+      "byte_window_sha256": "e683f27c807794ac47b891c8dc5d04fc80908ede1e7f75b8cf8b7dc87c2c504c",
+      "anchors": [],
+      "finding": "Exact native SSO-string initializers bind recovery section/key names. CIDNodeNum/CIDNode%d/ReproCheckResult remain initialized vocabulary but are not accessed by this release recovery reader/writer; do not import the older V18 recovery schema."
+    },
+    {
+      "id": "cuw_utility.recovery-progress-field-dataflow",
+      "source": "cuw_utility.core",
+      "kind": "native-field-key-dataflow",
+      "locator": "10022C27/10022F1C serializer;1003E7A6/1003F150 continuation;1003604A resume",
+      "serializer_fields": [
+        {
+          "key": "OffsetOfWriteCpuMultiCalIndex",
+          "object_offset": "0x110",
+          "load_va": "0x10022c27",
+          "load_bytes": "8b8610010000",
+          "key_push_va": "0x10022c3f",
+          "key_push_bytes": "68d4be0810",
+          "key_global": "0x1008bed4"
+        },
+        {
+          "key": "WriteTargetDividedCPUImageIndex",
+          "object_offset": "0x124",
+          "load_va": "0x10022f1c",
+          "load_bytes": "8b8624010000",
+          "key_push_va": "0x10022f34",
+          "key_push_bytes": "6834bf0810",
+          "key_global": "0x1008bf34"
+        }
+      ],
+      "continuation_fields": [
+        [
+          {
+            "key": "CalibrationFileIndex",
+            "object_offset": "0x10c",
+            "worker_offset": "0x6d4",
+            "store_global": "0x1008dcbc",
+            "locator": "0x1003e7a6",
+            "instruction_bytes": "8b86d4060000a3bcdc0810"
+          },
+          {
+            "key": "WriteCpuIndex",
+            "object_offset": "0x4c",
+            "worker_offset": "0x2c0",
+            "store_global": "0x1008dbfc",
+            "locator": "0x1003e7cb",
+            "instruction_bytes": "8b86c0020000a3fcdb0810"
+          },
+          {
+            "key": "OffsetOfWriteCpuMultiCalIndex",
+            "object_offset": "0x110",
+            "worker_offset": "0x98c",
+            "store_global": "0x1008dcc0",
+            "locator": "0x1003e7f0",
+            "instruction_bytes": "8b868c090000a3c0dc0810"
+          }
+        ],
+        [
+          {
+            "key": "CalibrationFileIndex",
+            "object_offset": "0x10c",
+            "worker_offset": "0x6d4",
+            "store_global": "0x1008dcbc",
+            "locator": "0x1003f150",
+            "instruction_bytes": "8b86d4060000a3bcdc0810"
+          },
+          {
+            "key": "WriteCpuIndex",
+            "object_offset": "0x4c",
+            "worker_offset": "0x2c0",
+            "store_global": "0x1008dbfc",
+            "locator": "0x1003f175",
+            "instruction_bytes": "8b86c0020000a3fcdb0810"
+          },
+          {
+            "key": "OffsetOfWriteCpuMultiCalIndex",
+            "object_offset": "0x110",
+            "worker_offset": "0x98c",
+            "store_global": "0x1008dcc0",
+            "locator": "0x1003f19a",
+            "instruction_bytes": "8b868c090000a3c0dc0810"
+          }
+        ]
+      ],
+      "restored_field": {
+        "key": "OffsetOfWriteCpuMultiCalIndex",
+        "object_offset": "0x110",
+        "load_va": "0x1003604a",
+        "load_bytes": "a1c0dc0810",
+        "store_va": "0x10036058",
+        "store_bytes": "a33cc90810",
+        "worker_global": "0x1008c93c"
+      },
+      "finding": "Decoded x86 operands bind +0x110 to OffsetOfWriteCpuMultiCalIndex and +0x124 to WriteTargetDividedCPUImageIndex. Both continuations update the former as their third checkpoint; resume restores that former field into1008C93C. The divided-image index is a separate serialized value."
+    },
+    {
+      "id": "cuw_utility.report-xml-schema",
+      "source": "cuw_utility.backend",
+      "kind": "managed-custom-attributes",
+      "locator": "Cuw.Entity.ReprogrammingReport TypeDef/PropertyMap CustomAttribute",
+      "attributes": [
+        {
+          "owner": "ReprogrammingReport",
+          "attribute": "XmlRootAttribute",
+          "serialized_blob": "01000100540e0b456c656d656e744e616d650e7361766545637550726f6772616d"
+        },
+        {
+          "owner": "DummyNs",
+          "attribute": "XmlAttributeAttribute",
+          "serialized_blob": "01000100540e0d4174747269627574654e616d6506786d6c6e7373"
+        },
+        {
+          "owner": "DealerCode",
+          "attribute": "XmlElementAttribute",
+          "serialized_blob": "01000100540e0b456c656d656e744e616d650a4465616c6572436f6465"
+        },
+        {
+          "owner": "VehicleConnectSession",
+          "attribute": "XmlElementAttribute",
+          "serialized_blob": "01000100540e0b456c656d656e744e616d651556656869636c65436f6e6e65637453657373696f6e"
+        },
+        {
+          "owner": "Version",
+          "attribute": "XmlElementAttribute",
+          "serialized_blob": "01000100540e0b456c656d656e744e616d650756657273696f6e"
+        },
+        {
+          "owner": "Vin",
+          "attribute": "XmlElementAttribute",
+          "serialized_blob": "01000100540e0b456c656d656e744e616d650356696e"
+        },
+        {
+          "owner": "Date",
+          "attribute": "XmlElementAttribute",
+          "serialized_blob": "01000100540e0b456c656d656e744e616d650444617465"
+        },
+        {
+          "owner": "Language",
+          "attribute": "XmlElementAttribute",
+          "serialized_blob": "01000100540e0b456c656d656e744e616d65084c616e6775616765"
+        },
+        {
+          "owner": "Type",
+          "attribute": "XmlElementAttribute",
+          "serialized_blob": "01000100540e0b456c656d656e744e616d650454797065"
+        },
+        {
+          "owner": "SoftwareId",
+          "attribute": "XmlElementAttribute",
+          "serialized_blob": "01000100540e0b456c656d656e744e616d650a536f6674776172654964"
+        },
+        {
+          "owner": "UserType",
+          "attribute": "XmlElementAttribute",
+          "serialized_blob": "01000100540e0b456c656d656e744e616d65085573657254797065"
+        },
+        {
+          "owner": "CalibrationIds",
+          "attribute": "XmlArrayAttribute",
+          "serialized_blob": "01000100540e0b456c656d656e744e616d65104f6c6443616c6962726174696f6e4964"
+        },
+        {
+          "owner": "CalibrationIds",
+          "attribute": "XmlArrayItemAttribute",
+          "serialized_blob": "0100124375772e456e746974792e43616c496e666f0100540e0b456c656d656e744e616d651343616c6962726174696f6e4461746154797065"
+        },
+        {
+          "owner": "NewCalibrationIds",
+          "attribute": "XmlArrayAttribute",
+          "serialized_blob": "01000100540e0b456c656d656e744e616d65104e657743616c6962726174696f6e4964"
+        },
+        {
+          "owner": "NewCalibrationIds",
+          "attribute": "XmlArrayItemAttribute",
+          "serialized_blob": "0100124375772e456e746974792e43616c496e666f0100540e0b456c656d656e744e616d651343616c6962726174696f6e4461746154797065"
+        },
+        {
+          "owner": "IsFlashSuccess",
+          "attribute": "XmlElementAttribute",
+          "serialized_blob": "01000100540e0b456c656d656e744e616d650e4973466c61736853756363657373"
+        }
+      ],
+      "finding": "Root saveEcuProgram, namespace http://www.openuri.org/ (xmlnss workaround); DealerCode/VehicleConnectSession/Version/Vin/Date/Language/Type=ReprogramResult/SoftwareId/UserType/IsFlashSuccess and OldCalibrationId/NewCalibrationId arrays of CalibrationDataType (CalibrationType/CalibrationId). Attribute blobs pin exact report serializer names; no values exported."
+    },
+    {
       "id": "cuw_utility.gene-before",
       "source": "cuw_utility.gene",
       "kind": "native-control-flow",
@@ -1660,6 +2152,103 @@
         }
       ],
       "finding": "Initialization case1 sets global ready only after Ex2initialCom success. Cases0x15/16/17 require ready, call UtilityGene ordinals98/99/100 and map argument/native failures to0x90281115/16/17. Case5 SecurityAccess requires initialized communication and odd byte level1..0x7F then ordinal request. Case2 stops periodic messages, finalizes transport, resets parameters/ready, stops keepalive even on finalize failure; return restores CCommFrameCtrl connection info."
+    },
+    {
+      "id": "cuw_utility.deployed-report-policy-join",
+      "source": "cuw_utility.deployed-report-config",
+      "related_sources": [
+        "cuw_utility.deployed-report-pair",
+        "cuw_utility.decode-cm",
+        "cuw_utility.report-join-upload-policy",
+        "cuw_utility.report-join-upload-pair"
+      ],
+      "kind": "offline-decrypted-allowlisted-deployment-join",
+      "locator": "CUWPlus/conf/cuwpf.yaml config -> DataSync GTSPlusDataSync.yml monitoring/extension rules",
+      "config_plaintext_sha256": "3e77212316c86d76d6f4704c0dcca44647a7da1f2e0ae8ae0d5a759dac0e6816",
+      "policy_plaintext_sha256": "1af209d7cd72a7ecfba5c1dc0dbede86730b4cd2d09de2814de651efb125bdb1",
+      "report_config": {
+        "dataSyncFolderPath": "C:\\Users\\Public\\Documents\\GTSPlus\\LOGS\\BDC\\CUW-R02\\",
+        "requireSendReprogrammingReport": "false"
+      },
+      "upload_destinations": [
+        {
+          "id": "GTS-C02",
+          "path": "C:\\Users\\Public\\Documents\\GTSPlus\\LOGS\\BDC\\GTS-C02\\",
+          "extension_validation": true,
+          "extensions": [
+            ".json"
+          ]
+        },
+        {
+          "id": "GTS-E02",
+          "path": "C:\\Users\\Public\\Documents\\GTSPlus\\DataSync\\Logs\\GTS-E02\\",
+          "extension_validation": true,
+          "extensions": [
+            ".gtsr"
+          ]
+        },
+        {
+          "id": "GTS-M02",
+          "path": "C:\\Users\\Public\\Documents\\GTSPlus\\LOGS\\BDC\\GTS-M02\\",
+          "extension_validation": true,
+          "extensions": [
+            ".json"
+          ]
+        }
+      ],
+      "canonical_consumer_evidence": [
+        "sync_upload.deployment_policy",
+        "sync_upload.validation"
+      ],
+      "finding": "Shipped CUW report directory is public LOGS/BDC/CUW-R02, outside all three deployed DataSync watcher roots; all three enforce extension lists .json/.gtsr, not .xml. Thus CUW XML is not eligible for the shipped upload policy. Shipped requireSendReprogrammingReport=false still permits the signed controller nonFieldFixFlag exception when needSendReprogrammingReport is true. This is deployed configuration/source eligibility, not an observation of upload or a statement about runtime overrides."
+    },
+    {
+      "id": "cuw_utility.report-config-decode",
+      "source": "cuw_utility.backend",
+      "kind": "managed-il",
+      "locator": "Cuw.Config.ConfigReader::ReadConfig",
+      "rva": 41025,
+      "body_size": 29,
+      "body_sha256": "0cb0e44e477f0ac99d6c69c3975c218c866bc98173955b12b7502db9ffa4895a",
+      "anchors": [
+        {
+          "il_offset": 2,
+          "instruction": "call GtsPlus.Tool.Cryptgraph.GtsPlusCM::Decrypt"
+        },
+        {
+          "il_offset": 7,
+          "instruction": "ldstr 'Editor-header'"
+        },
+        {
+          "il_offset": 22,
+          "instruction": "call Parse"
+        }
+      ],
+      "finding": "Backend Init selects CUWPlus/conf/cuwpf.yaml with conf/gtsplus.pp; reader decrypts, comments editor header and deserializes YAML. Only report path/enable scalars are exported here."
+    },
+    {
+      "id": "cuw_utility.report-config-lookup",
+      "source": "cuw_utility.backend",
+      "kind": "managed-il",
+      "locator": "Cuw.Model.CuwModel::GetConfig",
+      "rva": 15468,
+      "body_size": 71,
+      "body_sha256": "7dee107cf992d60c466bc5feacb31113d1eda527d8af342672fdd77c67b2ea76",
+      "anchors": [
+        {
+          "il_offset": 2,
+          "instruction": "callvirt get_Key"
+        },
+        {
+          "il_offset": 7,
+          "instruction": "call GTS.Common.Util.CollectionUtil::TryGet"
+        },
+        {
+          "il_offset": 20,
+          "instruction": "callvirt set_Value"
+        }
+      ],
+      "finding": "GetConfig returns the requested dictionary value; signed model maps CONFIG_KEY_DATA_SYNC_FOLDERPATH to dataSyncFolderPath and CONFIG_KEY_SEND_REP_REPORT to requireSendReprogrammingReport."
     },
     {
       "id": "cuw_utility.hc-launch",
@@ -3209,6 +3798,151 @@
         }
       ],
       "finding": "Completion report destination derives from configured DataSync folder and software ID; report contains before/new CID lists, success flag and session metadata, with no values exported here."
+    },
+    {
+      "id": "cuw_utility.report-filename",
+      "source": "cuw_utility.cuw-model",
+      "kind": "javascript-control-flow",
+      "locator": "createReprogrammingReportPath",
+      "function_sha256": "3a772bff6a2805593695c96301693405409537c03064b4beab94b6881da392c8",
+      "anchors": [
+        {
+          "character_offset": 36150,
+          "expression": "'CUW_' + softwareId"
+        },
+        {
+          "character_offset": 36178,
+          "expression": "year + month + day + hour + minutes + second + '.xml'"
+        },
+        {
+          "character_offset": 35934,
+          "expression": "d.getFullYear()"
+        },
+        {
+          "character_offset": 35968,
+          "expression": "d.getMonth() + 1"
+        }
+      ],
+      "finding": "Report target is <configured folder>\\\\CUW_<softwareId>_<local YYYYMMDDhhmmss>.xml, second-resolution with no unique suffix. File.Move does not overwrite an existing destination; collision/failure prevents report success and can leave temp file."
+    },
+    {
+      "id": "cuw_utility.report-enable-gate",
+      "source": "cuw_utility.cuw-controller",
+      "kind": "javascript-control-flow",
+      "locator": "sendReprogrammingReport",
+      "function_sha256": "b063b9c6b9a9c54a8d7ac42081c7d164c82c19e5de31ea8373b56418d27b97d5",
+      "anchors": [
+        {
+          "character_offset": 202890,
+          "expression": "CONFIG_KEY_SEND_REP_REPORT"
+        },
+        {
+          "character_offset": 202943,
+          "expression": "model.needSendReprogrammingReport"
+        },
+        {
+          "character_offset": 203022,
+          "expression": "calibrationInfo.nonFieldFixFlag"
+        },
+        {
+          "character_offset": 203057,
+          "expression": "result.value === 'true' || nonFieldFixFlag"
+        },
+        {
+          "character_offset": 203108,
+          "expression": "model.sendReprogrammingReport(repReport)"
+        }
+      ],
+      "finding": "Report publication requires needSendReprogrammingReport and either enable string true or calibration.nonFieldFixFlag. Shipped enable=false therefore suppresses ordinary reports, but not the explicit nonFieldFixFlag exception; any emitted XML still lies outside shipped upload selectors."
+    },
+    {
+      "id": "cuw_utility.recovery-vin-comparison",
+      "source": "cuw_utility.cuw-utility",
+      "kind": "javascript-control-flow",
+      "locator": "cuw.util.isEqualVin",
+      "character_offset": 5884,
+      "function_sha256": "bb6e793d0c43a304405720d77bfce972b809c1fc397439adbdf6b070c3278048",
+      "finding": "VIN equality trims both optional strings and uses strict equality; no case folding, padding, VIN checksum or ECU/session token check occurs here."
+    },
+    {
+      "id": "cuw_utility.recovery-vin-admission",
+      "source": "cuw_utility.cuw-controller",
+      "kind": "javascript-control-flow",
+      "locator": "checkRecoveryVin",
+      "function_sha256": "1e200960ac1c69433848a241ab7f1ffe741d15ecd50987874b434f4e6ddf9ba3",
+      "anchors": [
+        {
+          "character_offset": 56023,
+          "expression": "KindOfCentralGW.SUZUKI && !controller.commonInfo.isExistsReproSecurity"
+        },
+        {
+          "character_offset": 56155,
+          "expression": "CONFIG_KEY_REQUIRED_GET_VIN"
+        },
+        {
+          "character_offset": 56682,
+          "expression": "vins.resGetVIN,vins.dcm,vins.airbag,vins.ecgw,vins.suzukiDcm"
+        },
+        {
+          "character_offset": 56763,
+          "expression": "new Set(allVins.filter(Boolean))"
+        },
+        {
+          "character_offset": 56800,
+          "expression": "uniqueVins.length === 1"
+        },
+        {
+          "character_offset": 56838,
+          "expression": "isEqualVin(model.vin,uniqueVins[0])"
+        },
+        {
+          "character_offset": 57626,
+          "expression": "uniqueVins.length === 0"
+        },
+        {
+          "character_offset": 58281,
+          "expression": "viewS70197.init(vins)"
+        }
+      ],
+      "finding": "Recovery VIN is a conditional frontend check: Suzuki without repro-security or RequiredGetVin!=true skips vehicle comparison and releases VIM. One nonempty unique VIN must match saved VIN and any confirmed VIN; zero VINs only compares confirmed VIN to saved VIN when confirmation exists; multiple distinct VINs reject. Comparison trims only, and rejection never starts worker."
+    },
+    {
+      "id": "cuw_utility.recovery-browser-restore",
+      "source": "cuw_utility.cuw-model",
+      "kind": "javascript-control-flow",
+      "locator": "restoreClientData",
+      "function_sha256": "10ea9ba5e4507bf66781c25946c24845ca86bb9687cdada4316bd2131900341f",
+      "anchors": [
+        {
+          "character_offset": 17622,
+          "expression": "DATA_KEY_CALFILEHEADERINFO"
+        },
+        {
+          "character_offset": 17830,
+          "expression": "DATA_KEY_BEFORECIDLIST"
+        },
+        {
+          "character_offset": 17958,
+          "expression": "DATA_KEY_REWRITETARGETLIST"
+        },
+        {
+          "character_offset": 18094,
+          "expression": "DATA_KEY_REPROGRAMMING"
+        },
+        {
+          "character_offset": 18773,
+          "expression": "DATA_KEY_IS_RECOVERY"
+        },
+        {
+          "character_offset": 19567,
+          "expression": "DATA_KEY_IS_USB_COPY_COMPLETE"
+        },
+        {
+          "character_offset": 19727,
+          "expression": "DATA_KEY_VEHICLE_CONFIRMATION"
+        }
+      ],
+      "finding": "Same-process reconnect reconstructs browser state sequentially from backend dictionary: parsed calibration/before-CID/targets/progress, prior-info-sent, VIN/error, OEM/recovery/security/USB flags and confirmed vehicle. It does not read checkpoint or create/restart native worker. Missing/malformed cached JSON aborts restore and parent goStartCuw clears server state instead of silently treating it as fresh recovery."
     }
   ],
   "states": [
@@ -3398,10 +4132,11 @@
       "from": "cuw_utility.recovery",
       "to": "cuw_utility.select",
       "trigger": "User confirms recovery deletion",
-      "guard": "Delete chosen",
-      "action": "Delete recovery file and clear saved VIN/security state.",
+      "guard": "Delete chosen; native deletions do not throw",
+      "action": "Delete backup files then checkpoint, reset native object, then clear browser VIN/security cache. Native deletion failure resets memory but stops later browser cache clearing.",
       "evidence": [
-        "cuw_utility.ui-recovery-delete"
+        "cuw_utility.ui-recovery-delete",
+        "cuw_utility.recovery-discard-native"
       ]
     },
     {
@@ -3409,11 +4144,16 @@
       "from": "cuw_utility.recovery",
       "to": "cuw_utility.programming",
       "trigger": "User retries saved session",
-      "guard": "VIN check and JudgeFlashable succeed",
-      "action": "Start native engine with recovery marker; poll status.",
+      "guard": "Conditional VIN gate passes and native JudgeFlashable success+flashable",
+      "action": "Match saved J2534 name/calibration CID/node topology; restore CPU/end-block/password and multi-cal CPU offset(+0x110), distinct from divided-image index(+0x124); recreate or signal native worker and poll status.",
       "evidence": [
         "cuw_utility.ui-recovery",
-        "cuw_utility.start-flag"
+        "cuw_utility.start-flag",
+        "cuw_utility.recovery-vin-admission",
+        "cuw_utility.recovery-native-load",
+        "cuw_utility.recovery-native-match",
+        "cuw_utility.recovery-native-judge",
+        "cuw_utility.recovery-worker-restore"
       ]
     },
     {
@@ -3938,11 +4678,16 @@
     {
       "to_domain": "sync_upload",
       "caller": "CUW completion model/backend",
-      "callee": "DataSync report consumer",
-      "mechanism": "configured output path and native report create API",
-      "payload": "Before/new calibration IDs, flash success flag, session metadata; report path uses configured DataSync folder/software ID.",
+      "callee": "Shipped CUW-R02 staging is ineligible for deployed DataSync selectors",
+      "mechanism": "signed JS filename -> managed XML serializer/temp/File.Move; freshly decoded config/policy comparison",
+      "payload": "CUW XML stages under public LOGS/BDC/CUW-R02, outside GTS-C02/GTS-M02/GTS-E02 watcher roots; every deployed extension list excludes .xml. Report publication is not upload.",
       "evidence": [
-        "cuw_utility.ui-report-persist"
+        "cuw_utility.ui-report-persist",
+        "cuw_utility.report-filename",
+        "cuw_utility.report-enable-gate",
+        "cuw_utility.deployed-report-policy-join",
+        "cuw_utility.report-xml-publication",
+        "cuw_utility.report-xml-schema"
       ]
     }
   ],
@@ -3972,16 +4717,23 @@
       ]
     },
     {
-      "path_pattern": "CUW.dll recovery storage (native path list)",
-      "producer": "CUW native engine / SetInfoInStorageForRecovery",
-      "consumer": "ReadRecoveryInfoFile and recovery retry UI",
-      "created": "Programming/recovery storage lifecycle",
-      "flushed": "Native implementation owns serialization",
-      "deleted": "Explicit recovery Delete choice; not assumed deleted by every socket close",
+      "path_pattern": "{backend executable directory}\\Save\\{RecoveryInfo.ini,calibration basenames,<index>_<basename>}",
+      "producer": "CUW.dll process-global recovery object0x1008DBB0",
+      "consumer": "ReadRecoveryInfoFile -> saved calibration reload -> J2534 exact-name resolution -> native compatibility/VIN gates",
+      "created": "Backup copies then obfuscated INI publication; fields rewritten individually on worker transitions",
+      "flushed": "Old file remove then create/write/close/count-check, no flush or atomic replace; see recovery_format.source_order_prefixes",
+      "deleted": "Explicit discard: backups then checkpoint then memory reset; final native CPU/file success also deletes before browser report. Forced status-clear only resets memory.",
       "evidence": [
-        "cuw_utility.recovery-read",
-        "cuw_utility.ui-recovery-delete",
-        "cuw_utility.native-clear"
+        "cuw_utility.recovery-path",
+        "cuw_utility.recovery-copy-calibration",
+        "cuw_utility.recovery-create-order",
+        "cuw_utility.recovery-format-reader",
+        "cuw_utility.recovery-format-writer",
+        "cuw_utility.recovery-file-replace",
+        "cuw_utility.recovery-native-load",
+        "cuw_utility.recovery-discard-native",
+        "cuw_utility.recovery-next-checkpoints",
+        "cuw_utility.recovery-clear-memory"
       ]
     },
     {
@@ -4013,19 +4765,273 @@
       ]
     },
     {
-      "path_pattern": "configured DataSync folder/{software-ID-derived reprogramming-report path}",
+      "path_pattern": "C:\\Users\\Public\\Documents\\GTSPlus\\LOGS\\BDC\\CUW-R02\\CUW_<softwareId>_<localYYYYMMDDhhmmss>.xml",
       "producer": "CUW completion CuwModel/CuwBackendService",
-      "consumer": "DataSync service",
-      "created": "Post-write success/failure report stage",
-      "flushed": "CreateReprogrammingReport API",
-      "deleted": "Consumer retention/acknowledgement belongs to DataSync domain",
+      "consumer": "No eligible deployed DataSync destination: different watch roots and .xml excluded by all extension lists",
+      "created": "needSendReprogrammingReport AND (enable true OR calibration.nonFieldFixFlag); shipped enable=false; report stage not coupled transactionally to recovery deletion",
+      "flushed": "XmlSerializer -> UTF8 temp file -> dispose streams -> File.Move to expanded OutputPath; no overwrite/temp-cleanup catch",
+      "deleted": "No producer deletion after Move; shipped policy does not enroll this XML. Move failure can strand temp file.",
       "evidence": [
         "cuw_utility.ui-report-persist",
+        "cuw_utility.report-filename",
+        "cuw_utility.report-enable-gate",
+        "cuw_utility.deployed-report-policy-join",
         "cuw_utility.ui-success-cleanup",
-        "cuw_utility.ui-failure-exit"
+        "cuw_utility.ui-failure-exit",
+        "cuw_utility.report-xml-publication",
+        "cuw_utility.report-xml-schema"
       ]
     }
   ],
+  "recovery_format": {
+    "path": "{backend executable directory}\\Save\\RecoveryInfo.ini",
+    "owner": "Process-global native object 0x1008DBB0, size0x154; browser ServerData is a separate in-memory cache.",
+    "encoding": "Two obfuscated bytes per plaintext INI byte; nibbles n -> ((n+8)<<2)|(rand()&3); no MAC/checksum/version record.",
+    "serializer": "10021870 ->1002DF10/CStrings1005C060 ->1001EAE0; reader1001F2F0 ->1001E8E0 ->1001C640 ->1005BEE0 ->1002CDD0",
+    "scalar_grammar": "Plaintext [section] and key=value lines, CRLF separators without trailing CRLF; numbers decimal strtol, booleans decimal>0. Missing/empty values use getter defaults; invalid/no-conversion and ERANGE throw; trailing numeric junk is not rejected.",
+    "vocabulary": {
+      "0x1008bbec": "RecoveryInfo",
+      "0x1008bc04": "InfoInStorage",
+      "0x1008bc1c": "SavedCalibrationFilePath",
+      "0x1008bc34": "SelectedJ2534Device",
+      "0x1008bc4c": "CIDNum",
+      "0x1008bc64": "CID",
+      "0x1008bc7c": "VIN",
+      "0x1008bc94": "CIDNodeNum",
+      "0x1008bcac": "CIDNode%d",
+      "0x1008bcc4": "ReproCheckResult",
+      "0x1008bcdc": "IsCentralGWExist",
+      "0x1008bcf4": "WriteCpuIndex",
+      "0x1008bd0c": "Writing",
+      "0x1008bd24": "UseNewSoftwarePassword",
+      "0x1008bd3c": "WritingEndBlock",
+      "0x1008bd54": "RecoveryInfo.ini",
+      "0x1008bd6c": "PassThruErrorCode",
+      "0x1008bd84": "CommPhase",
+      "0x1008bd9c": "CIDRequestedCanID",
+      "0x1008bdb4": "ReproGWNode",
+      "0x1008bdcc": "CIDRequestedLogicalAddress",
+      "0x1008bde4": "ContactTypeAtSuccessGetCID",
+      "0x1008bdfc": "SequenceChangedForGetCID",
+      "0x1008be14": "SSMID",
+      "0x1008be2c": "AssyNoNum",
+      "0x1008be44": "AssyNo",
+      "0x1008be5c": "VehicleInfoForUpdateAvailableFlagNum",
+      "0x1008be74": "VehicleInfoForUpdateAvailableFlag",
+      "0x1008be8c": "BlankECUFlag",
+      "0x1008bea4": "MultiCalibrationFileNum",
+      "0x1008bebc": "CalibrationFileIndex",
+      "0x1008bed4": "OffsetOfWriteCpuMultiCalIndex",
+      "0x1008beec": "CanIDFromResultOfGetCIDNum",
+      "0x1008bf04": "CanIDFromResultOfGetCID",
+      "0x1008bf1c": "KindOfVehicle",
+      "0x1008bf34": "WriteTargetDividedCPUImageIndex",
+      "0x1008bf4c": "DHCentralGWType",
+      "0x1008bf64": "IsSuzukiReproSecuritySupported",
+      "0x1008bf7c": "IsDaihatsuReproSecuritySupported",
+      "0x1008bf94": "WholeReproCalibrationFileFlag"
+    },
+    "progress_field_dataflow": "cuw_utility.recovery-progress-field-dataflow",
+    "sections": {
+      "RecoveryInfo": "Master fields; also per-file fields when MultiCalibrationFileNum=0",
+      "RecoveryInfoN": "1-based suffix1..N when MultiCalibrationFileNum>0; per-file records",
+      "InfoInStorage": [
+        "IsSuzukiReproSecuritySupported",
+        "IsDaihatsuReproSecuritySupported"
+      ]
+    },
+    "native_object_fields": [
+      {
+        "offset": "0x00",
+        "key": "SavedCalibrationFilePath",
+        "representation": "vector<string>; per-file"
+      },
+      {
+        "offset": "0x0c",
+        "key": "SelectedJ2534Device",
+        "representation": "string; master"
+      },
+      {
+        "offset": "0x24",
+        "key": "CIDNum/CID1..N",
+        "representation": "vector<vector<string>>; per-file"
+      },
+      {
+        "offset": "0x30",
+        "key": "VIN",
+        "representation": "string; master"
+      },
+      {
+        "offset": "0x48",
+        "key": "IsCentralGWExist",
+        "representation": "bool"
+      },
+      {
+        "offset": "0x4c",
+        "key": "WriteCpuIndex",
+        "representation": "int32"
+      },
+      {
+        "offset": "0x50",
+        "key": "Writing",
+        "representation": "bool"
+      },
+      {
+        "offset": "0x51",
+        "key": "UseNewSoftwarePassword",
+        "representation": "bool"
+      },
+      {
+        "offset": "0x52",
+        "key": "WritingEndBlock",
+        "representation": "bool"
+      },
+      {
+        "offset": "0x98",
+        "key": "(not a record key)",
+        "representation": "RecoveryInfo.ini path"
+      },
+      {
+        "offset": "0xb0",
+        "key": "PassThruErrorCode",
+        "representation": "int32; missing default9999"
+      },
+      {
+        "offset": "0xb4",
+        "key": "CommPhase",
+        "representation": "byte; missing default2"
+      },
+      {
+        "offset": "0xb8",
+        "key": "CIDRequestedLogicalAddress1..N / fallback CIDRequestedCanID1..N",
+        "representation": "per-file address pairs; logical preferred"
+      },
+      {
+        "offset": "0xc4",
+        "key": "ReproGWNode",
+        "representation": "byte"
+      },
+      {
+        "offset": "0xc8",
+        "key": "ContactTypeAtSuccessGetCID",
+        "representation": "string"
+      },
+      {
+        "offset": "0xe0",
+        "key": "SequenceChangedForGetCID",
+        "representation": "bool"
+      },
+      {
+        "offset": "0xe1",
+        "key": "SSMID",
+        "representation": "byte"
+      },
+      {
+        "offset": "0xe4",
+        "key": "AssyNoNum/AssyNo1..N",
+        "representation": "per-file vector<string>"
+      },
+      {
+        "offset": "0xf0",
+        "key": "VehicleInfoForUpdateAvailableFlagNum/VehicleInfoForUpdateAvailableFlag1..N",
+        "representation": "per-file vector<bool>"
+      },
+      {
+        "offset": "0xfc",
+        "key": "BlankECUFlag/BlankECUFlag1..N",
+        "representation": "per-file bit vector; common flag is per-item fallback"
+      },
+      {
+        "offset": "0x108",
+        "key": "MultiCalibrationFileNum",
+        "representation": "int32"
+      },
+      {
+        "offset": "0x10c",
+        "key": "CalibrationFileIndex",
+        "representation": "int32"
+      },
+      {
+        "offset": "0x110",
+        "key": "OffsetOfWriteCpuMultiCalIndex",
+        "representation": "int32"
+      },
+      {
+        "offset": "0x114",
+        "key": "CanIDFromResultOfGetCIDNum/CanIDFromResultOfGetCID1..N",
+        "representation": "vector<string>"
+      },
+      {
+        "offset": "0x120",
+        "key": "KindOfVehicle",
+        "representation": "int32"
+      },
+      {
+        "offset": "0x124",
+        "key": "WriteTargetDividedCPUImageIndex",
+        "representation": "int32"
+      },
+      {
+        "offset": "0x128",
+        "key": "HardwareID",
+        "representation": "string"
+      },
+      {
+        "offset": "0x140",
+        "key": "IsSuzukiReproSecuritySupported",
+        "representation": "bool; InfoInStorage"
+      },
+      {
+        "offset": "0x141",
+        "key": "IsDaihatsuReproSecuritySupported",
+        "representation": "bool; InfoInStorage"
+      },
+      {
+        "offset": "0x142",
+        "key": "DHCentralGWType",
+        "representation": "byte"
+      },
+      {
+        "offset": "0x144",
+        "key": "WholeReproCalibrationFileFlag",
+        "representation": "per-file bit vector"
+      }
+    ],
+    "volatile_fields": {
+      "0x53": "resume-armed",
+      "0x54": "recovery-disabled",
+      "0x58": "original calibration paths",
+      "0x94": "persistence-active"
+    },
+    "source_order_prefixes": [
+      "ensure Save directory -> copy backup0..N (copy BOOL ignored) -> set Writing -> publish checkpoint -> active=true",
+      "each update: mutate one object field -> serialize full INI -> probe/close -> remove old checkpoint -> create -> write -> close -> count check",
+      "multi-index advance: CalibrationFileIndex(+0x10C) save -> WriteCpuIndex(+0x4C) save -> OffsetOfWriteCpuMultiCalIndex(+0x110) save; an interruption can expose a mixed tuple; the third field is not WriteTargetDividedCPUImageIndex(+0x124)",
+      "whole-repro backup replacement: set flag/original path -> delete old backup -> compute new backup name -> copy new calibration (BOOL ignored) -> publish record",
+      "discard: delete backups0..N -> delete checkpoint -> reset memory -> throw if any deletion failed",
+      "final native CPU/file completion deletes recovery before browser post-CID collection/report; a missing checkpoint is not proof of report publication",
+      "failure/cancel force-clear joins/reset memory without deleting checkpoint; browser report failure can skip later sleep/cache/unlock steps"
+    ],
+    "durability": "Source-level call prefixes only; no claim that close/delete/copy or File.Move survived power loss.",
+    "evidence": [
+      "cuw_utility.recovery-key-initializers",
+      "cuw_utility.recovery-format-reader",
+      "cuw_utility.recovery-format-writer",
+      "cuw_utility.recovery-file-replace",
+      "cuw_utility.recovery-copy-calibration",
+      "cuw_utility.recovery-create-order",
+      "cuw_utility.recovery-native-load",
+      "cuw_utility.recovery-worker-restore",
+      "cuw_utility.recovery-discard-native",
+      "cuw_utility.recovery-clear-memory",
+      "cuw_utility.recovery-next-checkpoints",
+      "cuw_utility.recovery-divided-checkpoints",
+      "cuw_utility.recovery-whole-calibration",
+      "cuw_utility.recovery-integer-parser",
+      "cuw_utility.recovery-boolean-parser",
+      "cuw_utility.recovery-line-serializer"
+    ]
+  },
   "coverage": {
     "components": [
       "CUWLauncher external file association executable (outside previous installed-root249 count)",
@@ -4063,9 +5069,9 @@
       "next_evidence": "Authorized captured transcript tied to exact calibration/ECU and configured service; never invoke from this extractor."
     },
     {
-      "question": "Crash/power-loss durability and native worker join completion on the target OS",
-      "why_unclosed": "Offline source/IL evidence identifies recovery reader/deletion ownership and the reset unbounded worker join, but does not observe target filesystem flush completion or an actual crashing worker.",
-      "next_evidence": "Isolated Windows harness with fake file/J2534 interfaces and interrupted native worker; no vehicle or service access."
+      "question": "Observed filesystem durability and worker join termination",
+      "why_unclosed": "Native create/update/remove/copy/close order and power-loss prefixes are closed from supplied callees; external filesystem persistence and eventual return of the unbounded worker join are not observed. No unavailable native source is required to state the source-order contract.",
+      "next_evidence": "Authorized filesystem fault-injection trace with known storage/cache policy, and synthetic worker-blocking trace; not an ECU or account prerequisite."
     }
   ],
   "safety": {
@@ -4074,6 +5080,16 @@
     "vehicle_contact": false,
     "network_contact": false,
     "credentials_used": false
+  },
+  "depth_smoke": {
+    "command": "uv run python build/tmp/lc2_cuw_utility_smoke.py",
+    "prepared_not_run": true,
+    "actual_code": [
+      "CUW.dll1001C640 decoder;100302B0 fresh/resume/request-reject;10037EA0 discard/failing-delete order under Unicorn",
+      "Actual serializer field-to-key x86 blocks10022C27/10022F1C, both three-stage continuation blocks and resume10036044; distinct +0x110/+0x124 sentinels, synthetic decimal conversion/map sink only",
+      "CuwModel.CreateReprogrammingReport IL with synthetic BCL edges, normal move and failed-publication temp retention",
+      "Freshly authenticated cuw.gui controller fresh/disk/live reconnect, actual VIN comparator and conditional gates, flashability reject, discard, clear/report failure cleanup"
+    ]
   },
   "smoke_plan": [
     "Run this extractor; it authenticates actual packaged JS and validates IL/materialized bodies/native branch bytes without loading PE code.",

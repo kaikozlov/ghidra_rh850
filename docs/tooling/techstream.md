@@ -4539,12 +4539,48 @@ Browser disconnect requests nonforced clear, which can return native error
 3007. Native reset joins the worker without a deadline. The PC-disconnected
 progress branch schedules no next poll.
 
-Successful postprocessing persists its report, clears native state, restores
+Disk recovery uses `{backend EXE directory}\Save\RecoveryInfo.ini` and
+single/multi-calibration backups. The artifact pins its initialized key names,
+active fields, decimal/Boolean parsing, CRLF records, and reversible nibble
+obfuscation. Backups precede checkpoint publication; `CopyFileA` results are
+ignored. Checkpoint replacement removes the old file before create/write/close.
+CPU, file, and `OffsetOfWriteCpuMultiCalIndex` updates are separate rewrites.
+That last field is object offset `+0x110`; the separately serialized
+`WriteTargetDividedCPUImageIndex` is `+0x124`.
+
+Resume requires the saved J2534 name to match enumeration and native CID/node
+lists to have equal counts and equal same-index pairs. The browser VIN gate is
+conditional, with Suzuki/configuration bypasses pinned in the artifact.
+Disk resume reloads calibration/progress and starts a worker; browser reconnect
+restores process-memory `ServerData`. Discard deletes backups, then checkpoint,
+and resets memory; deletion failure throws. Forced status-clear joins/resets
+memory without performing disk discard.
+
+Postprocessing conditionally publishes its report, clears native state, restores
 sleep/client state, relays `NORMAL`, and unlocks PF before Finish. Rejection
 stops that promise chain. The external launcher waits for the CUW connection
 to appear and disappear; browser process lifetime is not its completion signal.
 GTS Software-as-a-Part, AISAC2, and Hino callers consume the result relay and
 window closure before continuing their own work.
+
+Native completion deletes recovery before browser report publication. Managed
+report writing serializes temporary XML and then calls `File.Move`, with no
+overwrite or failure cleanup of that temporary file. Names are
+`CUW_<softwareId>_<local timestamp>.xml`, with second-resolution timestamps.
+Publication requires `needSendReprogrammingReport` and either configuration
+string `'true'` or `calibration.nonFieldFixFlag`.
+
+Shipped `cuwpf.yaml` sets `requireSendReprogrammingReport=false` and destination
+`C:\Users\Public\Documents\GTSPlus\LOGS\BDC\CUW-R02\`.
+That directory is outside all three shipped DataSync watcher roots, and their
+enabled extension lists all exclude `.xml`. These reports are therefore
+ineligible under the shipped upload policy.
+
+Actual x86 execution covered decoding, creation/matching/discard failures, both
+progress-field identities and continuation prefixes, and resume restoration.
+Actual IL exercised report serialization/publication and move-failure retention;
+authenticated JS exercised fresh/disk/live recovery and all report-enable
+branches above.
 
 Online signature requests, offline request/response XML, cancellation, recovery,
 and return routing are pinned separately. Phase/OEM-specific MACKey carriers
