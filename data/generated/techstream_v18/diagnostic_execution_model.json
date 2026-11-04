@@ -212,6 +212,11 @@
               "file_offset": "0xE516",
               "va": "0x1000F116"
             },
+            "context_controller_fields": {
+              "bytes": "8b43048b4b088945f48b430c83c32c",
+              "file_offset": "0xE507",
+              "va": "0x1000F107"
+            },
             "execute_symbol_lookup": {
               "bytes": "682053011050ff15045101108945e0",
               "file_offset": "0xE4DC",
@@ -240,10 +245,10 @@
             "fields": [
               "CCmdBase* command",
               "CCmdBase* response",
-              "CDataCtrl*",
+              "DWORD* cancel_flag",
               "CCommFrameCtrl*",
-              "CDataMonitorCtrl*",
-              "DWORD* cancel_flag"
+              "CDataCtrl*",
+              "CDataMonitorCtrl*"
             ]
           },
           "loader": "current GTS+ uses LoadLibraryExW(plugin, 0, 8), then GetProcAddress(\"Execute\")",

@@ -1,0 +1,1921 @@
+{
+  "api_ids": {
+    "checkEcuConnect": "DV000005",
+    "clearEcuConnectCache": "DV000033",
+    "disconnectJ2534Device": "DV000035",
+    "endDiagnosis": "SC000002",
+    "forcedEndDiagnosis": "SC000007",
+    "getEquippedEcuList": "DV000004",
+    "getVehicleConfirmation": "IF000004",
+    "getVin": "DV000090",
+    "notifySelectedVehicle": "SC000003",
+    "queryVehiclebyManualVin": "DV000103",
+    "selectVehicle": "DV000001",
+    "selectVehicleById": "DV000003",
+    "startDiagnosis": "SC000001"
+  },
+  "coverage": {
+    "branches": [
+      "VIM/battery continue/cancel",
+      "PF lock failure",
+      "matching/missing/mismatched/unfixed VIN",
+      "manual VIN and category/option fallback",
+      "default/nondefault OEM restart",
+      "initial healthcheck Optional/Required/None",
+      "ECU cache reuse/refresh/failure",
+      "healthcheck cooperative cancel/revoke/completion",
+      "physical disconnect vs context destruction",
+      "start failure cleanup and end failure retention"
+    ],
+    "components": [
+      "authenticated gts.gui frontend",
+      "GTSPlusDiagAdaptMng.dll",
+      "DiagAdaptation.dll",
+      "existing Toyota resolver closure"
+    ],
+    "entrypoints": [
+      "SC000001",
+      "SC000002",
+      "SC000007",
+      "DV000004",
+      "DV000005",
+      "DV000033",
+      "DV000001",
+      "DV000003",
+      "SC000003",
+      "IF000004",
+      "DV000090",
+      "DV000103",
+      "DV000035",
+      "VehicleConnectController.preConnectLogic",
+      "VehicleConnectController.initLogic",
+      "VehicleConnectWorkerModel.getVIN",
+      "VehicleConnectWorkerModel.refleshDiagnosis",
+      "VehicleConnectWorkerModel.startSelectVehicle",
+      "VehicleConnectWorkerModel.startManualMode",
+      "VehicleConnectWorkerModel.getCategoriesWithVin",
+      "VehicleConnectWorkerModel.setCategory",
+      "VehicleConnectWorkerModel.setOption",
+      "VehicleConnectWorkerModel.vehicleDecision",
+      "VehicleConnectWorkerModel.loadVehicleInformation",
+      "VehicleConnectController.vehicleDecisionPostprocessingLogic",
+      "VehicleConnectController.onClickBack",
+      "VehicleConnectWorkerModel.disconnectJ2534Device",
+      "EcuInfo.getEcuStatus",
+      "CommonInfo.setCurrentEcuId",
+      "CommonInfo.clearVehicleInfo",
+      "MainFrameController.dispose",
+      "MainFrameWorkerModel.endDiagnosis",
+      "HealthCheckWorkerModel.healthCheckOnLoadBeforePart",
+      "HealthCheckWorkerModel.healthCheckOnLoadAfterPart",
+      "HealthCheckWorkerModel._startHealthCheckFunc",
+      "HealthCheckWorkerModel._startHealthCheck",
+      "HealthCheckWorkerModel.cancelHealthCheck",
+      "HealthCheckWorkerModel._healthCheckSummaryEndFunc",
+      "HealthCheckWorkerModel.saveCacheData",
+      "HealthCheckWorkerModel.readCacheData",
+      "HealthCheckWorkerModel.makeCacheFilePath",
+      "VehicleConnectByIdWorkerModel.vehicleConnectById",
+      "VehicleConnectWorkerModel.getCategories",
+      "VehicleConnectWorkerModel.getEnvInfo",
+      "EcuFunctionController.setCurrentEcu",
+      "VehicleConnectWorkerModel.checkBatteryVoltage",
+      "GtsPFRawInterface.getEquippedEcuList"
+    ]
+  },
+  "domain": "vehicle_session",
+  "evidence": [
+    {
+      "finding": "VIM-version confirmation and 8000-mV battery precheck; 0x3001/0x3002 route no-connect view, other errors return menu; technician can continue low voltage or cancel.",
+      "id": "vehicle_session.preconnect",
+      "kind": "javascript-control-flow",
+      "locator": "VehicleConnectController.prototype.preConnectLogic",
+      "method_sha256": "21bd2b7168e1b0d2cb151d9a7fcecf0a8b03af47d8870cf1412d366e7cc4c93b",
+      "source": "vehicle_session.asset.js/gts/vehicle_connect/vehicle_connect_controller.js"
+    },
+    {
+      "finding": "Acquire PF lock; reuse fixed matching VIN; missing VIN forces end/start; mismatched/unfixed VIN prompts when other client exists, otherwise restart then recurse. Lock failure or cancellation releases lock and returns menu. SelectVehicle 0x3002 opens retry view; absent VIN opens manual input.",
+      "id": "vehicle_session.reuse",
+      "kind": "javascript-control-flow",
+      "locator": "VehicleConnectController.prototype.initLogic",
+      "method_sha256": "5557ec7d20fbe52b727505b46bcf644609bd0d94483b21352e292da4107cce3c",
+      "source": "vehicle_session.asset.js/gts/vehicle_connect/vehicle_connect_controller.js"
+    },
+    {
+      "finding": "Compare PF-confirmed VIN/decisionVin==1 with live getVin. gtsOnlyConnect controls other-client branch (returned as otherClientExist despite inverted-sounding name).",
+      "id": "vehicle_session.vin",
+      "kind": "javascript-control-flow",
+      "locator": "VehicleConnectWorkerModel.prototype.getVIN",
+      "method_sha256": "e86686337e3f8e727a8878c074be97573c856d23ee70f2b95798c61704b19c75",
+      "source": "vehicle_session.asset.js/gts/vehicle_connect/vehicle_connect_worker.js"
+    },
+    {
+      "finding": "forcedEndDiagnosis then startDiagnosis; both errors logged/consumed; diagnosisRestarted=true.",
+      "id": "vehicle_session.restart",
+      "kind": "javascript-control-flow",
+      "locator": "VehicleConnectWorkerModel.prototype.refleshDiagnosis",
+      "method_sha256": "6762040047894824fbcc1b50c08b0a3cd2543b1107560e2275664c44e4abb532",
+      "source": "vehicle_session.asset.js/gts/vehicle_connect/vehicle_connect_worker.js"
+    },
+    {
+      "finding": "Regional category IDs + brand division + index0/selectId0 + nonDispInfoList enter resolver; nonempty category map selects auto mode1, otherwise manual mode2; vehicleId65535 excluded from confirmation.",
+      "id": "vehicle_session.auto",
+      "kind": "javascript-control-flow",
+      "locator": "VehicleConnectWorkerModel.prototype.startSelectVehicle",
+      "method_sha256": "4cab11009164d7b1f296e8002437e53acf483ecb46eb430c059055909d3b7bfb",
+      "source": "vehicle_session.asset.js/gts/vehicle_connect/vehicle_connect_worker.js"
+    },
+    {
+      "finding": "Clear confirmed vehicle/category/option/parent phase; selectVehicleCategory drives hierarchical manual selection; decision mode1->2, modes3/4->0.",
+      "id": "vehicle_session.manual",
+      "kind": "javascript-control-flow",
+      "locator": "VehicleConnectWorkerModel.prototype.startManualMode",
+      "method_sha256": "55cb27b029f86e696c832bcd8acf00fe2ac75ef1bbc273afb0c4f71cd4ea3dd1",
+      "source": "vehicle_session.asset.js/gts/vehicle_connect/vehicle_connect_worker.js"
+    },
+    {
+      "finding": "Pad manual VIN to11; queryVehiclebyManualVin and relations constrain category/options, mode4 on resolved category map; reset invalidates cached selections; no match falls back manual.",
+      "id": "vehicle_session.manual_vin",
+      "kind": "javascript-control-flow",
+      "locator": "VehicleConnectWorkerModel.prototype.getCategoriesWithVin",
+      "method_sha256": "937658c4bd2a1d2ae0d53ef7215ed8963641fc461b2f4f78ed5718f8f704a252",
+      "source": "vehicle_session.asset.js/gts/vehicle_connect/vehicle_connect_worker.js"
+    },
+    {
+      "finding": "Category changes truncate downstream selections/options, query category hierarchy or filter VIN candidates, re-resolve confirmation.",
+      "id": "vehicle_session.category",
+      "kind": "javascript-control-flow",
+      "locator": "VehicleConnectWorkerModel.prototype.setCategory",
+      "method_sha256": "1269e78554ea68ce8e913339681c7802f8f1123e4158c334f9740e568c2b6bb5",
+      "source": "vehicle_session.asset.js/gts/vehicle_connect/vehicle_connect_worker.js"
+    },
+    {
+      "finding": "Option index/selectId feeds subsequent SelectVehicle requests or VIN candidate filtering; replaces downstream option state and confirmed vehicle.",
+      "id": "vehicle_session.option",
+      "kind": "javascript-control-flow",
+      "locator": "VehicleConnectWorkerModel.prototype.setOption",
+      "method_sha256": "a585dc1865b01cf4c6bcf50736ca47816051daa0758a7d9c84c7a461daa72259",
+      "source": "vehicle_session.asset.js/gts/vehicle_connect/vehicle_connect_worker.js"
+    },
+    {
+      "finding": "Manual-VIN mode4 selectsVehicleById; nondefault OEM forces end/start/selectById. Publish vehicle/VIN/category/car/option/decisionVin/parentPhase/OEM confirmation; apply vehicle exception; fetch equipped candidates; optionally connect443, apply system exception and functions; share is19pfVer3 storage3.",
+      "id": "vehicle_session.confirm",
+      "kind": "javascript-control-flow",
+      "locator": "VehicleConnectWorkerModel.prototype.vehicleDecision",
+      "method_sha256": "3ccc419a642cbf873ee02886ff1fd02a99ef34a2ce055cd83b320d97d658e7d5",
+      "source": "vehicle_session.asset.js/gts/vehicle_connect/vehicle_connect_worker.js"
+    },
+    {
+      "finding": "Rebuild worker mountedEcuMap from equipped candidates with status-1/hasConnected=false/functions=null and group/bus/phase; read descriptions/mileage; serialize VehicleInfo for controller.",
+      "id": "vehicle_session.context",
+      "kind": "javascript-control-flow",
+      "locator": "VehicleConnectWorkerModel.prototype.loadVehicleInformation",
+      "method_sha256": "f1fb87a9b93f2c08623c33bfdbe8e5246600af81a2146301b36742ed04f9a960",
+      "source": "vehicle_session.asset.js/gts/vehicle_connect/vehicle_connect_worker.js"
+    },
+    {
+      "finding": "Initialize legacy phase7 if needed; load shared VehicleInfo; web-service failure ends diagnosis/logs out; initialHealthCheck Required/Optional/None controls vehicleConnectTransitionFlag before VEHICLE_CONNECTED.",
+      "id": "vehicle_session.postconnect",
+      "kind": "javascript-control-flow",
+      "locator": "VehicleConnectController.prototype.vehicleDecisionPostprocessingLogic",
+      "method_sha256": "7b1b0dd4f8e7858307400a446d69f06ba8cfaffe79b86877921eca370a2d0262",
+      "source": "vehicle_session.asset.js/gts/vehicle_connect/vehicle_connect_controller.js"
+    },
+    {
+      "finding": "Release PF exclusive lock and return main menu.",
+      "id": "vehicle_session.back",
+      "kind": "javascript-control-flow",
+      "locator": "VehicleConnectController.prototype.onClickBack",
+      "method_sha256": "e6f98af963cccde1890811a930ea4b657c1ea0491164c75ab1a11120c7ff4113",
+      "source": "vehicle_session.asset.js/gts/vehicle_connect/vehicle_connect_controller.js"
+    },
+    {
+      "finding": "Invoke explicit J2534 device disconnect; rejection consumed.",
+      "id": "vehicle_session.disconnect_ui",
+      "kind": "javascript-control-flow",
+      "locator": "VehicleConnectWorkerModel.prototype.disconnectJ2534Device",
+      "method_sha256": "15603cb0ec9a7e5c32e2bad668b8071df2a535fe961a6e975f5e653a25fb7549",
+      "source": "vehicle_session.asset.js/gts/vehicle_connect/vehicle_connect_worker.js"
+    },
+    {
+      "finding": "Status-threshold cache avoids repeated connect; explicit recheck clears native ECU/bus cache except UNCHECKED; connect failure sets status0; connected sets hasConnected; replace-system/function discovery only when connected and missing/forced, function failure caches empty list.",
+      "id": "vehicle_session.ecu_cache",
+      "kind": "javascript-control-flow",
+      "locator": "EcuInfo.prototype.getEcuStatus",
+      "method_sha256": "0dd2dbb34479720f2dd77ab01e2aeb9b3927412fc4ce3913edb16f1eb90afb13",
+      "source": "vehicle_session.asset.js/gts/common/common_info_worker.js"
+    },
+    {
+      "finding": "Selected ECU ID/name are references copied from mounted map, independent of vehicle identity/session owner.",
+      "id": "vehicle_session.current_ecu",
+      "kind": "javascript-control-flow",
+      "locator": "CommonInfo.prototype.setCurrentEcuId",
+      "method_sha256": "1957318a477569d9b911ecdff9e52327ad3e80c68ee2044db1cd104e0952110b",
+      "source": "vehicle_session.asset.js/gts/common/common_info.js"
+    },
+    {
+      "finding": "Replace VehicleInfo and SharedData on workspace invalidation.",
+      "id": "vehicle_session.clear_context",
+      "kind": "javascript-control-flow",
+      "locator": "CommonInfo.prototype.clearVehicleInfo",
+      "method_sha256": "a49dd86b3972b317ed13abac0508531f746612442a1f125b06172cac675e8cc4",
+      "source": "vehicle_session.asset.js/gts/common/common_info_worker.js"
+    },
+    {
+      "finding": "Dispose active controller, stop voltage polling, remove UI/header, clear selected vehicle then end diagnosis, reset stored data, start a fresh diagnostic context; logs and consumes restart errors.",
+      "id": "vehicle_session.workspace_close",
+      "kind": "javascript-control-flow",
+      "locator": "MainFrameController.prototype.dispose",
+      "method_sha256": "594c8dc58c56270ad9bfd9af79799c22f968578fc5560f478c30e4291c7e3a37",
+      "source": "vehicle_session.asset.js/gts/main_frame/main_frame_controller.js"
+    },
+    {
+      "finding": "Worker clears VehicleInfo before PF endDiagnosis; rejection is logged and resolved.",
+      "id": "vehicle_session.workspace_end",
+      "kind": "javascript-control-flow",
+      "locator": "MainFrameWorkerModel.prototype.endDiagnosis",
+      "method_sha256": "ae23d3333af83aec1f875269ce42096a62df0817d15e3117790bb2031657c48e",
+      "source": "vehicle_session.asset.js/gts/main_frame/main_frame_worker.js"
+    },
+    {
+      "finding": "Initialize healthcheck flags/cache; reread equipped list when requested; sort shared mounted candidates; finally clear isRunning.",
+      "id": "vehicle_session.hc_before",
+      "kind": "javascript-control-flow",
+      "locator": "HealthCheckWorkerModel.prototype.healthCheckOnLoadBeforePart",
+      "method_sha256": "7b61d8b7d64a5ecd18e6c279ecc6a64e25f85d09dc36c8e44ee269da17172550",
+      "source": "vehicle_session.asset.js/gts/health_check/health_check_worker.js"
+    },
+    {
+      "finding": "Run healthcheck and postprocessing, produce buffer/IPK and latest JSON cache; finally clear isRunning.",
+      "id": "vehicle_session.hc_after",
+      "kind": "javascript-control-flow",
+      "locator": "HealthCheckWorkerModel.prototype.healthCheckOnLoadAfterPart",
+      "method_sha256": "b81a465e0f5eba0a76f0a971cfca8105324800130d0ac992205c03a8948fc106",
+      "source": "vehicle_session.asset.js/gts/health_check/health_check_worker.js"
+    },
+    {
+      "finding": "Sequential sorted mounted candidates; stop scheduling on cancelFlag; getEcuStatus with clearEcuConnectCache1 forcing connected/function refresh; only CONNECTED runs DTC/monitor/RoB/CID. Save each result and enqueue progress.",
+      "id": "vehicle_session.hc_scan",
+      "kind": "javascript-control-flow",
+      "locator": "HealthCheckWorkerModel.prototype._startHealthCheckFunc",
+      "method_sha256": "5f36fea4776b78a6b481a1f8415681ac9bdeb0086c6c58ef56f56c1e65c57826",
+      "source": "vehicle_session.asset.js/gts/health_check/health_check_worker.js"
+    },
+    {
+      "finding": "Gateway/wired data start then ECU scan; cancel returns summary early; otherwise timestamps/CAN bus/tires/SOH/web-service enrichment and final wired-data save; revoke error routes revoke UI.",
+      "id": "vehicle_session.hc_flow",
+      "kind": "javascript-control-flow",
+      "locator": "HealthCheckWorkerModel.prototype._startHealthCheck",
+      "method_sha256": "aa6167d6c7ade3c24ee65e8587c2993f167af6f793fe77a3ed79c5af949e0be0",
+      "source": "vehicle_session.asset.js/gts/health_check/health_check_worker.js"
+    },
+    {
+      "finding": "If running and not already canceled, end wired collection, retain callback+args, set cancelFlag and enqueue START_HEALTH_CHECK_CANCEL; cooperative between ECU work, not global forced abort.",
+      "id": "vehicle_session.hc_cancel",
+      "kind": "javascript-control-flow",
+      "locator": "HealthCheckWorkerModel.prototype.cancelHealthCheck",
+      "method_sha256": "b594dd0f9a065b2fdce6df41cc989ef8aa1d344f11af8686cdd7ed5a598c889b",
+      "source": "vehicle_session.asset.js/gts/health_check/health_check_worker.js"
+    },
+    {
+      "finding": "Enqueue END_HEALTH_CHECK_CANCEL with callback and ECU arg once summary sees cancelFlag; clear callback storage.",
+      "id": "vehicle_session.hc_cancel_end",
+      "kind": "javascript-control-flow",
+      "locator": "HealthCheckWorkerModel.prototype._healthCheckSummaryEndFunc",
+      "method_sha256": "3f92785990f363da555b3a59041795be0f43fcfedc84d7dfb7856a8e413e83f6",
+      "source": "vehicle_session.asset.js/gts/health_check/health_check_worker.js"
+    },
+    {
+      "finding": "Write latest JSON mode1 after stripping specificFolder/settings/settingExcerpt; write failure returns undefined, not success timestamp.",
+      "id": "vehicle_session.hc_cache",
+      "kind": "javascript-control-flow",
+      "locator": "HealthCheckWorkerModel.prototype.saveCacheData",
+      "method_sha256": "ec31e7596071cdfaaafda2e0150eb022bedfcaf46a22e565130097918502908c",
+      "source": "vehicle_session.asset.js/gts/health_check/health_check_worker.js"
+    },
+    {
+      "finding": "Read latest JSON and rehydrate healthcheck view/cache with current settings.",
+      "id": "vehicle_session.hc_read",
+      "kind": "javascript-control-flow",
+      "locator": "HealthCheckWorkerModel.prototype.readCacheData",
+      "method_sha256": "5df6b0d721e0f33f39ad85d4b4a971042729e117f7e484fd45e95ce4b0bd7862",
+      "source": "vehicle_session.asset.js/gts/health_check/health_check_worker.js"
+    },
+    {
+      "finding": "specificFolder folderNo1 + distributor specificSubFolders/cacheDataHealthCheck + LatestHealthCheckData.json.",
+      "id": "vehicle_session.hc_path",
+      "kind": "javascript-control-flow",
+      "locator": "HealthCheckWorkerModel.prototype.makeCacheFilePath",
+      "method_sha256": "d7c7c2b0d1a90820e7d1c129d7b7e1950da2dae0717651271c5ba78510cb997b",
+      "source": "vehicle_session.asset.js/gts/health_check/health_check_worker.js"
+    },
+    {
+      "finding": "Saved/linkage vehicleId and supplied VIN check existing PF-confirmed vehicle; only when present force end/start. selectVehicleById -> notify confirmation -> vehicle exception -> set worker VehicleInfo from linkage/resolver output.",
+      "id": "vehicle_session.by_id",
+      "kind": "javascript-control-flow",
+      "locator": "VehicleConnectByIdWorkerModel.prototype.vehicleConnectById",
+      "method_sha256": "f7ae2c2fb027eedcd9cd2029096fdae27247c661e579724ba19a8ca7ac5441fc",
+      "source": "vehicle_session.asset.js/gts/vehicle_connect_by_id/vehicle_connect_by_id_worker.js"
+    },
+    {
+      "finding": "When resolver nonDispInfo exists, save fileType5 vehicleConfigration ngCount0/password lookup metadata/package version before manual/auto category processing; failure logged.",
+      "id": "vehicle_session.configuration_cache",
+      "kind": "javascript-control-flow",
+      "locator": "VehicleConnectWorkerModel.prototype.getCategories",
+      "method_sha256": "fa246d55f51206e8f810066357d377a3a5f094440b3ebaadc53f305c13d03066",
+      "source": "vehicle_session.asset.js/gts/vehicle_connect/vehicle_connect_worker.js"
+    },
+    {
+      "finding": "New VehicleInfo and fresh connect cache; read vehicle configuration fileType5, retain password lookup array as nonDispInfoList; errors logged.",
+      "id": "vehicle_session.configuration_read",
+      "kind": "javascript-control-flow",
+      "locator": "VehicleConnectWorkerModel.prototype.getEnvInfo",
+      "method_sha256": "a7b5229824d60b963d713540270e6270a01a8ce21e45cddd8eab02405fe86a2f",
+      "source": "vehicle_session.asset.js/gts/vehicle_connect/vehicle_connect_worker.js"
+    },
+    {
+      "finding": "Different selected ECU changes common current ID and retrieves cached worker function list; NaN clears display; does not recreate vehicle context.",
+      "id": "vehicle_session.switch_controller",
+      "kind": "javascript-control-flow",
+      "locator": "EcuFunctionController.prototype.setCurrentEcu",
+      "method_sha256": "c7302c9de2ed1f1f93ad4fd8db0d4df42946709e521f05fbb239113816cc3416",
+      "source": "vehicle_session.asset.js/gts/ecu_function/ecu_function_controller.js"
+    },
+    {
+      "finding": "Compare batteryVoltage <8000; return lowBattery plus structured error code/detailCode.",
+      "id": "vehicle_session.battery_threshold",
+      "kind": "javascript-control-flow",
+      "locator": "VehicleConnectWorkerModel.prototype.checkBatteryVoltage",
+      "method_sha256": "050e2c4c60baff62b0bf5e57255b02e3e208dc1a06827ea455904f72d26a784d",
+      "source": "vehicle_session.asset.js/gts/vehicle_connect/vehicle_connect_worker.js"
+    },
+    {
+      "finding": "GtsPFRawInterface methods use constants listed in api_ids; entire raw-interface asset pinned. apiArgs routed as request payload.",
+      "id": "vehicle_session.api_contracts",
+      "kind": "javascript-control-flow",
+      "locator": "GtsPFRawInterface.prototype.getEquippedEcuList",
+      "method_sha256": "c57db63912ed96557bd9d2fe18a375f6d404b46e2ac1b237c4554ff5c03cffd2",
+      "source": "vehicle_session.asset.js/gts/common/gts_platform_raw_interface.js"
+    },
+    {
+      "entry_bytes": "558bec6aff687c5b081064a100000000",
+      "finding": "RTTI-derived execute slot, decompiled with PE_PROJECT=lc_vehicle_session; typed command ownership is retained in frontend/native handoffs.",
+      "id": "vehicle_session.native_StartDiagnosis",
+      "kind": "native-decompiled-handler",
+      "locator": "CDAExecStartDiagnosis::Execute @ 0x10061840",
+      "source": "vehicle_session.native",
+      "vtable": "0x10098B4C"
+    },
+    {
+      "entry_bytes": "558bec6aff688dcf071064a100000000",
+      "finding": "RTTI-derived execute slot, decompiled with PE_PROJECT=lc_vehicle_session; typed command ownership is retained in frontend/native handoffs.",
+      "id": "vehicle_session.native_EndDiagnosis",
+      "kind": "native-decompiled-handler",
+      "locator": "CDAExecEndDiagnosis::Execute @ 0x1000F020",
+      "source": "vehicle_session.native",
+      "vtable": "0x10098B3C"
+    },
+    {
+      "entry_bytes": "558bec6aff686250081064a100000000",
+      "finding": "RTTI-derived execute slot, decompiled with PE_PROJECT=lc_vehicle_session; typed command ownership is retained in frontend/native handoffs.",
+      "id": "vehicle_session.native_SelectVehicle",
+      "kind": "native-decompiled-handler",
+      "locator": "CDAExecSelectVehicle::Execute @ 0x1005B350",
+      "source": "vehicle_session.native",
+      "vtable": "0x10098B2C"
+    },
+    {
+      "entry_bytes": "558bec6aff687a51081064a100000000",
+      "finding": "RTTI-derived execute slot, decompiled with PE_PROJECT=lc_vehicle_session; typed command ownership is retained in frontend/native handoffs.",
+      "id": "vehicle_session.native_SelectVehicleCategory",
+      "kind": "native-decompiled-handler",
+      "locator": "CDAExecSelectVehicleCategory::Execute @ 0x1005BEB0",
+      "source": "vehicle_session.native",
+      "vtable": "0x10098B1C"
+    },
+    {
+      "entry_bytes": "558bec6aff685654081064a100000000",
+      "finding": "RTTI-derived execute slot, decompiled with PE_PROJECT=lc_vehicle_session; typed command ownership is retained in frontend/native handoffs.",
+      "id": "vehicle_session.native_SetVehicleId",
+      "kind": "native-decompiled-handler",
+      "locator": "CDAExecSetVehicleId::Execute @ 0x1005D790",
+      "source": "vehicle_session.native",
+      "vtable": "0x10098B0C"
+    },
+    {
+      "entry_bytes": "558bec6aff688127081064a100000000",
+      "finding": "RTTI-derived execute slot, decompiled with PE_PROJECT=lc_vehicle_session; typed command ownership is retained in frontend/native handoffs.",
+      "id": "vehicle_session.native_GetMountEcuList",
+      "kind": "native-decompiled-handler",
+      "locator": "CDAExecGetMountEcuList::Execute @ 0x10042320",
+      "source": "vehicle_session.native",
+      "vtable": "0x10098AF8"
+    },
+    {
+      "entry_bytes": "558bec6aff6831c0071064a100000000",
+      "finding": "RTTI-derived execute slot, decompiled with PE_PROJECT=lc_vehicle_session; typed command ownership is retained in frontend/native handoffs.",
+      "id": "vehicle_session.native_CheckECUConnect",
+      "kind": "native-decompiled-handler",
+      "locator": "CDAExecCheckECUConnect::Execute @ 0x100053A0",
+      "source": "vehicle_session.native",
+      "vtable": "0x10098AE8"
+    },
+    {
+      "entry_bytes": "558bec6aff686774081064a100000000",
+      "finding": "RTTI-derived execute slot, decompiled with PE_PROJECT=lc_vehicle_session; typed command ownership is retained in frontend/native handoffs.",
+      "id": "vehicle_session.native_GetVehicleCache",
+      "kind": "native-decompiled-handler",
+      "locator": "CDAExecGetVehicleCache::Execute @ 0x100728D0",
+      "source": "vehicle_session.native",
+      "vtable": "0x1009852C"
+    },
+    {
+      "entry_bytes": "558bec6aff68bfce071064a100000000",
+      "finding": "RTTI-derived execute slot, decompiled with PE_PROJECT=lc_vehicle_session; typed command ownership is retained in frontend/native handoffs.",
+      "id": "vehicle_session.native_DelEcuCnctCache",
+      "kind": "native-decompiled-handler",
+      "locator": "CDAExecDelEcuCnctCache::Execute @ 0x1000E970",
+      "source": "vehicle_session.native",
+      "vtable": "0x10098894"
+    },
+    {
+      "entry_bytes": "558bec6aff68f549081064a100000000",
+      "finding": "RTTI-derived execute slot, decompiled with PE_PROJECT=lc_vehicle_session; typed command ownership is retained in frontend/native handoffs.",
+      "id": "vehicle_session.native_J2534DeviceDisconnection",
+      "kind": "native-decompiled-handler",
+      "locator": "CDAExecJ2534DeviceDisconnection::Execute @ 0x10057A80",
+      "source": "vehicle_session.native",
+      "vtable": "0x10098874"
+    },
+    {
+      "entry_bytes": "558bec6aff680355081064a100000000",
+      "finding": "RTTI-derived execute slot, decompiled with PE_PROJECT=lc_vehicle_session; typed command ownership is retained in frontend/native handoffs.",
+      "id": "vehicle_session.native_QueryVehiclebyManualVin",
+      "kind": "native-decompiled-handler",
+      "locator": "CDAExecQueryVehiclebyManualVin::Execute @ 0x1005DCF0",
+      "source": "vehicle_session.native",
+      "vtable": "0x1009840C"
+    },
+    {
+      "entry_bytes": "558bec6aff68174c081064a100000000",
+      "finding": "RTTI-derived execute slot, decompiled with PE_PROJECT=lc_vehicle_session; typed command ownership is retained in frontend/native handoffs.",
+      "id": "vehicle_session.native_QueryVehicleDBbyId",
+      "kind": "native-decompiled-handler",
+      "locator": "CDAExecQueryVehicleDBbyId::Execute @ 0x10058EA0",
+      "source": "vehicle_session.native",
+      "vtable": "0x100984D8"
+    },
+    {
+      "entry_bytes": "558bec6aff68f746081064a100000000",
+      "finding": "RTTI-derived execute slot, decompiled with PE_PROJECT=lc_vehicle_session; typed command ownership is retained in frontend/native handoffs.",
+      "id": "vehicle_session.native_GetVIN",
+      "kind": "native-decompiled-handler",
+      "locator": "CDAExecGetVIN::Execute @ 0x10056550",
+      "source": "vehicle_session.native",
+      "vtable": "0x1009851C"
+    },
+    {
+      "bytes": "8b46048b480485c97417ff15848c08108b4e048945f08b4904ff15808c08108bf88b4e04e8aa560500837df000747c",
+      "finding": "StopCommunicationUtility -> DisconnectUtility -> CDAInstance clear unconditionally before error selection; stop error takes precedence.",
+      "id": "vehicle_session.native_end_order",
+      "kind": "native-instruction-dataflow",
+      "locator": "0x1000F0DD",
+      "source": "vehicle_session.native"
+    },
+    {
+      "bytes": "8b4e048b4904ff15848c08108b4df08bf08975e88b49048b4904ff15808c08108bd88b45f08b48048b4904ff157c8c08108945ec85c0747f",
+      "finding": "Explicit device disconnect invokes stop utility, disconnect utility, then physical Disconnect before reporting any failure.",
+      "id": "vehicle_session.native_disconnect_order",
+      "kind": "native-instruction-dataflow",
+      "locator": "0x10057B37",
+      "source": "vehicle_session.native"
+    },
+    {
+      "bytes": "80791000747a",
+      "finding": "NoComm list guarded by instance+0x10==0; JZ enters dispatch. Equipped list does not itself establish ECU connection.",
+      "id": "vehicle_session.native_mount_guard",
+      "kind": "native-instruction-dataflow",
+      "locator": "0x10042805",
+      "source": "vehicle_session.native"
+    },
+    {
+      "bytes": "5356578bf98b4f0485c9740d8b016a01ff10c74704000000008b770885f6741d8bceff15b48d081068e006000056e8f85e010083c408c7470800000000",
+      "finding": "Destroy+zero shared CCommCtrlMain and ViewerDataCtrl members at+4/+8.",
+      "id": "vehicle_session.native_clear_objects",
+      "kind": "native-instruction-dataflow",
+      "locator": "0x100647B0",
+      "source": "vehicle_session.native"
+    },
+    {
+      "bytes": "837f60008d775c74336a006a006a12ff36ff15688d08106affff7760ff15fc8c0810ff7760ff15008d08108d4744c747600000000050ff15048d0810",
+      "finding": "If queue thread exists post WM_QUIT0x12, wait INFINITE, close handle, delete critical section.",
+      "id": "vehicle_session.native_clear_thread",
+      "kind": "native-instruction-dataflow",
+      "locator": "0x10064801",
+      "source": "vehicle_session.native"
+    },
+    {
+      "bytes": "ff15888c08108bf085f60f84b30000008d4da4c745a400000000e8f32bffff81fe010604c0755c",
+      "finding": "CDelEcuCnctCache nonzero command result compared with0xC0040601; special warning result branch distinct from other failures.",
+      "id": "vehicle_session.native_invalidate_result",
+      "kind": "native-instruction-dataflow",
+      "locator": "0x1000EB2E",
+      "source": "vehicle_session.native"
+    },
+    {
+      "anchors": [
+        {
+          "il": "IL_0001",
+          "opcode": "call",
+          "operand": "get_DiagAdaptationHandle"
+        },
+        {
+          "il": "IL_0010",
+          "opcode": "brfalse.s",
+          "target_il": "IL_0067"
+        },
+        {
+          "il": "IL_009A",
+          "opcode": "brfalse.s",
+          "target_il": "IL_00F3"
+        },
+        {
+          "il": "IL_0122",
+          "opcode": "brtrue.s",
+          "target_il": "IL_012F"
+        },
+        {
+          "il": "IL_012D",
+          "opcode": "br.s",
+          "target_il": "IL_0141"
+        },
+        {
+          "il": "IL_0170",
+          "opcode": "call",
+          "operand": "LoadLibraryEx"
+        },
+        {
+          "il": "IL_0175",
+          "opcode": "call",
+          "operand": "set_DiagAdaptationHandle"
+        },
+        {
+          "il": "IL_0196",
+          "opcode": "call",
+          "operand": "get_DiagAdaptationHandle"
+        },
+        {
+          "il": "IL_01A5",
+          "opcode": "brfalse.s",
+          "target_il": "IL_01DC"
+        },
+        {
+          "il": "IL_01E3",
+          "opcode": "call",
+          "operand": "get_DiagAdaptationHandle"
+        },
+        {
+          "il": "IL_020D",
+          "opcode": "call",
+          "operand": "get_DiagAdaptationHandle"
+        },
+        {
+          "il": "IL_0237",
+          "opcode": "call",
+          "operand": "get_DiagAdaptationHandle"
+        },
+        {
+          "il": "IL_025F",
+          "opcode": "call",
+          "operand": "set_DiagAdaptationCreate"
+        },
+        {
+          "il": "IL_0265",
+          "opcode": "call",
+          "operand": "get_DiagAdaptationHandle"
+        },
+        {
+          "il": "IL_028D",
+          "opcode": "call",
+          "operand": "set_DiagAdaptationDestroy"
+        },
+        {
+          "il": "IL_0293",
+          "opcode": "call",
+          "operand": "get_DiagAdaptationHandle"
+        },
+        {
+          "il": "IL_02BB",
+          "opcode": "call",
+          "operand": "set_DiagAdaptationExecute"
+        },
+        {
+          "il": "IL_02C1",
+          "opcode": "call",
+          "operand": "get_DiagAdaptationHandle"
+        },
+        {
+          "il": "IL_02E9",
+          "opcode": "call",
+          "operand": "set_DiagAdaptationCancel"
+        },
+        {
+          "il": "IL_02EF",
+          "opcode": "call",
+          "operand": "get_DiagAdaptationHandle"
+        },
+        {
+          "il": "IL_0317",
+          "opcode": "call",
+          "operand": "set_DiagAdaptationFreememory"
+        },
+        {
+          "il": "IL_0368",
+          "opcode": "call",
+          "operand": "UnloadDiagAdaptation"
+        },
+        {
+          "il": "IL_0389",
+          "opcode": "brfalse.s",
+          "target_il": "IL_038F"
+        },
+        {
+          "il": "IL_038D",
+          "opcode": "brtrue.s",
+          "target_il": "IL_03E8"
+        },
+        {
+          "il": "IL_03CF",
+          "opcode": "call",
+          "operand": "UnloadDiagAdaptation"
+        },
+        {
+          "il": "IL_0409",
+          "opcode": "callvirt",
+          "operand": "Invoke"
+        },
+        {
+          "il": "IL_0429",
+          "opcode": "brtrue.s",
+          "target_il": "IL_0460"
+        },
+        {
+          "il": "IL_0447",
+          "opcode": "call",
+          "operand": "UnloadDiagAdaptation"
+        },
+        {
+          "il": "IL_0522",
+          "opcode": "callvirt",
+          "operand": "Invoke"
+        },
+        {
+          "il": "IL_0542",
+          "opcode": "brtrue.s",
+          "target_il": "IL_0599"
+        },
+        {
+          "il": "IL_058D",
+          "opcode": "call",
+          "operand": "UnloadDiagAdaptation"
+        },
+        {
+          "il": "IL_059D",
+          "opcode": "brfalse.s",
+          "target_il": "IL_05A6"
+        }
+      ],
+      "body_sha256": "9e1c00be34c4a9c906263b6b03bad82e235457a2fe34d4450ae2ef9569329ccd",
+      "body_size": 1528,
+      "finding": "Load configured cassette/bin DiagAdaptation; resolve create/destroy/execute/cancel/freememory and perform local module challenge check; unload on binding/auth failure.",
+      "id": "vehicle_session.il_LoadDiagAdaptation",
+      "kind": "managed-IL",
+      "locator": "DiagAdaptationManager::LoadDiagAdaptation RVA 0x2110",
+      "source": "vehicle_session.managed"
+    },
+    {
+      "anchors": [
+        {
+          "il": "IL_0001",
+          "opcode": "call",
+          "operand": "get_DiagAdaptationHandle"
+        },
+        {
+          "il": "IL_0010",
+          "opcode": "brfalse.s",
+          "target_il": "IL_0036"
+        },
+        {
+          "il": "IL_0052",
+          "opcode": "call",
+          "operand": "get_DiagAdaptationHandle"
+        },
+        {
+          "il": "IL_0057",
+          "opcode": "call",
+          "operand": "FreeLibrary"
+        },
+        {
+          "il": "IL_007E",
+          "opcode": "call",
+          "operand": "set_DiagAdaptationHandle"
+        },
+        {
+          "il": "IL_0085",
+          "opcode": "call",
+          "operand": "set_DiagAdaptationCreate"
+        },
+        {
+          "il": "IL_008C",
+          "opcode": "call",
+          "operand": "set_DiagAdaptationDestroy"
+        },
+        {
+          "il": "IL_0093",
+          "opcode": "call",
+          "operand": "set_DiagAdaptationExecute"
+        },
+        {
+          "il": "IL_009A",
+          "opcode": "call",
+          "operand": "set_DiagAdaptationCancel"
+        },
+        {
+          "il": "IL_00A1",
+          "opcode": "call",
+          "operand": "set_DiagAdaptationFreememory"
+        }
+      ],
+      "body_sha256": "f0d37834e283747d152d48cdc3a3fda3742d878775c6122ab064253c945c585a",
+      "body_size": 192,
+      "finding": "FreeLibrary then zero handle and delegates.",
+      "id": "vehicle_session.il_UnloadDiagAdaptation",
+      "kind": "managed-IL",
+      "locator": "DiagAdaptationManager::UnloadDiagAdaptation RVA 0x2708",
+      "source": "vehicle_session.managed"
+    },
+    {
+      "anchors": [
+        {
+          "il": "IL_000B",
+          "opcode": "brtrue.s",
+          "target_il": "IL_0050"
+        },
+        {
+          "il": "IL_0018",
+          "opcode": "brtrue.s",
+          "target_il": "IL_005D"
+        },
+        {
+          "il": "IL_0025",
+          "opcode": "brtrue.s",
+          "target_il": "IL_006A"
+        },
+        {
+          "il": "IL_0032",
+          "opcode": "brtrue.s",
+          "target_il": "IL_0077"
+        },
+        {
+          "il": "IL_003F",
+          "opcode": "brtrue.s",
+          "target_il": "IL_008F"
+        },
+        {
+          "il": "IL_004C",
+          "opcode": "brtrue.s",
+          "target_il": "IL_00A7"
+        },
+        {
+          "il": "IL_004E",
+          "opcode": "br.s",
+          "target_il": "IL_00BF"
+        },
+        {
+          "il": "IL_005B",
+          "opcode": "br.s",
+          "target_il": "IL_00CA"
+        },
+        {
+          "il": "IL_0068",
+          "opcode": "br.s",
+          "target_il": "IL_00CA"
+        },
+        {
+          "il": "IL_0075",
+          "opcode": "br.s",
+          "target_il": "IL_00CA"
+        },
+        {
+          "il": "IL_008D",
+          "opcode": "br.s",
+          "target_il": "IL_00CA"
+        },
+        {
+          "il": "IL_00A5",
+          "opcode": "br.s",
+          "target_il": "IL_00CA"
+        },
+        {
+          "il": "IL_00BD",
+          "opcode": "br.s",
+          "target_il": "IL_00CA"
+        },
+        {
+          "il": "IL_00C4",
+          "opcode": "call",
+          "operand": "DiagFunction"
+        }
+      ],
+      "body_sha256": "f28b676190c3efcf42d19a084af1ac758ea6a1ab0fff1025fb76659cf1ca3988",
+      "body_size": 216,
+      "finding": "SC000001 start,SC000002 end,SCXX0003 cached start info, other diagnostic requests delegated; SC000005 reaches cancel branch in DiagFunction.",
+      "id": "vehicle_session.il_ExecuteAdaptation",
+      "kind": "managed-IL",
+      "locator": "DiagAdaptationManager::ExecuteAdaptation RVA 0x27C8",
+      "source": "vehicle_session.managed"
+    },
+    {
+      "anchors": [
+        {
+          "il": "IL_0008",
+          "opcode": "call",
+          "operand": "get_DiagAdaptationInstance"
+        },
+        {
+          "il": "IL_0017",
+          "opcode": "brfalse.s",
+          "target_il": "IL_007C"
+        },
+        {
+          "il": "IL_0086",
+          "opcode": "brfalse.s",
+          "target_il": "IL_00F6"
+        },
+        {
+          "il": "IL_0100",
+          "opcode": "brfalse.s",
+          "target_il": "IL_0170"
+        },
+        {
+          "il": "IL_0180",
+          "opcode": "brtrue.s",
+          "target_il": "IL_01AB"
+        },
+        {
+          "il": "IL_01B5",
+          "opcode": "brfalse.s",
+          "target_il": "IL_01C5"
+        },
+        {
+          "il": "IL_01C8",
+          "opcode": "call",
+          "operand": "LoadDiagAdaptation"
+        },
+        {
+          "il": "IL_01D4",
+          "opcode": "brfalse.s",
+          "target_il": "IL_01ED"
+        },
+        {
+          "il": "IL_0231",
+          "opcode": "brfalse.s",
+          "target_il": "IL_0243"
+        },
+        {
+          "il": "IL_0241",
+          "opcode": "br.s",
+          "target_il": "IL_025B"
+        },
+        {
+          "il": "IL_02A7",
+          "opcode": "brfalse.s",
+          "target_il": "IL_0313"
+        },
+        {
+          "il": "IL_02FF",
+          "opcode": "call",
+          "operand": "UnloadDiagAdaptation"
+        },
+        {
+          "il": "IL_0315",
+          "opcode": "call",
+          "operand": "get_DiagAdaptationCreate"
+        },
+        {
+          "il": "IL_031A",
+          "opcode": "callvirt",
+          "operand": "Invoke"
+        },
+        {
+          "il": "IL_031F",
+          "opcode": "call",
+          "operand": "set_DiagAdaptationInstance"
+        },
+        {
+          "il": "IL_0325",
+          "opcode": "call",
+          "operand": "get_DiagAdaptationInstance"
+        },
+        {
+          "il": "IL_0334",
+          "opcode": "brfalse.s",
+          "target_il": "IL_03A0"
+        },
+        {
+          "il": "IL_038C",
+          "opcode": "call",
+          "operand": "UnloadDiagAdaptation"
+        },
+        {
+          "il": "IL_03C7",
+          "opcode": "call",
+          "operand": "DiagFunction"
+        },
+        {
+          "il": "IL_03EA",
+          "opcode": "call",
+          "operand": "GTSPlusPFCommon.Function.CommonFunction::GetResultInfoFromResponseMessage"
+        },
+        {
+          "il": "IL_03F0",
+          "opcode": "brtrue.s",
+          "target_il": "IL_03F6"
+        },
+        {
+          "il": "IL_03F4",
+          "opcode": "br.s",
+          "target_il": "IL_03FE"
+        },
+        {
+          "il": "IL_03FE",
+          "opcode": "brfalse.s",
+          "target_il": "IL_0467"
+        },
+        {
+          "il": "IL_0401",
+          "opcode": "call",
+          "operand": "get_DiagAdaptationDestroy"
+        },
+        {
+          "il": "IL_0407",
+          "opcode": "call",
+          "operand": "get_DiagAdaptationInstance"
+        },
+        {
+          "il": "IL_040C",
+          "opcode": "callvirt",
+          "operand": "Invoke"
+        },
+        {
+          "il": "IL_0418",
+          "opcode": "call",
+          "operand": "set_DiagAdaptationInstance"
+        },
+        {
+          "il": "IL_0461",
+          "opcode": "call",
+          "operand": "UnloadDiagAdaptation"
+        },
+        {
+          "il": "IL_047C",
+          "opcode": "call",
+          "operand": "get_DiagAdaptationManagerInformation"
+        },
+        {
+          "il": "IL_0487",
+          "opcode": "callvirt",
+          "operand": "set_DiagAdaptationRegionId"
+        },
+        {
+          "il": "IL_048D",
+          "opcode": "call",
+          "operand": "get_DiagAdaptationManagerInformation"
+        },
+        {
+          "il": "IL_04A2",
+          "opcode": "callvirt",
+          "operand": "set_DiagAdaptationLanguageCode"
+        },
+        {
+          "il": "IL_04AB",
+          "opcode": "brfalse.s",
+          "target_il": "IL_04B4"
+        }
+      ],
+      "body_sha256": "13c775ada20d9faef7c6516a557dca27118aecffbadb17f7393a0e9796bd0d38",
+      "body_size": 1236,
+      "finding": "Reject duplicate nonzero instance in response; read settings and deserialize OEM request; load native module, build AppPath/RegionId/LanguageCode, create native instance, execute start; missing/nonzero response result destroys instance+zeros it+unloads. Outer manager often returns success envelope while response carries failure.",
+      "id": "vehicle_session.il_StartDiagnosis",
+      "kind": "managed-IL",
+      "locator": "DiagAdaptationManager::StartDiagnosis RVA 0x28A0",
+      "source": "vehicle_session.managed"
+    },
+    {
+      "anchors": [
+        {
+          "il": "IL_0019",
+          "opcode": "call",
+          "operand": "get_DiagAdaptationManagerInformation"
+        },
+        {
+          "il": "IL_0026",
+          "opcode": "brfalse.s",
+          "target_il": "IL_002E"
+        },
+        {
+          "il": "IL_0030",
+          "opcode": "call",
+          "operand": "get_DiagAdaptationDestroy"
+        },
+        {
+          "il": "IL_0035",
+          "opcode": "brtrue.s",
+          "target_il": "IL_009A"
+        },
+        {
+          "il": "IL_009E",
+          "opcode": "call",
+          "operand": "DiagFunction"
+        },
+        {
+          "il": "IL_00A6",
+          "opcode": "call",
+          "operand": "GTSPlusPFCommon.Function.CommonFunction::GetResultInfoFromResponseMessage"
+        },
+        {
+          "il": "IL_00AD",
+          "opcode": "brtrue.s",
+          "target_il": "IL_00BD"
+        },
+        {
+          "il": "IL_00C4",
+          "opcode": "bne.un.s",
+          "target_il": "IL_0116"
+        },
+        {
+          "il": "IL_0117",
+          "opcode": "call",
+          "operand": "get_DiagAdaptationDestroy"
+        },
+        {
+          "il": "IL_011D",
+          "opcode": "call",
+          "operand": "get_DiagAdaptationInstance"
+        },
+        {
+          "il": "IL_0122",
+          "opcode": "callvirt",
+          "operand": "Invoke"
+        },
+        {
+          "il": "IL_0127",
+          "opcode": "brtrue.s",
+          "target_il": "IL_018C"
+        },
+        {
+          "il": "IL_0192",
+          "opcode": "call",
+          "operand": "set_DiagAdaptationInstance"
+        },
+        {
+          "il": "IL_0198",
+          "opcode": "call",
+          "operand": "UnloadDiagAdaptation"
+        }
+      ],
+      "body_sha256": "b137c0ef6edbf41d868926b42bc9cd52807368f589a83db4ff8536374bd760a9",
+      "body_size": 456,
+      "finding": "Clear region/language under monitor first; call native end; missing result or result==-1 returns without destroy; destroy failure also preserves instance; success zeros instance then unloads.",
+      "id": "vehicle_session.il_EndDiagnosis",
+      "kind": "managed-IL",
+      "locator": "DiagAdaptationManager::EndDiagnosis RVA 0x2D74",
+      "source": "vehicle_session.managed"
+    },
+    {
+      "anchors": [
+        {
+          "il": "IL_0008",
+          "opcode": "call",
+          "operand": "get_DiagAdaptationExecute"
+        },
+        {
+          "il": "IL_000D",
+          "opcode": "brfalse.s",
+          "target_il": "IL_0017"
+        },
+        {
+          "il": "IL_0010",
+          "opcode": "call",
+          "operand": "get_DiagAdaptationCancel"
+        },
+        {
+          "il": "IL_0015",
+          "opcode": "brtrue.s",
+          "target_il": "IL_007A"
+        },
+        {
+          "il": "IL_0085",
+          "opcode": "brfalse.s",
+          "target_il": "IL_00FC"
+        },
+        {
+          "il": "IL_0088",
+          "opcode": "call",
+          "operand": "get_DiagAdaptationInstance"
+        },
+        {
+          "il": "IL_0097",
+          "opcode": "brfalse.s",
+          "target_il": "IL_00FC"
+        },
+        {
+          "il": "IL_0107",
+          "opcode": "brfalse",
+          "target_il": "IL_01F1"
+        },
+        {
+          "il": "IL_0130",
+          "opcode": "call",
+          "operand": "get_DiagAdaptationExecute"
+        },
+        {
+          "il": "IL_0136",
+          "opcode": "call",
+          "operand": "get_DiagAdaptationInstance"
+        },
+        {
+          "il": "IL_013E",
+          "opcode": "callvirt",
+          "operand": "Invoke"
+        },
+        {
+          "il": "IL_016A",
+          "opcode": "brfalse.s",
+          "target_il": "IL_01CF"
+        },
+        {
+          "il": "IL_01D9",
+          "opcode": "call",
+          "operand": "get_DiagAdaptationFreememory"
+        },
+        {
+          "il": "IL_01DF",
+          "opcode": "call",
+          "operand": "get_DiagAdaptationInstance"
+        },
+        {
+          "il": "IL_01E6",
+          "opcode": "callvirt",
+          "operand": "Invoke"
+        },
+        {
+          "il": "IL_01EC",
+          "opcode": "br",
+          "target_il": "IL_0272"
+        },
+        {
+          "il": "IL_01F2",
+          "opcode": "call",
+          "operand": "get_DiagAdaptationCancel"
+        },
+        {
+          "il": "IL_01F8",
+          "opcode": "call",
+          "operand": "get_DiagAdaptationInstance"
+        },
+        {
+          "il": "IL_01FD",
+          "opcode": "callvirt",
+          "operand": "Invoke"
+        },
+        {
+          "il": "IL_0202",
+          "opcode": "brfalse.s",
+          "target_il": "IL_021D"
+        },
+        {
+          "il": "IL_021B",
+          "opcode": "br.s",
+          "target_il": "IL_0272"
+        }
+      ],
+      "body_sha256": "28f823b223bc27b453f111a5d2f875937a99f95f97b9ead30e57b128abe59943",
+      "body_size": 652,
+      "finding": "Require execute+cancel delegates and instance except start; execute returns UTF8 response pointer copied to string then freememory; null pointer yields error. SC000005 invokes cancel(instance); false cancel produces response code0x4002.",
+      "id": "vehicle_session.il_DiagFunction",
+      "kind": "managed-IL",
+      "locator": "DiagAdaptationManager::DiagFunction RVA 0x2F3C",
+      "source": "vehicle_session.managed"
+    }
+  ],
+  "handoffs": [
+    {
+      "callee": "GtsPFApi -> GtsPFRawInterface",
+      "caller": "VehicleConnectController/HealthCheckWorkerModel",
+      "evidence": [
+        "vehicle_session.api_contracts",
+        "vehicle_session.il_DiagFunction"
+      ],
+      "mechanism": "worker commands -> PF request/response",
+      "payload": "apiId + apiArgs; response resultInfo is separate from outer manager result",
+      "to_domain": "ui_ipc"
+    },
+    {
+      "callee": "CCommCtrlMain::CommandExecute(CEcuEachConnectSnd)",
+      "caller": "CDAExecCheckECUConnect/DV000005",
+      "evidence": [
+        "vehicle_session.native_CheckECUConnect",
+        "vehicle_session.ecu_cache"
+      ],
+      "mechanism": "native in-process command",
+      "payload": "groupId:u16,ecuId:int,busId:u16; connect response",
+      "to_domain": "vci_transport"
+    },
+    {
+      "callee": "CCommCtrlMain",
+      "caller": "DiagAdaptation vehicle/ECU handlers",
+      "evidence": [
+        "vehicle_session.native_SelectVehicle",
+        "vehicle_session.native_SetVehicleId",
+        "vehicle_session.native_GetVehicleCache"
+      ],
+      "mechanism": "shared native instance+4 across operations",
+      "payload": "typed CCmdBase send/receive; resolver family, cache delete, support execution and category-local default/extended/keepalive session ownership",
+      "to_domain": "operations"
+    },
+    {
+      "callee": "GtsPFApi.writeFile + healthcheck/IPK buffer",
+      "caller": "HealthCheckWorkerModel",
+      "evidence": [
+        "vehicle_session.hc_cache",
+        "vehicle_session.hc_after",
+        "vehicle_session.hc_read"
+      ],
+      "mechanism": "PF file API",
+      "payload": "LatestHealthCheckData.json and stored acquisition data",
+      "to_domain": "persistence"
+    },
+    {
+      "callee": "configuration/data collection web services",
+      "caller": "VehicleConnect postprocessing",
+      "evidence": [
+        "vehicle_session.postconnect",
+        "vehicle_session.hc_flow"
+      ],
+      "mechanism": "existing PF web service wrappers",
+      "payload": "vehicle configuration/initial healthcheck policy; rejection can end diagnosis and LOGOUT",
+      "to_domain": "auth_settings"
+    }
+  ],
+  "persistence": [
+    {
+      "consumer": "HealthCheckWorkerModel.readCacheData",
+      "created": "healthCheckOnLoadAfterPart completion",
+      "deleted": "No deletion in inspected save/read path; latest file overwritten",
+      "evidence": [
+        "vehicle_session.hc_after",
+        "vehicle_session.hc_cache",
+        "vehicle_session.hc_read",
+        "vehicle_session.hc_path"
+      ],
+      "flushed": "writeFile(mode1) promise completion; failures logged and return undefined",
+      "path_pattern": "<specificFolder folderNo1><DistDep.specificSubFolders.cacheDataHealthCheck>/LatestHealthCheckData.json",
+      "producer": "HealthCheckWorkerModel.saveCacheData"
+    },
+    {
+      "consumer": "VehicleConnectWorkerModel.getEnvInfo",
+      "created": "save ngCount/password lookup metadata and current package version when resolver returns nonDispInfo",
+      "deleted": "No deletion in inspected producer/consumer",
+      "evidence": [
+        "vehicle_session.configuration_cache"
+      ],
+      "flushed": "saveSettingFileInfo promise; failure logged",
+      "path_pattern": "GTSPlus/Env/VehicleConfigure.gstg (PF fileType5)",
+      "producer": "VehicleConnectWorkerModel.getCategories"
+    },
+    {
+      "consumer": "all diagnostic requests and ECU switching",
+      "created": "per diagnosis native create; per vehicle GUI VehicleInfo reconstruction",
+      "deleted": "MainFrame dispose replaces VehicleInfo/SharedData; native clear destroys controllers and worker queue; managed end success destroys/unloads",
+      "evidence": [
+        "vehicle_session.il_StartDiagnosis",
+        "vehicle_session.context",
+        "vehicle_session.clear_context",
+        "vehicle_session.native_clear_objects",
+        "vehicle_session.native_clear_thread"
+      ],
+      "flushed": "not disk state; worker serializes VehicleInfo across GUI boundary",
+      "path_pattern": "memory:CDAInstance +4/+8; GUI/worker CommonInfo.VehicleInfo",
+      "producer": "managed StartDiagnosis/native start; vehicle confirmation/context load"
+    }
+  ],
+  "release": "2026.03.002.02",
+  "residuals": [
+    {
+      "next_evidence": "Authorized capture of PF request/response and J2534 transcript, without changing extracted static model.",
+      "question": "Vehicle- and service-dependent results",
+      "why_unclosed": "Offline corpus supplies executable request/response branches but no current live mounted list, VIN, web-service policy or timings."
+    }
+  ],
+  "resolver_reuse": {
+    "artifact": "data/generated/gtsplus_2026/vehicle_resolver_semantics.json",
+    "frontend_distinction": "DV000004 returns CGetMountEcuListNoComm candidates; EcuInfo.getEcuStatus/DV000005 independently confirms connectivity. GUI named mounted map initially contains UNCHECKED candidates.",
+    "layers": [
+      "VIN/type41/type59 decision",
+      "expected installation",
+      "category+phase route",
+      "live connectivity",
+      "support-family dispatch"
+    ]
+  },
+  "schema": "gtsplus-lifecycle-domain-v1",
+  "sources": [
+    {
+      "id": "vehicle_session.native",
+      "path": "build/out/gtsplus-unprotected/bin/DiagAdaptation.dll",
+      "representation": "installer-recovered plaintext; native text or materialized CLR bodies",
+      "sha256": "eb4b5ffd08bfd1e18b7c5aa5b3679893fb6d3efc2c9bcd655c5e40038fe8531a",
+      "size": 793104
+    },
+    {
+      "id": "vehicle_session.native.original",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/DiagAdaptation.dll",
+      "representation": "installed protected stub",
+      "sha256": "676e077cc4d5d64193687a541509e7adae98eee0b9d28347b748b272b02f2cc0",
+      "size": 180240
+    },
+    {
+      "id": "vehicle_session.native.sidecar",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/DiagAdaptation.dll._",
+      "representation": "installed protected sidecar",
+      "sha256": "2912c35c790892ce80f549f213df66887b70a63e17a2c2c644fbeb8dd022d317",
+      "size": 617648
+    },
+    {
+      "id": "vehicle_session.managed",
+      "path": "build/out/gtsplus-unprotected/bin/GTSPlusDiagAdaptMng.dll",
+      "representation": "installer-recovered plaintext; native text or materialized CLR bodies",
+      "sha256": "7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e",
+      "size": 57360
+    },
+    {
+      "id": "vehicle_session.managed.original",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/GTSPlusDiagAdaptMng.dll",
+      "representation": "installed protected stub",
+      "sha256": "c3dd32e0ae0ba3816a1878785862d8cf1d0819d0c4cb5a1d2abf1873cfd9135d",
+      "size": 77840
+    },
+    {
+      "id": "vehicle_session.managed.sidecar",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/GTSPlusDiagAdaptMng.dll._",
+      "representation": "installed protected sidecar",
+      "sha256": "0fd228a9ed15971385d60e34b511b1ac4370adba05a376942c790d2296035748",
+      "size": 122384
+    },
+    {
+      "id": "vehicle_session.pf_contract",
+      "path": "build/out/gtsplus-unprotected/bin/GTSPlusPFCommon.dll",
+      "representation": "installer-recovered plaintext; native text or materialized CLR bodies",
+      "sha256": "d1972962a04b711eeb78c940b5d1c02b43d72959f7db61823a11df3c1d30227a",
+      "size": 152592
+    },
+    {
+      "id": "vehicle_session.pf_contract.original",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/GTSPlusPFCommon.dll",
+      "representation": "installed protected stub",
+      "sha256": "47a9e9a5b5623a37cdb7bd5d8e7616bfeb6c2fa9b2d0f5d37509e75562807079",
+      "size": 172048
+    },
+    {
+      "id": "vehicle_session.pf_contract.sidecar",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/GTSPlusPFCommon.dll._",
+      "representation": "installed protected sidecar",
+      "sha256": "ffd6f98fdeee317635ab52e7f6ec02f08596d62d0a63e7f36e293605a964ab2e",
+      "size": 123360
+    },
+    {
+      "id": "vehicle_session.gui",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlusGUI/gts.gui",
+      "representation": "authenticated encrypted GUI package",
+      "sha256": "80ff7eed3a3a429aedc14384befb0f43b8ebd8176868b0bf41135033ce4ea37d",
+      "size": 13806180
+    },
+    {
+      "id": "vehicle_session.gui_envelope",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlusGUI/gts.cpf",
+      "representation": "local package envelope",
+      "sha256": "773becfd6fad75bfaab3d0dbdb0f4e05cdf1511646f76d77ca2c3d0a914691dc",
+      "size": 48
+    },
+    {
+      "id": "vehicle_session.certificate",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/ContentServer/dist.crt",
+      "representation": "GUI signature verification certificate",
+      "sha256": "857ec034c946604c52fd845134386b5b914936962254048e8766d78fa6b3ad50",
+      "size": 1322
+    },
+    {
+      "id": "vehicle_session.crypto_native",
+      "path": "build/out/gts-lifecycle-aux/ContentServer/GtsPlus-CM.dll",
+      "representation": "recovered packaging implementation",
+      "sha256": "ebc7c0b359c63d12a80c7fc596e93c226007b915f21032e05efa1046c2b292b2",
+      "size": 1885184
+    },
+    {
+      "id": "vehicle_session.crypto_native.original",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/ContentServer/GtsPlus-CM.dll",
+      "representation": "installed protected stub",
+      "sha256": "b0e8a25289d697bef0da31812d895e55f4745efd000700cfeb66c1e3135addd2",
+      "size": 540688
+    },
+    {
+      "id": "vehicle_session.crypto_native.sidecar",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/ContentServer/GtsPlus-CM.dll._",
+      "representation": "installed protected sidecar",
+      "sha256": "db69e562601efdea05a06e924a9c06baf9ecee207ac3447cd0b7399e88ebce8f",
+      "size": 1350800
+    },
+    {
+      "id": "vehicle_session.crypto_resource",
+      "path": "build/out/gts-lifecycle-aux/ContentServer/CryptgraphResource.dll",
+      "representation": "recovered packaging implementation",
+      "sha256": "7a9a2c08f0055fdfed82258835ba68c4a4d41ffeb537bd27caa19ad19d1f16f6",
+      "size": 7168
+    },
+    {
+      "id": "vehicle_session.crypto_resource.original",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/ContentServer/CryptgraphResource.dll",
+      "representation": "installed protected stub",
+      "sha256": "c9d3d3c35f7af5f3fa4258cea547005846758f67fae2b3326f97b43be6da21b6",
+      "size": 32784
+    },
+    {
+      "id": "vehicle_session.crypto_resource.sidecar",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/ContentServer/CryptgraphResource.dll._",
+      "representation": "installed protected sidecar",
+      "sha256": "9f2d7bba218e97aacac917321711e6abaac26625b509770727e4471440c57b47",
+      "size": 114368
+    },
+    {
+      "id": "vehicle_session.crypto_common",
+      "path": "build/out/gts-lifecycle-aux/ContentServer/CryptgraphCommon.dll",
+      "representation": "recovered packaging implementation",
+      "sha256": "98fc5afd362f6e28aec9f06f71c15c4d6751751a27a8325cdc143ad9f57366b0",
+      "size": 24576
+    },
+    {
+      "id": "vehicle_session.crypto_common.original",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/ContentServer/CryptgraphCommon.dll",
+      "representation": "installed protected stub",
+      "sha256": "a70a55a78b3bea044bffa624a9c2aa668d4621e1a03c213cc0d5eb3ff302b073",
+      "size": 53264
+    },
+    {
+      "id": "vehicle_session.crypto_common.sidecar",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/ContentServer/CryptgraphCommon.dll._",
+      "representation": "installed protected sidecar",
+      "sha256": "c43577c8174b5d5c285c14f2582aaf1b84e19850b62283c6772fb711949a6176",
+      "size": 119728
+    },
+    {
+      "id": "vehicle_session.resolver",
+      "path": "data/generated/gtsplus_2026/vehicle_resolver_semantics.json",
+      "representation": "existing resolver executable/database closure",
+      "sha256": "bf94b12b3f6b4e6f22880a96c4dc5840578759849368bb8f044efd381101b421",
+      "size": 36969
+    },
+    {
+      "id": "vehicle_session.asset.js/gts/common/common_info.js",
+      "member": "js/gts/common/common_info.js",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlusGUI/gts.gui",
+      "representation": "authenticated decoded GUI ZIP member",
+      "sha256": "8970abf7db2777275fd26f3791e0a638916a04773a1dc6eba5870b7975a4a029",
+      "size": 18669
+    },
+    {
+      "id": "vehicle_session.asset.js/gts/common/common_info_worker.js",
+      "member": "js/gts/common/common_info_worker.js",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlusGUI/gts.gui",
+      "representation": "authenticated decoded GUI ZIP member",
+      "sha256": "3df40a013b4a7ad5cdc4965aced02bd6a18cc67b1dd35ad456e6e9a6c2ced6e7",
+      "size": 19705
+    },
+    {
+      "id": "vehicle_session.asset.js/gts/common/gts_platform_raw_interface.js",
+      "member": "js/gts/common/gts_platform_raw_interface.js",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlusGUI/gts.gui",
+      "representation": "authenticated decoded GUI ZIP member",
+      "sha256": "00e737331886aade43df5102c81c643defdc566ea0461f22cfa96ded4c4d019f",
+      "size": 82091
+    },
+    {
+      "id": "vehicle_session.asset.js/gts/ecu_function/ecu_function_controller.js",
+      "member": "js/gts/ecu_function/ecu_function_controller.js",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlusGUI/gts.gui",
+      "representation": "authenticated decoded GUI ZIP member",
+      "sha256": "815701e58b39320cbeadb6c67593ac10de4a8426226ca68b1a6bab5675d59403",
+      "size": 12611
+    },
+    {
+      "id": "vehicle_session.asset.js/gts/health_check/health_check_worker.js",
+      "member": "js/gts/health_check/health_check_worker.js",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlusGUI/gts.gui",
+      "representation": "authenticated decoded GUI ZIP member",
+      "sha256": "cce63d68c78f70383fc218b251811595d23279b5159d81a7a180f41f46776e0e",
+      "size": 334069
+    },
+    {
+      "id": "vehicle_session.asset.js/gts/main_frame/main_frame_controller.js",
+      "member": "js/gts/main_frame/main_frame_controller.js",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlusGUI/gts.gui",
+      "representation": "authenticated decoded GUI ZIP member",
+      "sha256": "89bc99889088c157d123f258a8367469e05d20beeacb0385d547896fc05156c9",
+      "size": 29273
+    },
+    {
+      "id": "vehicle_session.asset.js/gts/main_frame/main_frame_worker.js",
+      "member": "js/gts/main_frame/main_frame_worker.js",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlusGUI/gts.gui",
+      "representation": "authenticated decoded GUI ZIP member",
+      "sha256": "8bf023063a1c1e2c7102535ce6981499279d46670ff7d871a703efa344bf75f9",
+      "size": 20237
+    },
+    {
+      "id": "vehicle_session.asset.js/gts/vehicle_connect/vehicle_connect_controller.js",
+      "member": "js/gts/vehicle_connect/vehicle_connect_controller.js",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlusGUI/gts.gui",
+      "representation": "authenticated decoded GUI ZIP member",
+      "sha256": "1ca06dd1520a5e7d403f41cf64234cbdc3c23795be51d455e2c81fa4a398504a",
+      "size": 31069
+    },
+    {
+      "id": "vehicle_session.asset.js/gts/vehicle_connect/vehicle_connect_worker.js",
+      "member": "js/gts/vehicle_connect/vehicle_connect_worker.js",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlusGUI/gts.gui",
+      "representation": "authenticated decoded GUI ZIP member",
+      "sha256": "86199ae862927ff9d3f5369c315355860f39ffde0461887a065d30904d701bff",
+      "size": 102520
+    },
+    {
+      "id": "vehicle_session.asset.js/gts/vehicle_connect_by_id/vehicle_connect_by_id_worker.js",
+      "member": "js/gts/vehicle_connect_by_id/vehicle_connect_by_id_worker.js",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlusGUI/gts.gui",
+      "representation": "authenticated decoded GUI ZIP member",
+      "sha256": "d42cd373208ddba73cc3c76abdf5f9728ed1c3e290f450b28a60ebe0eea10470",
+      "size": 8992
+    }
+  ],
+  "states": [
+    {
+      "id": "vehicle_session.idle",
+      "meaning": "Fresh diagnostic instance; no confirmed vehicle.",
+      "owner": "PF+GUI"
+    },
+    {
+      "id": "vehicle_session.precheck",
+      "meaning": "VIM/battery checks and PF exclusive lock.",
+      "owner": "GUI VehicleConnectController"
+    },
+    {
+      "id": "vehicle_session.select",
+      "meaning": "Resolve VIN/category/options or manual vehicle identity.",
+      "owner": "GUI worker + native resolver"
+    },
+    {
+      "id": "vehicle_session.confirmed",
+      "meaning": "Vehicle identity published through SC000003.",
+      "owner": "PF arbitration + GUI worker"
+    },
+    {
+      "id": "vehicle_session.workspace",
+      "meaning": "Shared VehicleInfo and ECU candidate map; per-ECU status/function caches.",
+      "owner": "MainFrame/CommonInfo"
+    },
+    {
+      "id": "vehicle_session.healthcheck",
+      "meaning": "Cooperative sequential ECU acquisition and enrichment.",
+      "owner": "HealthCheckWorkerModel"
+    },
+    {
+      "id": "vehicle_session.cancelling",
+      "meaning": "cancelFlag set; next ECU scheduling skipped; summary callback pending.",
+      "owner": "HealthCheckWorkerModel"
+    },
+    {
+      "id": "vehicle_session.ecu",
+      "meaning": "Current ECU selected in existing vehicle workspace.",
+      "owner": "CommonInfo/EcuInfo"
+    },
+    {
+      "id": "vehicle_session.disconnected",
+      "meaning": "Physical J2534 disconnect requested; shared instance remains allocated.",
+      "owner": "native CCommCtrlMain"
+    },
+    {
+      "id": "vehicle_session.closing",
+      "meaning": "Stop utility, clear native context; manager may retain instance on failure.",
+      "owner": "managed/native adaptation"
+    },
+    {
+      "id": "vehicle_session.error",
+      "meaning": "Error response or user cancellation; caller-specific handling.",
+      "owner": "GUI/PF"
+    }
+  ],
+  "transitions": [
+    {
+      "action": "Acquire PF exclusive lock",
+      "evidence": [
+        "vehicle_session.preconnect",
+        "vehicle_session.reuse"
+      ],
+      "from": "vehicle_session.idle",
+      "guard": "VIM confirmation and battery precheck passed/continued",
+      "id": "vehicle_session.precheck",
+      "to": "vehicle_session.precheck",
+      "trigger": "connect requested"
+    },
+    {
+      "action": "Return menu; lock acquisition failure releases lock",
+      "evidence": [
+        "vehicle_session.preconnect",
+        "vehicle_session.reuse"
+      ],
+      "from": "vehicle_session.precheck",
+      "guard": "User choice or failure code",
+      "id": "vehicle_session.precheck_abort",
+      "to": "vehicle_session.error",
+      "trigger": "outdated VIM No/low battery Cancel/other error"
+    },
+    {
+      "action": "Keep existing PF context and start resolver selection",
+      "evidence": [
+        "vehicle_session.reuse",
+        "vehicle_session.vin"
+      ],
+      "from": "vehicle_session.precheck",
+      "guard": "matching VIN and decisionVin==1",
+      "id": "vehicle_session.reuse_context",
+      "to": "vehicle_session.select",
+      "trigger": "getVIN completion"
+    },
+    {
+      "action": "forcedEndDiagnosis then startDiagnosis; restart selection; consumed restart errors do not prove success",
+      "evidence": [
+        "vehicle_session.reuse",
+        "vehicle_session.restart"
+      ],
+      "from": "vehicle_session.precheck",
+      "guard": "Mismatch may require confirmation when other PF client exists",
+      "id": "vehicle_session.restart_context",
+      "to": "vehicle_session.select",
+      "trigger": "missing/mismatched/unfixed VIN"
+    },
+    {
+      "action": "Clear dependent identity and option cache; hierarchical category or manual VIN candidate resolution",
+      "evidence": [
+        "vehicle_session.auto",
+        "vehicle_session.manual",
+        "vehicle_session.manual_vin",
+        "vehicle_session.category",
+        "vehicle_session.option"
+      ],
+      "from": "vehicle_session.select",
+      "guard": "Regional resolver result or technician choice",
+      "id": "vehicle_session.manual_fallback",
+      "to": "vehicle_session.select",
+      "trigger": "no VIN/no auto category map/manual button"
+    },
+    {
+      "action": "Mode4 selectById; nondefault OEM restart; publish confirmation and apply vehicle exception",
+      "evidence": [
+        "vehicle_session.confirm"
+      ],
+      "from": "vehicle_session.select",
+      "guard": "vehicleId !=65535 and selection complete",
+      "id": "vehicle_session.confirm_vehicle",
+      "to": "vehicle_session.confirmed",
+      "trigger": "technician confirms selected identity"
+    },
+    {
+      "action": "Create status-1 ECU objects with group/bus/phase; hand serialized VehicleInfo to UI",
+      "evidence": [
+        "vehicle_session.context",
+        "vehicle_session.postconnect",
+        "vehicle_session.native_mount_guard"
+      ],
+      "from": "vehicle_session.confirmed",
+      "guard": "Resolver candidate list available",
+      "id": "vehicle_session.populate_workspace",
+      "to": "vehicle_session.workspace",
+      "trigger": "loadVehicleInformation"
+    },
+    {
+      "action": "Set vehicleConnectTransitionFlag=true; route healthcheck",
+      "evidence": [
+        "vehicle_session.postconnect",
+        "vehicle_session.hc_before",
+        "vehicle_session.hc_after"
+      ],
+      "from": "vehicle_session.workspace",
+      "guard": "initialHealthCheck Required or Optional Yes",
+      "id": "vehicle_session.initial_healthcheck",
+      "to": "vehicle_session.healthcheck",
+      "trigger": "VEHICLE_CONNECTED"
+    },
+    {
+      "action": "Set current ECU ID/name; lazily check native connection and discover functions",
+      "evidence": [
+        "vehicle_session.current_ecu",
+        "vehicle_session.ecu_cache"
+      ],
+      "from": "vehicle_session.workspace",
+      "guard": "ECU ID in shared mounted map",
+      "id": "vehicle_session.select_ecu",
+      "to": "vehicle_session.ecu",
+      "trigger": "system selection/feature navigation"
+    },
+    {
+      "action": "Update current reference only; reuse vehicle and per-ECU status/function caches; force flags trigger clear/recheck",
+      "evidence": [
+        "vehicle_session.current_ecu",
+        "vehicle_session.ecu_cache"
+      ],
+      "from": "vehicle_session.ecu",
+      "guard": "ECU candidate exists",
+      "id": "vehicle_session.switch_ecu",
+      "to": "vehicle_session.ecu",
+      "trigger": "select another ECU"
+    },
+    {
+      "action": "Sort candidates; getEcuStatus; only CONNECTED runs DTC/monitor/RoB/CID, persist and queue progress",
+      "evidence": [
+        "vehicle_session.hc_before",
+        "vehicle_session.hc_scan",
+        "vehicle_session.hc_flow"
+      ],
+      "from": "vehicle_session.workspace",
+      "guard": "selected scan pattern",
+      "id": "vehicle_session.scan",
+      "to": "vehicle_session.healthcheck",
+      "trigger": "manual healthcheck"
+    },
+    {
+      "action": "Clear native (ECU,bus) cache, connect(group,ECU,bus), refresh functions",
+      "evidence": [
+        "vehicle_session.ecu_cache",
+        "vehicle_session.hc_scan"
+      ],
+      "from": "vehicle_session.healthcheck",
+      "guard": "ECU already checked",
+      "id": "vehicle_session.recheck",
+      "to": "vehicle_session.healthcheck",
+      "trigger": "clearEcuConnectCache==1"
+    },
+    {
+      "action": "Connection status=0 or functions=[] cached; subsequent explicit recheck can retry",
+      "evidence": [
+        "vehicle_session.ecu_cache"
+      ],
+      "from": "vehicle_session.ecu",
+      "guard": "getEcuStatus catches promise rejection",
+      "id": "vehicle_session.connect_failure",
+      "to": "vehicle_session.workspace",
+      "trigger": "connection or function-list rejection"
+    },
+    {
+      "action": "End wired collection; store callback/args; set cancelFlag and enqueue start-cancel",
+      "evidence": [
+        "vehicle_session.hc_cancel"
+      ],
+      "from": "vehicle_session.healthcheck",
+      "guard": "isRunning and !cancelFlag",
+      "id": "vehicle_session.cancel_scan",
+      "to": "vehicle_session.cancelling",
+      "trigger": "cancelHealthCheck"
+    },
+    {
+      "action": "Stop scheduling remaining ECU work; enqueue end-cancel callback and retain partial acquired cache",
+      "evidence": [
+        "vehicle_session.hc_scan",
+        "vehicle_session.hc_flow",
+        "vehicle_session.hc_cancel_end"
+      ],
+      "from": "vehicle_session.cancelling",
+      "guard": "cooperative boundary",
+      "id": "vehicle_session.finish_cancel",
+      "to": "vehicle_session.workspace",
+      "trigger": "scan sees cancelFlag/summary completes"
+    },
+    {
+      "action": "Finalize buffer/IPK, latest JSON cache; clear running in finally",
+      "evidence": [
+        "vehicle_session.hc_flow",
+        "vehicle_session.hc_after",
+        "vehicle_session.hc_cache"
+      ],
+      "from": "vehicle_session.healthcheck",
+      "guard": "not canceled",
+      "id": "vehicle_session.finish_healthcheck",
+      "to": "vehicle_session.workspace",
+      "trigger": "scan/enrichment completion"
+    },
+    {
+      "action": "Stop utility -> disconnect utility -> physical Disconnect, report priority error; do not destroy context here",
+      "evidence": [
+        "vehicle_session.disconnect_ui",
+        "vehicle_session.native_disconnect_order"
+      ],
+      "from": "vehicle_session.workspace",
+      "guard": "native input guard succeeds",
+      "id": "vehicle_session.disconnect",
+      "to": "vehicle_session.disconnected",
+      "trigger": "DV000035"
+    },
+    {
+      "action": "Stop polling; clear UI and worker VehicleInfo, endDiagnosis; reset stored data; start fresh diagnosis",
+      "evidence": [
+        "vehicle_session.workspace_close",
+        "vehicle_session.workspace_end",
+        "vehicle_session.clear_context"
+      ],
+      "from": "vehicle_session.workspace",
+      "guard": "active child disposal permits transition",
+      "id": "vehicle_session.close",
+      "to": "vehicle_session.closing",
+      "trigger": "MainFrame.dispose/back/logout"
+    },
+    {
+      "action": "Stop/disconnect utility; unconditional context deletion/zeroing and WM_QUIT join; managed destroy+unload only if end result permits",
+      "evidence": [
+        "vehicle_session.native_end_order",
+        "vehicle_session.native_clear_objects",
+        "vehicle_session.native_clear_thread",
+        "vehicle_session.il_EndDiagnosis"
+      ],
+      "from": "vehicle_session.closing",
+      "guard": "native base input check succeeds",
+      "id": "vehicle_session.native_clear",
+      "to": "vehicle_session.idle",
+      "trigger": "SC000002 native completion"
+    },
+    {
+      "action": "Manager retains native instance/handle on failure despite already-cleared manager info; GUI close wrapper consumes failure",
+      "evidence": [
+        "vehicle_session.il_EndDiagnosis",
+        "vehicle_session.workspace_end"
+      ],
+      "from": "vehicle_session.closing",
+      "guard": "managed EndDiagnosis branches",
+      "id": "vehicle_session.end_failure_retains",
+      "to": "vehicle_session.error",
+      "trigger": "native end missing response/-1 or destroy false"
+    },
+    {
+      "action": "Create CDAInstance then native CCommCtrlMain+ViewerDataCtrl and cache region/language",
+      "evidence": [
+        "vehicle_session.il_StartDiagnosis",
+        "vehicle_session.native_StartDiagnosis"
+      ],
+      "from": "vehicle_session.idle",
+      "guard": "instance==0 and settings/load/create/start succeed",
+      "id": "vehicle_session.start",
+      "to": "vehicle_session.idle",
+      "trigger": "SC000001"
+    },
+    {
+      "action": "Construct error response; after failed native start destroy+zero+unload; duplicate instance rejected without replacement",
+      "evidence": [
+        "vehicle_session.il_StartDiagnosis"
+      ],
+      "from": "vehicle_session.idle",
+      "guard": "settings/load/serialize/create/native response failure",
+      "id": "vehicle_session.start_failure",
+      "to": "vehicle_session.error",
+      "trigger": "SC000001 failure"
+    },
+    {
+      "action": "cancel(instance); false cancel response code0x4002; context not destroyed",
+      "evidence": [
+        "vehicle_session.il_DiagFunction"
+      ],
+      "from": "vehicle_session.ecu",
+      "guard": "execute/cancel delegates and instance exist",
+      "id": "vehicle_session.api_cancel",
+      "to": "vehicle_session.ecu",
+      "trigger": "SC000005"
+    },
+    {
+      "action": "selectVehicleById + VIN fallback, notify confirmation, vehicle exception, populate linkage VehicleInfo",
+      "evidence": [
+        "vehicle_session.by_id"
+      ],
+      "from": "vehicle_session.idle",
+      "guard": "PF-confirmed prior vehicle exists -> end/start; otherwise reuse fresh context",
+      "id": "vehicle_session.linkage_reconnect",
+      "to": "vehicle_session.confirmed",
+      "trigger": "connect by saved/linkage vehicleId"
+    }
+  ]
+}

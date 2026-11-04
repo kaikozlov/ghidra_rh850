@@ -1366,13 +1366,14 @@ def gtsplus_execution_lifecycle(parser: DDBParser, master, gts_root: Path) -> di
             "loader": "current GTS+ uses LoadLibraryExW(plugin, 0, 8), then GetProcAddress(\"Execute\")",
             "execute_abi": {
                 "argument": "pointer to six-dword command context",
-                "fields": ["CCmdBase* command", "CCmdBase* response", "CDataCtrl*", "CCommFrameCtrl*", "CDataMonitorCtrl*", "DWORD* cancel_flag"],
+                "fields": ["CCmdBase* command", "CCmdBase* response", "DWORD* cancel_flag", "CCommFrameCtrl*", "CDataCtrl*", "CDataMonitorCtrl*"],
                 "cancel_flag": "controller-owned flag at +0x2C is cleared immediately before plugin execution",
             },
             "serialization": "CCommFrameCtrl::LineCriticalSection(1) brackets plugin Execute and LineCriticalSection(2) releases it",
             "anchors": {
                 "role_and_ecu_to_resolver": anchor(diag_comm, 0x1000F0A6, "8d45e050ff7708ff771ce88b040000"),
                 "execute_symbol_lookup": anchor(diag_comm, 0x1000F0DC, "682053011050ff15045101108945e0"),
+                "context_controller_fields": anchor(diag_comm, 0x1000F107, "8b43048b4b088945f48b430c83c32c"),
                 "cancel_reset_and_line_lock": anchor(diag_comm, 0x1000F116, "6a01897de48975e88945f8894df0c70300000000895decff1560510110"),
                 "plugin_execute": anchor(diag_comm, 0x1000F1AA, "8d45e450ff55e0"),
                 "line_unlock": anchor(diag_comm, 0x1000F1CD, "8b49086a02ff1560510110"),

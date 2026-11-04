@@ -2227,8 +2227,8 @@ The current GTS+ **native command/session spine** is instruction-closed.
 `CCommandCtrl::CommandExecute @ 0x1000F060` passes command `m_dwCmd`
 (`+0x08`) and `m_dwEcuId` (`+0x1C`) to its role/category resolver, loads the
 selected plugin, resolves `Execute`, clears the controller-owned cancel flag,
-and invokes the plugin with one six-dword context containing command, response,
-`CDataCtrl`, `CCommFrameCtrl`, `CDataMonitorCtrl`, and cancel-flag pointers.
+and invokes the plugin with one six-dword context ordered as command, response,
+cancel-flag, `CCommFrameCtrl`, `CDataCtrl`, and `CDataMonitorCtrl` pointers.
 `CCommFrameCtrl::LineCriticalSection(1)` is taken immediately before execution
 and `(2)` releases it afterward. The selected command plugin holds the
 communication critical section throughout its `Execute` call.
@@ -4012,3 +4012,40 @@ PKCS#1 v1.5 signature over `SHA256(SHA256(zipData))` using the installed
 signatures verified during offline extraction; all **4,642** decoded assets
 matched an independent decode. A ciphertext-byte modification was rejected.
 Decoded sources live under `build/out/gts-lifecycle-ui/{gts,cuw,qdc}`.
+
+### Vehicle workspace, ECU selection, and healthcheck
+
+[`lifecycle_vehicle_session.json`](../../data/generated/gtsplus_2026/lifecycle_vehicle_session.json)
+joins the signed frontend to managed `GTSPlusDiagAdaptMng.dll` and native
+`DiagAdaptation.dll`. Its extractor authenticates `gts.gui` directly and reuses
+the existing vehicle-resolver artifact.
+
+`VehicleConnectController` checks VIM version and battery voltage (8,000 mV),
+takes PF exclusive control, then compares live/confirmed VIN and `decisionVin`.
+A matching fixed context is reused. Other branches perform end/start diagnosis,
+manual VIN/category selection, or connection retry. Confirmation publishes the
+resolved vehicle identity through `SC000003`.
+
+`DV000004` builds the GUI's initial `mountedEcuMap` through
+`CGetMountEcuListNoComm`: entries start with `ecuStatus=-1`,
+`hasConnected=false`, and `ecuFuncList=null`. `EcuInfo.getEcuStatus` separately
+checks connectivity through `DV000005`, discovers functions, and caches the
+results. Explicit refresh uses `DV000033`. ECU switching retains the vehicle
+workspace and its per-ECU caches.
+
+Healthcheck visits candidates sequentially and acquires data from connected
+ECUs. Cancellation ends wired collection, sets `cancelFlag`, and queues
+start-cancel; subsequent scheduling skips remaining work, and summary queues
+end-cancel. Acquired results remain available. The latest healthcheck JSON is
+written through the PF file API to the configured cache directory.
+
+Workspace disposal orders feature disposal, battery-poll stop, vehicle-context
+clear, end diagnosis, stored-data reset, then fresh start diagnosis. Native
+`DV000035` instead stops/disconnects the utility and disconnects transport while
+retaining the shared instance. Managed end-diagnosis failure can also retain
+the instance and DLL handle; callers must inspect response `resultInfo`
+separately from the outer manager result.
+
+Offline execution of the actual authenticated JavaScript verified cache reuse,
+forced refresh, failed connection, idempotent cooperative cancellation, and the
+workspace close/restart order.
