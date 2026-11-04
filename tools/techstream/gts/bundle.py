@@ -1082,11 +1082,11 @@ def write_toyota_diag_bundle(
                     "root_base": "0xD100",
                     "root_shift": 0,
                     "selector_request": "3101d1NN",
-                    "selector_excluded": ["0xD1F0", "0xD1FE"],
+                    "selector_excluded": [f"0x{selector:04X}" for selector in range(0xD1F0, 0xD1FF)],
                     "member_base": "(selector & 0x00FF) << 8",
                     "member_shift": 0,
                     "selector_ids_remain_supported": True,
-                    "hierarchy": "D100-root bitmap -> D1nn selector IDs; query D1nn except D1F0/D1FE -> nn00..nnFF RID bitmap",
+                    "hierarchy": "D100-root bitmap -> D1nn selector IDs; query D1nn except inclusive D1F0..D1FE -> nn00..nnFF RID bitmap",
                 },
                 "plugin": "GetSupportMultiP6_DT.dll",
                 "implementation": {

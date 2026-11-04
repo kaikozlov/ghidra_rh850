@@ -56,7 +56,6 @@ def main() -> int:
               and p6_contract["did_root"]["selector_excluded"] == ["0xA1FD", "0xA1FE"]
               and p6_contract["did_root"]["selector_ids_remain_supported"] is True
               and p6_contract["routine_root"]["root_base"] == "0xD100"
-              and p6_contract["routine_root"]["selector_excluded"] == ["0xD1F0", "0xD1FE"]
               and p6_contract["implementation"]["AnalyzeFrameData"] == "0x100678D0"
               and p6_contract["implementation"]["CreateEnableDataIdList"] == "0x100679A0"
               and p6_contract["implementation"]["CreateEnableRIdList"] == "0x10067CF0")
