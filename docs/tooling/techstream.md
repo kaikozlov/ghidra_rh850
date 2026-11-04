@@ -2184,8 +2184,10 @@ execution engine.
 
 The recovered control path is:
 
-1. `CommandAPI.dll` exposes typed host APIs and hands a command object to
-   `DiagCommCtrlMain::CCommCtrlMain::CommandExecute`.
+1. V18 uses `CommandAPI.dll` typed host APIs. Current GTS+ routes frontend
+   requests through `GTSPlusDiagAdaptMng.dll`'s `DiagAdaptationManager::DiagFunction`
+   (RVA `0x2F3C`) into `DiagAdaptation.dll` and its `CDAExec*` handlers, which
+   reach `DiagCommCtrlMain::CCommCtrlMain::CommandExecute`.
 2. `DiagCommCtrlMain` constructs `CDbDllResRecords` and asks the DB for record
    class **`0x113`**. The corresponding master table is type 19
    **`CDbDllTable`**: `(ECU/category, DLL-role) -> plugin filename`.
@@ -2221,16 +2223,15 @@ The recovered control path is:
    terminates in `KGP_CommFrameCtrl::SendInt*` / `Receive*`, selecting ordinary,
    extended, or no-session variants from the frame/transport state.
 
-The current GTS+ **outer command/session lifecycle is now instruction-closed** as
-well. `CCommandCtrl::CommandExecute @ 0x1000F060` passes command `m_dwCmd`
+The current GTS+ **native command/session spine** is instruction-closed.
+`CCommandCtrl::CommandExecute @ 0x1000F060` passes command `m_dwCmd`
 (`+0x08`) and `m_dwEcuId` (`+0x1C`) to its role/category resolver, loads the
 selected plugin, resolves `Execute`, clears the controller-owned cancel flag,
 and invokes the plugin with one six-dword context containing command, response,
 `CDataCtrl`, `CCommFrameCtrl`, `CDataMonitorCtrl`, and cancel-flag pointers.
 `CCommFrameCtrl::LineCriticalSection(1)` is taken immediately before execution
-and `(2)` releases it afterward. This is the host-side serialization contract:
-one selected command plugin independently owns the J2534 line while another
-plugin is executing.
+and `(2)` releases it afterward. The selected command plugin holds the
+communication critical section throughout its `Execute` call.
 
 Current `KGP_CommFrameCtrl.dll` then closes the transport boundary below those
 plugins. `SendInt`/`SendIntExt` converge on `SendProc @ 0x10037F10`, `Receive @
