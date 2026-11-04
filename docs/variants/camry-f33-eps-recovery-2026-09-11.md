@@ -1243,6 +1243,35 @@ the returned-TX echo before wire-level success; only an exact host receipt,
 reconciled native RX evidence, and complete clean controller/Panda health on the
 physically isolated segment support an ACK-consistent inference.
 
+### Exact F33 NvM readiness and recovery state
+
+For stock `camry-8965F3307000`, CodeFlash SHA-256
+`42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7`,
+`0x66F1E` is a software-work readiness predicate, not a persistence-success
+predicate. Original instructions first call family-0 scan `0x67984`, then
+family-1 scan `0x681AA`. The immutable halfwords at `0x2AD70/0x2AD72`
+are `32/16`; both scans reject any counted status with high nibble `0x20`.
+They scan disabled descriptors too: family-0 object 16 and final object 31,
+and family-1 disabled object 7 and final object 15, participate.
+
+Family-0 statuses are `FEBF0308[32]`. Family-1 uses raw `FEBF0328[16]`,
+XOR55 `FEBF1088[16]`, and XORAA `FEBF10AC[16]`, repaired by original
+`0x66C24`. Only after both scans pass does readiness call busy getters
+`0x68924/0x68A4A` for `FEBF0690/0691`. Either `FF` or `A5` rejects;
+other values, including `5A` and `31`, pass this particular comparison.
+Finally `GP+4E73` must be zero: with actual application GP `FEBEB800`,
+that is **`FEBF0673`**, not `FEBE4E73`.
+
+The retained `camry_f33_nvm_recovery_ready_*.json` and
+`camry_f33_nvm_recovery_scan*.json` scenarios execute these original bytes
+with explicit synthetic status replicas, busy bytes, and bounded caller stack.
+All 19 retained scenarios passed exact-machine execution via
+`tools/rh850 test firmware camry-8965F3307000 <scenario.json>`. Coverage includes terminal
+`31`, enabled/disabled/final indices, one-past-count exclusion, both rejecting
+busy values in both families, non-rejecting busy values, the extra gate, and
+family-0 rejection short-circuiting family-1 repair. Thus a failed terminal
+operation can coexist with readiness; outstanding class-`20` work cannot.
+
 ### Why the ordinary reset and initial-setting ideas do not repair CodeFlash
 
 Cold-start recovery was rechecked from reset rather than inferred from the main
