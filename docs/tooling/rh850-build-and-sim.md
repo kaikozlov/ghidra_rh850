@@ -251,6 +251,11 @@ The machine has one owner for each layer:
    machine with `PcodeEmulator`, and enforces execute/read/write policy before
    each operation. One target session loads immutable images and model data
    once, then runs each scenario with fresh emulator state.
+   On every exit, the runner removes only that emulator's machine/stub/thread
+   libraries from Ghidra's symbol cache. Ghidra 12.2's `SymbolsCache` value
+   strongly references its weak-map key, otherwise retaining completed threads
+   and their entire machines. Cleanup also runs on initialization and execution
+   errors; it never clears another emulator's entries.
    The concrete byte state uses Ghidra's initialized-range lookup for fully
    initialized reads, avoiding complement-range allocation. Partial, empty
    and wrapping reads use Ghidra's normal unknown-state callback path.
@@ -262,8 +267,11 @@ The machine has one owner for each layer:
    check success. A failing check still makes the report and CLI fail.
    Memory/device rows are buffered to disk during execution and streamed into
    the final JSON report; event-count checks use online per-kind counters.
-   Neither execution nor report generation retains a second in-memory row
-   archive. Spools are removed after the batch, including runner-error paths.
+   Each scenario's report and optional instruction trace are written before
+   the next scenario starts, then its spools are closed and removed, including
+   runner-error paths. Completed reports and trace objects are not retained
+   for the whole batch. The complete batch file is published only after its
+   writer closes; an interrupted run cannot expose a partial report as complete.
    Existing memory-access and optional instruction-trace collection limits
    are unchanged.
    The Python caller writes contracts and reports with incremental `json.dump`

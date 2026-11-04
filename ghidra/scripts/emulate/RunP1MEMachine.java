@@ -7782,6 +7782,26 @@ public class RunP1MEMachine extends GhidraScript {
                 return new Rh850Userops();
             }
         };
+        try {
+            return executeScenario(contract, language, scenario, codeflash, dataflash, trace, model, emulator);
+        }
+        finally {
+            // Ghidra 12.2 SymbolsCache strongly retains its weak-map library key,
+            // which retains the thread and its entire machine. Remove only ours.
+            synchronized (PcodeUseropLibrary.SYMBOL_CACHE) {
+                PcodeUseropLibrary.SYMBOL_CACHE.remove(emulator.getUseropLibrary());
+                PcodeUseropLibrary.SYMBOL_CACHE.remove(emulator.getStubUseropLibrary());
+                for (PcodeThread<byte[]> thread : emulator.getAllThreads()) {
+                    PcodeUseropLibrary.SYMBOL_CACHE.remove(thread.getUseropLibrary());
+                }
+            }
+        }
+    }
+
+    private JsonObject executeScenario(
+            RunContract contract, SleighLanguage language, Scenario scenario,
+            byte[] codeflash, byte[] dataflash, Trace trace, Model model,
+            PcodeEmulator emulator) throws Exception {
         model.attach(emulator);
         if (scenario.icus_startup_stub != null)
             model.icusStartupStub = model.new IcusStartupStub(scenario.icus_startup_stub);
@@ -7932,48 +7952,26 @@ public class RunP1MEMachine extends GhidraScript {
         }
     }
 
-    private void writeBatchReport(Path path, JsonObject batch, List<Trace> traces) throws Exception {
-        try (BufferedWriter output = Files.newBufferedWriter(path, StandardCharsets.UTF_8);
-                JsonWriter writer = new JsonWriter(output)) {
-            writer.setIndent("  ");
-            writer.beginObject();
-            for (Map.Entry<String, JsonElement> field : batch.entrySet()) {
-                writer.name(field.getKey());
-                if (!"reports".equals(field.getKey())) {
-                    GSON.toJson(field.getValue(), writer);
-                    continue;
-                }
-                writer.beginArray();
-                JsonArray reports = field.getValue().getAsJsonArray();
-                for (int index = 0; index < reports.size(); index++) {
-                    writer.beginObject();
-                    for (Map.Entry<String, JsonElement> reportField :
-                            reports.get(index).getAsJsonObject().entrySet()) {
-                        writer.name(reportField.getKey());
-                        GSON.toJson(reportField.getValue(), writer);
-                    }
-                    Trace trace = traces.get(index);
-                    if (!"runner-error".equals(reports.get(index).getAsJsonObject()
-                            .get("termination_reason").getAsString())) {
-                        writer.name("memory_accesses");
-                        trace.memoryAccesses.writeTo(writer);
-                        writer.name("device_events");
-                        trace.deviceEvents.writeTo(writer);
-                        if (trace.instructionTraceEnabled) {
-                            writer.name("instruction_trace_shortcuts");
-                            GSON.toJson(trace.instructionShortcuts, List.class, writer);
-                            writer.name("instruction_trace");
-                            trace.writeInstructionTrace(writer);
-                        }
-                    }
-                    writer.endObject();
-                }
-                writer.endArray();
-            }
-            writer.endObject();
-            writer.flush();
-            output.newLine();
+    private void writeScenarioReport(JsonWriter writer, JsonObject report, Trace trace)
+            throws Exception {
+        writer.beginObject();
+        for (Map.Entry<String, JsonElement> field : report.entrySet()) {
+            writer.name(field.getKey());
+            GSON.toJson(field.getValue(), writer);
         }
+        if (!"runner-error".equals(report.get("termination_reason").getAsString())) {
+            writer.name("memory_accesses");
+            trace.memoryAccesses.writeTo(writer);
+            writer.name("device_events");
+            trace.deviceEvents.writeTo(writer);
+            if (trace.instructionTraceEnabled) {
+                writer.name("instruction_trace_shortcuts");
+                GSON.toJson(trace.instructionShortcuts, List.class, writer);
+                writer.name("instruction_trace");
+                trace.writeInstructionTrace(writer);
+            }
+        }
+        writer.endObject();
     }
 
     @Override
@@ -8033,60 +8031,60 @@ public class RunP1MEMachine extends GhidraScript {
         byte[] dataflash = contract.target.dataflash == null
             ? null : loadImage(contract.target.dataflash, "DataFlash");
 
-        JsonArray reports = new JsonArray();
-        List<Trace> traces = new ArrayList<>();
         boolean passed = true;
         Files.createDirectories(reportPath.getParent());
-        try (Closeable cleanup = () -> {
-            IOException failure = null;
-            for (Trace trace : traces) {
-                try { trace.close(); }
-                catch (IOException exception) {
-                    if (failure == null) failure = exception;
-                    else failure.addSuppressed(exception);
+        Path partialReport = Files.createTempFile(reportPath.getParent(), ".p1me-batch-", ".json");
+        try {
+            try (BufferedWriter output = Files.newBufferedWriter(partialReport, StandardCharsets.UTF_8);
+                    JsonWriter writer = new JsonWriter(output)) {
+                writer.setIndent("  ");
+                writer.beginObject();
+                writer.name("schema").value("rh850-p1me-machine-batch-report-v1");
+                writer.name("target").value(contract.target.name);
+                writer.name("mcu").value(contract.target.mcu);
+                writer.name("reports").beginArray();
+                for (Scenario scenario : contract.scenarios) {
+                    monitor.checkCancelled();
+                    try (Trace trace = new Trace(instructionTraceEnabled, reportPath.getParent())) {
+                        JsonObject report;
+                        try {
+                            report = runScenario(
+                                contract, machineSpec, language, scenario, codeflash, dataflash, trace);
+                        }
+                        catch (CancelledException exc) {
+                            throw exc;
+                        }
+                        catch (Exception exc) {
+                            report = new JsonObject();
+                            report.addProperty("schema", "rh850-p1me-machine-report-v2");
+                            report.addProperty("target", contract.target.name);
+                            report.addProperty("mcu", contract.target.mcu);
+                            report.addProperty("scenario", scenario.name);
+                            report.addProperty("status", "failed");
+                            report.addProperty("passed", false);
+                            report.addProperty("termination_reason", "runner-error");
+                            JsonObject error = new JsonObject();
+                            error.addProperty("type", exc.getClass().getSimpleName());
+                            error.addProperty("detail", exc.getMessage());
+                            report.add("error", error);
+                        }
+                        passed &= report.get("passed").getAsBoolean();
+                        writeScenarioReport(writer, report, trace);
+                    }
                 }
+                writer.endArray();
+                writer.name("passed").value(passed);
+                writer.endObject();
+                writer.flush();
+                output.newLine();
             }
-            if (failure != null) throw failure;
-        }) {
-            for (Scenario scenario : contract.scenarios) {
-                monitor.checkCancelled();
-                JsonObject report;
-                Trace trace = new Trace(instructionTraceEnabled, reportPath.getParent());
-                traces.add(trace);
-                try {
-                    report = runScenario(
-                        contract, machineSpec, language, scenario, codeflash, dataflash, trace);
-                }
-                catch (CancelledException exc) {
-                    throw exc;
-                }
-                catch (Exception exc) {
-                    report = new JsonObject();
-                    report.addProperty("schema", "rh850-p1me-machine-report-v2");
-                    report.addProperty("target", contract.target.name);
-                    report.addProperty("mcu", contract.target.mcu);
-                    report.addProperty("scenario", scenario.name);
-                    report.addProperty("status", "failed");
-                    report.addProperty("passed", false);
-                    report.addProperty("termination_reason", "runner-error");
-                    JsonObject error = new JsonObject();
-                    error.addProperty("type", exc.getClass().getSimpleName());
-                    error.addProperty("detail", exc.getMessage());
-                    report.add("error", error);
-                }
-                reports.add(report);
-                passed &= report.get("passed").getAsBoolean();
-            }
-            JsonObject batch = new JsonObject();
-            batch.addProperty("schema", "rh850-p1me-machine-batch-report-v1");
-            batch.addProperty("target", contract.target.name);
-            batch.addProperty("mcu", contract.target.mcu);
-            batch.addProperty("passed", passed);
-            batch.add("reports", reports);
-            writeBatchReport(reportPath, batch, traces);
-            println("P1ME_MACHINE_REPORT=" + reportPath);
-            println("P1ME_MACHINE_RESULT=" + (passed ? "PASS" : "FAIL"));
-            if (!passed) throw new IllegalStateException("P1M-E machine batch failed; see " + reportPath);
+            Files.move(partialReport, reportPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
         }
+        finally {
+            Files.deleteIfExists(partialReport);
+        }
+        println("P1ME_MACHINE_REPORT=" + reportPath);
+        println("P1ME_MACHINE_RESULT=" + (passed ? "PASS" : "FAIL"));
+        if (!passed) throw new IllegalStateException("P1M-E machine batch failed; see " + reportPath);
     }
 }
