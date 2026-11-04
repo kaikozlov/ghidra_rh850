@@ -4300,6 +4300,28 @@ components. Graph writeback writes `data.json` even after failed verification;
 only verified data gets a regenerated manifest. Recorder creation's caught
 failure can still be followed by deletion of the source feature logs.
 
+Publication is destructive rather than replace-on-success. The current archiver
+deletes an existing final archive before compression, writes that final path
+directly, and attempts deletion on failure. Legacy conversion finishes a
+temporary ZIP, then deletes the destination before moving it. PF write mode 0
+checks existence before opening with `FileMode.Create`; it does not use
+`CreateNew`. Graph writeback truncates `data.json` before serialization.
+
+Manifest refresh deletes the old manifest first and catches generation errors.
+Export still archives data after negative or failed verification; only successful
+verification requests manifest regeneration. ZIP import canonicalizes
+`Combine(destination, entry.FullName)` without an explicit containment check.
+The PF extraction-error path deletes the selected extraction directory; later
+browser verification/JSON failures retain it.
+
+The native file-hash routine checks a zero handle rather than
+`INVALID_HANDLE_VALUE` and ignores `ReadFile`'s Boolean result. A failed read
+with zero bytes finalizes the accumulated prefix plus the fixed salt. Actual
+x86 execution covered that path, invalid/null handles, normal chunks, and BCrypt
+failure propagation; authenticated JS and actual IL execution covered destructive
+archive publication, manifest failures, post-extract retention, and
+truncate-before-serialize ordering.
+
 `MsgDatComm` sends communication/action/transfer/clear IPC into
 `GTSPlusErrorReport`: bounded histories hold 3,000 communication and 10,000
 action entries. Communication flushes every second with 10-MiB/five-file

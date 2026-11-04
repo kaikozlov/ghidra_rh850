@@ -296,7 +296,8 @@ The current normal save path is **not** the legacy binary TSE conversion path:
   `tseName.json`, `cooperation.json` and `event.json` members. Current hash handling uses
   `list.cpt`, with legacy `list.txt` compatibility. The `TseCompression.dll` salt/manifest
   contract above describes the separate legacy converter, not every current archive.
-- Save refreshes hashes and packages the working directory; optional DataSync copying
+- Export conditionally refreshes the embedded hash manifest and packages the working
+  directory; it does not require positive verification to archive. Optional DataSync copying
   does not itself clear that directory. Import clears the workspace first, extracts and
   verifies the archive, then reconstructs playback state. **Recovery can delete without a
   successfully preserved export:** a verified root manifest, missing folder list, or
@@ -331,6 +332,48 @@ not a persistent relay dispatcher. Thus an unsolicited relay can remain unread o
 consumed as an ordinary response/error; it has **no implemented task-cancel transition**.
 Successful relay sending is not proof that conversion stopped. The artifact records
 the exhaustive callgraph drift checks and decisive receiver/broker IL.
+
+### 6.2 Publication and failure-prefix contracts
+
+These are application call-order contracts, **not crash-durability or multi-file atomicity
+guarantees**. The generated artifact's `publication_contracts` and new leaf-body evidence
+separate completed API calls from the state left by a later failure.
+
+| Boundary | Implementation and failure prefix |
+| --- | --- |
+| Capture content and metadata | `GTSPlusFileAdapt.dll::WriteFile` (RVA `0x2814`) implements mode **0** as `File.Exists` check followed by `StreamWriter(...,append:false,UTF8Encoding(false))`; this is not race-free `CreateNew`. Mode **1** creates/truncates, mode **2** appends/creates. Parent directories are created, and the writer is disposed. Data and info writes are independent; their rendezvous precedes tree mutation/write, not a transaction. A later failure cannot undo earlier content or metadata. |
+| Tree and manifest | `addData` mutates maps/rawTree **before** mode-1 `tree.json` overwrite. `createHashFile` then deletes the old manifest and attempts a replacement, swallowing list/delete/create errors. An awaited refresh can therefore leave no matching manifest. PF `CreateHashFile` (RVA `0x5dfc`) rejects an existing output, inventories/hashes before opening it, writes `.cpt` using `FileMode.Create` with IV+ciphertext or plaintext using UTF8 `WriteAllText`, and attempts deletion after write failure. There is no temporary-manifest rename or restoration of the deleted manifest. |
+| Current export | `verifyHashFile` runs **before** activity-report copying. Only positive verification enables embedded-manifest delete/recreate; missing, invalid or errored verification still permits export, without regenerating the embedded manifest. A separate root-level check manifest is always refreshed and lies **outside** the ZIP source. Report-copy errors are ignored. `ArchiveFile` (RVA `0x4d2c`) honors overwrite refusal, but the ZIP folder leaf (RVA `0x25e8`) **deletes an existing final archive before** `CreateFromDirectory(...,includeBaseDirectory:false)`. Compression writes the final pathname directly; its catch attempts deleting partial output. After deletion, the old archive is not preserved. Export does not clear the workspace. A failed subsequent DataSync copy returns `result:false` even though the archive exists; successful parallel folder exports are not rolled back when another fails. |
+| Legacy converter | `TseCompression::Compression` (overload RVA `0x2100`) deletes old `list.txt`, inventories/hashes, writes/disposes a create/truncate Shift-JIS manifest, then makes sibling `temp_yyyyMMddmmssfff.zip`. Only after ZIP creation does `changeExtZipToGTSE` (RVA `0x2504`) delete the final destination and call `File.Move`. ZIP creation failure preserves the old destination but can leave partial temporary output. Move failure **after deletion** loses the old destination and leaves the completed temporary ZIP. The catch does not clean temporary ZIPs. This is not atomic replacement. |
+| Graph writeback | `JsonFileUtility.Write` (RVA `0x4e98`) opens `FileStream(path,FileMode.Create)` **before serialization**, so even a serializer exception can truncate the old `data.json`. Finally blocks dispose streams, but do not restore content. Verified writeback writes data, deletes the embedded manifest, then requests asynchronous hash creation. Verification-false/request-failure writeback still writes data but does not regenerate the manifest. Hash-create success and failure callbacks (RVAs `0x12abc`/`0x12b04`) send the **same** UI notification. These callbacks update extracted workspace, not the user archive. |
+| Import | Browser import splits the basename on backslashes, clears first, extracts to `workPath/basename`, then chooses the first enumerated root folder, not the PF `changedFolderPath` response. PF `ExtractFile` (RVA `0x5404`) sniffs ZIP/gzip and selects an unused `_001`-style directory on collision. Extraction failure attempts recursive deletion of that selected directory. After successful extraction, hash/JSON/info reconstruction failure merely resolves error flags: extracted files and partially rebuilt maps are not cleaned or restored. |
+
+`GTSPlusArchiver.ZipFile.DecompressFileToFile` (RVA `0x26e8`) calculates each destination
+with `GetFullPath(Path.Combine(destination,entry.FullName))`, creates parents and calls
+`ExtractToFile(...,overwrite:true)` for nonempty names. **This wrapper has no explicit
+destination-containment check.** Paths normalized outside the selected extraction directory
+are not covered by PF's recursive cleanup of that directory. This is a source-level path
+handling finding, not evidence that any supplied archive contains such members.
+
+Production-date persistence joins through the shipped misspelled
+`StoredDataManager.overwirteVehicleInfo`: verify first, then mode-1 overwrite
+`vehicleInfo.json` regardless of the verification boolean; refresh the manifest only
+when verification was positive. Write errors reject, but refresh errors can resolve.
+This backend cannot turn an unawaited service callback into a durable metadata update.
+
+The managed hash wrapper calls native
+`GTSPlusFileCryptographic.dll!CalculateFileHashDevide` (`0x10001050`):
+`CreateFileW(GENERIC_READ,FILE_SHARE_READ,OPEN_EXISTING)` → 1-MiB reads →
+`CloseHandle` → fixed 20-byte salt → SHA-256. Disassembly at `0x10001158` and
+`0x100011a0` confirms that it ignores `ReadFile`'s BOOL and tests only `bytesRead`;
+the open gate also tests zero rather than `INVALID_HANDLE_VALUE`. A failed read
+that leaves a zero byte count can therefore finalize a prefix hash. This leaf is
+read-only and supplies neither a consistent snapshot nor a publication barrier.
+
+The inspected publication leaves use stream disposal, but no `File.Replace`,
+`ReplaceFile`, `MoveFileEx`, `FlushFileBuffers`, or `FileStream.Flush(true)`.
+Legacy `File.Move` follows destructive deletion. Neither ordinary API success nor
+viewer/worker close notification establishes hardware durability.
 
 
 

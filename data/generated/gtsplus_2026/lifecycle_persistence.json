@@ -777,8 +777,8 @@
       "producer": "StoredDataManager or legacy TSEConverter",
       "consumer": "GTSEStartup->stored browser; archival user; DataSync",
       "created": "archive after hash preparation",
-      "flushed": "ZIP complete before optional sync copy",
-      "deleted": "no automatic user-archive deletion in inspected flow",
+      "flushed": "ZIP completion precedes optional sync copy; direct final-path write, no durable flush guarantee",
+      "deleted": "overwrite deletes prior archive before compression; compressor catch attempts partial-output deletion",
       "evidence": [
         "persistence.session_export",
         "persistence.gtse_entry",
@@ -950,7 +950,12 @@
       "CSV parameter cleanup/failure deletion; UI relay99 has no converter task cancellation consumer",
       "nonfinal pre-ACK chunk failure posts unroutable Failed and stalls save/close; post-ACK failure rejects caller and releases worker deferred",
       "whole-write pre-ACK failure stalls caller but worker finalizer permits close",
-      "recovery clears verified/ineligible/skipped workspace without export and ignores resolved export failure before deletion"
+      "recovery clears verified/ineligible/skipped workspace without export and ignores resolved export failure before deletion",
+      "PF mode0 existence-check/create, mode1 truncate, mode2 append; graph truncate-before-serialize",
+      "embedded-vs-root check manifest, swallowed refresh failures, export negative-verification no-rehash",
+      "current direct-final ZIP overwrite/deletion failure prefixes vs legacy temp-ZIP/delete/Move",
+      "ZIP member normalization without explicit containment; extraction cleanup vs post-extraction preservation",
+      "native manifest hasher unchecked ReadFile BOOL and zero-vs-invalid handle gate"
     ]
   },
   "residuals": [
@@ -966,9 +971,46 @@
     "native_projects": [
       "lc_persistence",
       "lc_persistence_files",
-      "lc_persistence_mdf"
+      "lc_persistence_mdf",
+      "lc2_persistence_hash"
     ],
     "execution": "offline extraction and constant evaluation only; no app/vehicle/network/credential execution"
+  },
+  "publication_contracts": {
+    "scope": "Host call ordering and observable failure prefixes only; no hardware crash durability or cross-file atomicity claim.",
+    "current_capture": [
+      "Initial session creation writes tree, fileInfo, vehicleInfo, cooperation, event, tseName in order, then hashes and assigns buffer path. JSON writes use mode1; event uses mode2 with empty text and does not clear previous bytes. Rejection preserves the completed file prefix.",
+      "overwirteVehicleInfo verifies first, then mode1 overwrites selected vehicleInfo.json even after negative verification; only positive verification triggers refresh. Metadata failure/refresh failure does not restore previous vehicleInfo or manifest.",
+      "data.json mode0 is existence-check then create/truncate; divided suffix chunks use mode2 append. info.json mode1 can finish independently.",
+      "After completion/info rendezvous, addData mutates memory then mode1 overwrites tree.json; next createHashFile deletes old manifest and attempts new one.",
+      "Data/info failure can leave a prefix file or orphan directory. Tree failure leaves earlier content plus advanced in-memory tree. Hash failure can leave stale/no manifest while helper resolves; none rolls back prior writes."
+    ],
+    "current_export": [
+      "verifyHashFile runs before activity-report copies; copy failures are swallowed. Only positive pre-copy verification permits embedded-manifest delete/create. Negative/error verification retains embedded manifest (or absence).",
+      "Root-level check manifest is always delete/create and is outside the ZIP source folder; it hashes mgr.storedBasePath, not necessarily the per-folder target under parallel multi-folder export.",
+      "PF ZIP folder compression deletes final archive first and writes the final pathname directly, without temp or rename. Compression failure attempts deleting partial final output; old overwritten archive is not retained.",
+      "Failures before compressor entry leave old archive; after destination deletion old archive is lost. Failure during cleanup can leave partial output. Workspace is not cleared by export.",
+      "DataSync copy is after successful archive. Its rejection produces result:false although final archive remains. Parallel folder exports are not rolled back; successes may remain when another rejects."
+    ],
+    "legacy_export": [
+      "Delete old list.txt, enumerate recursive files, calculate salted hashes, create/truncate Shift-JIS list.txt and dispose writer.",
+      "Create ZIP beside source named temp_yyyyMMddmmssfff.zip (minutes, not hours), includeBaseDirectory=false, Shift-JIS entry encoding.",
+      "Timestamp temp names are not an exclusive random-name protocol; a preexisting same-name ZIP makes CreateFromDirectory fail rather than safely replace it.",
+      "Only after ZIP creation, delete existing destination and File.Move(tempZip,final). Failure before delete preserves old destination; Move failure after delete loses it and leaves completed temp ZIP.",
+      "Compression/rename catch returns error with no temp-ZIP cleanup. ZIP creation failure can leave partial temp ZIP; manifest write failure can leave partial list.txt. No atomic replacement or durable flush."
+    ],
+    "graph_writeback": [
+      "Both verification-false and request-failure paths still call JSON writer. Writer opens FileMode.Create BEFORE serialization, so even serializer failure can destroy previous data.",
+      "Positive verification: data write -> delete embedded manifest -> asynchronous PF CreateHashFile. Delete/create failure does not restore data/old manifest. False verification retains now-stale manifest.",
+      "Hash-create success and failure emit identical UI notification. No archive re-publication is performed by these callbacks; they update extracted workspace only."
+    ],
+    "import": [
+      "Browser basename splits only backslashes; clear existing workspace -> PF extract to workPath/basename -> enumerate root and choose first folder, ignoring changedFolderPath response.",
+      "PF sniffs ZIP/gzip, chooses unused _NNN destination directory, creates it, extracts sequentially. ZIP member paths use GetFullPath(Combine(dest,FullName)) with no explicit containment test; member extraction overwrites=true.",
+      "Extraction exception attempts recursive deletion of selected extraction directory; no prior-workspace restoration. Cleanup does not cover paths normalized outside destination.",
+      "After successful extraction, hash/JSON/tree/info/cache reconstruction failure only sets isOpenErr/isVerifyErr and resolves flags. Extracted/partially reconstructed workspace and partial maps remain; no catch-time delete."
+    ],
+    "flush_and_replace": "Owned managed streams are disposed; graph/buffer close notifications are not OS flush barriers. Inspected publication leaves contain no File.Replace, MoveFileEx, ReplaceFile, FlushFileBuffers, FileStream.Flush(true), or coordinated multi-file transaction. Legacy File.Move follows destructive destination deletion."
   },
   "sources": [
     {
@@ -1786,9 +1828,129 @@
       "size": 200208,
       "representation": "materialized managed PE",
       "original_source": "persistence.src102"
+    },
+    {
+      "id": "persistence.src105",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/GTSPlusFileCryptographic.dll",
+      "sha256": "1d134a3298a522130eaaf398f9e71f67569e05356f30a84363e9f7cd5651b4d9",
+      "size": 36880,
+      "representation": "installed protected PE"
+    },
+    {
+      "id": "persistence.src106",
+      "original_source": "persistence.src105",
+      "path": "build/out/gtsplus-unprotected/bin/GTSPlusFileCryptographic.dll",
+      "sha256": "67c8daf7ebd4558fffceced7f08eaf21cee945b86f2ec94306b33ab7ed9c85f1",
+      "size": 23568,
+      "representation": "materialized native PE"
     }
   ],
   "evidence": [
+    {
+      "id": "persistence.manifest_refresh_publication",
+      "source": "persistence.src42",
+      "kind": "authenticated-javascript-function",
+      "locator": "js/gts/common/stored_data_manager.js",
+      "anchors": [
+        {
+          "character_offset": 39238,
+          "text": "StoredDataManager.prototype.createHashFile=",
+          "character_length": 990,
+          "sha256_utf8": "4b39c0d893a2913d2217043f8282f066321c1d0b313fe7b7a1deccf0a01ade2c"
+        }
+      ],
+      "finding": "Hash refresh deletes first; helper catches folder-list/delete/create failures and resolves undefined. A successful caller await does not establish that any manifest exists or matches current content."
+    },
+    {
+      "id": "persistence.manifest_check_copy",
+      "source": "persistence.src42",
+      "kind": "authenticated-javascript-function",
+      "locator": "js/gts/common/stored_data_manager.js",
+      "anchors": [
+        {
+          "character_offset": 40228,
+          "text": "StoredDataManager.prototype.createStoredHashFile=",
+          "character_length": 641,
+          "sha256_utf8": "a8c1160582d3a823ee4afb52485347d7672c45b5cc5fc78f35f129459c272430"
+        }
+      ],
+      "finding": "Creates separate root-level check manifest of storedBasePath, swallowing delete/create errors. Import invokes this before verifying the archive's embedded manifest; it does not replace the embedded manifest."
+    },
+    {
+      "id": "persistence.tree_write_publication",
+      "source": "persistence.src42",
+      "kind": "authenticated-javascript-function",
+      "locator": "js/gts/common/stored_data_manager.js",
+      "anchors": [
+        {
+          "character_offset": 13677,
+          "text": "StoredDataManager.prototype.addData=",
+          "character_length": 1029,
+          "sha256_utf8": "9eef3a72d7a7b9c8961b138bad117d89fe0bc4ca3b9a38a688a2cadbce059e1c"
+        }
+      ],
+      "finding": "Mutates in-memory ECU/function/data maps and rawTree before mode1 tree.json write. No rollback of memory or earlier data/info writes on tree failure."
+    },
+    {
+      "id": "persistence.initial_metadata_publication",
+      "source": "persistence.src42",
+      "kind": "authenticated-javascript-function",
+      "locator": "js/gts/common/stored_data_manager.js",
+      "anchors": [
+        {
+          "character_offset": 571,
+          "text": "StoredDataManager.prototype.create=",
+          "character_length": 7253,
+          "sha256_utf8": "2bae69ec96cf53d5fea2d910c672f522c83cd8090b7c7537a3fb8c0911d5137d"
+        }
+      ],
+      "finding": "Sequential tree -> fileInfo -> vehicleInfo -> cooperation -> event -> tseName -> hash -> buffer path assignment. JSON metadata mode1 truncates/creates; event mode2 writes empty text, creating/appending without clearing existing event content. Earlier files survive a later rejected step; no rollback. Hash refresh errors can resolve and permit buffer path assignment."
+    },
+    {
+      "id": "persistence.vehicle_info_overwrite_publication",
+      "source": "persistence.src42",
+      "kind": "authenticated-javascript-function",
+      "locator": "js/gts/common/stored_data_manager.js",
+      "anchors": [
+        {
+          "character_offset": 25531,
+          "text": "StoredDataManager.prototype.overwirteVehicleInfo=",
+          "character_length": 493,
+          "sha256_utf8": "d48a9e381252b56cfbaa47c60e179c017dfb5f0da6dbe72bed71109b9eaacb94"
+        }
+      ],
+      "finding": "Production-date persistence backend first awaits verification, then mode1 overwrites selected vehicleInfo.json regardless of verification boolean; only positive verification refreshes hashes. Write rejection propagates through onErrorCommon, but hash-refresh errors are swallowed by createHashFile. Awaited completion is neither rollback-safe nor durable."
+    },
+    {
+      "id": "persistence.info_write_publication",
+      "source": "persistence.src42",
+      "kind": "authenticated-javascript-function",
+      "locator": "js/gts/common/stored_data_manager.js",
+      "anchors": [
+        {
+          "character_offset": 13422,
+          "text": "StoredDataManager.prototype.saveInfo=",
+          "character_length": 255,
+          "sha256_utf8": "eebb5ce75909a470faae43ec058027ee297701cd770e21991b7c3e5e3802b820"
+        }
+      ],
+      "finding": "info.json uses PF mode1 direct overwrite independently of data.json; caller Promise.all is a rendezvous, not an all-or-nothing filesystem commit."
+    },
+    {
+      "id": "persistence.export_verification_policy",
+      "source": "persistence.src42",
+      "kind": "authenticated-javascript-function",
+      "locator": "js/gts/common/stored_data_manager.js",
+      "anchors": [
+        {
+          "character_offset": 38228,
+          "text": "StoredDataManager.prototype.verifyHashFile=",
+          "character_length": 1010,
+          "sha256_utf8": "5f2bc937393ab7c486d5d65c9328964c17d8622e9bb65ee6bf6770e0f073a98c"
+        }
+      ],
+      "finding": "Before export, missing manifest, negative verification or caught error returns false. Export then skips embedded-manifest regeneration but still generates root check manifest and archives; unverified content is not automatically blessed with a replacement embedded manifest."
+    },
     {
       "id": "persistence.gtse_entry",
       "source": "persistence.src3",
@@ -4291,7 +4453,7 @@
           "target": 13250
         }
       ],
-      "finding": "Managed platform archive API executes requested compressor and reports IO errors."
+      "finding": "PF ArchiveFile checks overwrite, creates parent and calls ZIP folder/file compressor. Folder writer deletes existing final archive before CreateFromDirectory. Compressor exceptions log then delete destination if present; cleanup can itself throw. No temp, File.Replace or restoration; overwrite refusal alone preserves existing archive."
     },
     {
       "id": "persistence.file_delete",
@@ -4742,7 +4904,7 @@
           "target": 13113
         }
       ],
-      "finding": "DataContractJsonSerializer emits UTF8 JSON via MemoryStream/FileStream/StreamWriter, normalizes escaped slashes, disposes all owned streams; exceptions rethrow."
+      "finding": "MemoryStream allocation precedes FileStream(path,FileMode.Create), so existing data.json is truncated BEFORE DataContractJsonSerializer.WriteObject. StreamWriter writes normalized UTF8 JSON; nested finally Dispose closes writer/file/memory; exceptions rethrow. Serialization/write/Dispose failure cannot restore old data. No temp, explicit Flush(true), or replace."
     },
     {
       "id": "persistence.pcs_zip_reader",
@@ -12836,6 +12998,1119 @@
       "finding": "Routes target name match excluding sender session and GTSPlusLicense; no commandId predicate."
     },
     {
+      "id": "persistence.file_write_modes",
+      "source": "persistence.src39",
+      "kind": "managed-il",
+      "locator": "GTSPlusFileAdaptation.FileAdaptation::WriteFile",
+      "pin": {
+        "rva": 10260,
+        "body_size": 1316,
+        "body_sha256": "fd2664a722d06c52cddd6126f8648b37873ce5391fc19f8a1f50da6720bee86d"
+      },
+      "anchors": [
+        {
+          "offset": 3239,
+          "opcode": "ldloc.0",
+          "operand": ""
+        },
+        {
+          "offset": 3240,
+          "opcode": "callvirt",
+          "operand": "GTSPlusPFCommon.Message.FLMessage.WriteFileRequestMessage::get_ApiArgs"
+        },
+        {
+          "offset": 3245,
+          "opcode": "callvirt",
+          "operand": "GTSPlusPFCommon.Message.FLMessage.WriteFileRequestApiArgs::get_Mode"
+        },
+        {
+          "offset": 3250,
+          "opcode": "brtrue.s",
+          "operand": "0xd2a"
+        },
+        {
+          "offset": 3252,
+          "opcode": "ldloc.1",
+          "operand": ""
+        },
+        {
+          "offset": 3253,
+          "opcode": "call",
+          "operand": "System.IO.File::Exists"
+        },
+        {
+          "offset": 3370,
+          "opcode": "ldloc.0",
+          "operand": ""
+        },
+        {
+          "offset": 3371,
+          "opcode": "callvirt",
+          "operand": "GTSPlusPFCommon.Message.FLMessage.WriteFileRequestMessage::get_ApiArgs"
+        },
+        {
+          "offset": 3376,
+          "opcode": "callvirt",
+          "operand": "GTSPlusPFCommon.Message.FLMessage.WriteFileRequestApiArgs::get_Mode"
+        },
+        {
+          "offset": 3381,
+          "opcode": "ldc.i4.1",
+          "operand": ""
+        },
+        {
+          "offset": 3382,
+          "opcode": "bne.un.s",
+          "operand": "0xd3c"
+        },
+        {
+          "offset": 3384,
+          "opcode": "ldc.i4.0",
+          "operand": ""
+        },
+        {
+          "offset": 3388,
+          "opcode": "ldloc.0",
+          "operand": ""
+        },
+        {
+          "offset": 3389,
+          "opcode": "callvirt",
+          "operand": "GTSPlusPFCommon.Message.FLMessage.WriteFileRequestMessage::get_ApiArgs"
+        },
+        {
+          "offset": 3394,
+          "opcode": "callvirt",
+          "operand": "GTSPlusPFCommon.Message.FLMessage.WriteFileRequestApiArgs::get_Mode"
+        },
+        {
+          "offset": 3399,
+          "opcode": "ldc.i4.2",
+          "operand": ""
+        },
+        {
+          "offset": 3400,
+          "opcode": "bne.un.s",
+          "operand": "0xd4e"
+        },
+        {
+          "offset": 3402,
+          "opcode": "ldc.i4.1",
+          "operand": ""
+        },
+        {
+          "offset": 3510,
+          "opcode": "ldloc.1",
+          "operand": ""
+        },
+        {
+          "offset": 3511,
+          "opcode": "call",
+          "operand": "System.IO.Path::GetDirectoryName"
+        },
+        {
+          "offset": 3516,
+          "opcode": "call",
+          "operand": "System.IO.Directory::CreateDirectory"
+        },
+        {
+          "offset": 3521,
+          "opcode": "pop",
+          "operand": ""
+        },
+        {
+          "offset": 3522,
+          "opcode": "leave.s",
+          "operand": "0xe3b"
+        },
+        {
+          "offset": 3524,
+          "opcode": "stloc.s",
+          "operand": "local(0x000F)"
+        },
+        {
+          "offset": 3646,
+          "opcode": "ldc.i4.0",
+          "operand": ""
+        },
+        {
+          "offset": 3647,
+          "opcode": "newobj",
+          "operand": "System.Text.UTF8Encoding::.ctor"
+        },
+        {
+          "offset": 3652,
+          "opcode": "newobj",
+          "operand": "System.IO.StreamWriter::.ctor"
+        },
+        {
+          "offset": 3657,
+          "opcode": "stloc.s",
+          "operand": "local(0x0011)"
+        },
+        {
+          "offset": 3659,
+          "opcode": "ldloc.s",
+          "operand": "local(0x0011)"
+        },
+        {
+          "offset": 3661,
+          "opcode": "ldloc.0",
+          "operand": ""
+        }
+      ],
+      "branches": [
+        {
+          "offset": 2607,
+          "opcode": "brtrue.s",
+          "target": 2712
+        },
+        {
+          "offset": 2735,
+          "opcode": "brfalse.s",
+          "target": 2840
+        },
+        {
+          "offset": 2863,
+          "opcode": "brtrue.s",
+          "target": 2974
+        },
+        {
+          "offset": 3125,
+          "opcode": "brfalse.s",
+          "target": 3239
+        },
+        {
+          "offset": 3134,
+          "opcode": "brtrue.s",
+          "target": 3239
+        },
+        {
+          "offset": 3250,
+          "opcode": "brtrue.s",
+          "target": 3370
+        },
+        {
+          "offset": 3258,
+          "opcode": "brfalse.s",
+          "target": 3363
+        },
+        {
+          "offset": 3382,
+          "opcode": "bne.un.s",
+          "target": 3388
+        },
+        {
+          "offset": 3400,
+          "opcode": "bne.un.s",
+          "target": 3406
+        },
+        {
+          "offset": 3681,
+          "opcode": "brfalse.s",
+          "target": 3690
+        }
+      ],
+      "finding": "mode0 checks File.Exists then uses append=false; mode1 uses append=false; mode2 uses append=true. Creates parent directory; StreamWriter(path,append,UTF8Encoding(false)), Write, finally Dispose. No temp, rename, File.Replace or explicit durable flush. Existence check is not CreateNew."
+    },
+    {
+      "id": "persistence.manifest_create_leaf",
+      "source": "persistence.src39",
+      "kind": "managed-il",
+      "locator": "GTSPlusFileAdaptation.FileAdaptation::CreateHashFile",
+      "pin": {
+        "rva": 24060,
+        "body_size": 1980,
+        "body_sha256": "16cb9cf3edcd77f3c39bf6895cde6293327384689b94956f33e1163119929bff"
+      },
+      "anchors": [
+        {
+          "offset": 16863,
+          "opcode": "ldloc.2",
+          "operand": ""
+        },
+        {
+          "offset": 16864,
+          "opcode": "call",
+          "operand": "System.IO.Path::GetDirectoryName"
+        },
+        {
+          "offset": 16869,
+          "opcode": "call",
+          "operand": "System.IO.Directory::CreateDirectory"
+        },
+        {
+          "offset": 16874,
+          "opcode": "pop",
+          "operand": ""
+        },
+        {
+          "offset": 16875,
+          "opcode": "leave.s",
+          "operand": "0x4264"
+        },
+        {
+          "offset": 16877,
+          "opcode": "stloc.s",
+          "operand": "local(0x000A)"
+        },
+        {
+          "offset": 17221,
+          "opcode": "ldloc.s",
+          "operand": "local(0x0012)"
+        },
+        {
+          "offset": 17223,
+          "opcode": "ldloca.s",
+          "operand": "local(0x0014)"
+        },
+        {
+          "offset": 17225,
+          "opcode": "call",
+          "operand": "CalculateFileHashDevide"
+        },
+        {
+          "offset": 17230,
+          "opcode": "stloc.s",
+          "operand": "local(0x0013)"
+        },
+        {
+          "offset": 17232,
+          "opcode": "ldloc.s",
+          "operand": "local(0x0013)"
+        },
+        {
+          "offset": 17234,
+          "opcode": "callvirt",
+          "operand": "GTSPlusPFCommon.Message.ResultInfoData::get_Result"
+        },
+        {
+          "offset": 17664,
+          "opcode": "ldc.i4.2",
+          "operand": ""
+        },
+        {
+          "offset": 17665,
+          "opcode": "ldc.i4.2",
+          "operand": ""
+        },
+        {
+          "offset": 17666,
+          "opcode": "newobj",
+          "operand": "System.IO.FileStream::.ctor"
+        },
+        {
+          "offset": 17671,
+          "opcode": "stloc.s",
+          "operand": "local(0x001F)"
+        },
+        {
+          "offset": 17673,
+          "opcode": "ldloc.s",
+          "operand": "local(0x001F)"
+        },
+        {
+          "offset": 17675,
+          "opcode": "ldloc.s",
+          "operand": "local(0x001C)"
+        },
+        {
+          "offset": 17852,
+          "opcode": "brfalse.s",
+          "operand": "0x45c4"
+        },
+        {
+          "offset": 17854,
+          "opcode": "ldloc.2",
+          "operand": ""
+        },
+        {
+          "offset": 17855,
+          "opcode": "call",
+          "operand": "System.IO.File::Delete"
+        },
+        {
+          "offset": 17860,
+          "opcode": "ldc.i4.0",
+          "operand": ""
+        },
+        {
+          "offset": 17861,
+          "opcode": "ldc.i4.0",
+          "operand": ""
+        },
+        {
+          "offset": 17862,
+          "opcode": "ldstr",
+          "operand": "'File'"
+        },
+        {
+          "offset": 17884,
+          "opcode": "ldc.i4.0",
+          "operand": ""
+        },
+        {
+          "offset": 17885,
+          "opcode": "newobj",
+          "operand": "System.Text.UTF8Encoding::.ctor"
+        },
+        {
+          "offset": 17890,
+          "opcode": "call",
+          "operand": "System.IO.File::WriteAllText"
+        },
+        {
+          "offset": 17895,
+          "opcode": "leave",
+          "operand": "0x4671"
+        },
+        {
+          "offset": 17900,
+          "opcode": "stloc.s",
+          "operand": "local(0x0022)"
+        },
+        {
+          "offset": 17902,
+          "opcode": "ldc.i4.m1",
+          "operand": ""
+        },
+        {
+          "offset": 18005,
+          "opcode": "brfalse.s",
+          "operand": "0x465d"
+        },
+        {
+          "offset": 18007,
+          "opcode": "ldloc.2",
+          "operand": ""
+        },
+        {
+          "offset": 18008,
+          "opcode": "call",
+          "operand": "System.IO.File::Delete"
+        },
+        {
+          "offset": 18013,
+          "opcode": "ldc.i4.0",
+          "operand": ""
+        },
+        {
+          "offset": 18014,
+          "opcode": "ldc.i4.0",
+          "operand": ""
+        },
+        {
+          "offset": 18015,
+          "opcode": "ldstr",
+          "operand": "'File'"
+        }
+      ],
+      "branches": [
+        {
+          "offset": 16421,
+          "opcode": "brtrue.s",
+          "target": 16467
+        },
+        {
+          "offset": 16516,
+          "opcode": "brfalse.s",
+          "target": 16521
+        },
+        {
+          "offset": 16519,
+          "opcode": "brtrue.s",
+          "target": 16624
+        },
+        {
+          "offset": 16642,
+          "opcode": "brtrue.s",
+          "target": 16751
+        },
+        {
+          "offset": 16646,
+          "opcode": "brtrue.s",
+          "target": 16751
+        },
+        {
+          "offset": 16757,
+          "opcode": "brfalse.s",
+          "target": 16862
+        },
+        {
+          "offset": 17020,
+          "opcode": "brfalse",
+          "target": 17175
+        },
+        {
+          "offset": 17055,
+          "opcode": "bgt.s",
+          "target": 17166
+        },
+        {
+          "offset": 17239,
+          "opcode": "brfalse.s",
+          "target": 17271
+        },
+        {
+          "offset": 17292,
+          "opcode": "brtrue.s",
+          "target": 17317
+        },
+        {
+          "offset": 17384,
+          "opcode": "brtrue",
+          "target": 17212
+        },
+        {
+          "offset": 17422,
+          "opcode": "brtrue",
+          "target": 17880
+        }
+      ],
+      "finding": "Rejects an existing manifest; recursively inventories and hashes files before opening output. .cpt encrypts UTF8 manifest, then FileStream(FileMode.Create,FileAccess.Write) writes IV+ciphertext and disposes; plaintext uses WriteAllText UTF8 without BOM. Write exceptions attempt File.Delete; no temp publication or rollback of caller's earlier delete."
+    },
+    {
+      "id": "persistence.manifest_verify_leaf",
+      "source": "persistence.src39",
+      "kind": "managed-il",
+      "locator": "GTSPlusFileAdaptation.FileAdaptation::VerifyHashFile",
+      "pin": {
+        "rva": 26040,
+        "body_size": 2328,
+        "body_sha256": "66a43a00583020c1dcd8cf6ef7be1d3b9973f6045bef2a146c8152dbdac61f7e"
+      },
+      "anchors": [
+        {
+          "offset": 19159,
+          "opcode": "ldc.i4.3",
+          "operand": ""
+        },
+        {
+          "offset": 19160,
+          "opcode": "ldc.i4.1",
+          "operand": ""
+        },
+        {
+          "offset": 19161,
+          "opcode": "newobj",
+          "operand": "System.IO.FileStream::.ctor"
+        },
+        {
+          "offset": 19166,
+          "opcode": "stloc.s",
+          "operand": "local(0x0015)"
+        },
+        {
+          "offset": 19168,
+          "opcode": "newobj",
+          "operand": "System.Security.Cryptography.AesCng::.ctor"
+        },
+        {
+          "offset": 19173,
+          "opcode": "stloc.s",
+          "operand": "local(0x0016)"
+        },
+        {
+          "offset": 20199,
+          "opcode": "ldloc.s",
+          "operand": "local(0x002C)"
+        },
+        {
+          "offset": 20201,
+          "opcode": "ldloca.s",
+          "operand": "local(0x002D)"
+        },
+        {
+          "offset": 20203,
+          "opcode": "call",
+          "operand": "CalculateFileHashDevide"
+        },
+        {
+          "offset": 20208,
+          "opcode": "stloc.s",
+          "operand": "local(0x002E)"
+        },
+        {
+          "offset": 20210,
+          "opcode": "ldloc.s",
+          "operand": "local(0x002E)"
+        },
+        {
+          "offset": 20212,
+          "opcode": "callvirt",
+          "operand": "GTSPlusPFCommon.Message.ResultInfoData::get_Result"
+        }
+      ],
+      "branches": [
+        {
+          "offset": 18407,
+          "opcode": "brtrue.s",
+          "target": 18453
+        },
+        {
+          "offset": 18506,
+          "opcode": "brfalse.s",
+          "target": 18552
+        },
+        {
+          "offset": 18596,
+          "opcode": "brtrue.s",
+          "target": 18701
+        },
+        {
+          "offset": 18713,
+          "opcode": "brfalse.s",
+          "target": 18719
+        },
+        {
+          "offset": 18717,
+          "opcode": "brtrue.s",
+          "target": 18822
+        },
+        {
+          "offset": 18840,
+          "opcode": "brtrue.s",
+          "target": 18945
+        },
+        {
+          "offset": 18968,
+          "opcode": "brtrue",
+          "target": 19358
+        },
+        {
+          "offset": 19001,
+          "opcode": "brfalse.s",
+          "target": 19105
+        },
+        {
+          "offset": 19334,
+          "opcode": "brfalse.s",
+          "target": 19343
+        },
+        {
+          "offset": 19348,
+          "opcode": "brfalse.s",
+          "target": 19357
+        },
+        {
+          "offset": 19393,
+          "opcode": "brtrue.s",
+          "target": 19406
+        },
+        {
+          "offset": 19410,
+          "opcode": "brfalse.s",
+          "target": 19419
+        }
+      ],
+      "finding": "Reads .cpt IV+ciphertext or UTF8 lines, parses Target File/Target Folder paths with Path.Combine, recursively enumerates actual files excluding manifest, reports changed=0/missing=1/extra=2; VerificationResult=true only when difference list empty. Hashing is read-only, not a write barrier."
+    },
+    {
+      "id": "persistence.archive_extract_leaf",
+      "source": "persistence.src39",
+      "kind": "managed-il",
+      "locator": "GTSPlusFileAdaptation.FileAdaptation::ExtractFile",
+      "pin": {
+        "rva": 21508,
+        "body_size": 1900,
+        "body_sha256": "e9c34a7c187c8b93c630782cd9661f9bcf4080ad280cdd5b18ba47df0324889d"
+      },
+      "anchors": [
+        {
+          "offset": 14582,
+          "opcode": "ldc.i4.3",
+          "operand": ""
+        },
+        {
+          "offset": 14583,
+          "opcode": "ldc.i4.1",
+          "operand": ""
+        },
+        {
+          "offset": 14584,
+          "opcode": "newobj",
+          "operand": "System.IO.FileStream::.ctor"
+        },
+        {
+          "offset": 14589,
+          "opcode": "stloc.s",
+          "operand": "local(0x0013)"
+        },
+        {
+          "offset": 14591,
+          "opcode": "ldloc.s",
+          "operand": "local(0x0013)"
+        },
+        {
+          "offset": 14593,
+          "opcode": "ldloc.s",
+          "operand": "local(0x0012)"
+        },
+        {
+          "offset": 15278,
+          "opcode": "nop",
+          "operand": ""
+        },
+        {
+          "offset": 15279,
+          "opcode": "ldloc.s",
+          "operand": "local(0x0006)"
+        },
+        {
+          "offset": 15281,
+          "opcode": "call",
+          "operand": "System.IO.Directory::CreateDirectory"
+        },
+        {
+          "offset": 15286,
+          "opcode": "pop",
+          "operand": ""
+        },
+        {
+          "offset": 15287,
+          "opcode": "leave.s",
+          "operand": "0x3c37"
+        },
+        {
+          "offset": 15289,
+          "opcode": "stloc.s",
+          "operand": "local(0x001E)"
+        },
+        {
+          "offset": 15421,
+          "opcode": "ldc.i4.3",
+          "operand": ""
+        },
+        {
+          "offset": 15422,
+          "opcode": "ldc.i4.1",
+          "operand": ""
+        },
+        {
+          "offset": 15423,
+          "opcode": "newobj",
+          "operand": "System.IO.FileStream::.ctor"
+        },
+        {
+          "offset": 15428,
+          "opcode": "stloc.s",
+          "operand": "local(0x0020)"
+        },
+        {
+          "offset": 15430,
+          "opcode": "ldloc.s",
+          "operand": "local(0x0020)"
+        },
+        {
+          "offset": 15432,
+          "opcode": "ldloca.s",
+          "operand": "local(0x0021)"
+        },
+        {
+          "offset": 15576,
+          "opcode": "ldloc.s",
+          "operand": "local(0x0006)"
+        },
+        {
+          "offset": 15578,
+          "opcode": "ldc.i4.1",
+          "operand": ""
+        },
+        {
+          "offset": 15579,
+          "opcode": "call",
+          "operand": "System.IO.Directory::Delete"
+        },
+        {
+          "offset": 15584,
+          "opcode": "ldc.i4.0",
+          "operand": ""
+        },
+        {
+          "offset": 15585,
+          "opcode": "ldc.i4.0",
+          "operand": ""
+        },
+        {
+          "offset": 15586,
+          "opcode": "ldstr",
+          "operand": "'File'"
+        }
+      ],
+      "branches": [
+        {
+          "offset": 13855,
+          "opcode": "brtrue.s",
+          "target": 13901
+        },
+        {
+          "offset": 13941,
+          "opcode": "brfalse.s",
+          "target": 14046
+        },
+        {
+          "offset": 14069,
+          "opcode": "brtrue.s",
+          "target": 14180
+        },
+        {
+          "offset": 14331,
+          "opcode": "brfalse.s",
+          "target": 14445
+        },
+        {
+          "offset": 14340,
+          "opcode": "brtrue.s",
+          "target": 14445
+        },
+        {
+          "offset": 14451,
+          "opcode": "brfalse.s",
+          "target": 14461
+        },
+        {
+          "offset": 14459,
+          "opcode": "brfalse.s",
+          "target": 14564
+        },
+        {
+          "offset": 14610,
+          "opcode": "brfalse.s",
+          "target": 14619
+        },
+        {
+          "offset": 14631,
+          "opcode": "bne.un.s",
+          "target": 14654
+        },
+        {
+          "offset": 14644,
+          "opcode": "bne.un.s",
+          "target": 14654
+        },
+        {
+          "offset": 14665,
+          "opcode": "bne.un.s",
+          "target": 14711
+        },
+        {
+          "offset": 14678,
+          "opcode": "bne.un.s",
+          "target": 14711
+        }
+      ],
+      "finding": "Expands requested paths, rejects missing input or file-valued output; sniffs gzip/ZIP bytes, chooses unused destination suffix _001 etc when directory exists, creates destination then extracts. Extraction exception attempts recursive deletion of chosen destination, not restoration of prior workspace; cleanup exception can escape. Later JS verification/JSON errors have no extraction cleanup."
+    },
+    {
+      "id": "persistence.zip_folder_publication",
+      "source": "persistence.src36",
+      "kind": "managed-il",
+      "locator": "GTSPlusArchiver.ZipFile::CompressFolderToFile",
+      "pin": {
+        "rva": 9704,
+        "body_size": 43,
+        "body_sha256": "382869df598c89989797e901012c24eb47c5bfc244c7cdb45c3b4b47972e1292"
+      },
+      "anchors": [
+        {
+          "offset": 2044,
+          "opcode": "call",
+          "operand": "System.IO.File::Exists"
+        },
+        {
+          "offset": 2052,
+          "opcode": "call",
+          "operand": "System.IO.File::Delete"
+        },
+        {
+          "offset": 2061,
+          "opcode": "call",
+          "operand": "System.IO.Compression.ZipFile::CreateFromDirectory"
+        }
+      ],
+      "branches": [
+        {
+          "offset": 2049,
+          "opcode": "brfalse.s",
+          "target": 2057
+        }
+      ],
+      "finding": "Converts level, deletes destination if present, then CreateFromDirectory(source,destination,level,false). ZIP root excludes source directory. Final path is written directly; prior archive is lost before compression succeeds."
+    },
+    {
+      "id": "persistence.zip_member_paths",
+      "source": "persistence.src36",
+      "kind": "managed-il",
+      "locator": "GTSPlusArchiver.ZipFile::DecompressFileToFile",
+      "pin": {
+        "rva": 9960,
+        "body_size": 172,
+        "body_sha256": "f19ef3594873eb88c2f0a59f2dae96994a5f10fced173b3e92f657cadac23c71"
+      },
+      "anchors": [
+        {
+          "offset": 2320,
+          "opcode": "ldarg.1",
+          "operand": ""
+        },
+        {
+          "offset": 2321,
+          "opcode": "ldloc.2",
+          "operand": ""
+        },
+        {
+          "offset": 2322,
+          "opcode": "callvirt",
+          "operand": "System.IO.Compression.ZipArchiveEntry::get_FullName"
+        },
+        {
+          "offset": 2327,
+          "opcode": "call",
+          "operand": "System.IO.Path::Combine"
+        },
+        {
+          "offset": 2332,
+          "opcode": "call",
+          "operand": "System.IO.Path::GetFullPath"
+        },
+        {
+          "offset": 2337,
+          "opcode": "stloc.3",
+          "operand": ""
+        },
+        {
+          "offset": 2338,
+          "opcode": "ldloc.3",
+          "operand": ""
+        },
+        {
+          "offset": 2339,
+          "opcode": "call",
+          "operand": "System.IO.Path::GetDirectoryName"
+        },
+        {
+          "offset": 2362,
+          "opcode": "brtrue.s",
+          "operand": "0x944"
+        },
+        {
+          "offset": 2364,
+          "opcode": "ldloc.s",
+          "operand": "local(0x0004)"
+        },
+        {
+          "offset": 2366,
+          "opcode": "call",
+          "operand": "System.IO.Directory::CreateDirectory"
+        },
+        {
+          "offset": 2371,
+          "opcode": "pop",
+          "operand": ""
+        },
+        {
+          "offset": 2372,
+          "opcode": "ldloc.2",
+          "operand": ""
+        },
+        {
+          "offset": 2373,
+          "opcode": "callvirt",
+          "operand": "System.IO.Compression.ZipArchiveEntry::get_Name"
+        },
+        {
+          "offset": 2386,
+          "opcode": "ldloc.3",
+          "operand": ""
+        },
+        {
+          "offset": 2387,
+          "opcode": "ldc.i4.1",
+          "operand": ""
+        },
+        {
+          "offset": 2388,
+          "opcode": "call",
+          "operand": "System.IO.Compression.ZipFileExtensions::ExtractToFile"
+        },
+        {
+          "offset": 2393,
+          "opcode": "ldloc.1",
+          "operand": ""
+        },
+        {
+          "offset": 2394,
+          "opcode": "callvirt",
+          "operand": "System.Collections.IEnumerator::MoveNext"
+        },
+        {
+          "offset": 2399,
+          "opcode": "brtrue.s",
+          "operand": "0x909"
+        }
+      ],
+      "branches": [
+        {
+          "offset": 2353,
+          "opcode": "brtrue.s",
+          "target": 2372
+        },
+        {
+          "offset": 2362,
+          "opcode": "brtrue.s",
+          "target": 2372
+        },
+        {
+          "offset": 2383,
+          "opcode": "brtrue.s",
+          "target": 2393
+        },
+        {
+          "offset": 2399,
+          "opcode": "brtrue.s",
+          "target": 2313
+        },
+        {
+          "offset": 2404,
+          "opcode": "brfalse.s",
+          "target": 2412
+        },
+        {
+          "offset": 2414,
+          "opcode": "brfalse.s",
+          "target": 2422
+        }
+      ],
+      "finding": "For each ZIP entry: GetFullPath(Path.Combine(destination,entry.FullName)); create parent; nonempty entry.Name -> ExtractToFile(entry,path,true). No StartsWith/relative-root containment check occurs in this wrapper. Earlier extracted files remain until PF catch attempts deleting chosen destination; files resolved outside it are not covered by that cleanup."
+    },
+    {
+      "id": "persistence.legacy_compression_order",
+      "source": "persistence.src30",
+      "kind": "managed-il",
+      "locator": "TSECompressionUtility.TSECompression::Compression",
+      "pin": {
+        "rva": 8448,
+        "body_size": 436,
+        "body_sha256": "e5ba029a7c63dead0f22e033e5bd54a33263199181aa155190eeca7f3f2fc243"
+      },
+      "anchors": [
+        {
+          "offset": 1330,
+          "opcode": "call",
+          "operand": "System.IO.Directory::Exists"
+        },
+        {
+          "offset": 1362,
+          "opcode": "call",
+          "operand": "System.IO.Path::Combine"
+        },
+        {
+          "offset": 1431,
+          "opcode": "call",
+          "operand": "System.IO.Directory::GetFiles"
+        }
+      ],
+      "branches": [
+        {
+          "offset": 1335,
+          "opcode": "brtrue.s",
+          "target": 1346
+        }
+      ],
+      "finding": "Delete old manifest -> inventory/hash -> write list.txt -> compressionDir -> changeExtZipToGTSE; phase catches return negative status and contain no temp ZIP cleanup. Final destination is touched only after ZIP creation succeeds."
+    },
+    {
+      "id": "persistence.legacy_delete_destination",
+      "source": "persistence.src30",
+      "kind": "managed-il",
+      "locator": "TSECompressionUtility.TSECompression::deleteFileIfExist",
+      "pin": {
+        "rva": 9558,
+        "body_size": 16,
+        "body_sha256": "df1ad6bd98f63a31324e92ffa7b687f14e62d2b65c9f2884b69e36919b6016b4"
+      },
+      "anchors": [
+        {
+          "offset": 2392,
+          "opcode": "call",
+          "operand": "System.IO.File::Exists"
+        },
+        {
+          "offset": 2400,
+          "opcode": "call",
+          "operand": "System.IO.File::Delete"
+        }
+      ],
+      "branches": [
+        {
+          "offset": 2397,
+          "opcode": "brfalse.s",
+          "target": 2405
+        }
+      ],
+      "finding": "File.Exists then File.Delete. Legacy changeExtZipToGTSE deletes final destination before File.Move(tempZip,final); not File.Replace and not rollback-safe."
+    },
+    {
+      "id": "persistence.graph_hash_success",
+      "source": "persistence.src9",
+      "kind": "managed-il",
+      "locator": "WpfCommon.WebSockets.RECreateHashFile::ReceiveSuccessEvent",
+      "pin": {
+        "rva": 76476,
+        "body_size": 72,
+        "body_sha256": "81786b07aadcf2fadbb4757cf379fa01ca7ccfc6fbb22d878ecfd9cc5ac38a9e"
+      },
+      "anchors": [
+        {
+          "offset": 69340,
+          "opcode": "call",
+          "operand": "SendMessage"
+        },
+        {
+          "offset": 69348,
+          "opcode": "callvirt",
+          "operand": "System.Object::ToString"
+        },
+        {
+          "offset": 69353,
+          "opcode": "call",
+          "operand": "SendActivityLog"
+        }
+      ],
+      "branches": [],
+      "finding": "Both hash-create success and failure send the same UI message WM_USER/22/15; callback notification does not certify a matching regenerated manifest."
+    },
+    {
+      "id": "persistence.graph_hash_failure",
+      "source": "persistence.src9",
+      "kind": "managed-il",
+      "locator": "WpfCommon.WebSockets.RECreateHashFile::ReceiveFailureEvent",
+      "pin": {
+        "rva": 76548,
+        "body_size": 72,
+        "body_sha256": "81786b07aadcf2fadbb4757cf379fa01ca7ccfc6fbb22d878ecfd9cc5ac38a9e"
+      },
+      "anchors": [
+        {
+          "offset": 69412,
+          "opcode": "call",
+          "operand": "SendMessage"
+        },
+        {
+          "offset": 69420,
+          "opcode": "callvirt",
+          "operand": "System.Object::ToString"
+        },
+        {
+          "offset": 69425,
+          "opcode": "call",
+          "operand": "SendActivityLog"
+        }
+      ],
+      "branches": [],
+      "finding": "Both hash-create success and failure send the same UI message WM_USER/22/15; callback notification does not certify a matching regenerated manifest."
+    },
+    {
       "id": "persistence.csv_cancellation_closure",
       "source": "persistence.src18",
       "kind": "exhaustive-managed-callgraph",
@@ -13156,6 +14431,32 @@
       },
       "anchors": [],
       "finding": "NI MdfInterop initializes COM, parses RegServer/UnregServer/per-user commands, enters COM server; this is installer-distribution support, not evidenced vehicle MDF output."
+    },
+    {
+      "id": "persistence.native_manifest_hash_reads",
+      "source": "persistence.src106",
+      "kind": "native-bytes-and-decompilation",
+      "locator": "CalculateFileHashDevide@0x10001050",
+      "pin": {
+        "rva": 4324,
+        "size": 239,
+        "sha256": "0449bc11d5367811150091293eb063fc82ebf76aeb4ce210a127fd9a9dbec491"
+      },
+      "anchors": [
+        {
+          "va": 268439780,
+          "bytes": "68800000006a036a006a01680000008057ff15183000108bf885ff7526"
+        },
+        {
+          "va": 268439896,
+          "bytes": "ff151c3000108b45f885c07448"
+        },
+        {
+          "va": 268439968,
+          "bytes": "ff151c3000108b45f885c075b8"
+        }
+      ],
+      "finding": "Managed CalculateFileHashDevide wraps native export: CreateFileW(GENERIC_READ,FILE_SHARE_READ,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL), 1MiB ReadFile loop, CloseHandle, append fixed20-byte salt to SHA256. Native tests handle against zero rather than INVALID_HANDLE_VALUE, and ignores ReadFile BOOL, using only bytesRead; a failed zero-byte read can therefore finalize a prefix hash. No native writer/flush/rename participates in manifest publication."
     },
     {
       "id": "persistence.session_create",

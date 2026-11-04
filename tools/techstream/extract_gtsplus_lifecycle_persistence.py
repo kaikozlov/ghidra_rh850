@@ -1371,8 +1371,8 @@ LIFECYCLE = {'schema': 'gtsplus-lifecycle-domain-v1',
                   'producer': 'StoredDataManager or legacy TSEConverter',
                   'consumer': 'GTSEStartup->stored browser; archival user; DataSync',
                   'created': 'archive after hash preparation',
-                  'flushed': 'ZIP complete before optional sync copy',
-                  'deleted': 'no automatic user-archive deletion in inspected flow',
+                  'flushed': 'ZIP completion precedes optional sync copy; direct final-path write, no durable flush guarantee',
+                  'deleted': 'overwrite deletes prior archive before compression; compressor catch attempts partial-output deletion',
                   'evidence': ['persistence.session_export',
                                'persistence.gtse_entry',
                                'persistence.gtse_compress']},
@@ -2962,6 +2962,169 @@ LIFECYCLE["coverage"]["branches"].extend([
     "recovery clears verified/ineligible/skipped workspace without export and ignores resolved export failure before deletion",
 ])
 
+# Publication is a sequence of destructive writes, not a workspace transaction.
+# These leaf bodies close the PF wrappers used by the authenticated JS below.
+_COMMIT_METHODS = [
+    ("file_write_modes", "WriteFile", 10260, 1316,
+     "fd2664a722d06c52cddd6126f8648b37873ce5391fc19f8a1f50da6720bee86d",
+     "mode0 checks File.Exists then uses append=false; mode1 uses append=false; mode2 uses append=true. Creates parent directory; StreamWriter(path,append,UTF8Encoding(false)), Write, finally Dispose. No temp, rename, File.Replace or explicit durable flush. Existence check is not CreateNew."),
+    ("manifest_create_leaf", "CreateHashFile", 24060, 1980,
+     "16cb9cf3edcd77f3c39bf6895cde6293327384689b94956f33e1163119929bff",
+     "Rejects an existing manifest; recursively inventories and hashes files before opening output. .cpt encrypts UTF8 manifest, then FileStream(FileMode.Create,FileAccess.Write) writes IV+ciphertext and disposes; plaintext uses WriteAllText UTF8 without BOM. Write exceptions attempt File.Delete; no temp publication or rollback of caller's earlier delete."),
+    ("manifest_verify_leaf", "VerifyHashFile", 26040, 2328,
+     "66a43a00583020c1dcd8cf6ef7be1d3b9973f6045bef2a146c8152dbdac61f7e",
+     "Reads .cpt IV+ciphertext or UTF8 lines, parses Target File/Target Folder paths with Path.Combine, recursively enumerates actual files excluding manifest, reports changed=0/missing=1/extra=2; VerificationResult=true only when difference list empty. Hashing is read-only, not a write barrier."),
+    ("archive_extract_leaf", "ExtractFile", 21508, 1900,
+     "e9c34a7c187c8b93c630782cd9661f9bcf4080ad280cdd5b18ba47df0324889d",
+     "Expands requested paths, rejects missing input or file-valued output; sniffs gzip/ZIP bytes, chooses unused destination suffix _001 etc when directory exists, creates destination then extracts. Extraction exception attempts recursive deletion of chosen destination, not restoration of prior workspace; cleanup exception can escape. Later JS verification/JSON errors have no extraction cleanup."),
+]
+for suffix, method, rva, size, digest, finding in _COMMIT_METHODS:
+    METHODS.append({
+        "evidence": "persistence." + suffix,
+        "path": "build/out/gtsplus-unprotected/bin/GTSPlusFileAdapt.dll",
+        "type": "GTSPlusFileAdaptation.FileAdaptation", "method": method, "index": 0,
+        "pin": {"rva": rva, "body_size": size, "body_sha256": digest},
+        "source": "persistence.src39", "finding": finding,
+        "context_terms": ["get_Mode", "StreamWriter::.ctor", "FileStream::.ctor",
+                          "WriteAllText", "File::Delete", "Directory::Delete",
+                          "CreateDirectory", "CalculateFileHashDevide", "ExtractToFile"],
+    })
+METHODS.extend([
+    {"evidence": "persistence.zip_folder_publication",
+     "path": "build/out/gtsplus-unprotected/bin/GTSPlusArchiver.dll",
+     "type": "GTSPlusArchiver.ZipFile", "method": "CompressFolderToFile", "index": 0,
+     "pin": {"rva": 9704, "body_size": 43,
+             "body_sha256": "382869df598c89989797e901012c24eb47c5bfc244c7cdb45c3b4b47972e1292"},
+     "source": "persistence.src36",
+     "finding": "Converts level, deletes destination if present, then CreateFromDirectory(source,destination,level,false). ZIP root excludes source directory. Final path is written directly; prior archive is lost before compression succeeds."},
+    {"evidence": "persistence.zip_member_paths",
+     "path": "build/out/gtsplus-unprotected/bin/GTSPlusArchiver.dll",
+     "type": "GTSPlusArchiver.ZipFile", "method": "DecompressFileToFile", "index": 0,
+     "pin": {"rva": 9960, "body_size": 172,
+             "body_sha256": "f19ef3594873eb88c2f0a59f2dae96994a5f10fced173b3e92f657cadac23c71"},
+     "source": "persistence.src36",
+     "finding": "For each ZIP entry: GetFullPath(Path.Combine(destination,entry.FullName)); create parent; nonempty entry.Name -> ExtractToFile(entry,path,true). No StartsWith/relative-root containment check occurs in this wrapper. Earlier extracted files remain until PF catch attempts deleting chosen destination; files resolved outside it are not covered by that cleanup.",
+     "context_terms": ["get_FullName", "GetFullPath", "CreateDirectory", "ExtractToFile"]},
+    {"evidence": "persistence.legacy_compression_order",
+     "path": "build/out/gts-lifecycle-aux/GTSPlusTSEConverter/TseCompression.dll",
+     "type": "TSECompressionUtility.TSECompression", "method": "Compression", "index": 1,
+     "pin": {"rva": 8448, "body_size": 436,
+             "body_sha256": "e5ba029a7c63dead0f22e033e5bd54a33263199181aa155190eeca7f3f2fc243"},
+     "source": "persistence.src30",
+     "finding": "Delete old manifest -> inventory/hash -> write list.txt -> compressionDir -> changeExtZipToGTSE; phase catches return negative status and contain no temp ZIP cleanup. Final destination is touched only after ZIP creation succeeds."},
+    {"evidence": "persistence.legacy_delete_destination",
+     "path": "build/out/gts-lifecycle-aux/GTSPlusTSEConverter/TseCompression.dll",
+     "type": "TSECompressionUtility.TSECompression", "method": "deleteFileIfExist", "index": 0,
+     "pin": {"rva": 9558, "body_size": 16,
+             "body_sha256": "df1ad6bd98f63a31324e92ffa7b687f14e62d2b65c9f2884b69e36919b6016b4"},
+     "source": "persistence.src30",
+     "finding": "File.Exists then File.Delete. Legacy changeExtZipToGTSE deletes final destination before File.Move(tempZip,final); not File.Replace and not rollback-safe."},
+])
+for method, rva in (("ReceiveSuccessEvent", 76476), ("ReceiveFailureEvent", 76548)):
+    METHODS.append({
+        "evidence": "persistence.graph_hash_" + ("success" if method == "ReceiveSuccessEvent" else "failure"),
+        "path": "build/out/gts-lifecycle-aux/GTSPlusGraphViewer/GTSPlusGraphViewer.exe",
+        "type": "WpfCommon.WebSockets.RECreateHashFile", "method": method, "index": 0,
+        "pin": {"rva": rva, "body_size": 72,
+                "body_sha256": "81786b07aadcf2fadbb4757cf379fa01ca7ccfc6fbb22d878ecfd9cc5ac38a9e"},
+        "source": "persistence.src9",
+        "finding": "Both hash-create success and failure send the same UI message WM_USER/22/15; callback notification does not certify a matching regenerated manifest.",
+    })
+EXPECTED_SOURCES.append({
+    "id": "persistence.src105",
+    "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/GTSPlusFileCryptographic.dll",
+    "sha256": "1d134a3298a522130eaaf398f9e71f67569e05356f30a84363e9f7cd5651b4d9",
+    "size": 36880, "representation": "installed protected PE",
+})
+EXPECTED_SOURCES.append({
+    "id": "persistence.src106", "original_source": "persistence.src105",
+    "path": "build/out/gtsplus-unprotected/bin/GTSPlusFileCryptographic.dll",
+    "sha256": "67c8daf7ebd4558fffceced7f08eaf21cee945b86f2ec94306b33ab7ed9c85f1",
+    "size": 23568, "representation": "materialized native PE",
+})
+NATIVE_SPANS.append({
+    "evidence": "persistence.native_manifest_hash_reads",
+    "path": "build/out/gtsplus-unprotected/bin/GTSPlusFileCryptographic.dll",
+    "source": "persistence.src106", "locator": "CalculateFileHashDevide@0x10001050",
+    "pin": {"rva": 0x10E4, "size": 0xEF,
+            "sha256": "0449bc11d5367811150091293eb063fc82ebf76aeb4ce210a127fd9a9dbec491"},
+    "anchors": [
+        {"va": 0x100010E4, "bytes": "68800000006a036a006a01680000008057ff15183000108bf885ff7526"},
+        {"va": 0x10001158, "bytes": "ff151c3000108b45f885c07448"},
+        {"va": 0x100011A0, "bytes": "ff151c3000108b45f885c075b8"},
+    ],
+    "finding": "Managed CalculateFileHashDevide wraps native export: CreateFileW(GENERIC_READ,FILE_SHARE_READ,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL), 1MiB ReadFile loop, CloseHandle, append fixed20-byte salt to SHA256. Native tests handle against zero rather than INVALID_HANDLE_VALUE, and ignores ReadFile BOOL, using only bytesRead; a failed zero-byte read can therefore finalize a prefix hash. No native writer/flush/rename participates in manifest publication.",
+})
+for _spec in METHODS:
+    if _spec["evidence"] == "persistence.graph_json_writer":
+        _spec["finding"] = (
+            "MemoryStream allocation precedes FileStream(path,FileMode.Create), so existing data.json is truncated BEFORE DataContractJsonSerializer.WriteObject. StreamWriter writes normalized UTF8 JSON; nested finally Dispose closes writer/file/memory; exceptions rethrow. Serialization/write/Dispose failure cannot restore old data. No temp, explicit Flush(true), or replace.")
+    elif _spec["evidence"] == "persistence.file_archive":
+        _spec["finding"] = (
+            "PF ArchiveFile checks overwrite, creates parent and calls ZIP folder/file compressor. Folder writer deletes existing final archive before CreateFromDirectory. Compressor exceptions log then delete destination if present; cleanup can itself throw. No temp, File.Replace or restoration; overwrite refusal alone preserves existing archive.")
+
+# Offsets are re-established from the authenticated member, not decoded cache files.
+_PUBLICATION_JS = [
+    ("manifest_refresh_publication", "StoredDataManager.prototype.createHashFile=",
+     "Hash refresh deletes first; helper catches folder-list/delete/create failures and resolves undefined. A successful caller await does not establish that any manifest exists or matches current content."),
+    ("manifest_check_copy", "StoredDataManager.prototype.createStoredHashFile=",
+     "Creates separate root-level check manifest of storedBasePath, swallowing delete/create errors. Import invokes this before verifying the archive's embedded manifest; it does not replace the embedded manifest."),
+    ("tree_write_publication", "StoredDataManager.prototype.addData=",
+     "Mutates in-memory ECU/function/data maps and rawTree before mode1 tree.json write. No rollback of memory or earlier data/info writes on tree failure."),
+    ("initial_metadata_publication", "StoredDataManager.prototype.create=",
+     "Sequential tree -> fileInfo -> vehicleInfo -> cooperation -> event -> tseName -> hash -> buffer path assignment. JSON metadata mode1 truncates/creates; event mode2 writes empty text, creating/appending without clearing existing event content. Earlier files survive a later rejected step; no rollback. Hash refresh errors can resolve and permit buffer path assignment."),
+    ("vehicle_info_overwrite_publication", "StoredDataManager.prototype.overwirteVehicleInfo=",
+     "Production-date persistence backend first awaits verification, then mode1 overwrites selected vehicleInfo.json regardless of verification boolean; only positive verification refreshes hashes. Write rejection propagates through onErrorCommon, but hash-refresh errors are swallowed by createHashFile. Awaited completion is neither rollback-safe nor durable."),
+    ("info_write_publication", "StoredDataManager.prototype.saveInfo=",
+     "info.json uses PF mode1 direct overwrite independently of data.json; caller Promise.all is a rendezvous, not an all-or-nothing filesystem commit."),
+    ("export_verification_policy", "StoredDataManager.prototype.verifyHashFile=",
+     "Before export, missing manifest, negative verification or caught error returns false. Export then skips embedded-manifest regeneration but still generates root check manifest and archives; unverified content is not automatically blessed with a replacement embedded manifest."),
+]
+LIFECYCLE["publication_contracts"] = {
+    "scope": "Host call ordering and observable failure prefixes only; no hardware crash durability or cross-file atomicity claim.",
+    "current_capture": [
+        "Initial session creation writes tree, fileInfo, vehicleInfo, cooperation, event, tseName in order, then hashes and assigns buffer path. JSON writes use mode1; event uses mode2 with empty text and does not clear previous bytes. Rejection preserves the completed file prefix.",
+        "overwirteVehicleInfo verifies first, then mode1 overwrites selected vehicleInfo.json even after negative verification; only positive verification triggers refresh. Metadata failure/refresh failure does not restore previous vehicleInfo or manifest.",
+        "data.json mode0 is existence-check then create/truncate; divided suffix chunks use mode2 append. info.json mode1 can finish independently.",
+        "After completion/info rendezvous, addData mutates memory then mode1 overwrites tree.json; next createHashFile deletes old manifest and attempts new one.",
+        "Data/info failure can leave a prefix file or orphan directory. Tree failure leaves earlier content plus advanced in-memory tree. Hash failure can leave stale/no manifest while helper resolves; none rolls back prior writes.",
+    ],
+    "current_export": [
+        "verifyHashFile runs before activity-report copies; copy failures are swallowed. Only positive pre-copy verification permits embedded-manifest delete/create. Negative/error verification retains embedded manifest (or absence).",
+        "Root-level check manifest is always delete/create and is outside the ZIP source folder; it hashes mgr.storedBasePath, not necessarily the per-folder target under parallel multi-folder export.",
+        "PF ZIP folder compression deletes final archive first and writes the final pathname directly, without temp or rename. Compression failure attempts deleting partial final output; old overwritten archive is not retained.",
+        "Failures before compressor entry leave old archive; after destination deletion old archive is lost. Failure during cleanup can leave partial output. Workspace is not cleared by export.",
+        "DataSync copy is after successful archive. Its rejection produces result:false although final archive remains. Parallel folder exports are not rolled back; successes may remain when another rejects.",
+    ],
+    "legacy_export": [
+        "Delete old list.txt, enumerate recursive files, calculate salted hashes, create/truncate Shift-JIS list.txt and dispose writer.",
+        "Create ZIP beside source named temp_yyyyMMddmmssfff.zip (minutes, not hours), includeBaseDirectory=false, Shift-JIS entry encoding.",
+        "Timestamp temp names are not an exclusive random-name protocol; a preexisting same-name ZIP makes CreateFromDirectory fail rather than safely replace it.",
+        "Only after ZIP creation, delete existing destination and File.Move(tempZip,final). Failure before delete preserves old destination; Move failure after delete loses it and leaves completed temp ZIP.",
+        "Compression/rename catch returns error with no temp-ZIP cleanup. ZIP creation failure can leave partial temp ZIP; manifest write failure can leave partial list.txt. No atomic replacement or durable flush.",
+    ],
+    "graph_writeback": [
+        "Both verification-false and request-failure paths still call JSON writer. Writer opens FileMode.Create BEFORE serialization, so even serializer failure can destroy previous data.",
+        "Positive verification: data write -> delete embedded manifest -> asynchronous PF CreateHashFile. Delete/create failure does not restore data/old manifest. False verification retains now-stale manifest.",
+        "Hash-create success and failure emit identical UI notification. No archive re-publication is performed by these callbacks; they update extracted workspace only.",
+    ],
+    "import": [
+        "Browser basename splits only backslashes; clear existing workspace -> PF extract to workPath/basename -> enumerate root and choose first folder, ignoring changedFolderPath response.",
+        "PF sniffs ZIP/gzip, chooses unused _NNN destination directory, creates it, extracts sequentially. ZIP member paths use GetFullPath(Combine(dest,FullName)) with no explicit containment test; member extraction overwrites=true.",
+        "Extraction exception attempts recursive deletion of selected extraction directory; no prior-workspace restoration. Cleanup does not cover paths normalized outside destination.",
+        "After successful extraction, hash/JSON/tree/info/cache reconstruction failure only sets isOpenErr/isVerifyErr and resolves flags. Extracted/partially reconstructed workspace and partial maps remain; no catch-time delete.",
+    ],
+    "flush_and_replace": "Owned managed streams are disposed; graph/buffer close notifications are not OS flush barriers. Inspected publication leaves contain no File.Replace, MoveFileEx, ReplaceFile, FlushFileBuffers, FileStream.Flush(true), or coordinated multi-file transaction. Legacy File.Move follows destructive destination deletion.",
+}
+LIFECYCLE["coverage"]["branches"].extend([
+    "PF mode0 existence-check/create, mode1 truncate, mode2 append; graph truncate-before-serialize",
+    "embedded-vs-root check manifest, swallowed refresh failures, export negative-verification no-rehash",
+    "current direct-final ZIP overwrite/deletion failure prefixes vs legacy temp-ZIP/delete/Move",
+    "ZIP member normalization without explicit containment; extraction cleanup vs post-extraction preservation",
+    "native manifest hasher unchecked ReadFile BOOL and zero-vs-invalid handle gate",
+])
+LIFECYCLE["provenance"]["native_projects"].append("lc2_persistence_hash")
+
 def _operand(pe: Any, operand: Any) -> str:
     if hasattr(operand, "table"):
         resolved = resolve_token(pe, operand)
@@ -2988,6 +3151,20 @@ def build(*, installed_root: Path = DEFAULT_INSTALLED, main_root: Path = DEFAULT
                         aux_root / "ContentServer/CryptgraphResource.dll",
                         aux_root / "ContentServer/CryptgraphCommon.dll",
                         installed_root / "ContentServer/dist.crt")
+    publication_js = []
+    for suffix, marker, finding in _PUBLICATION_JS:
+        member = "js/gts/common/stored_data_manager.js"
+        text = assets[member].decode("utf-8-sig")
+        start = text.index(marker)
+        end = text.find("StoredDataManager.prototype.", start + len(marker))
+        function = text[start:end if end >= 0 else len(text)]
+        result_body = {"character_offset": start, "text": marker,
+                       "character_length": len(function),
+                       "sha256_utf8": hashlib.sha256(function.encode()).hexdigest()}
+        # Evidence is emitted below after the result schema is initialized.
+        publication_js.append({"id": "persistence." + suffix, "source": "persistence.src42",
+            "kind": "authenticated-javascript-function", "locator": member,
+            "anchors": [result_body], "finding": finding})
     for source in EXPECTED_SOURCES:
         if "archive_member" in source:
             raw = assets[source["archive_member"]]
@@ -3001,6 +3178,7 @@ def build(*, installed_root: Path = DEFAULT_INSTALLED, main_root: Path = DEFAULT
     result = copy.deepcopy(LIFECYCLE)
     result["sources"] = copy.deepcopy(EXPECTED_SOURCES)
     result["evidence"] = []
+    result["evidence"].extend(publication_js)
     opened: dict[str, Any] = {}
     for spec in METHODS:
         if spec["path"] not in opened:
