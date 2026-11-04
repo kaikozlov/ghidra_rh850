@@ -2,7 +2,7 @@
   "schema": "rh850-p1me-machine-v2",
   "source": {
     "path": "data/devices/p1me.rdl",
-    "sha256": "be71172bd544e69cff0094649a88f64b47187fcbd33c64b9067569c024ae180d",
+    "sha256": "7fefc07e90376c1099b74b2cc3a7cc72d04a459d082d740a0257babaddb9e1a5",
     "systemrdl_compiler": "1.33.0"
   },
   "products": [
@@ -737,15 +737,17 @@
         "size": 4,
         "access_widths": [
           1,
-          2
+          2,
+          4
         ],
         "access": "w",
         "reset": null,
         "behavior": "faci",
         "evidence": "manual",
-        "source_ref": "R01UH0615EJ0120 Table3.1,Tables4.7,4.15,6.2,sections6.3.8-6.3.10,6.3.14-6.3.15",
-        "description": "FACI command-issuing area: byte commands/count, halfword program data",
+        "source_ref": "R01UH0615EJ0120 Table3.1,Tables4.7,4.15,6.2,6.4,8.1,sections6.3.8-6.3.10,6.3.14-6.3.15,8.3",
+        "description": "FACI command-issuing area: byte commands/count, halfword program data; DataFlash P/E reads generate command lock with unspecified bus data",
         "trigger": "faci-command",
+        "read_input": true,
         "status_register": "FSTATR",
         "access_register": "FASTAT",
         "history_register": "FCMDR",

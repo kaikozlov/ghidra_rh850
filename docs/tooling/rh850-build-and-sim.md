@@ -465,6 +465,16 @@ reasserts at completion while `CMDLK` persists. `ECRCT` clears when the
 corresponding correction flags were set. Without clock progress, the original
 Camry `0x78CE6` polling routine still reaches its software timeout.
 
+DataFlash-P/E reads of the FACI command area generate `ILGLERR/CMDLK`
+without terminating an active operation (§6.3.14.1, §8.3, Table8.1).
+The supported 8/16/32-bit reads require explicit `register-input` bus data;
+that data remains separate from command writes. Read mode and CodeFlash P/E
+remain outside this read model. A premature `50` during modeled DataFlash
+forced stop locks without clearing errors or moving its deadline
+(Table6.4). The native Camry replay implements the same bus-response and
+deadline rules. Exact-image `camry_f33_icu_startup_faci_*` cases retain these
+boundaries, including missing-input and prohibited-mode faults.
+
 `FSADDR`/`FEADDR` discard their read-only low two bits and ignore busy writes
 (flash manual pp14–15). `FENTRYR` key bits read zero; writes while busy are
 ignored. In the supported read/DataFlash states, a bad key clears the mode,

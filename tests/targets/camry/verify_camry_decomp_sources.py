@@ -310,6 +310,11 @@ const char *confirm_fault(void) {
     camry_host_fault_call((void *)confirm, NULL, 0);
     return camry_host_fault_kind;
 }
+static void read_command(void) { (void)camry_read16(0xffa20000u); }
+const char *command_read_fault(void) {
+    camry_host_fault_call((void *)read_command, NULL, 0);
+    return camry_host_fault_kind;
+}
 """
     registers = memory.MACHINE_REGISTERS
     command = int(registers["FACI_COMMAND_AREA"]["address"])
@@ -365,6 +370,7 @@ const char *confirm_fault(void) {
         library.camry_native_advance.argtypes = [u32]
         library.camry_native_advance.restype = None
         library.confirm_fault.restype = ctypes.c_char_p
+        library.command_read_fault.restype = ctypes.c_char_p
 
         def install(case):
             empty = (ctypes.c_uint8 * 0)()
@@ -494,6 +500,36 @@ const char *confirm_fault(void) {
         assert library.camry_read32(status) & ready == 0
         assert library.camry_read32(status) & ready == ready
         library.camry_native_finish(2601)
+
+        # Read data are independent of command writes. Locking or an early
+        # status clear must not move the in-flight forced-stop deadline.
+        for width in (1, 2, 4):
+            install(scenario())
+            view = schedule([
+                (0, command, 1, True), (100, command, width, False),
+                (101, command, 1, True), (1599, status, 4, False),
+                (1600, status, 4, False),
+            ])
+            bus_input = (calls.NativeInput * 1)(calls.NativeInput(0, command, 0x12345678, 4))
+            library.camry_native_set_inputs(bus_input, 1)
+            library.camry_write8(command, 0xB3)
+            assert getattr(library, f"camry_read{width * 8}")(command) == (
+                0x12345678 & ((1 << (width * 8)) - 1)
+            )
+            library.camry_write8(command, 0x50)
+            assert library.camry_read32(status) & (ready | 0x4000) == 0x4000
+            assert library.camry_read32(status) & ready == ready
+            library.camry_native_finish(1601)
+            assert read_register("FASTAT") & 0x10 == 0x10
+            library.camry_write8(command, 0x50)
+            assert library.camry_read32(status) & 0x4000 == 0
+            assert read_register("FASTAT") & 0x10 == 0
+
+        install(scenario())
+        assert library.command_read_fault() == b"missing-read-input"
+        library.camry_write16.argtypes = [u32, ctypes.c_uint16]
+        library.camry_write16(int(registers["FENTRYR"]["address"]), 0xAA00)
+        assert library.command_read_fault() == b"read-prohibited"
 
         # Physical state, not immutable payload bytes, selects blankness.
         for state, expected in (("erased", 0), ("programmed", 1), ("erased", 0), (None, None)):

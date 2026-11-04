@@ -1576,6 +1576,10 @@ public class RunP1MEMachine extends GhidraScript {
                     register.evidence, "reset invalidated opaque hardware result "
                         + register.name + "; supply an explicit post-reset scenario input");
             }
+            if ("faci-command".equals(register.trigger)
+                    && (registerValue(requiredRegister(register.name, "control", register.control_register)) & 0x81) != 0x80)
+                throw fault("read-prohibited", thread, address, size, "read", register.evidence,
+                    "command-area read side effects are supported only in DataFlash P/E mode");
             if (register.read_value != null) {
                 setRegisterValue(register.name, register.read_value);
             }
@@ -1589,6 +1593,18 @@ public class RunP1MEMachine extends GhidraScript {
             else if (!register.access.contains("r")) {
                 throw fault("read-prohibited", thread, address, size, "read",
                     register.evidence, "register is not software-readable: " + register.name);
+            }
+            if ("faci-command".equals(register.trigger)) {
+                // R01UH0615EJ0120 section6.3.14.1 and Table8.1: reads cause
+                // command lock, without terminating the command in progress (8.3).
+                RegisterDef status = requiredRegister(register.name, "status", register.status_register);
+                RegisterDef access = requiredRegister(register.name, "access-status", register.access_register);
+                setRegisterValue(status.name, registerValue(status) | 0x4000);
+                setRegisterValue(access.name, registerValue(access) | FASTAT_CMDLK);
+                // A read breaks an incomplete command-issuance sequence so
+                // the subsequent forced stop is a command, not program data.
+                faciPendingCommand = 0;
+                faciProgramStage = 0;
             }
             if ("csih".equals(register.behavior) && !"dma-select".equals(register.trigger)) {
                 csih(register).read(thread, register);
@@ -5549,7 +5565,10 @@ public class RunP1MEMachine extends GhidraScript {
             boolean stop = !data && command == 0xb3;
             RegisterDef status = requiredRegister(register.name, "status", register.status_register);
             long statusValue = unsigned(memory(thread, status.address, status.size));
-            if (!stop && (statusValue & FSTATR_FRDY) == 0 && !program)
+            boolean prematureClear = !data && command == 0x50 && faciOperation == 0xb3
+                && (statusValue & FSTATR_FRDY) == 0
+                && (registerValue(requiredRegister(register.name, "control", register.control_register)) & 0x81) == 0x80;
+            if (!stop && !prematureClear && (statusValue & FSTATR_FRDY) == 0 && !program)
                 throw fault("faci-not-ready", thread, register.address, value.length, "write",
                     register.evidence, "new FACI commands require FSTATR.FRDY=1");
             RegisterDef access = requiredRegister(register.name, "access-status", register.access_register);
@@ -5712,6 +5731,16 @@ public class RunP1MEMachine extends GhidraScript {
             RegisterDef historyRegister = requiredRegister(register.name, "history", register.history_register);
             long status = unsigned(memory(statusRegister.address, statusRegister.size));
             long history = unsigned(memory(historyRegister.address, historyRegister.size));
+            if (command == 0x50 && faciOperation == 0xb3 && (status & FSTATR_FRDY) == 0) {
+                // Tables6.4/8.1: premature status clear locks, but neither
+                // completes nor restarts forced stop. Keep its original deadline.
+                setRegisterValue(statusRegister.name, status | 0x4000);
+                setRegisterValue(accessRegister.name, registerValue(accessRegister) | FASTAT_CMDLK);
+                setRegisterValue(historyRegister.name, (command << 8) | ((history >>> 8) & 0xff));
+                sequence.add(command);
+                faciTransition(thread, register, command, "status-clear-rejected-busy", sequence);
+                return;
+            }
             if (command == 0x71 || command == 0x20 || command == 0xe8) {
                 faciPendingCommand = command;
                 if (command == 0xe8) {
@@ -6654,6 +6683,12 @@ public class RunP1MEMachine extends GhidraScript {
                     }
                     continue;
                 }
+                if (register.read_input && register.reset == null) {
+                    // Internal command backing only. Reads still require a
+                    // separate explicit bus response; this is no reset value.
+                    setMemory(register.address, new byte[register.size]);
+                    continue;
+                }
                 if (register.reset == null) continue;
                 setRegisterValue(register.name, register.reset);
             }
@@ -6774,7 +6809,7 @@ public class RunP1MEMachine extends GhidraScript {
                     "register-input cannot impersonate an external master or inject guard/SEG configuration: "
                         + input.register);
             }
-            if ("faci".equals(register.behavior) && (register.trigger != null
+            if ("faci".equals(register.behavior) && !register.read_input && (register.trigger != null
                     || FACI_RESULT_REGISTERS.contains(register.name)))
                 throw new IllegalArgumentException(
                     "register-input cannot inject modeled flash sequencer state: " + input.register);

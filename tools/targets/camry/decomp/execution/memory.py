@@ -295,6 +295,8 @@ def configure_native_model(library: ctypes.CDLL, scenario: dict | None) -> None:
                     initialized |= 1 << offset
         widths = sum(1 << width for width in register["access_widths"])
         access = (1 if "r" in register["access"] else 0) | (2 if "w" in register["access"] else 0)
+        # Bit2 marks a separate explicit read-bus response, never command storage.
+        access |= 4 if register.get("read_input") else 0
         library.camry_host_add_register(address, size, widths, access, initialized)
     library.camry_native_set_clock(quantum)
     for row in cells:

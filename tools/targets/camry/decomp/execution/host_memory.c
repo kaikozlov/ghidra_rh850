@@ -50,6 +50,8 @@ typedef struct {
     uint32_t access;
     uint32_t initialized;
     uint8_t data[4];
+    uint32_t read_response;
+    uint32_t read_response_present;
 } CamryHostRegister;
 
 static CamryHostRegister *camry_host_registers;
@@ -118,7 +120,7 @@ void camry_host_add_register(uint32_t address, uint32_t size, uint32_t widths,
         camry_host_registers = camry_host_grow(camry_host_registers,
             sizeof(*camry_host_registers), &camry_host_register_capacity);
     camry_host_registers[camry_host_register_count++] = (CamryHostRegister){
-        address, size, widths, access, initialized, {0},
+        address, size, widths, access, initialized, {0}, 0, 0,
     };
 }
 
@@ -461,6 +463,15 @@ static void camry_native_advance_inputs(uint32_t instructions, int inclusive) {
             || (!inclusive && input->after_instructions == instructions))
             break;
         camry_native_clock_to(input->after_instructions);
+        {
+            CamryHostRegister *reg = camry_host_register(input->address, input->width);
+            if (reg != NULL && (reg->access & 4u) != 0) {
+                reg->read_response = input->value;
+                reg->read_response_present = 1;
+                camry_native_input_index += 1;
+                continue;
+            }
+        }
         bytes = camry_host_find(input->address, input->width);
         if (bytes == NULL) {
             fprintf(stderr, "unmapped camry native input at %#x width %u\n",
@@ -545,8 +556,16 @@ static void camry_require_access(uint32_t address, uint32_t width, uint32_t writ
         camry_device_fault(write ? "unmapped-write" : "unmapped-read", address, width, write);
     if ((reg->widths & (1u << width)) == 0 || (address & (width - 1u)) != 0)
         camry_device_fault("mmio-width", address, width, write);
-    if ((reg->access & (write ? 2u : 1u)) == 0)
+    if ((reg->access & (write ? 2u : 5u)) == 0)
         camry_device_fault(write ? "write-prohibited" : "read-prohibited", address, width, write);
+    if (!write && reg->address == 0xFFA20000u
+        && (camry_stored_value(0xFFA10084u, 2) & 0x81u) != 0x80u)
+        camry_device_fault("read-prohibited", address, width, 0);
+    if (!write && (reg->access & 4u) != 0) {
+        if (!reg->read_response_present)
+            camry_device_fault("missing-read-input", address, width, 0);
+        return;
+    }
     if (!write && address == 0xFFD51004u && camry_stored_value(0xFFD51020u, 1) != 0)
         camry_device_fault("unsupported-dcra-mode", 0xFFD51020u, 1, 0);
     mask = ((1u << width) - 1u) << (address - reg->address);
@@ -673,6 +692,15 @@ static void camry_faci_command(uint32_t command) {
         camry_device_fault("unsupported-faci-command", 0xFFA20000u, 1, 1);
     if (command == 0xD0u ? camry_faci_pending_command != 0x71u : camry_faci_pending_command != 0)
         camry_device_fault("unsupported-faci-sequence", 0xFFA20000u, 1, 1);
+    /* R01UH0615EJ0120 Tables6.4/8.1: premature50 locks without
+     * cancelling/restarting the supported DataFlash forced stop. */
+    if (command == 0x50u && camry_faci_operation == 0xB3u
+        && control == 0x80u && (status & 0x8000u) == 0) {
+        camry_store_value(0xFFA10080u, status | 0x4000u, 4);
+        camry_store_value(0xFFA10010u, access | 0x10u, 1);
+        camry_store_value(0xFFA100A0u, (command << 8) | ((history >> 8) & 0xFFu), 2);
+        return;
+    }
     if (command != 0xB3u && (status & 0x8000u) == 0)
         camry_device_fault("faci-not-ready", 0xFFA20000u, 1, 1);
     if (command == 0x50u || command == 0xB3u) {
@@ -1011,6 +1039,20 @@ static uint32_t camry_peripheral_poll(uint32_t address, uint32_t value, uint32_t
     int index;
     uint32_t count;
     uint32_t scripted;
+    if (!camry_peripheral_file && address >= 0xFF000000u) {
+        CamryHostRegister *reg = camry_host_register(address, width);
+        if (reg != NULL && (reg->access & 4u) != 0) {
+            if (reg->address == 0xFFA20000u) {
+                /* Section6.3.14.1/Table8.1: lock only; preserve FRDY,
+                 * operation and deadline as required by section8.3. */
+                camry_store_value(0xFFA10080u, camry_stored_value(0xFFA10080u, 4) | 0x4000u, 4);
+                camry_store_value(0xFFA10010u, camry_stored_value(0xFFA10010u, 1) | 0x10u, 1);
+                camry_faci_pending_command = 0;
+            }
+            value = reg->read_response >> (8u * (address - reg->address));
+            return width == 4u ? value : value & ((1u << (8u * width)) - 1u);
+        }
+    }
     if (!camry_peripheral_file || camry_native_workflow || address < 0xFF000000u
         || (address >= 0xFF200000u && address < 0xFF208000u))
         return value;

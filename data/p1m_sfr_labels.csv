@@ -31,7 +31,7 @@ address,name,size,access,comment
 0xFFA10100,FECCEMON,2,r,Flash ECC encoder monitor
 0xFFA10104,FECCTMD,2,rw,Flash ECC test-mode control
 0xFFA10108,FDMYECC,2,rw,Flash dummy ECC value
-0xFFA20000,FACI_COMMAND_AREA,4,w,"FACI command-issuing area: byte commands/count, halfword program data"
+0xFFA20000,FACI_COMMAND_AREA,4,w,"FACI command-issuing area: byte commands/count, halfword program data; DataFlash P/E reads generate command lock with unspecified bus data"
 0xFFC0A000,BRAMDAT0,4,rw,Backup data retained across every reset and BIST; initial contents unspecified
 0xFFC0A004,BRAMDAT1,4,rw,Backup data retained across every reset and BIST; initial contents unspecified
 0xFFC0A008,BRAMDAT2,4,rw,Backup data retained across every reset and BIST; initial contents unspecified

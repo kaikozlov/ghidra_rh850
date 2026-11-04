@@ -1,0 +1,104 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_icu_startup_faci_read_preserves_stop_deadline",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe1000"
+  },
+  "max_instructions": 100000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0xfebe102e"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack scratch; no persistent RAM blanket initialization."
+    },
+    {
+      "address": "0xffa10084",
+      "hex": "8000",
+      "evidence": "Explicit synthetic DataFlash P/E precondition; flash manual Table6.3."
+    },
+    {
+      "address": "0xfebe1000",
+      "hex": "26060000a2ff2706b30000003f061a10befe2106e68a0700610026060000a2ff3f062e10befe2106da8a07006100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "evidence": "Transparent native call-only RAM sequencer: MOV imm32 arguments/lp/r1 and JMP[r1], invoking original78AE6(B3) then original unsigned-load leaf.48 initialized speculative-fetch bytes follow. No flash/status overlay."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Original routine returns to caller",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0xfebe102e"
+    },
+    {
+      "name": "Caller stack restored",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    },
+    {
+      "name": "Read returns supplied bus lanes rather than writtenB3",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0x5678"
+    },
+    {
+      "name": "Original stop deadline completes with read-induced ILGLERR retained",
+      "kind": "memory",
+      "address": "0xffa10080",
+      "size": 4,
+      "equals_hex": "00c00000"
+    },
+    {
+      "name": "Read generates command lock without access errors",
+      "kind": "memory",
+      "address": "0xffa10010",
+      "size": 1,
+      "equals_hex": "10"
+    },
+    {
+      "name": "Native forced-stop completion count",
+      "kind": "event-count",
+      "operation": "faci-completion",
+      "equals": "1"
+    }
+  ],
+  "events": [
+    {
+      "kind": "register-input",
+      "after_instructions": 0,
+      "register": "FACI_COMMAND_AREA",
+      "value": "0x12345678",
+      "evidence": "Explicit arbitrary synthetic read-bus response, not command storage or hardware reset data; native read side effects follow R01UH0615EJ0120 section6.3.14.1/Table8.1."
+    },
+    {
+      "kind": "clock",
+      "after_instructions": 8,
+      "p_bus_cycles": 1599,
+      "evidence": "Explicit synthetic CLK_HSB stimulus at the documented20us forced-stop boundary (80MHz HSB); no result flags supplied."
+    },
+    {
+      "kind": "clock",
+      "after_instructions": 14,
+      "p_bus_cycles": 1,
+      "evidence": "Explicit synthetic CLK_HSB stimulus at the documented20us forced-stop boundary (80MHz HSB); no result flags supplied."
+    }
+  ]
+}

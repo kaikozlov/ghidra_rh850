@@ -1361,17 +1361,91 @@ callback rejection and readiness with explicit acquisition result zero and
 surviving application class `20`. It does not splice execution across a hardware
 initialization boundary.
 
-The full `0x681F8` sequence reaches an exact hardware-input prerequisite:
-`0x792FC` calls `0x78AE0` twice to read `FFC5D020` and uses the second
-read's bit 0. At the first original load, PC `78AE2`, registers
-`r6=ep=FFC5D020`. Model register `ICUSREG20` deliberately has no reset
-value or assigned bit meaning (`data/devices/p1me.rdl`). Renesas
-R01UH0585EJ0120 p.64 directs Security-function specification requests to
-the agent/distributor; it supplies no value for this register. The retained
-`reinit_acquisition_icus_input_boundary` scenario stops before that load
-and asserts the already executed software-state reset. Completing this
-hardware-dependent initialization requires authoritative `ICUSREG20`
-input/reset semantics; no success value is supplied.
+**ICU-dependent initialization is conditionally executable.** The preexisting
+retained scenarios `camry_f33_initialize_acquisition_and_drivers_complete` and
+`camry_f33_initialize_acquisition_icus_reject` in
+`decomp/camry-8965F3307000/oracles.jsonl` already cover complete `0x681F8`
+execution with explicit ICU/access-status inputs; the completion case advances
+the native forced-stop sequencer with `hsb_cycles_per_instruction=1`.
+The `reinit_acquisition_icus_input_boundary` fixture remains a useful prefix:
+it stops before the first ICU load and checks the acquisition reset. It is
+not the limit of available software execution.
+
+The exact input and return precedence is:
+
+* `0x792FC` calls `0x78AE0` twice on `FFC5D020`; only the second word's bit 0
+  determines its result. Original instructions `79306/7930A` are the two calls,
+  followed by `7930E: andi 1,r10,r10`. The load itself is `78AE2: sld.w`.
+  `0x8B018` instead performs one word load, shifts it left 31, and returns
+  whether the shifted value is nonzero. A later input change cannot alter
+  that already loaded word.
+* Driver initialization `0x78500` checks the two-read result first. A set
+  bit skips flash initialization, sets `FEBF6CB1=1`, and reports raw error
+  `82`. With the bit clear it masks EIC379, resets `FSUINITR` only if
+  `FSTATR.FRDY` is set, and calls `0x78D3E`.
+* `0x78D3E` first requests DataFlash P/E mode through `0x78C70`. A mode
+  readback mismatch returns `7` and skips forced stop. Otherwise it issues
+  native `B3` and polls through `0x78CE6`; the software timeout returns `8`.
+  On timeout the subsequent original instructions read the FACI halfword
+  twice, issue native status clear `50`, and attempt read-mode cleanup.
+  The original nonzero result is retained in `r29` and restored to `r10`
+  at `78D7A`. After a successful stop, the final mode-selection result is
+  returned instead. Timeout cleanup requires the command-aperture read
+  semantics described below.
+* Any nonzero `0x78D3E` result becomes raw driver error `5` at `7852A`;
+  idle admission initialization is skipped. The unmasked original
+  `7939C -> 74EFE` callback stores the raw error at `FEBF6B21`.
+  Native transfer initializer `0x74B3C` translates `5` to `FFFF0000` and
+  `82` to `0000FFFE` using the immutable table at `27934`; error `5`
+  additionally sets the driver block latch at `FEBF6B22`.
+* Outer `0x764E2` continues with `0x782DE` after that transfer result.
+  Its two descriptor initialization callbacks are followed by
+  `782FE: mov 1,r10`. Thus the final `r10` reaching the caller of
+  `0x681F8` is `1` even on these lower failures; this is not a propagated
+  initialization-success result. Earlier acquisition resets, logical-module
+  initialization, read-control writes, and the saved driver error remain.
+  Application public statuses are preserved.
+
+The sixteen standalone `camry_f33_icu_startup_*.json` fixtures cover the
+reverse two-read transition, a changed-input single-read boundary, original
+lower result preservation, transfer error translation, full-initializer
+failure side effects, and FACI read/lock behavior. They use original CodeFlash,
+bounded synthetic RAM/checkpoint inputs, and native FACI commands.
+
+This is a documented command-lock mechanism: flash manual R01UH0615EJ0120
+§6.3.14.1 p.66 explicitly directs reading the FACI command area to generate
+command lock, in 8-, 16-, or 32-bit units. Table8.1 p.83 specifies
+`ILGLERR=1` for a command-area read in CodeFlash or DataFlash P/E mode.
+The load's data value is unused by this firmware sequence and is not
+specified by these passages. The model now represents supported DataFlash
+P/E reads using the existing explicit `read_input` bus-response contract,
+separate from command storage, and sets `ILGLERR/CMDLK` without changing
+`FRDY`, the active forced stop, or its deadline. Other operating modes remain
+outside this read model. Table6.4 p.47 and §8.3 p.82 make status clear
+unavailable while forced-stop processing has `FRDY=0`; a premature `50`
+sets/retains command lock and preserves that operation's deadline.
+
+The two no-clock timeout fixtures supply arbitrary read-bus data and execute
+the native double-`50` cleanup attempt. Both preserve the lock and original
+lower error; full initialization retains its reset side effects and returns1.
+Eight focused `faci_*` fixtures exercise 8/16/32-bit read lock generation,
+unchanged busy state and exact stop deadline, premature status clear, missing
+bus input, and unsupported read-mode access. All sixteen scenarios passed
+in `build/out/firmware-question-campaign/icu-startup-wave2`: fourteen normal
+executions and the two expected missing-input/prohibited-mode faults.
+
+Execute the standalone scenarios with:
+
+`tools/rh850 test firmware camry-8965F3307000 tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_icu_startup_*.json`
+
+**Remaining hardware input:** the real reset value, temporal behavior, and
+meaning of `FFC5D020` bit 0 remain unknown. All supplied ICU words and
+transitions above are explicitly synthetic and have no assigned hardware
+meaning. Model register `ICUSREG20` intentionally has no reset value
+(`data/devices/p1me.rdl`). Renesas R01UH0585EJ0120 p.64 explicitly directs
+Security-function specification requests to the agent/distributor. That
+missing specification prevents selecting the car's actual startup branch;
+it does not prevent testing the firmware's conditional behavior.
 
 All 63 retained `camry_f33_nvm_recovery_*.json` scenarios passed their
 exact-machine checks, including this deliberately bounded hardware-input
