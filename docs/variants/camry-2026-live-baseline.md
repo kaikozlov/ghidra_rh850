@@ -6130,6 +6130,63 @@ advances `65650281 → 65652650 → 65655019`. The original zero-output path
 also sets `B1CF=5A` on a subsequent call, which enables rising on the next.
 The snapshot from `B1F8` to `AC5A` is explicit in these isolated sequences.
 
+#### Native cooperative-controller dynamics
+
+Fifteen `camry_f33_cooperative_dynamics_*.json` scenarios passed in
+`build/out/firmware-question-campaign/cooperative-dynamics-wave2`. They execute
+original producers against immutable F33 CodeFlash, retain histories between
+calls, and use explicit synthetic input publications. The connected sequence
+executes 133 passes of `CE8CA -> CD032 -> CE6CC -> CE6F4 -> CCEB4 -> CF33C`,
+including all nonlinear `CE6CC` callees; no local controller output is injected.
+Separate terminal-envelope sequences exercise saturation and reversal using
+declared local-output inputs.
+
+`D0EEC` calls readiness `CE8CA` before request supervision `CEC72`, so a newly
+produced request fault reaches readiness on the following pass. Active-bank
+controller arithmetic continues while readiness is false. Bank7 instead
+routes `CE384 -> CE26E`, clearing integral and active filter history. Terminal
+gain/output histories remain independently owned.
+
+**Target and accumulated error.** Bank2 doubles signed16 `AE90`, bounds it to
+±32767, interpolates a changed target over six invocations, then applies
+seven-count slew and magnitude3490. `CD128` separately converts target and
+feedback by `trunc0(value*2934/1024)` before subtracting and bounding error to
+±18000. At synthetic speed `AE02=2560`, the installed integral curve
+`D3FFC -> 1AC18` supplies48, giving increment `3*CA32`. The integral bound is
+±786432. An accepted update starts from the previously voted/clamped history;
+an inhibited update preserves the previous raw attempted sum. Exact `ADBB==1`
+holds accumulation; directional class2 blocks nonnegative increments and
+class1 blocks negative increments. Retained sustained-error, reversal,
+inhibition and bank7-reset sequences verify these distinct behaviors.
+
+**Connected output.** At the selected bank2/speed/zero-feedback inputs, original
+ROM clamps the feedback and companion terms to zero. The intact graph reduces
+to kinematic feedforward
+`trunc0(428 * trunc0(98*S/2000) / 64)` for selected target `S`.
+The two divisions remain separate: `S=7,14,21` produces `CB38=0,0,6`;
+`S=70` produces20 and reversal to−70 produces−20. These are independently
+calculated full-path output checks. The same sequence then loses readiness,
+enters bank7 through original `CEFFC`, and verifies cleared upstream history
+and eventual zero terminal gain/output.
+
+**Terminal envelope.** ID11 selects epsilon5, rise divisor1, normal-decay
+divisor1850, fault-decay divisor6, slew186 and magnitude9472. Bank0 instead
+uses epsilon26, decay33, slew192 and magnitude7936. Bank7 retains the previous
+parameters. `CF148` preserves the accumulator across divisor changes, uses
+low32 unsigned products and narrows the quotient to low16 before its snap
+threshold. Explicit initial-corruption cases distinguish those wrap boundaries.
+`CF2B2` then applies signed multiplication/division, slew, and finally magnitude;
+`CB3A` reports only strict magnitude overflow, not slew limiting.
+
+**Readiness recovery.** An admitted readiness loss selects fast decay and
+starts a401-invocation holdoff; admission becomes possible on the next call.
+`ACCD` loss is tolerated through count15 and clears readiness at16. ID loss
+to bank7 selects normal decay without creating that holdoff. Independent
+`C862==1` forces gain-rise selection even after readiness loss. Removing it
+can still produce one rising output sample: observed gain256→213 accompanies
+`CB38=744→832` because the previous output was slew-limited; the next gain177
+produces692. Gain decrease and output decrease are not equivalent transitions.
+
 ### 66.4 One stationary capture can now identify the first failing rung
 
 The useful experiment captures adjacent rungs.
