@@ -1,7 +1,7 @@
 # Toyota Techstream / GTS+ diagnostic software
 
-> **Scope:** Toyota Techstream V18.00.003 (DENSO) plus the 2026-06-18 GTS+
-> distribution used for current-generation P5/CUWPlus analysis. V18's internal
+> **Scope:** Toyota Techstream V18.00.003 (DENSO) plus GTS+ 2026.03.002.02
+> (the 2026-06-18 distribution), including its application lifecycle and P5/CUWPlus stack. V18's internal
 > module version comes from `VerApp.ini`/`VerCmd.ini` (dated 2022-11-22 /
 > 2022-12-08); its installer filename says V18.00.008. The "008" identifies the
 > Flexera IS wrapper build. The application version is V18.00.003. V18 DDB files
@@ -18,7 +18,7 @@
 >
 > **Canonical tracked artifacts:** `software/locks/techstream-v18.json`,
 > `software/locks/gtsplus.json`, `software/locks/toyota-cuw-corpus.json`, and
-> derived evidence under `data/generated/techstream_v18/`
+> derived evidence under `data/generated/techstream_v18/` and `data/generated/gtsplus_2026/`
 >
 > **Ignored source corpora:** `software/Techstream/v18/`,
 > `software/Techstream/gtsplus/`, and `software/Techstream/cuw/`
@@ -3975,3 +3975,39 @@ Current ECU table 77 `CDbSimpleUtilityTable` is the concrete generic **Simple Op
 The P5 RID support cache is now also instruction-closed. Ordinary generation-20 P5 uses selector `0xCC = 31 01 10 01 -> 71` and `CCmdSupportDataIdList::CreateEnableRIdList @ 0x10066160`. After optional `ConvertToNoRoutineInfo @ 0x100738F0`, `AnalyzeFrameData @ 0x10063660` interprets the returned MSB-first bitmap with shift 8, yielding `xx00` group RIDs. Group RIDs `0x0200..0xDF00` are queried as `31 01 <group RID>` and expanded with shift 0 to `xx01..xxFF`; root group RIDs themselves remain enabled. Whether the positive response includes the optional one-byte routine-info field is cached from `CheckIncludingRoutineInfo @ 0x10070910`, whose unresolved case is decided by ECU function 3/detail `0x56`. Generation-low5 `0x15` instead seeds the RID cache statically from type-71 Active-Test RIDs plus type-77 Simple-Utility RIDs. P6 retains its independent `D100/D1nn` RID hierarchy.
 
 The universal bundle now exports concrete table-77 rows under each category's existing `utilities` array, with exact D8/D9/DA request bytes, fixed command variables, timer/check interval, result keys, and a RID support-gate descriptor. Representative P5 witness: Engine utility 8001 **Reset Memory**, RID `0x1187`, `31011187/31021187/31031187`, timer 180000 ms, check interval 200 ms. P6 Engine utility 8001 **Switch Specification Information**, RID `0xDA03`, `3101DA03/3102DA03/3103DA03`, timer 8000 ms, check interval 200 ms.
+
+## 10. Current GTS+ application lifecycle
+
+### 10.1 Executable and frontend sources
+
+The installed tree contains **17 CP-protected CLR application executables**
+and five National Instruments support executables. The application bodies are
+available through the main, auxiliary, and CUW recovery paths; the outer
+`CUWLauncher/CUWLauncher.exe` is recovered separately. Use materialized method
+bodies, not the zero-filled executable sections in older recovery copies.
+The recovery procedures and source identities are owned by
+[GTS+ body recovery](gtsplus-body-recovery.md) and
+[CP body recovery](cuwplus-body-recovery.md).
+
+The browser applications are shipped as three signed, encrypted packages under
+`Toyota Diagnostics/GTSPlusGUI`, each with a sibling `.cpf` envelope:
+
+| Package | Decoded assets | Top-level application entries |
+|---|---:|---|
+| `gts.gui` | 3,887 | `GTSMain.html`, `GTSStoredMain.html`, `ActiveTestPanel.html` |
+| `cuw.gui` | 356 | `CUWMain.html` |
+| `qdc.gui` | 399 | `QDCMain.html`, `index.html` |
+
+`tools/techstream/gtsplus_local_crypto.py` decodes these packages offline using
+packaging material read from the installed implementation. The CM file envelope
+is salt[16], IV[16], then AES-256-CBC ciphertext; its key derivation is
+PBKDF2-HMAC-SHA1 with 1,024 iterations. The decisive instruction is
+`GtsPlus-CM.dll:0x10002D23`, `68 00 04 00 00` (`push 0x400`); the decompiler's
+inferred byte parameter loses that value.
+
+The decoded `.cpf` supplies the GUI AES key. `GuiFile.Load` verifies an RSA
+PKCS#1 v1.5 signature over `SHA256(SHA256(zipData))` using the installed
+`ContentServer/dist.crt`, then unmasks the ZIP members. All three package
+signatures verified during offline extraction; all **4,642** decoded assets
+matched an independent decode. A ciphertext-byte modification was rejected.
+Decoded sources live under `build/out/gts-lifecycle-ui/{gts,cuw,qdc}`.
