@@ -4965,7 +4965,7 @@
   ],
   "handoffs": [
     {
-      "to_domain": "ui_ipc",
+      "to_domain": "auth_settings",
       "caller": "GTSPlusArbitration.Form1.StartApplication",
       "callee": "GtsPlus-InfoCenter/GtsPlus-InfoCenter.exe",
       "mechanism": "Process.Start; no args; cwd executable directory",
@@ -4976,7 +4976,7 @@
       ]
     },
     {
-      "to_domain": "ui_ipc",
+      "to_domain": "auth_settings",
       "caller": "second arbitration/PF invocation",
       "callee": "GtsPlus-InfoCenter/GtsPlus-InfoCenter_Multi/GtsPlus-InfoCenter_Multi.exe",
       "mechanism": "Process.Start after nonblocking global mutex contention",

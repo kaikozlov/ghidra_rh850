@@ -13,11 +13,13 @@ import re
 from pathlib import Path
 from typing import Any
 
+from dncil.cil.opcode import OpCode, OpCodes
 import pefile
 
 from tools import REPO_ROOT
+from tools.techstream.extract_gtsplus_lifecycle_ui_ipc import _operand
 from tools.techstream.extract_gtsplus_tse_managed_semantics import (
-    _instructions, _lines, _method_pin, _open, _recovery_proof,
+    _instructions, _method_pin, _open, _recovery_proof,
 )
 from tools.techstream.gtsplus_local_crypto import decode_gui
 
@@ -29,6 +31,7 @@ DEFAULT_LAUNCHER = REPO_ROOT / 'build/out/gts-lifecycle-launcher'
 DEFAULT_AUX = REPO_ROOT / 'build/out/gts-lifecycle-aux'
 DEFAULT_OUT = REPO_ROOT / 'data/generated/gtsplus_2026/lifecycle_cuw_utility.json'
 DOMAIN = 'cuw_utility'
+_IL_OPCODES = frozenset(str(opcode) for opcode in vars(OpCodes).values() if isinstance(opcode, OpCode))
 JS_FILES = {
     'cuw-main': ('cuw', 'js/cuw/cuw_main.js'),
     'cuw-controller': ('cuw', 'js/cuw/controllers/cuw_controller.js'),
@@ -109,10 +112,14 @@ def build(*, installed: Path = DEFAULT_INSTALLED, cuw_root: Path = DEFAULT_CUW,
     def il(name: str, component: str, typename: str, method: str, anchors: tuple[str, ...], finding: str, index: int = 0) -> None:
         pe = managed[component]
         row, ins, body = _instructions(pe, typename, method, index=index)
-        rendered = _lines(pe, ins)
+        rendered = [f'{instruction.opcode} {_operand(pe, instruction.operand)}'.rstrip() for instruction in ins]
         hits = []
         for anchor in anchors:
-            found = [(n, line) for n, line in enumerate(rendered) if anchor in line]
+            if anchor in _IL_OPCODES:
+                found = [(n, line) for n, line in enumerate(rendered)
+                         if str(ins[n].opcode) in (anchor, anchor + '.s')]
+            else:
+                found = [(n, line) for n, line in enumerate(rendered) if anchor in line]
             if not found:
                 raise ValueError(f'IL control-flow drift: {typename}::{method}: {anchor}')
             n, line = found[0]

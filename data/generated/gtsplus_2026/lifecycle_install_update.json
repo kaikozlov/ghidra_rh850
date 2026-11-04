@@ -429,6 +429,15 @@
       "container": "install_update.archive"
     },
     {
+      "id": "install_update.child.CUWPlusPF.exe.hdr",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/gtsplus_msi.7z:2026.03.002.02/CUWPlusPF.exe:[0]:Disk1\\data1.hdr",
+      "sha256": "323ad0f6771f2362752e604b0e63e061b8c239d4d5e64b2d520db6785cb1c98e",
+      "size": 123536,
+      "representation": "original declarative cabinet header",
+      "container": "install_update.child.CUWPlusPF.exe",
+      "sfx_payload_offset": 7328149
+    },
+    {
       "id": "install_update.child.CUWPlusPF.exe.inx",
       "path": "software/Techstream/gtsplus/unpacked/gtsplus/gtsplus_msi.7z:2026.03.002.02/CUWPlusPF.exe:[0]:Disk1\\setup.inx",
       "sha256": "8b823604cc7f0bc243b7c71946d350dcd7864978fa5c5c9aaea572cb39d3a894",
@@ -454,6 +463,15 @@
       "container": "install_update.archive"
     },
     {
+      "id": "install_update.child.Setup_DB.exe.hdr",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/gtsplus_msi.7z:2026.03.002.02/Setup_DB.exe:[0]:Disk1\\data1.hdr",
+      "sha256": "f5c09827b4951dc664eeb231ad4f5b1cebc3f1e40ebdce6862b36945bca79daa",
+      "size": 221896,
+      "representation": "original declarative cabinet header",
+      "container": "install_update.child.Setup_DB.exe",
+      "sfx_payload_offset": 2057368
+    },
+    {
       "id": "install_update.child.Setup_DB.exe.inx",
       "path": "software/Techstream/gtsplus/unpacked/gtsplus/gtsplus_msi.7z:2026.03.002.02/Setup_DB.exe:[0]:Disk1\\setup.inx",
       "sha256": "b008c71c1380688b9d3e043ba4579a638e9be3b86721777236142f98d974561a",
@@ -469,6 +487,15 @@
       "size": 15647928,
       "representation": "original packaged component installer",
       "container": "install_update.archive"
+    },
+    {
+      "id": "install_update.child.Setup_DataSync.exe.hdr",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/gtsplus_msi.7z:2026.03.002.02/Setup_DataSync.exe:[0]:Disk1\\data1.hdr",
+      "sha256": "9864cf77706775aea07c077638a6eb01504ce17f0eeb1767fe1a164211ba931a",
+      "size": 31221,
+      "representation": "original declarative cabinet header",
+      "container": "install_update.child.Setup_DataSync.exe",
+      "sfx_payload_offset": 2062801
     },
     {
       "id": "install_update.child.Setup_DataSync.exe.inx",
@@ -496,6 +523,15 @@
       "container": "install_update.archive"
     },
     {
+      "id": "install_update.child.Setup_GUI.exe.hdr",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/gtsplus_msi.7z:2026.03.002.02/Setup_GUI.exe:[0]:Disk1\\data1.hdr",
+      "sha256": "a93568e8b5bd8f9b6057dbe06fe1cef763c1bc819eaa696b2254f4d90bb3b28f",
+      "size": 30144,
+      "representation": "original declarative cabinet header",
+      "container": "install_update.child.Setup_GUI.exe",
+      "sfx_payload_offset": 2062702
+    },
+    {
       "id": "install_update.child.Setup_GUI.exe.inx",
       "path": "software/Techstream/gtsplus/unpacked/gtsplus/gtsplus_msi.7z:2026.03.002.02/Setup_GUI.exe:[0]:Disk1\\setup.inx",
       "sha256": "2ff9f69486c7286a3753c45976bc1fb0e1d0639d5ac780eaa3bfc5f912fb23b0",
@@ -513,12 +549,37 @@
       "container": "install_update.child.Setup_GUI.exe"
     },
     {
+      "id": "install_update.shortcut-engine",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/gtsplus_msi.7z:2026.03.002.02/Setup_GUI.exe:[0]:Disk1\\ISSetup.dll",
+      "sha256": "462ad24e32884802cd02194b95b67ad57d0c35df9c91c31defc6ac701603c1a1",
+      "size": 1635328,
+      "representation": "original native InstallShield engine",
+      "container": "install_update.child.Setup_GUI.exe"
+    },
+    {
+      "id": "install_update.shortcut-labels",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/gtsplus_msi.7z:2026.03.002.02/Setup_GUI.exe:[0]:Disk1\\data1.cab:<Support>0x0409 String Tables\\StringTable_0x0409.ips",
+      "sha256": "e48eca0dc59f0d914c6d31fc8a97a8cdbbe53e91027ea46c04580a042e6fc468",
+      "size": 822,
+      "representation": "original English shortcut string table",
+      "container": "install_update.child.Setup_GUI.exe"
+    },
+    {
       "id": "install_update.child.Setup_GuiServer.exe",
       "path": "software/Techstream/gtsplus/unpacked/gtsplus/gtsplus_msi.7z:2026.03.002.02/Setup_GuiServer.exe",
       "sha256": "328788d4b4930fc37b5f542f68d19991b2361395a40366d3f3b370fc33162e82",
       "size": 9013544,
       "representation": "original packaged component installer",
       "container": "install_update.archive"
+    },
+    {
+      "id": "install_update.child.Setup_GuiServer.exe.hdr",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/gtsplus_msi.7z:2026.03.002.02/Setup_GuiServer.exe:[0]:Disk1\\data1.hdr",
+      "sha256": "ccc1c2e27ca59d8fffb3ec1a497f9379e09e94e92ad28fdf69b6588374e244fe",
+      "size": 25043,
+      "representation": "original declarative cabinet header",
+      "container": "install_update.child.Setup_GuiServer.exe",
+      "sfx_payload_offset": 2365548
     },
     {
       "id": "install_update.child.Setup_GuiServer.exe.inx",
@@ -570,6 +631,15 @@
       "container": "install_update.archive"
     },
     {
+      "id": "install_update.child.Setup_InfoCenter.exe.hdr",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/gtsplus_msi.7z:2026.03.002.02/Setup_InfoCenter.exe:[0]:Disk1\\data1.hdr",
+      "sha256": "e75ab84adfd729bdb8c4a3b35ca471ab60c7d2524a04b07a329a552637a1f7c4",
+      "size": 38338,
+      "representation": "original declarative cabinet header",
+      "container": "install_update.child.Setup_InfoCenter.exe",
+      "sfx_payload_offset": 2062574
+    },
+    {
       "id": "install_update.child.Setup_InfoCenter.exe.inx",
       "path": "software/Techstream/gtsplus/unpacked/gtsplus/gtsplus_msi.7z:2026.03.002.02/Setup_InfoCenter.exe:[0]:Disk1\\setup.inx",
       "sha256": "5bfb321f64511a28c81343e2c327b288585ed484559803b69930aad86ce98f9a",
@@ -593,6 +663,15 @@
       "size": 310981056,
       "representation": "original packaged component installer",
       "container": "install_update.archive"
+    },
+    {
+      "id": "install_update.child.Setup_NativeGraphViewer.exe.hdr",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/gtsplus_msi.7z:2026.03.002.02/Setup_NativeGraphViewer.exe:[0]:Disk1\\data1.hdr",
+      "sha256": "9df1d8c77770e6e507299528651479a42eddbb623ed0b9d4e118461447218f23",
+      "size": 13065,
+      "representation": "original declarative cabinet header",
+      "container": "install_update.child.Setup_NativeGraphViewer.exe",
+      "sfx_payload_offset": 871014
     },
     {
       "id": "install_update.child.Setup_NativeGraphViewer.exe.inx",
@@ -620,6 +699,15 @@
       "container": "install_update.archive"
     },
     {
+      "id": "install_update.child.Setup_PCSDataViewer.exe.hdr",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/gtsplus_msi.7z:2026.03.002.02/Setup_PCSDataViewer.exe:[0]:Disk1\\data1.hdr",
+      "sha256": "1197a2eac93932f533dc072240eb92e9d66fae11d7d4bd54511acaf66a70007d",
+      "size": 15228,
+      "representation": "original declarative cabinet header",
+      "container": "install_update.child.Setup_PCSDataViewer.exe",
+      "sfx_payload_offset": 915775
+    },
+    {
       "id": "install_update.child.Setup_PCSDataViewer.exe.inx",
       "path": "software/Techstream/gtsplus/unpacked/gtsplus/gtsplus_msi.7z:2026.03.002.02/Setup_PCSDataViewer.exe:[0]:Disk1\\setup.inx",
       "sha256": "a6388ffd8b60d5303f0dfe34d5b17f7fa2a5408774b56bc3ea31bac3e7c5730c",
@@ -643,6 +731,15 @@
       "size": 126438128,
       "representation": "original packaged component installer",
       "container": "install_update.archive"
+    },
+    {
+      "id": "install_update.child.Setup_PF.exe.hdr",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/gtsplus_msi.7z:2026.03.002.02/Setup_PF.exe:[0]:Disk1\\data1.hdr",
+      "sha256": "fd90056e7b5fea8c544dd3cff7622a5dcc84ac63f2bdc392a402580c499310bc",
+      "size": 158837,
+      "representation": "original declarative cabinet header",
+      "container": "install_update.child.Setup_PF.exe",
+      "sfx_payload_offset": 2062931
     },
     {
       "id": "install_update.child.Setup_PF.exe.inx",
@@ -670,6 +767,15 @@
       "container": "install_update.archive"
     },
     {
+      "id": "install_update.child.Setup_TSEConverter.exe.hdr",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/gtsplus_msi.7z:2026.03.002.02/Setup_TSEConverter.exe:[0]:Disk1\\data1.hdr",
+      "sha256": "a097e3080865094af298b85c324ef20f2c3a05cbb923fed5f3083ba430835c51",
+      "size": 22167,
+      "representation": "original declarative cabinet header",
+      "container": "install_update.child.Setup_TSEConverter.exe",
+      "sfx_payload_offset": 2062685
+    },
+    {
       "id": "install_update.child.Setup_TSEConverter.exe.inx",
       "path": "software/Techstream/gtsplus/unpacked/gtsplus/gtsplus_msi.7z:2026.03.002.02/Setup_TSEConverter.exe:[0]:Disk1\\setup.inx",
       "sha256": "c6328d9a7a8284726cf8f11dc555058c357611c31aa32dbdd5b0a250a51c6871",
@@ -693,6 +799,15 @@
       "size": 5265368,
       "representation": "original packaged component installer",
       "container": "install_update.child.CUWPlusPF.exe"
+    },
+    {
+      "id": "install_update.child.CUWLauncher_Setup.exe.hdr",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/gtsplus_msi.7z:2026.03.002.02/CUWPlusPF.exe:[0]:Disk1\\CUWLauncher_Setup.exe:[0]:Disk1\\data1.hdr",
+      "sha256": "815e04e4516040cd968ad8ef0a6257704835654b6d8b2da03ff52f4069597121",
+      "size": 14008,
+      "representation": "original declarative cabinet header",
+      "container": "install_update.child.CUWLauncher_Setup.exe",
+      "sfx_payload_offset": 876174
     },
     {
       "id": "install_update.child.CUWLauncher_Setup.exe.inx",
@@ -1099,7 +1214,7 @@
         },
         {
           "file_offset": 14903,
-          "text": "call <dnfile.mdtable.TypeSpecRow object at 0x109296420>::GetResult",
+          "text": "call TypeSpec[151180e10102]::GetResult",
           "bytes": "286901000a"
         },
         {
@@ -1166,7 +1281,7 @@
         },
         {
           "file_offset": 18497,
-          "text": "call <dnfile.mdtable.TypeSpecRow object at 0x109295220>::SetResult",
+          "text": "call TypeSpec[151180d50102]::SetResult",
           "bytes": "287701000a"
         }
       ],
@@ -1193,7 +1308,7 @@
         },
         {
           "file_offset": 14044,
-          "text": "callvirt <dnfile.mdtable.TypeSpecRow object at 0x109295070>::get_Count",
+          "text": "callvirt TypeSpec[1512809d011234]::get_Count",
           "bytes": "6f5701000a"
         },
         {
@@ -1422,7 +1537,7 @@
         },
         {
           "file_offset": 16039,
-          "text": "callvirt <dnfile.mdtable.TypeSpecRow object at 0x1092952b0>::get_Count",
+          "text": "callvirt TypeSpec[1512809d0108]::get_Count",
           "bytes": "6f6d01000a"
         },
         {
@@ -1509,7 +1624,7 @@
         },
         {
           "file_offset": 15619,
-          "text": "call <dnfile.mdtable.TypeSpecRow object at 0x109296420>::GetResult",
+          "text": "call TypeSpec[151180e10102]::GetResult",
           "bytes": "286901000a"
         },
         {
@@ -1606,7 +1721,7 @@
         },
         {
           "file_offset": 17689,
-          "text": "call <dnfile.mdtable.TypeSpecRow object at 0x109295190>::MoveNext",
+          "text": "call TypeSpec[151180bd010e]::MoveNext",
           "bytes": "284400000a"
         },
         {
@@ -2755,6 +2870,11 @@
         "VerifyTest2.exe",
         "SafetyShutdown/GTSPlusNotifyEnd.exe"
       ],
+      "copied_shortcut_file_members": [],
+      "sfx_shortcut_file_members": [],
+      "archive_shortcut_file_members": [],
+      "declarative_shortcut_source": "install_update.data1.hdr",
+      "declarative_shortcuts": [],
       "cabinet_application_payloads": [
         "PCSettingsNA\\PcSettings.gstg",
         "ComponentNA\\GTSPlus_test.ico",
@@ -2971,6 +3091,10 @@
         }
       ],
       "cabinet_file_count": 841,
+      "declarative_shortcut_source": "install_update.child.CUWPlusPF.exe.hdr",
+      "declarative_shortcuts": [],
+      "copied_shortcut_file_members": [],
+      "sfx_shortcut_file_members": [],
       "agentlite_payloads": [],
       "embedded_runtime_packages": [],
       "finding": "Feature hook launches embedded CUWLauncher_Setup /clone_wait -s without checking result, then signature-verifies CUWDLL/CUWPlusPF DLL/exe sets and aborts on helper0. Uninstall hook dispatches launcher GUID uninstall -s. Completion writes temp/CUW+ PF.txt. OnAbort and OnRebooted return without custom compensation."
@@ -3114,6 +3238,10 @@
         }
       ],
       "cabinet_file_count": 2053,
+      "declarative_shortcut_source": "install_update.child.Setup_DB.exe.hdr",
+      "declarative_shortcuts": [],
+      "copied_shortcut_file_members": [],
+      "sfx_shortcut_file_members": [],
       "agentlite_payloads": [],
       "embedded_runtime_packages": [],
       "finding": "Database setup uses standard first/maintenance/update transfer and cancel/finish paths; OnMoved/OnEnd/OnAbort/OnRebooted return without Toyota custom action. OnAbort and OnRebooted return without custom compensation."
@@ -3418,6 +3546,10 @@
         }
       ],
       "cabinet_file_count": 98,
+      "declarative_shortcut_source": "install_update.child.Setup_DataSync.exe.hdr",
+      "declarative_shortcuts": [],
+      "copied_shortcut_file_members": [],
+      "sfx_shortcut_file_members": [],
       "agentlite_payloads": [],
       "embedded_runtime_packages": [],
       "finding": "Before transfer, attempts bounded DataSync service stop and up-to-five ProxyManager taskkills; stop/launch failures do not abort here. After transfer creates/changes and starts GTS+ DataSync, starts ProxyManager if tasklist reports absent; uninstall deletes service. Feature hooks verify DLL/exe groups; Proxy feature creates startup shortcut. OnAbort and OnRebooted return without custom compensation."
@@ -3639,9 +3771,170 @@
         }
       ],
       "cabinet_file_count": 97,
+      "declarative_shortcut_source": "install_update.child.Setup_GUI.exe.hdr",
+      "declarative_shortcuts": [
+        {
+          "folder": "Desktop",
+          "name": "NewShortcut1",
+          "label": "ID_STRING2",
+          "flags": 1,
+          "target": "https://127.0.0.1:50005/GetResource/gts/GTSMain.html",
+          "icon": "<TARGETDIR>\\GTSPlus\\GTSPlus_test.ico",
+          "record_file_offset": "0x1b95",
+          "components": [
+            "GTSPlus GUI"
+          ]
+        },
+        {
+          "folder": "Programs/ID_STRING5",
+          "name": "NewShortcut2",
+          "label": "ID_STRING3",
+          "flags": 1,
+          "target": "https://127.0.0.1:50005/GetResource/gts/GTSMain.html",
+          "icon": "<TARGETDIR>\\GTSPlus\\GTSPlus_test.ico",
+          "record_file_offset": "0x1c13",
+          "components": [
+            "GTSPlus GUI"
+          ]
+        },
+        {
+          "folder": "Programs/ID_STRING5",
+          "name": "NewShortcut3",
+          "label": "ID_STRING6",
+          "flags": 1,
+          "target": "https://127.0.0.1:50005/GetResource/cuw/CUWMain.html",
+          "icon": "<TARGETDIR>\\GTSPlus\\cuw32.ico",
+          "record_file_offset": "0x1c49",
+          "components": [
+            "GTSPlus GUI"
+          ]
+        }
+      ],
+      "copied_shortcut_file_members": [],
+      "sfx_shortcut_file_members": [],
       "agentlite_payloads": [],
       "embedded_runtime_packages": [],
       "finding": "Feature hook verifies GTSE DLL/exe sets, aborting helper0. OnBegin deletes old public desktop GTSPlus.url; OnEnd sets .gtse open command to GTSPlusTSEStartup.exe %1 and writes temp/GTS+ GUI.txt; hides child uninstall DisplayName. OnAbort and OnRebooted return without custom compensation."
+    },
+    {
+      "id": "install_update.native.shortcut-engine",
+      "source": "install_update.shortcut-engine",
+      "kind": "native-bytes-and-decompilation",
+      "locator": "10011851 ->10055ac7 ->10055bc9 ->10055d90",
+      "anchors": [
+        {
+          "rva": "0x55b7b",
+          "bytes": "e849000000"
+        },
+        {
+          "rva": "0x55bb6",
+          "bytes": "e80e000000"
+        },
+        {
+          "rva": "0x55ceb",
+          "bytes": "e8a0000000"
+        },
+        {
+          "rva": "0x5668b",
+          "bytes": "f64308010f84aa050000"
+        },
+        {
+          "rva": "0x56830",
+          "bytes": "8b3d60010d10"
+        },
+        {
+          "rva": "0x56853",
+          "bytes": "68ec6b0d10bea86b0d1056ffd7"
+        }
+      ],
+      "typelib": {
+        "resource": "TYPELIB/1",
+        "rva": "0x148158",
+        "size": 103104,
+        "sha256": "c74b5e6eb91f8ac7777988ada5de385e287fbc1d52d980b4822106e487d7637a",
+        "enum": "tagSpecialFolders",
+        "members": [
+          {
+            "name": "SF_DESKTOP",
+            "value": 0,
+            "typed_value": "0x8c000000",
+            "value_rva": "0x15be68"
+          },
+          {
+            "name": "SF_PROGRAMS",
+            "value": 1,
+            "typed_value": "0x8c000001",
+            "value_rva": "0x15be7c"
+          },
+          {
+            "name": "SF_STARTUP",
+            "value": 2,
+            "typed_value": "0x8c000002",
+            "value_rva": "0x15be90"
+          },
+          {
+            "name": "SF_FAVORITES",
+            "value": 3,
+            "typed_value": "0x8c000003",
+            "value_rva": "0x15bea4"
+          },
+          {
+            "name": "SF_STARTMENU",
+            "value": 4,
+            "typed_value": "0x8c000004",
+            "value_rva": "0x15beb8"
+          }
+        ]
+      },
+      "finding": "10011851 copies four header root pointers.10055ac7 dispatches slots0/1/2/3 with folder enums0/4/1/2; typed embedded enum proves Desktop/StartMenu/Programs/Startup.10055bc9 recursively enumerates folder and shortcut descriptor arrays.10055d90 reads flags+8 and URL pointer+10; mask0x1 selects InternetShortcut/.url.1005668b TEST/JZ separates normal links;10056830 loads WritePrivateProfileStringW and10056853..5e writes[InternetShortcut]URL. This write's return is not checked before continuing. It creates links, not browser processes."
+    },
+    {
+      "id": "install_update.declarative-shortcuts",
+      "source": "install_update.child.Setup_GUI.exe.hdr",
+      "kind": "typed-installshield-shortcut-table",
+      "locator": "descriptor base0x200 +field0x27e ->four root pointers; label string table",
+      "label_source": "install_update.shortcut-labels",
+      "native_consumer": "install_update.native.shortcut-engine",
+      "shortcuts": [
+        {
+          "folder": "Desktop",
+          "name": "NewShortcut1",
+          "label": "GTS+",
+          "flags": 1,
+          "target": "https://127.0.0.1:50005/GetResource/gts/GTSMain.html",
+          "icon": "<TARGETDIR>\\GTSPlus\\GTSPlus_test.ico",
+          "record_file_offset": "0x1b95",
+          "components": [
+            "GTSPlus GUI"
+          ]
+        },
+        {
+          "folder": "Programs/GTS+",
+          "name": "NewShortcut2",
+          "label": "GTS+",
+          "flags": 1,
+          "target": "https://127.0.0.1:50005/GetResource/gts/GTSMain.html",
+          "icon": "<TARGETDIR>\\GTSPlus\\GTSPlus_test.ico",
+          "record_file_offset": "0x1c13",
+          "components": [
+            "GTSPlus GUI"
+          ]
+        },
+        {
+          "folder": "Programs/GTS+",
+          "name": "NewShortcut3",
+          "label": "CUW+",
+          "flags": 1,
+          "target": "https://127.0.0.1:50005/GetResource/cuw/CUWMain.html",
+          "icon": "<TARGETDIR>\\GTSPlus\\cuw32.ico",
+          "record_file_offset": "0x1c49",
+          "components": [
+            "GTSPlus GUI"
+          ]
+        }
+      ],
+      "startup_shortcuts": [],
+      "finding": "GUI installs Desktop/GTS+.url and Programs/GTS+/{GTS+,CUW+}.url for GUI-selected feature; localized English labels resolve ID_STRING2/3/5 toGTS+ and ID_STRING6 toCUW+. Targets are local frontend pages. Startup root is empty; browser entry is user activation through Windows shell/default HTTPS handler, not InfoCenter tray click or automatic application startup."
     },
     {
       "id": "install_update.verifier.Setup_GuiServer.exe",
@@ -3841,6 +4134,10 @@
         }
       ],
       "cabinet_file_count": 64,
+      "declarative_shortcut_source": "install_update.child.Setup_GuiServer.exe.hdr",
+      "declarative_shortcuts": [],
+      "copied_shortcut_file_members": [],
+      "sfx_shortcut_file_members": [],
       "agentlite_payloads": [],
       "embedded_runtime_packages": [],
       "finding": "Before transfer bounded service-stop retry with1000ms sleeps; failure does not abort this hook. Feature hook verifies ContentServer DLL/exe sets; uninstall hook launches persisted removeCerts.bat; completion writes GTS+GUIServer.txt. CertInstaller helper and local TLS batch are separately pinned. OnAbort and OnRebooted return without custom compensation."
@@ -4439,6 +4736,10 @@
         }
       ],
       "cabinet_file_count": 172,
+      "declarative_shortcut_source": "install_update.child.Setup_InfoCenter.exe.hdr",
+      "declarative_shortcuts": [],
+      "copied_shortcut_file_members": [],
+      "sfx_shortcut_file_members": [],
       "agentlite_payloads": [],
       "embedded_runtime_packages": [],
       "finding": "Feature hooks verify GTSPlus/GTSPlusCP DLL/exe groups, aborting helper0. OnMoved/OnEnd/OnAbort/OnRebooted have no Toyota custom operation. OnAbort and OnRebooted return without custom compensation."
@@ -4647,6 +4948,10 @@
         }
       ],
       "cabinet_file_count": 13,
+      "declarative_shortcut_source": "install_update.child.Setup_NativeGraphViewer.exe.hdr",
+      "declarative_shortcuts": [],
+      "copied_shortcut_file_members": [],
+      "sfx_shortcut_file_members": [],
       "agentlite_payloads": [],
       "embedded_runtime_packages": [
         "UserInstaller.msi",
@@ -4868,6 +5173,10 @@
         }
       ],
       "cabinet_file_count": 29,
+      "declarative_shortcut_source": "install_update.child.Setup_PCSDataViewer.exe.hdr",
+      "declarative_shortcuts": [],
+      "copied_shortcut_file_members": [],
+      "sfx_shortcut_file_members": [],
       "agentlite_payloads": [],
       "embedded_runtime_packages": [],
       "finding": "Feature hook verifies installed DLL/exe groups; uninstall hook removes Help/application directories; completion writes PCS Data Viewer.txt. OnAbort and OnRebooted return without custom compensation."
@@ -5193,6 +5502,10 @@
         }
       ],
       "cabinet_file_count": 1229,
+      "declarative_shortcut_source": "install_update.child.Setup_PF.exe.hdr",
+      "declarative_shortcuts": [],
+      "copied_shortcut_file_members": [],
+      "sfx_shortcut_file_members": [],
       "agentlite_payloads": [],
       "embedded_runtime_packages": [],
       "finding": "Creates Arbitration startup shortcut on first install; feature hooks verify GTSPlus/GTSPlusCP/DS4/DS4CP/native-registration groups. NativeUtilityReg runs RegAsm ReplaceFromLegasy.dll /codebase and /u. CA hook runs certutil addstore Root ca.crt, removal deletes GTS+ Root CA; command failures ignored by empty branches. OnAbort and OnRebooted return without custom compensation."
@@ -5382,6 +5695,23 @@
         }
       ],
       "cabinet_file_count": 42,
+      "declarative_shortcut_source": "install_update.child.Setup_TSEConverter.exe.hdr",
+      "declarative_shortcuts": [
+        {
+          "folder": "Programs/ID_STRING4",
+          "name": "NewShortcut2",
+          "label": "ID_STRING6",
+          "flags": 0,
+          "target": "<TARGETDIR>\\GTSPlusTSEConverter\\TSEConverter.exe",
+          "icon": "",
+          "record_file_offset": "0x1ad3",
+          "components": [
+            "GTSPlusTSEConverter"
+          ]
+        }
+      ],
+      "copied_shortcut_file_members": [],
+      "sfx_shortcut_file_members": [],
       "agentlite_payloads": [],
       "embedded_runtime_packages": [],
       "finding": "Feature hook verifies GTSPlusTSEConverter DLL/exe sets; completion writes GTS+ TSEConverter.txt. OnAbort and OnRebooted return without custom compensation."
@@ -5665,6 +5995,10 @@
         }
       ],
       "cabinet_file_count": 21,
+      "declarative_shortcut_source": "install_update.child.CUWLauncher_Setup.exe.hdr",
+      "declarative_shortcuts": [],
+      "copied_shortcut_file_members": [],
+      "sfx_shortcut_file_members": [],
       "agentlite_payloads": [],
       "embedded_runtime_packages": [],
       "finding": "Nested CUW installer owns shell associations: clears old .cuw/.cuwc/.scuw/.cuwd/.usbrepro keys, installs quoted CUWLauncher.exe \"%1\" open commands/default icons; uninstall removes extensions. OnAbort/OnRebooted empty. OnAbort and OnRebooted return without custom compensation. Removal is gated: OnBegin aborts before feature deletion when remove-only mode and more than one shared-client uninstall key exists; caller ignores the nested result."
@@ -5868,6 +6202,16 @@
       "id": "install_update.children",
       "owner": "parent setup.inx",
       "meaning": "Optional sibling components processed serially"
+    },
+    {
+      "id": "install_update.shortcuts-installed",
+      "owner": "GUI installer + native InstallShield engine",
+      "meaning": "Generated desktop/menu InternetShortcut files for local GTS/CUW pages"
+    },
+    {
+      "id": "install_update.browser-navigation-requested",
+      "owner": "Windows shell/default HTTPS handler",
+      "meaning": "User activates an installed .url to request the local frontend"
     },
     {
       "id": "install_update.setup-aborted",
@@ -6387,6 +6731,31 @@
         "install_update.component.CUWPlusPF.exe",
         "install_update.launcher-preservation-gate"
       ]
+    },
+    {
+      "id": "install_update.create-browser-shortcuts",
+      "from": "install_update.children",
+      "to": "install_update.shortcuts-installed",
+      "trigger": "GUI engine shortcut phase",
+      "guard": "GTSPlus GUI feature eligible",
+      "action": "generate Desktop/GTS+.url and Programs/GTS+/{GTS+,CUW+}.url; no startup-root browser shortcut",
+      "evidence": [
+        "install_update.declarative-shortcuts",
+        "install_update.native.shortcut-engine",
+        "install_update.component.Setup_GUI.exe"
+      ]
+    },
+    {
+      "id": "install_update.activate-browser-shortcut",
+      "from": "install_update.shortcuts-installed",
+      "to": "install_update.browser-navigation-requested",
+      "trigger": "user activates desktop/menu .url",
+      "guard": "Windows HTTPS handler configured",
+      "action": "Windows shell opens local GTSMain.html or CUWMain.html in default handler; this is not InfoCenter tray activation or automatic process startup",
+      "evidence": [
+        "install_update.declarative-shortcuts",
+        "install_update.native.shortcut-engine"
+      ]
     }
   ],
   "handoffs": [
@@ -6478,6 +6847,17 @@
         "install_update.cert.Program.Main",
         "install_update.cert.Program.Start",
         "install_update.component.Setup_GuiServer.exe"
+      ]
+    },
+    {
+      "to_domain": "ui_ipc",
+      "caller": "Windows shell:GUI-installed desktop/menu InternetShortcut",
+      "callee": "https://127.0.0.1:50005/GetResource/{gts/GTSMain.html,cuw/CUWMain.html}",
+      "mechanism": "user activation of generated .url through default HTTPS handler",
+      "payload": "GTS+ desktop and GTS+/CUW+ Programs labels; no automatic browser startup",
+      "evidence": [
+        "install_update.declarative-shortcuts",
+        "install_update.native.shortcut-engine"
       ]
     }
   ],
@@ -6636,6 +7016,19 @@
         "install_update.cert.Program.copyCertFiles",
         "install_update.cert.PolicyEditer.AddCertificationPolicies",
         "install_update.cert.PolicyEditer.WriteJson"
+      ]
+    },
+    {
+      "path_pattern": "Desktop/GTS+.url; Programs/GTS+/{GTS+,CUW+}.url",
+      "producer": "GUI declarative header + native ISSetup engine",
+      "consumer": "Windows shell/default HTTPS handler",
+      "created": "GUI-selected component shortcut phase",
+      "flushed": "WritePrivateProfileStringW writes InternetShortcut URL/icon/working-directory properties; API result not checked here",
+      "deleted": "GUI OnBegin deletes legacy Public/Desktop/GTSPlus.url; generated shortcut removal is InstallShield engine/log ownership",
+      "evidence": [
+        "install_update.declarative-shortcuts",
+        "install_update.native.shortcut-engine",
+        "install_update.component.Setup_GUI.exe"
       ]
     }
   ],
@@ -6977,7 +7370,9 @@
       "install_update.launcher-uninstall-check",
       "install_update.launcher-preserve-shared",
       "install_update.launcher-removal-admitted",
-      "install_update.launcher-abort-ignored"
+      "install_update.launcher-abort-ignored",
+      "install_update.create-browser-shortcuts",
+      "install_update.activate-browser-shortcut"
     ]
   },
   "installer_child_order": [
@@ -7047,7 +7442,8 @@
   "analysis_projects": [
     "lc_install_update",
     "lc_install_update_verify",
-    "lc_install_update_verify_legacy"
+    "lc_install_update_verify_legacy",
+    "lc_install_update_shortcuts"
   ],
   "safety": "Static PE/IL/InstallScript/config inspection and local package decryption only; no Windows application, installer, vehicle, authentication or network execution."
 }

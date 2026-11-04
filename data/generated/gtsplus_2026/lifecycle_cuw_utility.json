@@ -973,7 +973,7 @@
       "anchors": [
         {
           "il_offset": 7,
-          "instruction": "callvirt <dnfile.mdtable.TypeSpecRow object at 0x1095acb90>::ContainsKey"
+          "instruction": "callvirt TypeSpec[15128095020e1210]::ContainsKey"
         },
         {
           "il_offset": 28,
@@ -985,7 +985,7 @@
         },
         {
           "il_offset": 48,
-          "instruction": "callvirt <dnfile.mdtable.TypeSpecRow object at 0x1095acb90>::Remove"
+          "instruction": "callvirt TypeSpec[15128095020e1210]::Remove"
         }
       ],
       "finding": "Removing a live session disconnects it before deleting pool entry."
@@ -1285,15 +1285,15 @@
       "anchors": [
         {
           "il_offset": 7,
-          "instruction": "callvirt <dnfile.mdtable.TypeSpecRow object at 0x1095ac890>::ContainsKey"
+          "instruction": "callvirt TypeSpec[151280b1020e0e]::ContainsKey"
         },
         {
           "il_offset": 27,
-          "instruction": "callvirt <dnfile.mdtable.TypeSpecRow object at 0x1095ac890>::set_Item"
+          "instruction": "callvirt TypeSpec[151280b1020e0e]::set_Item"
         },
         {
           "il_offset": 47,
-          "instruction": "callvirt <dnfile.mdtable.TypeSpecRow object at 0x1095ac890>::Add"
+          "instruction": "callvirt TypeSpec[151280b1020e0e]::Add"
         }
       ],
       "finding": "SaveData updates the backend-owned dictionary used to restore browser state; it is not a disk flush."
@@ -1416,8 +1416,8 @@
           "instruction": "ldfld mintWSSPortTo"
         },
         {
-          "il_offset": 46,
-          "instruction": "callvirt <dnfile.mdtable.TypeSpecRow object at 0x109f9a450>::GetEnumerator"
+          "il_offset": 377,
+          "instruction": "ble 0x1034"
         },
         {
           "il_offset": 331,

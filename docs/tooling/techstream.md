@@ -1,7 +1,7 @@
 # Toyota Techstream / GTS+ diagnostic software
 
-> **Scope:** Toyota Techstream V18.00.003 (DENSO) plus GTS+ 2026.03.002.02
-> (the 2026-06-18 distribution), including its application lifecycle and P5/CUWPlus stack. V18's internal
+> **Scope:** Toyota Techstream V18.00.003 (DENSO) plus GTS+ 2026.03.002.02,
+> including the installed application lifecycle and diagnostic/CUWPlus stacks. V18's internal
 > module version comes from `VerApp.ini`/`VerCmd.ini` (dated 2022-11-22 /
 > 2022-12-08); its installer filename says V18.00.008. The "008" identifies the
 > Flexera IS wrapper build. The application version is V18.00.003. V18 DDB files
@@ -38,17 +38,20 @@ Communication Interface) over standard UDS/ISO-TP. It performs diagnostic
 reads (DTCs, data monitors, freeze frames), active tests, configuration
 writes, and ECU reflashing (Calibration Update Wizard).
 
-The analysis yields three categories of finding relative to the Sienna EPS
+The [current GTS+ lifecycle](#10-current-gts-application-lifecycle) connects
+installation and desktop entry, process/service ownership, authentication,
+diagnosis, recording, upload, programming, and shutdown. Its ten generated
+domain artifacts retain source pins, control-flow evidence, states, and handoffs.
+
+The V18 analysis yields three categories of finding relative to the Sienna EPS
 firmware:
 
 1. **Independent corroboration** of our SA model: Techstream's
    `CSecurityAccessAES128` class confirms the AES-128-ECB seed/key
    construction recovered from firmware (SEC-BOOT-003, SEC-APP-001).
 
-2. **A CAN traffic capture tool** (`ptshim32.dll`) — a J2534 API
-   interceptor/logger that transparently records every UDS message between
-   Techstream and the VCI. This is the highest-value practical artifact for
-   bench validation of firmware findings.
+2. **V18 pass-thru logging** (`ptshim32.dll`). The V18 shim intercepts J2534
+   API calls and writes communication-log records.
 
 3. **No direct SecOC runtime interaction, but useful steering-command diagnostic vocabulary.**
    Techstream operates through UDS diagnostics and neither sends nor receives
@@ -3803,95 +3806,20 @@ post-clear DTC-status acceptance check.
 ## 7. MACKey Registration — ECU authentication key provisioning
 
 The canonical report is
-[security/mackey-registration.md](../security/mackey-registration.md). Managed
-IL plus native `IT3UtilityNK.dll`/`UtilityExNK2.dll` recover the online and
-vehicle-facing ECU Security Key flow, with an important generation distinction:
-**the V18 capture uses Routine `0x3002`, while current 2026 GTS+ carries both
-`0x3002` and an older/alternate RID-`0x1010` MACKey transport.**
+[security/mackey-registration.md](../security/mackey-registration.md).
+The authenticated 2026 frontend selects the carrier by OEM and diagnostic phase:
+ordinary P4 uses `3B F5/F6`, P5 uses RID `0x1010`, and P6 uses RID `0xD904`.
+The separate Subaru branch selects `UG000021/22/23`, native command cases
+`0x15/0x16/0x17`, and `UtilityGene` ordinals 98/99/100, which implement the
+RID-`0x3002` network update. Suzuki has a separate RID-`0x1010` flow.
+The recovered V18 flow also uses RID `0x3002`.
 
-The V18 path remains exactly as recovered:
-
-- the request XML contains VIN, master/slave `SafekeyNumber`, `MACM1`,
-  `MACM2`, `MACM3`, and a deterministic SHA-256 `HashValue`;
-- native `IT3UtilityNK.dll` bridges to
-  `CWebService::TisServiceSendMacKey` / `TisServiceGetMacKeyInfo`;
-- the returned request ID replaces `$36` in the configured login URL, then the
-  client polls by `request_id` plus `SHA256(request_id)` and stores the returned
-  exchange-key XML as `Memg/MAC_01_WriteData.xml`;
-- `$36` is therefore **not DID `0x0036`**;
-- `UtilityExNK2.dll` reads VIN with `22 F1 90`, the 16+32+16-byte MAC tuple
-  with `22 10 2E`, and master/slave 16-byte `SafekeyNumber` values with
-  `22 10 10`;
-- selected ECUs are written through
-  `31 01 30 02 || M1[16] || M2[32] || M3[16]` and polled with
-  `31 03 30 02` for state plus `M4[32] || M5[16]`;
-- all 24 `CMAC_01_*` RTTI classes, vtables, 51 embedded `S324-*` procedure
-  codes, critical body hashes, and command shapes are pinned in generated
-  evidence. Cross-class UI successors remain caller-selected and bounded.
-
-Current GTS+ adds a direct official `MAC_01` RID-`0x1010` route in its pinned
-`UtilityExNK2.dll` (SHA-256
-`d9868c8a9a69ffbab26ea7d4431e290372cd207e84e7b4aed27446aeb4c12ec1`):
-
-- helper `0x100F9FE0` builds and sends exactly
-  `31 01 10 10 || M1[16] || M2[32] || M3[16]` (`0x44` bytes total);
-- helper `0x100F9EF0` sends `31 03 10 10` and copies the returned
-  `M4[32] || M5[16]`;
-- worker `0x100FA9C0` runs the start/poll sequence;
-- exported `Ex2MAC_01_ComProcess @ 0x10028590` selects the state machine at
-  `0x100F9740` containing that worker for one supported protocol family;
-- the same DLL also contains the newer `31 01/03 30 02` helpers, so both
-  transports intentionally coexist.
-
-The current frontend selection is now instruction-closed. `UtilityPlusFrontNK.dll`
-imports `UtilityGene.dll` ordinals 98/99/100 and calls them as MACKey
-validation/update-before/update-after for command cases `0x15/0x16/0x17`.
-Although the installed `UtilityGene.dll` is a hollow Crackproof image, TMS-081's
-same-release installer recovery yields Toyota's original plaintext twin
-(SHA-256 `a844d3045b2cb780a63e3959ec04bd27baab4ea7195080876bbdf6d2cf86c4cc`).
-The recovered wrappers close the selected current network flow:
-
-- master endpoint `0x763` enters `10 4F` and uses `27 41/42` with a 16-byte
-  seed/key;
-- topology discovery checks participant `22 1000` bit0 and reads the admitted
-  endpoint's 16-byte `22 1010` identity;
-- `Ex2MAC_01_S_KeyUpdate_after` reconnects each selected ECU, enters `10 4F`,
-  sends `31 01 30 02 || M1[16] || M2[32] || M3[16]`, and polls
-  `31 03 30 02` for the result/proof.
-
-Thus **RID `0x3002` is the implementation selected by the current
-`UtilityPlusFrontNK -> UtilityGene` Update-ECU-Security-Key path**. The separate
-RID-`0x1010` state machine in current `UtilityExNK2.dll` remains genuine
-multi-generation/alternate support, but it is not selected by these frontend
-command cases. `tests/techstream/verify_gtsplus_mackey_rid1010.py` now recovers the
-installer plaintext independently and pins both the coexistence and selected
-flow.
-
-One camera-specific boundary remains: ordinary `FRC_P5` uses DID `0x1010` for
-FOE-origin/roll calibration and exposes no ordinary Data-Monitor DID `0x1000`.
-The MACKey `22 1000/1010` participant namespace therefore cannot be equated to
-ordinary FRC application DIDs. A live camera key-update transcript or decoded
-FRC handler is still required to prove how the FRC is admitted/addressed inside
-this generic `0x3002` workflow.
-
-That current-GTS result closes a previous over-bounding statement: Toyota
-service tooling **does** have an exact diagnostic join to the RID-`0x1010`
-M1–M5 routine used by Sienna firmware and by the yc 2021 Venza SRS firmware.
-The current UtilityPlusFront network-update branch is now statically selected as
-RID `0x3002`; a transcript is still required to prove a specific ECU's
-participant admission and any alternate-family use outside that branch.
-
-This remains distinct from ordinary UDS SecurityAccess and from CUW reflash
-authorization. The `M1/M2/M3 -> M4/M5` object is the **standard AUTOSAR SHE
-Memory Update Protocol / `CMD_LOAD_KEY` contract**; Toyota's additions are the
-online exchange-key service, ECU identity/topology association, and the UDS
-RoutineControl carrier. In the yc airbag, the `0x1010` package is routed to the
-local secure subsystem as that authenticated key-update operation, while its
-application SecOC MAC paths use key selectors into the same secure-service
-boundary. Thus MACKey Registration is directly relevant to **key
-provisioning/lifecycle**, while still exposing neither the plaintext runtime
-SecOC key nor the ordinary SecOC verify/generate traffic. AUTOSAR FO R22-11
-§4.7.7 and §4.9/§4.9.1 define the M1--M5 construction.
+The owner report contains the online exchange, participant/VIN/Safekey gates,
+M1–M5 request/proof handling, native addresses and source hashes, and firmware
+comparisons. This is ECU key provisioning through the SHE Memory Update
+Protocol, separate from ordinary UDS SecurityAccess and CUW authorization.
+Current entry/return contracts are pinned in
+[`lifecycle_cuw_utility.json`](../../data/generated/gtsplus_2026/lifecycle_cuw_utility.json).
 
 ### 7.1 Representation-bounded secret census
 
@@ -3979,6 +3907,33 @@ The universal bundle now exports concrete table-77 rows under each category's ex
 
 ## 10. Current GTS+ application lifecycle
 
+The linked domain artifacts join the installed client's process, state, and
+handoff ownership. Normal ownership is:
+
+```mermaid
+flowchart TD
+    Installer["GTS+ installer"] -->|startup entry| Arbitration
+    Installer -->|service registration| SCM["Windows SCM"]
+    Installer -->|desktop and file associations| Entry["URL shortcuts / CUWLauncher"]
+    SCM --> Content["ContentServer"]
+    SCM --> Sync["DataSync"]
+    Arbitration -->|launch 1| Info["InfoCenter WPF / tray"]
+    Arbitration -->|launch 2| PF["GTSPlus PF"]
+    Arbitration -->|launch 3| CUW["CUW backend"]
+    Entry -->|user activation| Browser["GTS / CUW / QDC browsers"]
+    Content -->|signed assets| Browser
+    Browser <-->|requests and responses| PF
+    Browser <-->|programming control| CUW
+    PF --> Operations["Diagnostic operations"]
+    Operations --> VCI["VCI / ECU transport"]
+    CUW --> VCI
+    PF --> Store["Local recordings / reports"]
+    Arbitration -->|error reports| Store
+    Store -->|open and export| Viewers["Playback / export tools"]
+    Store -->|configured upload queues| Sync
+    Sync --> Upload["Upload service"]
+```
+
 ### 10.1 Executable and frontend sources
 
 The installed tree contains **17 CP-protected CLR application executables**
@@ -4012,6 +3967,56 @@ PKCS#1 v1.5 signature over `SHA256(SHA256(zipData))` using the installed
 signatures verified during offline extraction; all **4,642** decoded assets
 matched an independent decode. A ciphertext-byte modification was rejected.
 Decoded sources live under `build/out/gts-lifecycle-ui/{gts,cuw,qdc}`.
+
+### Installation, maintenance, and process recovery
+
+[`lifecycle_install_update.json`](../../data/generated/gtsplus_2026/lifecycle_install_update.json)
+recovers the parent installer, ten sibling components, nested CUW launcher,
+native trust helpers, shutdown helper, certificate registration, and PCChecker.
+The parent runs components serially. Missing siblings are skipped; a nonzero
+child exit aborts only when the launch wrapper returned zero. Wrapper failure
+can therefore continue to the next component.
+
+Parent-level signature gates cover the DataSync and GUI installers; component
+scripts have their own payload checks. Empty first-party `OnAbort` callbacks
+provide no compensation for earlier completed child installations.
+Service hooks stop/start DataSync and GUIServer; other hooks register COM,
+local certificate trust/bindings, the arbitration startup shortcut, and file
+associations. Maintenance invokes `GTSPlusNotifyEnd`, whose error/no-reply
+returns abort parent removal.
+
+Nested launcher removal counts twelve specific uninstall keys. More than one
+existing key aborts that removal; the outer CUW uninstaller ignores the nested
+result and continues, retaining the shared launcher and associations.
+
+The GUI header defines the English InternetShortcuts below. Targets use
+`https://127.0.0.1:50005/GetResource/`.
+
+| Shell-folder path | Target resource |
+|---|---|
+| `Desktop/GTS+.url` | `gts/GTSMain.html` |
+| `Programs/GTS+/GTS+.url` | `gts/GTSMain.html` |
+| `Programs/GTS+/CUW+.url` | `cuw/CUWMain.html` |
+
+The native installer engine resolves the typed shell-folder roots and writes
+`[InternetShortcut] URL` through `WritePrivateProfileStringW`, ignoring that
+call's return. Source-pinned native execution covered the URL/link flag branch
+and all three URL writes. Declarative Startup roots are empty across the
+parent, ten siblings, and nested launcher; arbitration and proxy startup entries
+are custom-script actions. Activating these URLs delegates to the Windows
+shell/default HTTPS handler.
+
+PCChecker visits its configured checks and enables Next after warnings or
+per-check exceptions. Its `ExecReboot` kills matching GTS processes and restarts
+Arbitration. Native trust-helper branch execution covered ordinary verdicts,
+error cleanup, and the alternate secondary-signature state machine.
+
+AgentLite's executable implementation is absent from the original archive and
+the complete shipped installer/cabinet chain. Retained logs expose one download
+and reinstall run. General scheduling, retry, cancellation, and rollback need
+the original AgentLite installer or its host/CommonLib/service/message/edit
+assemblies. Toyota's [installation guide, pages 7–13](https://techinfo.toyota.com/techInfoPortal/staticcontent/en/techinfo/html/prelogin/docs/tslinstalltinfo.pdf)
+places that separate download behind TIS login, before AgentLite installs GTS+.
 
 ### Bootstrap, process ownership, and shutdown
 
@@ -4123,8 +4128,51 @@ the window. Relay-triggered login failure is caught and resolved, so connection,
 routing, and a result-0 relay can continue before that acknowledgement. Initial
 login ignores popup `WINDOW_CLOSED`; relay login converts it to `FAILED_LAUNCH`.
 Six offline cases executed these exact authenticated JavaScript methods.
+
+Primary InfoCenter runs an STA WPF application with explicit shutdown, a tray
+icon, and a main window constructed without being shown. The startup task
+counts successful readiness polls cumulatively; more than one success replaces
+Preparing with Prepared. The six-minute timeout closes Preparing. Tray click
+shows InfoCenter's own WPF window; ordinary window close is cancelled and hides
+that resident window.
+
+An open error-report dialog vetoes ending with `IC000001`; an exception before
+the normal flag reset can retain that veto. `doExecute` alone selects ending:
+true cancels and dispatches shutdown, false hides the ending notice.
+`isShutdown` is logged but does not select the branch. OS session ending is
+cancelled while `terminateRequestFromABApp` is false; the complete managed-body
+scan found no writer setting that field. Exit cleanup is sequential, so an
+early failure can bypass later cleanup. Twelve offline cases executed the
+actual confirmation, execution, session-ending, and window-closing IL.
+
 The Multi executable owns a separate local mutex and localized notice window;
 its Closing handler hides the window and lets the close event proceed.
+
+### VCI discovery, transport ownership, and disconnect
+
+[`lifecycle_vci_transport.json`](../../data/generated/gtsplus_2026/lifecycle_vci_transport.json)
+joins VIM settings, the main and DS-4 factories, J2534 wrappers/shims, and
+Ethernet transports. VIM selection writes HKLM `FunctionLibrary`, `Vendor`,
+and `Name` for the API-version families. The exact DENSO/TIS Techstream VIM
+API-1 selection bypasses the shim; other selections interpose it. API-05
+discovery calls `GetNextDevice` once, and device information retrieval probes
+the selected device.
+
+Main Ethernet uses UDP identification and TCP port 13400 routing; its
+identification timeout has one retry. DS-4 uses vendor protocol `0x800F` with
+logical IPv4/UDP/TCP/stream channels `0x8203/05/06/08`, and tears them down from
+TCP through the physical channel. Wrappers retain module handles and cached
+function pointers across their reset calls.
+
+In `Connect04`, filter failure attempts disconnect before setting the connected
+flag; the disconnect guard rejects that rollback. Other disconnect paths clear
+software state despite physical errors. Close failure retains the open flag,
+while finalization still destroys the owner.
+
+All four current `SaveLog` shim exports are `33 C0 C2 04 00`: return zero.
+Native execution with an invalid path pointer confirmed that none reads the
+path. Communication logs instead use the optional `MsgDatComm`
+`ER_PutLogCommunication` IPC path into the arbitration-owned collector.
 
 ### Vehicle workspace, ECU selection, and healthcheck
 
@@ -4138,6 +4186,17 @@ takes PF exclusive control, then compares live/confirmed VIN and `decisionVin`.
 A matching fixed context is reused. Other branches perform end/start diagnosis,
 manual VIN/category selection, or connection retry. Confirmation publishes the
 resolved vehicle identity through `SC000003`.
+
+A fixed nonempty VIN differing from a nonempty live VIN always opens
+`S301DL011`: `otherClientExist` remains undefined on the fixed-VIN path.
+Choosing No releases PF exclusion and returns to the menu. Unfixed-VIN
+automatic restart separately depends on `gtsOnlyConnect`.
+
+Workspace entry then passes `_vehicleDecision`/`getVimSupport`. Capability
+errors and rejected Ethernet/CAN-FD combinations select reset/Home/Back paths.
+The `PATTERN_1`/connection-method-2 branch opens `S301DL027`; Next disconnects
+J2534, checks battery communication, then retries admission or resets selection.
+That reconnect branch admits a successful response even with `lowBattery=true`.
 
 `DV000004` builds the GUI's initial `mountedEcuMap` through
 `CGetMountEcuListNoComm`: entries start with `ecuStatus=-1`,
@@ -4160,8 +4219,78 @@ the instance and DLL handle; callers must inspect response `resultInfo`
 separately from the outer manager result.
 
 Offline execution of the actual authenticated JavaScript verified cache reuse,
-forced refresh, failed connection, idempotent cooperative cancellation, and the
-workspace close/restart order.
+forced refresh, failed connection, cooperative cancellation, fixed-VIN prompts,
+VIM capability/reconnection branches, and workspace close/restart ordering.
+
+### Diagnostic operation scheduling and teardown
+
+[`lifecycle_operations.json`](../../data/generated/gtsplus_2026/lifecycle_operations.json)
+joins frontend operation workers, managed dispatch, native command plugins,
+monitor threads, frame retries, and teardown. The current adaptation path and
+six-pointer plugin ABI are specified in §6.2.0.
+
+Command cancellation sets cooperative state and returns without waiting for
+completion. The monitor-owner stop path is different: both P5 and P6 signal
+exit, wait 1,000 ms, then call `TerminateThread` and the stop callback for any
+nonzero wait result, including timeout and wait failure.
+
+The native monitor command queue is a single borrowed context slot. Occupancy
+returns `0xC0060601`; an accepted producer signals the worker and waits
+indefinitely for completion before releasing the slot. Frontend periodic
+operations reschedule after success; rejection removes the registration.
+Stopping their timer leaves an already-running promise in flight.
+
+Retry ownership is local: frame retry uses the communication-set bound,
+DataListIF slot 2 has its own acquisition retry, and keepalive follows its
+cadence. There is no blanket host-command retry. Simple utilities retain
+distinct start/stop/status control types and deadline/result polling.
+
+Aggregate destruction disconnects/closes transport before destroying the
+monitor controller. Managed `FinalizeAdaptation` is unload-only; normal
+end-diagnosis can retain the native instance on a failed response or destroy.
+Offline native execution covered nine result classifications and both monitor
+stop implementations with normal, timed-out, and failed waits.
+
+### Recording, stored sessions, and error-report retention
+
+[`lifecycle_persistence.json`](../../data/generated/gtsplus_2026/lifecycle_persistence.json)
+joins the current browser buffer/ZIP writer, six viewer/converter executables,
+native temporary-file closing, and arbitration's report collector. Current
+normal saves create JSON/ZIP GTSE format `0.0.1` directly. Legacy binary TSE
+conversion and the current/legacy manifests are specified in
+[saved-session formats](gtsplus-tse-gtse-saved-session.md); recorder and PCS
+handoffs are owned by [VDAS/PCS data](gtsplus-vdas-pcs-data.md).
+
+Save ACK precedes completion. The actual buffer/interface consumers distinguish:
+
+| Write failure | Caller save promise | Worker close |
+|---|---|---|
+| Nonfinal chunk before ACK | Remains pending | Remains pending |
+| Whole-file write before ACK | Remains pending | Can finish |
+| Final write after ACK | Rejects | Can finish |
+
+The first two failures emit `saveFinish` before the caller has installed its
+ACK-keyed completion handler. Recovery can also wildcard-delete the workspace
+after a skipped export or an export that resolved with `result:false`.
+Offline execution reproduced these failure, deletion, and successful-drain paths.
+
+CSV command 99 is forwarded opaquely by PF and has no converter task-cancellation
+consumer. The closure traverses all 884 materialized methods in its ten managed
+components. Graph writeback writes `data.json` even after failed verification;
+only verified data gets a regenerated manifest. Recorder creation's caught
+failure can still be followed by deletion of the source feature logs.
+
+`MsgDatComm` sends communication/action/transfer/clear IPC into
+`GTSPlusErrorReport`: bounded histories hold 3,000 communication and 10,000
+action entries. Communication flushes every second with 10-MiB/five-file
+rotation; action saves are size/event-driven. Transfer consumes history.
+Clear marks retained entries and deletes temporary communication files.
+The action saver exits on cancellation before a final queued-action drain.
+
+Report compression failure can be caught before trace staging is deleted.
+`SendErrorReport` retains a Send copy, then moves the package to
+Public Documents `GTSPlus/DataSync/Logs/GTS-E02`, where DataSync takes ownership.
+The folder selector is `0x2E` (`CommonDocuments`).
 
 ### Background synchronization, proxy state, and ActionTool
 
@@ -4195,31 +4324,65 @@ device wizard, and writes encrypted timestamped `.rlog` results. Its transport
 filters and cancellation/result classification are pinned separately.
 Offline execution covered 28 branches of its actual recovered IL.
 
-### Diagnostic operation scheduling and teardown
+### CUW programming and privileged-utility handoffs
 
-[`lifecycle_operations.json`](../../data/generated/gtsplus_2026/lifecycle_operations.json)
-joins frontend operation workers, managed dispatch, native command plugins,
-monitor threads, frame retries, and teardown. The current adaptation path and
-six-pointer plugin ABI are specified in §6.2.0.
+[`lifecycle_cuw_utility.json`](../../data/generated/gtsplus_2026/lifecycle_cuw_utility.json)
+joins the outer file-association launcher, CUW browser, managed backend,
+native programming engine, GTS callers, and ECU Security Key branches.
+Process singleton, backend session lock, PF API exclusion, and GUI logout
+inhibition are separate mechanisms.
 
-Command cancellation sets cooperative state and returns without waiting for
-completion. The monitor-owner stop path is different: both P5 and P6 signal
-exit, wait 1,000 ms, then call `TerminateThread` and the stop callback for any
-nonzero wait result, including timeout and wait failure.
+The backend owns programming lifetime. Normal `CanExit` requires no programming
+and zero client connections; OS ending waits ten seconds before its fallback.
+Browser disconnect requests nonforced clear, which can return native error
+3007. Native reset joins the worker without a deadline. The PC-disconnected
+progress branch schedules no next poll.
 
-The native monitor command queue is a single borrowed context slot. Occupancy
-returns `0xC0060601`; an accepted producer signals the worker and waits
-indefinitely for completion before releasing the slot. Frontend periodic
-operations reschedule after success; rejection removes the registration.
-Stopping their timer leaves an already-running promise in flight.
+Successful postprocessing persists its report, clears native state, restores
+sleep/client state, relays `NORMAL`, and unlocks PF before Finish. Rejection
+stops that promise chain. The external launcher waits for the CUW connection
+to appear and disappear; browser process lifetime is not its completion signal.
+GTS Software-as-a-Part, AISAC2, and Hino callers consume the result relay and
+window closure before continuing their own work.
 
-Retry ownership is local: frame retry uses the communication-set bound,
-DataListIF slot 2 has its own acquisition retry, and keepalive follows its
-cadence. There is no blanket host-command retry. Simple utilities retain
-distinct start/stop/status control types and deadline/result polling.
+Online signature requests, offline request/response XML, cancellation, recovery,
+and return routing are pinned separately. Phase/OEM-specific MACKey carriers
+and admission gates are owned by [MACKey registration](../security/mackey-registration.md).
+Offline execution covered actual CUW progress branches, P4/P5/P6 writers and
+cleanup, and ordinary-versus-Subaru admission using the packaged SHA-256 code.
 
-Aggregate destruction disconnects/closes transport before destroying the
-monitor controller. Managed `FinalizeAdaptation` is unload-only; normal
-end-diagnosis can retain the native instance on a failed response or destroy.
-Offline native execution covered nine result classifications and both monitor
-stop implementations with normal, timed-out, and failed waits.
+### Reproduction and verification boundary
+
+`tools/artifact list` registers all ten lifecycle producers. Materialize the
+source roots identified in each artifact using the body-recovery procedures
+linked above; each producer's `--help` exposes its input overrides.
+
+InstallScript decoding uses
+[`installscript-decompiler`](https://github.com/jte/installscript-decompiler)
+at commit `1d5edb7b022cc1573a1f3971382391b9c5457cc9`. The installation artifact
+pins the source revision, Cargo inputs, build recipe, and observed local binary
+digest. Build output stays outside the reference checkout:
+
+```sh
+cargo build --locked --release \
+  --manifest-path REFERENCE/installscript-decompiler/Cargo.toml \
+  --target-dir build/cache/installscript-decompiler -p cli
+
+for domain in bootstrap ui_ipc auth_settings install_update \
+              vci_transport vehicle_session operations persistence \
+              sync_upload cuw_utility; do
+  uv run --locked python -m "tools.techstream.extract_gtsplus_lifecycle_${domain}" || exit
+done
+```
+
+All ten producers were regenerated and the combined source identities, state
+endpoints, provenance links, and cross-domain evidence references checked.
+Managed generic operands render from metadata signatures; opcode anchors match
+decoded opcodes rather than substrings in type or method names.
+
+Offline execution used the exact recovered x86, selected recovered IL paths,
+and authenticated JavaScript with synthetic platform interfaces. Existing
+diagnostic-execution, vehicle-resolver, MACKey, TSE, VDAS, and auxiliary-recovery
+verification gates passed. Windows UI/SCM execution, physical VCI/ECU responses,
+and live OEM services remain runtime boundaries. AgentLite's missing executable
+corpus is the source prerequisite for closing the updater policy described above.

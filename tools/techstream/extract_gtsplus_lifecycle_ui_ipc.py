@@ -47,6 +47,17 @@ def js_function(text: str, owner: str, name: str) -> str:
     return text[match.start():end]
 
 
+def _operand(pe: Any, value: Any) -> str:
+    row = resolve_token(pe, value) if hasattr(value, 'table') else value
+    if isinstance(row, dnfile.mdtable.MethodSpecRow):
+        row = row.Method.row
+    if isinstance(row, dnfile.mdtable.MemberRefRow) and isinstance(row.Class.row, dnfile.mdtable.TypeSpecRow):
+        return f'TypeSpec[{bytes(row.Class.row.Signature.value).hex()}]::{row.Name}'
+    if isinstance(row, dnfile.mdtable.TypeSpecRow):
+        return f'TypeSpec[{bytes(row.Signature.value).hex()}]'
+    return format_operand(pe, row)
+
+
 def build(root: Path = DEFAULT_ROOT, main_root: Path = DEFAULT_MAIN, aux_root: Path = DEFAULT_AUX) -> dict[str, Any]:
     sources: list[dict[str, Any]] = []
     evidence: list[dict[str, Any]] = []
@@ -98,22 +109,12 @@ def build(root: Path = DEFAULT_ROOT, main_root: Path = DEFAULT_MAIN, aux_root: P
             binaries[key] = dnfile.dnPE(str(recovered))
             evidence.append(dict(id=D+key+'.materialization', source=sid, kind='managed-materialization', locator='all nonzero MethodDef RVAs', **proof, finding='Every declared managed body RVA has materialized bytes.'))
 
-    def operand(pe: Any, value: Any) -> str:
-        row = resolve_token(pe, value) if hasattr(value, 'table') else value
-        if isinstance(row, dnfile.mdtable.MethodSpecRow):
-            row = row.Method.row
-        if isinstance(row, dnfile.mdtable.MemberRefRow) and isinstance(row.Class.row, dnfile.mdtable.TypeSpecRow):
-            return f'TypeSpec[{bytes(row.Class.row.Signature.value).hex()}]::{row.Name}'
-        if isinstance(row, dnfile.mdtable.TypeSpecRow):
-            return f'TypeSpec[{bytes(row.Signature.value).hex()}]'
-        return format_operand(pe, row)
-
     def il(key: str, owner: str, method: str, finding: str, needles: tuple[str, ...], index: int = 0) -> str:
         pe = binaries[key]
         td = next(t for t in pe.net.mdtables.TypeDef if type_name(t) == owner and any(str(m.row.Name) == method for m in t.MethodList))
         row = [m.row for m in td.MethodList if str(m.row.Name) == method][index]
         body = CilMethodBody(MethodBodyReader(pe, row))
-        lines = [f'{str(i.opcode)} {operand(pe, i.operand)}'.rstrip() for i in body.instructions]
+        lines = [f'{str(i.opcode)} {_operand(pe, i.operand)}'.rstrip() for i in body.instructions]
         pos = 0
         anchors = []
         for needle in needles:
@@ -125,7 +126,7 @@ def build(root: Path = DEFAULT_ROOT, main_root: Path = DEFAULT_MAIN, aux_root: P
             anchors.append(dict(offset_from_body=int(ins.offset)-int(body.offset), instruction=lines[pos]))
             pos += 1
         eid = D + key + '.' + owner.split('.')[-1] + '.' + method + (f'.{index}' if index else '')
-        branches = [dict(offset_from_body=int(i.offset)-int(body.offset), opcode=str(i.opcode), target=operand(pe, i.operand)) for i in body.instructions if i.opcode.flow_control.name in ('Branch', 'Cond_Branch')]
+        branches = [dict(offset_from_body=int(i.offset)-int(body.offset), opcode=str(i.opcode), target=_operand(pe, i.operand)) for i in body.instructions if i.opcode.flow_control.name in ('Branch', 'Cond_Branch')]
         evidence.append(dict(id=eid, source=D+key, kind='managed-il', locator=f'{owner}::{method} overload {index}', rva=int(row.Rva), body_size=int(body.size), body_sha256=digest(body.raw_bytes), anchors=anchors, branches=branches, finding=finding))
         return eid
 

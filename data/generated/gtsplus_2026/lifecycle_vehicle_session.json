@@ -18,9 +18,13 @@
     "branches": [
       "VIM/battery continue/cancel",
       "PF lock failure",
-      "matching/missing/mismatched/unfixed VIN",
+      "fixed matching/missing VIN",
+      "fixed mismatched VIN unconditional Yes/No prompt",
+      "unfixed VIN prompt vs gtsOnlyConnect automatic restart",
       "manual VIN and category/option fallback",
       "default/nondefault OEM restart",
+      "VIM Ethernet/CANFD admission/rejection",
+      "S301DL027 Home/disconnect/battery-check/retry/reset",
       "initial healthcheck Optional/Required/None",
       "ECU cache reuse/refresh/failure",
       "healthcheck cooperative cancel/revoke/completion",
@@ -80,7 +84,12 @@
       "VehicleConnectWorkerModel.getEnvInfo",
       "EcuFunctionController.setCurrentEcu",
       "VehicleConnectWorkerModel.checkBatteryVoltage",
-      "GtsPFRawInterface.getEquippedEcuList"
+      "GtsPFRawInterface.getEquippedEcuList",
+      "VehicleConnectController.onClickNext",
+      "VehicleConnectWorkerModel.getVimSupport",
+      "VehicleConnectWorkerModel._getGeneralCommResult",
+      "VehicleConnectWorkerModel._isGeneralCommResultResponseCodesYesRoute",
+      "VehicleConnectController._vehicleDecision"
     ]
   },
   "domain": "vehicle_session",
@@ -94,7 +103,7 @@
       "source": "vehicle_session.asset.js/gts/vehicle_connect/vehicle_connect_controller.js"
     },
     {
-      "finding": "Acquire PF lock; reuse fixed matching VIN; missing VIN forces end/start; mismatched/unfixed VIN prompts when other client exists, otherwise restart then recurse. Lock failure or cancellation releases lock and returns menu. SelectVehicle 0x3002 opens retry view; absent VIN opens manual input.",
+      "finding": "Acquire PF lock; reuse fixed matching VIN; missing VIN forces end/start. Fixed mismatched VIN always prompts S301DL011 because otherClientExist remains undefined. Unfixed VIN prompts when !gtsOnlyConnect, otherwise restarts and recurses. Prompt Yes restarts and recurses; No releases lock and returns menu. SelectVehicle 0x3002 opens retry view; absent VIN opens manual input.",
       "id": "vehicle_session.reuse",
       "kind": "javascript-control-flow",
       "locator": "VehicleConnectController.prototype.initLogic",
@@ -102,7 +111,7 @@
       "source": "vehicle_session.asset.js/gts/vehicle_connect/vehicle_connect_controller.js"
     },
     {
-      "finding": "Compare PF-confirmed VIN/decisionVin==1 with live getVin. gtsOnlyConnect controls other-client branch (returned as otherClientExist despite inverted-sounding name).",
+      "finding": "Compare confirmed/live VIN and decisionVin==1. otherClientExist is undefined for fixed VIN; only unfixed VIN assigns cache.gtsOnlyConnect to that field. initLogic uses its truthiness, not a client count, so fixed mismatch always prompts.",
       "id": "vehicle_session.vin",
       "kind": "javascript-control-flow",
       "locator": "VehicleConnectWorkerModel.prototype.getVIN",
@@ -356,6 +365,46 @@
       "locator": "GtsPFRawInterface.prototype.getEquippedEcuList",
       "method_sha256": "c57db63912ed96557bd9d2fe18a375f6d404b46e2ac1b237c4554ff5c03cffd2",
       "source": "vehicle_session.asset.js/gts/common/gts_platform_raw_interface.js"
+    },
+    {
+      "finding": "Regional defective-vehicle and manual PSA/Mazda confirmations precede vehicleDecision; successful identity confirmation calls _vehicleDecision, not workspace postprocessing directly.",
+      "id": "vehicle_session.confirm_consumer",
+      "kind": "javascript-control-flow",
+      "locator": "VehicleConnectController.prototype.onClickNext",
+      "method_sha256": "4027e65c02b3a4f732d9625f42ddff6c85f86bc0532d5a6e68ce660fcf62f914",
+      "source": "vehicle_session.asset.js/gts/vehicle_connect/vehicle_connect_controller.js"
+    },
+    {
+      "finding": "Read ethernetSupport/canfdSupport/vimConnectMethod. Each support value0/2 is admitted; ethernet1 selects pattern2 and CANFD1 selects pattern3, both1 pattern4. Disconnected ECU443 or negative [16,95] route predicate downgrades2->1 or4->3. API failure/unknown support values return PATTERN_ERROR.",
+      "id": "vehicle_session.vim_support",
+      "kind": "javascript-control-flow",
+      "locator": "VehicleConnectWorkerModel.prototype.getVimSupport",
+      "method_sha256": "e8d513418bfa7b19f9774c1fab307e0c242956128b26e79b1b83e698689addab",
+      "source": "vehicle_session.asset.js/gts/vehicle_connect/vehicle_connect_worker.js"
+    },
+    {
+      "finding": "Only connected ECU443 with busId and optionList queries general communication: ecuId443,phaseType20,busId,mode34,optionList. Returns success or rejection response.",
+      "id": "vehicle_session.vim_route",
+      "kind": "javascript-control-flow",
+      "locator": "VehicleConnectWorkerModel.prototype._getGeneralCommResult",
+      "method_sha256": "bf44c37d90711aa03a3a883909ecabb3cd2d91803a2f8eeacddfed223457f4bd",
+      "source": "vehicle_session.asset.js/gts/vehicle_connect/vehicle_connect_worker.js"
+    },
+    {
+      "finding": "Require first responseDataList entry with at least two bytes after slice(3), then test bit0x80 of responseCodes[4]; absent/short data returns false.",
+      "id": "vehicle_session.vim_route_predicate",
+      "kind": "javascript-control-flow",
+      "locator": "VehicleConnectWorkerModel.prototype._isGeneralCommResultResponseCodesYesRoute",
+      "method_sha256": "35504ce36588987a283b89aaad07d080d3d07e88815b1d51018a51ce486375c6",
+      "source": "vehicle_session.asset.js/gts/vehicle_connect/vehicle_connect_worker.js"
+    },
+    {
+      "finding": "Only PATTERN1 with vimConnectMethod!=2 releases PF lock and enters workspace postprocessing. ERROR refreshes diagnosis, clears UI/worker VehicleInfo and opens S30101; patterns2/3/4 reset likewise then show Ethernet/CANFD/both dialogs with Home or Back/reinit. Pattern1/method2 opens S301DL027: Home clears vehicle and returns menu; Next physically disconnects J2534 then checks battery communication. No error retries admission; error refreshes diagnosis, clears vehicle and opens S30101.",
+      "id": "vehicle_session.vim_admission",
+      "kind": "javascript-control-flow",
+      "locator": "VehicleConnectController.prototype._vehicleDecision",
+      "method_sha256": "8cde5fe52fe872c858af9c4aa8011f147fde8fe6a66413b0bab0a6b06182ee23",
+      "source": "vehicle_session.asset.js/gts/vehicle_connect/vehicle_connect_controller.js"
     },
     {
       "entry_bytes": "558bec6aff687c5b081064a100000000",
@@ -1233,6 +1282,19 @@
       "to_domain": "vci_transport"
     },
     {
+      "callee": "getVimSupport; ECU443 getGeneralCommResult; disconnectJ2534Device",
+      "caller": "VehicleConnectWorkerModel.getVimSupport / VehicleConnectController._vehicleDecision",
+      "evidence": [
+        "vehicle_session.vim_support",
+        "vehicle_session.vim_route",
+        "vehicle_session.vim_route_predicate",
+        "vehicle_session.vim_admission"
+      ],
+      "mechanism": "PF capability/route query and explicit transport reconnect before workspace entry",
+      "payload": "ethernetSupport,canfdSupport,vimConnectMethod; ECU443 phase20/mode34/options[16,95]; PATTERN1 method2 disconnects then battery-checks and retries admission",
+      "to_domain": "vci_transport"
+    },
+    {
       "callee": "CCommCtrlMain",
       "caller": "DiagAdaptation vehicle/ECU handlers",
       "evidence": [
@@ -1573,6 +1635,11 @@
       "owner": "PF+GUI"
     },
     {
+      "id": "vehicle_session.menu",
+      "meaning": "Returned to main menu; retained PF context depends on whether the preceding branch refreshed diagnosis.",
+      "owner": "GUI main menu/PF"
+    },
+    {
       "id": "vehicle_session.precheck",
       "meaning": "VIM/battery checks and PF exclusive lock.",
       "owner": "GUI VehicleConnectController"
@@ -1586,6 +1653,26 @@
       "id": "vehicle_session.confirmed",
       "meaning": "Vehicle identity published through SC000003.",
       "owner": "PF arbitration + GUI worker"
+    },
+    {
+      "id": "vehicle_session.vin_prompt",
+      "meaning": "S301DL011 asks whether to restart an existing VIN context.",
+      "owner": "VehicleConnectController"
+    },
+    {
+      "id": "vehicle_session.vim_admission",
+      "meaning": "Identity confirmed; VIM capability admission pending.",
+      "owner": "VehicleConnectController/worker"
+    },
+    {
+      "id": "vehicle_session.vim_rejected",
+      "meaning": "Vehicle context reset; Ethernet/CANFD support dialog awaits Home/Back.",
+      "owner": "VehicleConnectController"
+    },
+    {
+      "id": "vehicle_session.vim_reconnect",
+      "meaning": "S301DL027 awaits Home or disconnect/battery-check/retry.",
+      "owner": "VehicleConnectController"
     },
     {
       "id": "vehicle_session.workspace",
@@ -1661,16 +1748,65 @@
       "trigger": "getVIN completion"
     },
     {
-      "action": "forcedEndDiagnosis then startDiagnosis; restart selection; consumed restart errors do not prove success",
+      "action": "forcedEndDiagnosis then startDiagnosis; continue selection; consumed restart errors do not prove success",
+      "evidence": [
+        "vehicle_session.reuse",
+        "vehicle_session.vin",
+        "vehicle_session.restart"
+      ],
+      "from": "vehicle_session.precheck",
+      "guard": "!hasVin",
+      "id": "vehicle_session.restart_context",
+      "to": "vehicle_session.select",
+      "trigger": "getVIN reports missing confirmed or live VIN"
+    },
+    {
+      "action": "Open S301DL011; fixed mismatch always prompts regardless of gtsOnlyConnect",
+      "evidence": [
+        "vehicle_session.reuse",
+        "vehicle_session.vin"
+      ],
+      "from": "vehicle_session.precheck",
+      "guard": "hasVin && ((!hasSameVin && isVinFixed) || (!isVinFixed && !gtsOnlyConnect)); fixed VIN leaves otherClientExist undefined, so !otherClientExist is true",
+      "id": "vehicle_session.prompt_vin_restart",
+      "to": "vehicle_session.vin_prompt",
+      "trigger": "nonempty confirmed/live VIN mismatch or unfixed VIN"
+    },
+    {
+      "action": "Refresh diagnosis then recursively rerun initLogic without S301DL011",
+      "evidence": [
+        "vehicle_session.reuse",
+        "vehicle_session.vin",
+        "vehicle_session.restart"
+      ],
+      "from": "vehicle_session.precheck",
+      "guard": "hasVin && !isVinFixed && gtsOnlyConnect",
+      "id": "vehicle_session.unfixed_vin_restart",
+      "to": "vehicle_session.precheck",
+      "trigger": "getVIN reports unfixed VIN"
+    },
+    {
+      "action": "Refresh diagnosis and recursively rerun initLogic",
       "evidence": [
         "vehicle_session.reuse",
         "vehicle_session.restart"
       ],
-      "from": "vehicle_session.precheck",
-      "guard": "Mismatch may require confirmation when other PF client exists",
-      "id": "vehicle_session.restart_context",
-      "to": "vehicle_session.select",
-      "trigger": "missing/mismatched/unfixed VIN"
+      "from": "vehicle_session.vin_prompt",
+      "guard": "Technician accepts restart",
+      "id": "vehicle_session.accept_vin_restart",
+      "to": "vehicle_session.precheck",
+      "trigger": "S301DL011 Yes"
+    },
+    {
+      "action": "Release PF lock and return main menu; do not refresh diagnosis",
+      "evidence": [
+        "vehicle_session.reuse"
+      ],
+      "from": "vehicle_session.vin_prompt",
+      "guard": "Technician declines restart",
+      "id": "vehicle_session.decline_vin_restart",
+      "to": "vehicle_session.menu",
+      "trigger": "S301DL011 No"
     },
     {
       "action": "Clear dependent identity and option cache; hierarchical category or manual VIN candidate resolution",
@@ -1688,6 +1824,28 @@
       "trigger": "no VIN/no auto category map/manual button"
     },
     {
+      "action": "Release PF lock, close loader and return main menu before vehicleDecision",
+      "evidence": [
+        "vehicle_session.confirm_consumer"
+      ],
+      "from": "vehicle_session.select",
+      "guard": "GTS+ EU/OTHER and euDefectiveVehicleFlag",
+      "id": "vehicle_session.confirmation_admission_abort",
+      "to": "vehicle_session.menu",
+      "trigger": "onClickNext regional defective-vehicle dialog S301DL012 OK"
+    },
+    {
+      "action": "Close loader and return without vehicleDecision; Next permits confirmation",
+      "evidence": [
+        "vehicle_session.confirm_consumer"
+      ],
+      "from": "vehicle_session.select",
+      "guard": "Manual parentPhaseType10/18/19 or region!=1 with MAZDA_OEM",
+      "id": "vehicle_session.confirmation_admission_cancel",
+      "to": "vehicle_session.select",
+      "trigger": "onClickNext manual PSA S301DL015 or non-region1 Mazda S301DL016 Cancel"
+    },
+    {
       "action": "Mode4 selectById; nondefault OEM restart; publish confirmation and apply vehicle exception",
       "evidence": [
         "vehicle_session.confirm"
@@ -1699,17 +1857,147 @@
       "trigger": "technician confirms selected identity"
     },
     {
-      "action": "Create status-1 ECU objects with group/bus/phase; hand serialized VehicleInfo to UI",
+      "action": "Call _vehicleDecision -> getVimSupport; classify Ethernet/CANFD and ECU443 route response",
       "evidence": [
+        "vehicle_session.confirm_consumer",
+        "vehicle_session.vim_support",
+        "vehicle_session.vim_route",
+        "vehicle_session.vim_route_predicate"
+      ],
+      "from": "vehicle_session.confirmed",
+      "guard": "Regional/manual selection confirmation dialogs permit continuation",
+      "id": "vehicle_session.check_vim_admission",
+      "to": "vehicle_session.vim_admission",
+      "trigger": "onClickNext completes vehicleDecision"
+    },
+    {
+      "action": "Activity report then release PF lock; postprocess and loadVehicleInformation; create unchecked status-1 ECU objects and hand serialized VehicleInfo to UI",
+      "evidence": [
+        "vehicle_session.vim_admission",
         "vehicle_session.context",
         "vehicle_session.postconnect",
         "vehicle_session.native_mount_guard"
       ],
-      "from": "vehicle_session.confirmed",
-      "guard": "Resolver candidate list available",
+      "from": "vehicle_session.vim_admission",
+      "guard": "supportPattern==PATTERN_1 && vimConnectMethod!=2",
       "id": "vehicle_session.populate_workspace",
       "to": "vehicle_session.workspace",
-      "trigger": "loadVehicleInformation"
+      "trigger": "_vehicleDecision admits VIM"
+    },
+    {
+      "action": "Refresh diagnosis; replace UI VehicleInfo and clear worker vehicle; close loader; show S30101",
+      "evidence": [
+        "vehicle_session.vim_support",
+        "vehicle_session.vim_admission"
+      ],
+      "from": "vehicle_session.vim_admission",
+      "guard": "API failure or unsupported response shape",
+      "id": "vehicle_session.vim_admission_error",
+      "to": "vehicle_session.precheck",
+      "trigger": "getVimSupport returns PATTERN_ERROR"
+    },
+    {
+      "action": "Refresh diagnosis and clear UI/worker vehicle; show S301DL022/024/026 respectively",
+      "evidence": [
+        "vehicle_session.vim_support",
+        "vehicle_session.vim_admission"
+      ],
+      "from": "vehicle_session.vim_admission",
+      "guard": "Ethernet/CANFD capability and ECU443 route classification",
+      "id": "vehicle_session.vim_capability_rejected",
+      "to": "vehicle_session.vim_rejected",
+      "trigger": "getVimSupport returns PATTERN_2/3/4"
+    },
+    {
+      "action": "Return main menu after context reset",
+      "evidence": [
+        "vehicle_session.vim_admission"
+      ],
+      "from": "vehicle_session.vim_rejected",
+      "guard": "Technician chooses Home",
+      "id": "vehicle_session.vim_rejection_home",
+      "to": "vehicle_session.menu",
+      "trigger": "S301DL022/024/026 Home"
+    },
+    {
+      "action": "Dispose current view, clear main/loader references and reinitialize connect controller",
+      "evidence": [
+        "vehicle_session.vim_admission"
+      ],
+      "from": "vehicle_session.vim_rejected",
+      "guard": "Technician chooses Back",
+      "id": "vehicle_session.vim_rejection_back",
+      "to": "vehicle_session.precheck",
+      "trigger": "S301DL022/024/026 Back"
+    },
+    {
+      "action": "Close loader and show S301DL027; do not enter workspace or release lock here",
+      "evidence": [
+        "vehicle_session.vim_admission"
+      ],
+      "from": "vehicle_session.vim_admission",
+      "guard": "supportPattern==PATTERN_1 && vimConnectMethod==2",
+      "id": "vehicle_session.vim_reconnect_required",
+      "to": "vehicle_session.vim_reconnect",
+      "trigger": "VIM connection-method admission"
+    },
+    {
+      "action": "Replace UI VehicleInfo, clear worker vehicle and return menu without disconnect/battery check",
+      "evidence": [
+        "vehicle_session.vim_admission"
+      ],
+      "from": "vehicle_session.vim_reconnect",
+      "guard": "Technician chooses Home",
+      "id": "vehicle_session.vim_reconnect_home",
+      "to": "vehicle_session.menu",
+      "trigger": "S301DL027 Home"
+    },
+    {
+      "action": "disconnectJ2534Device then checkBatteryVoltage communication result",
+      "evidence": [
+        "vehicle_session.vim_admission",
+        "vehicle_session.disconnect_ui"
+      ],
+      "from": "vehicle_session.vim_reconnect",
+      "guard": "Technician chooses Next",
+      "id": "vehicle_session.vim_reconnect_disconnect",
+      "to": "vehicle_session.disconnected",
+      "trigger": "S301DL027 Next"
+    },
+    {
+      "action": "Recursively call _vehicleDecision and requery VIM support",
+      "evidence": [
+        "vehicle_session.vim_admission",
+        "vehicle_session.battery_threshold"
+      ],
+      "from": "vehicle_session.disconnected",
+      "guard": "errorCode===undefined; lowBattery is not tested in this consumer",
+      "id": "vehicle_session.vim_reconnect_retry",
+      "to": "vehicle_session.vim_admission",
+      "trigger": "S301DL027 battery communication check succeeds"
+    },
+    {
+      "action": "Refresh diagnosis, replace UI VehicleInfo, clear worker vehicle and show S30101",
+      "evidence": [
+        "vehicle_session.vim_admission"
+      ],
+      "from": "vehicle_session.disconnected",
+      "guard": "errorCode!==undefined",
+      "id": "vehicle_session.vim_reconnect_reset",
+      "to": "vehicle_session.precheck",
+      "trigger": "S301DL027 battery communication check fails"
+    },
+    {
+      "action": "Reject to onClickNext catch, which closes loader; do not claim workspace entry or context reset",
+      "evidence": [
+        "vehicle_session.vim_admission",
+        "vehicle_session.confirm_consumer"
+      ],
+      "from": "vehicle_session.vim_admission",
+      "guard": "Unexpected supportPattern or PATTERN1 activity-report/lock-release failure",
+      "id": "vehicle_session.vim_admission_exception",
+      "to": "vehicle_session.error",
+      "trigger": "VIM admission workflow rejects outside its handled reset branches"
     },
     {
       "action": "Set vehicleConnectTransitionFlag=true; route healthcheck",

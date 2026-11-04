@@ -14,6 +14,7 @@ import argparse
 import hashlib
 import json
 import re
+import struct
 import subprocess
 import tempfile
 from pathlib import Path
@@ -22,8 +23,9 @@ from typing import Any
 import pefile
 
 from tools import REPO_ROOT
+from tools.techstream.extract_gtsplus_lifecycle_ui_ipc import _operand
 from tools.techstream.extract_gtsplus_tse_managed_semantics import (
-    _instructions, _lines, _method_pin, _open, _recovery_proof, sha256_file,
+    _instructions, _method_pin, _open, _recovery_proof, sha256_file,
 )
 from tools.techstream.gtsplus_local_crypto import decrypt_file
 from tools.techstream.recover_gtsplus_bodies import (
@@ -230,7 +232,7 @@ def _managed_evidence(pes: dict[str, Any], methods: list[dict[str, Any]] = METHO
         row, ins, body = _instructions(pe, spec["type"], spec["method"])
         if _method_pin(row, body) != spec["pin"]:
             raise ValueError(f"IL body drift: {spec['key']}")
-        lines = _lines(pe, ins)
+        lines = [f"{instruction.opcode} {_operand(pe, instruction.operand)}".rstrip() for instruction in ins]
         if any(not any(n in line for line in lines) for n in spec["needles"]):
             raise ValueError(f"IL anchor drift: {spec['key']}")
         selected = []
@@ -244,6 +246,126 @@ def _managed_evidence(pes: dict[str, Any], methods: list[dict[str, Any]] = METHO
                      "locator": f"{spec['type']}::{spec['method']}", **spec["pin"],
                      "anchors": selected, "finding": spec["finding"]})
     return rows
+
+
+def _header_shortcuts(data: bytes, labels: dict[str, str] | None = None) -> list[dict[str, Any]]:
+    """Read packed folder/shortcut descriptors consumed by ISSetup's native loop."""
+    labels = labels or {}
+    u32 = lambda offset: struct.unpack_from("<I", data, offset)[0]
+    u16 = lambda offset: struct.unpack_from("<H", data, offset)[0]
+    base = u32(12)
+    if data[:4] != b"ISc(" or base != 0x200:
+        raise ValueError("InstallShield descriptor representation drift")
+    def text(pointer: int) -> str:
+        if not pointer:
+            return ""
+        start = base + pointer
+        end = start
+        while data[end:end + 2] != b"\0\0":
+            end += 2
+            if end + 2 > len(data):
+                raise ValueError("InstallShield descriptor string boundary")
+        return data[start:end].decode("utf-16le")
+    table = u32(base + 0x27e)
+    if not table:
+        return []
+    result = []
+    def folder(pointer: int, parts: list[str]) -> None:
+        if not pointer:
+            return
+        at = base + pointer
+        name = text(u32(at + 4)) or text(u32(at))
+        path = parts + ([labels.get(name, name)] if name else [])
+        shortcut_count, shortcut_array = u16(at + 14), u32(at + 16)
+        for index in range(shortcut_count):
+            record = base + u32(base + shortcut_array + index * 4)
+            label = text(u32(record + 4)) or text(u32(record))
+            component_count, component_array = u16(record + 44), u32(record + 46)
+            result.append({"folder": "/".join(path), "name": text(u32(record)),
+                           "label": labels.get(label, label), "flags": u16(record + 8),
+                           "target": text(u32(record + 10)), "icon": text(u32(record + 31)),
+                           "record_file_offset": hex(record),
+                           "components": [text(u32(base + component_array + i * 4)) for i in range(component_count)]})
+        child_count, child_array = u16(at + 8) & 0x7fff, u32(at + 10)
+        for index in range(child_count):
+            folder(u32(base + child_array + index * 4), path)
+    # Native constructor preserves these four pointers;10055ac7 dispatches
+    # slots0/1/2/3 using SF_DESKTOP0/SF_STARTMENU4/SF_PROGRAMS1/SF_STARTUP2.
+    for index, root in enumerate(("Desktop", "StartMenu", "Programs", "Startup")):
+        folder(u32(base + table + index * 4), [root])
+    return result
+
+
+def _gui_shortcut_evidence(work: Path, source_path: str, source_id: str,
+                           sources: list[dict[str, Any]], evidence: list[dict[str, Any]]) -> None:
+    header = (work / "data1.hdr").read_bytes()
+    if _hash(header) != "a93568e8b5bd8f9b6057dbe06fe1cef763c1bc819eaa696b2254f4d90bb3b28f":
+        raise ValueError("GUI declarative shortcut header drift")
+    engine_path = work / "ISSetup.dll"
+    _pin(engine_path, "462ad24e32884802cd02194b95b67ad57d0c35df9c91c31defc6ac701603c1a1")
+    sources.append({"id": _id("shortcut-engine"), "path": source_path + ":[0]:Disk1\\ISSetup.dll",
+                    "sha256": sha256_file(engine_path), "size": engine_path.stat().st_size,
+                    "representation": "original native InstallShield engine", "container": source_id})
+    output = work / "shortcut-labels"
+    subprocess.run(["unshield", "-g", "<Support>0x0409 String Tables", "-d", str(output),
+                    "x", str(work / "data1.cab")], check=True, capture_output=True, text=True)
+    strings_path = output / "_Support_0x0409_String_Tables/StringTable_0x0409.ips"
+    _pin(strings_path, "e48eca0dc59f0d914c6d31fc8a97a8cdbbe53e91027ea46c04580a042e6fc468")
+    sources.append({"id": _id("shortcut-labels"), "path": source_path + ":[0]:Disk1\\data1.cab:<Support>0x0409 String Tables\\StringTable_0x0409.ips",
+                    "sha256": sha256_file(strings_path), "size": strings_path.stat().st_size,
+                    "representation": "original English shortcut string table", "container": source_id})
+    labels = dict(line.split("=", 1) for line in strings_path.read_text(encoding="utf-16").splitlines() if "=" in line)
+    shortcuts = _header_shortcuts(header, labels)
+    expected = [("Desktop", "GTS+", "gts/GTSMain.html"),
+                ("Programs/GTS+", "GTS+", "gts/GTSMain.html"),
+                ("Programs/GTS+", "CUW+", "cuw/CUWMain.html")]
+    if [(s["folder"], s["label"], s["target"]) for s in shortcuts] != [
+            (folder, label, "https://127.0.0.1:50005/GetResource/" + target) for folder, label, target in expected]:
+        raise ValueError("GUI browser shortcut target/folder drift")
+    if any(s["flags"] != 1 or s["components"] != ["GTSPlus GUI"] for s in shortcuts):
+        raise ValueError("GUI shortcut type/feature gate drift")
+    native = pefile.PE(str(engine_path))
+    resource = next(r for r in native.DIRECTORY_ENTRY_RESOURCE.entries if str(r.name) == "TYPELIB")
+    entry = resource.directory.entries[0].directory.entries[0].data.struct
+    tlb = native.get_data(entry.OffsetToData, entry.Size)
+    # MSFT enum records carry typed immediate values, not just enum-name strings.
+    if tlb[:4] != b"MSFT":
+        raise ValueError("InstallShield typelib format drift")
+    count = struct.unpack_from("<I", tlb, 0x20)[0]
+    directory = 0x54 + count * 4
+    typebase = struct.unpack_from("<I", tlb, directory)[0]
+    namebase = struct.unpack_from("<I", tlb, directory + 7 * 16)[0]
+    typeinfo = typebase + 0x1d4c
+    member_data = struct.unpack_from("<I", tlb, typeinfo + 4)[0]
+    if count != 190 or struct.unpack_from("<I", tlb, typeinfo + 24)[0] != 5 << 16:
+        raise ValueError("special-folder enum shape drift")
+    enum_members = []
+    for index, expected_name in enumerate(("SF_DESKTOP", "SF_PROGRAMS", "SF_STARTUP", "SF_FAVORITES", "SF_STARTMENU")):
+        value_offset = member_data + 4 + index * 20 + 16
+        typed_value = struct.unpack_from("<I", tlb, value_offset)[0]
+        name_pointer = struct.unpack_from("<I", tlb, member_data + 4 + 100 + 20 + index * 4)[0]
+        name_at = namebase + name_pointer
+        name = tlb[name_at + 12:name_at + 12 + tlb[name_at + 8]].decode("ascii")
+        if name != expected_name or typed_value != 0x8c000000 | index:
+            raise ValueError("special-folder enum value drift")
+        enum_members.append({"name": name, "value": index, "typed_value": hex(typed_value),
+                             "value_rva": hex(entry.OffsetToData + value_offset)})
+    native_pins = [(0x55b7b, "e849000000"), (0x55bb6, "e80e000000"),
+                   (0x55ceb, "e8a0000000"), (0x5668b, "f64308010f84aa050000"),
+                   (0x56830, "8b3d60010d10"), (0x56853, "68ec6b0d10bea86b0d1056ffd7")]
+    if any(native.get_data(rva, len(bytes.fromhex(value))) != bytes.fromhex(value) for rva, value in native_pins):
+        raise ValueError("native shortcut branch/URL-write instruction drift")
+    evidence.append({"id": _id("native.shortcut-engine"), "source": _id("shortcut-engine"),
+                     "kind": "native-bytes-and-decompilation", "locator": "10011851 ->10055ac7 ->10055bc9 ->10055d90",
+                     "anchors": [{"rva": hex(rva), "bytes": value} for rva, value in native_pins],
+                     "typelib": {"resource": "TYPELIB/1", "rva": hex(entry.OffsetToData), "size": entry.Size,
+                                 "sha256": _hash(tlb), "enum": "tagSpecialFolders", "members": enum_members},
+                     "finding": "10011851 copies four header root pointers.10055ac7 dispatches slots0/1/2/3 with folder enums0/4/1/2; typed embedded enum proves Desktop/StartMenu/Programs/Startup.10055bc9 recursively enumerates folder and shortcut descriptor arrays.10055d90 reads flags+8 and URL pointer+10; mask0x1 selects InternetShortcut/.url.1005668b TEST/JZ separates normal links;10056830 loads WritePrivateProfileStringW and10056853..5e writes[InternetShortcut]URL. This write's return is not checked before continuing. It creates links, not browser processes."})
+    evidence.append({"id": _id("declarative-shortcuts"), "source": _id("child.Setup_GUI.exe.hdr"),
+                     "kind": "typed-installshield-shortcut-table", "locator": "descriptor base0x200 +field0x27e ->four root pointers; label string table",
+                     "label_source": _id("shortcut-labels"), "native_consumer": _id("native.shortcut-engine"),
+                     "shortcuts": shortcuts, "startup_shortcuts": [],
+                     "finding": "GUI installs Desktop/GTS+.url and Programs/GTS+/{GTS+,CUW+}.url for GUI-selected feature; localized English labels resolve ID_STRING2/3/5 toGTS+ and ID_STRING6 toCUW+. Targets are local frontend pages. Startup root is empty; browser entry is user activation through Windows shell/default HTTPS handler, not InfoCenter tray click or automatic application startup."})
 
 
 def _component_evidence(archive: Path, directory: Path, decoder: Path,
@@ -280,6 +402,7 @@ def _component_evidence(archive: Path, directory: Path, decoder: Path,
             raise ValueError(f"component SFX record count drift: {name}")
         pos = 4
         inx = None
+        direct_shortcuts = []
         for _ in range(count):
             fields = []
             for _ in range(4):
@@ -291,12 +414,18 @@ def _component_evidence(archive: Path, directory: Path, decoder: Path,
                 fields.append(payload[pos:stop].decode("utf-16le"))
                 pos = stop + 2
             filename, member, version, length = fields
+            if re.search(r"\.(?:url|lnk)$", filename, re.I):
+                direct_shortcuts.append(member)
             size = int(length)
             body = payload[pos:pos + size]
             if len(body) != size:
                 raise ValueError("component SFX payload boundary")
-            if filename in ("setup.inx", "data1.cab", "data1.hdr", "data2.cab"):
+            if filename in ("setup.inx", "data1.cab", "data1.hdr", "data2.cab") or (name == "Setup_GUI.exe" and filename == "ISSetup.dll"):
                 (work / filename).write_bytes(body)
+            if filename == "data1.hdr":
+                sources.append({"id": _id("child." + name + ".hdr"), "path": source_path + ":[0]:" + member,
+                                "sha256": _hash(body), "size": size, "representation": "original declarative cabinet header",
+                                "container": source_id, "sfx_payload_offset": pos})
             if filename == "CUWLauncher_Setup.exe":
                 (directory / filename).write_bytes(body)
             if filename == "setup.inx":
@@ -314,6 +443,8 @@ def _component_evidence(archive: Path, directory: Path, decoder: Path,
         entries = [e for e in _parse_unshield_listing(listing) if e.path != "files"]
         if len(entries) != spec["cabinet_file_count"] or any(re.search(r"AgentLite|AgentLight", e.path, re.I) for e in entries):
             raise ValueError(f"component cabinet/updater census drift: {name}")
+        if any(re.search(r"\.(?:url|lnk)$", e.path, re.I) for e in entries):
+            raise ValueError("copied shortcut-member census drift")
         expected_verifier = VERIFIER_PINS.get(name)
         if bool(expected_verifier) != any(e.path.endswith("VerifyTest2.exe") for e in entries):
             raise ValueError("component signature helper inventory drift")
@@ -368,6 +499,10 @@ def _component_evidence(archive: Path, directory: Path, decoder: Path,
         evidence.append({"id": _id("component." + name), "source": _id("child." + name + ".inx"),
                          "kind": "decoded-component-installscript", "locator": "selected lifecycle/feature callbacks",
                          "functions": functions, "cabinet_file_count": len(entries),
+                         "declarative_shortcut_source": _id("child." + name + ".hdr"),
+                         "declarative_shortcuts": _header_shortcuts((work / "data1.hdr").read_bytes()),
+                         "copied_shortcut_file_members": [],
+                         "sfx_shortcut_file_members": direct_shortcuts,
                          "agentlite_payloads": [], "embedded_runtime_packages": spec["embedded_runtime_packages"],
                          "finding": spec["finding"] + " OnAbort and OnRebooted return without custom compensation."})
         if name == "CUWLauncher_Setup.exe":
@@ -381,6 +516,8 @@ def _component_evidence(archive: Path, directory: Path, decoder: Path,
                              "registry_root": "HKLM/0x80000002", "registry_prefix": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\",
                              "shared_client_keys": LAUNCHER_CLIENT_KEYS, "abort_threshold": ">1 existing keys",
                              "finding": "Func_2116 returns GblVarNum63, set from engine option38 by Func_2284; OnSuiteMaintBefore classifies this predicate as removal303. OnBegin sets HKLM via bound registry root, counts exactly12 uninstall keys and aborts only in remove-only mode with count>1. Initialization calls OnBegin before feature removal. Outer CUWPlusPF_UnInstalled does not inspect launch/exit result; outer removal can continue while launcher and associations remain."})
+        if name == "Setup_GUI.exe":
+            _gui_shortcut_evidence(work, source_path, source_id, sources, evidence)
         if name == "Setup_GuiServer.exe":
             support = work / "certificate-support"
             subprocess.run(["unshield", "-g", "<Support>Language Independent OS Independent Files", "-d", str(support),
@@ -560,6 +697,11 @@ def build(root: Path = DEFAULT_ROOT, recovered_root: Path = DEFAULT_RECOVERED,
                          "locator": "7z11 executables; parent SFX20 records; cabinet50 files",
                          "archive_members": archived, "parent_record_count": 20, "parent_cabinet_file_count": 50,
                          "additional_first_party_helpers": ["VerifyTest2.exe", "SafetyShutdown/GTSPlusNotifyEnd.exe"],
+                         "copied_shortcut_file_members": [e.path for e in entries if re.search(r"\.(?:url|lnk)$", e.path, re.I)],
+                         "sfx_shortcut_file_members": [r["member"] for r in records if re.search(r"\.(?:url|lnk)$", r["name"], re.I)],
+                         "archive_shortcut_file_members": [line.split()[-1] for line in listing.splitlines() if re.search(r"\.(?:url|lnk)$", line.rstrip(), re.I)],
+                         "declarative_shortcut_source": _id("data1.hdr"),
+                         "declarative_shortcuts": _header_shortcuts((directory / "data1.hdr").read_bytes()),
                          "cabinet_application_payloads": [e.path for e in entries if e.path.startswith(("ComponentNA", "PCSettingsNA", "AutoSave"))],
                          "finding": "Parent embeds component settings/manifest, VC prerequisites and shutdown/signature helpers, but references sibling component installers. No AgentLite host/message/edit/service executable occurs in parent records or cabinet."})
         _component_evidence(archive, directory / "components", decoder, sources, evidence)
@@ -593,6 +735,8 @@ def build(root: Path = DEFAULT_ROOT, recovered_root: Path = DEFAULT_RECOVERED,
         ("setup-route", "parent setup.inx", "Select initial/update/maintenance branch"),
         ("transferring", "parent setup.inx + InstallShield runtime", "Transfer settings and prepare uninstall metadata"),
         ("children", "parent setup.inx", "Optional sibling components processed serially"),
+        ("shortcuts-installed", "GUI installer + native InstallShield engine", "Generated desktop/menu InternetShortcut files for local GTS/CUW pages"),
+        ("browser-navigation-requested", "Windows shell/default HTTPS handler", "User activates an installed .url to request the local frontend"),
         ("setup-aborted", "InstallShield runtime", "Abort after explicit script failure/cancel or component error"),
         ("setup-finish", "parent setup.inx", "Finish UI or reboot-needed finish UI"),
         ("os-reboot", "InstallShield runtime", "Finish reboot option delegates engine.Reboot"),
@@ -649,6 +793,8 @@ def build(root: Path = DEFAULT_ROOT, recovered_root: Path = DEFAULT_RECOVERED,
     transition("launcher-preserve-shared", "launcher-uninstall-check", "launcher-preserved", "OnBegin", "Func_2116 remove-only flag true AND existing shared-client HKLM uninstall keys>1", "abort before launcher/association removal", "launcher-preservation-gate")
     transition("launcher-removal-admitted", "launcher-uninstall-check", "uninstall", "OnBegin returns", "remove-only flag true AND existing shared-client keys<=1", "gate admits nested removal; selected launcher uninstall feature deletes extension keys", "launcher-preservation-gate", "component.CUWLauncher_Setup.exe")
     transition("launcher-abort-ignored", "launcher-preserved", "uninstall", "nested uninstall returns after abort", "outer CUWPlusPF_UnInstalled ignores wrapper/exit result", "outer component continues while shared launcher and file associations remain", "component.CUWPlusPF.exe", "launcher-preservation-gate")
+    transition("create-browser-shortcuts", "children", "shortcuts-installed", "GUI engine shortcut phase", "GTSPlus GUI feature eligible", "generate Desktop/GTS+.url and Programs/GTS+/{GTS+,CUW+}.url; no startup-root browser shortcut", "declarative-shortcuts", "native.shortcut-engine", "component.Setup_GUI.exe")
+    transition("activate-browser-shortcut", "shortcuts-installed", "browser-navigation-requested", "user activates desktop/menu .url", "Windows HTTPS handler configured", "Windows shell opens local GTSMain.html or CUWMain.html in default handler; this is not InfoCenter tray activation or automatic process startup", "declarative-shortcuts", "native.shortcut-engine")
     handoffs = [
         {"to_domain": "bootstrap", "caller": "parent setup.inx OnMaintUIBefore", "callee": "GTSPlusNotifyEnd -> MsgDatComm.ER_EndABAppCS -> Arbitration", "mechanism": "child process then existing application communication API", "payload": "helper exit0/1/2; parent abort on>0", "evidence": ev("script.OnMaintUIBefore", "notify.<>c.<GTSPlusNotifyEndExec>b__2_0", "notify.ProgramReturn..cctor")},
         {"to_domain": "bootstrap", "caller": "PcChecker ExecReboot", "callee": "GTSPlusArbitration.exe", "mechanism": "Process.Kill/WaitForExit/Start", "payload": "four process names; install-prefix filter;10000ms waits", "evidence": ev("pc.RebootPage..ctor", "pc.RebootPage.GetPid", "pc.<ExecReboot>d__7.MoveNext")},
@@ -658,6 +804,7 @@ def build(root: Path = DEFAULT_ROOT, recovered_root: Path = DEFAULT_RECOVERED,
         {"to_domain": "cuw_utility", "caller": "CUWPlusPF feature hook -> nested CUWLauncher setup", "callee": "CUWLauncher.exe", "mechanism": "nested silent installer and Windows shell file associations", "payload": ".cuw/.cuwc/.scuw/.cuwd/.usbrepro quoted file argument", "evidence": ev("component.CUWPlusPF.exe", "component.CUWLauncher_Setup.exe")},
         {"to_domain": "bootstrap", "caller": "PF OnMoved/NativeUtilityReg feature hook", "callee": "Arbitration startup and ReplaceFromLegasy COM registration", "mechanism": "startup shortcut plus RegAsm /codebase or /u", "payload": "installed executable/DLL paths", "evidence": ev("component.Setup_PF.exe")},
         {"to_domain": "ui_ipc", "caller": "GuiServer certificate support package", "callee": "local HTTPS certificate binding and Firefox trust policy helper", "mechanism": "packaged batch/managed helper; runtime caller ownership is separate", "payload": "127.0.0.1:50005; public CA filenames and Firefox policies.json; no secret emitted or used", "evidence": ev("certificate-batches", "cert.Program.Main", "cert.Program.Start", "component.Setup_GuiServer.exe")},
+        {"to_domain": "ui_ipc", "caller": "Windows shell:GUI-installed desktop/menu InternetShortcut", "callee": "https://127.0.0.1:50005/GetResource/{gts/GTSMain.html,cuw/CUWMain.html}", "mechanism": "user activation of generated .url through default HTTPS handler", "payload": "GTS+ desktop and GTS+/CUW+ Programs labels; no automatic browser startup", "evidence": ev("declarative-shortcuts", "native.shortcut-engine")},
     ]
     persistence = [
         {"path_pattern": "GTSPlus/Ver/Manifest.json + component-name.json", "producer": "parent ComponentNA and sibling installers", "consumer": "InfoCenter status/version and AgentLite version integration", "created": "installer transfer; ten installed version files observed", "flushed": "installed JSON files", "deleted": "removal delegated component logs/registered uninstallers", "evidence": ev("versions", "installer-census", "info.MainWindow.UpdateStatus", "script.OnMoved")},
@@ -672,6 +819,7 @@ def build(root: Path = DEFAULT_ROOT, recovered_root: Path = DEFAULT_RECOVERED,
         {"path_pattern": "PublicDocuments/GTSPlus/temp/{component-marker}.txt", "producer": "component OnEnd callbacks", "consumer": "external progress integration not recovered", "created": "except pure uninstall where guarded", "flushed": "create/close marker file; no application data payload", "deleted": "not specified by these callbacks", "evidence": ev("component.Setup_GUI.exe", "component.Setup_GuiServer.exe", "component.Setup_NativeGraphViewer.exe", "component.Setup_PCSDataViewer.exe", "component.CUWPlusPF.exe", "component.Setup_TSEConverter.exe")},
         {"path_pattern": "Windows certificate stores and HTTP.sys binding127.0.0.1:50005", "producer": "packaged importCerts_SS.bat; PF CA feature", "consumer": "local service TLS and root trust", "created": "when explicit certificate import/feature hook invoked", "flushed": "certutil/netsh commands; no verified environment result asserted", "deleted": "removeCerts.bat and PF root-CA uninstall hook", "evidence": ev("certificate-batches", "component.Setup_PF.exe", "component.Setup_GuiServer.exe")},
         {"path_pattern": "Firefox/distribution/policies.json; Users/{profile,Default}/AppData/Roaming/Mozilla/Certificates/{rca,ica}.crt", "producer": "packaged CertInstaller managed helper", "consumer": "Firefox certificate policy", "created": "installCerts first argument adds filenames/copies public CAs; other mode sets enterprise roots", "flushed": "File.WriteAllText and overwrite File.Copy; policy edit exceptions printed/caught", "deleted": "no certificate-file deletion in Main/Start path; alternate mode retains files", "evidence": ev("cert.Program.Main", "cert.Program.Start", "cert.Program.CopyCerts2AppData", "cert.Program.copyCertFiles", "cert.PolicyEditer.AddCertificationPolicies", "cert.PolicyEditer.WriteJson")},
+        {"path_pattern": "Desktop/GTS+.url; Programs/GTS+/{GTS+,CUW+}.url", "producer": "GUI declarative header + native ISSetup engine", "consumer": "Windows shell/default HTTPS handler", "created": "GUI-selected component shortcut phase", "flushed": "WritePrivateProfileStringW writes InternetShortcut URL/icon/working-directory properties; API result not checked here", "deleted": "GUI OnBegin deletes legacy Public/Desktop/GTSPlus.url; generated shortcut removal is InstallShield engine/log ownership", "evidence": ev("declarative-shortcuts", "native.shortcut-engine", "component.Setup_GUI.exe")},
     ]
     residuals = [
         {"question": "General AgentLite update/retry/cancel/scheduling and atomic rollback policy", "why_unclosed": "Installed tree, parent20 records/cabinet50 entries, all10 sibling SFX/cabinets and nested CUWLauncher setup contain no AgentLite/AgentLight service/host/message/edit executable body; retained run is observation only.", "next_evidence": "Original AgentLite installer or installed AgentLightHost/CommonLib/service/message/edit assemblies; decompile scheduling/version-comparison/download/install/cleanup paths."},
@@ -689,7 +837,7 @@ def build(root: Path = DEFAULT_ROOT, recovered_root: Path = DEFAULT_RECOVERED,
             "installer_child_order": CHILD_ORDER,
             "residuals": residuals,
             "tool_provenance": {"installscript_decoder": decoder_provenance},
-            "analysis_projects": ["lc_install_update", "lc_install_update_verify", "lc_install_update_verify_legacy"],
+            "analysis_projects": ["lc_install_update", "lc_install_update_verify", "lc_install_update_verify_legacy", "lc_install_update_shortcuts"],
             "safety": "Static PE/IL/InstallScript/config inspection and local package decryption only; no Windows application, installer, vehicle, authentication or network execution."}
 
 
