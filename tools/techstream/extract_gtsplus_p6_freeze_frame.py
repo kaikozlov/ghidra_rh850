@@ -103,6 +103,25 @@ def source(path: Path, root: Path) -> dict[str, Any]:
             "sha256": hashlib.sha256(data).hexdigest()}
 
 
+def intern_evidence(pool: dict[str, Any], value: dict[str, Any]) -> str:
+    canonical = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    key = "sha256:" + hashlib.sha256(canonical).hexdigest()
+    pool.setdefault(key, value)
+    return key
+
+
+def frame_references(frames: dict[str, list[dict[str, Any]]],
+                     pool: dict[str, Any]) -> dict[str, list[dict[str, str]]]:
+    return {
+        selector: [{"frame_ref": intern_evidence(pool, {
+                        key: value for key, value in frame.items()
+                        if key not in {"category_id", "func_comm_frame_raw"}}),
+                    "func_comm_frame_raw": frame["func_comm_frame_raw"]}
+                   for frame in rows]
+        for selector, rows in frames.items()
+    }
+
+
 def interval(pe: Any, data: bytes, base: int, start: int, end: int) -> dict[str, Any]:
     body = read_va(pe, data, base, start, end - start)
     if len(body) != end - start:
@@ -217,11 +236,12 @@ def monitor_witness(db: Any, strings: Any, master: Any, row: Any,
     }
 
 
-def region_evidence(gts: Path, region: str) -> dict[str, Any]:
+def region_evidence(gts: Path, region: str, evidence: dict[str, dict[str, Any]]) -> dict[str, Any]:
     parser = DDBParser()
     dbroot = gts_db_root(gts, region, "Gen")
     master = parser.parse_master_db(dbroot / "Toyota.ddb")
     strings = load_string_db(parser, dbroot / "M_English.ddb")
+    monitor_pool = evidence["monitors"]
     bindings = {r.category_id: r for r in parser.extract_master_dlls(master.sections[19])
                 if r.dll_role_id == 0xB5 and r.dll_name == PLUGIN}
     categories = sorted((r for r in parser.extract_master_ecu_categories(master.sections[16])
@@ -236,10 +256,11 @@ def region_evidence(gts: Path, region: str) -> dict[str, Any]:
                "strings": source(dbroot / "M_English.ddb", gts)}
     for category in categories:
         frames = {f"0x{s:X}": _master_frame_rows(parser, master, category.category_id, s) for s in (0xCF, 0xD0, 0x13E)}
+        frame_refs = frame_references(frames, evidence["frames"])
         path = dbroot / category.database_name
         if not category.database_name or not path.is_file():
             category_rows.append({"category_id": category.category_id, "database": category.database_name,
-                                  "selectors": frames,
+                                  "selectors": frame_refs,
                                   "status": "no ECU DDB filename" if not category.database_name else "DDB missing"})
             continue
         db = parser.parse_ecu_db(path)
@@ -269,28 +290,42 @@ def region_evidence(gts: Path, region: str) -> dict[str, Any]:
             signature = (geometry, mode, row.raw[0x4B], bool(row.ffd_support_condition_key), row.primary_did != row.alternate_did)
             if signature not in mode_witnesses:
                 mode_witnesses[signature] = {"category_id": category.category_id, "database": category.database_name,
-                    "source": source(path, gts), "row": monitor_witness(db, strings, master, row, did_rows)}
+                    "source": source(path, gts),
+                    "row_ref": intern_evidence(monitor_pool, monitor_witness(db, strings, master, row, did_rows))}
         census.update(counts)
         census["categories_with_ddb"] += 1
         census["ffd_rows"] += len(ffd)
         category_rows.append({"category_id": category.category_id, "database": category.database_name,
                               "source": source(path, gts), "monitor_rows": len(monitors), "ffd_rows": len(ffd),
-                              "row_mode_census": dict(sorted(counts.items())), "selectors": frames})
+                              "row_mode_census": dict(sorted(counts.items())), "selectors": frame_refs})
         if frames["0x13E"]:
             memberships = raw_rows(db, 171)
             monitor_by_key = {row.monitor_key: row for row in monitors}
             by_group = {}
-            for raw in memberships:
+            group_counts: dict[int, Counter[str]] = {}
+            for index, raw in enumerate(memberships):
                 monitor = monitor_by_key.get(u16(raw, 2))
-                if monitor is not None:
-                    by_group.setdefault((raw[6], bool(monitor.ffd_support_condition_key)), raw)
+                counts171 = group_counts.setdefault(raw[6], Counter())
+                counts171["rows"] += 1
+                if monitor is None:
+                    counts171["missing_monitor"] += 1
+                else:
+                    conditioned = bool(monitor.ffd_support_condition_key)
+                    counts171["conditioned" if conditioned else "unconditioned"] += 1
+                    by_group.setdefault((raw[6], conditioned), (index, raw))
             additional_info.append({"category_id": category.category_id, "database": category.database_name,
-                "source": source(path, gts), "selector": frames["0x13E"],
-                "table171": [{"index": index, "raw": raw.hex(), "monitor_key": u16(raw, 2), "byte6": raw[6]}
-                             for index, raw in enumerate(memberships)],
-                "monitor_witnesses": [{"byte6": group, "conditioned": conditioned, "membership_raw": raw.hex(),
-                    "monitor": monitor_witness(db, strings, master, monitor_by_key[u16(raw, 2)], did_rows)}
-                    for (group, conditioned), raw in sorted(by_group.items())]})
+                "source": source(path, gts), "selector": frame_refs["0x13E"],
+                "table171": {
+                    "record_size": db.sections[171].decoded_record_size if 171 in db.sections else None,
+                    "record_count": len(memberships),
+                    "decoded_rows_sha256": hashlib.sha256(b"".join(memberships)).hexdigest(),
+                    "group_census": [{"byte6": group, **dict(sorted(counts171.items()))}
+                                     for group, counts171 in sorted(group_counts.items())]},
+                "monitor_witnesses": [{"byte6": group, "conditioned": conditioned,
+                    "membership_index": index, "membership_raw": raw.hex(),
+                    "monitor_ref": intern_evidence(monitor_pool,
+                        monitor_witness(db, strings, master, monitor_by_key[u16(raw, 2)], did_rows))}
+                    for (group, conditioned), (index, raw) in sorted(by_group.items())]})
         if Path(category.database_name).stem not in {"ADCU_P6", "Engine_CM_P6"}:
             continue
         # Keep one concrete witness per distinct relevant row mode, plus every
@@ -311,12 +346,13 @@ def region_evidence(gts: Path, region: str) -> dict[str, Any]:
             "table_inventory": [{"table": t, "records": db.sections[t].header.record_count,
                                   "record_size": db.sections[t].decoded_record_size} for t in (61, 62, 64, 80, 89, 156, 157, 171) if t in db.sections],
             "row_mode_census": dict(sorted(counts.items())), "ffd_rows": len(ffd),
-            "selectors": frames,
+            "selectors": frame_refs,
             "request_materialization_examples": [
                 {"selector": key, "dtc": "0x123456", "snapshot_record": record,
                  "bytes": (bytes.fromhex(frame["send"]["bytes"])[:2] + bytes.fromhex("123456" + record)).hex()}
                 for key, record in (("0xCF", "01"), ("0xD0", "a1")) for frame in frames[key]],
-            "witnesses": [monitor_witness(db, strings, master, row, did_rows) for row in sorted(chosen.values(), key=lambda r: r.index)]})
+            "witness_refs": [intern_evidence(monitor_pool, monitor_witness(db, strings, master, row, did_rows))
+                             for row in sorted(chosen.values(), key=lambda r: r.index)]})
     return {"region": region, "sources": sources, "binding_count": len(bindings),
             "census": dict(sorted(census.items())), "categories": category_rows,
             "mode_witnesses": list(mode_witnesses.values()), "targets": targets,
@@ -393,8 +429,12 @@ def semantics() -> dict[str, Any]:
 
 def build(gts_root: Path | None = None, recovered_root: Path = DEFAULT_RECOVERED) -> dict[str, Any]:
     gts = resolve_gts_root(gts_root)
-    return {"schema": "gtsplus-p6-per-dtc-ffd-evidence-v1", "native": native(gts, recovered_root),
-            "semantics": semantics(), "regions": [region_evidence(gts, region) for region in ("NA", "EU", "JP")]}
+    evidence: dict[str, dict[str, Any]] = {"frames": {}, "monitors": {}}
+    regions = [region_evidence(gts, region, evidence) for region in ("NA", "EU", "JP")]
+    return {"schema": "gtsplus-p6-per-dtc-ffd-evidence-v2", "native": native(gts, recovered_root),
+            "evidence": evidence,
+            "evidence_reference_format": "sha256 of canonical UTF-8 JSON (sorted keys, compact separators); frame_ref resolves in evidence.frames, row_ref/monitor_ref/witness_refs resolve in evidence.monitors. Regional master/string/ECU source hashes identify each use. Category-specific FuncCommFrame raw bindings remain at each selector reference. Type171 retains full row counts, decoded-row digest, per-group census, and one raw membership per group/condition branch.",
+            "semantics": semantics(), "regions": regions}
 
 
 def main() -> None:
