@@ -1,0 +1,89 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_dcm_full_ring_all_duplicates_tombstone_without_capacity",
+  "entry": {
+    "role": "retained",
+    "scope": "resolved-address",
+    "address": "0x922ea"
+  },
+  "max_instructions": 15000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1f00",
+      "size": 256,
+      "fill": 165,
+      "evidence": "Bounded caller stack only; exact PREPARE frames and nested lock thunks remain within 256 bytes."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "6A4C4 reads the PMR-save depth; zero depth matches PMR=FF00 with no caller lock frames."
+    },
+    {
+      "address": "0xfebe5e51",
+      "hex": "07071f00000000000000000000000000000000000000000000000000000000000000",
+      "evidence": "989EC/98946/98A44: three-byte producer/consumer/occupied prefix and exactly 31 event bytes; valid p=(c+n) mod31. FF is a tombstone, not free capacity."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Exact original-byte stop boundary",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Priority ceiling retained",
+      "kind": "register",
+      "register": "PMR",
+      "equals": "0xff00"
+    },
+    {
+      "name": "No unmatched priority-mask frame",
+      "kind": "memory",
+      "address": "0xfebe39dc",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "Bounded stack lower canary retained",
+      "kind": "memory",
+      "address": "0xfebe1f00",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    },
+    {
+      "name": "Callable stack fully restored",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    },
+    {
+      "name": "Exact producer/consumer/occupied and all event bytes",
+      "kind": "memory",
+      "address": "0xfebe5e51",
+      "size": 34,
+      "equals_hex": "07071fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    },
+    {
+      "name": "Invalidation does not decrement occupied count",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0x2"
+    }
+  ]
+}

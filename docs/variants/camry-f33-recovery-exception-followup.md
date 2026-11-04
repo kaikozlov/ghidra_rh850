@@ -73,11 +73,119 @@ The reviewed single-frame chain is
 `81200 -> 79DB0 -> 7A57A -> 7A4E4 -> 7ADF8 -> 7AD96`, through fixed PDU-router
 callbacks and `7BE58/7BE6C/7BE90` to DCM `920BE/92152/921D2`.
 
-The nested completion path `921D2 -> 91F72 -> 92B4A -> 92AB0/92A86` was also
-inspected: it prepares request buffers/state for later service execution.
-`98B3A` writes timer deadlines and flags. Timer slot 6's callback `922EA`
-queues event 0 through `989EC`, which writes an event ring. Timer worker `98AE4`
-and event consumer `98946` run under `988C2`.
+The nested completion path `921D2 -> 91F72 -> 92B4A -> 92AB0/92A86` prepares
+request buffers/state for later service execution. `98B3A` arms software timers.
+The lifecycle analysis below uses reconstructed sources, exact
+`tools/gtarget camry-8965F3307000` instruction bytes, ROM reads, and local
+execution of the original firmware.
+
+**Foreground and routing.** `988C2` rereads/rewrites byte `FEBE5E50` and runs
+`91FBE -> 98AE4 -> 98946` only when that byte equals `A5`. `91FBE` rewrites the
+phase, pending/current receive slots, session byte, and communication-enable byte
+unchanged under the priority-mask wrappers. Event-table word `26B18` is
+`AA 22 09 00`: event 0 calls `922AA`. That callback reads pending slot
+`FEBE59E0` and phase `FEBE5960`; exact compare/branch `922C2/922C4` selects:
+
+- Phase 2: `93C66` publishes the pending slot into current slot `FEBE59E2`,
+  then `91C0A` builds the arguments and calls service entry `91566`.
+  `93C6C` rewinds the selected receive cursor without clearing its length or
+  payload. ROM `25E90`, `25EE8`, `25EC0`, and their connection/descriptor
+  pointers give slots 0/1/2 buffers `FEBE5651/FEBE5751/FEBE5851`, addressing
+  bytes `0/1/0`, and service-list selectors `2/3/4`. Each response argument
+  uses `FEBE5A20` with capacity `0300`.
+- Any other phase: `93C9A(pending_slot, 1)` resets that slot's cursor to its
+  configured base, length to zero, remaining capacity to `0100`, receiving
+  and inactivity-participant bytes to zero, and the first payload byte to zero.
+  The phase and pending/current slot identifiers remain unchanged. Argument 1
+  preserves the shared response's first byte and transport-accepted flag;
+  the slot's abort-pending byte and other untouched bytes also remain retained.
+
+**Timer boundary.** `26AEC` contains u32 `5`; the nine callback words begin
+at `26BCC`, with slot 6 word `26BE4 = EA 22 09 00` (`922EA`). Timer records
+start at `FEBE5E74`, stride 8; slot 6 is `FEBE5EA4`, armed byte `FEBE5EA8`.
+`98AFA..98B16` reads only armed value 1 as active and compares the u32 countdown
+unsigned with the quantum. Countdown `<5` clears armed and calls the callback
+without changing the countdown. Countdown `>=5` subtracts 5 and remains armed.
+Thus 5 becomes zero on the first invocation and expires on the next; zero is
+itself an expiry input. The timer callback invalidates all queued event-0
+instances with `98A44(0,0)`, then calls `989EC(0)`. Since `988C2` advances
+timers before entering the event consumer, a successfully enqueued expiry event
+can reach `91566` in that **same foreground invocation**. These are invocation
+boundaries, not measured clock intervals.
+
+**Ring capacity and invalidation.** `FEBE5E51/52/53` are producer, consumer,
+and occupied count; 31 event bytes occupy `FEBE5E54..FEBE5E72`. For a valid
+ring, both cursors are `0..30`, count is `0..31`, and
+`producer = (consumer + count) mod 31`; equal cursors can mean empty or full.
+`98A44` scans the occupied interval from the consumer, including wraparound,
+and writes `FF` tombstones without moving either cursor or changing count.
+`989EC` accepts count `<31`, writes at the producer, advances it modulo 31,
+and increments count; count 31 returns 2 without overwriting an event.
+`98946` snapshots count at entry and pops exactly that many slots, advancing
+consumer/decrementing count even for `FF`, which suppresses its callback.
+The consumed event byte itself is not erased.
+
+Consequently, three wrapped duplicates become three occupied tombstones plus
+one appended event when capacity exists. At count 30, replacement can use the
+last slot and dispatch after the tombstones in the same foreground call. At
+count 31, invalidation does not create enqueue capacity: replacement returns 2.
+Other event IDs remain queued. If all 31 occupied bytes were event 0, expiry
+turns them into tombstones, replacement fails, and the immediately following
+consumer drains them. The retained request and phase 2 survive, but slot 6 is
+disarmed and a second foreground invocation does not automatically retry.
+These full-ring fixtures use valid cursor/count invariants and explicit synthetic
+event contents. They do not establish that external traffic can produce saturation,
+and saturation does not erase every kind of queued work.
+
+**Observed original-byte coverage.** All **22/22** scheduling scenarios below
+passed with status `verified-local-execution`, totaling **17,458 instructions**.
+The canonical scenarios and exact case names are the standalone JSON fixtures in
+[`tests/fixtures/rh850/machine/camry-8965F3307000/`](../../tests/fixtures/rh850/machine/camry-8965F3307000/).
+These are exact-machine execution contracts with nested service-entry checkpoints,
+not native-C equivalence checks; internal SP, PDU, phase, payload, ring, and
+multi-call assertions remain intact.
+
+| Semantic boundary | Cases | Inputs covered |
+|---|---:|---|
+| Ready-slot routing | 3 | Phase 2, slots 0/1/2 |
+| Non-ready slot reset | 4 | Phases 0/1/3/255 |
+| Timer quantum | 5 | Countdowns 0/4/5/6, including two invocations at equality |
+| Wrapped invalidation | 2 | Direct expiry callback and foreground dispatch |
+| Ring capacity | 5 | Counts 30/31, mixed IDs/all duplicates, subsequent foreground invocation |
+| Foreground enable | 3 | Disabled values `00/A4/A6` |
+
+Every scenario enters original `988C2`, except three direct `922EA` callback
+cases: wrapped invalidation and the two full-ring invalidation cases.
+Terminal stops are `798` and, for dispatch cases, `91566`.
+A stop at `91566` checks route/PDU arguments and retained slot state before
+any service-body instruction or response execution.
+
+Inputs explicitly supply only the ring, selected receive record/payload,
+foreground context bytes, timer armed bytes and necessary countdowns, empty
+priority-mask save depth, and a bounded 256-byte caller stack. The two-call rows
+return from the first original `988C2` to the 14-byte RAM sequencer at `FEBF2000`:
+`3F 06 98 07 00 00 21 06 C2 88 09 00 61 00`
+(`mov 798,lp; mov 988C2,r1; jmp [r1]`). It only invokes the second unmodified
+foreground call and returns to `798`; it changes no firmware state or arguments
+between calls. The MOV encodings were confirmed in original instructions at
+`34B5A/1300`. Execution used the original firmware plus these explicit sparse
+inputs, with no CodeFlash overlays, callback substitutions, stubs, or blanket
+RAM initialization.
+
+To rerun these 22 scenarios directly, use:
+
+```sh
+tools/rh850 test firmware camry-8965F3307000 \
+  tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_dcm_queued_event0_*.json \
+  tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_dcm_timer6_*.json \
+  tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_dcm_duplicate_event0_*.json \
+  tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_dcm_full_ring_*.json \
+  tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_dcm_ring30_*.json \
+  tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_dcm_disabled_*.json
+```
+
+`tests/tooling/verify_rh850_machine.py` automatically includes these fixtures in
+`tools/test rh850_firmware`; no harness registration is required.
 
 The recovered application-to-boot handoff remains
 `58B5E -> 5F464/5F91C -> 56CF6 -> 65F5E -> 9F00 -> 148E -> 1398`.

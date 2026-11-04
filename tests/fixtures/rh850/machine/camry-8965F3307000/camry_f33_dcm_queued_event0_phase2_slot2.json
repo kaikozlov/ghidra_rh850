@@ -1,0 +1,346 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_dcm_queued_event0_phase2_slot2",
+  "entry": {
+    "role": "retained",
+    "scope": "resolved-address",
+    "address": "0x988c2"
+  },
+  "max_instructions": 15000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798",
+    "0x91566"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1f00",
+      "size": 256,
+      "fill": 165,
+      "evidence": "Bounded caller stack only; exact PREPARE frames and nested lock thunks remain within 256 bytes."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "6A4C4 reads the PMR-save depth; zero depth matches PMR=FF00 with no caller lock frames."
+    },
+    {
+      "address": "0xfebe5e50",
+      "hex": "a5",
+      "evidence": "988C2 exact A5 foreground enable gate."
+    },
+    {
+      "address": "0xfebe5960",
+      "hex": "02",
+      "evidence": "922AA compares this byte with2; no service code executes at the 91566 stop."
+    },
+    {
+      "address": "0xfebe59e0",
+      "hex": "02000000",
+      "evidence": "9400E pending slot, 93C66 current slot; use distinct valid slots to expose publication."
+    },
+    {
+      "address": "0xfebe595c",
+      "hex": "01",
+      "evidence": "92602 rereads/rewrites the current session byte unchanged."
+    },
+    {
+      "address": "0xfebe5650",
+      "hex": "01",
+      "evidence": "91AB8 rereads/rewrites the communication-enable byte unchanged."
+    },
+    {
+      "address": "0xfebe5a20",
+      "hex": "7e",
+      "evidence": "Shared-response first-byte canary; 93C9A second argument1 leaves it untouched."
+    },
+    {
+      "address": "0xfebe59ea",
+      "hex": "01",
+      "evidence": "Shared pending-transport flag; the non-ready reset preserves it with second argument1."
+    },
+    {
+      "address": "0xfebe5a10",
+      "hex": "5358befe0200ccddfe00000101919293",
+      "evidence": "93C6C rewinds only the cursor; 93C9A resets cursor/length/capacity/receiving/inactivity and preserves other bytes. Two retained payload bytes occupy capacity256."
+    },
+    {
+      "address": "0xfebe5851",
+      "hex": "1003a7",
+      "evidence": "Two-byte retained diagnostic request and adjacent payload canary; 93C9A clears only the first buffer byte."
+    },
+    {
+      "address": "0xfebe5e78",
+      "hex": "00",
+      "evidence": "98AE4 reads only this inactive slot armed byte; its countdown is deliberately unspecified."
+    },
+    {
+      "address": "0xfebe5e80",
+      "hex": "00",
+      "evidence": "98AE4 reads only this inactive slot armed byte; its countdown is deliberately unspecified."
+    },
+    {
+      "address": "0xfebe5e88",
+      "hex": "00",
+      "evidence": "98AE4 reads only this inactive slot armed byte; its countdown is deliberately unspecified."
+    },
+    {
+      "address": "0xfebe5e90",
+      "hex": "00",
+      "evidence": "98AE4 reads only this inactive slot armed byte; its countdown is deliberately unspecified."
+    },
+    {
+      "address": "0xfebe5e98",
+      "hex": "00",
+      "evidence": "98AE4 reads only this inactive slot armed byte; its countdown is deliberately unspecified."
+    },
+    {
+      "address": "0xfebe5ea0",
+      "hex": "00",
+      "evidence": "98AE4 reads only this inactive slot armed byte; its countdown is deliberately unspecified."
+    },
+    {
+      "address": "0xfebe5ea4",
+      "hex": "6400000000",
+      "evidence": "98AE4 slot6: u32 countdown and byte armed; immutable 26AEC quantum is5."
+    },
+    {
+      "address": "0xfebe5eb0",
+      "hex": "00",
+      "evidence": "98AE4 reads only this inactive slot armed byte; its countdown is deliberately unspecified."
+    },
+    {
+      "address": "0xfebe5eb8",
+      "hex": "00",
+      "evidence": "98AE4 reads only this inactive slot armed byte; its countdown is deliberately unspecified."
+    },
+    {
+      "address": "0xfebe5e51",
+      "hex": "01000100ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "evidence": "989EC/98946/98A44: three-byte producer/consumer/occupied prefix and exactly 31 event bytes; valid p=(c+n) mod31. FF is a tombstone, not free capacity."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Exact original-byte stop boundary",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x91566"
+    },
+    {
+      "name": "Priority ceiling retained",
+      "kind": "register",
+      "register": "PMR",
+      "equals": "0xff00"
+    },
+    {
+      "name": "No unmatched priority-mask frame",
+      "kind": "memory",
+      "address": "0xfebe39dc",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "Bounded stack lower canary retained",
+      "kind": "memory",
+      "address": "0xfebe1f00",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    },
+    {
+      "name": "Exact retained receive-slot record",
+      "kind": "memory",
+      "address": "0xfebe5a10",
+      "size": 16,
+      "equals_hex": "5158befe0200ccddfe00000101919293"
+    },
+    {
+      "name": "Request bytes and adjacent canary",
+      "kind": "memory",
+      "address": "0xfebe5851",
+      "size": 3,
+      "equals_hex": "1003a7"
+    },
+    {
+      "name": "Request phase retained at this boundary",
+      "kind": "memory",
+      "address": "0xfebe5960",
+      "size": 1,
+      "equals_hex": "02"
+    },
+    {
+      "name": "Pending/current receive-slot routing",
+      "kind": "memory",
+      "address": "0xfebe59e0",
+      "size": 4,
+      "equals_hex": "02000200"
+    },
+    {
+      "name": "Shared response preserved",
+      "kind": "memory",
+      "address": "0xfebe5a20",
+      "size": 1,
+      "equals_hex": "7e"
+    },
+    {
+      "name": "Shared transport-accepted flag preserved",
+      "kind": "memory",
+      "address": "0xfebe59ea",
+      "size": 1,
+      "equals_hex": "01"
+    },
+    {
+      "name": "Enable byte remains exact",
+      "kind": "memory",
+      "address": "0xfebe5e50",
+      "size": 1,
+      "equals_hex": "a5"
+    },
+    {
+      "name": "Session byte retained",
+      "kind": "memory",
+      "address": "0xfebe595c",
+      "size": 1,
+      "equals_hex": "01"
+    },
+    {
+      "name": "Communication-enable byte retained",
+      "kind": "memory",
+      "address": "0xfebe5650",
+      "size": 1,
+      "equals_hex": "01"
+    },
+    {
+      "name": "Original nested foreground/consumer/callback/dispatcher frames",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe1fc0"
+    },
+    {
+      "name": "Service route argument",
+      "kind": "register",
+      "register": "r6",
+      "equals": "0xfebe1fc0"
+    },
+    {
+      "name": "Received PDU argument",
+      "kind": "register",
+      "register": "r7",
+      "equals": "0xfebe1fcc"
+    },
+    {
+      "name": "Response PDU argument",
+      "kind": "register",
+      "register": "r8",
+      "equals": "0xfebe1fc4"
+    },
+    {
+      "name": "ROM-derived physical/functional addressing byte",
+      "kind": "memory",
+      "address": "0xfebe1fc0",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "ROM-derived receive ID used as service-list selector",
+      "kind": "memory",
+      "address": "0xfebe1fc2",
+      "size": 2,
+      "equals_hex": "0400"
+    },
+    {
+      "name": "Received PDU contains exact configured buffer and retained length",
+      "kind": "memory",
+      "address": "0xfebe1fcc",
+      "size": 6,
+      "equals_hex": "5158befe0200"
+    },
+    {
+      "name": "ROM-derived shared response pointer and connection capacity",
+      "kind": "memory",
+      "address": "0xfebe1fc4",
+      "size": 6,
+      "equals_hex": "205abefe0003"
+    },
+    {
+      "name": "Inactive timer0 remains inactive",
+      "kind": "memory",
+      "address": "0xfebe5e78",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "Inactive timer1 remains inactive",
+      "kind": "memory",
+      "address": "0xfebe5e80",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "Inactive timer2 remains inactive",
+      "kind": "memory",
+      "address": "0xfebe5e88",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "Inactive timer3 remains inactive",
+      "kind": "memory",
+      "address": "0xfebe5e90",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "Inactive timer4 remains inactive",
+      "kind": "memory",
+      "address": "0xfebe5e98",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "Inactive timer5 remains inactive",
+      "kind": "memory",
+      "address": "0xfebe5ea0",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "Slot6 countdown and armed byte",
+      "kind": "memory",
+      "address": "0xfebe5ea4",
+      "size": 5,
+      "equals_hex": "6400000000"
+    },
+    {
+      "name": "Inactive timer7 remains inactive",
+      "kind": "memory",
+      "address": "0xfebe5eb0",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "Inactive timer8 remains inactive",
+      "kind": "memory",
+      "address": "0xfebe5eb8",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "Exact producer/consumer/occupied and all event bytes",
+      "kind": "memory",
+      "address": "0xfebe5e51",
+      "size": 34,
+      "equals_hex": "01010000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    }
+  ]
+}
