@@ -1557,7 +1557,7 @@ seeded ones.
 |---|---|---|---|---|
 | Missing subfunction read | `dcm_resolve_subfunction @ 0x9105A`, PC `0x91078` | 1-byte request (SID only) for a subfunction service | **Proven through `cantp_receive_can_frame @ 0x7A57A`** | The hoisted read occurs, but the declared-length branch returns NRC `13` independently of the stale byte |
 | Zero-length first-byte reads | `dcm_begin_service_request @ 0x91566` (PCs `0x91586/0x9158C/0x915A2/0x9161C`), `dcm_resolve_service @ 0x90F98` (PC `0x90FC6`) | 0-length direct-injected request | Direct entry only; not demonstrated through CanTp | Reads the absent SID byte; no write effect |
-| RoutineControl retained-tail read | `unpack_routine_arguments_and_zero_response_payload @ 0x974B0`, PCs `0x9758A/0x9758C` | Short `31 01 10 04` followed by operation-status continuation | Scheduled dispatcher (DCM lifecycle) | Only RID `1004` can turn the stale scalar into an action; exact consequences are closed below |
+| RoutineControl retained-tail read | `unpack_routine_arguments_and_zero_response_payload @ 0x974B0`, PCs `0x9758A/0x9758C` | Short `31 01 10 04` followed by a directly invoked operation-status-1 callback | Synthetic continuation after scheduled dispatch | RID `1004` can turn the stale scalar into an action if the callback is forced; normal short-request dispatch does not schedule it |
 | BA stale selector/token read | `dispatch_ba_configured_start @ 0x34DD4` PC `0x34DE4`, `compare_ba_token_bytes @ 0x34D7A` PC `0x34D8E` | 1-byte `BA` reusing a slot holding `F7 BAENA` | Scheduled DCM; not yet through CanTp | Up to **six** stale bytes consumed (maximal case `ba_stale_selector_token_reuse`, now a permanent seed); action dispatch blocked — see below |
 
 **The missing-subfunction consequence is closed through transport.** Two
@@ -1602,6 +1602,36 @@ RID-`1010` pointer form, and the valid-length control. Inputs are explicit
 synthetic receive-slot state. The action case stops at original `0x5551A` after
 the operation-5 state write; it does not claim capture-media behavior.
 
+**Normal transport dispatch does not create that continuation.** Original
+`97B12` is ROM event6's callback (`26B30`). Its sole recovered event producer
+is `97822`'s callback-result-`0A` arm: `978D8` compares the result, then
+`978E2/978E4` loads event6 and calls `989EC`. The initial length gate at
+`97936..9793C` branches to NRC `13` at `9798E`, before callback execution
+at `97986`. The variable RDBI event producer chooses only `05/24`; public
+service-event wrapper callers use `EB..F1`, not6.
+
+Five `camry_f33_rc_transport_*.json` scenarios close the relevant transitions:
+
+* Native timeout cleanup, fresh SF reception through `7A57A`, transport
+  foreground, and four scheduled `988C2` cycles reject declared lengths4
+  and5 while retaining the action-admitting `FF FF` scalar bytes. Both leave
+  exact `7F 31 13`, callback-pending0, an empty event ring, and operation5 idle.
+* The six-byte control follows the same transport path and reaches original
+  `5551A` with operation5 state5.
+* A valid request followed by a short SF on the same active connection retains
+  the original six-byte request and its received length. `9373A` rejects a
+  matching protocol/connection while request phase exceeds1; the replacement
+  cannot shorten the active callback's input.
+* Original cancellation `97A94` passes operation-status2 without unpacking
+  arguments, clears pending state, and invalidates **all** queued event6
+  entries (`97AB8..97ABC`). A synthetic outstanding callback with two queued
+  resumes is cancelled and drained without starting operation5.
+
+All five cases passed exact-image execution. Cancellation's outstanding state
+is an explicit synthetic precondition; the transport cases inject neither
+resume callbacks nor event6. The earlier direct-`97B12` case establishes a
+low-level callback precondition defect, not an externally created continuation.
+
 
 **A latent null function-pointer call exists in the WDBI length path.**
 `dcm_did_class_length @ 0x9449E` bounds its row index with `cmp 0x6` (indices
@@ -1622,11 +1652,11 @@ latent, matching MEM-SAFE-004's treatment of the Sienna command-8 defect.
 **Disposition:** the four read mechanisms are bounded but not equivalent. BA
 stops at its configured length gate; the WDBI row-5 call is not request
 reachable; zero-length direct injection has no demonstrated write effect; and
-the missing-subfunction byte does not change the length-error result. The
-RoutineControl operation-status-1 path can convert a stale RID-`1004` `FF FF`
-tail into an operation-5 state change. Its exact software consequence is now
-retained; external creation of the required slot/lifecycle state is a separate
-reachability question.
+the missing-subfunction byte does not change the length-error result.
+RoutineControl's forced operation-status-1 callback can convert a stale
+RID-`1004` `FF FF` tail into an operation-5 state change, but normal short-request
+dispatch rejects it before creating a continuation. Active-request ownership
+and cancellation prevent the tested slot-replacement and queued-resume paths.
 
 ## 14. Exact F33 persistent Gate-2 development patch
 
@@ -4856,6 +4886,12 @@ reads that lifecycle byte at `6A250` and propagates it to `5090`; its optional
 counter/ring path is disabled by `5A`. Both observed terminal cases preserve
 committed freshness and release queue/work; only budget203 publishes COM44,
 while budget204 preserves the COM payload/generation/timer canaries.
+
+Upstream transport completion, result-copy ownership, cancellation, and
+software-produced failures are covered by the exact-F33
+[crypto lifecycle closure](../security/icu-hsm-command-surface.md#71-exact-f33-secoc-verification-lifecycle).
+Its eighteen executed scenarios distinguish transport status `FEBF13BE/13BF`
+from the MAC verdict at `FEBE5564`; hardware crypto input remains explicit.
 
 
 ## 58. 2026-09-06 RAM resident failure, ABI correction, and corrected discriminator (VAR-135/136)

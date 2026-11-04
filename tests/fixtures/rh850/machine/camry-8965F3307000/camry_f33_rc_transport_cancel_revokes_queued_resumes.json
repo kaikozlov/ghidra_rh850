@@ -1,0 +1,90 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_rc_transport_cancel_revokes_queued_resumes",
+  "entry": {
+    "role": "retained",
+    "scope": "resolved-address",
+    "address": "0x97a94"
+  },
+  "max_instructions": 10000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0xfebf2000",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 211,
+      "evidence": "Synthetic bounded caller stack."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Synthetic empty native PMR-save stack."
+    },
+    {
+      "address": "0xfebe5e14",
+      "hex": "030001",
+      "evidence": "Synthetic retained RID1004 row3 and startRoutine type1 from a previously admitted request. No request bytes are needed by original operation-status2."
+    },
+    {
+      "address": "0xfebe5d28",
+      "hex": "01",
+      "evidence": "Synthetic outstanding application callback flag, consumed by native cancellation."
+    },
+    {
+      "address": "0xfebe5e51",
+      "hex": "0200020606",
+      "evidence": "Synthetic two queued resume events6 with read cursor0, write cursor2, occupied2. Tests cancellation of all matching queued callbacks, including a stale duplicate."
+    },
+    {
+      "address": "0xfebe82d4",
+      "hex": "00",
+      "evidence": "Synthetic operation5 idle canary; cancellation must not start the action."
+    },
+    {
+      "address": "0xfebf2000",
+      "hex": "3f06980700002106468909006100",
+      "evidence": "Call-only continuation enters original event dispatcher after97A94 cancellation; no state mutation between calls."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Cancellation and scheduled drain return",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "No callback remains pending",
+      "kind": "memory",
+      "address": "0xfebe5d28",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "All queued resumes revoked and drained",
+      "kind": "memory",
+      "address": "0xfebe5e51",
+      "size": 5,
+      "equals_hex": "020200ffff"
+    },
+    {
+      "name": "Cancellation never starts operation5",
+      "kind": "memory",
+      "address": "0xfebe82d4",
+      "size": 1,
+      "equals_hex": "00"
+    }
+  ]
+}

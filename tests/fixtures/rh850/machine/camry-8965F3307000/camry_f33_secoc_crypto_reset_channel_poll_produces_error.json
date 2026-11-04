@@ -1,0 +1,171 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_secoc_crypto_reset_channel_poll_produces_error",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0x89114"
+  },
+  "max_instructions": 60000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack scratch only."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Synthetic input: No outer priority-mask nesting frame."
+    },
+    {
+      "address": "0xfebf137c",
+      "hex": "e87d02001782fdffa500d2",
+      "evidence": "Synthetic input: Original configured handle0 descriptor, complemented selected pointer, active serviceA5 and unlockedD2."
+    },
+    {
+      "address": "0xfebf1318",
+      "hex": "6455befe",
+      "evidence": "Synthetic input: Synthetic caller output pointer retained from88FC0."
+    },
+    {
+      "address": "0xfebf128c",
+      "hex": "9baa4101",
+      "evidence": "Synthetic input: Complement of caller output pointer."
+    },
+    {
+      "address": "0xfebe5564",
+      "hex": "a7",
+      "evidence": "Synthetic input: Canary caller result, not an authentication verdict."
+    },
+    {
+      "address": "0xfebf13be",
+      "hex": "005b",
+      "evidence": "Synthetic input: No completion; distinct callback status canary."
+    },
+    {
+      "address": "0xfebf12b4",
+      "hex": "7e000000",
+      "evidence": "Synthetic input: Explicit synthetic rejected verifier output staging, not observed ICU output; callback injection only."
+    },
+    {
+      "address": "0xfebf1198",
+      "hex": "ffffffff",
+      "evidence": "Synthetic input: Complement of null installed callback."
+    },
+    {
+      "address": "0xfebf1294",
+      "hex": "d200",
+      "evidence": "Synthetic input: No deferred completion."
+    },
+    {
+      "address": "0xfebf1288",
+      "hex": "e47d0200",
+      "evidence": "Synthetic input: Original handle0 readiness pointer from configured ROM record."
+    },
+    {
+      "address": "0xfebf1290",
+      "hex": "1b82fdff",
+      "evidence": "Synthetic input: Complement of configured readiness pointer."
+    },
+    {
+      "address": "0xfebf10d0",
+      "hex": "0000000000000000",
+      "evidence": "Synthetic input: Bounded saved FHVE state for original release routine."
+    },
+    {
+      "address": "0xfebf6cd0",
+      "hex": "0000",
+      "evidence": "Synthetic input: No suspended flash operation to resume."
+    },
+    {
+      "address": "0xfebf1190",
+      "hex": "b4000000",
+      "evidence": "Synthetic input: Synthetic active wrapper whose installed low-level channel was reset."
+    },
+    {
+      "address": "0xfebf136c",
+      "hex": "00",
+      "evidence": "Synthetic input: Uninitialized low-level channel causes native poll error10 without ICU execution."
+    },
+    {
+      "address": "0xfebf131c",
+      "hex": "00000000000000000000000000000000",
+      "evidence": "Synthetic input: Bounded null stream/finalizer/command snapshot read before validator."
+    },
+    {
+      "address": "0xfebf1360",
+      "hex": "ffffffffffffffffffffffff",
+      "evidence": "Synthetic input: Complements of null stream callbacks."
+    },
+    {
+      "address": "0xffc5d000",
+      "hex": "00000000000000000000000000000000",
+      "evidence": "Synthetic input: Explicit idle peripheral inputs; no command submitted by scenario."
+    },
+    {
+      "address": "0xffc5d014",
+      "hex": "00000000",
+      "evidence": "Synthetic input: No hardware FIFO/completion indication."
+    }
+  ],
+  "checks": [
+    {
+      "name": "PC",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Native validator error reaches original completion callback",
+      "kind": "memory",
+      "address": "0xfebf13be",
+      "size": 2,
+      "equals_hex": "0101"
+    },
+    {
+      "name": "Software channel error does not write verifier output",
+      "kind": "memory",
+      "address": "0xfebe5564",
+      "size": 1,
+      "equals_hex": "a7"
+    },
+    {
+      "name": "Native poll error releases wrapper ownership",
+      "kind": "memory",
+      "address": "0xfebf1190",
+      "size": 1,
+      "equals_hex": "e1"
+    },
+    {
+      "name": "Native poll error consumes service ownership",
+      "kind": "memory",
+      "address": "0xfebf137c",
+      "size": 9,
+      "equals_hex": "00000000ffffffffe1"
+    },
+    {
+      "name": "Uninitialized driver reports no hardware error bits",
+      "kind": "memory",
+      "address": "0xfebf1184",
+      "size": 4,
+      "equals_hex": "00000000"
+    }
+  ],
+  "peripheral_file": true
+}

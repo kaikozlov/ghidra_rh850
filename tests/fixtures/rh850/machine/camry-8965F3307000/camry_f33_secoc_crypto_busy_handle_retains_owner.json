@@ -1,0 +1,96 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_secoc_crypto_busy_handle_retains_owner",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0x89c98"
+  },
+  "max_instructions": 60000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00",
+    "r6": "0x0",
+    "r7": "0xfebe3000",
+    "r8": "0x1c",
+    "r9": "0xfebe5564"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack scratch only."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Synthetic input: No outer priority-mask nesting frame."
+    },
+    {
+      "address": "0xfebf13b0",
+      "hex": "000000000000000000000000",
+      "evidence": "Synthetic input: Explicit null staged input words; rejected before dereference."
+    },
+    {
+      "address": "0xfebf13be",
+      "hex": "015b",
+      "evidence": "Synthetic input: Stale completion must be reset by submission."
+    },
+    {
+      "address": "0xfebe5564",
+      "hex": "a7",
+      "evidence": "Synthetic input: Caller verdict canary."
+    },
+    {
+      "address": "0xfebf137c",
+      "hex": "e87d02001782fdffa500d2",
+      "evidence": "Synthetic input: Existing service owner."
+    }
+  ],
+  "checks": [
+    {
+      "name": "PC",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Native submit return",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0x2"
+    },
+    {
+      "name": "Busy submission preserves existing descriptor owner",
+      "kind": "memory",
+      "address": "0xfebf137c",
+      "size": 9,
+      "equals_hex": "e87d02001782fdffa5"
+    },
+    {
+      "name": "Busy return is not a completed error",
+      "kind": "memory",
+      "address": "0xfebf13be",
+      "size": 2,
+      "equals_hex": "0001"
+    },
+    {
+      "name": "Busy is not a MAC verdict",
+      "kind": "memory",
+      "address": "0xfebe5564",
+      "size": 1,
+      "equals_hex": "a7"
+    }
+  ]
+}

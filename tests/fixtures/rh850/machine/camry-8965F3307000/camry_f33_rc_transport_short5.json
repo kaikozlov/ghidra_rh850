@@ -1,0 +1,301 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_rc_transport_short5",
+  "entry": {
+    "role": "retained",
+    "scope": "resolved-address",
+    "address": "0x7a408"
+  },
+  "max_instructions": 100000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0xfebf2000",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "Synthetic bounded 1-KiB stack below SP=FEBE2000; A5 fill exposes stack use"
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Synthetic zero OS priority-mask nesting depth for original interrupt guards"
+    },
+    {
+      "address": "0xfebe4f3c",
+      "hex": "a5aa",
+      "evidence": "Synthetic CanTp fault sentinel A5 and initialized guard AA"
+    },
+    {
+      "address": "0xfebe4f40",
+      "hex": "00000000ffff0000e1ff000000000000",
+      "evidence": "Synthetic idle channel0 TX state: owner FFFF, timeout0, state E1, sequence FF"
+    },
+    {
+      "address": "0xfebe4f50",
+      "hex": "020000000208010003005a080100f041",
+      "evidence": "Synthetic active channel0 RX per F33CanTpRxState: remaining2, owner0802, timeout1, stateZ, DLC8, sequence1, generation41"
+    },
+    {
+      "address": "0xfebe4f60",
+      "hex": "00000000ffff0000e1ff000000000000",
+      "evidence": "Synthetic idle channel1 TX state: owner FFFF, timeout0, state E1, sequence FF"
+    },
+    {
+      "address": "0xfebe4f70",
+      "hex": "00000000ffff00000000e100ff00f000",
+      "evidence": "Synthetic idle channel1 RX state per F33CanTpRxState; generation0"
+    },
+    {
+      "address": "0xfebe4f80",
+      "hex": "00000000ffff0000e1ff000000000000",
+      "evidence": "Synthetic idle channel2 TX state: owner FFFF, timeout0, state E1, sequence FF"
+    },
+    {
+      "address": "0xfebe4f90",
+      "hex": "00000000ffff00000000e100ff00f000",
+      "evidence": "Synthetic idle channel2 RX state per F33CanTpRxState; generation0"
+    },
+    {
+      "address": "0xfebe564c",
+      "hex": "02000200",
+      "evidence": "Synthetic DCM communication-slot modes 2,0 for both configured slots"
+    },
+    {
+      "address": "0xfebe5960",
+      "hex": "01",
+      "evidence": "Synthetic DCM phase1 selects inactivity timer cancellation and re-admission path"
+    },
+    {
+      "address": "0xfebe5964",
+      "hex": "40",
+      "evidence": "Synthetic response coordinator40 sentinel for receive-only cleanup"
+    },
+    {
+      "address": "0xfebe59d8",
+      "hex": "a1a2a3a4a5a6a7a8",
+      "evidence": "Synthetic unrelated DCM owner-bookkeeping sentinels for preservation checks"
+    },
+    {
+      "address": "0xfebe59e0",
+      "hex": "00000000",
+      "evidence": "Synthetic pending/current DCM dispatch receive-slot indices both0"
+    },
+    {
+      "address": "0xfebe59ea",
+      "hex": "01",
+      "evidence": "Synthetic pending-transport-accepted1 sentinel for receive-only cleanup"
+    },
+    {
+      "address": "0xfebe59f0",
+      "hex": "5756befe0600b6b7fa00010001ddeeff",
+      "evidence": "Synthetic slot0 ownership per F33DcmReceiveBufferState: base+6 cursor, length6, capacity250, receiving1, participant1; opaque sentinels"
+    },
+    {
+      "address": "0xfebe5a00",
+      "hex": "5157befe000000000001000000000000",
+      "evidence": "Synthetic idle DCM slot1 at ROM-configured base FEBE5751, capacity256, no receiving participant"
+    },
+    {
+      "address": "0xfebe5a10",
+      "hex": "5158befe000000000001000000000000",
+      "evidence": "Synthetic idle DCM slot2 at ROM-configured base FEBE5851, capacity256, no receiving participant"
+    },
+    {
+      "address": "0xfebe5a20",
+      "hex": "7f3178aabbccddee",
+      "evidence": "Synthetic shared-response payload sentinels outside receive-only reset"
+    },
+    {
+      "address": "0xfebe5e74",
+      "hex": "1122334401a1a2a3",
+      "evidence": "Synthetic timer0 active1 with deadline44332211 and A1-A3 padding sentinels"
+    },
+    {
+      "address": "0xfebe5e9c",
+      "hex": "5566778800b1b2b3",
+      "evidence": "Synthetic timer5 inactive0 with deadline88776655 and B1-B3 padding sentinels"
+    },
+    {
+      "address": "0xfebe1000",
+      "hex": "0011befe0800",
+      "evidence": "Synthetic F33PduInfo: data FEBE1100, length8 for original receive entry"
+    },
+    {
+      "address": "0xfebe48d8",
+      "hex": "a857",
+      "evidence": "Synthetic controller0 request-cache gate57A8 permits original CTS queue admission"
+    },
+    {
+      "address": "0xfebe4903",
+      "hex": "5a",
+      "evidence": "Synthetic controller0 request-mode gate5A permits original CTS queue admission"
+    },
+    {
+      "address": "0xfebe48fe",
+      "hex": "5555",
+      "evidence": "Synthetic controller0 availability gate5555 permits original CTS queue admission"
+    },
+    {
+      "address": "0xfebe48e6",
+      "hex": "0000aabb0000",
+      "evidence": "Synthetic empty CTS queue2 cursors0,0 with opaque middle-halfword BBAA sentinel"
+    },
+    {
+      "address": "0xfebe4fa0",
+      "hex": "00ff28d7",
+      "evidence": "Synthetic valid flow pairs block-size00/FF and STmin28/D7 with bitwise complements"
+    },
+    {
+      "address": "0xfebe5e50",
+      "hex": "a5",
+      "evidence": "Synthetic DCM foreground enabled exactA5."
+    },
+    {
+      "address": "0xfebe5e51",
+      "hex": "000000",
+      "evidence": "Synthetic empty DCM event ring cursors/count before actual receive indication enqueues work."
+    },
+    {
+      "address": "0xfebe5954",
+      "hex": "0000000000000000",
+      "evidence": "Synthetic locked security bitmap."
+    },
+    {
+      "address": "0xfebe81cc",
+      "hex": "5a",
+      "evidence": "Synthetic admitted application policy gate."
+    },
+    {
+      "address": "0xfebe81ac",
+      "hex": "5a",
+      "evidence": "Synthetic admitted application policy gate."
+    },
+    {
+      "address": "0xfebe7f97",
+      "hex": "00",
+      "evidence": "Synthetic no admission-clear marker."
+    },
+    {
+      "address": "0xfebe5650",
+      "hex": "00",
+      "evidence": "Synthetic connection-request integration disabled state read by exact91938; avoids inventing external communication-manager requests."
+    },
+    {
+      "address": "0xfebe5651",
+      "hex": "22a50411ffff445566778899aabbccdd",
+      "evidence": "Synthetic prior-slot bytes. Stale FFFF lies after the four-byte RoutineControl header; original timeout cleanup and fresh SF reception determine what survives."
+    },
+    {
+      "address": "0xfebe1100",
+      "hex": "0531011004ff0000",
+      "evidence": "Synthetic CanTp SF on configured route0804. PCI length bounds the UDS object; zero link padding is not request data."
+    },
+    {
+      "address": "0xfebe595c",
+      "hex": "03030300",
+      "evidence": "Synthetic coherent diagnostic session3; original routine session allowlist remains intact."
+    },
+    {
+      "address": "0xfebe5642",
+      "hex": "c7d8",
+      "evidence": "Synthetic opaque context bytes copied by961DC; not initialized by913C2."
+    },
+    {
+      "address": "0xfebe5649",
+      "hex": "e9",
+      "evidence": "Synthetic opaque context byte copied by961DC."
+    },
+    {
+      "address": "0xfebe819a",
+      "hex": "00",
+      "evidence": "Synthetic idle application routine admission state."
+    },
+    {
+      "address": "0xfebe819e",
+      "hex": "00",
+      "evidence": "Synthetic idle request-history state."
+    },
+    {
+      "address": "0xfebe82d4",
+      "hex": "00",
+      "evidence": "Synthetic operation5 idle state; unchanged on rejected request,5 at original518E0 action."
+    },
+    {
+      "address": "0xfebe82d6",
+      "hex": "00",
+      "evidence": "Synthetic operation5 idle cursor."
+    },
+    {
+      "address": "0xfebe82d8",
+      "hex": "00000000",
+      "evidence": "Synthetic empty operation5 inputs."
+    },
+    {
+      "address": "0xfebf2000",
+      "hex": "3f060e20bffe2106cc8a090061003f061c20bffe21069055090061003f062a20bffe2106e60e090061003f063820bffe2106d4b3080061003f064620bffe2106b8b70800610026060408000027060010befe3f066020bffe21067aa5070061003f066e20bffe210608a4070061003f067c20bffe2106c288090061003f068a20bffe2106c288090061003f069820bffe2106c288090061003f06980700002106c28809006100",
+      "evidence": "Synthetic call-only sequencer after native timeout:98ACC/95590/90EE6/8B3D4/8B7B8 initialization,7A57A SF receive,7A408 foreground, four988C2 scheduled cycles. Only argument registers/LP are assigned; no resume callback or event is injected."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Declared SF bytes and retained scalar tail",
+      "kind": "memory",
+      "address": "0xfebe5651",
+      "size": 6,
+      "equals_hex": "31011004ffff"
+    },
+    {
+      "name": "Four original foreground cycles return",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Caller stack balances",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    },
+    {
+      "name": "Length rejection initializes NRC13",
+      "kind": "memory",
+      "address": "0xfebe5967",
+      "size": 3,
+      "equals_hex": "7f3113"
+    },
+    {
+      "name": "No operation5 action",
+      "kind": "memory",
+      "address": "0xfebe82d4",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "No pending routine callback",
+      "kind": "memory",
+      "address": "0xfebe5d28",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "No remaining scheduled event",
+      "kind": "memory",
+      "address": "0xfebe5e53",
+      "size": 1,
+      "equals_hex": "00"
+    }
+  ]
+}

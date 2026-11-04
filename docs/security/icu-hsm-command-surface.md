@@ -322,8 +322,8 @@ same generated layer; only the MAC adapter below differs.
 
 The stock driver is a complete, self-contained ICUS programming reference —
 including for command words the application never issues (the §3 dead stubs
-are working templates). Everything below is Sienna-verified firmware-static;
-the TSS3 builds use the same idiom at the §3 addresses.
+are working templates). The register map and recipe below are Sienna-verified
+firmware-static; §7.1 separately traces the exact Camry lifecycle.
 
 ### Register map (`0xFFC5D0xx`)
 
@@ -387,6 +387,86 @@ driver for command 5; issuing the unexercised opcode family is the same
 sequence with different counts and command word — the Sienna orphan stubs
 (`0x89A4C` cmd-11, `0x89B70` cmd-`0x22`) are byte-level templates for
 zero-I/O and 1-in/2-out shapes respectively.
+
+### 7.1 Exact F33 SecOC verification lifecycle
+
+For Camry `8965F3307000`, CodeFlash SHA-256
+`42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7`,
+the transport completion and MAC verdict are separate values. SecOC
+`8F676 -> 89C98 -> 89646` submits handle0. Its original ROM record at
+`27DE8` contains completion `89CFA`, submit `891CC`, service `892CC`,
+and readiness pointer `27DE4` (byte1). Handle1 at `27E08` instead uses
+test-bank callback `6A2DC` and readiness pointer `27DE5` (byte0).
+
+`891CC` installs guarded scheduler start/completion callbacks
+`FEBF117C=89170` / `1180=890BA`; the starter installs guarded ISR/poll
+callback `1194=89114`. The NVM suspension result travels through
+`79D38 -> 87EF6 -> 885B2`: input1 retains wait state`D2`, input0 makes
+the request prepared`C3` and starts it if already waiting, and other
+inputs release a waiting owner and report transport failure1. `89170`
+changes `C3 -> B4` before issuing command7.
+For a waiting request, `885E2..885EE` snapshots both scheduler callback
+pointers and complements before selecting the reply branch. Even pending
+and error callback fixtures therefore retain the complete active-request
+callback set installed by `891CC`.
+
+`88FC0` retains caller result pointer `FEBF1318` and its complement
+`FEBF128C`, copies input/tag into bounded staging, and installs the
+command7 output destination `FEBF12B4`. SecOC supplies `FEBE5564`
+as the caller result pointer. The completion chain is:
+
+```text
+8A898: consume four ICU output words; retain first at FEBF12B4
+8AF10 -> 8A600: finalize channel (1=transport completed, 2=error, 20=abort)
+89114 -> 890BA -> 8906C: route transport status; copy verdict only on status0
+896E0 -> ROM[27DEC]=89CFA: consume service owner; set 13BF=status, 13BE=1
+89C98: return0 only for completed status0; return1 error, 2 busy/poll timeout
+8F746 -> 8F906 -> 8F8D2 -> ROM[25918]=90448: consume FEBE5564 for B6
+```
+
+`13BE/13BF` above have RAM prefix `FEBF`. `89CFA` is a raw
+14-byte callback, `4437bf5b010a440fbe5b00527f00`: store status byte,
+store completion1, return0. `8906C` copies only the low byte of the
+staged output. Thus transport success and a rejected MAC verdict can
+coexist; a transport error preserves the previous caller result byte.
+`8F746` admits `8F906` only after submit returns0.
+
+| Boundary | Native software behavior |
+|---|---|
+| Invalid handle/request, unavailable job, busy descriptor/lock | Return1/2 without producing a MAC verdict. `89C98` resets `13BE=0,13BF=1` even before a busy return. |
+| Accepted request but no callback within `E07` polling iterations | Return2; the polling wrapper neither cancels the job nor releases its selected descriptor. |
+| `89114` receives poll result0 or `12` | Retain pending wrapper state `FEBF1190=B4`; no completion. A channel-validation error such as `10` instead releases the wrapper and reports transport error1. |
+| Deferred completion | `890BA` queues status at `1294=E1/1295` when readiness is not1. `892CC` consumes that queue on its next invocation without rechecking readiness. |
+| Waiting/prepared/running deadlines | `892CC` expires `D2` at tick7, `C3` at tick12, or `B4` when either running counter reaches12; reports transport error1. The running case invokes bounded abort/reinitialization `88574`; the prepared case requires no crypto execution. |
+| Abort | `8ACA8` replaces streaming callbacks with null, retains finalizer `8A600`, tracks command`3F`, and sets channel`C3`. An abort request alone supplies no reply. Finalizer return`20` is cancellation, not verified MAC output. |
+| Service owner and duplicate notification | `896E0` requires selection state`A5` and a complemented pointer, then resets selection **before** invoking the configured callback. A duplicate at this boundary is ignored. |
+| Late low-level output callback | `8906C` copies the output **before** `896E0` checks selection ownership. Resetting selection alone does not revoke the result pointer; `88F92` clears it and the staging buffers, making a late callback report error instead. |
+
+There is no generation/token check at the selected-service callback boundary:
+ownership is its current state and complemented pointer. Retain both ownership
+layers when interpreting late or duplicate callback experiments.
+
+Exact authority: reconstructed source for `88FC0`, `8906C..89386`,
+`895A4..8972A`, `89C98`, `8A898`, `8ACA8`, `8AF10`, and `8F676..8F906`;
+disassembly at `8906C`, `892CC`, `896E0`, `8A600`, `8A8E4`; raw ROM
+`27DE0..27E2B`, `258E0..2591F`, and callback bytes `89CFA..89D07`.
+The `8A8E4` gate controls staging and its return value: its command-register
+store at `8A9FC` is also reached on return2, after valid arguments, even
+when the idle/BUSY/STS2 staging gate fails.
+
+Eighteen standalone `camry_f33_secoc_crypto_*.json` fixtures retain native
+submission failures, pointer/owner guards, deferred/duplicate/late callbacks,
+buffer-reset recovery, NVM suspend pending/error inputs, a software-only
+prepared deadline, a reset-channel error producer, and abort without a reply.
+Callback-entry scenarios explicitly
+inject transport status and, where copied, a rejected synthetic output byte;
+the abort-finalizer scenario also explicitly invokes its callback. These are
+distinct from continuous submit-to-hardware completion. True crypto evidence
+requires a real command7 transaction with its input/tag and slot provenance,
+output FIFO words, completion/error indications, and uninterrupted propagation
+through `89114/89C98` into SecOC. All eighteen scenarios passed original-byte
+execution (`secoc-crypto-wave1`, with the two completed suspension preconditions
+verified in `secoc-crypto-wave2`, under `build/out/firmware-question-campaign/`).
 
 ## 8. Boundaries and open questions
 

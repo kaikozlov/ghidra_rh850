@@ -1,0 +1,137 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_secoc_crypto_suspend_pending_is_not_completion",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0x79d38"
+  },
+  "max_instructions": 60000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00",
+    "r6": "0x1"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack scratch only."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Synthetic input: No outer priority-mask nesting frame."
+    },
+    {
+      "address": "0xfebf137c",
+      "hex": "e87d02001782fdffa500d2",
+      "evidence": "Synthetic input: Original configured handle0 descriptor, complemented selected pointer, active serviceA5 and unlockedD2."
+    },
+    {
+      "address": "0xfebf1318",
+      "hex": "6455befe",
+      "evidence": "Synthetic input: Synthetic caller output pointer retained from88FC0."
+    },
+    {
+      "address": "0xfebf128c",
+      "hex": "9baa4101",
+      "evidence": "Synthetic input: Complement of caller output pointer."
+    },
+    {
+      "address": "0xfebe5564",
+      "hex": "a7",
+      "evidence": "Synthetic input: Canary caller result, not an authentication verdict."
+    },
+    {
+      "address": "0xfebf13be",
+      "hex": "005b",
+      "evidence": "Synthetic input: No completion; distinct callback status canary."
+    },
+    {
+      "address": "0xfebf12b4",
+      "hex": "7e000000",
+      "evidence": "Synthetic input: Explicit synthetic rejected verifier output staging, not observed ICU output; callback injection only."
+    },
+    {
+      "address": "0xfebf1190",
+      "hex": "d2000000",
+      "evidence": "Synthetic input: Waiting for flash-suspend callback; pending software ownership."
+    },
+    {
+      "address": "0xfebf117c",
+      "hex": "70910800",
+      "evidence": "Synthetic active-request precondition: original891CC installs start callback89170 before requesting NVM suspension. Original885B2 snapshots it at885E2 even for pending/error replies; initializer-null state is not an active request."
+    },
+    {
+      "address": "0xfebf1188",
+      "hex": "8f6ef7ff",
+      "evidence": "Synthetic active-request precondition: complement FFF76E8F installed by original891CC for start callback89170; original885B2 snapshots it at885EA."
+    },
+    {
+      "address": "0xfebf1180",
+      "hex": "ba900800",
+      "evidence": "Synthetic input: Original scheduler completion callback installed by891CC."
+    },
+    {
+      "address": "0xfebf118c",
+      "hex": "456ff7ff",
+      "evidence": "Synthetic input: Complement of original completion callback."
+    },
+    {
+      "address": "0xfebf1288",
+      "hex": "e47d0200",
+      "evidence": "Synthetic input: Original handle0 ROM readiness pointer."
+    },
+    {
+      "address": "0xfebf1290",
+      "hex": "1b82fdff",
+      "evidence": "Synthetic input: Complement of readiness pointer."
+    },
+    {
+      "address": "0xfebf1294",
+      "hex": "d200",
+      "evidence": "Synthetic input: No deferred completion."
+    }
+  ],
+  "checks": [
+    {
+      "name": "PC",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Pending flash suspend retains scheduler owner",
+      "kind": "memory",
+      "address": "0xfebf1190",
+      "size": 1,
+      "equals_hex": "d2"
+    },
+    {
+      "name": "Pending flash suspend does not notify crypto completion",
+      "kind": "memory",
+      "address": "0xfebf13be",
+      "size": 2,
+      "equals_hex": "005b"
+    },
+    {
+      "name": "Pending flash suspend cannot create verifier result",
+      "kind": "memory",
+      "address": "0xfebe5564",
+      "size": 1,
+      "equals_hex": "a7"
+    }
+  ]
+}

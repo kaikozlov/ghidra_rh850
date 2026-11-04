@@ -1,0 +1,99 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_secoc_crypto_duplicate_service_completion_is_consumed_once",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe1000"
+  },
+  "max_instructions": 60000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack scratch only."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Synthetic input: No outer priority-mask nesting frame."
+    },
+    {
+      "address": "0xfebf137c",
+      "hex": "e87d02001782fdffa500d2",
+      "evidence": "Synthetic input: Original configured handle0 descriptor, complemented selected pointer, active serviceA5 and unlockedD2."
+    },
+    {
+      "address": "0xfebf1318",
+      "hex": "6455befe",
+      "evidence": "Synthetic input: Synthetic caller output pointer retained from88FC0."
+    },
+    {
+      "address": "0xfebf128c",
+      "hex": "9baa4101",
+      "evidence": "Synthetic input: Complement of caller output pointer."
+    },
+    {
+      "address": "0xfebe5564",
+      "hex": "a7",
+      "evidence": "Synthetic input: Canary caller result, not an authentication verdict."
+    },
+    {
+      "address": "0xfebf13be",
+      "hex": "005b",
+      "evidence": "Synthetic input: No completion; distinct callback status canary."
+    },
+    {
+      "address": "0xfebf1190",
+      "hex": "e1000000",
+      "evidence": "Synthetic input: Idle crypto job; do not enter release/flash ownership path."
+    },
+    {
+      "address": "0xfebf12b4",
+      "hex": "7e000000",
+      "evidence": "Synthetic input: Explicit synthetic rejected verifier output staging, not observed ICU output; callback injection only."
+    },
+    {
+      "address": "0xfebe1000",
+      "hex": "2606010000003f061410befe2106e096080061002606000000003f062810befe2106e096080061002106980700006100",
+      "evidence": "Synthetic input: Transparent call-only sequencer, MOV immediate/register and JMP only; no state writes, overlays, auth stubs or crypto execution. Calls 0x896e0, 0x896e0."
+    }
+  ],
+  "checks": [
+    {
+      "name": "PC",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "First error consumed; duplicate zero status cannot replace it",
+      "kind": "memory",
+      "address": "0xfebf13be",
+      "size": 2,
+      "equals_hex": "0101"
+    },
+    {
+      "name": "No service owner remains",
+      "kind": "memory",
+      "address": "0xfebf137c",
+      "size": 9,
+      "equals_hex": "00000000ffffffffe1"
+    }
+  ]
+}
