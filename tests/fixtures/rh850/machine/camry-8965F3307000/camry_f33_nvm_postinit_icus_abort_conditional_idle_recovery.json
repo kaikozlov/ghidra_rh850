@@ -1,0 +1,129 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_nvm_postinit_icus_abort_conditional_idle_recovery",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe1000"
+  },
+  "max_instructions": 100000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "hsb_cycles_per_instruction": 1,
+  "memory": [
+    {
+      "address": "0xfebe1e00",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Bounded synthetic caller stack scratch."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Synthetic priority-mask nesting depth0."
+    },
+    {
+      "address": "0xfebf6b20",
+      "size": 412,
+      "fill": 165,
+      "evidence": "Bounded lower-driver software state sentinel; targeted postfailure fields below are explicit checkpoint inputs."
+    },
+    {
+      "address": "0xfebf6b20",
+      "hex": "ff820000",
+      "evidence": "Explicit synthetic postfailure checkpoint: completionFF, raw82/latch0 after ICU rejection or raw5/latch1 after FACI rejection, phase0. Earlier full-chain fixtures exercise production of these bytes."
+    },
+    {
+      "address": "0xfebf6cb0",
+      "hex": "a501a5a5",
+      "evidence": "Explicit synthetic retained uninitialized idle fields after masked initialization failure."
+    },
+    {
+      "address": "0xffc5d020",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic later ICU bit0-clear hardware condition; temporal transition is not modeled or inferred."
+    },
+    {
+      "address": "0xffa10010",
+      "hex": "00",
+      "evidence": "Explicit synthetic FASTAT access-status checkpoint; no completion flags supplied."
+    },
+    {
+      "address": "0xfebe1000",
+      "hex": "3f060e10befe2106944e070061000aa03f061e10befe21065a4a070061000aa83f062e10befe21066e4e070061000ab02106980700006100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "evidence": "Transparent synthetic native RAM caller; original CodeFlash functions only. MOV imm32 encodes(0620|reg):u16 + value:u32; JMP[r1]=6100; result-only MOV r10,r20..r29 snapshots are callee-preserved. Calls 74E94() -> r20; 74A5A() -> r21; 74E6E() -> r22. Final jump798 and48 initialized speculative-fetch bytes; no callback replacement or state repair."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Native sequencer returns",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Caller stack restored",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    },
+    {
+      "name": "Original reset/reinitialization result",
+      "kind": "register",
+      "register": "r20",
+      "equals": "0x1"
+    },
+    {
+      "name": "Synchronous admission restored",
+      "kind": "register",
+      "register": "r21",
+      "equals": "0x1"
+    },
+    {
+      "name": "Idle lower driver busy status0",
+      "kind": "register",
+      "register": "r22",
+      "equals": "0x0"
+    },
+    {
+      "name": "Saved completion/error reset and block latch cleared",
+      "kind": "memory",
+      "address": "0xfebf6b20",
+      "size": 4,
+      "equals_hex": "ffff0000"
+    },
+    {
+      "name": "Original software restores idle driver fields",
+      "kind": "memory",
+      "address": "0xfebf6cb0",
+      "size": 4,
+      "equals_hex": "01010e00"
+    },
+    {
+      "name": "Native stop returns FACI to read mode",
+      "kind": "memory",
+      "address": "0xffa10084",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "Original native forced stop completed",
+      "kind": "event-count",
+      "operation": "faci-completion",
+      "equals": "1"
+    }
+  ]
+}

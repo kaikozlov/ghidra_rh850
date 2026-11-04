@@ -1438,6 +1438,92 @@ Execute the standalone scenarios with:
 
 `tools/rh850 test firmware camry-8965F3307000 tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_icu_startup_*.json`
 
+**Post-initialization failure contract.** The complete direct-caller chain is
+`66BC8 -> 681F8 -> 764E2 -> 74B6A -> 74B3C -> 78500`.
+The caller at `66C18` ignores the final `1` and immediately invokes bounded
+initial acquisition `66B96`. That routine arms the initial-read token and
+runs at most ROM `2AD7A` acquisition passes, then clears `FEBF0673`.
+Neither it nor subsequent acquisition passes call a driver initializer.
+The periodic foreground owner `66062` calls `68318 -> 79C60 -> 74164`,
+then application cycle `66CF6`; application work calls `682D6 -> 74114`.
+Those service paths select lower polling `767EA` or `766F4` through
+`73B2C`, service the logical scheduler, and can retry ordinary queued/read
+work. They do not retry `681F8`, `764E2`, `74B3C`, or `78500`.
+The initialization caller census comes from exact-target Ghidra caller
+queries, checked against the reconstructed whole-image call sites.
+
+The finite direct data-reference census explains the stable gate:
+
+| State | Exact direct consumers/writers | Post-failure contract |
+|---|---|---|
+| Saved raw error `FEBF6B21` | `74932`, `749AE`, `749C6` | `74932` translates the saved byte; `749C6` stores the callback error; `749AE` resets it to `FF`. |
+| Driver block latch `FEBF6B22` | `74A36`, `74B3C`, `74CE8` | `74CE8` sets it for raw `5/80/81` or read result `9`; only `74B3C` clears it. Raw `82` records diagnostic group1 without setting this latch. |
+| Lower job result `FEBF6CB1` | `78500`, `78566`, `7867A`, `78766`, `78896`, `78B1C`, `79164` | Failed initialization sets `1`. The access gate compares this byte with `80`, not with `1`; the busy query also needs driver-state byte `FEBF6CB0`. |
+
+These lists are the canonical exact-target `tools/pseudo --data-ref`
+results, read together with their reconstructed bodies. Original bytes
+`74A40: 810F236B` load the block latch and `74A46` skips the job-result
+getter when it is nonzero. `74A4C` compares that getter with `80`.
+`74E54` skips polling, deferred retries, timeout processing, and completion
+dispatch while blocked. Thus either FACI mode failure or forced-stop timeout
+leaves raw `5`, latch `1`, synchronous admission `FFFF0000`, busy-status `2`,
+guarded read result `6`, and guarded erase result `8`. The native timeout's
+uncompleted forced stop and command lock remain when no HSB clock is supplied.
+
+ICU rejection instead leaves raw `82`, latch `0`, job result `1`, and the
+preexisting idle-admission fields: `78500` never called `78B1C`.
+Synchronous admission can therefore return `1` while the lower busy-status
+query returns `2`. With bit0 still set, `787FA` exits at `78808` before
+changing driver state; a read returns raw read result `0B`, translated to
+`FFFE`, and guarded read result `4`; erase reports result `8`.
+The immutable read-result pair at `279D4` is `0B -> FFFE`.
+If bit0 later clears, an ordinary poll can set `FEBF6CB0=1`, but does not
+initialize `FEBF6CB2=0E`; that remaining mode field can still reject
+transactions. Acquisition busy bytes and application public status remain
+separate: readiness `66F1E` reads neither saved driver error nor block latch
+nor lower job result. Terminal public statuses plus reset acquisition busy
+can consequently report ready after either lower failure.
+
+**Reset/retry ownership.** Abort/reset wrapper `74E94` is not an unblock
+operation. With latch1 it returns `FFFF0000` without calling lower abort
+`78766`; with persistent ICU rejection it calls that abort and returns
+`FFFE`. Both paths finish through `749E4 -> 749AE`, clearing the saved
+error to `FF` and its translation to zero even though admission has not
+recovered. The latch survives. `76772` merely wraps this path and enables
+service. Direct lower abort callers are exactly `74E94`, timeout `74E1C`,
+and guarded physical paths `78176/781BE`; lower abort never clears the
+block latch.
+
+Software has two conditional recovery mechanisms. After ICU rejection with
+latch0, `74E94 -> 78766` can restore idle state `CB0=1/CB2=0E/CB3=0` if
+the later ICU input is clear and native forced stop completes; synchronous
+admission then returns1 and busy-status0. After a FACI failure with latch1,
+`74B3C` is the sole software latch-clearing entry, at original instruction
+`74B44: 4B07226B`. Reinvoking that initializer can restore admission under
+the same favorable hardware conditions. Its production caller is solely
+the startup chain above, not a periodic recovery timer. Neither recovery
+mechanism reconstructs cleared acquisition results or application mirrors.
+
+Seven standalone `camry_f33_nvm_postinit_*.json` scenarios specify these
+consequences. Three chain intact `681F8`, two actual `68318` service calls,
+two lower polls, error/admission/busy/readiness queries, and rejected
+guarded read/erase transactions for ICU rejection, FACI mode rejection,
+and no-clock timeout. Two chain failed initialization into the misleading
+saved-error-clearing abort. Two start from explicitly synthetic software
+post-failure checkpoints and execute the distinct successful lower-abort
+and transfer-reinitialization recovery paths with synthetic clear ICU input
+and `hsb_cycles_per_instruction=1`; FACI completion comes from the native
+sequencer. Their RAM callers only invoke original functions and retain
+return-value snapshots. No model changes or completion-result injections
+are needed. All seven scenarios passed exact-image execution in
+`build/out/firmware-question-campaign/nvm-postinit-wave1`.
+
+The recovery checkpoints deliberately do not prescribe how the real ICU
+input changes, when an actual failed FACI operation becomes serviceable, or
+which retained idle fields a particular ECU reset leaves. Selecting those
+physical conditions still requires the security-function specification and
+actual reset/clock/flash-status observations.
+
 **Remaining hardware input:** the real reset value, temporal behavior, and
 meaning of `FFC5D020` bit 0 remain unknown. All supplied ICU words and
 transitions above are explicitly synthetic and have no assigned hardware

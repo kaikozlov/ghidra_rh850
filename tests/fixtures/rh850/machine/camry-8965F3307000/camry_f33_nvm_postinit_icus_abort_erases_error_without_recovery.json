@@ -1,0 +1,188 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_nvm_postinit_icus_abort_erases_error_without_recovery",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe1000"
+  },
+  "max_instructions": 150000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1e00",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack scratch, not persistent/object RAM initialization."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Synthetic priority-mask nesting depth0; PMR=FF00, no outer frame."
+    },
+    {
+      "address": "0xfebf0308",
+      "hex": "3131313131313131313131313131313131313131313131313131313131313131",
+      "evidence": "Explicit synthetic terminal31 public statuses for all32 family0 objects; preserved across681F8 and next-cycle consumers."
+    },
+    {
+      "address": "0xfebf0328",
+      "hex": "31313131313131313131313131313131",
+      "evidence": "Synthetic family1 public raw statuses, exactly16 counted entries."
+    },
+    {
+      "address": "0xfebf1088",
+      "hex": "64646464646464646464646464646464",
+      "evidence": "Synthetic family1 encoded55 status replicas."
+    },
+    {
+      "address": "0xfebf10ac",
+      "hex": "9b9b9b9b9b9b9b9b9b9b9b9b9b9b9b9b",
+      "evidence": "Synthetic family1 encodedAA status replicas."
+    },
+    {
+      "address": "0xfebf0690",
+      "hex": "ff00",
+      "evidence": "Synthetic family0/family1 acquisition busy bytes, original getters68924/68A4A."
+    },
+    {
+      "address": "0xfebf0673",
+      "hex": "00",
+      "evidence": "Synthetic extra readiness gate GP+4E73 with actualGP FEBEB800."
+    },
+    {
+      "address": "0xfebf0372",
+      "hex": "4000",
+      "evidence": "Synthetic object5 prior selected handle64."
+    },
+    {
+      "address": "0xfebf033d",
+      "hex": "ff",
+      "evidence": "Synthetic object5 pending completion."
+    },
+    {
+      "address": "0xfebf0680",
+      "hex": "33000500",
+      "evidence": "Synthetic family0 phase33, padding0, active object5."
+    },
+    {
+      "address": "0xfebf067c",
+      "hex": "00",
+      "evidence": "Synthetic family0 sticky failure latch."
+    },
+    {
+      "address": "0xfebf0488",
+      "hex": "ffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffffffa5ffff",
+      "evidence": "Synthetic 65 empty family0 request cells."
+    },
+    {
+      "address": "0xfebf0694",
+      "hex": "02",
+      "evidence": "Synthetic previous lower read retry count."
+    },
+    {
+      "address": "0xfebf0698",
+      "hex": "5a5a5a005a5a5a005a5a5a005a5a5a00",
+      "evidence": "Synthetic four outstanding copy-result masks."
+    },
+    {
+      "address": "0xfebf6b20",
+      "size": 412,
+      "fill": 165,
+      "evidence": "Synthetic bounded lower driver state; original initialization must retain its earlier reset effects on rejection."
+    },
+    {
+      "address": "0xffc5d020",
+      "hex": "01000000",
+      "evidence": "Explicit synthetic opaque ICU-S offset20 input; no hardware reset value or bit meaning assigned."
+    },
+    {
+      "address": "0xffa10010",
+      "hex": "00",
+      "evidence": "Explicit synthetic initial FASTAT access-status checkpoint; no completion flag supplied."
+    },
+    {
+      "address": "0xfebe1000",
+      "hex": "3f060e10befe2106f881060061000aa03f061e10befe21063249070061000aa83f062e10befe2106944e070061000ab03f063e10befe21063249070061000ab83f064e10befe21065a4a070061000ac03f065e10befe21066e4e070061000ac82106980700006100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "evidence": "Transparent synthetic native RAM caller; original CodeFlash functions only. MOV imm32 encodes(0620|reg):u16 + value:u32; JMP[r1]=6100; result-only MOV r10,r20..r29 snapshots are callee-preserved. Calls 681F8() -> r20; 74932() -> r21; 74E94() -> r22; 74932() -> r23; 74A5A() -> r24; 74E6E() -> r25. Final jump798 and48 initialized speculative-fetch bytes; no callback replacement or state repair."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Native sequencer returns",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Caller stack restored",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    },
+    {
+      "name": "Original result snapshot r20",
+      "kind": "register",
+      "register": "r20",
+      "equals": "0x1"
+    },
+    {
+      "name": "Original result snapshot r21",
+      "kind": "register",
+      "register": "r21",
+      "equals": "0xfffe"
+    },
+    {
+      "name": "Original result snapshot r22",
+      "kind": "register",
+      "register": "r22",
+      "equals": "0xfffe"
+    },
+    {
+      "name": "Original result snapshot r23",
+      "kind": "register",
+      "register": "r23",
+      "equals": "0x0"
+    },
+    {
+      "name": "Original result snapshot r24",
+      "kind": "register",
+      "register": "r24",
+      "equals": "0x1"
+    },
+    {
+      "name": "Original result snapshot r25",
+      "kind": "register",
+      "register": "r25",
+      "equals": "0x2"
+    },
+    {
+      "name": "Abort resets completion and saved error but retains block latch",
+      "kind": "memory",
+      "address": "0xfebf6b20",
+      "size": 3,
+      "equals_hex": "ffff00"
+    },
+    {
+      "name": "Abort has not initialized idle admission fields",
+      "kind": "memory",
+      "address": "0xfebf6cb0",
+      "size": 4,
+      "equals_hex": "a501a5a5"
+    }
+  ]
+}
