@@ -7,16 +7,22 @@ import configparser
 import copy
 import hashlib
 import json
+import re
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
-import xml.etree.ElementTree as ET
 
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
 
 from tools import REPO_ROOT
+from tools.techstream.extract_gtsplus_lifecycle_ui_ipc import _operand
 from tools.techstream.extract_gtsplus_tse_managed_semantics import (
-    _body, _instructions, _method_pin, _open, _recovery_proof,
+    _body,
+    _instructions,
+    _method_pin,
+    _open,
+    _recovery_proof,
 )
 from tools.techstream.gtsplus_local_crypto import decrypt_file
 from tools.techstream.inspect_dotnet_il import format_operand, resolve_token
@@ -25,7 +31,7 @@ DEFAULT_INSTALLED = REPO_ROOT / "software/Techstream/gtsplus/unpacked/gtsplus/To
 DEFAULT_RECOVERED = REPO_ROOT / "build/out/gtsplus-unprotected"
 DEFAULT_OUT = REPO_ROOT / "data/generated/gtsplus_2026/lifecycle_bootstrap.json"
 
-SOURCE_PINS = {'arb': {'file': 'GTSPlusArbitration.exe',
+SOURCE_PINS: dict[str, dict[str, Any]] = {'arb': {'file': 'GTSPlusArbitration.exe',
          'plaintext': {'sha256': 'f324c24f21eaa0deed85f71720eaa17222912b85ef920bec19347d043dad126e',
                        'size': 76304},
          'protected': {'stub_sha256': '9f48c65cca6a91ec1e8f6dae15f04fe3f2f016f6bef7661ad2b3d3a852a5276b',
@@ -75,14 +81,14 @@ SOURCE_PINS = {'arb': {'file': 'GTSPlusArbitration.exe',
                       'sidecar_sha256': 'db69e562601efdea05a06e924a9c06baf9ecee207ac3447cd0b7399e88ebce8f',
                       'sidecar_size': 1350800}}}
 
-CONFIG_PINS = {'Env/ABSystem.yml': {'sha256': 'efdb6658fe0d9388177d74099170b92a243db47968688e7ca3ef1c045ac2996b',
+CONFIG_PINS: dict[str, dict[str, Any]] = {'Env/ABSystem.yml': {'sha256': 'efdb6658fe0d9388177d74099170b92a243db47968688e7ca3ef1c045ac2996b',
                       'size': 1632},
  'Env/GTSPlus.pp': {'sha256': '3db86bbac46d10b0a81cefe23a922b77382db03e1b59ae95dc5a588424c61e4d',
                     'size': 256},
  'Env/GTSPlusInfo.ini': {'sha256': '6551ef8b53268645e2c690c4053f09830fc76d1d764a65fc2dbd32e3f3f6861f',
                          'size': 784}}
 
-CONFIGURATION = {'applications': [{'name': 'GTS+ InfoCenter',
+CONFIGURATION: dict[str, Any] = {'applications': [{'name': 'GTS+ InfoCenter',
                    'file_path': 'GtsPlus-InfoCenter\\GtsPlus-InfoCenter.exe',
                    'start_mode': 3,
                    'end_mode': 1,
@@ -638,6 +644,159 @@ def _decode_info(pe: Any, path: Path) -> bytes:
     return unpad(AES.new(pe.get_data(rvas[0], 16), AES.MODE_CBC, data[:16]).decrypt(data[16:]), 16)
 
 
+def _api_routing(pe: Any, adaptation_pe: Any, evidence: list[dict[str, Any]],
+                 adaptations: list[dict[str, Any]]) -> dict[str, Any]:
+    """Recover selector cases and first target blocks, not API implementation claims."""
+    workers = ("Cancel", "WebService", "Message", "NonVehicleConnection", "VehicleConnection")
+    specs = [
+        ("connection", "GTSPlusController.ConnectionManager", "AnalysisRequestMessage", 0x31D),
+        ("queue", "GTSPlusController.MainTask", "StartMainTask", 0x541),
+        *[(name, "GTSPlusController.ExecuteTask." + name + "ExecuteTask", "MessageFunction", default)
+          for name, default in zip(workers, (0x45, 0x121, 0x79, 0x232, 0x751))],
+    ]
+    owner_by_row = {id(m.row): f"{t.TypeNamespace}.{t.TypeName}".lstrip(".")
+                    for t in pe.net.mdtables.TypeDef for m in t.MethodList}
+
+    def integer(instruction: Any) -> int:
+        op = str(instruction.opcode)
+        if op in ("ldc.i4", "ldc.i4.s"):
+            return int(instruction.operand)
+        if op.startswith("ldc.i4."):
+            suffix = op.rsplit(".", 1)[1]
+            return -1 if suffix == "m1" else int(suffix)
+        raise ValueError(f"expected direct integer constant, got {op}")
+
+    def target_row(instruction: Any) -> Any:
+        row = resolve_token(pe, instruction.operand)
+        return row.Method.row if hasattr(row, "Method") else row
+
+    def call_name(instruction: Any) -> str:
+        row = target_row(instruction)
+        owner = owner_by_row.get(id(row))
+        return f"{owner}::{row.Name}" if owner else _operand(pe, instruction.operand)
+
+    def instruction_record(instruction: Any, base: int) -> dict[str, Any]:
+        value = _operand(pe, instruction.operand)
+        if instruction.opcode.flow_control.name in ("Branch", "Cond_Branch"):
+            if isinstance(instruction.operand, int):
+                value = f"IL_{instruction.operand - base:04X}"
+            elif isinstance(instruction.operand, list):
+                value = ", ".join(f"IL_{target - base:04X}" for target in instruction.operand)
+        return {"il": f"IL_{instruction.offset - base:04X}", "opcode": str(instruction.opcode),
+                "operand": value, "bytes": (instruction.opcode_bytes + instruction.operand_bytes).hex()}
+
+    selectors = []
+    for key, owner, method, default in specs:
+        row, instructions, body = _instructions(pe, owner, method)
+        base = instructions[0].offset
+        positions = {instruction.offset: index for index, instruction in enumerate(instructions)}
+        cases = []
+        targets = {base + default}
+        if key == "VehicleConnection":
+            targets.add(base + 0x77E)  # Non-UG continuation of the default prefix selector.
+        # The later CN000001 comparison only selects status logging, not dispatch.
+        end = next((i for i, instruction in enumerate(instructions)
+                    if str(instruction.opcode) == "call"
+                    and _operand(pe, instruction.operand) == "SetApiTaskMessageList"), len(instructions))
+        if key != "connection":
+            end = len(instructions)
+        for index, instruction in enumerate(instructions[:end]):
+            if str(instruction.opcode) != "ldstr":
+                continue
+            literal = resolve_token(pe, instruction.operand)
+            if not isinstance(literal, str) or not re.fullmatch(r"[A-Z]{2}(?:(?:[0-9]{6}|XX[0-9]{4}))?", literal):
+                continue
+            equality, branch = instructions[index + 1:index + 3]
+            if _operand(pe, equality.operand) != "System.String::op_Equality":
+                continue
+            op = str(branch.opcode)
+            if not op.startswith(("brtrue", "brfalse")):
+                raise ValueError(f"selector equality lowering drift: {owner}::{method}")
+            target = branch.operand if op.startswith("brtrue") else instructions[index + 3].offset
+            targets.add(target)
+            cases.append({"value": literal, "comparison": instruction_record(instruction, base),
+                          "branch": instruction_record(branch, base), "target_il": f"IL_{target - base:04X}"})
+        blocks = []
+        for target in sorted(targets):
+            block = []
+            for instruction in instructions[positions[target]:]:
+                block.append(instruction)
+                if instruction.opcode.flow_control.name in ("Branch", "Cond_Branch", "Return", "Throw"):
+                    break
+            entry = {"il": f"IL_{target - base:04X}",
+                     "instructions": [instruction_record(instruction, base) for instruction in block],
+                     "calls": [call_name(instruction) for instruction in block
+                               if str(instruction.opcode) in ("call", "callvirt", "newobj")]}
+            if key == "queue":
+                enqueue = next(i for i, instruction in enumerate(block)
+                               if str(instruction.opcode) == "callvirt"
+                               and _operand(pe, instruction.operand) == "EnqueueMessage")
+                entry["queue_id"] = integer(block[enqueue - 2])
+            blocks.append(entry)
+        eid = f"bootstrap.api.{key}"
+        evidence.append({"id": eid, "source": "bootstrap.pf.recovered", "kind": "managed-dispatch-selector",
+                         "locator": f"{owner}::{method}", **_method_pin(row, body),
+                         "offset_basis": "relative to first IL instruction", "cases": cases,
+                         "default_target_il": f"IL_{default:04X}", "target_blocks": blocks,
+                         "finding": "Exact equality selectors and their first target blocks; admission and downstream implementation are separate contracts."})
+        if key == "VehicleConnection":
+            evidence[-1]["prefix_default_target_il"] = "IL_077E"
+        selectors.append(eid)
+
+    worker_owners = []
+    for name in workers:
+        owner = "GTSPlusController.ExecuteTask." + name + "ExecuteTask"
+        row, instructions, body = _instructions(pe, owner, ".ctor")
+        assignments = {}
+        for index, instruction in enumerate(instructions):
+            if str(instruction.opcode) != "stfld":
+                continue
+            field = _operand(pe, instruction.operand)
+            if field == "<ApiTaskId>k__BackingField":
+                assignments["queue_id"] = integer(instructions[index - 1])
+            elif field == "<MessageEventName>k__BackingField":
+                assignments["event_name"] = resolve_token(pe, instructions[index - 1].operand)
+        if set(assignments) != {"queue_id", "event_name"}:
+            raise ValueError(f"worker registration drift: {owner}")
+        eid = f"bootstrap.api.{name}.constructor"
+        evidence.append({"id": eid, "source": "bootstrap.pf.recovered", "kind": "managed-worker-registration",
+                         "locator": owner + "::.ctor", **_method_pin(row, body), **assignments,
+                         "finding": "Constructor constants bind this worker to its queue and named wake event."})
+        worker_owners.append({"owner": owner, **assignments, "evidence": [eid, f"bootstrap.api.{name}"]})
+
+    enqueue_sites = []
+    method_count = 0
+    for td in pe.net.mdtables.TypeDef:
+        for method in td.MethodList:
+            row = method.row
+            if not row.Rva:
+                continue
+            method_count += 1
+            body = _body(pe, row)
+            for index, instruction in enumerate(body.instructions):
+                if str(instruction.opcode) not in ("call", "callvirt"):
+                    continue
+                if str(getattr(target_row(instruction), "Name", "")) != "EnqueueMessage":
+                    continue
+                enqueue_sites.append({"caller": f"{td.TypeNamespace}.{td.TypeName}::{row.Name}".lstrip("."),
+                                      **_method_pin(row, body), "queue_id": integer(body.instructions[index - 2]),
+                                      "call": instruction_record(instruction, body.instructions[0].offset)})
+    evidence.append({"id": "bootstrap.api.enqueue-census", "source": "bootstrap.pf.recovered",
+                     "kind": "managed-callsite-census", "locator": "all nonzero MethodDef bodies",
+                     "methods_scanned": method_count, "callsites": enqueue_sites,
+                     "finding": "All direct call/callvirt EnqueueMessage sites, including internal insertions that bypass main classification."})
+    row, _, body = _instructions(adaptation_pe, "GTSPlusAdaptationIF.AdaptationInterface", "ExecuteAdaptation")
+    evidence.append({"id": "bootstrap.api.adapter-routing", "source": "bootstrap.adapt.recovered",
+                     "kind": "managed-il", "locator": "GTSPlusAdaptationIF.AdaptationInterface::ExecuteAdaptation",
+                     **_method_pin(row, body),
+                     "finding": "Substring(0,2) selects the first category match in adaptation order. It invokes that instance and returns; it does not try another adapter after a failure. Unknown category and caught adapter exceptions produce AdaptIf error3; the initial substring is outside that catch."})
+    return {"selectors": selectors, "workers": worker_owners, "adaptation_categories": adaptations,
+            "evidence": ["bootstrap.api.enqueue-census", "bootstrap.api.adapter-routing", "bootstrap.adaptation-table"],
+            "scope": "Complete PF selector/queue/category census, not an assertion that every native API suffix is implemented.",
+            "precedence": "Seven immediate ConnectionManager selectors precede the main classifier. Queued exact IDs precede two-character family routing; unknown families use message queue5. Internal callers can enqueue directly.",
+            "input_boundary": "Main classification falls back to Substring(0,2); null/short inputs throw in this method. Its exception regions are finally-only. Network admission is an earlier, separate boundary."}
+
+
 def build(installed_root: Path = DEFAULT_INSTALLED, recovered_root: Path = DEFAULT_RECOVERED) -> dict[str, Any]:
     installed_root, recovered_root = Path(installed_root), Path(recovered_root)
     sources: list[dict[str, Any]] = []
@@ -749,6 +908,7 @@ def build(installed_root: Path = DEFAULT_INSTALLED, recovered_root: Path = DEFAU
                      "locator": "GTSPlusAdaptationInterface.AdaptationTable.xml", "resource_sha256": ADAPTATION_XML_SHA256,
                      "initialization_and_finalization_order": adaptations,
                      "finding": "UserInfo, TGD, DiagAdaptationManager, WebServiceAdaptationManager, FileAdaptation in table order."})
+    api_routing = _api_routing(assemblies["pf"], assemblies["adapt"], evidence, adaptations)
     for key, pe in assemblies.items():
         imports = [{"dll": str(r.ImportScope.row.Name), "export": str(r.ImportName), "method": str(r.MemberForwarded.row.Name)}
                    for r in (pe.net.mdtables.ImplMap or [])]
@@ -762,7 +922,8 @@ def build(installed_root: Path = DEFAULT_INSTALLED, recovered_root: Path = DEFAU
     return {"schema": "gtsplus-lifecycle-domain-v1", "domain": "bootstrap", "sources": sources,
             "evidence": evidence, "states": copy.deepcopy(STATES), "transitions": copy.deepcopy(TRANSITIONS),
             "handoffs": copy.deepcopy(HANDOFFS), "persistence": copy.deepcopy(PERSISTENCE),
-            "coverage": copy.deepcopy(COVERAGE), "residuals": copy.deepcopy(RESIDUALS)}
+            "coverage": copy.deepcopy(COVERAGE), "residuals": copy.deepcopy(RESIDUALS),
+            "api_routing": api_routing}
 
 
 def main() -> None:

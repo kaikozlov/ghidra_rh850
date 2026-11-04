@@ -1463,7 +1463,6 @@ LIFECYCLE = {'schema': 'gtsplus-lifecycle-domain-v1',
                                     'pinned original+recovered source identities',
                 'gui_recovery': 'decode_gui authenticates installed gts.gui and compares each used member '
                                 'byte-for-byte; no decoded build source is trusted alone',
-                'native_projects': ['lc_persistence', 'lc_persistence_files', 'lc_persistence_mdf'],
                 'execution': 'offline extraction and constant evaluation only; no '
                              'app/vehicle/network/credential execution'}}
 
@@ -3123,7 +3122,6 @@ LIFECYCLE["coverage"]["branches"].extend([
     "ZIP member normalization without explicit containment; extraction cleanup vs post-extraction preservation",
     "native manifest hasher unchecked ReadFile BOOL and zero-vs-invalid handle gate",
 ])
-LIFECYCLE["provenance"]["native_projects"].append("lc2_persistence_hash")
 
 def _operand(pe: Any, operand: Any) -> str:
     if hasattr(operand, "table"):

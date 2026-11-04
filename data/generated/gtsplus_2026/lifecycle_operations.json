@@ -77343,14 +77343,6 @@
         ],
         "selector": 25
       }
-    ],
-    "native_projects": [
-      "lc2_operations_front",
-      "lc2_operations_broker",
-      "lc2_operations_gene",
-      "lc2_operations_toyota"
-    ],
-    "parent_module_loading_smoke": "uv run python build/tmp/lc2_operations_module_loading_smoke.py",
-    "parent_smoke": "uv run python build/tmp/lc2_operations_smoke.py"
+    ]
   }
 }

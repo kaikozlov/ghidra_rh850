@@ -968,12 +968,6 @@
   "provenance": {
     "managed_recovery": "uv run --locked python -m tools.techstream.recover_all_gtsplus_bodies; pinned original+recovered source identities",
     "gui_recovery": "decode_gui authenticates installed gts.gui and compares each used member byte-for-byte; no decoded build source is trusted alone",
-    "native_projects": [
-      "lc_persistence",
-      "lc_persistence_files",
-      "lc_persistence_mdf",
-      "lc2_persistence_hash"
-    ],
     "execution": "offline extraction and constant evaluation only; no app/vehicle/network/credential execution"
   },
   "publication_contracts": {

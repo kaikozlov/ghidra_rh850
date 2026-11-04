@@ -5080,27 +5080,5 @@
     "vehicle_contact": false,
     "network_contact": false,
     "credentials_used": false
-  },
-  "depth_smoke": {
-    "command": "uv run python build/tmp/lc2_cuw_utility_smoke.py",
-    "prepared_not_run": true,
-    "actual_code": [
-      "CUW.dll1001C640 decoder;100302B0 fresh/resume/request-reject;10037EA0 discard/failing-delete order under Unicorn",
-      "Actual serializer field-to-key x86 blocks10022C27/10022F1C, both three-stage continuation blocks and resume10036044; distinct +0x110/+0x124 sentinels, synthetic decimal conversion/map sink only",
-      "CuwModel.CreateReprogrammingReport IL with synthetic BCL edges, normal move and failed-publication temp retention",
-      "Freshly authenticated cuw.gui controller fresh/disk/live reconnect, actual VIN comparator and conditional gates, flashability reject, discard, clear/report failure cleanup"
-    ]
-  },
-  "smoke_plan": [
-    "Run this extractor; it authenticates actual packaged JS and validates IL/materialized bodies/native branch bytes without loading PE code.",
-    "Use Node isolated VM with signed-source CuwController prototype and fake Promise APIs to exercise status SUCCESS/IN_PROGRESS/WAITING/key-required/error/PC-disconnected branches; ensure the last branch schedules no poll.",
-    "Use managed reflection-only/dncil decoding for CanExit/SessionEnding/lock and command ResultCode branches; do not instantiate backend listener.",
-    "Native Windows harness must stub imports/J2534, initialize only private synthetic state, and exercise UtilityPlusFront ready/level guard and CUW clear rejection before allowing worker/reset execution; never call real mutation exports."
-  ],
-  "native_projects": [
-    "lc_cuw_utility",
-    "lc_cuw_utility_gene",
-    "lc_cuw_utility_core",
-    "lc_cuw_utility_adapt"
-  ]
+  }
 }

@@ -3275,10 +3275,7 @@ def _utility_depth(paths: dict, assets: dict, sources: list, evidence: list, man
                     "Workflow registration inventory is complete for utilityModuleMap. Preloaded controllers outside that map, individual workflow business decisions beyond the two full examples, CUW/security-key internals and calibration grammar are separate scopes.",
                     "Fcm13 registers fcm_13/fcm_13_vin_error_dialog_view.js, absent from the authenticated shipped GUI members; its registered path is not evidence of a loadable browser module.",
                     "Szcom03 has shipped modules but its guarded worker is already preloaded and its controller is uncached: zero new worker registrations become isError and reject first dynamic controller construction. No other utilityModuleMap worker path is preloaded by GTSWorker.",
-                    "VCI/ECU response bytes and externally completed operations require authorized runtime observations; offline source proves host ordering and response interpretation only."],
-        native_projects=["lc2_operations_front", "lc2_operations_broker", "lc2_operations_gene", "lc2_operations_toyota"],
-        parent_smoke="uv run python build/tmp/lc2_operations_smoke.py",
-        parent_module_loading_smoke="uv run python build/tmp/lc2_operations_module_loading_smoke.py")
+                    "VCI/ECU response bytes and externally completed operations require authorized runtime observations; offline source proves host ordering and response interpretation only."])
 
 def sha(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()

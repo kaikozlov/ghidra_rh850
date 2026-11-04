@@ -4249,6 +4249,5685 @@
       "finding": "UserInfo, TGD, DiagAdaptationManager, WebServiceAdaptationManager, FileAdaptation in table order."
     },
     {
+      "id": "bootstrap.api.connection",
+      "source": "bootstrap.pf.recovered",
+      "kind": "managed-dispatch-selector",
+      "locator": "GTSPlusController.ConnectionManager::AnalysisRequestMessage",
+      "rva": 21740,
+      "body_size": 944,
+      "body_sha256": "1eea282324fad6188c1b4edbc1690ba0696fbb4b8691030361628445d0473a00",
+      "offset_basis": "relative to first IL instruction",
+      "cases": [
+        {
+          "value": "CN000002",
+          "comparison": {
+            "il": "IL_025E",
+            "opcode": "ldstr",
+            "operand": "'CN000002'",
+            "bytes": "723f170070"
+          },
+          "branch": {
+            "il": "IL_0268",
+            "opcode": "brtrue.s",
+            "operand": "IL_02D5",
+            "bytes": "2d6b"
+          },
+          "target_il": "IL_02D5"
+        },
+        {
+          "value": "CN000003",
+          "comparison": {
+            "il": "IL_0271",
+            "opcode": "ldstr",
+            "operand": "'CN000003'",
+            "bytes": "7251170070"
+          },
+          "branch": {
+            "il": "IL_027B",
+            "opcode": "brtrue.s",
+            "operand": "IL_02DF",
+            "bytes": "2d62"
+          },
+          "target_il": "IL_02DF"
+        },
+        {
+          "value": "CN000004",
+          "comparison": {
+            "il": "IL_0284",
+            "opcode": "ldstr",
+            "operand": "'CN000004'",
+            "bytes": "7263170070"
+          },
+          "branch": {
+            "il": "IL_028E",
+            "opcode": "brtrue.s",
+            "operand": "IL_02E9",
+            "bytes": "2d59"
+          },
+          "target_il": "IL_02E9"
+        },
+        {
+          "value": "CN000005",
+          "comparison": {
+            "il": "IL_0297",
+            "opcode": "ldstr",
+            "operand": "'CN000005'",
+            "bytes": "7275170070"
+          },
+          "branch": {
+            "il": "IL_02A1",
+            "opcode": "brtrue.s",
+            "operand": "IL_02F3",
+            "bytes": "2d50"
+          },
+          "target_il": "IL_02F3"
+        },
+        {
+          "value": "CN000006",
+          "comparison": {
+            "il": "IL_02A7",
+            "opcode": "ldstr",
+            "operand": "'CN000006'",
+            "bytes": "7287170070"
+          },
+          "branch": {
+            "il": "IL_02B1",
+            "opcode": "brtrue.s",
+            "operand": "IL_02FE",
+            "bytes": "2d4b"
+          },
+          "target_il": "IL_02FE"
+        },
+        {
+          "value": "IF000009",
+          "comparison": {
+            "il": "IL_02B7",
+            "opcode": "ldstr",
+            "operand": "'IF000009'",
+            "bytes": "7299170070"
+          },
+          "branch": {
+            "il": "IL_02C1",
+            "opcode": "brtrue.s",
+            "operand": "IL_0309",
+            "bytes": "2d46"
+          },
+          "target_il": "IL_0309"
+        },
+        {
+          "value": "EX000001",
+          "comparison": {
+            "il": "IL_02C7",
+            "opcode": "ldstr",
+            "operand": "'EX000001'",
+            "bytes": "72ab170070"
+          },
+          "branch": {
+            "il": "IL_02D1",
+            "opcode": "brtrue.s",
+            "operand": "IL_0313",
+            "bytes": "2d40"
+          },
+          "target_il": "IL_0313"
+        }
+      ],
+      "default_target_il": "IL_031D",
+      "target_blocks": [
+        {
+          "il": "IL_02D5",
+          "instructions": [
+            {
+              "il": "IL_02D5",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_02D6",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_02D7",
+              "opcode": "call",
+              "operand": "ExecuteCreateChallengeCode",
+              "bytes": "28b3000006"
+            },
+            {
+              "il": "IL_02DC",
+              "opcode": "stloc.0",
+              "operand": "",
+              "bytes": "0a"
+            },
+            {
+              "il": "IL_02DD",
+              "opcode": "br.s",
+              "operand": "IL_0328",
+              "bytes": "2b49"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ConnectionManager::ExecuteCreateChallengeCode"
+          ]
+        },
+        {
+          "il": "IL_02DF",
+          "instructions": [
+            {
+              "il": "IL_02DF",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_02E0",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_02E1",
+              "opcode": "call",
+              "operand": "ExecuteCheckApiAuthentication",
+              "bytes": "28b4000006"
+            },
+            {
+              "il": "IL_02E6",
+              "opcode": "stloc.0",
+              "operand": "",
+              "bytes": "0a"
+            },
+            {
+              "il": "IL_02E7",
+              "opcode": "br.s",
+              "operand": "IL_0328",
+              "bytes": "2b3f"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ConnectionManager::ExecuteCheckApiAuthentication"
+          ]
+        },
+        {
+          "il": "IL_02E9",
+          "instructions": [
+            {
+              "il": "IL_02E9",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_02EA",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_02EB",
+              "opcode": "call",
+              "operand": "ExecuteCheckConnectionNameExist",
+              "bytes": "28b5000006"
+            },
+            {
+              "il": "IL_02F0",
+              "opcode": "stloc.0",
+              "operand": "",
+              "bytes": "0a"
+            },
+            {
+              "il": "IL_02F1",
+              "opcode": "br.s",
+              "operand": "IL_0328",
+              "bytes": "2b35"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ConnectionManager::ExecuteCheckConnectionNameExist"
+          ]
+        },
+        {
+          "il": "IL_02F3",
+          "instructions": [
+            {
+              "il": "IL_02F3",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_02F4",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_02F5",
+              "opcode": "ldarg.2",
+              "operand": "",
+              "bytes": "04"
+            },
+            {
+              "il": "IL_02F6",
+              "opcode": "call",
+              "operand": "ExecuteApiExclusiveControlLock",
+              "bytes": "28b6000006"
+            },
+            {
+              "il": "IL_02FB",
+              "opcode": "stloc.0",
+              "operand": "",
+              "bytes": "0a"
+            },
+            {
+              "il": "IL_02FC",
+              "opcode": "br.s",
+              "operand": "IL_0328",
+              "bytes": "2b2a"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ConnectionManager::ExecuteApiExclusiveControlLock"
+          ]
+        },
+        {
+          "il": "IL_02FE",
+          "instructions": [
+            {
+              "il": "IL_02FE",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_02FF",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_0300",
+              "opcode": "ldarg.2",
+              "operand": "",
+              "bytes": "04"
+            },
+            {
+              "il": "IL_0301",
+              "opcode": "call",
+              "operand": "ExecuteApiExclusiveControlUnlock",
+              "bytes": "28b7000006"
+            },
+            {
+              "il": "IL_0306",
+              "opcode": "stloc.0",
+              "operand": "",
+              "bytes": "0a"
+            },
+            {
+              "il": "IL_0307",
+              "opcode": "br.s",
+              "operand": "IL_0328",
+              "bytes": "2b1f"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ConnectionManager::ExecuteApiExclusiveControlUnlock"
+          ]
+        },
+        {
+          "il": "IL_0309",
+          "instructions": [
+            {
+              "il": "IL_0309",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_030A",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_030B",
+              "opcode": "call",
+              "operand": "ExecuteGetSoftwareId",
+              "bytes": "28b9000006"
+            },
+            {
+              "il": "IL_0310",
+              "opcode": "stloc.0",
+              "operand": "",
+              "bytes": "0a"
+            },
+            {
+              "il": "IL_0311",
+              "opcode": "br.s",
+              "operand": "IL_0328",
+              "bytes": "2b15"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ConnectionManager::ExecuteGetSoftwareId"
+          ]
+        },
+        {
+          "il": "IL_0313",
+          "instructions": [
+            {
+              "il": "IL_0313",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_0314",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_0315",
+              "opcode": "call",
+              "operand": "ExecuteGetDateTimeLocaleForWindows",
+              "bytes": "28b8000006"
+            },
+            {
+              "il": "IL_031A",
+              "opcode": "stloc.0",
+              "operand": "",
+              "bytes": "0a"
+            },
+            {
+              "il": "IL_031B",
+              "opcode": "br.s",
+              "operand": "IL_0328",
+              "bytes": "2b0b"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ConnectionManager::ExecuteGetDateTimeLocaleForWindows"
+          ]
+        },
+        {
+          "il": "IL_031D",
+          "instructions": [
+            {
+              "il": "IL_031D",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_031E",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_031F",
+              "opcode": "ldarg.2",
+              "operand": "",
+              "bytes": "04"
+            },
+            {
+              "il": "IL_0320",
+              "opcode": "call",
+              "operand": "SetApiTaskMessageList",
+              "bytes": "28ba000006"
+            },
+            {
+              "il": "IL_0325",
+              "opcode": "stloc.0",
+              "operand": "",
+              "bytes": "0a"
+            },
+            {
+              "il": "IL_0326",
+              "opcode": "ldc.i4.0",
+              "operand": "",
+              "bytes": "16"
+            },
+            {
+              "il": "IL_0327",
+              "opcode": "stloc.3",
+              "operand": "",
+              "bytes": "0d"
+            },
+            {
+              "il": "IL_0328",
+              "opcode": "ldloc.3",
+              "operand": "",
+              "bytes": "09"
+            },
+            {
+              "il": "IL_0329",
+              "opcode": "brfalse.s",
+              "operand": "IL_038E",
+              "bytes": "2c63"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ConnectionManager::SetApiTaskMessageList"
+          ]
+        }
+      ],
+      "finding": "Exact equality selectors and their first target blocks; admission and downstream implementation are separate contracts."
+    },
+    {
+      "id": "bootstrap.api.queue",
+      "source": "bootstrap.pf.recovered",
+      "kind": "managed-dispatch-selector",
+      "locator": "GTSPlusController.MainTask::StartMainTask",
+      "rva": 34564,
+      "body_size": 1684,
+      "body_sha256": "e070eb5b3413844d9d3b66d53e9a2d215a098f9825f9c8f567d447aa2bc70537",
+      "offset_basis": "relative to first IL instruction",
+      "cases": [
+        {
+          "value": "SC000001",
+          "comparison": {
+            "il": "IL_01AD",
+            "opcode": "ldstr",
+            "operand": "'SC000001'",
+            "bytes": "72e4240070"
+          },
+          "branch": {
+            "il": "IL_01B7",
+            "opcode": "brtrue",
+            "operand": "IL_035D",
+            "bytes": "3aa1010000"
+          },
+          "target_il": "IL_035D"
+        },
+        {
+          "value": "SC000011",
+          "comparison": {
+            "il": "IL_01BE",
+            "opcode": "ldstr",
+            "operand": "'SC000011'",
+            "bytes": "725c1f0070"
+          },
+          "branch": {
+            "il": "IL_01C8",
+            "opcode": "brtrue",
+            "operand": "IL_035D",
+            "bytes": "3a90010000"
+          },
+          "target_il": "IL_035D"
+        },
+        {
+          "value": "CN000001",
+          "comparison": {
+            "il": "IL_01CF",
+            "opcode": "ldstr",
+            "operand": "'CN000001'",
+            "bytes": "7233180070"
+          },
+          "branch": {
+            "il": "IL_01D9",
+            "opcode": "brtrue",
+            "operand": "IL_0379",
+            "bytes": "3a9b010000"
+          },
+          "target_il": "IL_0379"
+        },
+        {
+          "value": "CNXX0001",
+          "comparison": {
+            "il": "IL_01E0",
+            "opcode": "ldstr",
+            "operand": "'CNXX0001'",
+            "bytes": "72a7180070"
+          },
+          "branch": {
+            "il": "IL_01EA",
+            "opcode": "brtrue",
+            "operand": "IL_0395",
+            "bytes": "3aa6010000"
+          },
+          "target_il": "IL_0395"
+        },
+        {
+          "value": "SC000002",
+          "comparison": {
+            "il": "IL_01F6",
+            "opcode": "ldstr",
+            "operand": "'SC000002'",
+            "bytes": "721a250070"
+          },
+          "branch": {
+            "il": "IL_0200",
+            "opcode": "brtrue",
+            "operand": "IL_035D",
+            "bytes": "3a58010000"
+          },
+          "target_il": "IL_035D"
+        },
+        {
+          "value": "SCXX0002",
+          "comparison": {
+            "il": "IL_0207",
+            "opcode": "ldstr",
+            "operand": "'SCXX0002'",
+            "bytes": "72dd180070"
+          },
+          "branch": {
+            "il": "IL_0211",
+            "opcode": "brtrue",
+            "operand": "IL_035D",
+            "bytes": "3a47010000"
+          },
+          "target_il": "IL_035D"
+        },
+        {
+          "value": "SC000012",
+          "comparison": {
+            "il": "IL_0218",
+            "opcode": "ldstr",
+            "operand": "'SC000012'",
+            "bytes": "726e1f0070"
+          },
+          "branch": {
+            "il": "IL_0222",
+            "opcode": "brtrue",
+            "operand": "IL_035D",
+            "bytes": "3a36010000"
+          },
+          "target_il": "IL_035D"
+        },
+        {
+          "value": "SC000003",
+          "comparison": {
+            "il": "IL_022E",
+            "opcode": "ldstr",
+            "operand": "'SC000003'",
+            "bytes": "72f6240070"
+          },
+          "branch": {
+            "il": "IL_0238",
+            "opcode": "brtrue",
+            "operand": "IL_035D",
+            "bytes": "3a20010000"
+          },
+          "target_il": "IL_035D"
+        },
+        {
+          "value": "SC000013",
+          "comparison": {
+            "il": "IL_023F",
+            "opcode": "ldstr",
+            "operand": "'SC000013'",
+            "bytes": "72921f0070"
+          },
+          "branch": {
+            "il": "IL_0249",
+            "opcode": "brtrue",
+            "operand": "IL_035D",
+            "bytes": "3a0f010000"
+          },
+          "target_il": "IL_035D"
+        },
+        {
+          "value": "SC000007",
+          "comparison": {
+            "il": "IL_0255",
+            "opcode": "ldstr",
+            "operand": "'SC000007'",
+            "bytes": "72801f0070"
+          },
+          "branch": {
+            "il": "IL_025F",
+            "opcode": "brtrue",
+            "operand": "IL_035D",
+            "bytes": "3af9000000"
+          },
+          "target_il": "IL_035D"
+        },
+        {
+          "value": "CN000007",
+          "comparison": {
+            "il": "IL_0266",
+            "opcode": "ldstr",
+            "operand": "'CN000007'",
+            "bytes": "72e42c0070"
+          },
+          "branch": {
+            "il": "IL_0270",
+            "opcode": "brtrue",
+            "operand": "IL_0395",
+            "bytes": "3a20010000"
+          },
+          "target_il": "IL_0395"
+        },
+        {
+          "value": "SC000008",
+          "comparison": {
+            "il": "IL_027C",
+            "opcode": "ldstr",
+            "operand": "'SC000008'",
+            "bytes": "7208250070"
+          },
+          "branch": {
+            "il": "IL_0286",
+            "opcode": "brtrue",
+            "operand": "IL_035D",
+            "bytes": "3ad2000000"
+          },
+          "target_il": "IL_035D"
+        },
+        {
+          "value": "SC000009",
+          "comparison": {
+            "il": "IL_0292",
+            "opcode": "ldstr",
+            "operand": "'SC000009'",
+            "bytes": "7262250070"
+          },
+          "branch": {
+            "il": "IL_029C",
+            "opcode": "brtrue",
+            "operand": "IL_035D",
+            "bytes": "3abc000000"
+          },
+          "target_il": "IL_035D"
+        },
+        {
+          "value": "IF000004",
+          "comparison": {
+            "il": "IL_02A8",
+            "opcode": "ldstr",
+            "operand": "'IF000004'",
+            "bytes": "72f62c0070"
+          },
+          "branch": {
+            "il": "IL_02B2",
+            "opcode": "brtrue",
+            "operand": "IL_035D",
+            "bytes": "3aa6000000"
+          },
+          "target_il": "IL_035D"
+        },
+        {
+          "value": "SC000014",
+          "comparison": {
+            "il": "IL_02B9",
+            "opcode": "ldstr",
+            "operand": "'SC000014'",
+            "bytes": "72a41f0070"
+          },
+          "branch": {
+            "il": "IL_02C3",
+            "opcode": "brtrue",
+            "operand": "IL_035D",
+            "bytes": "3a95000000"
+          },
+          "target_il": "IL_035D"
+        },
+        {
+          "value": "SCXX0004",
+          "comparison": {
+            "il": "IL_02CA",
+            "opcode": "ldstr",
+            "operand": "'SCXX0004'",
+            "bytes": "7201190070"
+          },
+          "branch": {
+            "il": "IL_02D4",
+            "opcode": "brtrue",
+            "operand": "IL_035D",
+            "bytes": "3a84000000"
+          },
+          "target_il": "IL_035D"
+        },
+        {
+          "value": "SC000004",
+          "comparison": {
+            "il": "IL_02DB",
+            "opcode": "ldstr",
+            "operand": "'SC000004'",
+            "bytes": "722c250070"
+          },
+          "branch": {
+            "il": "IL_02E5",
+            "opcode": "brtrue",
+            "operand": "IL_03B1",
+            "bytes": "3ac7000000"
+          },
+          "target_il": "IL_03B1"
+        },
+        {
+          "value": "SC000010",
+          "comparison": {
+            "il": "IL_02F1",
+            "opcode": "ldstr",
+            "operand": "'SC000010'",
+            "bytes": "724a1f0070"
+          },
+          "branch": {
+            "il": "IL_02FB",
+            "opcode": "brtrue.s",
+            "operand": "IL_035D",
+            "bytes": "2d60"
+          },
+          "target_il": "IL_035D"
+        },
+        {
+          "value": "SC000015",
+          "comparison": {
+            "il": "IL_0304",
+            "opcode": "ldstr",
+            "operand": "'SC000015'",
+            "bytes": "72b61f0070"
+          },
+          "branch": {
+            "il": "IL_030E",
+            "opcode": "brtrue.s",
+            "operand": "IL_035D",
+            "bytes": "2d4d"
+          },
+          "target_il": "IL_035D"
+        },
+        {
+          "value": "SCXX0005",
+          "comparison": {
+            "il": "IL_0312",
+            "opcode": "ldstr",
+            "operand": "'SCXX0005'",
+            "bytes": "72b9180070"
+          },
+          "branch": {
+            "il": "IL_031C",
+            "opcode": "brtrue.s",
+            "operand": "IL_035D",
+            "bytes": "2d3f"
+          },
+          "target_il": "IL_035D"
+        },
+        {
+          "value": "CN000005",
+          "comparison": {
+            "il": "IL_0320",
+            "opcode": "ldstr",
+            "operand": "'CN000005'",
+            "bytes": "7275170070"
+          },
+          "branch": {
+            "il": "IL_032A",
+            "opcode": "brtrue.s",
+            "operand": "IL_0395",
+            "bytes": "2d69"
+          },
+          "target_il": "IL_0395"
+        },
+        {
+          "value": "SC000005",
+          "comparison": {
+            "il": "IL_032E",
+            "opcode": "ldstr",
+            "operand": "'SC000005'",
+            "bytes": "723e250070"
+          },
+          "branch": {
+            "il": "IL_0338",
+            "opcode": "brtrue.s",
+            "operand": "IL_03B1",
+            "bytes": "2d77"
+          },
+          "target_il": "IL_03B1"
+        },
+        {
+          "value": "SC000006",
+          "comparison": {
+            "il": "IL_0341",
+            "opcode": "ldstr",
+            "operand": "'SC000006'",
+            "bytes": "7250250070"
+          },
+          "branch": {
+            "il": "IL_034B",
+            "opcode": "brtrue.s",
+            "operand": "IL_0379",
+            "bytes": "2d2c"
+          },
+          "target_il": "IL_0379"
+        },
+        {
+          "value": "CN000006",
+          "comparison": {
+            "il": "IL_034F",
+            "opcode": "ldstr",
+            "operand": "'CN000006'",
+            "bytes": "7287170070"
+          },
+          "branch": {
+            "il": "IL_0359",
+            "opcode": "brtrue.s",
+            "operand": "IL_0395",
+            "bytes": "2d3a"
+          },
+          "target_il": "IL_0395"
+        },
+        {
+          "value": "DV",
+          "comparison": {
+            "il": "IL_0458",
+            "opcode": "ldstr",
+            "operand": "'DV'",
+            "bytes": "72a8240070"
+          },
+          "branch": {
+            "il": "IL_0462",
+            "opcode": "brtrue",
+            "operand": "IL_04F6",
+            "bytes": "3a8f000000"
+          },
+          "target_il": "IL_04F6"
+        },
+        {
+          "value": "UG",
+          "comparison": {
+            "il": "IL_046E",
+            "opcode": "ldstr",
+            "operand": "'UG'",
+            "bytes": "72441f0070"
+          },
+          "branch": {
+            "il": "IL_0478",
+            "opcode": "brtrue.s",
+            "operand": "IL_04F6",
+            "bytes": "2d7c"
+          },
+          "target_il": "IL_04F6"
+        },
+        {
+          "value": "UP",
+          "comparison": {
+            "il": "IL_047C",
+            "opcode": "ldstr",
+            "operand": "'UP'",
+            "bytes": "72082d0070"
+          },
+          "branch": {
+            "il": "IL_0486",
+            "opcode": "brtrue",
+            "operand": "IL_0528",
+            "bytes": "3a9d000000"
+          },
+          "target_il": "IL_0528"
+        },
+        {
+          "value": "IF",
+          "comparison": {
+            "il": "IL_0492",
+            "opcode": "ldstr",
+            "operand": "'IF'",
+            "bytes": "720e2d0070"
+          },
+          "branch": {
+            "il": "IL_049C",
+            "opcode": "brtrue.s",
+            "operand": "IL_050F",
+            "bytes": "2d71"
+          },
+          "target_il": "IL_050F"
+        },
+        {
+          "value": "FL",
+          "comparison": {
+            "il": "IL_04A5",
+            "opcode": "ldstr",
+            "operand": "'FL'",
+            "bytes": "72142d0070"
+          },
+          "branch": {
+            "il": "IL_04AF",
+            "opcode": "brtrue.s",
+            "operand": "IL_050F",
+            "bytes": "2d5e"
+          },
+          "target_il": "IL_050F"
+        },
+        {
+          "value": "TG",
+          "comparison": {
+            "il": "IL_04B8",
+            "opcode": "ldstr",
+            "operand": "'TG'",
+            "bytes": "723e1f0070"
+          },
+          "branch": {
+            "il": "IL_04C2",
+            "opcode": "brtrue.s",
+            "operand": "IL_050F",
+            "bytes": "2d4b"
+          },
+          "target_il": "IL_050F"
+        },
+        {
+          "value": "EX",
+          "comparison": {
+            "il": "IL_04C8",
+            "opcode": "ldstr",
+            "operand": "'EX'",
+            "bytes": "721a2d0070"
+          },
+          "branch": {
+            "il": "IL_04D2",
+            "opcode": "brtrue.s",
+            "operand": "IL_050F",
+            "bytes": "2d3b"
+          },
+          "target_il": "IL_050F"
+        },
+        {
+          "value": "LN",
+          "comparison": {
+            "il": "IL_04D8",
+            "opcode": "ldstr",
+            "operand": "'LN'",
+            "bytes": "72202d0070"
+          },
+          "branch": {
+            "il": "IL_04E2",
+            "opcode": "brtrue.s",
+            "operand": "IL_0528",
+            "bytes": "2d44"
+          },
+          "target_il": "IL_0528"
+        },
+        {
+          "value": "WS",
+          "comparison": {
+            "il": "IL_04E8",
+            "opcode": "ldstr",
+            "operand": "'WS'",
+            "bytes": "72262d0070"
+          },
+          "branch": {
+            "il": "IL_04F2",
+            "opcode": "brtrue.s",
+            "operand": "IL_0528",
+            "bytes": "2d34"
+          },
+          "target_il": "IL_0528"
+        }
+      ],
+      "default_target_il": "IL_0541",
+      "target_blocks": [
+        {
+          "il": "IL_035D",
+          "instructions": [
+            {
+              "il": "IL_035D",
+              "opcode": "ldc.i4.1",
+              "operand": "",
+              "bytes": "17"
+            },
+            {
+              "il": "IL_035E",
+              "opcode": "stloc.s",
+              "operand": "local(0x000D)",
+              "bytes": "130d"
+            },
+            {
+              "il": "IL_0360",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_0361",
+              "opcode": "call",
+              "operand": "get_MessageListManager",
+              "bytes": "2821010006"
+            },
+            {
+              "il": "IL_0366",
+              "opcode": "ldc.i4.1",
+              "operand": "",
+              "bytes": "17"
+            },
+            {
+              "il": "IL_0367",
+              "opcode": "ldloc.s",
+              "operand": "local(0x000C)",
+              "bytes": "110c"
+            },
+            {
+              "il": "IL_0369",
+              "opcode": "callvirt",
+              "operand": "EnqueueMessage",
+              "bytes": "6f4b010006"
+            },
+            {
+              "il": "IL_036E",
+              "opcode": "ldloc.2",
+              "operand": "",
+              "bytes": "08"
+            },
+            {
+              "il": "IL_036F",
+              "opcode": "ldc.i4.0",
+              "operand": "",
+              "bytes": "16"
+            },
+            {
+              "il": "IL_0370",
+              "opcode": "ldelem.ref",
+              "operand": "",
+              "bytes": "9a"
+            },
+            {
+              "il": "IL_0371",
+              "opcode": "callvirt",
+              "operand": "System.Threading.EventWaitHandle::Set",
+              "bytes": "6fe600000a"
+            },
+            {
+              "il": "IL_0376",
+              "opcode": "pop",
+              "operand": "",
+              "bytes": "26"
+            },
+            {
+              "il": "IL_0377",
+              "opcode": "br.s",
+              "operand": "IL_03D0",
+              "bytes": "2b57"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.MainTask::get_MessageListManager",
+            "GTSPlusController.MessageListManager::EnqueueMessage",
+            "System.Threading.EventWaitHandle::Set"
+          ],
+          "queue_id": 1
+        },
+        {
+          "il": "IL_0379",
+          "instructions": [
+            {
+              "il": "IL_0379",
+              "opcode": "ldc.i4.1",
+              "operand": "",
+              "bytes": "17"
+            },
+            {
+              "il": "IL_037A",
+              "opcode": "stloc.s",
+              "operand": "local(0x000D)",
+              "bytes": "130d"
+            },
+            {
+              "il": "IL_037C",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_037D",
+              "opcode": "call",
+              "operand": "get_MessageListManager",
+              "bytes": "2821010006"
+            },
+            {
+              "il": "IL_0382",
+              "opcode": "ldc.i4.2",
+              "operand": "",
+              "bytes": "18"
+            },
+            {
+              "il": "IL_0383",
+              "opcode": "ldloc.s",
+              "operand": "local(0x000C)",
+              "bytes": "110c"
+            },
+            {
+              "il": "IL_0385",
+              "opcode": "callvirt",
+              "operand": "EnqueueMessage",
+              "bytes": "6f4b010006"
+            },
+            {
+              "il": "IL_038A",
+              "opcode": "ldloc.2",
+              "operand": "",
+              "bytes": "08"
+            },
+            {
+              "il": "IL_038B",
+              "opcode": "ldc.i4.1",
+              "operand": "",
+              "bytes": "17"
+            },
+            {
+              "il": "IL_038C",
+              "opcode": "ldelem.ref",
+              "operand": "",
+              "bytes": "9a"
+            },
+            {
+              "il": "IL_038D",
+              "opcode": "callvirt",
+              "operand": "System.Threading.EventWaitHandle::Set",
+              "bytes": "6fe600000a"
+            },
+            {
+              "il": "IL_0392",
+              "opcode": "pop",
+              "operand": "",
+              "bytes": "26"
+            },
+            {
+              "il": "IL_0393",
+              "opcode": "br.s",
+              "operand": "IL_03D0",
+              "bytes": "2b3b"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.MainTask::get_MessageListManager",
+            "GTSPlusController.MessageListManager::EnqueueMessage",
+            "System.Threading.EventWaitHandle::Set"
+          ],
+          "queue_id": 2
+        },
+        {
+          "il": "IL_0395",
+          "instructions": [
+            {
+              "il": "IL_0395",
+              "opcode": "ldc.i4.1",
+              "operand": "",
+              "bytes": "17"
+            },
+            {
+              "il": "IL_0396",
+              "opcode": "stloc.s",
+              "operand": "local(0x000D)",
+              "bytes": "130d"
+            },
+            {
+              "il": "IL_0398",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_0399",
+              "opcode": "call",
+              "operand": "get_MessageListManager",
+              "bytes": "2821010006"
+            },
+            {
+              "il": "IL_039E",
+              "opcode": "ldc.i4.5",
+              "operand": "",
+              "bytes": "1b"
+            },
+            {
+              "il": "IL_039F",
+              "opcode": "ldloc.s",
+              "operand": "local(0x000C)",
+              "bytes": "110c"
+            },
+            {
+              "il": "IL_03A1",
+              "opcode": "callvirt",
+              "operand": "EnqueueMessage",
+              "bytes": "6f4b010006"
+            },
+            {
+              "il": "IL_03A6",
+              "opcode": "ldloc.2",
+              "operand": "",
+              "bytes": "08"
+            },
+            {
+              "il": "IL_03A7",
+              "opcode": "ldc.i4.4",
+              "operand": "",
+              "bytes": "1a"
+            },
+            {
+              "il": "IL_03A8",
+              "opcode": "ldelem.ref",
+              "operand": "",
+              "bytes": "9a"
+            },
+            {
+              "il": "IL_03A9",
+              "opcode": "callvirt",
+              "operand": "System.Threading.EventWaitHandle::Set",
+              "bytes": "6fe600000a"
+            },
+            {
+              "il": "IL_03AE",
+              "opcode": "pop",
+              "operand": "",
+              "bytes": "26"
+            },
+            {
+              "il": "IL_03AF",
+              "opcode": "br.s",
+              "operand": "IL_03D0",
+              "bytes": "2b1f"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.MainTask::get_MessageListManager",
+            "GTSPlusController.MessageListManager::EnqueueMessage",
+            "System.Threading.EventWaitHandle::Set"
+          ],
+          "queue_id": 5
+        },
+        {
+          "il": "IL_03B1",
+          "instructions": [
+            {
+              "il": "IL_03B1",
+              "opcode": "ldc.i4.1",
+              "operand": "",
+              "bytes": "17"
+            },
+            {
+              "il": "IL_03B2",
+              "opcode": "stloc.s",
+              "operand": "local(0x000D)",
+              "bytes": "130d"
+            },
+            {
+              "il": "IL_03B4",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_03B5",
+              "opcode": "call",
+              "operand": "get_MessageListManager",
+              "bytes": "2821010006"
+            },
+            {
+              "il": "IL_03BA",
+              "opcode": "ldc.i4.4",
+              "operand": "",
+              "bytes": "1a"
+            },
+            {
+              "il": "IL_03BB",
+              "opcode": "ldloc.s",
+              "operand": "local(0x000C)",
+              "bytes": "110c"
+            },
+            {
+              "il": "IL_03BD",
+              "opcode": "callvirt",
+              "operand": "EnqueueMessage",
+              "bytes": "6f4b010006"
+            },
+            {
+              "il": "IL_03C2",
+              "opcode": "ldloc.2",
+              "operand": "",
+              "bytes": "08"
+            },
+            {
+              "il": "IL_03C3",
+              "opcode": "ldc.i4.3",
+              "operand": "",
+              "bytes": "19"
+            },
+            {
+              "il": "IL_03C4",
+              "opcode": "ldelem.ref",
+              "operand": "",
+              "bytes": "9a"
+            },
+            {
+              "il": "IL_03C5",
+              "opcode": "callvirt",
+              "operand": "System.Threading.EventWaitHandle::Set",
+              "bytes": "6fe600000a"
+            },
+            {
+              "il": "IL_03CA",
+              "opcode": "pop",
+              "operand": "",
+              "bytes": "26"
+            },
+            {
+              "il": "IL_03CB",
+              "opcode": "br.s",
+              "operand": "IL_03D0",
+              "bytes": "2b03"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.MainTask::get_MessageListManager",
+            "GTSPlusController.MessageListManager::EnqueueMessage",
+            "System.Threading.EventWaitHandle::Set"
+          ],
+          "queue_id": 4
+        },
+        {
+          "il": "IL_04F6",
+          "instructions": [
+            {
+              "il": "IL_04F6",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_04F7",
+              "opcode": "call",
+              "operand": "get_MessageListManager",
+              "bytes": "2821010006"
+            },
+            {
+              "il": "IL_04FC",
+              "opcode": "ldc.i4.1",
+              "operand": "",
+              "bytes": "17"
+            },
+            {
+              "il": "IL_04FD",
+              "opcode": "ldloc.s",
+              "operand": "local(0x000C)",
+              "bytes": "110c"
+            },
+            {
+              "il": "IL_04FF",
+              "opcode": "callvirt",
+              "operand": "EnqueueMessage",
+              "bytes": "6f4b010006"
+            },
+            {
+              "il": "IL_0504",
+              "opcode": "ldloc.2",
+              "operand": "",
+              "bytes": "08"
+            },
+            {
+              "il": "IL_0505",
+              "opcode": "ldc.i4.0",
+              "operand": "",
+              "bytes": "16"
+            },
+            {
+              "il": "IL_0506",
+              "opcode": "ldelem.ref",
+              "operand": "",
+              "bytes": "9a"
+            },
+            {
+              "il": "IL_0507",
+              "opcode": "callvirt",
+              "operand": "System.Threading.EventWaitHandle::Set",
+              "bytes": "6fe600000a"
+            },
+            {
+              "il": "IL_050C",
+              "opcode": "pop",
+              "operand": "",
+              "bytes": "26"
+            },
+            {
+              "il": "IL_050D",
+              "opcode": "br.s",
+              "operand": "IL_0558",
+              "bytes": "2b49"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.MainTask::get_MessageListManager",
+            "GTSPlusController.MessageListManager::EnqueueMessage",
+            "System.Threading.EventWaitHandle::Set"
+          ],
+          "queue_id": 1
+        },
+        {
+          "il": "IL_050F",
+          "instructions": [
+            {
+              "il": "IL_050F",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_0510",
+              "opcode": "call",
+              "operand": "get_MessageListManager",
+              "bytes": "2821010006"
+            },
+            {
+              "il": "IL_0515",
+              "opcode": "ldc.i4.2",
+              "operand": "",
+              "bytes": "18"
+            },
+            {
+              "il": "IL_0516",
+              "opcode": "ldloc.s",
+              "operand": "local(0x000C)",
+              "bytes": "110c"
+            },
+            {
+              "il": "IL_0518",
+              "opcode": "callvirt",
+              "operand": "EnqueueMessage",
+              "bytes": "6f4b010006"
+            },
+            {
+              "il": "IL_051D",
+              "opcode": "ldloc.2",
+              "operand": "",
+              "bytes": "08"
+            },
+            {
+              "il": "IL_051E",
+              "opcode": "ldc.i4.1",
+              "operand": "",
+              "bytes": "17"
+            },
+            {
+              "il": "IL_051F",
+              "opcode": "ldelem.ref",
+              "operand": "",
+              "bytes": "9a"
+            },
+            {
+              "il": "IL_0520",
+              "opcode": "callvirt",
+              "operand": "System.Threading.EventWaitHandle::Set",
+              "bytes": "6fe600000a"
+            },
+            {
+              "il": "IL_0525",
+              "opcode": "pop",
+              "operand": "",
+              "bytes": "26"
+            },
+            {
+              "il": "IL_0526",
+              "opcode": "br.s",
+              "operand": "IL_0558",
+              "bytes": "2b30"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.MainTask::get_MessageListManager",
+            "GTSPlusController.MessageListManager::EnqueueMessage",
+            "System.Threading.EventWaitHandle::Set"
+          ],
+          "queue_id": 2
+        },
+        {
+          "il": "IL_0528",
+          "instructions": [
+            {
+              "il": "IL_0528",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_0529",
+              "opcode": "call",
+              "operand": "get_MessageListManager",
+              "bytes": "2821010006"
+            },
+            {
+              "il": "IL_052E",
+              "opcode": "ldc.i4.6",
+              "operand": "",
+              "bytes": "1c"
+            },
+            {
+              "il": "IL_052F",
+              "opcode": "ldloc.s",
+              "operand": "local(0x000C)",
+              "bytes": "110c"
+            },
+            {
+              "il": "IL_0531",
+              "opcode": "callvirt",
+              "operand": "EnqueueMessage",
+              "bytes": "6f4b010006"
+            },
+            {
+              "il": "IL_0536",
+              "opcode": "ldloc.2",
+              "operand": "",
+              "bytes": "08"
+            },
+            {
+              "il": "IL_0537",
+              "opcode": "ldc.i4.5",
+              "operand": "",
+              "bytes": "1b"
+            },
+            {
+              "il": "IL_0538",
+              "opcode": "ldelem.ref",
+              "operand": "",
+              "bytes": "9a"
+            },
+            {
+              "il": "IL_0539",
+              "opcode": "callvirt",
+              "operand": "System.Threading.EventWaitHandle::Set",
+              "bytes": "6fe600000a"
+            },
+            {
+              "il": "IL_053E",
+              "opcode": "pop",
+              "operand": "",
+              "bytes": "26"
+            },
+            {
+              "il": "IL_053F",
+              "opcode": "br.s",
+              "operand": "IL_0558",
+              "bytes": "2b17"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.MainTask::get_MessageListManager",
+            "GTSPlusController.MessageListManager::EnqueueMessage",
+            "System.Threading.EventWaitHandle::Set"
+          ],
+          "queue_id": 6
+        },
+        {
+          "il": "IL_0541",
+          "instructions": [
+            {
+              "il": "IL_0541",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_0542",
+              "opcode": "call",
+              "operand": "get_MessageListManager",
+              "bytes": "2821010006"
+            },
+            {
+              "il": "IL_0547",
+              "opcode": "ldc.i4.5",
+              "operand": "",
+              "bytes": "1b"
+            },
+            {
+              "il": "IL_0548",
+              "opcode": "ldloc.s",
+              "operand": "local(0x000C)",
+              "bytes": "110c"
+            },
+            {
+              "il": "IL_054A",
+              "opcode": "callvirt",
+              "operand": "EnqueueMessage",
+              "bytes": "6f4b010006"
+            },
+            {
+              "il": "IL_054F",
+              "opcode": "ldloc.2",
+              "operand": "",
+              "bytes": "08"
+            },
+            {
+              "il": "IL_0550",
+              "opcode": "ldc.i4.4",
+              "operand": "",
+              "bytes": "1a"
+            },
+            {
+              "il": "IL_0551",
+              "opcode": "ldelem.ref",
+              "operand": "",
+              "bytes": "9a"
+            },
+            {
+              "il": "IL_0552",
+              "opcode": "callvirt",
+              "operand": "System.Threading.EventWaitHandle::Set",
+              "bytes": "6fe600000a"
+            },
+            {
+              "il": "IL_0557",
+              "opcode": "pop",
+              "operand": "",
+              "bytes": "26"
+            },
+            {
+              "il": "IL_0558",
+              "opcode": "ldloca.s",
+              "operand": "local(0x000B)",
+              "bytes": "120b"
+            },
+            {
+              "il": "IL_055A",
+              "opcode": "call",
+              "operand": "TypeSpec[15116101120c]::MoveNext",
+              "bytes": "282201000a"
+            },
+            {
+              "il": "IL_055F",
+              "opcode": "brtrue",
+              "operand": "IL_013D",
+              "bytes": "3ad9fbffff"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.MainTask::get_MessageListManager",
+            "GTSPlusController.MessageListManager::EnqueueMessage",
+            "System.Threading.EventWaitHandle::Set",
+            "TypeSpec[15116101120c]::MoveNext"
+          ],
+          "queue_id": 5
+        }
+      ],
+      "finding": "Exact equality selectors and their first target blocks; admission and downstream implementation are separate contracts."
+    },
+    {
+      "id": "bootstrap.api.Cancel",
+      "source": "bootstrap.pf.recovered",
+      "kind": "managed-dispatch-selector",
+      "locator": "GTSPlusController.ExecuteTask.CancelExecuteTask::MessageFunction",
+      "rva": 56452,
+      "body_size": 188,
+      "body_sha256": "a7c3428fd88bd411c7375c5a6b0f9228ffeaa8f74610ce90f97593adb85d235d",
+      "offset_basis": "relative to first IL instruction",
+      "cases": [
+        {
+          "value": "SC000004",
+          "comparison": {
+            "il": "IL_0016",
+            "opcode": "ldstr",
+            "operand": "'SC000004'",
+            "bytes": "722c250070"
+          },
+          "branch": {
+            "il": "IL_0020",
+            "opcode": "brtrue.s",
+            "operand": "IL_0031",
+            "bytes": "2d0f"
+          },
+          "target_il": "IL_0031"
+        },
+        {
+          "value": "SC000005",
+          "comparison": {
+            "il": "IL_0023",
+            "opcode": "ldstr",
+            "operand": "'SC000005'",
+            "bytes": "723e250070"
+          },
+          "branch": {
+            "il": "IL_002D",
+            "opcode": "brtrue.s",
+            "operand": "IL_003B",
+            "bytes": "2d0c"
+          },
+          "target_il": "IL_003B"
+        }
+      ],
+      "default_target_il": "IL_0045",
+      "target_blocks": [
+        {
+          "il": "IL_0031",
+          "instructions": [
+            {
+              "il": "IL_0031",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_0032",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_0033",
+              "opcode": "call",
+              "operand": "ExecuteCancelAwaitingExecution",
+              "bytes": "28b1010006"
+            },
+            {
+              "il": "IL_0038",
+              "opcode": "stloc.0",
+              "operand": "",
+              "bytes": "0a"
+            },
+            {
+              "il": "IL_0039",
+              "opcode": "br.s",
+              "operand": "IL_00AE",
+              "bytes": "2b73"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.CancelExecuteTask::ExecuteCancelAwaitingExecution"
+          ]
+        },
+        {
+          "il": "IL_003B",
+          "instructions": [
+            {
+              "il": "IL_003B",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_003C",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_003D",
+              "opcode": "call",
+              "operand": "ExecuteCancelByCancelID",
+              "bytes": "28b2010006"
+            },
+            {
+              "il": "IL_0042",
+              "opcode": "stloc.0",
+              "operand": "",
+              "bytes": "0a"
+            },
+            {
+              "il": "IL_0043",
+              "opcode": "br.s",
+              "operand": "IL_00AE",
+              "bytes": "2b69"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.CancelExecuteTask::ExecuteCancelByCancelID"
+          ]
+        },
+        {
+          "il": "IL_0045",
+          "instructions": [
+            {
+              "il": "IL_0045",
+              "opcode": "newobj",
+              "operand": "GTSPlusPFCommon.Function.ErrorReportStringData::.ctor",
+              "bytes": "734400000a"
+            },
+            {
+              "il": "IL_004A",
+              "opcode": "dup",
+              "operand": "",
+              "bytes": "25"
+            },
+            {
+              "il": "IL_004B",
+              "opcode": "ldc.i4.2",
+              "operand": "",
+              "bytes": "18"
+            },
+            {
+              "il": "IL_004C",
+              "opcode": "callvirt",
+              "operand": "GTSPlusPFCommon.Function.ErrorReportStringData::set_Level",
+              "bytes": "6f4500000a"
+            },
+            {
+              "il": "IL_0051",
+              "opcode": "dup",
+              "operand": "",
+              "bytes": "25"
+            },
+            {
+              "il": "IL_0052",
+              "opcode": "ldstr",
+              "operand": "'AppCtrl'",
+              "bytes": "72eb070070"
+            },
+            {
+              "il": "IL_0057",
+              "opcode": "callvirt",
+              "operand": "GTSPlusPFCommon.Function.ErrorReportStringData::set_Type",
+              "bytes": "6f4600000a"
+            },
+            {
+              "il": "IL_005C",
+              "opcode": "dup",
+              "operand": "",
+              "bytes": "25"
+            },
+            {
+              "il": "IL_005D",
+              "opcode": "ldstr",
+              "operand": "'Abnormal API ID'",
+              "bytes": "72b23d0070"
+            },
+            {
+              "il": "IL_0062",
+              "opcode": "callvirt",
+              "operand": "GTSPlusPFCommon.Function.ErrorReportStringData::set_ErrorMessage",
+              "bytes": "6f4700000a"
+            },
+            {
+              "il": "IL_0067",
+              "opcode": "dup",
+              "operand": "",
+              "bytes": "25"
+            },
+            {
+              "il": "IL_0068",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_0069",
+              "opcode": "callvirt",
+              "operand": "get_Message",
+              "bytes": "6f07000006"
+            },
+            {
+              "il": "IL_006E",
+              "opcode": "callvirt",
+              "operand": "GTSPlusPFCommon.Function.ErrorReportStringData::set_RequestMessage",
+              "bytes": "6f7000000a"
+            },
+            {
+              "il": "IL_0073",
+              "opcode": "dup",
+              "operand": "",
+              "bytes": "25"
+            },
+            {
+              "il": "IL_0074",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_0075",
+              "opcode": "callvirt",
+              "operand": "get_ApiTaskId",
+              "bytes": "6f9a010006"
+            },
+            {
+              "il": "IL_007A",
+              "opcode": "callvirt",
+              "operand": "GTSPlusPFCommon.Function.ErrorReportStringData::set_TaskId",
+              "bytes": "6f3702000a"
+            },
+            {
+              "il": "IL_007F",
+              "opcode": "dup",
+              "operand": "",
+              "bytes": "25"
+            },
+            {
+              "il": "IL_0080",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_0081",
+              "opcode": "callvirt",
+              "operand": "get_GuiInformation",
+              "bytes": "6f0d000006"
+            },
+            {
+              "il": "IL_0086",
+              "opcode": "callvirt",
+              "operand": "get_SessionId",
+              "bytes": "6ffe000006"
+            },
+            {
+              "il": "IL_008B",
+              "opcode": "callvirt",
+              "operand": "GTSPlusPFCommon.Function.ErrorReportStringData::set_SessionId",
+              "bytes": "6f7100000a"
+            },
+            {
+              "il": "IL_0090",
+              "opcode": "call",
+              "operand": "GTSPlusPFCommon.Function.ErrorReportFunction::OutputErrorReportActionLog",
+              "bytes": "284a00000a"
+            },
+            {
+              "il": "IL_0095",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_0096",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_0097",
+              "opcode": "ldc.i4.m1",
+              "operand": "",
+              "bytes": "15"
+            },
+            {
+              "il": "IL_0098",
+              "opcode": "ldc.i4",
+              "operand": "0x1fff",
+              "bytes": "20ff1f0000"
+            },
+            {
+              "il": "IL_009D",
+              "opcode": "ldstr",
+              "operand": "'AppCtrl'",
+              "bytes": "72eb070070"
+            },
+            {
+              "il": "IL_00A2",
+              "opcode": "ldc.i4.3",
+              "operand": "",
+              "bytes": "19"
+            },
+            {
+              "il": "IL_00A3",
+              "opcode": "call",
+              "operand": "GTSPlusPFCommon.Function.CommonFunction::GetResultInfoData",
+              "bytes": "284300000a"
+            },
+            {
+              "il": "IL_00A8",
+              "opcode": "call",
+              "operand": "BaseErrorResponseMessage",
+              "bytes": "28a7010006"
+            },
+            {
+              "il": "IL_00AD",
+              "opcode": "stloc.0",
+              "operand": "",
+              "bytes": "0a"
+            },
+            {
+              "il": "IL_00AE",
+              "opcode": "ldloc.0",
+              "operand": "",
+              "bytes": "06"
+            },
+            {
+              "il": "IL_00AF",
+              "opcode": "ret",
+              "operand": "",
+              "bytes": "2a"
+            }
+          ],
+          "calls": [
+            "GTSPlusPFCommon.Function.ErrorReportStringData::.ctor",
+            "GTSPlusPFCommon.Function.ErrorReportStringData::set_Level",
+            "GTSPlusPFCommon.Function.ErrorReportStringData::set_Type",
+            "GTSPlusPFCommon.Function.ErrorReportStringData::set_ErrorMessage",
+            "GTSPlusController.ApiTaskMessage::get_Message",
+            "GTSPlusPFCommon.Function.ErrorReportStringData::set_RequestMessage",
+            "GTSPlusController.ExecuteTask.BaseExecuteTask::get_ApiTaskId",
+            "GTSPlusPFCommon.Function.ErrorReportStringData::set_TaskId",
+            "GTSPlusController.ApiTaskMessage::get_GuiInformation",
+            "GTSPlusController.GuiInformation::get_SessionId",
+            "GTSPlusPFCommon.Function.ErrorReportStringData::set_SessionId",
+            "GTSPlusPFCommon.Function.ErrorReportFunction::OutputErrorReportActionLog",
+            "GTSPlusPFCommon.Function.CommonFunction::GetResultInfoData",
+            "GTSPlusController.ExecuteTask.BaseExecuteTask::BaseErrorResponseMessage"
+          ]
+        }
+      ],
+      "finding": "Exact equality selectors and their first target blocks; admission and downstream implementation are separate contracts."
+    },
+    {
+      "id": "bootstrap.api.WebService",
+      "source": "bootstrap.pf.recovered",
+      "kind": "managed-dispatch-selector",
+      "locator": "GTSPlusController.ExecuteTask.WebServiceExecuteTask::MessageFunction",
+      "rva": 57680,
+      "body_size": 312,
+      "body_sha256": "bc0adb1f3019f1f9d68f7b0d8a7fdb94867ead3cb9e98f50dccf23f347e1d825",
+      "offset_basis": "relative to first IL instruction",
+      "cases": [
+        {
+          "value": "UP000008",
+          "comparison": {
+            "il": "IL_005C",
+            "opcode": "ldstr",
+            "operand": "'UP000008'",
+            "bytes": "72043e0070"
+          },
+          "branch": {
+            "il": "IL_0066",
+            "opcode": "brtrue.s",
+            "operand": "IL_00E5",
+            "bytes": "2d7d"
+          },
+          "target_il": "IL_00E5"
+        },
+        {
+          "value": "UP000009",
+          "comparison": {
+            "il": "IL_006E",
+            "opcode": "ldstr",
+            "operand": "'UP000009'",
+            "bytes": "72163e0070"
+          },
+          "branch": {
+            "il": "IL_0078",
+            "opcode": "brtrue.s",
+            "operand": "IL_00EF",
+            "bytes": "2d75"
+          },
+          "target_il": "IL_00EF"
+        },
+        {
+          "value": "LN000003",
+          "comparison": {
+            "il": "IL_0080",
+            "opcode": "ldstr",
+            "operand": "'LN000003'",
+            "bytes": "72283e0070"
+          },
+          "branch": {
+            "il": "IL_008A",
+            "opcode": "brtrue.s",
+            "operand": "IL_00F9",
+            "bytes": "2d6d"
+          },
+          "target_il": "IL_00F9"
+        },
+        {
+          "value": "LNXX0003",
+          "comparison": {
+            "il": "IL_008D",
+            "opcode": "ldstr",
+            "operand": "'LNXX0003'",
+            "bytes": "72ef180070"
+          },
+          "branch": {
+            "il": "IL_0097",
+            "opcode": "brtrue.s",
+            "operand": "IL_0103",
+            "bytes": "2d6a"
+          },
+          "target_il": "IL_0103"
+        },
+        {
+          "value": "LNXX0004",
+          "comparison": {
+            "il": "IL_009F",
+            "opcode": "ldstr",
+            "operand": "'LNXX0004'",
+            "bytes": "72c82d0070"
+          },
+          "branch": {
+            "il": "IL_00A9",
+            "opcode": "brtrue.s",
+            "operand": "IL_010D",
+            "bytes": "2d62"
+          },
+          "target_il": "IL_010D"
+        },
+        {
+          "value": "LN000004",
+          "comparison": {
+            "il": "IL_00AC",
+            "opcode": "ldstr",
+            "operand": "'LN000004'",
+            "bytes": "7200240070"
+          },
+          "branch": {
+            "il": "IL_00B6",
+            "opcode": "brtrue.s",
+            "operand": "IL_0121",
+            "bytes": "2d69"
+          },
+          "target_il": "IL_0121"
+        },
+        {
+          "value": "LNXX0005",
+          "comparison": {
+            "il": "IL_00BB",
+            "opcode": "ldstr",
+            "operand": "'LNXX0005'",
+            "bytes": "72da2d0070"
+          },
+          "branch": {
+            "il": "IL_00C5",
+            "opcode": "brtrue.s",
+            "operand": "IL_0117",
+            "bytes": "2d50"
+          },
+          "target_il": "IL_0117"
+        },
+        {
+          "value": "LN000005",
+          "comparison": {
+            "il": "IL_00C8",
+            "opcode": "ldstr",
+            "operand": "'LN000005'",
+            "bytes": "723a3e0070"
+          },
+          "branch": {
+            "il": "IL_00D2",
+            "opcode": "brtrue.s",
+            "operand": "IL_0121",
+            "bytes": "2d4d"
+          },
+          "target_il": "IL_0121"
+        },
+        {
+          "value": "LN000006",
+          "comparison": {
+            "il": "IL_00D7",
+            "opcode": "ldstr",
+            "operand": "'LN000006'",
+            "bytes": "7212240070"
+          },
+          "branch": {
+            "il": "IL_00E1",
+            "opcode": "brtrue.s",
+            "operand": "IL_0121",
+            "bytes": "2d3e"
+          },
+          "target_il": "IL_0121"
+        }
+      ],
+      "default_target_il": "IL_0121",
+      "target_blocks": [
+        {
+          "il": "IL_00E5",
+          "instructions": [
+            {
+              "il": "IL_00E5",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_00E6",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_00E7",
+              "opcode": "call",
+              "operand": "ExecuteApplyPFConfig",
+              "bytes": "28bb010006"
+            },
+            {
+              "il": "IL_00EC",
+              "opcode": "stloc.0",
+              "operand": "",
+              "bytes": "0a"
+            },
+            {
+              "il": "IL_00ED",
+              "opcode": "br.s",
+              "operand": "IL_012A",
+              "bytes": "2b3b"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.WebServiceExecuteTask::ExecuteApplyPFConfig"
+          ]
+        },
+        {
+          "il": "IL_00EF",
+          "instructions": [
+            {
+              "il": "IL_00EF",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_00F0",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_00F1",
+              "opcode": "call",
+              "operand": "ExecuteGetPFConfig",
+              "bytes": "28bc010006"
+            },
+            {
+              "il": "IL_00F6",
+              "opcode": "stloc.0",
+              "operand": "",
+              "bytes": "0a"
+            },
+            {
+              "il": "IL_00F7",
+              "opcode": "br.s",
+              "operand": "IL_012A",
+              "bytes": "2b31"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.WebServiceExecuteTask::ExecuteGetPFConfig"
+          ]
+        },
+        {
+          "il": "IL_00F9",
+          "instructions": [
+            {
+              "il": "IL_00F9",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_00FA",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_00FB",
+              "opcode": "call",
+              "operand": "ExecuteNotifyAuthentication",
+              "bytes": "28bd010006"
+            },
+            {
+              "il": "IL_0100",
+              "opcode": "stloc.0",
+              "operand": "",
+              "bytes": "0a"
+            },
+            {
+              "il": "IL_0101",
+              "opcode": "br.s",
+              "operand": "IL_012A",
+              "bytes": "2b27"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.WebServiceExecuteTask::ExecuteNotifyAuthentication"
+          ]
+        },
+        {
+          "il": "IL_0103",
+          "instructions": [
+            {
+              "il": "IL_0103",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_0104",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_0105",
+              "opcode": "call",
+              "operand": "ExecuteInternalLogout",
+              "bytes": "28c0010006"
+            },
+            {
+              "il": "IL_010A",
+              "opcode": "stloc.0",
+              "operand": "",
+              "bytes": "0a"
+            },
+            {
+              "il": "IL_010B",
+              "opcode": "br.s",
+              "operand": "IL_012A",
+              "bytes": "2b1d"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.WebServiceExecuteTask::ExecuteInternalLogout"
+          ]
+        },
+        {
+          "il": "IL_010D",
+          "instructions": [
+            {
+              "il": "IL_010D",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_010E",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_010F",
+              "opcode": "call",
+              "operand": "ExecuteInternalNotificationMskRevoke",
+              "bytes": "28c1010006"
+            },
+            {
+              "il": "IL_0114",
+              "opcode": "stloc.0",
+              "operand": "",
+              "bytes": "0a"
+            },
+            {
+              "il": "IL_0115",
+              "opcode": "br.s",
+              "operand": "IL_012A",
+              "bytes": "2b13"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.WebServiceExecuteTask::ExecuteInternalNotificationMskRevoke"
+          ]
+        },
+        {
+          "il": "IL_0117",
+          "instructions": [
+            {
+              "il": "IL_0117",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_0118",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_0119",
+              "opcode": "call",
+              "operand": "ExecuteInternalNotificationMskExpired",
+              "bytes": "28c2010006"
+            },
+            {
+              "il": "IL_011E",
+              "opcode": "stloc.0",
+              "operand": "",
+              "bytes": "0a"
+            },
+            {
+              "il": "IL_011F",
+              "opcode": "br.s",
+              "operand": "IL_012A",
+              "bytes": "2b09"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.WebServiceExecuteTask::ExecuteInternalNotificationMskExpired"
+          ]
+        },
+        {
+          "il": "IL_0121",
+          "instructions": [
+            {
+              "il": "IL_0121",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_0122",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_0123",
+              "opcode": "ldnull",
+              "operand": "",
+              "bytes": "14"
+            },
+            {
+              "il": "IL_0124",
+              "opcode": "call",
+              "operand": "AdaptationIFExecuteAndResponse",
+              "bytes": "28a5010006"
+            },
+            {
+              "il": "IL_0129",
+              "opcode": "stloc.0",
+              "operand": "",
+              "bytes": "0a"
+            },
+            {
+              "il": "IL_012A",
+              "opcode": "ldloc.0",
+              "operand": "",
+              "bytes": "06"
+            },
+            {
+              "il": "IL_012B",
+              "opcode": "ret",
+              "operand": "",
+              "bytes": "2a"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.BaseExecuteTask::AdaptationIFExecuteAndResponse"
+          ]
+        }
+      ],
+      "finding": "Exact equality selectors and their first target blocks; admission and downstream implementation are separate contracts."
+    },
+    {
+      "id": "bootstrap.api.Message",
+      "source": "bootstrap.pf.recovered",
+      "kind": "managed-dispatch-selector",
+      "locator": "GTSPlusController.ExecuteTask.MessageExecuteTask::MessageFunction",
+      "rva": 60292,
+      "body_size": 240,
+      "body_sha256": "029a479a55c825a6464d46f903cfbfd67002e57b7b879b6b3fd93c19c937cccd",
+      "offset_basis": "relative to first IL instruction",
+      "cases": [
+        {
+          "value": "CN000007",
+          "comparison": {
+            "il": "IL_0016",
+            "opcode": "ldstr",
+            "operand": "'CN000007'",
+            "bytes": "72e42c0070"
+          },
+          "branch": {
+            "il": "IL_0020",
+            "opcode": "brtrue.s",
+            "operand": "IL_0065",
+            "bytes": "2d43"
+          },
+          "target_il": "IL_0065"
+        },
+        {
+          "value": "CN000005",
+          "comparison": {
+            "il": "IL_0023",
+            "opcode": "ldstr",
+            "operand": "'CN000005'",
+            "bytes": "7275170070"
+          },
+          "branch": {
+            "il": "IL_002D",
+            "opcode": "brtrue.s",
+            "operand": "IL_006F",
+            "bytes": "2d40"
+          },
+          "target_il": "IL_006F"
+        },
+        {
+          "value": "CN000006",
+          "comparison": {
+            "il": "IL_0030",
+            "opcode": "ldstr",
+            "operand": "'CN000006'",
+            "bytes": "7287170070"
+          },
+          "branch": {
+            "il": "IL_003A",
+            "opcode": "brtrue.s",
+            "operand": "IL_006F",
+            "bytes": "2d33"
+          },
+          "target_il": "IL_006F"
+        },
+        {
+          "value": "CNXX0001",
+          "comparison": {
+            "il": "IL_003D",
+            "opcode": "ldstr",
+            "operand": "'CNXX0001'",
+            "bytes": "72a7180070"
+          },
+          "branch": {
+            "il": "IL_0047",
+            "opcode": "brtrue.s",
+            "operand": "IL_006F",
+            "bytes": "2d26"
+          },
+          "target_il": "IL_006F"
+        },
+        {
+          "value": "UPXX0002",
+          "comparison": {
+            "il": "IL_004A",
+            "opcode": "ldstr",
+            "operand": "'UPXX0002'",
+            "bytes": "7234300070"
+          },
+          "branch": {
+            "il": "IL_0054",
+            "opcode": "brtrue.s",
+            "operand": "IL_006F",
+            "bytes": "2d19"
+          },
+          "target_il": "IL_006F"
+        },
+        {
+          "value": "UPXX0003",
+          "comparison": {
+            "il": "IL_0057",
+            "opcode": "ldstr",
+            "operand": "'UPXX0003'",
+            "bytes": "7246300070"
+          },
+          "branch": {
+            "il": "IL_0061",
+            "opcode": "brtrue.s",
+            "operand": "IL_006F",
+            "bytes": "2d0c"
+          },
+          "target_il": "IL_006F"
+        }
+      ],
+      "default_target_il": "IL_0079",
+      "target_blocks": [
+        {
+          "il": "IL_0065",
+          "instructions": [
+            {
+              "il": "IL_0065",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_0066",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_0067",
+              "opcode": "call",
+              "operand": "ExecuteGuiRelay",
+              "bytes": "28c7010006"
+            },
+            {
+              "il": "IL_006C",
+              "opcode": "stloc.0",
+              "operand": "",
+              "bytes": "0a"
+            },
+            {
+              "il": "IL_006D",
+              "opcode": "br.s",
+              "operand": "IL_00E2",
+              "bytes": "2b73"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.MessageExecuteTask::ExecuteGuiRelay"
+          ]
+        },
+        {
+          "il": "IL_006F",
+          "instructions": [
+            {
+              "il": "IL_006F",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_0070",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_0071",
+              "opcode": "call",
+              "operand": "ExecuteBroadCastOthers",
+              "bytes": "28c8010006"
+            },
+            {
+              "il": "IL_0076",
+              "opcode": "stloc.0",
+              "operand": "",
+              "bytes": "0a"
+            },
+            {
+              "il": "IL_0077",
+              "opcode": "br.s",
+              "operand": "IL_00E2",
+              "bytes": "2b69"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.MessageExecuteTask::ExecuteBroadCastOthers"
+          ]
+        },
+        {
+          "il": "IL_0079",
+          "instructions": [
+            {
+              "il": "IL_0079",
+              "opcode": "newobj",
+              "operand": "GTSPlusPFCommon.Function.ErrorReportStringData::.ctor",
+              "bytes": "734400000a"
+            },
+            {
+              "il": "IL_007E",
+              "opcode": "dup",
+              "operand": "",
+              "bytes": "25"
+            },
+            {
+              "il": "IL_007F",
+              "opcode": "ldc.i4.2",
+              "operand": "",
+              "bytes": "18"
+            },
+            {
+              "il": "IL_0080",
+              "opcode": "callvirt",
+              "operand": "GTSPlusPFCommon.Function.ErrorReportStringData::set_Level",
+              "bytes": "6f4500000a"
+            },
+            {
+              "il": "IL_0085",
+              "opcode": "dup",
+              "operand": "",
+              "bytes": "25"
+            },
+            {
+              "il": "IL_0086",
+              "opcode": "ldstr",
+              "operand": "'AppCtrl'",
+              "bytes": "72eb070070"
+            },
+            {
+              "il": "IL_008B",
+              "opcode": "callvirt",
+              "operand": "GTSPlusPFCommon.Function.ErrorReportStringData::set_Type",
+              "bytes": "6f4600000a"
+            },
+            {
+              "il": "IL_0090",
+              "opcode": "dup",
+              "operand": "",
+              "bytes": "25"
+            },
+            {
+              "il": "IL_0091",
+              "opcode": "ldstr",
+              "operand": "'Abnormal API ID'",
+              "bytes": "72b23d0070"
+            },
+            {
+              "il": "IL_0096",
+              "opcode": "callvirt",
+              "operand": "GTSPlusPFCommon.Function.ErrorReportStringData::set_ErrorMessage",
+              "bytes": "6f4700000a"
+            },
+            {
+              "il": "IL_009B",
+              "opcode": "dup",
+              "operand": "",
+              "bytes": "25"
+            },
+            {
+              "il": "IL_009C",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_009D",
+              "opcode": "callvirt",
+              "operand": "get_Message",
+              "bytes": "6f07000006"
+            },
+            {
+              "il": "IL_00A2",
+              "opcode": "callvirt",
+              "operand": "GTSPlusPFCommon.Function.ErrorReportStringData::set_RequestMessage",
+              "bytes": "6f7000000a"
+            },
+            {
+              "il": "IL_00A7",
+              "opcode": "dup",
+              "operand": "",
+              "bytes": "25"
+            },
+            {
+              "il": "IL_00A8",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_00A9",
+              "opcode": "callvirt",
+              "operand": "get_ApiTaskId",
+              "bytes": "6f9a010006"
+            },
+            {
+              "il": "IL_00AE",
+              "opcode": "callvirt",
+              "operand": "GTSPlusPFCommon.Function.ErrorReportStringData::set_TaskId",
+              "bytes": "6f3702000a"
+            },
+            {
+              "il": "IL_00B3",
+              "opcode": "dup",
+              "operand": "",
+              "bytes": "25"
+            },
+            {
+              "il": "IL_00B4",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_00B5",
+              "opcode": "callvirt",
+              "operand": "get_GuiInformation",
+              "bytes": "6f0d000006"
+            },
+            {
+              "il": "IL_00BA",
+              "opcode": "callvirt",
+              "operand": "get_SessionId",
+              "bytes": "6ffe000006"
+            },
+            {
+              "il": "IL_00BF",
+              "opcode": "callvirt",
+              "operand": "GTSPlusPFCommon.Function.ErrorReportStringData::set_SessionId",
+              "bytes": "6f7100000a"
+            },
+            {
+              "il": "IL_00C4",
+              "opcode": "call",
+              "operand": "GTSPlusPFCommon.Function.ErrorReportFunction::OutputErrorReportActionLog",
+              "bytes": "284a00000a"
+            },
+            {
+              "il": "IL_00C9",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_00CA",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_00CB",
+              "opcode": "ldc.i4.m1",
+              "operand": "",
+              "bytes": "15"
+            },
+            {
+              "il": "IL_00CC",
+              "opcode": "ldc.i4",
+              "operand": "0x1fff",
+              "bytes": "20ff1f0000"
+            },
+            {
+              "il": "IL_00D1",
+              "opcode": "ldstr",
+              "operand": "'AppCtrl'",
+              "bytes": "72eb070070"
+            },
+            {
+              "il": "IL_00D6",
+              "opcode": "ldc.i4.6",
+              "operand": "",
+              "bytes": "1c"
+            },
+            {
+              "il": "IL_00D7",
+              "opcode": "call",
+              "operand": "GTSPlusPFCommon.Function.CommonFunction::GetResultInfoData",
+              "bytes": "284300000a"
+            },
+            {
+              "il": "IL_00DC",
+              "opcode": "call",
+              "operand": "BaseErrorResponseMessage",
+              "bytes": "28a7010006"
+            },
+            {
+              "il": "IL_00E1",
+              "opcode": "stloc.0",
+              "operand": "",
+              "bytes": "0a"
+            },
+            {
+              "il": "IL_00E2",
+              "opcode": "ldloc.0",
+              "operand": "",
+              "bytes": "06"
+            },
+            {
+              "il": "IL_00E3",
+              "opcode": "ret",
+              "operand": "",
+              "bytes": "2a"
+            }
+          ],
+          "calls": [
+            "GTSPlusPFCommon.Function.ErrorReportStringData::.ctor",
+            "GTSPlusPFCommon.Function.ErrorReportStringData::set_Level",
+            "GTSPlusPFCommon.Function.ErrorReportStringData::set_Type",
+            "GTSPlusPFCommon.Function.ErrorReportStringData::set_ErrorMessage",
+            "GTSPlusController.ApiTaskMessage::get_Message",
+            "GTSPlusPFCommon.Function.ErrorReportStringData::set_RequestMessage",
+            "GTSPlusController.ExecuteTask.BaseExecuteTask::get_ApiTaskId",
+            "GTSPlusPFCommon.Function.ErrorReportStringData::set_TaskId",
+            "GTSPlusController.ApiTaskMessage::get_GuiInformation",
+            "GTSPlusController.GuiInformation::get_SessionId",
+            "GTSPlusPFCommon.Function.ErrorReportStringData::set_SessionId",
+            "GTSPlusPFCommon.Function.ErrorReportFunction::OutputErrorReportActionLog",
+            "GTSPlusPFCommon.Function.CommonFunction::GetResultInfoData",
+            "GTSPlusController.ExecuteTask.BaseExecuteTask::BaseErrorResponseMessage"
+          ]
+        }
+      ],
+      "finding": "Exact equality selectors and their first target blocks; admission and downstream implementation are separate contracts."
+    },
+    {
+      "id": "bootstrap.api.NonVehicleConnection",
+      "source": "bootstrap.pf.recovered",
+      "kind": "managed-dispatch-selector",
+      "locator": "GTSPlusController.ExecuteTask.NonVehicleConnectionExecuteTask::MessageFunction",
+      "rva": 62088,
+      "body_size": 585,
+      "body_sha256": "bd2bc6dd2c7dd7a9171cc120a778ecf4ea2b13b1f283507d012648fc8dd26336",
+      "offset_basis": "relative to first IL instruction",
+      "cases": [
+        {
+          "value": "TGXX0001",
+          "comparison": {
+            "il": "IL_0070",
+            "opcode": "ldstr",
+            "operand": "'TGXX0001'",
+            "bytes": "7271180070"
+          },
+          "branch": {
+            "il": "IL_007A",
+            "opcode": "brtrue",
+            "operand": "IL_01AC",
+            "bytes": "3a2d010000"
+          },
+          "target_il": "IL_01AC"
+        },
+        {
+          "value": "IFXX0001",
+          "comparison": {
+            "il": "IL_0080",
+            "opcode": "ldstr",
+            "operand": "'IFXX0001'",
+            "bytes": "7213190070"
+          },
+          "branch": {
+            "il": "IL_008A",
+            "opcode": "brtrue",
+            "operand": "IL_0214",
+            "bytes": "3a85010000"
+          },
+          "target_il": "IL_0214"
+        },
+        {
+          "value": "CN000001",
+          "comparison": {
+            "il": "IL_0090",
+            "opcode": "ldstr",
+            "operand": "'CN000001'",
+            "bytes": "7233180070"
+          },
+          "branch": {
+            "il": "IL_009A",
+            "opcode": "brtrue",
+            "operand": "IL_021E",
+            "bytes": "3a7f010000"
+          },
+          "target_il": "IL_021E"
+        },
+        {
+          "value": "FL000001",
+          "comparison": {
+            "il": "IL_00A0",
+            "opcode": "ldstr",
+            "operand": "'FL000001'",
+            "bytes": "7213410070"
+          },
+          "branch": {
+            "il": "IL_00AA",
+            "opcode": "brtrue",
+            "operand": "IL_0228",
+            "bytes": "3a79010000"
+          },
+          "target_il": "IL_0228"
+        },
+        {
+          "value": "FL000011",
+          "comparison": {
+            "il": "IL_00B0",
+            "opcode": "ldstr",
+            "operand": "'FL000011'",
+            "bytes": "7225410070"
+          },
+          "branch": {
+            "il": "IL_00BA",
+            "opcode": "brtrue",
+            "operand": "IL_0228",
+            "bytes": "3a69010000"
+          },
+          "target_il": "IL_0228"
+        },
+        {
+          "value": "FL000006",
+          "comparison": {
+            "il": "IL_00C5",
+            "opcode": "ldstr",
+            "operand": "'FL000006'",
+            "bytes": "7294230070"
+          },
+          "branch": {
+            "il": "IL_00CF",
+            "opcode": "brtrue",
+            "operand": "IL_01E2",
+            "bytes": "3a0e010000"
+          },
+          "target_il": "IL_01E2"
+        },
+        {
+          "value": "SC000006",
+          "comparison": {
+            "il": "IL_00D5",
+            "opcode": "ldstr",
+            "operand": "'SC000006'",
+            "bytes": "7250250070"
+          },
+          "branch": {
+            "il": "IL_00DF",
+            "opcode": "brtrue",
+            "operand": "IL_01EC",
+            "bytes": "3a08010000"
+          },
+          "target_il": "IL_01EC"
+        },
+        {
+          "value": "IF000013",
+          "comparison": {
+            "il": "IL_00EA",
+            "opcode": "ldstr",
+            "operand": "'IF000013'",
+            "bytes": "725e230070"
+          },
+          "branch": {
+            "il": "IL_00F4",
+            "opcode": "brtrue",
+            "operand": "IL_01F6",
+            "bytes": "3afd000000"
+          },
+          "target_il": "IL_01F6"
+        },
+        {
+          "value": "FL000013",
+          "comparison": {
+            "il": "IL_00FA",
+            "opcode": "ldstr",
+            "operand": "'FL000013'",
+            "bytes": "7237410070"
+          },
+          "branch": {
+            "il": "IL_0104",
+            "opcode": "brtrue",
+            "operand": "IL_0228",
+            "bytes": "3a1f010000"
+          },
+          "target_il": "IL_0228"
+        },
+        {
+          "value": "IF000014",
+          "comparison": {
+            "il": "IL_010F",
+            "opcode": "ldstr",
+            "operand": "'IF000014'",
+            "bytes": "7249410070"
+          },
+          "branch": {
+            "il": "IL_0119",
+            "opcode": "brtrue",
+            "operand": "IL_0200",
+            "bytes": "3ae2000000"
+          },
+          "target_il": "IL_0200"
+        },
+        {
+          "value": "IF000015",
+          "comparison": {
+            "il": "IL_0124",
+            "opcode": "ldstr",
+            "operand": "'IF000015'",
+            "bytes": "725b410070"
+          },
+          "branch": {
+            "il": "IL_012E",
+            "opcode": "brtrue",
+            "operand": "IL_020A",
+            "bytes": "3ad7000000"
+          },
+          "target_il": "IL_020A"
+        },
+        {
+          "value": "FL000002",
+          "comparison": {
+            "il": "IL_0139",
+            "opcode": "ldstr",
+            "operand": "'FL000002'",
+            "bytes": "726d410070"
+          },
+          "branch": {
+            "il": "IL_0143",
+            "opcode": "brtrue",
+            "operand": "IL_0228",
+            "bytes": "3ae0000000"
+          },
+          "target_il": "IL_0228"
+        },
+        {
+          "value": "FL000012",
+          "comparison": {
+            "il": "IL_0149",
+            "opcode": "ldstr",
+            "operand": "'FL000012'",
+            "bytes": "727f410070"
+          },
+          "branch": {
+            "il": "IL_0153",
+            "opcode": "brtrue",
+            "operand": "IL_0228",
+            "bytes": "3ad0000000"
+          },
+          "target_il": "IL_0228"
+        },
+        {
+          "value": "FL000008",
+          "comparison": {
+            "il": "IL_015E",
+            "opcode": "ldstr",
+            "operand": "'FL000008'",
+            "bytes": "7291410070"
+          },
+          "branch": {
+            "il": "IL_0168",
+            "opcode": "brtrue",
+            "operand": "IL_0228",
+            "bytes": "3abb000000"
+          },
+          "target_il": "IL_0228"
+        },
+        {
+          "value": "FL000009",
+          "comparison": {
+            "il": "IL_0173",
+            "opcode": "ldstr",
+            "operand": "'FL000009'",
+            "bytes": "72a3410070"
+          },
+          "branch": {
+            "il": "IL_017D",
+            "opcode": "brtrue",
+            "operand": "IL_0228",
+            "bytes": "3aa6000000"
+          },
+          "target_il": "IL_0228"
+        },
+        {
+          "value": "FL000010",
+          "comparison": {
+            "il": "IL_0188",
+            "opcode": "ldstr",
+            "operand": "'FL000010'",
+            "bytes": "72b5410070"
+          },
+          "branch": {
+            "il": "IL_0192",
+            "opcode": "brtrue",
+            "operand": "IL_0228",
+            "bytes": "3a91000000"
+          },
+          "target_il": "IL_0228"
+        },
+        {
+          "value": "FL000020",
+          "comparison": {
+            "il": "IL_0198",
+            "opcode": "ldstr",
+            "operand": "'FL000020'",
+            "bytes": "72c7410070"
+          },
+          "branch": {
+            "il": "IL_01A2",
+            "opcode": "brtrue",
+            "operand": "IL_0228",
+            "bytes": "3a81000000"
+          },
+          "target_il": "IL_0228"
+        }
+      ],
+      "default_target_il": "IL_0232",
+      "target_blocks": [
+        {
+          "il": "IL_01AC",
+          "instructions": [
+            {
+              "il": "IL_01AC",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_01AD",
+              "opcode": "call",
+              "operand": "get_AdaptationIF",
+              "bytes": "288f010006"
+            },
+            {
+              "il": "IL_01B2",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_01B3",
+              "opcode": "callvirt",
+              "operand": "get_ApiId",
+              "bytes": "6f09000006"
+            },
+            {
+              "il": "IL_01B8",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_01B9",
+              "opcode": "callvirt",
+              "operand": "get_GuiInformation",
+              "bytes": "6f0d000006"
+            },
+            {
+              "il": "IL_01BE",
+              "opcode": "callvirt",
+              "operand": "get_SessionId",
+              "bytes": "6ffe000006"
+            },
+            {
+              "il": "IL_01C3",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_01C4",
+              "opcode": "callvirt",
+              "operand": "get_Message",
+              "bytes": "6f07000006"
+            },
+            {
+              "il": "IL_01C9",
+              "opcode": "ldloca.s",
+              "operand": "local(0x0001)",
+              "bytes": "1201"
+            },
+            {
+              "il": "IL_01CB",
+              "opcode": "ldnull",
+              "operand": "",
+              "bytes": "14"
+            },
+            {
+              "il": "IL_01CC",
+              "opcode": "callvirt",
+              "operand": "GTSPlusAdaptationIF.AdaptationInterface::ExecuteAdaptation",
+              "bytes": "6fb101000a"
+            },
+            {
+              "il": "IL_01D1",
+              "opcode": "stloc.0",
+              "operand": "",
+              "bytes": "0a"
+            },
+            {
+              "il": "IL_01D2",
+              "opcode": "ldc.i4.0",
+              "operand": "",
+              "bytes": "16"
+            },
+            {
+              "il": "IL_01D3",
+              "opcode": "ldc.i4.0",
+              "operand": "",
+              "bytes": "16"
+            },
+            {
+              "il": "IL_01D4",
+              "opcode": "ldstr",
+              "operand": "'AppCtrl'",
+              "bytes": "72eb070070"
+            },
+            {
+              "il": "IL_01D9",
+              "opcode": "ldc.i4.0",
+              "operand": "",
+              "bytes": "16"
+            },
+            {
+              "il": "IL_01DA",
+              "opcode": "call",
+              "operand": "GTSPlusPFCommon.Function.CommonFunction::GetResultInfoData",
+              "bytes": "284300000a"
+            },
+            {
+              "il": "IL_01DF",
+              "opcode": "stloc.0",
+              "operand": "",
+              "bytes": "0a"
+            },
+            {
+              "il": "IL_01E0",
+              "opcode": "br.s",
+              "operand": "IL_023B",
+              "bytes": "2b59"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.BaseExecuteTask::get_AdaptationIF",
+            "GTSPlusController.ApiTaskMessage::get_ApiId",
+            "GTSPlusController.ApiTaskMessage::get_GuiInformation",
+            "GTSPlusController.GuiInformation::get_SessionId",
+            "GTSPlusController.ApiTaskMessage::get_Message",
+            "GTSPlusAdaptationIF.AdaptationInterface::ExecuteAdaptation",
+            "GTSPlusPFCommon.Function.CommonFunction::GetResultInfoData"
+          ]
+        },
+        {
+          "il": "IL_01E2",
+          "instructions": [
+            {
+              "il": "IL_01E2",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_01E3",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_01E4",
+              "opcode": "call",
+              "operand": "ExecuteOutputActivityLog",
+              "bytes": "28cd010006"
+            },
+            {
+              "il": "IL_01E9",
+              "opcode": "stloc.0",
+              "operand": "",
+              "bytes": "0a"
+            },
+            {
+              "il": "IL_01EA",
+              "opcode": "br.s",
+              "operand": "IL_023B",
+              "bytes": "2b4f"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.NonVehicleConnectionExecuteTask::ExecuteOutputActivityLog"
+          ]
+        },
+        {
+          "il": "IL_01EC",
+          "instructions": [
+            {
+              "il": "IL_01EC",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_01ED",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_01EE",
+              "opcode": "call",
+              "operand": "ExecuteGetDiagnosticInformation",
+              "bytes": "28ce010006"
+            },
+            {
+              "il": "IL_01F3",
+              "opcode": "stloc.0",
+              "operand": "",
+              "bytes": "0a"
+            },
+            {
+              "il": "IL_01F4",
+              "opcode": "br.s",
+              "operand": "IL_023B",
+              "bytes": "2b45"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.NonVehicleConnectionExecuteTask::ExecuteGetDiagnosticInformation"
+          ]
+        },
+        {
+          "il": "IL_01F6",
+          "instructions": [
+            {
+              "il": "IL_01F6",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_01F7",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_01F8",
+              "opcode": "call",
+              "operand": "ExecuteSaveSettingFileInfo",
+              "bytes": "28d3010006"
+            },
+            {
+              "il": "IL_01FD",
+              "opcode": "stloc.0",
+              "operand": "",
+              "bytes": "0a"
+            },
+            {
+              "il": "IL_01FE",
+              "opcode": "br.s",
+              "operand": "IL_023B",
+              "bytes": "2b3b"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.NonVehicleConnectionExecuteTask::ExecuteSaveSettingFileInfo"
+          ]
+        },
+        {
+          "il": "IL_0200",
+          "instructions": [
+            {
+              "il": "IL_0200",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_0201",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_0202",
+              "opcode": "call",
+              "operand": "ExecuteGetGUISharedParameter",
+              "bytes": "28cf010006"
+            },
+            {
+              "il": "IL_0207",
+              "opcode": "stloc.0",
+              "operand": "",
+              "bytes": "0a"
+            },
+            {
+              "il": "IL_0208",
+              "opcode": "br.s",
+              "operand": "IL_023B",
+              "bytes": "2b31"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.NonVehicleConnectionExecuteTask::ExecuteGetGUISharedParameter"
+          ]
+        },
+        {
+          "il": "IL_020A",
+          "instructions": [
+            {
+              "il": "IL_020A",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_020B",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_020C",
+              "opcode": "call",
+              "operand": "ExecuteSetGUISharedParameter",
+              "bytes": "28d0010006"
+            },
+            {
+              "il": "IL_0211",
+              "opcode": "stloc.0",
+              "operand": "",
+              "bytes": "0a"
+            },
+            {
+              "il": "IL_0212",
+              "opcode": "br.s",
+              "operand": "IL_023B",
+              "bytes": "2b27"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.NonVehicleConnectionExecuteTask::ExecuteSetGUISharedParameter"
+          ]
+        },
+        {
+          "il": "IL_0214",
+          "instructions": [
+            {
+              "il": "IL_0214",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_0215",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_0216",
+              "opcode": "call",
+              "operand": "ExecuteClearGUISharedParameter",
+              "bytes": "28d1010006"
+            },
+            {
+              "il": "IL_021B",
+              "opcode": "stloc.0",
+              "operand": "",
+              "bytes": "0a"
+            },
+            {
+              "il": "IL_021C",
+              "opcode": "br.s",
+              "operand": "IL_023B",
+              "bytes": "2b1d"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.NonVehicleConnectionExecuteTask::ExecuteClearGUISharedParameter"
+          ]
+        },
+        {
+          "il": "IL_021E",
+          "instructions": [
+            {
+              "il": "IL_021E",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_021F",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_0220",
+              "opcode": "call",
+              "operand": "ExecuteSetConnectionCondition",
+              "bytes": "28d4010006"
+            },
+            {
+              "il": "IL_0225",
+              "opcode": "stloc.0",
+              "operand": "",
+              "bytes": "0a"
+            },
+            {
+              "il": "IL_0226",
+              "opcode": "br.s",
+              "operand": "IL_023B",
+              "bytes": "2b13"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.NonVehicleConnectionExecuteTask::ExecuteSetConnectionCondition"
+          ]
+        },
+        {
+          "il": "IL_0228",
+          "instructions": [
+            {
+              "il": "IL_0228",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_0229",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_022A",
+              "opcode": "call",
+              "operand": "ExecuteAdaptationApiAuthentication",
+              "bytes": "28d2010006"
+            },
+            {
+              "il": "IL_022F",
+              "opcode": "stloc.0",
+              "operand": "",
+              "bytes": "0a"
+            },
+            {
+              "il": "IL_0230",
+              "opcode": "br.s",
+              "operand": "IL_023B",
+              "bytes": "2b09"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.NonVehicleConnectionExecuteTask::ExecuteAdaptationApiAuthentication"
+          ]
+        },
+        {
+          "il": "IL_0232",
+          "instructions": [
+            {
+              "il": "IL_0232",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_0233",
+              "opcode": "ldarg.1",
+              "operand": "",
+              "bytes": "03"
+            },
+            {
+              "il": "IL_0234",
+              "opcode": "ldnull",
+              "operand": "",
+              "bytes": "14"
+            },
+            {
+              "il": "IL_0235",
+              "opcode": "call",
+              "operand": "AdaptationIFExecuteAndResponse",
+              "bytes": "28a5010006"
+            },
+            {
+              "il": "IL_023A",
+              "opcode": "stloc.0",
+              "operand": "",
+              "bytes": "0a"
+            },
+            {
+              "il": "IL_023B",
+              "opcode": "ldloc.0",
+              "operand": "",
+              "bytes": "06"
+            },
+            {
+              "il": "IL_023C",
+              "opcode": "ret",
+              "operand": "",
+              "bytes": "2a"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.BaseExecuteTask::AdaptationIFExecuteAndResponse"
+          ]
+        }
+      ],
+      "finding": "Exact equality selectors and their first target blocks; admission and downstream implementation are separate contracts."
+    },
+    {
+      "id": "bootstrap.api.VehicleConnection",
+      "source": "bootstrap.pf.recovered",
+      "kind": "managed-dispatch-selector",
+      "locator": "GTSPlusController.ExecuteTask.VehicleConnectionExecuteTask::MessageFunction",
+      "rva": 68784,
+      "body_size": 2020,
+      "body_sha256": "2c88459126c3ff32e97a91954f6b2378d9501315d55cbd015e9eaa3f155b400b",
+      "offset_basis": "relative to first IL instruction",
+      "cases": [
+        {
+          "value": "SC000001",
+          "comparison": {
+            "il": "IL_024B",
+            "opcode": "ldstr",
+            "operand": "'SC000001'",
+            "bytes": "72e4240070"
+          },
+          "branch": {
+            "il": "IL_0255",
+            "opcode": "brtrue",
+            "operand": "IL_04B1",
+            "bytes": "3a57020000"
+          },
+          "target_il": "IL_04B1"
+        },
+        {
+          "value": "SC000002",
+          "comparison": {
+            "il": "IL_0261",
+            "opcode": "ldstr",
+            "operand": "'SC000002'",
+            "bytes": "721a250070"
+          },
+          "branch": {
+            "il": "IL_026B",
+            "opcode": "brtrue",
+            "operand": "IL_04C3",
+            "bytes": "3a53020000"
+          },
+          "target_il": "IL_04C3"
+        },
+        {
+          "value": "SCXX0004",
+          "comparison": {
+            "il": "IL_0277",
+            "opcode": "ldstr",
+            "operand": "'SCXX0004'",
+            "bytes": "7201190070"
+          },
+          "branch": {
+            "il": "IL_0281",
+            "opcode": "brtrue",
+            "operand": "IL_04D5",
+            "bytes": "3a4f020000"
+          },
+          "target_il": "IL_04D5"
+        },
+        {
+          "value": "SC000003",
+          "comparison": {
+            "il": "IL_028D",
+            "opcode": "ldstr",
+            "operand": "'SC000003'",
+            "bytes": "72f6240070"
+          },
+          "branch": {
+            "il": "IL_0297",
+            "opcode": "brtrue",
+            "operand": "IL_04E7",
+            "bytes": "3a4b020000"
+          },
+          "target_il": "IL_04E7"
+        },
+        {
+          "value": "SC000007",
+          "comparison": {
+            "il": "IL_02A3",
+            "opcode": "ldstr",
+            "operand": "'SC000007'",
+            "bytes": "72801f0070"
+          },
+          "branch": {
+            "il": "IL_02AD",
+            "opcode": "brtrue",
+            "operand": "IL_04F9",
+            "bytes": "3a47020000"
+          },
+          "target_il": "IL_04F9"
+        },
+        {
+          "value": "SC000008",
+          "comparison": {
+            "il": "IL_02B9",
+            "opcode": "ldstr",
+            "operand": "'SC000008'",
+            "bytes": "7208250070"
+          },
+          "branch": {
+            "il": "IL_02C3",
+            "opcode": "brtrue",
+            "operand": "IL_050B",
+            "bytes": "3a43020000"
+          },
+          "target_il": "IL_050B"
+        },
+        {
+          "value": "SC000009",
+          "comparison": {
+            "il": "IL_02CF",
+            "opcode": "ldstr",
+            "operand": "'SC000009'",
+            "bytes": "7262250070"
+          },
+          "branch": {
+            "il": "IL_02D9",
+            "opcode": "brtrue",
+            "operand": "IL_051D",
+            "bytes": "3a3f020000"
+          },
+          "target_il": "IL_051D"
+        },
+        {
+          "value": "SCXX0002",
+          "comparison": {
+            "il": "IL_02E5",
+            "opcode": "ldstr",
+            "operand": "'SCXX0002'",
+            "bytes": "72dd180070"
+          },
+          "branch": {
+            "il": "IL_02EF",
+            "opcode": "brtrue",
+            "operand": "IL_051D",
+            "bytes": "3a29020000"
+          },
+          "target_il": "IL_051D"
+        },
+        {
+          "value": "SC000010",
+          "comparison": {
+            "il": "IL_02FB",
+            "opcode": "ldstr",
+            "operand": "'SC000010'",
+            "bytes": "724a1f0070"
+          },
+          "branch": {
+            "il": "IL_0305",
+            "opcode": "brtrue",
+            "operand": "IL_052F",
+            "bytes": "3a25020000"
+          },
+          "target_il": "IL_052F"
+        },
+        {
+          "value": "SC000011",
+          "comparison": {
+            "il": "IL_0311",
+            "opcode": "ldstr",
+            "operand": "'SC000011'",
+            "bytes": "725c1f0070"
+          },
+          "branch": {
+            "il": "IL_031B",
+            "opcode": "brtrue",
+            "operand": "IL_052F",
+            "bytes": "3a0f020000"
+          },
+          "target_il": "IL_052F"
+        },
+        {
+          "value": "SC000012",
+          "comparison": {
+            "il": "IL_0327",
+            "opcode": "ldstr",
+            "operand": "'SC000012'",
+            "bytes": "726e1f0070"
+          },
+          "branch": {
+            "il": "IL_0331",
+            "opcode": "brtrue",
+            "operand": "IL_0542",
+            "bytes": "3a0c020000"
+          },
+          "target_il": "IL_0542"
+        },
+        {
+          "value": "SC000013",
+          "comparison": {
+            "il": "IL_033D",
+            "opcode": "ldstr",
+            "operand": "'SC000013'",
+            "bytes": "72921f0070"
+          },
+          "branch": {
+            "il": "IL_0347",
+            "opcode": "brtrue",
+            "operand": "IL_0554",
+            "bytes": "3a08020000"
+          },
+          "target_il": "IL_0554"
+        },
+        {
+          "value": "SC000014",
+          "comparison": {
+            "il": "IL_0353",
+            "opcode": "ldstr",
+            "operand": "'SC000014'",
+            "bytes": "72a41f0070"
+          },
+          "branch": {
+            "il": "IL_035D",
+            "opcode": "brtrue",
+            "operand": "IL_0566",
+            "bytes": "3a04020000"
+          },
+          "target_il": "IL_0566"
+        },
+        {
+          "value": "SCXX0005",
+          "comparison": {
+            "il": "IL_0369",
+            "opcode": "ldstr",
+            "operand": "'SCXX0005'",
+            "bytes": "72b9180070"
+          },
+          "branch": {
+            "il": "IL_0373",
+            "opcode": "brtrue",
+            "operand": "IL_0578",
+            "bytes": "3a00020000"
+          },
+          "target_il": "IL_0578"
+        },
+        {
+          "value": "IF000004",
+          "comparison": {
+            "il": "IL_037F",
+            "opcode": "ldstr",
+            "operand": "'IF000004'",
+            "bytes": "72f62c0070"
+          },
+          "branch": {
+            "il": "IL_0389",
+            "opcode": "brtrue",
+            "operand": "IL_058A",
+            "bytes": "3afc010000"
+          },
+          "target_il": "IL_058A"
+        },
+        {
+          "value": "DV000015",
+          "comparison": {
+            "il": "IL_0395",
+            "opcode": "ldstr",
+            "operand": "'DV000015'",
+            "bytes": "7275440070"
+          },
+          "branch": {
+            "il": "IL_039F",
+            "opcode": "brtrue",
+            "operand": "IL_059C",
+            "bytes": "3af8010000"
+          },
+          "target_il": "IL_059C"
+        },
+        {
+          "value": "DV000034",
+          "comparison": {
+            "il": "IL_03AB",
+            "opcode": "ldstr",
+            "operand": "'DV000034'",
+            "bytes": "7287440070"
+          },
+          "branch": {
+            "il": "IL_03B5",
+            "opcode": "brtrue",
+            "operand": "IL_059C",
+            "bytes": "3ae2010000"
+          },
+          "target_il": "IL_059C"
+        },
+        {
+          "value": "DV000017",
+          "comparison": {
+            "il": "IL_03C1",
+            "opcode": "ldstr",
+            "operand": "'DV000017'",
+            "bytes": "72c0240070"
+          },
+          "branch": {
+            "il": "IL_03CB",
+            "opcode": "brtrue",
+            "operand": "IL_05AF",
+            "bytes": "3adf010000"
+          },
+          "target_il": "IL_05AF"
+        },
+        {
+          "value": "DV000023",
+          "comparison": {
+            "il": "IL_03D7",
+            "opcode": "ldstr",
+            "operand": "'DV000023'",
+            "bytes": "7246200070"
+          },
+          "branch": {
+            "il": "IL_03E1",
+            "opcode": "brtrue",
+            "operand": "IL_05C2",
+            "bytes": "3adc010000"
+          },
+          "target_il": "IL_05C2"
+        },
+        {
+          "value": "DV000024",
+          "comparison": {
+            "il": "IL_03ED",
+            "opcode": "ldstr",
+            "operand": "'DV000024'",
+            "bytes": "7258200070"
+          },
+          "branch": {
+            "il": "IL_03F7",
+            "opcode": "brtrue",
+            "operand": "IL_05C2",
+            "bytes": "3ac6010000"
+          },
+          "target_il": "IL_05C2"
+        },
+        {
+          "value": "DV000025",
+          "comparison": {
+            "il": "IL_0403",
+            "opcode": "ldstr",
+            "operand": "'DV000025'",
+            "bytes": "726a200070"
+          },
+          "branch": {
+            "il": "IL_040D",
+            "opcode": "brtrue",
+            "operand": "IL_05D5",
+            "bytes": "3ac3010000"
+          },
+          "target_il": "IL_05D5"
+        },
+        {
+          "value": "DVXX0002",
+          "comparison": {
+            "il": "IL_0419",
+            "opcode": "ldstr",
+            "operand": "'DVXX0002'",
+            "bytes": "7283180070"
+          },
+          "branch": {
+            "il": "IL_0423",
+            "opcode": "brtrue",
+            "operand": "IL_05E8",
+            "bytes": "3ac0010000"
+          },
+          "target_il": "IL_05E8"
+        },
+        {
+          "value": "DVXX0001",
+          "comparison": {
+            "il": "IL_042F",
+            "opcode": "ldstr",
+            "operand": "'DVXX0001'",
+            "bytes": "7295180070"
+          },
+          "branch": {
+            "il": "IL_0439",
+            "opcode": "brtrue",
+            "operand": "IL_05FA",
+            "bytes": "3abc010000"
+          },
+          "target_il": "IL_05FA"
+        },
+        {
+          "value": "DV000061",
+          "comparison": {
+            "il": "IL_0445",
+            "opcode": "ldstr",
+            "operand": "'DV000061'",
+            "bytes": "7230210070"
+          },
+          "branch": {
+            "il": "IL_044F",
+            "opcode": "brtrue",
+            "operand": "IL_060C",
+            "bytes": "3ab8010000"
+          },
+          "target_il": "IL_060C"
+        },
+        {
+          "value": "DV000080",
+          "comparison": {
+            "il": "IL_045B",
+            "opcode": "ldstr",
+            "operand": "'DV000080'",
+            "bytes": "7242210070"
+          },
+          "branch": {
+            "il": "IL_0465",
+            "opcode": "brtrue",
+            "operand": "IL_060C",
+            "bytes": "3aa2010000"
+          },
+          "target_il": "IL_060C"
+        },
+        {
+          "value": "DV000035",
+          "comparison": {
+            "il": "IL_0471",
+            "opcode": "ldstr",
+            "operand": "'DV000035'",
+            "bytes": "72d2240070"
+          },
+          "branch": {
+            "il": "IL_047B",
+            "opcode": "brtrue",
+            "operand": "IL_071B",
+            "bytes": "3a9b020000"
+          },
+          "target_il": "IL_071B"
+        },
+        {
+          "value": "DVXX0004",
+          "comparison": {
+            "il": "IL_0487",
+            "opcode": "ldstr",
+            "operand": "'DVXX0004'",
+            "bytes": "72cb180070"
+          },
+          "branch": {
+            "il": "IL_0491",
+            "opcode": "brtrue",
+            "operand": "IL_072D",
+            "bytes": "3a97020000"
+          },
+          "target_il": "IL_072D"
+        },
+        {
+          "value": "DV000104",
+          "comparison": {
+            "il": "IL_049D",
+            "opcode": "ldstr",
+            "operand": "'DV000104'",
+            "bytes": "7216260070"
+          },
+          "branch": {
+            "il": "IL_04A7",
+            "opcode": "brtrue",
+            "operand": "IL_073F",
+            "bytes": "3a93020000"
+          },
+          "target_il": "IL_073F"
+        },
+        {
+          "value": "UG",
+          "comparison": {
+            "il": "IL_0763",
+            "opcode": "ldstr",
+            "operand": "'UG'",
+            "bytes": "72441f0070"
+          },
+          "branch": {
+            "il": "IL_076D",
+            "opcode": "brfalse.s",
+            "operand": "IL_077E",
+            "bytes": "2c0f"
+          },
+          "target_il": "IL_076F"
+        }
+      ],
+      "default_target_il": "IL_0751",
+      "target_blocks": [
+        {
+          "il": "IL_04B1",
+          "instructions": [
+            {
+              "il": "IL_04B1",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_04B2",
+              "opcode": "ldloc.0",
+              "operand": "",
+              "bytes": "06"
+            },
+            {
+              "il": "IL_04B3",
+              "opcode": "ldfld",
+              "operand": "a_apiTaskMessage",
+              "bytes": "7b1d020004"
+            },
+            {
+              "il": "IL_04B8",
+              "opcode": "call",
+              "operand": "ExecuteStartDiagnosis",
+              "bytes": "28df010006"
+            },
+            {
+              "il": "IL_04BD",
+              "opcode": "stloc.1",
+              "operand": "",
+              "bytes": "0b"
+            },
+            {
+              "il": "IL_04BE",
+              "opcode": "br",
+              "operand": "IL_07D6",
+              "bytes": "3813030000"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.VehicleConnectionExecuteTask::ExecuteStartDiagnosis"
+          ]
+        },
+        {
+          "il": "IL_04C3",
+          "instructions": [
+            {
+              "il": "IL_04C3",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_04C4",
+              "opcode": "ldloc.0",
+              "operand": "",
+              "bytes": "06"
+            },
+            {
+              "il": "IL_04C5",
+              "opcode": "ldfld",
+              "operand": "a_apiTaskMessage",
+              "bytes": "7b1d020004"
+            },
+            {
+              "il": "IL_04CA",
+              "opcode": "call",
+              "operand": "ExecuteEndDiagnosis",
+              "bytes": "28e1010006"
+            },
+            {
+              "il": "IL_04CF",
+              "opcode": "stloc.1",
+              "operand": "",
+              "bytes": "0b"
+            },
+            {
+              "il": "IL_04D0",
+              "opcode": "br",
+              "operand": "IL_07D6",
+              "bytes": "3801030000"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.VehicleConnectionExecuteTask::ExecuteEndDiagnosis"
+          ]
+        },
+        {
+          "il": "IL_04D5",
+          "instructions": [
+            {
+              "il": "IL_04D5",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_04D6",
+              "opcode": "ldloc.0",
+              "operand": "",
+              "bytes": "06"
+            },
+            {
+              "il": "IL_04D7",
+              "opcode": "ldfld",
+              "operand": "a_apiTaskMessage",
+              "bytes": "7b1d020004"
+            },
+            {
+              "il": "IL_04DC",
+              "opcode": "call",
+              "operand": "ExecuteInternalEndDiagnosis",
+              "bytes": "28f6010006"
+            },
+            {
+              "il": "IL_04E1",
+              "opcode": "stloc.1",
+              "operand": "",
+              "bytes": "0b"
+            },
+            {
+              "il": "IL_04E2",
+              "opcode": "br",
+              "operand": "IL_07D6",
+              "bytes": "38ef020000"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.VehicleConnectionExecuteTask::ExecuteInternalEndDiagnosis"
+          ]
+        },
+        {
+          "il": "IL_04E7",
+          "instructions": [
+            {
+              "il": "IL_04E7",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_04E8",
+              "opcode": "ldloc.0",
+              "operand": "",
+              "bytes": "06"
+            },
+            {
+              "il": "IL_04E9",
+              "opcode": "ldfld",
+              "operand": "a_apiTaskMessage",
+              "bytes": "7b1d020004"
+            },
+            {
+              "il": "IL_04EE",
+              "opcode": "call",
+              "operand": "ExecuteNotifyVehicleConfirmation",
+              "bytes": "28e4010006"
+            },
+            {
+              "il": "IL_04F3",
+              "opcode": "stloc.1",
+              "operand": "",
+              "bytes": "0b"
+            },
+            {
+              "il": "IL_04F4",
+              "opcode": "br",
+              "operand": "IL_07D6",
+              "bytes": "38dd020000"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.VehicleConnectionExecuteTask::ExecuteNotifyVehicleConfirmation"
+          ]
+        },
+        {
+          "il": "IL_04F9",
+          "instructions": [
+            {
+              "il": "IL_04F9",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_04FA",
+              "opcode": "ldloc.0",
+              "operand": "",
+              "bytes": "06"
+            },
+            {
+              "il": "IL_04FB",
+              "opcode": "ldfld",
+              "operand": "a_apiTaskMessage",
+              "bytes": "7b1d020004"
+            },
+            {
+              "il": "IL_0500",
+              "opcode": "call",
+              "operand": "ExecuteForcedEndDiagnosis",
+              "bytes": "28e3010006"
+            },
+            {
+              "il": "IL_0505",
+              "opcode": "stloc.1",
+              "operand": "",
+              "bytes": "0b"
+            },
+            {
+              "il": "IL_0506",
+              "opcode": "br",
+              "operand": "IL_07D6",
+              "bytes": "38cb020000"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.VehicleConnectionExecuteTask::ExecuteForcedEndDiagnosis"
+          ]
+        },
+        {
+          "il": "IL_050B",
+          "instructions": [
+            {
+              "il": "IL_050B",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_050C",
+              "opcode": "ldloc.0",
+              "operand": "",
+              "bytes": "06"
+            },
+            {
+              "il": "IL_050D",
+              "opcode": "ldfld",
+              "operand": "a_apiTaskMessage",
+              "bytes": "7b1d020004"
+            },
+            {
+              "il": "IL_0512",
+              "opcode": "call",
+              "operand": "ExecuteStartBatteryVoltagePolling",
+              "bytes": "28ef010006"
+            },
+            {
+              "il": "IL_0517",
+              "opcode": "stloc.1",
+              "operand": "",
+              "bytes": "0b"
+            },
+            {
+              "il": "IL_0518",
+              "opcode": "br",
+              "operand": "IL_07D6",
+              "bytes": "38b9020000"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.VehicleConnectionExecuteTask::ExecuteStartBatteryVoltagePolling"
+          ]
+        },
+        {
+          "il": "IL_051D",
+          "instructions": [
+            {
+              "il": "IL_051D",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_051E",
+              "opcode": "ldloc.0",
+              "operand": "",
+              "bytes": "06"
+            },
+            {
+              "il": "IL_051F",
+              "opcode": "ldfld",
+              "operand": "a_apiTaskMessage",
+              "bytes": "7b1d020004"
+            },
+            {
+              "il": "IL_0524",
+              "opcode": "call",
+              "operand": "ExecuteStopBatteryVoltagePolling",
+              "bytes": "28f0010006"
+            },
+            {
+              "il": "IL_0529",
+              "opcode": "stloc.1",
+              "operand": "",
+              "bytes": "0b"
+            },
+            {
+              "il": "IL_052A",
+              "opcode": "br",
+              "operand": "IL_07D6",
+              "bytes": "38a7020000"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.VehicleConnectionExecuteTask::ExecuteStopBatteryVoltagePolling"
+          ]
+        },
+        {
+          "il": "IL_052F",
+          "instructions": [
+            {
+              "il": "IL_052F",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_0530",
+              "opcode": "ldloc.0",
+              "operand": "",
+              "bytes": "06"
+            },
+            {
+              "il": "IL_0531",
+              "opcode": "ldfld",
+              "operand": "a_apiTaskMessage",
+              "bytes": "7b1d020004"
+            },
+            {
+              "il": "IL_0536",
+              "opcode": "ldnull",
+              "operand": "",
+              "bytes": "14"
+            },
+            {
+              "il": "IL_0537",
+              "opcode": "call",
+              "operand": "AdaptationIFExecuteAndResponse",
+              "bytes": "28a5010006"
+            },
+            {
+              "il": "IL_053C",
+              "opcode": "stloc.1",
+              "operand": "",
+              "bytes": "0b"
+            },
+            {
+              "il": "IL_053D",
+              "opcode": "br",
+              "operand": "IL_07D6",
+              "bytes": "3894020000"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.BaseExecuteTask::AdaptationIFExecuteAndResponse"
+          ]
+        },
+        {
+          "il": "IL_0542",
+          "instructions": [
+            {
+              "il": "IL_0542",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_0543",
+              "opcode": "ldloc.0",
+              "operand": "",
+              "bytes": "06"
+            },
+            {
+              "il": "IL_0544",
+              "opcode": "ldfld",
+              "operand": "a_apiTaskMessage",
+              "bytes": "7b1d020004"
+            },
+            {
+              "il": "IL_0549",
+              "opcode": "call",
+              "operand": "ExecuteRequestPermissionIMG_OPE_DDR",
+              "bytes": "28f2010006"
+            },
+            {
+              "il": "IL_054E",
+              "opcode": "stloc.1",
+              "operand": "",
+              "bytes": "0b"
+            },
+            {
+              "il": "IL_054F",
+              "opcode": "br",
+              "operand": "IL_07D6",
+              "bytes": "3882020000"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.VehicleConnectionExecuteTask::ExecuteRequestPermissionIMG_OPE_DDR"
+          ]
+        },
+        {
+          "il": "IL_0554",
+          "instructions": [
+            {
+              "il": "IL_0554",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_0555",
+              "opcode": "ldloc.0",
+              "operand": "",
+              "bytes": "06"
+            },
+            {
+              "il": "IL_0556",
+              "opcode": "ldfld",
+              "operand": "a_apiTaskMessage",
+              "bytes": "7b1d020004"
+            },
+            {
+              "il": "IL_055B",
+              "opcode": "call",
+              "operand": "ExecuteStartGeneralComm",
+              "bytes": "28f4010006"
+            },
+            {
+              "il": "IL_0560",
+              "opcode": "stloc.1",
+              "operand": "",
+              "bytes": "0b"
+            },
+            {
+              "il": "IL_0561",
+              "opcode": "br",
+              "operand": "IL_07D6",
+              "bytes": "3870020000"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.VehicleConnectionExecuteTask::ExecuteStartGeneralComm"
+          ]
+        },
+        {
+          "il": "IL_0566",
+          "instructions": [
+            {
+              "il": "IL_0566",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_0567",
+              "opcode": "ldloc.0",
+              "operand": "",
+              "bytes": "06"
+            },
+            {
+              "il": "IL_0568",
+              "opcode": "ldfld",
+              "operand": "a_apiTaskMessage",
+              "bytes": "7b1d020004"
+            },
+            {
+              "il": "IL_056D",
+              "opcode": "call",
+              "operand": "ExecuteEndGeneralComm",
+              "bytes": "28f5010006"
+            },
+            {
+              "il": "IL_0572",
+              "opcode": "stloc.1",
+              "operand": "",
+              "bytes": "0b"
+            },
+            {
+              "il": "IL_0573",
+              "opcode": "br",
+              "operand": "IL_07D6",
+              "bytes": "385e020000"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.VehicleConnectionExecuteTask::ExecuteEndGeneralComm"
+          ]
+        },
+        {
+          "il": "IL_0578",
+          "instructions": [
+            {
+              "il": "IL_0578",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_0579",
+              "opcode": "ldloc.0",
+              "operand": "",
+              "bytes": "06"
+            },
+            {
+              "il": "IL_057A",
+              "opcode": "ldfld",
+              "operand": "a_apiTaskMessage",
+              "bytes": "7b1d020004"
+            },
+            {
+              "il": "IL_057F",
+              "opcode": "call",
+              "operand": "ExecuteInternalEndGeneralComm",
+              "bytes": "28f7010006"
+            },
+            {
+              "il": "IL_0584",
+              "opcode": "stloc.1",
+              "operand": "",
+              "bytes": "0b"
+            },
+            {
+              "il": "IL_0585",
+              "opcode": "br",
+              "operand": "IL_07D6",
+              "bytes": "384c020000"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.VehicleConnectionExecuteTask::ExecuteInternalEndGeneralComm"
+          ]
+        },
+        {
+          "il": "IL_058A",
+          "instructions": [
+            {
+              "il": "IL_058A",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_058B",
+              "opcode": "ldloc.0",
+              "operand": "",
+              "bytes": "06"
+            },
+            {
+              "il": "IL_058C",
+              "opcode": "ldfld",
+              "operand": "a_apiTaskMessage",
+              "bytes": "7b1d020004"
+            },
+            {
+              "il": "IL_0591",
+              "opcode": "call",
+              "operand": "ExecuteGetVehicleConfirmation",
+              "bytes": "28e5010006"
+            },
+            {
+              "il": "IL_0596",
+              "opcode": "stloc.1",
+              "operand": "",
+              "bytes": "0b"
+            },
+            {
+              "il": "IL_0597",
+              "opcode": "br",
+              "operand": "IL_07D6",
+              "bytes": "383a020000"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.VehicleConnectionExecuteTask::ExecuteGetVehicleConfirmation"
+          ]
+        },
+        {
+          "il": "IL_059C",
+          "instructions": [
+            {
+              "il": "IL_059C",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_059D",
+              "opcode": "ldloc.0",
+              "operand": "",
+              "bytes": "06"
+            },
+            {
+              "il": "IL_059E",
+              "opcode": "ldfld",
+              "operand": "a_apiTaskMessage",
+              "bytes": "7b1d020004"
+            },
+            {
+              "il": "IL_05A3",
+              "opcode": "ldc.i4.1",
+              "operand": "",
+              "bytes": "17"
+            },
+            {
+              "il": "IL_05A4",
+              "opcode": "call",
+              "operand": "ExecuteDiagnosisApiCallAndResultCheck",
+              "bytes": "28e7010006"
+            },
+            {
+              "il": "IL_05A9",
+              "opcode": "stloc.1",
+              "operand": "",
+              "bytes": "0b"
+            },
+            {
+              "il": "IL_05AA",
+              "opcode": "br",
+              "operand": "IL_07D6",
+              "bytes": "3827020000"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.VehicleConnectionExecuteTask::ExecuteDiagnosisApiCallAndResultCheck"
+          ]
+        },
+        {
+          "il": "IL_05AF",
+          "instructions": [
+            {
+              "il": "IL_05AF",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_05B0",
+              "opcode": "ldloc.0",
+              "operand": "",
+              "bytes": "06"
+            },
+            {
+              "il": "IL_05B1",
+              "opcode": "ldfld",
+              "operand": "a_apiTaskMessage",
+              "bytes": "7b1d020004"
+            },
+            {
+              "il": "IL_05B6",
+              "opcode": "ldc.i4.2",
+              "operand": "",
+              "bytes": "18"
+            },
+            {
+              "il": "IL_05B7",
+              "opcode": "call",
+              "operand": "ExecuteDiagnosisApiCallAndResultCheck",
+              "bytes": "28e7010006"
+            },
+            {
+              "il": "IL_05BC",
+              "opcode": "stloc.1",
+              "operand": "",
+              "bytes": "0b"
+            },
+            {
+              "il": "IL_05BD",
+              "opcode": "br",
+              "operand": "IL_07D6",
+              "bytes": "3814020000"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.VehicleConnectionExecuteTask::ExecuteDiagnosisApiCallAndResultCheck"
+          ]
+        },
+        {
+          "il": "IL_05C2",
+          "instructions": [
+            {
+              "il": "IL_05C2",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_05C3",
+              "opcode": "ldloc.0",
+              "operand": "",
+              "bytes": "06"
+            },
+            {
+              "il": "IL_05C4",
+              "opcode": "ldfld",
+              "operand": "a_apiTaskMessage",
+              "bytes": "7b1d020004"
+            },
+            {
+              "il": "IL_05C9",
+              "opcode": "ldc.i4.3",
+              "operand": "",
+              "bytes": "19"
+            },
+            {
+              "il": "IL_05CA",
+              "opcode": "call",
+              "operand": "ExecuteDiagnosisApiCallAndResultCheck",
+              "bytes": "28e7010006"
+            },
+            {
+              "il": "IL_05CF",
+              "opcode": "stloc.1",
+              "operand": "",
+              "bytes": "0b"
+            },
+            {
+              "il": "IL_05D0",
+              "opcode": "br",
+              "operand": "IL_07D6",
+              "bytes": "3801020000"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.VehicleConnectionExecuteTask::ExecuteDiagnosisApiCallAndResultCheck"
+          ]
+        },
+        {
+          "il": "IL_05D5",
+          "instructions": [
+            {
+              "il": "IL_05D5",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_05D6",
+              "opcode": "ldloc.0",
+              "operand": "",
+              "bytes": "06"
+            },
+            {
+              "il": "IL_05D7",
+              "opcode": "ldfld",
+              "operand": "a_apiTaskMessage",
+              "bytes": "7b1d020004"
+            },
+            {
+              "il": "IL_05DC",
+              "opcode": "ldc.i4.4",
+              "operand": "",
+              "bytes": "1a"
+            },
+            {
+              "il": "IL_05DD",
+              "opcode": "call",
+              "operand": "ExecuteDiagnosisApiCallAndResultCheck",
+              "bytes": "28e7010006"
+            },
+            {
+              "il": "IL_05E2",
+              "opcode": "stloc.1",
+              "operand": "",
+              "bytes": "0b"
+            },
+            {
+              "il": "IL_05E3",
+              "opcode": "br",
+              "operand": "IL_07D6",
+              "bytes": "38ee010000"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.VehicleConnectionExecuteTask::ExecuteDiagnosisApiCallAndResultCheck"
+          ]
+        },
+        {
+          "il": "IL_05E8",
+          "instructions": [
+            {
+              "il": "IL_05E8",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_05E9",
+              "opcode": "ldloc.0",
+              "operand": "",
+              "bytes": "06"
+            },
+            {
+              "il": "IL_05EA",
+              "opcode": "ldfld",
+              "operand": "a_apiTaskMessage",
+              "bytes": "7b1d020004"
+            },
+            {
+              "il": "IL_05EF",
+              "opcode": "call",
+              "operand": "ExecuteInternalStopActTst",
+              "bytes": "28e9010006"
+            },
+            {
+              "il": "IL_05F4",
+              "opcode": "stloc.1",
+              "operand": "",
+              "bytes": "0b"
+            },
+            {
+              "il": "IL_05F5",
+              "opcode": "br",
+              "operand": "IL_07D6",
+              "bytes": "38dc010000"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.VehicleConnectionExecuteTask::ExecuteInternalStopActTst"
+          ]
+        },
+        {
+          "il": "IL_05FA",
+          "instructions": [
+            {
+              "il": "IL_05FA",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_05FB",
+              "opcode": "ldloc.0",
+              "operand": "",
+              "bytes": "06"
+            },
+            {
+              "il": "IL_05FC",
+              "opcode": "ldfld",
+              "operand": "a_apiTaskMessage",
+              "bytes": "7b1d020004"
+            },
+            {
+              "il": "IL_0601",
+              "opcode": "call",
+              "operand": "ExecuteInternalStopDatMon",
+              "bytes": "28ea010006"
+            },
+            {
+              "il": "IL_0606",
+              "opcode": "stloc.1",
+              "operand": "",
+              "bytes": "0b"
+            },
+            {
+              "il": "IL_0607",
+              "opcode": "br",
+              "operand": "IL_07D6",
+              "bytes": "38ca010000"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.VehicleConnectionExecuteTask::ExecuteInternalStopDatMon"
+          ]
+        },
+        {
+          "il": "IL_060C",
+          "instructions": [
+            {
+              "il": "IL_060C",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_060D",
+              "opcode": "ldloc.0",
+              "operand": "",
+              "bytes": "06"
+            },
+            {
+              "il": "IL_060E",
+              "opcode": "ldfld",
+              "operand": "a_apiTaskMessage",
+              "bytes": "7b1d020004"
+            },
+            {
+              "il": "IL_0613",
+              "opcode": "call",
+              "operand": "CheckDiagnosisApiAvailable",
+              "bytes": "28e8010006"
+            },
+            {
+              "il": "IL_0618",
+              "opcode": "stloc.3",
+              "operand": "",
+              "bytes": "0d"
+            },
+            {
+              "il": "IL_0619",
+              "opcode": "ldloc.3",
+              "operand": "",
+              "bytes": "09"
+            },
+            {
+              "il": "IL_061A",
+              "opcode": "callvirt",
+              "operand": "GTSPlusPFCommon.Message.ResultInfoData::get_Result",
+              "bytes": "6f5a00000a"
+            },
+            {
+              "il": "IL_061F",
+              "opcode": "brtrue",
+              "operand": "IL_0708",
+              "bytes": "3ae4000000"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.VehicleConnectionExecuteTask::CheckDiagnosisApiAvailable",
+            "GTSPlusPFCommon.Message.ResultInfoData::get_Result"
+          ]
+        },
+        {
+          "il": "IL_071B",
+          "instructions": [
+            {
+              "il": "IL_071B",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_071C",
+              "opcode": "ldloc.0",
+              "operand": "",
+              "bytes": "06"
+            },
+            {
+              "il": "IL_071D",
+              "opcode": "ldfld",
+              "operand": "a_apiTaskMessage",
+              "bytes": "7b1d020004"
+            },
+            {
+              "il": "IL_0722",
+              "opcode": "call",
+              "operand": "ExecuteJ2534DeviceDisconnection",
+              "bytes": "28ec010006"
+            },
+            {
+              "il": "IL_0727",
+              "opcode": "stloc.1",
+              "operand": "",
+              "bytes": "0b"
+            },
+            {
+              "il": "IL_0728",
+              "opcode": "br",
+              "operand": "IL_07D6",
+              "bytes": "38a9000000"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.VehicleConnectionExecuteTask::ExecuteJ2534DeviceDisconnection"
+          ]
+        },
+        {
+          "il": "IL_072D",
+          "instructions": [
+            {
+              "il": "IL_072D",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_072E",
+              "opcode": "ldloc.0",
+              "operand": "",
+              "bytes": "06"
+            },
+            {
+              "il": "IL_072F",
+              "opcode": "ldfld",
+              "operand": "a_apiTaskMessage",
+              "bytes": "7b1d020004"
+            },
+            {
+              "il": "IL_0734",
+              "opcode": "call",
+              "operand": "ExecuteInternalJ2534DeviceDisconnection",
+              "bytes": "28eb010006"
+            },
+            {
+              "il": "IL_0739",
+              "opcode": "stloc.1",
+              "operand": "",
+              "bytes": "0b"
+            },
+            {
+              "il": "IL_073A",
+              "opcode": "br",
+              "operand": "IL_07D6",
+              "bytes": "3897000000"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.VehicleConnectionExecuteTask::ExecuteInternalJ2534DeviceDisconnection"
+          ]
+        },
+        {
+          "il": "IL_073F",
+          "instructions": [
+            {
+              "il": "IL_073F",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_0740",
+              "opcode": "ldloc.0",
+              "operand": "",
+              "bytes": "06"
+            },
+            {
+              "il": "IL_0741",
+              "opcode": "ldfld",
+              "operand": "a_apiTaskMessage",
+              "bytes": "7b1d020004"
+            },
+            {
+              "il": "IL_0746",
+              "opcode": "call",
+              "operand": "ExecuteGetVimVersion",
+              "bytes": "28f3010006"
+            },
+            {
+              "il": "IL_074B",
+              "opcode": "stloc.1",
+              "operand": "",
+              "bytes": "0b"
+            },
+            {
+              "il": "IL_074C",
+              "opcode": "br",
+              "operand": "IL_07D6",
+              "bytes": "3885000000"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.VehicleConnectionExecuteTask::ExecuteGetVimVersion"
+          ]
+        },
+        {
+          "il": "IL_0751",
+          "instructions": [
+            {
+              "il": "IL_0751",
+              "opcode": "ldloc.0",
+              "operand": "",
+              "bytes": "06"
+            },
+            {
+              "il": "IL_0752",
+              "opcode": "ldfld",
+              "operand": "a_apiTaskMessage",
+              "bytes": "7b1d020004"
+            },
+            {
+              "il": "IL_0757",
+              "opcode": "callvirt",
+              "operand": "get_ApiId",
+              "bytes": "6f09000006"
+            },
+            {
+              "il": "IL_075C",
+              "opcode": "ldc.i4.0",
+              "operand": "",
+              "bytes": "16"
+            },
+            {
+              "il": "IL_075D",
+              "opcode": "ldc.i4.2",
+              "operand": "",
+              "bytes": "18"
+            },
+            {
+              "il": "IL_075E",
+              "opcode": "callvirt",
+              "operand": "System.String::Substring",
+              "bytes": "6fc300000a"
+            },
+            {
+              "il": "IL_0763",
+              "opcode": "ldstr",
+              "operand": "'UG'",
+              "bytes": "72441f0070"
+            },
+            {
+              "il": "IL_0768",
+              "opcode": "call",
+              "operand": "System.String::op_Equality",
+              "bytes": "282e00000a"
+            },
+            {
+              "il": "IL_076D",
+              "opcode": "brfalse.s",
+              "operand": "IL_077E",
+              "bytes": "2c0f"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ApiTaskMessage::get_ApiId",
+            "System.String::Substring",
+            "System.String::op_Equality"
+          ]
+        },
+        {
+          "il": "IL_076F",
+          "instructions": [
+            {
+              "il": "IL_076F",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_0770",
+              "opcode": "ldloc.0",
+              "operand": "",
+              "bytes": "06"
+            },
+            {
+              "il": "IL_0771",
+              "opcode": "ldfld",
+              "operand": "a_apiTaskMessage",
+              "bytes": "7b1d020004"
+            },
+            {
+              "il": "IL_0776",
+              "opcode": "call",
+              "operand": "ExecuteDiagnosisApiCall",
+              "bytes": "28e6010006"
+            },
+            {
+              "il": "IL_077B",
+              "opcode": "stloc.1",
+              "operand": "",
+              "bytes": "0b"
+            },
+            {
+              "il": "IL_077C",
+              "opcode": "br.s",
+              "operand": "IL_07D6",
+              "bytes": "2b58"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.VehicleConnectionExecuteTask::ExecuteDiagnosisApiCall"
+          ]
+        },
+        {
+          "il": "IL_077E",
+          "instructions": [
+            {
+              "il": "IL_077E",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_077F",
+              "opcode": "call",
+              "operand": "get_ConnectionManager",
+              "bytes": "288b010006"
+            },
+            {
+              "il": "IL_0784",
+              "opcode": "callvirt",
+              "operand": "get_GuiCommonInformationList",
+              "bytes": "6fa5000006"
+            },
+            {
+              "il": "IL_0789",
+              "opcode": "ldloc.0",
+              "operand": "",
+              "bytes": "06"
+            },
+            {
+              "il": "IL_078A",
+              "opcode": "ldftn",
+              "operand": "<MessageFunction>b__1",
+              "bytes": "fe06ab020006"
+            },
+            {
+              "il": "IL_0790",
+              "opcode": "newobj",
+              "operand": "TypeSpec[151280b101123c]::.ctor",
+              "bytes": "73c900000a"
+            },
+            {
+              "il": "IL_0795",
+              "opcode": "callvirt",
+              "operand": "TypeSpec[15127d01123c]::ForEachSafe",
+              "bytes": "6fca00000a"
+            },
+            {
+              "il": "IL_079A",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_079B",
+              "opcode": "ldloc.0",
+              "operand": "",
+              "bytes": "06"
+            },
+            {
+              "il": "IL_079C",
+              "opcode": "ldfld",
+              "operand": "a_apiTaskMessage",
+              "bytes": "7b1d020004"
+            },
+            {
+              "il": "IL_07A1",
+              "opcode": "call",
+              "operand": "ExecuteDiagnosisApiCall",
+              "bytes": "28e6010006"
+            },
+            {
+              "il": "IL_07A6",
+              "opcode": "stloc.1",
+              "operand": "",
+              "bytes": "0b"
+            },
+            {
+              "il": "IL_07A7",
+              "opcode": "ldarg.0",
+              "operand": "",
+              "bytes": "02"
+            },
+            {
+              "il": "IL_07A8",
+              "opcode": "call",
+              "operand": "get_ConnectionManager",
+              "bytes": "288b010006"
+            },
+            {
+              "il": "IL_07AD",
+              "opcode": "callvirt",
+              "operand": "get_GuiCommonInformationList",
+              "bytes": "6fa5000006"
+            },
+            {
+              "il": "IL_07B2",
+              "opcode": "ldsfld",
+              "operand": "<>9__16_2",
+              "bytes": "7e01020004"
+            },
+            {
+              "il": "IL_07B7",
+              "opcode": "dup",
+              "operand": "",
+              "bytes": "25"
+            },
+            {
+              "il": "IL_07B8",
+              "opcode": "brtrue.s",
+              "operand": "IL_07D1",
+              "bytes": "2d17"
+            }
+          ],
+          "calls": [
+            "GTSPlusController.ExecuteTask.BaseExecuteTask::get_ConnectionManager",
+            "GTSPlusController.ConnectionManager::get_GuiCommonInformationList",
+            "TypeSpec[151280b101123c]::.ctor",
+            "TypeSpec[15127d01123c]::ForEachSafe",
+            "GTSPlusController.ExecuteTask.VehicleConnectionExecuteTask::ExecuteDiagnosisApiCall",
+            "GTSPlusController.ExecuteTask.BaseExecuteTask::get_ConnectionManager",
+            "GTSPlusController.ConnectionManager::get_GuiCommonInformationList"
+          ]
+        }
+      ],
+      "finding": "Exact equality selectors and their first target blocks; admission and downstream implementation are separate contracts.",
+      "prefix_default_target_il": "IL_077E"
+    },
+    {
+      "id": "bootstrap.api.Cancel.constructor",
+      "source": "bootstrap.pf.recovered",
+      "kind": "managed-worker-registration",
+      "locator": "GTSPlusController.ExecuteTask.CancelExecuteTask::.ctor",
+      "rva": 56416,
+      "body_size": 33,
+      "body_sha256": "53a371adc504591584e97545b7aa92c7c4d4bdcdaaefcac6b9a5bc4c2b928c31",
+      "event_name": "GTSP_CANCEL_API",
+      "queue_id": 4,
+      "finding": "Constructor constants bind this worker to its queue and named wake event."
+    },
+    {
+      "id": "bootstrap.api.WebService.constructor",
+      "source": "bootstrap.pf.recovered",
+      "kind": "managed-worker-registration",
+      "locator": "GTSPlusController.ExecuteTask.WebServiceExecuteTask::.ctor",
+      "rva": 57581,
+      "body_size": 33,
+      "body_sha256": "22f9b15d0267f780e810fcfbe07a5fb968f1bb323d3572a6a9e646d2315e0ce4",
+      "event_name": "GTSP_WEB_SERVICE_API",
+      "queue_id": 6,
+      "finding": "Constructor constants bind this worker to its queue and named wake event."
+    },
+    {
+      "id": "bootstrap.api.Message.constructor",
+      "source": "bootstrap.pf.recovered",
+      "kind": "managed-worker-registration",
+      "locator": "GTSPlusController.ExecuteTask.MessageExecuteTask::.ctor",
+      "rva": 60258,
+      "body_size": 33,
+      "body_sha256": "f1cd1743e870bd5c33cdbb9bfe6d67b39ab7cf85b37760f6febd1fbc75e6f7d4",
+      "event_name": "GTSP_MESSAGE_API",
+      "queue_id": 5,
+      "finding": "Constructor constants bind this worker to its queue and named wake event."
+    },
+    {
+      "id": "bootstrap.api.NonVehicleConnection.constructor",
+      "source": "bootstrap.pf.recovered",
+      "kind": "managed-worker-registration",
+      "locator": "GTSPlusController.ExecuteTask.NonVehicleConnectionExecuteTask::.ctor",
+      "rva": 62040,
+      "body_size": 46,
+      "body_sha256": "8e1e6e5a3430b239c8ddd943f6b88b713d17dafae0df73de1f540432cffe92b3",
+      "event_name": "GTSP_NON_VEHICLE_API",
+      "queue_id": 2,
+      "finding": "Constructor constants bind this worker to its queue and named wake event."
+    },
+    {
+      "id": "bootstrap.api.VehicleConnection.constructor",
+      "source": "bootstrap.pf.recovered",
+      "kind": "managed-worker-registration",
+      "locator": "GTSPlusController.ExecuteTask.VehicleConnectionExecuteTask::.ctor",
+      "rva": 68158,
+      "body_size": 33,
+      "body_sha256": "bf8d88c5fc8c50336dd76ccb7faea2132ce7c8e24e117fc86b570e9074409568",
+      "event_name": "GTSP_VEHICLE_API",
+      "queue_id": 1,
+      "finding": "Constructor constants bind this worker to its queue and named wake event."
+    },
+    {
+      "id": "bootstrap.api.enqueue-census",
+      "source": "bootstrap.pf.recovered",
+      "kind": "managed-callsite-census",
+      "locator": "all nonzero MethodDef bodies",
+      "methods_scanned": 667,
+      "callsites": [
+        {
+          "caller": "GTSPlusController.MainTask::StartMainTask",
+          "rva": 34564,
+          "body_size": 1684,
+          "body_sha256": "e070eb5b3413844d9d3b66d53e9a2d215a098f9825f9c8f567d447aa2bc70537",
+          "queue_id": 1,
+          "call": {
+            "il": "IL_0369",
+            "opcode": "callvirt",
+            "operand": "EnqueueMessage",
+            "bytes": "6f4b010006"
+          }
+        },
+        {
+          "caller": "GTSPlusController.MainTask::StartMainTask",
+          "rva": 34564,
+          "body_size": 1684,
+          "body_sha256": "e070eb5b3413844d9d3b66d53e9a2d215a098f9825f9c8f567d447aa2bc70537",
+          "queue_id": 2,
+          "call": {
+            "il": "IL_0385",
+            "opcode": "callvirt",
+            "operand": "EnqueueMessage",
+            "bytes": "6f4b010006"
+          }
+        },
+        {
+          "caller": "GTSPlusController.MainTask::StartMainTask",
+          "rva": 34564,
+          "body_size": 1684,
+          "body_sha256": "e070eb5b3413844d9d3b66d53e9a2d215a098f9825f9c8f567d447aa2bc70537",
+          "queue_id": 5,
+          "call": {
+            "il": "IL_03A1",
+            "opcode": "callvirt",
+            "operand": "EnqueueMessage",
+            "bytes": "6f4b010006"
+          }
+        },
+        {
+          "caller": "GTSPlusController.MainTask::StartMainTask",
+          "rva": 34564,
+          "body_size": 1684,
+          "body_sha256": "e070eb5b3413844d9d3b66d53e9a2d215a098f9825f9c8f567d447aa2bc70537",
+          "queue_id": 4,
+          "call": {
+            "il": "IL_03BD",
+            "opcode": "callvirt",
+            "operand": "EnqueueMessage",
+            "bytes": "6f4b010006"
+          }
+        },
+        {
+          "caller": "GTSPlusController.MainTask::StartMainTask",
+          "rva": 34564,
+          "body_size": 1684,
+          "body_sha256": "e070eb5b3413844d9d3b66d53e9a2d215a098f9825f9c8f567d447aa2bc70537",
+          "queue_id": 1,
+          "call": {
+            "il": "IL_04FF",
+            "opcode": "callvirt",
+            "operand": "EnqueueMessage",
+            "bytes": "6f4b010006"
+          }
+        },
+        {
+          "caller": "GTSPlusController.MainTask::StartMainTask",
+          "rva": 34564,
+          "body_size": 1684,
+          "body_sha256": "e070eb5b3413844d9d3b66d53e9a2d215a098f9825f9c8f567d447aa2bc70537",
+          "queue_id": 2,
+          "call": {
+            "il": "IL_0518",
+            "opcode": "callvirt",
+            "operand": "EnqueueMessage",
+            "bytes": "6f4b010006"
+          }
+        },
+        {
+          "caller": "GTSPlusController.MainTask::StartMainTask",
+          "rva": 34564,
+          "body_size": 1684,
+          "body_sha256": "e070eb5b3413844d9d3b66d53e9a2d215a098f9825f9c8f567d447aa2bc70537",
+          "queue_id": 6,
+          "call": {
+            "il": "IL_0531",
+            "opcode": "callvirt",
+            "operand": "EnqueueMessage",
+            "bytes": "6f4b010006"
+          }
+        },
+        {
+          "caller": "GTSPlusController.MainTask::StartMainTask",
+          "rva": 34564,
+          "body_size": 1684,
+          "body_sha256": "e070eb5b3413844d9d3b66d53e9a2d215a098f9825f9c8f567d447aa2bc70537",
+          "queue_id": 5,
+          "call": {
+            "il": "IL_054A",
+            "opcode": "callvirt",
+            "operand": "EnqueueMessage",
+            "bytes": "6f4b010006"
+          }
+        },
+        {
+          "caller": "GTSPlusController.MainTask::CallbackAppCommunication",
+          "rva": 36380,
+          "body_size": 280,
+          "body_sha256": "f74d14a07e6162964e51322ab4ef2fb7563f026860948e2e6c1c88d933f65572",
+          "queue_id": 6,
+          "call": {
+            "il": "IL_00AD",
+            "opcode": "callvirt",
+            "operand": "EnqueueMessage",
+            "bytes": "6f4b010006"
+          }
+        },
+        {
+          "caller": "GTSPlusController.MainTask::CallbackAppCommunication",
+          "rva": 36380,
+          "body_size": 280,
+          "body_sha256": "f74d14a07e6162964e51322ab4ef2fb7563f026860948e2e6c1c88d933f65572",
+          "queue_id": 6,
+          "call": {
+            "il": "IL_00DF",
+            "opcode": "callvirt",
+            "operand": "EnqueueMessage",
+            "bytes": "6f4b010006"
+          }
+        },
+        {
+          "caller": "GTSPlusController.MainTask::NetworkAvailabilityEventFunction",
+          "rva": 37264,
+          "body_size": 120,
+          "body_sha256": "6dfa0f5d72718bdd0a128916424b4de5dbbc719c58bc6abc15b74f54ce903c73",
+          "queue_id": 5,
+          "call": {
+            "il": "IL_0041",
+            "opcode": "callvirt",
+            "operand": "EnqueueMessage",
+            "bytes": "6f4b010006"
+          }
+        },
+        {
+          "caller": "GTSPlusController.ExecuteTask.VehicleConnectionExecuteTask::MessageFunction",
+          "rva": 68784,
+          "body_size": 2020,
+          "body_sha256": "2c88459126c3ff32e97a91954f6b2378d9501315d55cbd015e9eaa3f155b400b",
+          "queue_id": 1,
+          "call": {
+            "il": "IL_06CF",
+            "opcode": "callvirt",
+            "operand": "EnqueueMessage",
+            "bytes": "6f4b010006"
+          }
+        }
+      ],
+      "finding": "All direct call/callvirt EnqueueMessage sites, including internal insertions that bypass main classification."
+    },
+    {
+      "id": "bootstrap.api.adapter-routing",
+      "source": "bootstrap.adapt.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusAdaptationIF.AdaptationInterface::ExecuteAdaptation",
+      "rva": 9788,
+      "body_size": 344,
+      "body_sha256": "14fe3fede7b4d58500f5739839557ef2727696a0c21b3274bfa0ee2797962ed2",
+      "finding": "Substring(0,2) selects the first category match in adaptation order. It invokes that instance and returns; it does not try another adapter after a failure. Unknown category and caught adapter exceptions produce AdaptIf error3; the initial substring is outside that catch."
+    },
+    {
       "id": "bootstrap.arb.dependencies",
       "source": "bootstrap.arb.recovered",
       "kind": "cli-metadata",
@@ -5198,5 +10877,113 @@
       "why_unclosed": "Inspected entrypoints have local catches, no global unhandled-exception/relaunch handler. Forced process termination does not run guaranteed FormClosed persistence; unbounded Task.Wait/WaitForExit/WaitForPipeDrain can stop forward progress.",
       "next_evidence": "Throwaway Windows crash/kill harness and storage-worker flush implementation; do not label crash as graceful teardown."
     }
-  ]
+  ],
+  "api_routing": {
+    "selectors": [
+      "bootstrap.api.connection",
+      "bootstrap.api.queue",
+      "bootstrap.api.Cancel",
+      "bootstrap.api.WebService",
+      "bootstrap.api.Message",
+      "bootstrap.api.NonVehicleConnection",
+      "bootstrap.api.VehicleConnection"
+    ],
+    "workers": [
+      {
+        "owner": "GTSPlusController.ExecuteTask.CancelExecuteTask",
+        "event_name": "GTSP_CANCEL_API",
+        "queue_id": 4,
+        "evidence": [
+          "bootstrap.api.Cancel.constructor",
+          "bootstrap.api.Cancel"
+        ]
+      },
+      {
+        "owner": "GTSPlusController.ExecuteTask.WebServiceExecuteTask",
+        "event_name": "GTSP_WEB_SERVICE_API",
+        "queue_id": 6,
+        "evidence": [
+          "bootstrap.api.WebService.constructor",
+          "bootstrap.api.WebService"
+        ]
+      },
+      {
+        "owner": "GTSPlusController.ExecuteTask.MessageExecuteTask",
+        "event_name": "GTSP_MESSAGE_API",
+        "queue_id": 5,
+        "evidence": [
+          "bootstrap.api.Message.constructor",
+          "bootstrap.api.Message"
+        ]
+      },
+      {
+        "owner": "GTSPlusController.ExecuteTask.NonVehicleConnectionExecuteTask",
+        "event_name": "GTSP_NON_VEHICLE_API",
+        "queue_id": 2,
+        "evidence": [
+          "bootstrap.api.NonVehicleConnection.constructor",
+          "bootstrap.api.NonVehicleConnection"
+        ]
+      },
+      {
+        "owner": "GTSPlusController.ExecuteTask.VehicleConnectionExecuteTask",
+        "event_name": "GTSP_VEHICLE_API",
+        "queue_id": 1,
+        "evidence": [
+          "bootstrap.api.VehicleConnection.constructor",
+          "bootstrap.api.VehicleConnection"
+        ]
+      }
+    ],
+    "adaptation_categories": [
+      {
+        "file": "bin\\GTSPlusUserInfoAdapt.dll",
+        "class": "GTSPlusUserInformationAdaptation.UserInformationAdaptation",
+        "categories": [
+          "IF",
+          "EX"
+        ]
+      },
+      {
+        "file": "bin\\GTSPlusTGDFileAdapt.dll",
+        "class": "GTSPlusTGDFileAdaptation.TGDFileAdaptation",
+        "categories": [
+          "TG"
+        ]
+      },
+      {
+        "file": "bin\\GTSPlusDiagAdaptMng.dll",
+        "class": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+        "categories": [
+          "SC",
+          "DV",
+          "UG"
+        ]
+      },
+      {
+        "file": "bin\\GTSPlusWebServiceAdaptMng.dll",
+        "class": "GTSPlusWebServiceAdaptationManager.WebServiceAdaptationManager",
+        "categories": [
+          "UP",
+          "LN",
+          "WS"
+        ]
+      },
+      {
+        "file": "bin\\GTSPlusFileAdapt.dll",
+        "class": "GTSPlusFileAdaptation.FileAdaptation",
+        "categories": [
+          "FL"
+        ]
+      }
+    ],
+    "evidence": [
+      "bootstrap.api.enqueue-census",
+      "bootstrap.api.adapter-routing",
+      "bootstrap.adaptation-table"
+    ],
+    "scope": "Complete PF selector/queue/category census, not an assertion that every native API suffix is implemented.",
+    "precedence": "Seven immediate ConnectionManager selectors precede the main classifier. Queued exact IDs precede two-character family routing; unknown families use message queue5. Internal callers can enqueue directly.",
+    "input_boundary": "Main classification falls back to Substring(0,2); null/short inputs throw in this method. Its exception regions are finally-only. Network admission is an earlier, separate boundary."
+  }
 }
