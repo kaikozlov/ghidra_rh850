@@ -1,0 +1,97 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_mode_service_priority_400_event00",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe0000"
+  },
+  "reset": "none",
+  "max_instructions": 500000,
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe7800",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0xb16f4"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe8b4c",
+      "hex": "a5a5",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebeb082",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebeb115",
+      "hex": "005a375a",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebeb11a",
+      "hex": "0004",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebeb1a4",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebe7400",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack; original PREPARE frames and caller-save slots only."
+    },
+    {
+      "address": "0xfebe0000",
+      "hex": "3f060e00befe2106b2140b0061003f061c00befe21063a160b0061002606000000003f063000befe2106ac150b0061002606010000003f064400befe2106ac150b0061002606090000003f065800befe2106ac150b0061002606060000003f066c00befe2106ac150b00610026060b0000003f068000befe2106ac150b0061002606070000003f069400befe2106ac150b0061003f06a200befe210646150b0061003f06b000befe210608180b0061002106980700006100",
+      "evidence": "Synthetic transparent MOV/JMP call-only sequencer, no direct data stores or firmware overlays. Original calls: 0xb14b2, 0xb163a, 0xb15ac, 0xb15ac, 0xb15ac, 0xb15ac, 0xb15ac, 0xb15ac, 0xb1546, 0xb1808"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Original route reaches discriminating boundary",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0xb16f4"
+    },
+    {
+      "name": "Selected target mode before exit callback",
+      "kind": "register",
+      "register": "r6",
+      "equals": "0x700"
+    },
+    {
+      "name": "Winning request identity",
+      "kind": "memory",
+      "address": "0xfebeb10c",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "Overrides preserved before family callback",
+      "kind": "memory",
+      "address": "0xfebeb116",
+      "size": 3,
+      "equals_hex": "5a375a"
+    },
+    {
+      "name": "Control direct enables disabled before mode decision",
+      "kind": "memory",
+      "address": "0xfebe8b4c",
+      "size": 2,
+      "equals_hex": "0000"
+    }
+  ]
+}

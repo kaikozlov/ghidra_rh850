@@ -7654,3 +7654,109 @@ This treatment does not separately prove that RF key detection, rather than
 another no-touch effect of the operator's physical approach while carrying the
 key, is the specific physical trigger. That distinction is unnecessary for the
 current binary wake question.
+
+## 77. Native application-mode, service and shutdown transitions
+
+Fifty-seven `camry_f33_mode_service_*.json` scenarios execute the exact F33
+coordinator, configured service callbacks and stateful lifecycle paths.
+All passed across `command-mode-wave1`, `control-lifecycle-wave1/2`,
+`assist-mode-wave5` and `mode-service-wave6` under
+`build/out/firmware-question-campaign/`. Numeric modes/events below are
+hexadecimal. They are recovered software values, not OEM mode names.
+
+### 77.1 Event priority and retained requests
+
+`B15AC` queues one of 50 request bits with an inverse copy; `B1546` materializes
+pending status `A55A`. `B16BC` selects a pending low event and records its
+ID/complement and previous mode. `B1738` acknowledges the selected low event
+as `5AA5`; reconciliation later removes its queued bit and status.
+Losing simultaneous requests remain pending.
+
+`B1808` dispatches on `mode&FF00`. Ordered decisions:
+
+| Family | Event → destination, highest priority first |
+|---|---|
+|100|0→700; 9→900; 5→200|
+|200|0→700; 1→700; 9→900; 3→300|
+|300|0→700; 1→700; 9→900; 6→500; C→400|
+|400|0→700; 1→700; 9→900; 6→500; B→700; 7→600|
+|500|0→700; 1→700; 9→900; 4→300 or400 according to `B1A4`; 7→600|
+|600|0→700; D→900; 8→700; 1→700; 9→900|
+|700|0→800; 9→900; exclusive restart2 branch when substate701; otherwise A→800; 7→600|
+|800|F→terminal wrapper `FF0D8`; 9→900; exclusive restart2 branch; 7→600|
+|900|E→800|
+
+The full retained sequence D+9 in600 selects D, advances900→800 on E, then
+uses still-pending9 to reenter900. Event9 therefore has neither universal
+priority nor automatic consumption. With pending NvM, restart2 in701 or800
+blocks competing7; in701 it also blocks A while mode remains unchanged.
+Priority-only fixtures stop at the actual selected transition boundary;
+separate lifecycle fixtures execute the callbacks and their effects.
+
+### 77.2 Entry, service completion and reset ownership
+
+`B16F4` executes the old-family exit callback, then the new-family entry,
+then publishes the redundant new mode through `B1620`. Callback table `AEB00`
+has eight-byte entry/exit records. Entry effects therefore see the old
+published mode.
+
+- Family400 entry `B2C82` conditionally captures record C, clears both output
+  request words and sets `82A9=5A`. Its narrow initialization preserves BA
+  overrides.
+- Family600 exit `B32FA -> 33FC6` clears fit-active/stimulus-valid state and
+  sets fit state10; it is not a whole-application reset.
+- Original queue API `B3224(3)` reaches400→500 through event6, then service
+  selection2E reaches520 through `B2F5E/B83F8`. Kind2 initializes its own
+  phase, done latch and timeout count while preserving another kind's done
+  latch, unrelated extrema and BA overrides.
+- Original `B83BA` reaches timeout count12000 on one call; only the following
+  call invalidates the still-incomplete operation and sets `B3CF=5A`.
+  Shared `B7D38` progress priority is **cancel → done → continuing → invalid**.
+  Cancel beats simultaneous done, but the preceding timeout side effect can
+  still occur. Family500 exit stops the service phase and clears its request
+  flags; it does not perform global initialization.
+- Full `BF97A`, reached by application initialization through `FDC14`,
+  clears the owned histories and `B116/B117/B118`. The native scenario first
+  installs overrides through configured callbacks, then executes all of
+  `BF97A` and the consumer to observe their removal.
+
+### 77.3 Configured BA operations and cancellation
+
+The exact ten-record operation table is at `27EC4`. Admitted synthetic DCM
+requests execute original `8E434 -> 8E3A2 -> 8E20E/8E2DE -> 4D520/4D560`
+and the ROM start/finish dispatchers. The scenarios stop after service success
+at `8E6BA`, before transport-response publication.
+
+| Operation | Original callbacks | Proven effect |
+|---|---|---|
+|FA / `VSPD`|`3546E/354A0`|Start validates token and `80A5!=0`, staging one byte. Finish sets `B116=5A,B117=value`; `BEE2C` selects unsigned `value<<7` into `BEE6`.|
+|FB / `ASINC`|`354B0/354CA`|Finish sets `B118=5A`; `BAA18` then selects branch2 and its fast-release coefficient when the current limit is below target.|
+|F9 / `JTRM3`|`3543A/35460`|Under the exercised mode400 admission, original selector7 finish publishes `B112=5A,B113=88`.|
+
+`8E41E` cancellation removes the queued service continuation and clears its
+DCM phase, but retains committed FA/FB overrides. A sequence installs value11,
+stages52, cancels, then calls idle finish: active value11 and consumer0880
+remain; staged52 cannot commit. Narrow family transitions preserve these
+flags. Full application initialization is their recovered clear owner.
+
+### 77.4 Shutdown and pending NvM ordering
+
+Most recurring coordinator families clear direct enables `8B4C/8B4D` before
+their worker and event decision. Family200 has its own sequenced output
+control and is the exception.
+
+Normal700 entry `B2DA8` stages retained-record and diagnostic dirty work
+before publishing shutdown requests. The native300→700→900→800 sequence
+uses original NvM initialization and write-hold release, observes real
+record9/D pending statuses, and leaves them pending. Family900 entry `B33DA`
+writes both output banks `70017001` and both primary/secondary owner banks
+`00020002`.
+
+Family800's recurring worker `B2E64 -> 66F1E` checks the configured32+16
+NvM statuses, busy flags and acquisition-active byte. Pending work suppresses
+ready-priority output requests while direct control remains disabled.
+Restart qualification `B176E` first requires this readiness, then checks the
+owner states or its timeout counter. It does not synchronously commit flash.
+An already-pending F in800 instead selects the terminal wrapper at its higher
+priority; the fixture stops at that original boundary.
+

@@ -1,0 +1,281 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_mode_service_priority_500_return4_selects_degraded_when_latched",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe0000"
+  },
+  "reset": "none",
+  "max_instructions": 500000,
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe7800",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0xb16f4"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe6add",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebe81af",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebe81b2",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebe82ba",
+      "hex": "00000000000000000000000000000000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebe82d0",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebe82d4",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebe82d6",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebe82d8",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebe8483",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebe8a0c",
+      "hex": "0000000000000000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebe8b4c",
+      "hex": "a5a5",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebeacef",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebeacf2",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebead00",
+      "hex": "000000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebead0a",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebead0c",
+      "hex": "000000000000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebead61",
+      "hex": "000000000000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebead68",
+      "hex": "000000000000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebeae10",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebeae14",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebeae2c",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebeae36",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebeae6a",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebeb0a6",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebeb10c",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebeb10e",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebeb115",
+      "hex": "005a375a",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebeb11a",
+      "hex": "0005",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebeb1a4",
+      "hex": "11",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebeb388",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebeb3cb",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebeb3d5",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebec60c",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebecb3c",
+      "hex": "000000000000000000000000000000000000000000000000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebef010",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebef012",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebef172",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebef176",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebef208",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebef210",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebf048a",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebf048e",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebf058e",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebf0592",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebf067a",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebf0686",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebe7400",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack; original PREPARE frames and caller-save slots only."
+    },
+    {
+      "address": "0xfebe0000",
+      "hex": "3f060e00befe2106b2140b0061003f061c00befe21063a160b0061002606040000003f063000befe2106ac150b0061002606070000003f064400befe2106ac150b0061003f065200befe210646150b0061003f066000befe210608180b0061002106980700006100",
+      "evidence": "Synthetic transparent MOV/JMP call-only sequencer, no direct data stores or firmware overlays. Original calls: 0xb14b2, 0xb163a, 0xb15ac, 0xb15ac, 0xb1546, 0xb1808"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Original route reaches discriminating boundary",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0xb16f4"
+    },
+    {
+      "name": "NonzeroB1A4 selects400 not300 on return4",
+      "kind": "register",
+      "register": "r6",
+      "equals": "0x400"
+    }
+  ]
+}

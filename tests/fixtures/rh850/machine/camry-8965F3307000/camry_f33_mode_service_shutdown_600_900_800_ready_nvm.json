@@ -1,0 +1,195 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_mode_service_shutdown_600_900_800_ready_nvm",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe0000"
+  },
+  "reset": "none",
+  "max_instructions": 500000,
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe7800",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe6a60",
+      "hex": "205a5a",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebe8a9c",
+      "hex": "a5a5a5a5a5a5a5a5",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebe8b4c",
+      "hex": "a5a5",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebeb111",
+      "hex": "01",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebeb115",
+      "hex": "005a375a",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebeb11a",
+      "hex": "0006",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebeb1a4",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebf0308",
+      "hex": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebf0673",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebf0690",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebf1088",
+      "hex": "55555555555555555555555555555555",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebf10ac",
+      "hex": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebe7400",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack; original PREPARE frames and caller-save slots only."
+    },
+    {
+      "address": "0xfebe8ffc",
+      "size": 264,
+      "fill": 165,
+      "evidence": "Synthetic observation-only scratch and A5 canaries; intact original89F2E copies out, never restores internal state."
+    },
+    {
+      "address": "0xfebe0000",
+      "hex": "3f060e00befe2106b2140b0061003f061c00befe21063a160b00610026060d0000003f063000befe2106ac150b0061002606080000003f064400befe2106ac150b0061002606010000003f065800befe2106ac150b0061003f066600befe210646150b0061003f067400befe210608180b00610026060090befe27061ab1befe2806020000003f069400befe21062e9f0800610026060490befe27062c8bbefe2806080000003f06b400befe21062e9f0800610026060c90befe2706708abefe2806080000003f06d400befe21062e9f0800610026061490befe2706d08abefe2806080000003f06f400befe21062e9f0800610026060e0000003f060801befe2106ac150b0061003f061601befe210646150b0061003f062401befe210608180b0061003f063201befe210608180b0061002106980700006100",
+      "evidence": "Synthetic transparent MOV/JMP call-only sequencer, no direct data stores or firmware overlays. Original calls: 0xb14b2, 0xb163a, 0xb15ac, 0xb15ac, 0xb15ac, 0xb1546, 0xb1808, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0xb15ac, 0xb1546, 0xb1808, 0xb1808"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Original route reaches discriminating boundary",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Mode600 competing13 wins then publishes900 after callback",
+      "kind": "memory",
+      "address": "0xfebe9000",
+      "size": 2,
+      "equals_hex": "0009"
+    },
+    {
+      "name": "Shutdown callback requests both output banks",
+      "kind": "memory",
+      "address": "0xfebe9004",
+      "size": 8,
+      "equals_hex": "0170017001700170"
+    },
+    {
+      "name": "Shutdown callback channel owner commands",
+      "kind": "memory",
+      "address": "0xfebe900c",
+      "size": 8,
+      "equals_hex": "0200020002000200"
+    },
+    {
+      "name": "Shutdown callback secondary owner commands",
+      "kind": "memory",
+      "address": "0xfebe9014",
+      "size": 8,
+      "equals_hex": "0200020002000200"
+    },
+    {
+      "name": "Completion14 advances900 to800",
+      "kind": "memory",
+      "address": "0xfebeb11a",
+      "size": 2,
+      "equals_hex": "0008"
+    },
+    {
+      "name": "Mode600 exit cancels stimulus fit",
+      "kind": "memory",
+      "address": "0xfebe6a60",
+      "size": 3,
+      "equals_hex": "100000"
+    },
+    {
+      "name": "Mode600 exit clears cancel authorization",
+      "kind": "memory",
+      "address": "0xfebeb111",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "Both direct control enables remain disabled",
+      "kind": "memory",
+      "address": "0xfebe8b4c",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "Override flags survive shutdown mode callbacks",
+      "kind": "memory",
+      "address": "0xfebeb116",
+      "size": 3,
+      "equals_hex": "5a375a"
+    },
+    {
+      "name": "Losing event8 remains pending",
+      "kind": "memory",
+      "address": "0xfebeb0b8",
+      "size": 2,
+      "equals_hex": "5aa5"
+    },
+    {
+      "name": "Selected13 acknowledged exactly",
+      "kind": "memory",
+      "address": "0xfebeb0c2",
+      "size": 2,
+      "equals_hex": "a55a"
+    },
+    {
+      "name": "NvM readiness governs ready output priority only",
+      "kind": "memory",
+      "address": "0xfebe8a9c",
+      "size": 8,
+      "equals_hex": "0400000000000400"
+    }
+  ]
+}

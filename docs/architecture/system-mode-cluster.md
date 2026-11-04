@@ -18,6 +18,11 @@ Decompilation and state-transition map for the three-function cluster
 `0xBA43A`, `0xBEC4C`, and `0xCBCC8`, their callers, and the
 `system_mode_coordinator @ 0xB0518` that drives them.
 
+The exact Camry `8965F3307000` counterpart, including native transition
+precedence and retained service/NvM behavior, is in
+[live baseline §77](../variants/camry-2026-live-baseline.md#77-native-application-mode-service-and-shutdown-transitions).
+The addresses and transition table below remain Sienna-specific.
+
 ## 1. Cluster topology
 
 ```

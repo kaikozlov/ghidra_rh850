@@ -1,0 +1,144 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_mode_service_vspd_bad_token",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe0000"
+  },
+  "reset": "none",
+  "max_instructions": 500000,
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe7800",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebe5e52",
+      "hex": "000000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebe5f4c",
+      "hex": "0000005a00000000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebe8000",
+      "hex": "2080befe060000004080befe00000000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebe8020",
+      "hex": "fa5256535058",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebe8040",
+      "hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebe8084",
+      "hex": "a5a5a5a5",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebe80a5",
+      "hex": "01",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebeb054",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebeb116",
+      "hex": "000000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebebca8",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebebcac",
+      "hex": "000000000000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebebede",
+      "hex": "000000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebebee2",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebebee8",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebebef0",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebf48e5",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebe7400",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack; original PREPARE frames and caller-save slots only."
+    },
+    {
+      "address": "0xfebe0000",
+      "hex": "3f060e00befe2106e0e10800610026060080befe27068080befe3f062800befe21060ee2080061003f063600befe21061ee4080061002106980700006100",
+      "evidence": "Synthetic transparent MOV/JMP call-only sequencer, no direct data stores or firmware overlays. Original calls: 0x8e1e0, 0x8e20e, 0x8e41e"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Original route reaches discriminating boundary",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Rejected route cannot install override",
+      "kind": "memory",
+      "address": "0xfebeb116",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "Rejected route cannot stage unsigned byte",
+      "kind": "memory",
+      "address": "0xfebe5f52",
+      "size": 1,
+      "equals_hex": "00"
+    }
+  ]
+}

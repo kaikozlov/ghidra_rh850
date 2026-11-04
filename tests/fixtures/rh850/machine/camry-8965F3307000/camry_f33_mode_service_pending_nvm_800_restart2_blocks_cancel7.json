@@ -1,0 +1,130 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_mode_service_pending_nvm_800_restart2_blocks_cancel7",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe0000"
+  },
+  "reset": "none",
+  "max_instructions": 500000,
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe7800",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe8b4c",
+      "hex": "a5a5",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebeb072",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebeb114",
+      "hex": "00005a375a",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebeb11a",
+      "hex": "0008",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebeb1a4",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebf0308",
+      "hex": "200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebf0673",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebf0690",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebf1088",
+      "hex": "55555555555555555555555555555555",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebf10ac",
+      "hex": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "evidence": "Explicit bounded synthetic initial input/read state for original F33 calls; contiguous rows only combine individually decoded RAM READ widths, not a RAM default."
+    },
+    {
+      "address": "0xfebe7400",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack; original PREPARE frames and caller-save slots only."
+    },
+    {
+      "address": "0xfebe0000",
+      "hex": "3f060e00befe2106b2140b0061003f061c00befe21063a160b0061002606020000003f063000befe2106ac150b0061002606070000003f064400befe2106ac150b0061003f065200befe210646150b0061003f066000befe210608180b0061002106980700006100",
+      "evidence": "Synthetic transparent MOV/JMP call-only sequencer, no direct data stores or firmware overlays. Original calls: 0xb14b2, 0xb163a, 0xb15ac, 0xb15ac, 0xb1546, 0xb1808"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Original route reaches discriminating boundary",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Pending NvM keeps selected restart in original mode",
+      "kind": "memory",
+      "address": "0xfebeb11a",
+      "size": 2,
+      "equals_hex": "0008"
+    },
+    {
+      "name": "Restart2 retained while NvM is pending",
+      "kind": "memory",
+      "address": "0xfebeb0ac",
+      "size": 2,
+      "equals_hex": "5aa5"
+    },
+    {
+      "name": "Cancel7 is not consumed behind pending restart2",
+      "kind": "memory",
+      "address": "0xfebeb0b6",
+      "size": 2,
+      "equals_hex": "5aa5"
+    },
+    {
+      "name": "Restart2 owns selection",
+      "kind": "memory",
+      "address": "0xfebeb10c",
+      "size": 1,
+      "equals_hex": "02"
+    },
+    {
+      "name": "Direct control is already disabled while waiting",
+      "kind": "memory",
+      "address": "0xfebe8b4c",
+      "size": 2,
+      "equals_hex": "0000"
+    }
+  ]
+}
