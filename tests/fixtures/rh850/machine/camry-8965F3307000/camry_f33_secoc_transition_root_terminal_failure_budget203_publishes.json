@@ -1,0 +1,264 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_secoc_transition_root_terminal_failure_budget203_publishes",
+  "entry": {
+    "role": "retained",
+    "scope": "resolved-address",
+    "address": "0x8f906"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00",
+    "r6": "0x2"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1e00",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack for original PREPARE frames; not global RAM initialization."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Synthetic input: Priority-mask saved-depth input0; PMR=FF00; original lock thunks execute."
+    },
+    {
+      "address": "0xfebe5526",
+      "hex": "c3",
+      "evidence": "Synthetic input: Profile2 waiting-for-result state; original root gate executes."
+    },
+    {
+      "address": "0xfebe5564",
+      "hex": "01",
+      "evidence": "Synthetic input: Explicit synthetic post-command7 completion output:0=verified/nonzero=rejected. Enter8F906 only after hardware completion boundary. No ICU-S command, matched-status mutation during execution, or authentication claim."
+    },
+    {
+      "address": "0xfebe5502",
+      "hex": "00",
+      "evidence": "Synthetic input: Software crypto-qualification state unqualified; no D2 override."
+    },
+    {
+      "address": "0xfebe5518",
+      "hex": "4d000100",
+      "evidence": "Synthetic input: Retry-work index and invocation-unit retry count; ROM258F8 limit1."
+    },
+    {
+      "address": "0xfebe551c",
+      "hex": "cb000000",
+      "evidence": "Synthetic input: Failure-delivery budget input in invocation units; ROM25842 thresholdCC=204."
+    },
+    {
+      "address": "0xfebe55e8",
+      "hex": "07000000640000000900a5a5",
+      "evidence": "Synthetic input: Committed B6 history."
+    },
+    {
+      "address": "0xfebe5600",
+      "hex": "07000000640000000a00bbcc",
+      "evidence": "Synthetic input: Pending B6 history from earlier native reconstruction."
+    },
+    {
+      "address": "0xfebe5464",
+      "hex": "0200fdff",
+      "evidence": "Synthetic input: Queue head2 and exact complement."
+    },
+    {
+      "address": "0xfebe547a",
+      "hex": "2000ffff0000",
+      "evidence": "Synthetic input: Profile2 queue descriptor length32/nextFFFF/complement0; reserved tail bytes unspecified."
+    },
+    {
+      "address": "0xfebe54d4",
+      "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "evidence": "Synthetic input: Explicit 32-byte secured PDU queued at profile2 offset40; native payload view and cleanup execute."
+    },
+    {
+      "address": "0xfebe4bff",
+      "hex": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "evidence": "Synthetic input: Raw COM44 destination canary."
+    },
+    {
+      "address": "0xfebe4a2c",
+      "hex": "0000",
+      "evidence": "Synthetic input: COM44 timer index(44-ROM21C56=5); original timer receives period6+delta1."
+    },
+    {
+      "address": "0xfebe496a",
+      "hex": "ff",
+      "evidence": "Synthetic input: COM44 status flags; native publication ANDs DC."
+    },
+    {
+      "address": "0xfebe5304",
+      "hex": "a5",
+      "evidence": "Synthetic input: COM44 tracking flag; publication clears it."
+    },
+    {
+      "address": "0xfebe5364",
+      "hex": "3f",
+      "evidence": "Synthetic input: COM44 generation count; publication increments once."
+    },
+    {
+      "address": "0xfebe507c",
+      "hex": "11",
+      "evidence": "Synthetic input: Crypto test-bank profile0 armed; configured status ID0 differs from B6 ID2, so counts do not increment."
+    },
+    {
+      "address": "0xfebe507e",
+      "hex": "10",
+      "evidence": "Synthetic input: Success status counter canary."
+    },
+    {
+      "address": "0xfebe5080",
+      "hex": "20",
+      "evidence": "Synthetic input: Nonzero status counter canary."
+    },
+    {
+      "address": "0xfebe5090",
+      "hex": "01",
+      "evidence": "Synthetic input: Stock callback ring disabled; no unrelated ring RAM required."
+    },
+    {
+      "address": "0xfebe5424",
+      "hex": "5a",
+      "evidence": "Synthetic input: Per-COM44 tracking-result lifecycle byte at FEBE53F8+44, stock initializer8E74E writes5A. Intact ROM25934 callback6A218 reads it at6A250 and propagates it to5090, disabling its optional counter/ring side path."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Exact original-byte return/checkpoint",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Native root return code",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0x102"
+    },
+    {
+      "name": "Root success commits; root failure preserves committed freshness",
+      "kind": "memory",
+      "address": "0xfebe55e8",
+      "size": 12,
+      "equals_hex": "07000000640000000900a5a5"
+    },
+    {
+      "name": "Post-crypto callback does not clear candidate",
+      "kind": "memory",
+      "address": "0xfebe5600",
+      "size": 12,
+      "equals_hex": "07000000640000000a00bbcc"
+    },
+    {
+      "name": "Native release or retry phase",
+      "kind": "memory",
+      "address": "0xfebe5526",
+      "size": 1,
+      "equals_hex": "e1"
+    },
+    {
+      "name": "Native route44 publication or no-publication",
+      "kind": "memory",
+      "address": "0xfebe4bff",
+      "size": 32,
+      "equals_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f"
+    },
+    {
+      "name": "Publication generation count",
+      "kind": "memory",
+      "address": "0xfebe5364",
+      "size": 1,
+      "equals_hex": "40"
+    },
+    {
+      "name": "Publication tracking ownership",
+      "kind": "memory",
+      "address": "0xfebe5304",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "Native COM timer update in invocation units",
+      "kind": "memory",
+      "address": "0xfebe4a2c",
+      "size": 2,
+      "equals_hex": "0700"
+    },
+    {
+      "name": "Native COM status flags",
+      "kind": "memory",
+      "address": "0xfebe496a",
+      "size": 1,
+      "equals_hex": "dc"
+    },
+    {
+      "name": "Original packed B6 status callback result",
+      "kind": "memory",
+      "address": "0xfebe5054",
+      "size": 4,
+      "equals_hex": "02000100"
+    },
+    {
+      "name": "B6 result does not increment ID0 success counter",
+      "kind": "memory",
+      "address": "0xfebe507e",
+      "size": 1,
+      "equals_hex": "10"
+    },
+    {
+      "name": "B6 result does not increment ID0 rejection counter",
+      "kind": "memory",
+      "address": "0xfebe5080",
+      "size": 1,
+      "equals_hex": "20"
+    },
+    {
+      "name": "Original queue cleanup only on release",
+      "kind": "memory",
+      "address": "0xfebe54d4",
+      "size": 32,
+      "equals_hex": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "name": "Native queue descriptor lifecycle",
+      "kind": "memory",
+      "address": "0xfebe547a",
+      "size": 6,
+      "equals_hex": "0000ffff0000"
+    },
+    {
+      "name": "Native head/complement lifecycle",
+      "kind": "memory",
+      "address": "0xfebe5464",
+      "size": 4,
+      "equals_hex": "ffff0000"
+    },
+    {
+      "name": "Retry index/count lifecycle",
+      "kind": "memory",
+      "address": "0xfebe5518",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "Release clears native work area",
+      "kind": "memory",
+      "address": "0xfebe5528",
+      "size": 64,
+      "equals_hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ]
+}

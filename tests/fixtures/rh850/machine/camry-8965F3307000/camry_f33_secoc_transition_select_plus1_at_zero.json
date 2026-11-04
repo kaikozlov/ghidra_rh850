@@ -1,0 +1,82 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_secoc_transition_select_plus1_at_zero",
+  "entry": {
+    "role": "retained",
+    "scope": "resolved-address",
+    "address": "0x909ca"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00",
+    "r7": "0xfebf3000",
+    "r8": "0xfebf3020"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1e00",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack for original PREPARE frames; not global RAM initialization."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Synthetic input: Priority-mask saved-depth input0; PMR=FF00; original lock thunks execute."
+    },
+    {
+      "address": "0xfebe55c4",
+      "hex": "00000000",
+      "evidence": "Synthetic input: Current sync reset20; native selector clips +/- candidates at0 andFFFFF."
+    },
+    {
+      "address": "0xfebf3000",
+      "hex": "000000000000000000000104",
+      "evidence": "Synthetic input: Decoded FV4 reset-low2 field at+10."
+    },
+    {
+      "address": "0xfebf3020",
+      "hex": "0200000002000000cccccccc0000cccc00",
+      "evidence": "Synthetic input: Search descriptor message-width2/reset-width2/skip16/index16/rollover flag."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Exact original-byte return/checkpoint",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Match/exhaustion return",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0x1"
+    },
+    {
+      "name": "Last tested usable reset candidate",
+      "kind": "memory",
+      "address": "0xfebf3028",
+      "size": 4,
+      "equals_hex": "01000000"
+    },
+    {
+      "name": "Native candidate-order index",
+      "kind": "memory",
+      "address": "0xfebf302e",
+      "size": 2,
+      "equals_hex": "0200"
+    }
+  ]
+}

@@ -1,0 +1,128 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_secoc_transition_ordinary_forward",
+  "entry": {
+    "role": "retained",
+    "scope": "resolved-address",
+    "address": "0x90b8a"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00",
+    "r6": "0xfebf3000",
+    "r7": "0xfebf3030",
+    "r8": "0x0",
+    "r9": "0xfebf3040"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1e00",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack for original PREPARE frames; not global RAM initialization."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Synthetic input: Priority-mask saved-depth input0; PMR=FF00; original lock thunks execute."
+    },
+    {
+      "address": "0xfebf3000",
+      "hex": "00000100",
+      "evidence": "Synthetic input: Ordinary selector0/slot1 resolved profile2 B6."
+    },
+    {
+      "address": "0xfebf3020",
+      "hex": "80",
+      "evidence": "Synthetic input: Transmitted FV4; no CMAC bytes consumed at this entry."
+    },
+    {
+      "address": "0xfebf3030",
+      "hex": "2030bffe04000000",
+      "evidence": "Synthetic input: Wire descriptor pointer/bit-length4."
+    },
+    {
+      "address": "0xfebf3040",
+      "hex": "6030bffe5030bffe",
+      "evidence": "Synthetic input: Output pointer and capacity-pointer descriptor."
+    },
+    {
+      "address": "0xfebf3050",
+      "hex": "2e000000",
+      "evidence": "Synthetic input: Output bit capacity46."
+    },
+    {
+      "address": "0xfebf3060",
+      "hex": "cccccccccccc",
+      "evidence": "Synthetic input: Encoded candidate canary."
+    },
+    {
+      "address": "0xfebe55c0",
+      "hex": "0700000064000000",
+      "evidence": "Synthetic input: Current authenticated sync trip/reset software state."
+    },
+    {
+      "address": "0xfebe55e8",
+      "hex": "07000000640000000900a5a5",
+      "evidence": "Synthetic input: Committed ordinary B6 history; 12-byte record including pad."
+    },
+    {
+      "address": "0xfebe5600",
+      "hex": "112233445566778899aabbcc",
+      "evidence": "Synthetic input: Distinct pending B6 canary; rejected candidate must not overwrite it."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Exact original-byte return/checkpoint",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Original freshness verdict",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0x0"
+    },
+    {
+      "name": "Committed B6 remains untouched during reconstruction",
+      "kind": "memory",
+      "address": "0xfebe55e8",
+      "size": 12,
+      "equals_hex": "07000000640000000900a5a5"
+    },
+    {
+      "name": "Pending B6 receives exact reconstructed trip/reset/message",
+      "kind": "memory",
+      "address": "0xfebe5600",
+      "size": 12,
+      "equals_hex": "07000000640000000a00bbcc"
+    },
+    {
+      "name": "Original 90566 packs 46-bit freshness with two unused low bits",
+      "kind": "memory",
+      "address": "0xfebf3060",
+      "size": 6,
+      "equals_hex": "0007000640a0"
+    },
+    {
+      "name": "46-bit output length",
+      "kind": "memory",
+      "address": "0xfebf3050",
+      "size": 4,
+      "equals_hex": "2e000000"
+    }
+  ]
+}

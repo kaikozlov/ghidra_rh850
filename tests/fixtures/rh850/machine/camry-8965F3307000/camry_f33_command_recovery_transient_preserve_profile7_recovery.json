@@ -1,0 +1,301 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_command_recovery_transient_preserve_profile7_recovery",
+  "entry": {
+    "role": "synthetic-call-only-sequencer-for-original-command-supervision",
+    "scope": "resolved-address",
+    "address": "0xfebf8000"
+  },
+  "max_instructions": 100000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "PSW": "0x20",
+    "lp": "0x798"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1f00",
+      "hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "evidence": "Synthetic bounded caller stack for intact original PREPARE frames; not application initialization."
+    },
+    {
+      "address": "0xfebeac3c",
+      "hex": "00",
+      "evidence": "Synthetic calibration-set selector."
+    },
+    {
+      "address": "0xfebecb00",
+      "hex": "02",
+      "evidence": "Synthetic ID11 controller bank selected for isolated monitor calls."
+    },
+    {
+      "address": "0xfebecab6",
+      "hex": "00",
+      "evidence": "Synthetic holdoff input."
+    },
+    {
+      "address": "0xfebecaa4",
+      "hex": "0000",
+      "evidence": "Synthetic previous doubled controller target."
+    },
+    {
+      "address": "0xfebeaccc",
+      "hex": "00",
+      "evidence": "Synthetic ready gate."
+    },
+    {
+      "address": "0xfebeaccd",
+      "hex": "00",
+      "evidence": "Synthetic ready gate."
+    },
+    {
+      "address": "0xfebeadbf",
+      "hex": "00",
+      "evidence": "Synthetic ready request gate."
+    },
+    {
+      "address": "0xfebecad9",
+      "hex": "00",
+      "evidence": "Synthetic independent ready inhibit."
+    },
+    {
+      "address": "0xfebecab2",
+      "hex": "000000",
+      "evidence": "Synthetic triplicate readiness initial state."
+    },
+    {
+      "address": "0xfebecaae",
+      "hex": "0000",
+      "evidence": "Synthetic ready timeout initial state."
+    },
+    {
+      "address": "0xfebfc000",
+      "hex": "01",
+      "evidence": "Synthetic request input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc001",
+      "hex": "c800",
+      "evidence": "Synthetic request input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc003",
+      "hex": "00",
+      "evidence": "Synthetic holdoff input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc004",
+      "hex": "02",
+      "evidence": "Synthetic controller profile input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc005",
+      "hex": "0000",
+      "evidence": "Synthetic request input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc007",
+      "hex": "01",
+      "evidence": "Synthetic holdoff input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc008",
+      "hex": "02",
+      "evidence": "Synthetic controller profile input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc009",
+      "hex": "0000",
+      "evidence": "Synthetic request input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc00b",
+      "hex": "00",
+      "evidence": "Synthetic holdoff input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc00c",
+      "hex": "02",
+      "evidence": "Synthetic controller profile input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc00d",
+      "hex": "c800",
+      "evidence": "Synthetic request input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc00f",
+      "hex": "01",
+      "evidence": "Synthetic holdoff input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc010",
+      "hex": "02",
+      "evidence": "Synthetic controller profile input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc011",
+      "hex": "c800",
+      "evidence": "Synthetic request input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc013",
+      "hex": "00",
+      "evidence": "Synthetic holdoff input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc014",
+      "hex": "02",
+      "evidence": "Synthetic controller profile input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc015",
+      "hex": "c800",
+      "evidence": "Synthetic request input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc017",
+      "hex": "01",
+      "evidence": "Synthetic holdoff input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc018",
+      "hex": "07",
+      "evidence": "Synthetic controller profile input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc019",
+      "hex": "0000",
+      "evidence": "Synthetic request input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc01b",
+      "hex": "00",
+      "evidence": "Synthetic holdoff input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc01c",
+      "hex": "02",
+      "evidence": "Synthetic controller profile input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebf8000",
+      "hex": "3f060e80bffe21060cec0c0061002606bcadbefe270600c0bffe2806010000003f062e80bffe21062e9f080061003f063c80bffe21068aec0c006100260690aebefe270601c0bffe2806020000003f065c80bffe21062e9f080061002606b6cabefe270603c0bffe2806010000003f067c80bffe21062e9f08006100260600cbbefe270604c0bffe2806010000003f069c80bffe21062e9f080061003f06aa80bffe21067cee0c0061003f06b880bffe210672ec0c0061003f06c680bffe2106fee70c006100260600d0bffe2706fbcabefe2806030000003f06e680bffe21062e9f08006100260603d0bffe2706b2cabefe2806030000003f060681bffe21062e9f08006100260690aebefe270605c0bffe2806020000003f062681bffe21062e9f080061002606b6cabefe270607c0bffe2806010000003f064681bffe21062e9f08006100260600cbbefe270608c0bffe2806010000003f066681bffe21062e9f080061003f067481bffe21067cee0c0061003f068281bffe210672ec0c0061003f069081bffe2106fee70c006100260606d0bffe2706fbcabefe2806030000003f06b081bffe21062e9f08006100260609d0bffe2706b2cabefe2806030000003f06d081bffe21062e9f08006100260690aebefe270609c0bffe2806020000003f06f081bffe21062e9f080061002606b6cabefe27060bc0bffe2806010000003f061082bffe21062e9f08006100260600cbbefe27060cc0bffe2806010000003f063082bffe21062e9f080061003f063e82bffe21067cee0c0061003f064c82bffe210672ec0c0061003f065a82bffe2106fee70c00610026060cd0bffe2706fbcabefe2806030000003f067a82bffe21062e9f0800610026060fd0bffe2706b2cabefe2806030000003f069a82bffe21062e9f08006100260690aebefe27060dc0bffe2806020000003f06ba82bffe21062e9f080061002606b6cabefe27060fc0bffe2806010000003f06da82bffe21062e9f08006100260600cbbefe270610c0bffe2806010000003f06fa82bffe21062e9f080061003f060883bffe21067cee0c0061003f061683bffe210672ec0c0061003f062483bffe2106fee70c006100260612d0bffe2706fbcabefe2806030000003f064483bffe21062e9f08006100260615d0bffe2706b2cabefe2806030000003f066483bffe21062e9f08006100260690aebefe270611c0bffe2806020000003f068483bffe21062e9f080061002606b6cabefe270613c0bffe2806010000003f06a483bffe21062e9f08006100260600cbbefe270614c0bffe2806010000003f06c483bffe21062e9f080061003f06d283bffe21067cee0c0061003f06e083bffe210672ec0c0061003f06ee83bffe2106fee70c006100260618d0bffe2706fbcabefe2806030000003f060e84bffe21062e9f0800610026061bd0bffe2706b2cabefe2806030000003f062e84bffe21062e9f08006100260690aebefe270615c0bffe2806020000003f064e84bffe21062e9f080061002606b6cabefe270617c0bffe2806010000003f066e84bffe21062e9f08006100260600cbbefe270618c0bffe2806010000003f068e84bffe21062e9f080061003f069c84bffe21067cee0c0061003f06aa84bffe210672ec0c0061003f06b884bffe2106fee70c00610026061ed0bffe2706fbcabefe2806030000003f06d884bffe21062e9f08006100260621d0bffe2706b2cabefe2806030000003f06f884bffe21062e9f08006100260690aebefe270619c0bffe2806020000003f061885bffe21062e9f080061002606b6cabefe27061bc0bffe2806010000003f063885bffe21062e9f08006100260600cbbefe27061cc0bffe2806010000003f065885bffe21062e9f080061003f066685bffe21067cee0c0061003f067485bffe210672ec0c0061003f068285bffe2106fee70c006100260624d0bffe2706fbcabefe2806030000003f06a285bffe21062e9f08006100260627d0bffe2706b2cabefe2806030000003f06c285bffe21062e9f080061002106980700006100",
+      "evidence": "Synthetic call-only RAM sequencer: MOV imm32 encoding (0x0620|register), little-endian u32; MOV continuation,lp; MOV original entry,r1; JMP[r1]=6100. Only original 89F2E copies labeled request inputs/snapshots; no host predicates or flag writes. Immutable CodeFlash SHA256 42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7."
+    }
+  ],
+  "checks": [
+    {
+      "name": "invalid target sets transient CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd000",
+      "size": 3,
+      "equals_hex": "010100"
+    },
+    {
+      "name": "invalid target sets transient triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd003",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "holdoff preserves asserted transient CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd006",
+      "size": 3,
+      "equals_hex": "010100"
+    },
+    {
+      "name": "holdoff preserves asserted transient triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd009",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "valid request recovers CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd00c",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "valid request recovers triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd00f",
+      "size": 3,
+      "equals_hex": "010101"
+    },
+    {
+      "name": "holdoff preserves clear transient CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd012",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "holdoff preserves clear transient triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd015",
+      "size": 3,
+      "equals_hex": "010101"
+    },
+    {
+      "name": "invalid request reasserts CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd018",
+      "size": 3,
+      "equals_hex": "010100"
+    },
+    {
+      "name": "invalid request reasserts triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd01b",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "profile7 overrides holdoff and clears transient CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd01e",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "profile7 overrides holdoff and clears transient triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd021",
+      "size": 3,
+      "equals_hex": "010101"
+    },
+    {
+      "name": "active-bank valid recovery CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd024",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "active-bank valid recovery triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd027",
+      "size": 3,
+      "equals_hex": "010101"
+    },
+    {
+      "name": "original frames restore caller stack",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    }
+  ]
+}

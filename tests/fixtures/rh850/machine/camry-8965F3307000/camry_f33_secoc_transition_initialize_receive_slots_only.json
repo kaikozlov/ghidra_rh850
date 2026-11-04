@@ -1,0 +1,117 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_secoc_transition_initialize_receive_slots_only",
+  "entry": {
+    "role": "retained",
+    "scope": "resolved-address",
+    "address": "0x8f26c"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1e00",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack for original PREPARE frames; not global RAM initialization."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Synthetic input: Priority-mask saved-depth input0; PMR=FF00; original lock thunks execute."
+    },
+    {
+      "address": "0xfebe55c0",
+      "hex": "07000000640000000800000065000000f8ffffff9bffffff020001a5",
+      "evidence": "Synthetic input: Bounded sync current/pending/complement/status/wrap state."
+    },
+    {
+      "address": "0xfebe55dc",
+      "hex": "0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f30",
+      "evidence": "Synthetic input: Bounded ordinary committed/pending record canaries."
+    },
+    {
+      "address": "0xfebe560c",
+      "hex": "3132333435363738393a3b3c3d3e3f404142434445464748",
+      "evidence": "Synthetic input: Bounded transmit committed/pending record canaries."
+    },
+    {
+      "address": "0xfebe5504",
+      "hex": "808182838485868788898a8b8c8d8e8f90919293",
+      "evidence": "Synthetic input: Software key descriptor canary."
+    },
+    {
+      "address": "0xfebe5518",
+      "hex": "000102030405060708090a0b0c0d0e0f",
+      "evidence": "Synthetic input: Receive work prefix/index/three phase bytes and adjacent pad canary."
+    },
+    {
+      "address": "0xfebe5528",
+      "hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f",
+      "evidence": "Synthetic input: Bounded64-byte verification work-area canary."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Exact original-byte return/checkpoint",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Exact synchronization reset domain",
+      "kind": "memory",
+      "address": "0xfebe55c0",
+      "size": 28,
+      "equals_hex": "07000000640000000800000065000000f8ffffff9bffffff020001a5"
+    },
+    {
+      "name": "Exact ordinary-history reset domain",
+      "kind": "memory",
+      "address": "0xfebe55dc",
+      "size": 48,
+      "equals_hex": "0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f30"
+    },
+    {
+      "name": "Exact transmit-history reset domain",
+      "kind": "memory",
+      "address": "0xfebe560c",
+      "size": 24,
+      "equals_hex": "3132333435363738393a3b3c3d3e3f404142434445464748"
+    },
+    {
+      "name": "Software freshness initialization never touches key descriptor",
+      "kind": "memory",
+      "address": "0xfebe5504",
+      "size": 20,
+      "equals_hex": "808182838485868788898a8b8c8d8e8f90919293"
+    },
+    {
+      "name": "Receive work indices and phase reset scope",
+      "kind": "memory",
+      "address": "0xfebe5518",
+      "size": 16,
+      "equals_hex": "000000000000000000000000e1e1e10f"
+    },
+    {
+      "name": "Verification work-area reset scope",
+      "kind": "memory",
+      "address": "0xfebe5528",
+      "size": 64,
+      "equals_hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ]
+}

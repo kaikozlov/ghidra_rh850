@@ -1,0 +1,219 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_rdbi_completion_010b_s2_odd_body_poison1",
+  "entry": {
+    "role": "retained",
+    "scope": "resolved-address",
+    "address": "0x98acc"
+  },
+  "max_instructions": 25000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0xfebf2000",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 211,
+      "evidence": "Synthetic bounded caller-stack backing, not ECU RAM initialization; original nested PREPARE frames execute."
+    },
+    {
+      "address": "0xfebf2000",
+      "hex": "3f060e20bffe21063a89090061003f061c20bffe21069055090061003f062a20bffe2106e60e090061003f063820bffe2106242b090061003f064620bffe2106d4b3080061003f06980700002106aa2209006100",
+      "evidence": "Synthetic call-only continuation after original98ACC: 0x9893a,0x95590,0x90ee6,0x92b24,0x8b3d4,0x922aa. Each14-byte unit is MOV imm32,lp (3f06+little-endian next PC); MOV imm32,r1 (2106+callee); JMP[r1] (6100). Final LP798. No state writes, callback substitution or CodeFlash overlay."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Synthetic empty native PMR-save stack; PMR starts FF00."
+    },
+    {
+      "address": "0xfebe59e0",
+      "hex": "00000000",
+      "evidence": "Synthetic completed-request routing: pending/current receive slot0;93CE6 queue initializer requires a valid current route."
+    },
+    {
+      "address": "0xfebe5960",
+      "hex": "02",
+      "evidence": "Synthetic completed-slot phase, consumed by original922AA gate; lifecycle subset deliberately leaves this request input intact."
+    },
+    {
+      "address": "0xfebe5954",
+      "hex": "0000000000000000",
+      "evidence": "Synthetic locked security bitmap; no unlock outcome injected."
+    },
+    {
+      "address": "0xfebe595c",
+      "hex": "02020200",
+      "evidence": "Synthetic coherent current/staged/previous diagnostic session snapshot, matching existing dispatcher_primes."
+    },
+    {
+      "address": "0xfebe59f0",
+      "hex": "5156befe0400dccbfc00000000919293",
+      "evidence": "Synthetic completed receive row0, length4 and remaining252; all other row fields follow positive scenario."
+    },
+    {
+      "address": "0xfebe5651",
+      "hex": "22010b9d",
+      "evidence": "Synthetic exact four-byte tester request: SID22, named DID, trailing9D; odd three-byte service body must take original961DC NRC13 gate."
+    },
+    {
+      "address": "0xfebe59ea",
+      "hex": "00",
+      "evidence": "Synthetic no previously accepted pending transport; read by actual final disposition gate."
+    },
+    {
+      "address": "0xfebe81cc",
+      "hex": "5a",
+      "evidence": "Synthetic admitted application gate input; original policy callback executes."
+    },
+    {
+      "address": "0xfebe81ac",
+      "hex": "5a",
+      "evidence": "Synthetic admitted application gate input; original policy callback executes."
+    },
+    {
+      "address": "0xfebe7f97",
+      "hex": "00",
+      "evidence": "Synthetic no admission-clear marker; original policy callback executes."
+    },
+    {
+      "address": "0xfebe5642",
+      "hex": "c7d8",
+      "evidence": "Synthetic inert context opaque12 bytes;961DC copies all seven context words, including these bytes."
+    },
+    {
+      "address": "0xfebe5649",
+      "hex": "e9",
+      "evidence": "Synthetic inert context opaque19 byte, copied by961DC but not initialized by913C2."
+    },
+    {
+      "address": "0xfebe5a1f",
+      "hex": "e3",
+      "evidence": "Synthetic one-byte lower response-object canary."
+    },
+    {
+      "address": "0xfebe5a20",
+      "hex": "4c95de2770b9024b94dd266fb8014a93dc256eb7004992db246db6ff4891da236cb5fe4790d9226bb4fd468fd8216ab3fc458ed72069b2fb448dd61f68b1fa438cd51e67b0f9428bd41d66aff8418ad31c65aef74089d21b64adf63f88d11a63acf53e87d01962abf43d86cf1861aaf33c85ce1760a9f23b84cd165fa8f13a83cc155ea7f03982cb145da6ef3881ca135ca5ee3780c9125ba4ed367fc8115aa3ec357ec71059a2eb347dc60f58a1ea337cc50e57a0e9327bc40d569fe8317ac30c559ee73079c20b549de62f78c10a539ce52e77c009529be42d76bf08519ae32c75be075099e22b74bd064f98e12a73bc054e97e02972bb044d96df2871ba034c95de2770b9024b94dd266fb8014a93",
+      "evidence": "Synthetic address-distinct poison confined to the0x110-byte response object. Two independent poisons retain identical source-derived published bytes."
+    },
+    {
+      "address": "0xfebe5b30",
+      "hex": "7c",
+      "evidence": "Synthetic upper response-object canary."
+    },
+    {
+      "address": "0xfebe5967",
+      "hex": "b2c3d4",
+      "evidence": "Synthetic distinct final-negative-object poison. Queue reset clears first byte only; original93154 must initialize all three published bytes."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Original length-error scheduler returns bounded",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Original caller stack balanced",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    },
+    {
+      "name": "Native priority mask restored",
+      "kind": "register",
+      "register": "PMR",
+      "equals": "0xff00"
+    },
+    {
+      "name": "No unmatched native priority-mask frame",
+      "kind": "memory",
+      "address": "0xfebe39dc",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "Only positive SID staging byte changed in shared object",
+      "kind": "memory",
+      "address": "0xfebe5a20",
+      "size": 272,
+      "equals_hex": "6295de2770b9024b94dd266fb8014a93dc256eb7004992db246db6ff4891da236cb5fe4790d9226bb4fd468fd8216ab3fc458ed72069b2fb448dd61f68b1fa438cd51e67b0f9428bd41d66aff8418ad31c65aef74089d21b64adf63f88d11a63acf53e87d01962abf43d86cf1861aaf33c85ce1760a9f23b84cd165fa8f13a83cc155ea7f03982cb145da6ef3881ca135ca5ee3780c9125ba4ed367fc8115aa3ec357ec71059a2eb347dc60f58a1ea337cc50e57a0e9327bc40d569fe8317ac30c559ee73079c20b549de62f78c10a539ce52e77c009529be42d76bf08519ae32c75be075099e22b74bd064f98e12a73bc054e97e02972bb044d96df2871ba034c95de2770b9024b94dd266fb8014a93"
+    },
+    {
+      "name": "Response object lower canary",
+      "kind": "memory",
+      "address": "0xfebe5a1f",
+      "size": 1,
+      "equals_hex": "e3"
+    },
+    {
+      "name": "Response object upper canary",
+      "kind": "memory",
+      "address": "0xfebe5b30",
+      "size": 1,
+      "equals_hex": "7c"
+    },
+    {
+      "name": "All three final-negative bytes initialized",
+      "kind": "memory",
+      "address": "0xfebe5967",
+      "size": 3,
+      "equals_hex": "7f2213"
+    },
+    {
+      "name": "Final-negative node exact pointer and fixed length3",
+      "kind": "memory",
+      "address": "0xfebe59a8",
+      "size": 6,
+      "equals_hex": "6759befe0300"
+    },
+    {
+      "name": "Final NRC is incorrect-length13",
+      "kind": "memory",
+      "address": "0xfebe5624",
+      "size": 1,
+      "equals_hex": "13"
+    },
+    {
+      "name": "No asynchronous callback pending",
+      "kind": "memory",
+      "address": "0xfebe5d28",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "No pending or continuation event enqueued",
+      "kind": "memory",
+      "address": "0xfebe5e51",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "Application adapter remains lifecycle-idle",
+      "kind": "memory",
+      "address": "0xfebf3b26",
+      "size": 4,
+      "equals_hex": "000101ff"
+    },
+    {
+      "name": "Bounded stack lower canary",
+      "kind": "memory",
+      "address": "0xfebe1c00",
+      "size": 4,
+      "equals_hex": "d3d3d3d3"
+    }
+  ]
+}

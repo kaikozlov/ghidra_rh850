@@ -1,0 +1,144 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_secoc_transition_duplicate_then_nextvalid",
+  "entry": {
+    "role": "retained",
+    "scope": "resolved-address",
+    "address": "0x90b8a"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0xfebf2000",
+    "PSW": "0x20",
+    "PMR": "0xff00",
+    "r6": "0xfebf3000",
+    "r7": "0xfebf3030",
+    "r8": "0x0",
+    "r9": "0xfebf3040"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1e00",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack for original PREPARE frames; not global RAM initialization."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Synthetic input: Priority-mask saved-depth input0; PMR=FF00; original lock thunks execute."
+    },
+    {
+      "address": "0xfebf3000",
+      "hex": "00000100",
+      "evidence": "Synthetic input: Resolved B6 ordinary slot1."
+    },
+    {
+      "address": "0xfebf3020",
+      "hex": "4080",
+      "evidence": "Synthetic input: Two distinct FV4 input nibbles, native decoding on both calls."
+    },
+    {
+      "address": "0xfebf3030",
+      "hex": "2030bffe040000002130bffe04000000",
+      "evidence": "Synthetic input: Two immutable input descriptors."
+    },
+    {
+      "address": "0xfebf3040",
+      "hex": "6030bffe5030bffe",
+      "evidence": "Synthetic input: Output descriptor reused across original calls."
+    },
+    {
+      "address": "0xfebf3050",
+      "hex": "2e000000",
+      "evidence": "Synthetic input: Capacity46 preserved between calls."
+    },
+    {
+      "address": "0xfebf3060",
+      "hex": "cccccccccccc",
+      "evidence": "Synthetic input: Candidate packed-wire canary."
+    },
+    {
+      "address": "0xfebe55c0",
+      "hex": "0700000064000000",
+      "evidence": "Synthetic input: Synthetic current sync trip/reset."
+    },
+    {
+      "address": "0xfebe55e8",
+      "hex": "07000000640000000900a5a5",
+      "evidence": "Synthetic input: Initial committed B6 history; failures must retain it."
+    },
+    {
+      "address": "0xfebe5600",
+      "hex": "4d000000e70300006f00bbcc",
+      "evidence": "Synthetic input: Initial pending canary; both native staging calls overwrite its fields."
+    },
+    {
+      "address": "0xfebf3080",
+      "hex": "dddddddddddddddddddddddddddddddddddddddddddddddd",
+      "evidence": "Synthetic input: Snapshot destination written only by original memcpy89F2E after explicit failure callback."
+    },
+    {
+      "address": "0xfebe4bff",
+      "hex": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "evidence": "Synthetic input: Raw COM publication canary; these post-crypto freshness callbacks do not publish payload."
+    },
+    {
+      "address": "0xfebf2000",
+      "hex": "2606020000002706010000003f061a20bffe2106d2f80800610026068030bffe2706e855befe28060c0000003f063a20bffe21062e9f0800610026068c30bffe27060056befe28060c0000003f065a20bffe21062e9f0800610026060030bffe27063830bffe28060000000029064030bffe3f068020bffe21068a0b090061002606020000002706000000003f06980700002106d2f808006100",
+      "evidence": "Synthetic input: Call-only sequencer; explicit post-command7 completion arguments to 8F8D2 are1=failure then0=valid. No ICU-S operation is invoked or modeled. MOV imm32 to argument registers and LP; MOV original function address to r1; JMP[r1]. Encoding: MOV=(0620|register) LE plus imm32, JMP[r1]=6100, confirmed at CodeFlash1300/34B5A. Only intact original callees execute state writes, including memcpy89F2E snapshots."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Completed original-call sequence",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Failure callback preserves committed history",
+      "kind": "memory",
+      "address": "0xfebf3080",
+      "size": 12,
+      "equals_hex": "07000000640000000900a5a5"
+    },
+    {
+      "name": "Failure leaves staged candidate owned by pending storage",
+      "kind": "memory",
+      "address": "0xfebf308c",
+      "size": 12,
+      "equals_hex": "07000000640000000d00bbcc"
+    },
+    {
+      "name": "Later valid callback commits newly reconstructed candidate, not old pending",
+      "kind": "memory",
+      "address": "0xfebe55e8",
+      "size": 12,
+      "equals_hex": "07000000640000000a00bbcc"
+    },
+    {
+      "name": "Candidate remains present after successful 12-byte commit",
+      "kind": "memory",
+      "address": "0xfebe5600",
+      "size": 12,
+      "equals_hex": "07000000640000000a00bbcc"
+    },
+    {
+      "name": "Freshness callback alone does not publish COM payload",
+      "kind": "memory",
+      "address": "0xfebe4bff",
+      "size": 32,
+      "equals_hex": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+    }
+  ]
+}

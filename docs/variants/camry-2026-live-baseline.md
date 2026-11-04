@@ -1325,11 +1325,12 @@ Executed results:
 | DCM exact request-tail guard | 6,199 | 6,190 returns | 0 | 9 DCRA1 |
 | Full-dispatch RDBI response extent | 726 (242 × 3 sessions) | 429 completed positives; 288 incomplete | 0 unwritten published bytes | 9 DCRA1 |
 
-The nine blocked cases in each new pass are DIDs `0x0105`, `0x010B`, and
-`0xF18C` in all three sessions. All stop at `dcra1_crc_raw_words + 0x6 @
-0x67066`; exact bytes disassemble as `sst.b 0x1c,ep,r0` after
-`mov 0xFFD51004,ep`. This is an unmodeled DCRA1 CRC MMIO write. These cases are
-classified **peripheral-blocked**, not clean and not firmware memory faults.
+The nine historically blocked cases in each pass were DIDs `0x0105`, `0x010B`,
+and `0xF18C` in all three sessions. They stopped at
+`dcra1_crc_raw_words + 0x6 @ 0x67066`: `sst.b 0x1c,ep,r0` after
+`mov 0xFFD51004,ep`, the DCRA1 control write absent from that GNU harness.
+Their **current native-machine disposition is completed positive** in all nine
+combinations, as captured below; the historical counts above are unchanged.
 
 The completed positive responses contained no surviving poison bytes, no
 first-pass poison candidates, and no poison collisions. This exact-target
@@ -1390,6 +1391,65 @@ primitive for those completed covered paths and therefore no LOAD+EXEC
 composition. It is not a whole-image absence proof. Reads that stay inside the
 receive slot but pass the declared request length are real on this image; they
 are recorded in §13.12.
+
+**Native-machine closure of all nine historical DCRA1 cases.** All 18
+valid-request `camry_f33_rdbi_completion_*` machine-v2 fixtures passed
+`verified-local-execution` in the centralized `rdbi-wave1` capture: each named
+DID/session pair completes under two independent, address-distinct
+response-object poisons (5,895–9,226 instructions per capture). They enter
+original scheduled dispatcher `0x922AA` after intact timer, event, callback,
+active-service, response-queue and application-reader initializers. Synthetic
+inputs are sparse completed-slot/session/admission state, bounded stack backing,
+inert context padding and object-local poisons. A documented call-only RAM
+continuation preserves state between original functions; CodeFlash is unchanged.
+
+| DID / sessions | Exact publication row / callback | Producer selected by `0x66DFC` | Source-derived and observed complete positive response |
+|---|---|---|---|
+| `0105` / 1, 2, 3 | `0x292BC` / `0x4D93C`, body 12 | ROM-family2 object4, descriptor `0x2AFBC`, record `0xA0A0`, length16 | 15 bytes: `62 01 05 38 39 36 35 30 33 33 4B 39 30 00 00` |
+| `010B` / 1, 2, 3 | `0x292DC` / `0x4D9EC`, body 16 | ROM-family2 object10, descriptor `0x2B004`, record `0xA628`, length24 | 19 bytes: `62 01 0B 01 00 14 00 00 00 00 00 00 00 00 00 01 02 BB 64` |
+| `F18C` / 1, 2, 3 | `0x2A18C` / `0x4FA8A`, body 20 | ROM-family2 object7, descriptor `0x2AFE0`, record `0xA5D8`, length40 | 23 bytes: `62 F1 8C` + ASCII `8965033K9011J2740743` + `00 00` |
+
+These are ROM producers, not DataFlash readbacks. `0x67208` checks the descriptor's
+ROM pointer at `+8` through native `0x67090` / DCRA1 `0x67060`, publishes the
+redundant integrity status, then copies the record to the callback's actual stack.
+Each immutable record, including its stored CRC word, has raw residue zero under
+the documented reflected `EDB88320` recurrence, seed `FFFFFFFF`, no final XOR.
+All three record headers are `A55A5AA5`; the source-derived result is status
+`10`, then the bytes above. No NvM RAM cache, fabricated erased DataFlash,
+callback return or integrity status is preloaded.
+
+The sessions are semantically identical here: SID22's record `0x25CB4` permits
+`01 02 03` from `0x259DD`; classes0 (`0105`/`010B`) and4 (`F18C`) both select
+policy `0x25F90`, whose read policy `0x25F60` has zero-count security/session
+lists and no condition callback. Exact `0x9432C–0x9434C` accepts a zero-count
+list. The original application admission callback also executes against the
+explicit synthetic gate inputs.
+
+All three valid callbacks are synchronous; these paths have no pending producer
+result. All 18 captures matched exact active-context and response-node lengths
+and every published byte, preserved the entire unpublished poisoned suffix and
+both object canaries, and ended with callback-pending zero, an empty event ring,
+idle application-reader state, balanced native PMR frames and an original return.
+Another 18 captures append one byte to each request: original
+`0x96210–0x9623A` rejects the odd service-body length with fixed three-byte
+`7F 22 13`. All 18 passed `verified-local-execution` in 1,352–1,372 instructions
+each (24,516 total). Both the shared object and the separate final-negative
+object start poisoned: the shared object changes only its staged `62` byte,
+while all three published negative bytes are initialized, with node length3,
+NRC13, no continuation or pending event, and an original balanced return.
+
+Centralized capture summaries:
+`build/out/firmware-question-campaign/rdbi-wave1/summary.json` (18 positives) and
+`build/out/firmware-question-campaign/rdbi-wave2/summary.json` (18 length errors).
+All 36 results have no fault and no failed checks. The nine historical blockers
+are closed as native-machine software paths; no historical campaign count was
+rewritten.
+
+```bash
+tools/rh850 test firmware camry-8965F3307000 \
+  tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_rdbi_completion_*.json \
+  --output-dir build/out/camry-f33-rdbi-completion
+```
 
 #### 13.11.1 Original CanTp timeout and re-admission contract
 
@@ -4655,6 +4715,112 @@ Fork-side construction is aligned with the recovered wire contract:
 probe/sender mismatch but does not prove that the current zero-MAC candidate
 passes F33 freshness.
 
+### 57.13 Exact F33 native freshness and completion transitions
+
+The transition fixtures use immutable `8965F3307000` CodeFlash SHA-256
+`42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7`.
+Authority is `tools/toyota decomp source` cross-checked against target
+`disasm` and `memory read`, especially `909CA..90B84`, `90B8A..90C58`,
+`90448..9047E`, `8F8D2..8F988`, `90C5E..90EA8`, and configuration
+`2583C..2593D`. The 20-byte `8F19A` snapshot described above is the
+**software key descriptor** at `FEBE5504`; ordinary reconstruction reads
+sync trip/reset at `FEBE55C0/55C4`.
+
+#### Freshness ownership and boundary matrix
+
+Each ordinary history occupies 12 bytes: little-endian `u32 trip`,
+`u32 reset`, `u16 message`, two padding bytes. `90248` maps receive freshness
+IDs 0/1/2 to primary sync / ordinary slot0 / ordinary slot1. B6 therefore
+owns committed `55E8` and candidate `5600` (all RAM addresses here have
+prefix `FEBE`). `90B8A` stages only the first ten candidate bytes;
+successful `90448 -> 90D6A` copies all twelve into committed storage.
+
+| Native path / input boundary | Exact software transition |
+|---|---|
+| `90736`, ordinary FV4 | Wire high nibble becomes message-low2=`byte>>6`, reset-low2=`(byte>>4)&3`. |
+| `909CA`, sync reset candidate | Search order `{0,-1,+1,-2,+2}`; subtract candidates require reset≥1/2, add candidates require reset≤`FFFFE/FFFFD`. Skip counts matching candidates, not search positions. |
+| Same trip/reset, forward low2 | Reconstruct `(committed_message & ~3) | received_low2`. |
+| Same trip/reset, duplicate or reordered low2 | `90B1C` uses `received_low2 <= committed_low2` to select the next four-message interval. For committed9: low1 reconstructs13; low0 reconstructs12; low2 reconstructs10. Reconstruction alone does not authenticate a duplicate. |
+| Low2 rollover / message ceiling | Committed11 plus low0 reconstructs12. Committed254 plus low3 yields255; committed252 plus duplicate low0 saturates255. No reset increment is synthesized. |
+| Newer trip or same-trip newer selected reset | Start message from received low2, discarding old message high bits. Reset `3→4` handles low-reset-bit rollover. Selected reset=`FFFFF` forces message255. |
+| Older selected trip/reset | Verdict `23` while candidate-order index<4; verdict `22` at index4. Reset100/low-reset2 first selects98/index3; skip1 selects102/index4. |
+| No matching candidate / exhausted skip | Verdict `22`; committed, pending and packed-output bytes remain unchanged. |
+| Successful candidate with message255 | `90B8A` stages it and returns `24`; other staged candidates return0. |
+| `90566`, 46-bit packing | Big-endian trip16, reset20, message8, reset-low2, then two zero padding bits. `1234/ABCDE/9A/2 → 12 34 AB CD E9 A8`; maximum → `FF FF FF FF FF FC`. |
+| Packing capacity | Reads the capacity word's **low byte**; insufficient capacity preserves output/capacity. Unsupported admitted length writes capacity0. Four-bit packing emits `(message<<6)|(reset_low2<<4)`. |
+
+#### Completion, publication and recovery
+
+The synthetic completion boundary is explicit: `8F8D2(profile,result)` receives
+`result=0` or a nonzero rejection after crypto, or a root fixture enters
+`8F906` with an explicitly synthetic completion byte at `5564`. No fixture
+executes or substitutes ICU-S CMAC. `8F8D2` resolves the original callback
+pointer at ROM `25918=00090448` for B6 and packs freshness ID2 with rejection
+in bit16. `90448` accepts only an all-zero upper halfword; rejection preserves
+committed history without clearing the candidate.
+
+| Original completion state | Committed / candidate ownership | Publication and counters |
+|---|---|---|
+| B6 phase `C3`, root `5564=0` | Commit candidate through original callback. | `8F546 -> 90204 -> 81CA6 -> 7D72C` copies queue payload to COM44 `4BFF`, increments generation `5364`, clears tracking `5304`, updates COM timer; native release clears queue/work and sets phase`E1`. |
+| Phase `C3`, nonzero result, retry count0 | Preserve committed/candidate; retry phase`B4`. | Immutable ROM `258F8=1` permits one retry: `551A→1`, `5518→0`; no COM publication. |
+| Phase `C3`, nonzero synthetic completion, retry count1, unqualified `5502=00`, B6 mode ROM`258F1=00`, `551C=204` | Preserve committed freshness; release queue/work, phase`E1`. | Observed no COM publication; return`102`. |
+| Same state, `551C=203` | Preserve committed freshness; release queue/work, phase`E1`. | Observed **configured failure delivery** through `8F596`: queue payload copied to COM44, generation incremented, tracking cleared and timer updated; return`102`. The original comparison is against ROM halfword `25842=00CC`. Completion remains rejected; this is not MAC acceptance. |
+| Retry phase `B4`, stale result0 and old pending candidate | `8F924` rejects the completion state before callback; return`103`. | No commit or publication. |
+
+B6 status reporting stores ID2/status0-or1 at `5054/5056`. The crypto-bank
+success/rejection counters `507E/5080` are qualified by configured freshness
+ID0, so these B6 completions leave them unchanged. Retry counts, failure
+delivery budgets and timer updates above are invocation units.
+
+Stateful fixtures retain native RAM across reconstruction, explicit rejected
+completion, a different reconstruction and explicit successful completion.
+Failure→valid commits the replacement candidate. Duplicate→next-valid commits10
+after rejected candidate13, rather than committing stale13. A reordered
+candidate sequence exercises the same ownership boundary. Call-only RAM
+sequencing changes argument registers/LP and invokes intact original
+functions; checkpoint snapshots use original `memcpy @ 89F2E`.
+
+#### Sync and software reset scope
+
+`90C5E` decodes trip16/reset20 and stages sync candidate words at `55C8/55CC`.
+Equal current words return1; backward state returns`22`; forward reset or
+trip returns0. ROM byte `25844=0F` admits trip wrap only when current
+trip≥`FFF0` and new trip is1..16;0/17 do not qualify. `90E20`, reached through
+the same post-crypto callback, copies accepted sync words to `55C0/55C4`,
+refreshes complements `55D0/55D4`, and consumes wrap flag `55DA`.
+A rejected wrap clears that flag but retains current sync and ordinary
+histories. A subsequent staged/verified wrap clears both ordinary committed
+and pending histories through `90D9E(0)`, plus transmit histories
+`560C..5623`.
+
+| Original initializer/reset | Software write scope |
+|---|---|
+| `90502` | Zero current/pending sync, ordinary and transmit histories; initialize sync complements to all-ones, status and wrap flag to0. |
+| `90D9E(0)` | Clear ordinary and transmit histories only; retain sync state. Other selector1 leaves these configured histories intact. |
+| `90E6E(0,0)` | Reset sync words/complements/wrap and dependent histories; nonzero reason leaves them intact. |
+| `8F26C` | Reset receive work, retry indices and phases to`E1`; retain sync and ordinary histories. |
+
+These routines preserve the software key descriptor at `5504..5517`.
+Their scope is software freshness/reset ownership, not cold-boot ICU-S key
+state.
+
+Retained executable coverage: **73** standalone
+`tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_secoc_transition_*.json`
+fixtures: ordinary reconstruction19, candidate selection12, packing6,
+ordinary recovery sequences3, direct callbacks4, root completion/state gate6,
+sync transitions/recovery17, initialization/reset6. All preloads are bounded,
+explicit synthetic inputs; CodeFlash and auth predicates remain intact.
+Central execution observed **all73 fixtures pass**: ordinary reconstruction
+19/19 (`build/out/firmware-question-campaign/secoc-wave1`), 27 completion/
+selection/packing fixtures (`secoc-wave2`), all24 sync/reset/state-gate
+fixtures (`secoc-wave3`), and three corrected boundary fixtures (`secoc-wave4`).
+The terminal-result fixtures explicitly supply tracking result `5424=5A`,
+the stock `8E74E` initializer value. Original callback `6A218` (ROM `25934`)
+reads that lifecycle byte at `6A250` and propagates it to `5090`; its optional
+counter/ring path is disabled by `5A`. Both observed terminal cases preserve
+committed freshness and release queue/work; only budget203 publishes COM44,
+while budget204 preserves the COM payload/generation/timer canaries.
+
 
 ## 58. 2026-09-06 RAM resident failure, ABI correction, and corrected discriminator (VAR-135/136)
 
@@ -6562,10 +6728,12 @@ present, and there is no Panda-TX-block explanation. A separate stopped/parked
 rise is `B19[0]` and is not part of the road-dropout pattern.
 
 That wire bit is `FEBECAFC`. Exact `0xCEC72` publishes
-`CAFC = (CAFB == 1) || (CAFD == 1)`. `CAFD` is the separately recovered latched
-rate-fault source at `0xCEF26`; repeated self-clearing 20--31-ms pulses therefore
-exclude it. The road events are the recoverable `CAFB` request-failure source
-from `0xCEE7C`.
+`CAFC = (CAFB == 1) || (CAFD == 1)`. `CAFD` is the separately recovered
+**torque-domain latch** at `0xCEF26`: unsigned magnitude of `AE24 >= 1280`
+for 96 eligible invocations in ID11. Subsequent valid inputs cannot clear it;
+`CEC0C` subsystem initialization can. The short recoverable road pulses support
+the transient `CAFB` source at `CEE7C`, conditional on no intervening subsystem
+initialization. The capture does not record calls to `CEC0C`.
 
 The individual `0xCEE7C` branches can be eliminated against the route and exact
 calibration:
@@ -6573,13 +6741,12 @@ calibration:
 - the ID11 absolute target limit is **1745 raw**; all fault-rise C7 targets are
   only 140..630 raw in magnitude;
 - the persistent measured-feedback monitor is exact `0x025` signal189,
-  **Steering Angle Velocity**, with threshold `abs(raw)>100` for 79 cycles;
+  **Steering Angle Velocity**, with threshold `abs(raw)>100` for 79 invocations;
   the recent measured rates at every rise are below 100;
-- the second persistent monitor is the steering-wheel-torque source
-  `FEBE66A8` / DID1035, paired with the first monitor rather than sufficient by
-  itself;
+- its paired torque-domain monitor requires `abs(AE24)<512` for 79 invocations;
+  `CAFA` requires **both** persistent predicates, so torque alone is insufficient;
 - the independent `CAF5` path requires `0x13B` signal223 / `FEBEACD6 == 1`
-  for 87 cycles; that wire signal is zero throughout the 600-ms windows before
+  for 87 invocations; that wire signal is zero throughout the 600-ms windows before
   every moving rise;
 - profile 7 clears `CAFB` and the `CAB6` preserve leg cannot create a 0->1
   transition.
@@ -6772,6 +6939,150 @@ native `0x08A` targets occasionally differ by more than 78 raw, F33 no longer
 asserts B16 because the native request-plane target is never allowed to become
 the cooperative application target while C7 owns lateral. That is the root-cause
 fix; the LTA-off behavior was only a reduction in exposure.
+
+### 73.5 Native command supervision: decision and transition matrix
+
+The following evidence is specific to immutable F33 CodeFlash SHA-256
+`42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7`.
+The reconstructed source in `decomp/.../src/retained/000ce000.c` was checked
+against original instructions at `CEC8A`, `CECD6`, `CED28..CEE20`,
+`CEE46..CEF9C`, `CEFA4..CF048`, `CEC72`, and `CE7FE`.
+All persistence counts below are **function invocations**, not independently
+established wall-clock durations.
+
+**Calibration evidence.** Bank index is
+`(CB00 & 7) + 8*(AC3C & 1)` with pointer-record stride `0x15C`.
+For ID11/bank2 the exact ROM reads are:
+
+| Quantity | Pointer / bytes | Value |
+|---|---|---|
+| Modulo maximum / effective-gap ceiling | `B0620: 3F 00 08 00` | 63 / 8 |
+| Small-target exemption | `B061C: 57 00 00 00` | 87 |
+| Absolute target / step | `D4098/D409C -> 1A978/1A97A: D1 06 4E 00` | 1745 / 78 |
+| Alternate calibration-set absolute / step | `D4B78/D4B7C -> 12978/1297A: D1 06 4E 00` | 1745 / 78 |
+| Measured-rate / paired torque-domain threshold | `D4090/D4094 -> B066E/B0674` | 100 / 512 |
+| `CAF5` persistence | `B146C -> 1A960`, offset2 `57 00` | 87 |
+| Rate / torque-domain persistence | Same block, offsets8/14 `4F 00` | 79 / 79 |
+| Latched torque-domain threshold / persistence | `D40A0/D40A4 -> B067A/B0680` | 1280 / 96 |
+
+`B1470 -> 12960` has the same persistence bytes for calibration-set1.
+These are raw software-domain values; no physical torque conversion is implied.
+
+**A: sequence history.** For six-bit input `n=ADBC`, `CEC8A` reads signed16
+previous `p=CADA`, computes `g=n-p` when `n>=p`, otherwise `g=64+n-p`,
+then stores `CADA=n`, `CADC=g`, `CADE=max(1,min(g,8))`.
+
+| Input transition | Raw gap | Effective gap |
+|---|---:|---:|
+| repeated sequence | 0 | 1 |
+| next sequence, including `63 -> 0` | 1 | 1 |
+| forward or wrapped multiple gap2..7 | 2..7 | 2..7 |
+| gap8..63 | 8..63 | 8 |
+| `CEC0C`, then sequence19 | 19 (previous reset to0) | 8 |
+
+Every call advances the stored previous sequence, including repeated and
+large-gap requests. This is one wrapped subtraction over the native six-bit
+field, not a missing-frame counter that accumulates between calls.
+
+**B/C: transient decision, in priority order.** Let `T=s16(AE90)`,
+`P=trunc_toward_zero(s16(CAA4)/2)`, `A=abs_s32(T)`, and
+`D=abs_s32(T-P)`. `CEE7C` loads unsigned16 absolute/step limits via `CEE46`;
+the comparisons of `A`, `D` and the signed16 effective-gap product are signed32.
+
+| First matching condition | Next `CAFB` |
+|---|---|
+| `(CB00 & 7)==7` | 0, even during holdoff |
+| `CAB6!=0` | preserve previous value |
+| `CAFA==1` or `CAF5==1` or `A>1745` | 1 |
+| `A<=87` | 0 regardless of delta |
+| Otherwise | `D > 78*CADE` |
+
+Thus absolute1745 and step equality are accepted by those respective predicates;
+1746 or step-limit+1 fail. Both signs use the same magnitude predicate.
+`T=-32768` becomes magnitude32768 in this **32-bit** absolute helper and fails
+the absolute check. Negative odd `CAA4` truncates toward zero: e.g.
+`T=-156, CAA4=-155` gives `D=79`, not78. A repeated B6 still permits one
+78-count effective step. A valid subsequent request clears `CAFB` without
+subsystem reset unless holdoff preserves it.
+
+`CEC72` executes the exact-one OR
+`CAFC=(CAFB==1 || CAFD==1)`. Original `CE7FE -> CE772/CE7A6` then clears all
+three readiness bytes `CAB2/CAB3/CAB4` when `CAFC==1`, and restores all three
+when both fault sources and the other explicit readiness gates are clear.
+The sequence scenarios retain monitor state across fault, projection and recovery;
+they do not preload final fault flags.
+
+**D: receive/global gates and controller consequence.** Original
+`CEFA4 -> BDB76 -> FF204 -> 49E98` resolves selectors`11/1A` through ROM
+`29162/291AA`, both byte`02`, to the same group2 byte `FEBE7F52`.
+The code tests `(status11 | status1A) != 0x5A`, not a truthiness test:
+
+| Condition | `CAFF` / `CAFE` / controller bank |
+|---|---|
+| Group status exactly`5A` | both0; bank7 |
+| Other group status, `ADB9==0`, `ACC1==0`, `ACBD==0`, ID11 | both1; bank2 |
+| `ADB9!=0` | primary `CAFF=0`; bank7; sibling depends separately on `ACC1` |
+| `ACC1!=0`, primary otherwise available | sibling `CAFE=0`; primary bank unchanged |
+| `ACBD!=0` | bank7 even if both availability flags remain1 |
+| Available/global-enabled IDs1/4/10/11/18/19 | banks0/1/3/2/5/4 respectively |
+| Any other ID | bank7 |
+
+Command inhibit is not an input to `CEFFC`: bank2 may remain selected while
+`CAFC` clears readiness. Receive loss selects bank7, which clears the transient
+request fault on the next `CEE7C`; receive recovery selects bank2 and evaluates
+the current request afresh. A generated `CAFD` latch survives both receive and
+global-disable loss/recovery and continues to suppress readiness.
+
+**E: independent persistence and latch transitions.** `D095E` returns a
+**signed16 wrapped absolute**. `CED28` uses its signed result for rate;
+`CEDA4` uses its signed result for the paired torque-domain predicate.
+`CEF26` instead zero-extends it before its unsigned threshold comparison.
+
+| Monitor | Eligible input in bank2 | Counter / flag transition |
+|---|---|---|
+| `CED28`, `CAE2/CAF6/CAF7` | signed wrapped-abs`(AE22)>100` | Increment up to79; immediate flag1; persistent flag1 at79 |
+| `CEDA4`, `CAE6/CAF8/CAF9` | signed wrapped-abs`(AE24)<512` | Independently increment up to79; immediate1; persistent1 at79 |
+| `CEE20`, `CAFA` | `CAF7==1 && CAF9==1` | Exact conjunction, recomputed every call |
+| Either above debounce in profile7 or predicate false | Ineligible | Its counter and both flags reset0; the other counter is independent |
+| `CECD6`, `CAE0/CAF4/CAF5` | profile not7 and `ACD6==1` | Increment/saturate87; persistent flag1 at87 |
+| `CECD6` profile7 or `ACD6!=1` (including2) | Ineligible | Counter and both flags reset0 |
+| `CEF26`, `CAF2/CAFD` | profile not7, `CAB6==0`, `CAFD!=1`, unsigned wrapped-abs`(AE24)>=1280` | Increment; at96 set latch1 and reset counter0 |
+| `CEF26` profile7, holdoff, already-latched, or input below1280 | Ineligible | Reset counter0; retain previous latch |
+| `CEC0C` subsystem initialization | Any state | Clear both fault sources, projection, sequence history and monitor counters/flags |
+
+`CAB6` does not stop the two `CEE20` counters or `CECD6`; it preserves
+`CAFB` at the later request decision. At the representational extreme
+`AE22=-32768`, the signed rate magnitude remains negative and resets its
+debounce. `AE24=-32768` satisfies the signed `<512` predicate but its unsigned
+magnitude32768 qualifies for the separate latch. The discriminating fixtures
+retain these exact instruction semantics.
+
+**Retained executable evidence.** Standalone v2 machine fixtures live under
+`tests/fixtures/rh850/machine/camry-8965F3307000/`, prefix
+`camry_f33_command_recovery_`. The call-only synthetic RAM sequence uses
+`MOV imm32,register` (`0x0620|register`, followed by little-endian immediate),
+`MOV continuation,lp; MOV original_entry,r1; JMP[r1]` (`6100`).
+Intact original `89F2E` copies labeled synthetic request inputs and snapshots;
+no sequencer branch models a monitor decision. Original `CEC0C` initializes
+only its owned state. Stack, calibration selector, input snapshots and other
+readiness gates are explicit sparse synthetic preconditions.
+
+Coverage consists of sequence wrap/repetition/clamping/reset; signed
+absolute/delta boundaries and odd-negative division; transient
+preservation/profile7/recovery; receive/global gate and bank matrix; eight
+persistent rate/torque boundary/extreme cases; interrupted/restarted persistence;
+87-call `CAF5` saturation/reset/restart; four 96-call latch boundary/extreme cases;
+and receive-loss recovery with an originally generated latch.
+
+Parent-run `control-wave1` executed the first three scenarios successfully:
+sequence1125, ID11 matrix6743, and transient recovery2177 original-machine
+instructions. `control-wave2` passed all15 receive, persistence, holdoff and
+latch cases. `control-wave3` passed the two final receive-latch and
+wrapped-gap/step-ceiling supplements, totaling10336 instructions.
+**All20 scenarios passed**, reporting verified local execution with no faults
+or check failures.
+Classifier-aging `511xx` remains owned by the
+[fault-status report](camry-2026-tss3-fault-status.md#5-exact-f33-classifier-ages-request-gate-and-capture-eligibility).
 
 ## 74. 2026-09-19 native `0x08A` request-plane road qualification
 

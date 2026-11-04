@@ -184,7 +184,8 @@ when either asserts. The inspected CarState maps B6[2] (`EPS_FAULT_INHIBIT`) to
 
 The permanent/transient distinction is provably lossy at this projection:
 `CEC72` ORs `CAFB==1` and `CAFD==1`. `CEE7C` clears the request-failure source
-in inactive profile 7, whereas `CEF26` retains the asserted rate-latch source;
+in inactive profile 7, whereas `CEF26` retains the asserted torque-domain latch
+(see the exact predicates and original-code transitions in [baseline §73.5](camry-2026-live-baseline.md#735-native-command-supervision-decision-and-transition-matrix));
 `CEC0C` clears both during subsystem initialization. These two causes publish
 the same command-inhibit bit. Assigning a restart-required boolean from that
 bit would therefore invent information. This does not rule out a distinct,

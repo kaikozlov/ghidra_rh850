@@ -1,0 +1,329 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_command_recovery_latched_torque_negative_equal",
+  "entry": {
+    "role": "synthetic-call-only-sequencer-for-original-command-supervision",
+    "scope": "resolved-address",
+    "address": "0xfebf8000"
+  },
+  "max_instructions": 100000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "PSW": "0x20",
+    "lp": "0x798"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1f00",
+      "hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "evidence": "Synthetic bounded caller stack for intact original PREPARE frames; not application initialization."
+    },
+    {
+      "address": "0xfebeac3c",
+      "hex": "00",
+      "evidence": "Synthetic calibration-set selector."
+    },
+    {
+      "address": "0xfebecb00",
+      "hex": "02",
+      "evidence": "Synthetic ID11 controller bank selected for isolated monitor calls."
+    },
+    {
+      "address": "0xfebecab6",
+      "hex": "00",
+      "evidence": "Synthetic holdoff input."
+    },
+    {
+      "address": "0xfebecaa4",
+      "hex": "0000",
+      "evidence": "Synthetic previous doubled controller target."
+    },
+    {
+      "address": "0xfebeaccc",
+      "hex": "00",
+      "evidence": "Synthetic ready gate."
+    },
+    {
+      "address": "0xfebeaccd",
+      "hex": "00",
+      "evidence": "Synthetic ready gate."
+    },
+    {
+      "address": "0xfebeadbf",
+      "hex": "00",
+      "evidence": "Synthetic ready request gate."
+    },
+    {
+      "address": "0xfebecad9",
+      "hex": "00",
+      "evidence": "Synthetic independent ready inhibit."
+    },
+    {
+      "address": "0xfebecab2",
+      "hex": "000000",
+      "evidence": "Synthetic triplicate readiness initial state."
+    },
+    {
+      "address": "0xfebecaae",
+      "hex": "0000",
+      "evidence": "Synthetic ready timeout initial state."
+    },
+    {
+      "address": "0xfebfc000",
+      "hex": "00fb",
+      "evidence": "Synthetic signed16 torque-domain snapshot; CEF26 converts wrapped abs to unsigned16; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc002",
+      "hex": "0000",
+      "evidence": "Synthetic valid target; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc004",
+      "hex": "01",
+      "evidence": "Synthetic request input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc005",
+      "hex": "02",
+      "evidence": "Synthetic controller profile; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc006",
+      "hex": "00",
+      "evidence": "Synthetic holdoff input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc007",
+      "hex": "0000",
+      "evidence": "Synthetic subsequent torque-domain request; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc009",
+      "hex": "07",
+      "evidence": "Synthetic controller profile; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc00a",
+      "hex": "00",
+      "evidence": "Synthetic holdoff input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc00b",
+      "hex": "0005",
+      "evidence": "Synthetic subsequent torque-domain request; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc00d",
+      "hex": "02",
+      "evidence": "Synthetic controller profile; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc00e",
+      "hex": "01",
+      "evidence": "Synthetic holdoff input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc00f",
+      "hex": "0005",
+      "evidence": "Synthetic subsequent torque-domain request; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc011",
+      "hex": "02",
+      "evidence": "Synthetic controller profile; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc012",
+      "hex": "00",
+      "evidence": "Synthetic holdoff input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc013",
+      "hex": "0000",
+      "evidence": "Synthetic subsequent torque-domain request; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebf8000",
+      "hex": "3f060e80bffe21060cec0c006100260624aebefe270600c0bffe2806020000003f062e80bffe21062e9f08006100260690aebefe270602c0bffe2806020000003f064e80bffe21062e9f080061002606bcadbefe270604c0bffe2806010000003f066e80bffe21062e9f080061003f067c80bffe21068aec0c0061003f068a80bffe210626ef0c0061003f069880bffe210626ef0c0061003f06a680bffe210626ef0c0061003f06b480bffe210626ef0c0061003f06c280bffe210626ef0c0061003f06d080bffe210626ef0c0061003f06de80bffe210626ef0c0061003f06ec80bffe210626ef0c0061003f06fa80bffe210626ef0c0061003f060881bffe210626ef0c0061003f061681bffe210626ef0c0061003f062481bffe210626ef0c0061003f063281bffe210626ef0c0061003f064081bffe210626ef0c0061003f064e81bffe210626ef0c0061003f065c81bffe210626ef0c0061003f066a81bffe210626ef0c0061003f067881bffe210626ef0c0061003f068681bffe210626ef0c0061003f069481bffe210626ef0c0061003f06a281bffe210626ef0c0061003f06b081bffe210626ef0c0061003f06be81bffe210626ef0c0061003f06cc81bffe210626ef0c0061003f06da81bffe210626ef0c0061003f06e881bffe210626ef0c0061003f06f681bffe210626ef0c0061003f060482bffe210626ef0c0061003f061282bffe210626ef0c0061003f062082bffe210626ef0c0061003f062e82bffe210626ef0c0061003f063c82bffe210626ef0c0061003f064a82bffe210626ef0c0061003f065882bffe210626ef0c0061003f066682bffe210626ef0c0061003f067482bffe210626ef0c0061003f068282bffe210626ef0c0061003f069082bffe210626ef0c0061003f069e82bffe210626ef0c0061003f06ac82bffe210626ef0c0061003f06ba82bffe210626ef0c0061003f06c882bffe210626ef0c0061003f06d682bffe210626ef0c0061003f06e482bffe210626ef0c0061003f06f282bffe210626ef0c0061003f060083bffe210626ef0c0061003f060e83bffe210626ef0c0061003f061c83bffe210626ef0c0061003f062a83bffe210626ef0c0061003f063883bffe210626ef0c0061003f064683bffe210626ef0c0061003f065483bffe210626ef0c0061003f066283bffe210626ef0c0061003f067083bffe210626ef0c0061003f067e83bffe210626ef0c0061003f068c83bffe210626ef0c0061003f069a83bffe210626ef0c0061003f06a883bffe210626ef0c0061003f06b683bffe210626ef0c0061003f06c483bffe210626ef0c0061003f06d283bffe210626ef0c0061003f06e083bffe210626ef0c0061003f06ee83bffe210626ef0c0061003f06fc83bffe210626ef0c0061003f060a84bffe210626ef0c0061003f061884bffe210626ef0c0061003f062684bffe210626ef0c0061003f063484bffe210626ef0c0061003f064284bffe210626ef0c0061003f065084bffe210626ef0c0061003f065e84bffe210626ef0c0061003f066c84bffe210626ef0c0061003f067a84bffe210626ef0c0061003f068884bffe210626ef0c0061003f069684bffe210626ef0c0061003f06a484bffe210626ef0c0061003f06b284bffe210626ef0c0061003f06c084bffe210626ef0c0061003f06ce84bffe210626ef0c0061003f06dc84bffe210626ef0c0061003f06ea84bffe210626ef0c0061003f06f884bffe210626ef0c0061003f060685bffe210626ef0c0061003f061485bffe210626ef0c0061003f062285bffe210626ef0c0061003f063085bffe210626ef0c0061003f063e85bffe210626ef0c0061003f064c85bffe210626ef0c0061003f065a85bffe210626ef0c0061003f066885bffe210626ef0c0061003f067685bffe210626ef0c0061003f068485bffe210626ef0c0061003f069285bffe210626ef0c0061003f06a085bffe210626ef0c0061003f06ae85bffe210626ef0c006100260600d0bffe2706eecabefe2806060000003f06ce85bffe21062e9f080061003f06dc85bffe21067cee0c0061003f06ea85bffe210672ec0c0061003f06f885bffe2106fee70c006100260606d0bffe2706fbcabefe2806030000003f061886bffe21062e9f08006100260609d0bffe2706b2cabefe2806030000003f063886bffe21062e9f080061003f064686bffe210626ef0c00610026060cd0bffe2706eecabefe2806060000003f066686bffe21062e9f080061003f067486bffe21067cee0c0061003f068286bffe210672ec0c0061003f069086bffe2106fee70c006100260612d0bffe2706fbcabefe2806030000003f06b086bffe21062e9f08006100260615d0bffe2706b2cabefe2806030000003f06d086bffe21062e9f080061003f06de86bffe210626ef0c006100260618d0bffe2706eecabefe2806060000003f06fe86bffe21062e9f080061003f060c87bffe21067cee0c0061003f061a87bffe210672ec0c0061003f062887bffe2106fee70c00610026061ed0bffe2706fbcabefe2806030000003f064887bffe21062e9f08006100260621d0bffe2706b2cabefe2806030000003f066887bffe21062e9f08006100260600cbbefe270605c0bffe2806010000003f068887bffe21062e9f080061002606b6cabefe270606c0bffe2806010000003f06a887bffe21062e9f08006100260624aebefe270607c0bffe2806020000003f06c887bffe21062e9f080061003f06d687bffe210626ef0c0061003f06e487bffe21067cee0c0061003f06f287bffe210672ec0c0061003f060088bffe2106fee70c006100260624d0bffe2706f2cabefe2806020000003f062088bffe21062e9f08006100260626d0bffe2706fbcabefe2806030000003f064088bffe21062e9f08006100260629d0bffe2706b2cabefe2806030000003f066088bffe21062e9f08006100260600cbbefe270609c0bffe2806010000003f068088bffe21062e9f080061002606b6cabefe27060ac0bffe2806010000003f06a088bffe21062e9f08006100260624aebefe27060bc0bffe2806020000003f06c088bffe21062e9f080061003f06ce88bffe210626ef0c0061003f06dc88bffe21067cee0c0061003f06ea88bffe210672ec0c0061003f06f888bffe2106fee70c00610026062cd0bffe2706f2cabefe2806020000003f061889bffe21062e9f0800610026062ed0bffe2706fbcabefe2806030000003f063889bffe21062e9f08006100260631d0bffe2706b2cabefe2806030000003f065889bffe21062e9f08006100260600cbbefe27060dc0bffe2806010000003f067889bffe21062e9f080061002606b6cabefe27060ec0bffe2806010000003f069889bffe21062e9f08006100260624aebefe27060fc0bffe2806020000003f06b889bffe21062e9f080061003f06c689bffe210626ef0c0061003f06d489bffe21067cee0c0061003f06e289bffe210672ec0c0061003f06f089bffe2106fee70c006100260634d0bffe2706f2cabefe2806020000003f06108abffe21062e9f08006100260636d0bffe2706fbcabefe2806030000003f06308abffe21062e9f08006100260639d0bffe2706b2cabefe2806030000003f06508abffe21062e9f08006100260600cbbefe270611c0bffe2806010000003f06708abffe21062e9f080061002606b6cabefe270612c0bffe2806010000003f06908abffe21062e9f08006100260624aebefe270613c0bffe2806020000003f06b08abffe21062e9f080061003f06be8abffe210626ef0c0061003f06cc8abffe21067cee0c0061003f06da8abffe210672ec0c0061003f06e88abffe2106fee70c00610026063cd0bffe2706f2cabefe2806020000003f06088bbffe21062e9f0800610026063ed0bffe2706fbcabefe2806030000003f06288bbffe21062e9f08006100260641d0bffe2706b2cabefe2806030000003f06488bbffe21062e9f080061003f06568bbffe21060cec0c0061003f06648bbffe210672ec0c0061003f06728bbffe2106fee70c006100260644d0bffe2706fbcabefe2806030000003f06928bbffe21062e9f08006100260647d0bffe2706b2cabefe2806030000003f06b28bbffe21062e9f080061002106980700006100",
+      "evidence": "Synthetic call-only RAM sequencer: MOV imm32 encoding (0x0620|register), little-endian u32; MOV continuation,lp; MOV original entry,r1; JMP[r1]=6100. Only original 89F2E copies labeled request inputs/snapshots; no host predicates or flag writes. Immutable CodeFlash SHA256 42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7."
+    }
+  ],
+  "checks": [
+    {
+      "name": "call95 loaded unsigned threshold/duration/counter",
+      "kind": "memory",
+      "address": "0xfebfd000",
+      "size": 6,
+      "equals_hex": "000560005f00"
+    },
+    {
+      "name": "call95 CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd006",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "call95 triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd009",
+      "size": 3,
+      "equals_hex": "010101"
+    },
+    {
+      "name": "call96 loaded unsigned threshold/duration/counter",
+      "kind": "memory",
+      "address": "0xfebfd00c",
+      "size": 6,
+      "equals_hex": "000560000000"
+    },
+    {
+      "name": "call96 CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd012",
+      "size": 3,
+      "equals_hex": "000101"
+    },
+    {
+      "name": "call96 triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd015",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "call97 loaded unsigned threshold/duration/counter",
+      "kind": "memory",
+      "address": "0xfebfd018",
+      "size": 6,
+      "equals_hex": "000560000000"
+    },
+    {
+      "name": "call97 CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd01e",
+      "size": 3,
+      "equals_hex": "000101"
+    },
+    {
+      "name": "call97 triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd021",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "profile2 hold0 torque0 resets counter",
+      "kind": "memory",
+      "address": "0xfebfd024",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "profile2 hold0 torque0 latch retention CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd026",
+      "size": 3,
+      "equals_hex": "000101"
+    },
+    {
+      "name": "profile2 hold0 torque0 latch retention triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd029",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "profile7 hold0 torque1280 resets counter",
+      "kind": "memory",
+      "address": "0xfebfd02c",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "profile7 hold0 torque1280 latch retention CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd02e",
+      "size": 3,
+      "equals_hex": "000101"
+    },
+    {
+      "name": "profile7 hold0 torque1280 latch retention triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd031",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "profile2 hold1 torque1280 resets counter",
+      "kind": "memory",
+      "address": "0xfebfd034",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "profile2 hold1 torque1280 latch retention CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd036",
+      "size": 3,
+      "equals_hex": "000101"
+    },
+    {
+      "name": "profile2 hold1 torque1280 latch retention triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd039",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "profile2 hold0 torque0 resets counter",
+      "kind": "memory",
+      "address": "0xfebfd03c",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "profile2 hold0 torque0 latch retention CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd03e",
+      "size": 3,
+      "equals_hex": "000101"
+    },
+    {
+      "name": "profile2 hold0 torque0 latch retention triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd041",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "original initializer clears latched inhibit CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd044",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "original initializer clears latched inhibit triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd047",
+      "size": 3,
+      "equals_hex": "010101"
+    },
+    {
+      "name": "original frames restore caller stack",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    }
+  ]
+}

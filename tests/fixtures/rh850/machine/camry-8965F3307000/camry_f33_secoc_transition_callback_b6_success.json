@@ -1,0 +1,82 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_secoc_transition_callback_b6_success",
+  "entry": {
+    "role": "retained",
+    "scope": "resolved-address",
+    "address": "0x90448"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00",
+    "r6": "0x2"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1e00",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack for original PREPARE frames; not global RAM initialization."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Synthetic input: Priority-mask saved-depth input0; PMR=FF00; original lock thunks execute."
+    },
+    {
+      "address": "0xfebe55e8",
+      "hex": "07000000640000000900a5a5",
+      "evidence": "Synthetic input: Committed B6 history."
+    },
+    {
+      "address": "0xfebe5600",
+      "hex": "07000000640000000a00bbcc",
+      "evidence": "Synthetic input: Pending B6 history from prior reconstruction; explicit synthetic completion provided in r6 upper16."
+    },
+    {
+      "address": "0xfebe4bff",
+      "hex": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "evidence": "Synthetic input: COM publication canary."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Exact original-byte return/checkpoint",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Exact callback commit/reject outcome",
+      "kind": "memory",
+      "address": "0xfebe55e8",
+      "size": 12,
+      "equals_hex": "07000000640000000a00bbcc"
+    },
+    {
+      "name": "Callback never clears candidate bytes",
+      "kind": "memory",
+      "address": "0xfebe5600",
+      "size": 12,
+      "equals_hex": "07000000640000000a00bbcc"
+    },
+    {
+      "name": "No COM publication from freshness commit callback",
+      "kind": "memory",
+      "address": "0xfebe4bff",
+      "size": 32,
+      "equals_hex": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+    }
+  ]
+}

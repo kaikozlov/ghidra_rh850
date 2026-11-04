@@ -1,0 +1,659 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_command_recovery_receive_global_gates_bank_and_command_precedence",
+  "entry": {
+    "role": "synthetic-call-only-sequencer-for-original-command-supervision",
+    "scope": "resolved-address",
+    "address": "0xfebf8000"
+  },
+  "max_instructions": 100000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "PSW": "0x20",
+    "lp": "0x798"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1f00",
+      "hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "evidence": "Synthetic bounded caller stack for intact original PREPARE frames; not application initialization."
+    },
+    {
+      "address": "0xfebeac3c",
+      "hex": "00",
+      "evidence": "Synthetic calibration-set selector."
+    },
+    {
+      "address": "0xfebecb00",
+      "hex": "02",
+      "evidence": "Synthetic ID11 controller bank selected for isolated monitor calls."
+    },
+    {
+      "address": "0xfebecab6",
+      "hex": "00",
+      "evidence": "Synthetic holdoff input."
+    },
+    {
+      "address": "0xfebecaa4",
+      "hex": "0000",
+      "evidence": "Synthetic previous doubled controller target."
+    },
+    {
+      "address": "0xfebeaccc",
+      "hex": "00",
+      "evidence": "Synthetic ready gate."
+    },
+    {
+      "address": "0xfebeaccd",
+      "hex": "00",
+      "evidence": "Synthetic ready gate."
+    },
+    {
+      "address": "0xfebeadbf",
+      "hex": "00",
+      "evidence": "Synthetic ready request gate."
+    },
+    {
+      "address": "0xfebecad9",
+      "hex": "00",
+      "evidence": "Synthetic independent ready inhibit."
+    },
+    {
+      "address": "0xfebecab2",
+      "hex": "000000",
+      "evidence": "Synthetic triplicate readiness initial state."
+    },
+    {
+      "address": "0xfebecaae",
+      "hex": "0000",
+      "evidence": "Synthetic ready timeout initial state."
+    },
+    {
+      "address": "0xfebe7f52",
+      "hex": "00",
+      "evidence": "Synthetic group2 receive-status byte; selectors11 and1A both map to2."
+    },
+    {
+      "address": "0xfebeadb9",
+      "hex": "00",
+      "evidence": "Synthetic primary receive gate."
+    },
+    {
+      "address": "0xfebeacc1",
+      "hex": "00",
+      "evidence": "Synthetic sibling receive gate."
+    },
+    {
+      "address": "0xfebeacbd",
+      "hex": "00",
+      "evidence": "Synthetic global disable gate."
+    },
+    {
+      "address": "0xfebeadb0",
+      "hex": "0b",
+      "evidence": "Synthetic native Target Lateral ID."
+    },
+    {
+      "address": "0xfebeae90",
+      "hex": "0000",
+      "evidence": "Synthetic target snapshot."
+    },
+    {
+      "address": "0xfebeadbc",
+      "hex": "01",
+      "evidence": "Synthetic native B6 sequence."
+    },
+    {
+      "address": "0xfebfc000",
+      "hex": "00",
+      "evidence": "Synthetic receive group2 status; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc001",
+      "hex": "00",
+      "evidence": "Synthetic primary receive gate; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc002",
+      "hex": "00",
+      "evidence": "Synthetic sibling receive gate; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc003",
+      "hex": "00",
+      "evidence": "Synthetic global disable; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc004",
+      "hex": "0b",
+      "evidence": "Synthetic native ID; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc005",
+      "hex": "0000",
+      "evidence": "Synthetic target snapshot; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc007",
+      "hex": "5a",
+      "evidence": "Synthetic receive group2 status; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc008",
+      "hex": "00",
+      "evidence": "Synthetic primary receive gate; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc009",
+      "hex": "00",
+      "evidence": "Synthetic sibling receive gate; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc00a",
+      "hex": "00",
+      "evidence": "Synthetic global disable; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc00b",
+      "hex": "0b",
+      "evidence": "Synthetic native ID; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc00c",
+      "hex": "c800",
+      "evidence": "Synthetic target snapshot; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc00e",
+      "hex": "00",
+      "evidence": "Synthetic receive group2 status; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc00f",
+      "hex": "00",
+      "evidence": "Synthetic primary receive gate; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc010",
+      "hex": "00",
+      "evidence": "Synthetic sibling receive gate; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc011",
+      "hex": "00",
+      "evidence": "Synthetic global disable; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc012",
+      "hex": "0b",
+      "evidence": "Synthetic native ID; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc013",
+      "hex": "c800",
+      "evidence": "Synthetic target snapshot; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc015",
+      "hex": "00",
+      "evidence": "Synthetic receive group2 status; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc016",
+      "hex": "00",
+      "evidence": "Synthetic primary receive gate; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc017",
+      "hex": "00",
+      "evidence": "Synthetic sibling receive gate; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc018",
+      "hex": "00",
+      "evidence": "Synthetic global disable; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc019",
+      "hex": "0b",
+      "evidence": "Synthetic native ID; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc01a",
+      "hex": "0000",
+      "evidence": "Synthetic target snapshot; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc01c",
+      "hex": "00",
+      "evidence": "Synthetic receive group2 status; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc01d",
+      "hex": "01",
+      "evidence": "Synthetic primary receive gate; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc01e",
+      "hex": "00",
+      "evidence": "Synthetic sibling receive gate; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc01f",
+      "hex": "00",
+      "evidence": "Synthetic global disable; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc020",
+      "hex": "0b",
+      "evidence": "Synthetic native ID; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc021",
+      "hex": "0000",
+      "evidence": "Synthetic target snapshot; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc023",
+      "hex": "00",
+      "evidence": "Synthetic receive group2 status; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc024",
+      "hex": "00",
+      "evidence": "Synthetic primary receive gate; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc025",
+      "hex": "01",
+      "evidence": "Synthetic sibling receive gate; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc026",
+      "hex": "00",
+      "evidence": "Synthetic global disable; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc027",
+      "hex": "0b",
+      "evidence": "Synthetic native ID; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc028",
+      "hex": "0000",
+      "evidence": "Synthetic target snapshot; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc02a",
+      "hex": "00",
+      "evidence": "Synthetic receive group2 status; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc02b",
+      "hex": "00",
+      "evidence": "Synthetic primary receive gate; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc02c",
+      "hex": "00",
+      "evidence": "Synthetic sibling receive gate; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc02d",
+      "hex": "01",
+      "evidence": "Synthetic global disable; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc02e",
+      "hex": "0b",
+      "evidence": "Synthetic native ID; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc02f",
+      "hex": "0000",
+      "evidence": "Synthetic target snapshot; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc031",
+      "hex": "ff",
+      "evidence": "Synthetic receive group2 status; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc032",
+      "hex": "00",
+      "evidence": "Synthetic primary receive gate; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc033",
+      "hex": "00",
+      "evidence": "Synthetic sibling receive gate; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc034",
+      "hex": "00",
+      "evidence": "Synthetic global disable; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc035",
+      "hex": "0b",
+      "evidence": "Synthetic native ID; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc036",
+      "hex": "0000",
+      "evidence": "Synthetic target snapshot; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc038",
+      "hex": "00",
+      "evidence": "Synthetic receive group2 status; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc039",
+      "hex": "00",
+      "evidence": "Synthetic primary receive gate; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc03a",
+      "hex": "00",
+      "evidence": "Synthetic sibling receive gate; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc03b",
+      "hex": "00",
+      "evidence": "Synthetic global disable; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc03c",
+      "hex": "31",
+      "evidence": "Synthetic native ID; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc03d",
+      "hex": "0000",
+      "evidence": "Synthetic target snapshot; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc03f",
+      "hex": "01",
+      "evidence": "Synthetic native ID; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc040",
+      "hex": "04",
+      "evidence": "Synthetic native ID; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc041",
+      "hex": "0a",
+      "evidence": "Synthetic native ID; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc042",
+      "hex": "0b",
+      "evidence": "Synthetic native ID; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc043",
+      "hex": "12",
+      "evidence": "Synthetic native ID; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc044",
+      "hex": "13",
+      "evidence": "Synthetic native ID; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebf8000",
+      "hex": "3f060e80bffe21060cec0c0061003f061c80bffe21068aec0c0061002606527fbefe270600c0bffe2806010000003f063c80bffe21062e9f080061002606b9adbefe270601c0bffe2806010000003f065c80bffe21062e9f080061002606c1acbefe270602c0bffe2806010000003f067c80bffe21062e9f080061002606bdacbefe270603c0bffe2806010000003f069c80bffe21062e9f080061002606b0adbefe270604c0bffe2806010000003f06bc80bffe21062e9f08006100260690aebefe270605c0bffe2806020000003f06dc80bffe21062e9f080061003f06ea80bffe2106a4ef0c0061003f06f880bffe2106fcef0c0061003f060681bffe21067cee0c0061003f061481bffe210672ec0c0061003f062281bffe2106fee70c006100260600d0bffe2706fecabefe2806030000003f064281bffe21062e9f08006100260603d0bffe2706fbcabefe2806030000003f066281bffe21062e9f08006100260606d0bffe2706b2cabefe2806030000003f068281bffe21062e9f080061002606527fbefe270607c0bffe2806010000003f06a281bffe21062e9f080061002606b9adbefe270608c0bffe2806010000003f06c281bffe21062e9f080061002606c1acbefe270609c0bffe2806010000003f06e281bffe21062e9f080061002606bdacbefe27060ac0bffe2806010000003f060282bffe21062e9f080061002606b0adbefe27060bc0bffe2806010000003f062282bffe21062e9f08006100260690aebefe27060cc0bffe2806020000003f064282bffe21062e9f080061003f065082bffe2106a4ef0c0061003f065e82bffe2106fcef0c0061003f066c82bffe21067cee0c0061003f067a82bffe210672ec0c0061003f068882bffe2106fee70c006100260609d0bffe2706fecabefe2806030000003f06a882bffe21062e9f0800610026060cd0bffe2706fbcabefe2806030000003f06c882bffe21062e9f0800610026060fd0bffe2706b2cabefe2806030000003f06e882bffe21062e9f080061002606527fbefe27060ec0bffe2806010000003f060883bffe21062e9f080061002606b9adbefe27060fc0bffe2806010000003f062883bffe21062e9f080061002606c1acbefe270610c0bffe2806010000003f064883bffe21062e9f080061002606bdacbefe270611c0bffe2806010000003f066883bffe21062e9f080061002606b0adbefe270612c0bffe2806010000003f068883bffe21062e9f08006100260690aebefe270613c0bffe2806020000003f06a883bffe21062e9f080061003f06b683bffe2106a4ef0c0061003f06c483bffe2106fcef0c0061003f06d283bffe21067cee0c0061003f06e083bffe210672ec0c0061003f06ee83bffe2106fee70c006100260612d0bffe2706fecabefe2806030000003f060e84bffe21062e9f08006100260615d0bffe2706fbcabefe2806030000003f062e84bffe21062e9f08006100260618d0bffe2706b2cabefe2806030000003f064e84bffe21062e9f080061002606527fbefe270615c0bffe2806010000003f066e84bffe21062e9f080061002606b9adbefe270616c0bffe2806010000003f068e84bffe21062e9f080061002606c1acbefe270617c0bffe2806010000003f06ae84bffe21062e9f080061002606bdacbefe270618c0bffe2806010000003f06ce84bffe21062e9f080061002606b0adbefe270619c0bffe2806010000003f06ee84bffe21062e9f08006100260690aebefe27061ac0bffe2806020000003f060e85bffe21062e9f080061003f061c85bffe2106a4ef0c0061003f062a85bffe2106fcef0c0061003f063885bffe21067cee0c0061003f064685bffe210672ec0c0061003f065485bffe2106fee70c00610026061bd0bffe2706fecabefe2806030000003f067485bffe21062e9f0800610026061ed0bffe2706fbcabefe2806030000003f069485bffe21062e9f08006100260621d0bffe2706b2cabefe2806030000003f06b485bffe21062e9f080061002606527fbefe27061cc0bffe2806010000003f06d485bffe21062e9f080061002606b9adbefe27061dc0bffe2806010000003f06f485bffe21062e9f080061002606c1acbefe27061ec0bffe2806010000003f061486bffe21062e9f080061002606bdacbefe27061fc0bffe2806010000003f063486bffe21062e9f080061002606b0adbefe270620c0bffe2806010000003f065486bffe21062e9f08006100260690aebefe270621c0bffe2806020000003f067486bffe21062e9f080061003f068286bffe2106a4ef0c0061003f069086bffe2106fcef0c0061003f069e86bffe21067cee0c0061003f06ac86bffe210672ec0c0061003f06ba86bffe2106fee70c006100260624d0bffe2706fecabefe2806030000003f06da86bffe21062e9f08006100260627d0bffe2706fbcabefe2806030000003f06fa86bffe21062e9f0800610026062ad0bffe2706b2cabefe2806030000003f061a87bffe21062e9f080061002606527fbefe270623c0bffe2806010000003f063a87bffe21062e9f080061002606b9adbefe270624c0bffe2806010000003f065a87bffe21062e9f080061002606c1acbefe270625c0bffe2806010000003f067a87bffe21062e9f080061002606bdacbefe270626c0bffe2806010000003f069a87bffe21062e9f080061002606b0adbefe270627c0bffe2806010000003f06ba87bffe21062e9f08006100260690aebefe270628c0bffe2806020000003f06da87bffe21062e9f080061003f06e887bffe2106a4ef0c0061003f06f687bffe2106fcef0c0061003f060488bffe21067cee0c0061003f061288bffe210672ec0c0061003f062088bffe2106fee70c00610026062dd0bffe2706fecabefe2806030000003f064088bffe21062e9f08006100260630d0bffe2706fbcabefe2806030000003f066088bffe21062e9f08006100260633d0bffe2706b2cabefe2806030000003f068088bffe21062e9f080061002606527fbefe27062ac0bffe2806010000003f06a088bffe21062e9f080061002606b9adbefe27062bc0bffe2806010000003f06c088bffe21062e9f080061002606c1acbefe27062cc0bffe2806010000003f06e088bffe21062e9f080061002606bdacbefe27062dc0bffe2806010000003f060089bffe21062e9f080061002606b0adbefe27062ec0bffe2806010000003f062089bffe21062e9f08006100260690aebefe27062fc0bffe2806020000003f064089bffe21062e9f080061003f064e89bffe2106a4ef0c0061003f065c89bffe2106fcef0c0061003f066a89bffe21067cee0c0061003f067889bffe210672ec0c0061003f068689bffe2106fee70c006100260636d0bffe2706fecabefe2806030000003f06a689bffe21062e9f08006100260639d0bffe2706fbcabefe2806030000003f06c689bffe21062e9f0800610026063cd0bffe2706b2cabefe2806030000003f06e689bffe21062e9f080061002606527fbefe270631c0bffe2806010000003f06068abffe21062e9f080061002606b9adbefe270632c0bffe2806010000003f06268abffe21062e9f080061002606c1acbefe270633c0bffe2806010000003f06468abffe21062e9f080061002606bdacbefe270634c0bffe2806010000003f06668abffe21062e9f080061002606b0adbefe270635c0bffe2806010000003f06868abffe21062e9f08006100260690aebefe270636c0bffe2806020000003f06a68abffe21062e9f080061003f06b48abffe2106a4ef0c0061003f06c28abffe2106fcef0c0061003f06d08abffe21067cee0c0061003f06de8abffe210672ec0c0061003f06ec8abffe2106fee70c00610026063fd0bffe2706fecabefe2806030000003f060c8bbffe21062e9f08006100260642d0bffe2706fbcabefe2806030000003f062c8bbffe21062e9f08006100260645d0bffe2706b2cabefe2806030000003f064c8bbffe21062e9f080061002606527fbefe270638c0bffe2806010000003f066c8bbffe21062e9f080061002606b9adbefe270639c0bffe2806010000003f068c8bbffe21062e9f080061002606c1acbefe27063ac0bffe2806010000003f06ac8bbffe21062e9f080061002606bdacbefe27063bc0bffe2806010000003f06cc8bbffe21062e9f080061002606b0adbefe27063cc0bffe2806010000003f06ec8bbffe21062e9f08006100260690aebefe27063dc0bffe2806020000003f060c8cbffe21062e9f080061003f061a8cbffe2106a4ef0c0061003f06288cbffe2106fcef0c0061003f06368cbffe21067cee0c0061003f06448cbffe210672ec0c0061003f06528cbffe2106fee70c006100260648d0bffe2706fecabefe2806030000003f06728cbffe21062e9f0800610026064bd0bffe2706fbcabefe2806030000003f06928cbffe21062e9f0800610026064ed0bffe2706b2cabefe2806030000003f06b28cbffe21062e9f080061002606b0adbefe27063fc0bffe2806010000003f06d28cbffe21062e9f080061003f06e08cbffe2106fcef0c006100260651d0bffe270600cbbefe2806010000003f06008dbffe21062e9f080061002606b0adbefe270640c0bffe2806010000003f06208dbffe21062e9f080061003f062e8dbffe2106fcef0c006100260652d0bffe270600cbbefe2806010000003f064e8dbffe21062e9f080061002606b0adbefe270641c0bffe2806010000003f066e8dbffe21062e9f080061003f067c8dbffe2106fcef0c006100260653d0bffe270600cbbefe2806010000003f069c8dbffe21062e9f080061002606b0adbefe270642c0bffe2806010000003f06bc8dbffe21062e9f080061003f06ca8dbffe2106fcef0c006100260654d0bffe270600cbbefe2806010000003f06ea8dbffe21062e9f080061002606b0adbefe270643c0bffe2806010000003f060a8ebffe21062e9f080061003f06188ebffe2106fcef0c006100260655d0bffe270600cbbefe2806010000003f06388ebffe21062e9f080061002606b0adbefe270644c0bffe2806010000003f06588ebffe21062e9f080061003f06668ebffe2106fcef0c006100260656d0bffe270600cbbefe2806010000003f06868ebffe21062e9f080061002106980700006100",
+      "evidence": "Synthetic call-only RAM sequencer: MOV imm32 encoding (0x0620|register), little-endian u32; MOV continuation,lp; MOV original entry,r1; JMP[r1]=6100. Only original 89F2E copies labeled request inputs/snapshots; no host predicates or flag writes. Immutable CodeFlash SHA256 42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7."
+    }
+  ],
+  "checks": [
+    {
+      "name": "available ID11 sibling/primary availability and controller bank",
+      "kind": "memory",
+      "address": "0xfebfd000",
+      "size": 3,
+      "equals_hex": "010102"
+    },
+    {
+      "name": "available ID11 CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd003",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "available ID11 triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd006",
+      "size": 3,
+      "equals_hex": "010101"
+    },
+    {
+      "name": "receive loss profile7 suppresses transient sibling/primary availability and controller bank",
+      "kind": "memory",
+      "address": "0xfebfd009",
+      "size": 3,
+      "equals_hex": "000007"
+    },
+    {
+      "name": "receive loss profile7 suppresses transient CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd00c",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "receive loss profile7 suppresses transient triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd00f",
+      "size": 3,
+      "equals_hex": "010101"
+    },
+    {
+      "name": "receive recovery invalid command inhibits ready sibling/primary availability and controller bank",
+      "kind": "memory",
+      "address": "0xfebfd012",
+      "size": 3,
+      "equals_hex": "010102"
+    },
+    {
+      "name": "receive recovery invalid command inhibits ready CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd015",
+      "size": 3,
+      "equals_hex": "010100"
+    },
+    {
+      "name": "receive recovery invalid command inhibits ready triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd018",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "valid command recovery sibling/primary availability and controller bank",
+      "kind": "memory",
+      "address": "0xfebfd01b",
+      "size": 3,
+      "equals_hex": "010102"
+    },
+    {
+      "name": "valid command recovery CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd01e",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "valid command recovery triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd021",
+      "size": 3,
+      "equals_hex": "010101"
+    },
+    {
+      "name": "primary gate only sibling/primary availability and controller bank",
+      "kind": "memory",
+      "address": "0xfebfd024",
+      "size": 3,
+      "equals_hex": "010007"
+    },
+    {
+      "name": "primary gate only CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd027",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "primary gate only triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd02a",
+      "size": 3,
+      "equals_hex": "010101"
+    },
+    {
+      "name": "sibling gate does not disable primary bank sibling/primary availability and controller bank",
+      "kind": "memory",
+      "address": "0xfebfd02d",
+      "size": 3,
+      "equals_hex": "000102"
+    },
+    {
+      "name": "sibling gate does not disable primary bank CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd030",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "sibling gate does not disable primary bank triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd033",
+      "size": 3,
+      "equals_hex": "010101"
+    },
+    {
+      "name": "global disable precedes ID selection sibling/primary availability and controller bank",
+      "kind": "memory",
+      "address": "0xfebfd036",
+      "size": 3,
+      "equals_hex": "010107"
+    },
+    {
+      "name": "global disable precedes ID selection CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd039",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "global disable precedes ID selection triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd03c",
+      "size": 3,
+      "equals_hex": "010101"
+    },
+    {
+      "name": "FF is not 5A sibling/primary availability and controller bank",
+      "kind": "memory",
+      "address": "0xfebfd03f",
+      "size": 3,
+      "equals_hex": "010102"
+    },
+    {
+      "name": "FF is not 5A CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd042",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "FF is not 5A triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd045",
+      "size": 3,
+      "equals_hex": "010101"
+    },
+    {
+      "name": "unsupported ID profile7 sibling/primary availability and controller bank",
+      "kind": "memory",
+      "address": "0xfebfd048",
+      "size": 3,
+      "equals_hex": "010107"
+    },
+    {
+      "name": "unsupported ID profile7 CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd04b",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "unsupported ID profile7 triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd04e",
+      "size": 3,
+      "equals_hex": "010101"
+    },
+    {
+      "name": "ID1 selects bank0",
+      "kind": "memory",
+      "address": "0xfebfd051",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "ID4 selects bank1",
+      "kind": "memory",
+      "address": "0xfebfd052",
+      "size": 1,
+      "equals_hex": "01"
+    },
+    {
+      "name": "ID10 selects bank3",
+      "kind": "memory",
+      "address": "0xfebfd053",
+      "size": 1,
+      "equals_hex": "03"
+    },
+    {
+      "name": "ID11 selects bank2",
+      "kind": "memory",
+      "address": "0xfebfd054",
+      "size": 1,
+      "equals_hex": "02"
+    },
+    {
+      "name": "ID18 selects bank5",
+      "kind": "memory",
+      "address": "0xfebfd055",
+      "size": 1,
+      "equals_hex": "05"
+    },
+    {
+      "name": "ID19 selects bank4",
+      "kind": "memory",
+      "address": "0xfebfd056",
+      "size": 1,
+      "equals_hex": "04"
+    },
+    {
+      "name": "original frames restore caller stack",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    }
+  ]
+}

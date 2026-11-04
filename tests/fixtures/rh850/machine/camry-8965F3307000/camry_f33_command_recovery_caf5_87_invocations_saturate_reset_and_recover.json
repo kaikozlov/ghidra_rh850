@@ -1,0 +1,316 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_command_recovery_caf5_87_invocations_saturate_reset_and_recover",
+  "entry": {
+    "role": "synthetic-call-only-sequencer-for-original-command-supervision",
+    "scope": "resolved-address",
+    "address": "0xfebf8000"
+  },
+  "max_instructions": 100000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "PSW": "0x20",
+    "lp": "0x798"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1f00",
+      "hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "evidence": "Synthetic bounded caller stack for intact original PREPARE frames; not application initialization."
+    },
+    {
+      "address": "0xfebeac3c",
+      "hex": "00",
+      "evidence": "Synthetic calibration-set selector."
+    },
+    {
+      "address": "0xfebecb00",
+      "hex": "02",
+      "evidence": "Synthetic ID11 controller bank selected for isolated monitor calls."
+    },
+    {
+      "address": "0xfebecab6",
+      "hex": "00",
+      "evidence": "Synthetic holdoff input."
+    },
+    {
+      "address": "0xfebecaa4",
+      "hex": "0000",
+      "evidence": "Synthetic previous doubled controller target."
+    },
+    {
+      "address": "0xfebeaccc",
+      "hex": "00",
+      "evidence": "Synthetic ready gate."
+    },
+    {
+      "address": "0xfebeaccd",
+      "hex": "00",
+      "evidence": "Synthetic ready gate."
+    },
+    {
+      "address": "0xfebeadbf",
+      "hex": "00",
+      "evidence": "Synthetic ready request gate."
+    },
+    {
+      "address": "0xfebecad9",
+      "hex": "00",
+      "evidence": "Synthetic independent ready inhibit."
+    },
+    {
+      "address": "0xfebecab2",
+      "hex": "000000",
+      "evidence": "Synthetic triplicate readiness initial state."
+    },
+    {
+      "address": "0xfebecaae",
+      "hex": "0000",
+      "evidence": "Synthetic ready timeout initial state."
+    },
+    {
+      "address": "0xfebfc000",
+      "hex": "0000",
+      "evidence": "Synthetic request input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc002",
+      "hex": "01",
+      "evidence": "Synthetic request input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc003",
+      "hex": "01",
+      "evidence": "Synthetic signal223 exact-one request; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc004",
+      "hex": "02",
+      "evidence": "Synthetic controller profile; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc005",
+      "hex": "02",
+      "evidence": "Synthetic signal223 input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc006",
+      "hex": "02",
+      "evidence": "Synthetic controller profile; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc007",
+      "hex": "00",
+      "evidence": "Synthetic signal223 input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc008",
+      "hex": "07",
+      "evidence": "Synthetic controller profile; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc009",
+      "hex": "01",
+      "evidence": "Synthetic signal223 input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc00a",
+      "hex": "02",
+      "evidence": "Synthetic controller profile; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc00b",
+      "hex": "01",
+      "evidence": "Synthetic signal223 input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebf8000",
+      "hex": "3f060e80bffe21060cec0c006100260690aebefe270600c0bffe2806020000003f062e80bffe21062e9f080061002606bcadbefe270602c0bffe2806010000003f064e80bffe21062e9f080061003f065c80bffe21068aec0c0061002606d6acbefe270603c0bffe2806010000003f067c80bffe21062e9f080061003f068a80bffe2106d6ec0c0061003f069880bffe2106d6ec0c0061003f06a680bffe2106d6ec0c0061003f06b480bffe2106d6ec0c0061003f06c280bffe2106d6ec0c0061003f06d080bffe2106d6ec0c0061003f06de80bffe2106d6ec0c0061003f06ec80bffe2106d6ec0c0061003f06fa80bffe2106d6ec0c0061003f060881bffe2106d6ec0c0061003f061681bffe2106d6ec0c0061003f062481bffe2106d6ec0c0061003f063281bffe2106d6ec0c0061003f064081bffe2106d6ec0c0061003f064e81bffe2106d6ec0c0061003f065c81bffe2106d6ec0c0061003f066a81bffe2106d6ec0c0061003f067881bffe2106d6ec0c0061003f068681bffe2106d6ec0c0061003f069481bffe2106d6ec0c0061003f06a281bffe2106d6ec0c0061003f06b081bffe2106d6ec0c0061003f06be81bffe2106d6ec0c0061003f06cc81bffe2106d6ec0c0061003f06da81bffe2106d6ec0c0061003f06e881bffe2106d6ec0c0061003f06f681bffe2106d6ec0c0061003f060482bffe2106d6ec0c0061003f061282bffe2106d6ec0c0061003f062082bffe2106d6ec0c0061003f062e82bffe2106d6ec0c0061003f063c82bffe2106d6ec0c0061003f064a82bffe2106d6ec0c0061003f065882bffe2106d6ec0c0061003f066682bffe2106d6ec0c0061003f067482bffe2106d6ec0c0061003f068282bffe2106d6ec0c0061003f069082bffe2106d6ec0c0061003f069e82bffe2106d6ec0c0061003f06ac82bffe2106d6ec0c0061003f06ba82bffe2106d6ec0c0061003f06c882bffe2106d6ec0c0061003f06d682bffe2106d6ec0c0061003f06e482bffe2106d6ec0c0061003f06f282bffe2106d6ec0c0061003f060083bffe2106d6ec0c0061003f060e83bffe2106d6ec0c0061003f061c83bffe2106d6ec0c0061003f062a83bffe2106d6ec0c0061003f063883bffe2106d6ec0c0061003f064683bffe2106d6ec0c0061003f065483bffe2106d6ec0c0061003f066283bffe2106d6ec0c0061003f067083bffe2106d6ec0c0061003f067e83bffe2106d6ec0c0061003f068c83bffe2106d6ec0c0061003f069a83bffe2106d6ec0c0061003f06a883bffe2106d6ec0c0061003f06b683bffe2106d6ec0c0061003f06c483bffe2106d6ec0c0061003f06d283bffe2106d6ec0c0061003f06e083bffe2106d6ec0c0061003f06ee83bffe2106d6ec0c0061003f06fc83bffe2106d6ec0c0061003f060a84bffe2106d6ec0c0061003f061884bffe2106d6ec0c0061003f062684bffe2106d6ec0c0061003f063484bffe2106d6ec0c0061003f064284bffe2106d6ec0c0061003f065084bffe2106d6ec0c0061003f065e84bffe2106d6ec0c0061003f066c84bffe2106d6ec0c0061003f067a84bffe2106d6ec0c0061003f068884bffe2106d6ec0c0061003f069684bffe2106d6ec0c0061003f06a484bffe2106d6ec0c0061003f06b284bffe2106d6ec0c0061003f06c084bffe2106d6ec0c0061003f06ce84bffe2106d6ec0c0061003f06dc84bffe2106d6ec0c0061003f06ea84bffe2106d6ec0c0061003f06f884bffe2106d6ec0c0061003f060685bffe2106d6ec0c0061003f061485bffe2106d6ec0c0061003f062285bffe2106d6ec0c0061003f063085bffe2106d6ec0c006100260600d0bffe2706e0cabefe2806020000003f065085bffe21062e9f08006100260602d0bffe2706f4cabefe2806020000003f067085bffe21062e9f080061003f067e85bffe21067cee0c0061003f068c85bffe210672ec0c0061003f069a85bffe2106fee70c006100260604d0bffe2706fbcabefe2806030000003f06ba85bffe21062e9f08006100260607d0bffe2706b2cabefe2806030000003f06da85bffe21062e9f080061003f06e885bffe2106d6ec0c00610026060ad0bffe2706e0cabefe2806020000003f060886bffe21062e9f0800610026060cd0bffe2706f4cabefe2806020000003f062886bffe21062e9f080061003f063686bffe21067cee0c0061003f064486bffe210672ec0c0061003f065286bffe2106fee70c00610026060ed0bffe2706fbcabefe2806030000003f067286bffe21062e9f08006100260611d0bffe2706b2cabefe2806030000003f069286bffe21062e9f080061003f06a086bffe2106d6ec0c006100260614d0bffe2706e0cabefe2806020000003f06c086bffe21062e9f08006100260616d0bffe2706f4cabefe2806020000003f06e086bffe21062e9f080061003f06ee86bffe21067cee0c0061003f06fc86bffe210672ec0c0061003f060a87bffe2106fee70c006100260618d0bffe2706fbcabefe2806030000003f062a87bffe21062e9f0800610026061bd0bffe2706b2cabefe2806030000003f064a87bffe21062e9f08006100260600cbbefe270604c0bffe2806010000003f066a87bffe21062e9f080061002606d6acbefe270605c0bffe2806010000003f068a87bffe21062e9f080061003f069887bffe2106d6ec0c0061003f06a687bffe21067cee0c0061003f06b487bffe210672ec0c0061003f06c287bffe2106fee70c00610026061ed0bffe2706e0cabefe2806020000003f06e287bffe21062e9f08006100260620d0bffe2706fbcabefe2806030000003f060288bffe21062e9f08006100260623d0bffe2706b2cabefe2806030000003f062288bffe21062e9f08006100260600cbbefe270606c0bffe2806010000003f064288bffe21062e9f080061002606d6acbefe270607c0bffe2806010000003f066288bffe21062e9f080061003f067088bffe2106d6ec0c0061003f067e88bffe21067cee0c0061003f068c88bffe210672ec0c0061003f069a88bffe2106fee70c006100260626d0bffe2706e0cabefe2806020000003f06ba88bffe21062e9f08006100260628d0bffe2706fbcabefe2806030000003f06da88bffe21062e9f0800610026062bd0bffe2706b2cabefe2806030000003f06fa88bffe21062e9f08006100260600cbbefe270608c0bffe2806010000003f061a89bffe21062e9f080061002606d6acbefe270609c0bffe2806010000003f063a89bffe21062e9f080061003f064889bffe2106d6ec0c0061003f065689bffe21067cee0c0061003f066489bffe210672ec0c0061003f067289bffe2106fee70c00610026062ed0bffe2706e0cabefe2806020000003f069289bffe21062e9f08006100260630d0bffe2706fbcabefe2806030000003f06b289bffe21062e9f08006100260633d0bffe2706b2cabefe2806030000003f06d289bffe21062e9f08006100260600cbbefe27060ac0bffe2806010000003f06f289bffe21062e9f080061002606d6acbefe27060bc0bffe2806010000003f06128abffe21062e9f080061003f06208abffe2106d6ec0c0061003f062e8abffe21067cee0c0061003f063c8abffe210672ec0c0061003f064a8abffe2106fee70c006100260636d0bffe2706e0cabefe2806020000003f066a8abffe21062e9f08006100260638d0bffe2706fbcabefe2806030000003f068a8abffe21062e9f0800610026063bd0bffe2706b2cabefe2806030000003f06aa8abffe21062e9f080061002106980700006100",
+      "evidence": "Synthetic call-only RAM sequencer: MOV imm32 encoding (0x0620|register), little-endian u32; MOV continuation,lp; MOV original entry,r1; JMP[r1]=6100. Only original 89F2E copies labeled request inputs/snapshots; no host predicates or flag writes. Immutable CodeFlash SHA256 42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7."
+    }
+  ],
+  "checks": [
+    {
+      "name": "CAF5 call86 saturating counter",
+      "kind": "memory",
+      "address": "0xfebfd000",
+      "size": 2,
+      "equals_hex": "5600"
+    },
+    {
+      "name": "CAF5 call86 immediate/persistent",
+      "kind": "memory",
+      "address": "0xfebfd002",
+      "size": 2,
+      "equals_hex": "0100"
+    },
+    {
+      "name": "CAF5 call86 CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd004",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "CAF5 call86 triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd007",
+      "size": 3,
+      "equals_hex": "010101"
+    },
+    {
+      "name": "CAF5 call87 saturating counter",
+      "kind": "memory",
+      "address": "0xfebfd00a",
+      "size": 2,
+      "equals_hex": "5700"
+    },
+    {
+      "name": "CAF5 call87 immediate/persistent",
+      "kind": "memory",
+      "address": "0xfebfd00c",
+      "size": 2,
+      "equals_hex": "0101"
+    },
+    {
+      "name": "CAF5 call87 CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd00e",
+      "size": 3,
+      "equals_hex": "010100"
+    },
+    {
+      "name": "CAF5 call87 triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd011",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "CAF5 call88 saturating counter",
+      "kind": "memory",
+      "address": "0xfebfd014",
+      "size": 2,
+      "equals_hex": "5700"
+    },
+    {
+      "name": "CAF5 call88 immediate/persistent",
+      "kind": "memory",
+      "address": "0xfebfd016",
+      "size": 2,
+      "equals_hex": "0101"
+    },
+    {
+      "name": "CAF5 call88 CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd018",
+      "size": 3,
+      "equals_hex": "010100"
+    },
+    {
+      "name": "CAF5 call88 triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd01b",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "mode2 signal2 reset/restart",
+      "kind": "memory",
+      "address": "0xfebfd01e",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "mode2 signal2 CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd020",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "mode2 signal2 triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd023",
+      "size": 3,
+      "equals_hex": "010101"
+    },
+    {
+      "name": "mode2 signal0 reset/restart",
+      "kind": "memory",
+      "address": "0xfebfd026",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "mode2 signal0 CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd028",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "mode2 signal0 triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd02b",
+      "size": 3,
+      "equals_hex": "010101"
+    },
+    {
+      "name": "mode7 signal1 reset/restart",
+      "kind": "memory",
+      "address": "0xfebfd02e",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "mode7 signal1 CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd030",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "mode7 signal1 triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd033",
+      "size": 3,
+      "equals_hex": "010101"
+    },
+    {
+      "name": "mode2 signal1 reset/restart",
+      "kind": "memory",
+      "address": "0xfebfd036",
+      "size": 2,
+      "equals_hex": "0100"
+    },
+    {
+      "name": "mode2 signal1 CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd038",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "mode2 signal1 triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd03b",
+      "size": 3,
+      "equals_hex": "010101"
+    },
+    {
+      "name": "original frames restore caller stack",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    }
+  ]
+}

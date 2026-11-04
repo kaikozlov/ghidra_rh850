@@ -1,0 +1,208 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_command_recovery_persistent_interrupt_restart_and_holdoff",
+  "entry": {
+    "role": "synthetic-call-only-sequencer-for-original-command-supervision",
+    "scope": "resolved-address",
+    "address": "0xfebf8000"
+  },
+  "max_instructions": 100000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "PSW": "0x20",
+    "lp": "0x798"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1f00",
+      "hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "evidence": "Synthetic bounded caller stack for intact original PREPARE frames; not application initialization."
+    },
+    {
+      "address": "0xfebeac3c",
+      "hex": "00",
+      "evidence": "Synthetic calibration-set selector."
+    },
+    {
+      "address": "0xfebecb00",
+      "hex": "02",
+      "evidence": "Synthetic ID11 controller bank selected for isolated monitor calls."
+    },
+    {
+      "address": "0xfebecab6",
+      "hex": "00",
+      "evidence": "Synthetic holdoff input."
+    },
+    {
+      "address": "0xfebecaa4",
+      "hex": "0000",
+      "evidence": "Synthetic previous doubled controller target."
+    },
+    {
+      "address": "0xfebeaccc",
+      "hex": "00",
+      "evidence": "Synthetic ready gate."
+    },
+    {
+      "address": "0xfebeaccd",
+      "hex": "00",
+      "evidence": "Synthetic ready gate."
+    },
+    {
+      "address": "0xfebeadbf",
+      "hex": "00",
+      "evidence": "Synthetic ready request gate."
+    },
+    {
+      "address": "0xfebecad9",
+      "hex": "00",
+      "evidence": "Synthetic independent ready inhibit."
+    },
+    {
+      "address": "0xfebecab2",
+      "hex": "000000",
+      "evidence": "Synthetic triplicate readiness initial state."
+    },
+    {
+      "address": "0xfebecaae",
+      "hex": "0000",
+      "evidence": "Synthetic ready timeout initial state."
+    },
+    {
+      "address": "0xfebfc000",
+      "hex": "6500",
+      "evidence": "Synthetic request input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc002",
+      "hex": "ff01",
+      "evidence": "Synthetic request input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc004",
+      "hex": "0000",
+      "evidence": "Synthetic request input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc006",
+      "hex": "01",
+      "evidence": "Synthetic request input; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc007",
+      "hex": "6400",
+      "evidence": "Synthetic rate equality interrupts persistence; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc009",
+      "hex": "6500",
+      "evidence": "Synthetic rate restarts eligibility; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc00b",
+      "hex": "01",
+      "evidence": "Synthetic holdoff input; CEE20 deliberately does not read it; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc00c",
+      "hex": "00",
+      "evidence": "Synthetic holdoff release; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc00d",
+      "hex": "07",
+      "evidence": "Synthetic invalid/profile7; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebf8000",
+      "hex": "3f060e80bffe21060cec0c006100260622aebefe270600c0bffe2806020000003f062e80bffe21062e9f08006100260624aebefe270602c0bffe2806020000003f064e80bffe21062e9f08006100260690aebefe270604c0bffe2806020000003f066e80bffe21062e9f080061002606bcadbefe270606c0bffe2806010000003f068e80bffe21062e9f080061003f069c80bffe21068aec0c0061003f06aa80bffe210620ee0c0061003f06b880bffe210620ee0c0061003f06c680bffe210620ee0c0061003f06d480bffe210620ee0c0061003f06e280bffe210620ee0c0061003f06f080bffe210620ee0c0061003f06fe80bffe210620ee0c0061003f060c81bffe210620ee0c0061003f061a81bffe210620ee0c0061003f062881bffe210620ee0c0061003f063681bffe210620ee0c0061003f064481bffe210620ee0c0061003f065281bffe210620ee0c0061003f066081bffe210620ee0c0061003f066e81bffe210620ee0c0061003f067c81bffe210620ee0c0061003f068a81bffe210620ee0c0061003f069881bffe210620ee0c0061003f06a681bffe210620ee0c0061003f06b481bffe210620ee0c0061003f06c281bffe210620ee0c0061003f06d081bffe210620ee0c0061003f06de81bffe210620ee0c0061003f06ec81bffe210620ee0c0061003f06fa81bffe210620ee0c0061003f060882bffe210620ee0c0061003f061682bffe210620ee0c0061003f062482bffe210620ee0c0061003f063282bffe210620ee0c0061003f064082bffe210620ee0c0061003f064e82bffe210620ee0c0061003f065c82bffe210620ee0c0061003f066a82bffe210620ee0c0061003f067882bffe210620ee0c0061003f068682bffe210620ee0c0061003f069482bffe210620ee0c0061003f06a282bffe210620ee0c0061003f06b082bffe210620ee0c0061003f06be82bffe210620ee0c0061003f06cc82bffe210620ee0c0061003f06da82bffe210620ee0c0061003f06e882bffe210620ee0c0061003f06f682bffe210620ee0c0061003f060483bffe210620ee0c0061003f061283bffe210620ee0c0061003f062083bffe210620ee0c0061003f062e83bffe210620ee0c0061003f063c83bffe210620ee0c0061003f064a83bffe210620ee0c0061003f065883bffe210620ee0c0061003f066683bffe210620ee0c0061003f067483bffe210620ee0c0061003f068283bffe210620ee0c0061003f069083bffe210620ee0c0061003f069e83bffe210620ee0c0061003f06ac83bffe210620ee0c0061003f06ba83bffe210620ee0c0061003f06c883bffe210620ee0c0061003f06d683bffe210620ee0c0061003f06e483bffe210620ee0c0061003f06f283bffe210620ee0c0061003f060084bffe210620ee0c0061003f060e84bffe210620ee0c0061003f061c84bffe210620ee0c0061003f062a84bffe210620ee0c0061003f063884bffe210620ee0c0061003f064684bffe210620ee0c0061003f065484bffe210620ee0c0061003f066284bffe210620ee0c0061003f067084bffe210620ee0c0061003f067e84bffe210620ee0c0061003f068c84bffe210620ee0c0061003f069a84bffe210620ee0c0061003f06a884bffe210620ee0c0061003f06b684bffe210620ee0c0061003f06c484bffe210620ee0c0061003f06d284bffe210620ee0c0061003f06e084bffe210620ee0c006100260600d0bffe2706e2cabefe2806080000003f060085bffe21062e9f08006100260622aebefe270607c0bffe2806020000003f062085bffe21062e9f080061003f062e85bffe210620ee0c006100260608d0bffe2706e2cabefe2806080000003f064e85bffe21062e9f08006100260622aebefe270609c0bffe2806020000003f066e85bffe21062e9f080061002606b6cabefe27060bc0bffe2806010000003f068e85bffe21062e9f080061003f069c85bffe210620ee0c0061003f06aa85bffe210620ee0c0061003f06b885bffe210620ee0c0061003f06c685bffe210620ee0c0061003f06d485bffe210620ee0c0061003f06e285bffe210620ee0c0061003f06f085bffe210620ee0c0061003f06fe85bffe210620ee0c0061003f060c86bffe210620ee0c0061003f061a86bffe210620ee0c0061003f062886bffe210620ee0c0061003f063686bffe210620ee0c0061003f064486bffe210620ee0c0061003f065286bffe210620ee0c0061003f066086bffe210620ee0c0061003f066e86bffe210620ee0c0061003f067c86bffe210620ee0c0061003f068a86bffe210620ee0c0061003f069886bffe210620ee0c0061003f06a686bffe210620ee0c0061003f06b486bffe210620ee0c0061003f06c286bffe210620ee0c0061003f06d086bffe210620ee0c0061003f06de86bffe210620ee0c0061003f06ec86bffe210620ee0c0061003f06fa86bffe210620ee0c0061003f060887bffe210620ee0c0061003f061687bffe210620ee0c0061003f062487bffe210620ee0c0061003f063287bffe210620ee0c0061003f064087bffe210620ee0c0061003f064e87bffe210620ee0c0061003f065c87bffe210620ee0c0061003f066a87bffe210620ee0c0061003f067887bffe210620ee0c0061003f068687bffe210620ee0c0061003f069487bffe210620ee0c0061003f06a287bffe210620ee0c0061003f06b087bffe210620ee0c0061003f06be87bffe210620ee0c0061003f06cc87bffe210620ee0c0061003f06da87bffe210620ee0c0061003f06e887bffe210620ee0c0061003f06f687bffe210620ee0c0061003f060488bffe210620ee0c0061003f061288bffe210620ee0c0061003f062088bffe210620ee0c0061003f062e88bffe210620ee0c0061003f063c88bffe210620ee0c0061003f064a88bffe210620ee0c0061003f065888bffe210620ee0c0061003f066688bffe210620ee0c0061003f067488bffe210620ee0c0061003f068288bffe210620ee0c0061003f069088bffe210620ee0c0061003f069e88bffe210620ee0c0061003f06ac88bffe210620ee0c0061003f06ba88bffe210620ee0c0061003f06c888bffe210620ee0c0061003f06d688bffe210620ee0c0061003f06e488bffe210620ee0c0061003f06f288bffe210620ee0c0061003f060089bffe210620ee0c0061003f060e89bffe210620ee0c0061003f061c89bffe210620ee0c0061003f062a89bffe210620ee0c0061003f063889bffe210620ee0c0061003f064689bffe210620ee0c0061003f065489bffe210620ee0c0061003f066289bffe210620ee0c0061003f067089bffe210620ee0c0061003f067e89bffe210620ee0c0061003f068c89bffe210620ee0c0061003f069a89bffe210620ee0c0061003f06a889bffe210620ee0c0061003f06b689bffe210620ee0c0061003f06c489bffe210620ee0c0061003f06d289bffe210620ee0c0061003f06e089bffe210620ee0c0061003f06ee89bffe21067cee0c0061003f06fc89bffe210672ec0c0061003f060a8abffe2106fee70c006100260610d0bffe2706fbcabefe2806030000003f062a8abffe21062e9f08006100260613d0bffe2706b2cabefe2806030000003f064a8abffe21062e9f08006100260616d0bffe2706facabefe2806010000003f066a8abffe21062e9f080061002606b6cabefe27060cc0bffe2806010000003f068a8abffe21062e9f080061003f06988abffe21067cee0c0061003f06a68abffe210672ec0c0061003f06b48abffe2106fee70c006100260617d0bffe2706fbcabefe2806030000003f06d48abffe21062e9f0800610026061ad0bffe2706b2cabefe2806030000003f06f48abffe21062e9f08006100260600cbbefe27060dc0bffe2806010000003f06148bbffe21062e9f080061003f06228bbffe210620ee0c0061003f06308bbffe21067cee0c0061003f063e8bbffe210672ec0c0061003f064c8bbffe2106fee70c00610026061dd0bffe2706e2cabefe2806080000003f066c8bbffe21062e9f08006100260625d0bffe2706fbcabefe2806030000003f068c8bbffe21062e9f08006100260628d0bffe2706b2cabefe2806030000003f06ac8bbffe21062e9f080061002106980700006100",
+      "evidence": "Synthetic call-only RAM sequencer: MOV imm32 encoding (0x0620|register), little-endian u32; MOV continuation,lp; MOV original entry,r1; JMP[r1]=6100. Only original 89F2E copies labeled request inputs/snapshots; no host predicates or flag writes. Immutable CodeFlash SHA256 42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7."
+    }
+  ],
+  "checks": [
+    {
+      "name": "78 eligible calls are not persistent",
+      "kind": "memory",
+      "address": "0xfebfd000",
+      "size": 8,
+      "equals_hex": "4e0064004e000002"
+    },
+    {
+      "name": "rate resets while torque independently reaches79",
+      "kind": "memory",
+      "address": "0xfebfd008",
+      "size": 8,
+      "equals_hex": "000064004f000002"
+    },
+    {
+      "name": "holdoff preserves prior clear transient despite persistent conjunction CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd010",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "holdoff preserves prior clear transient despite persistent conjunction triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd013",
+      "size": 3,
+      "equals_hex": "010101"
+    },
+    {
+      "name": "holdoff does not stop conjunction counters",
+      "kind": "memory",
+      "address": "0xfebfd016",
+      "size": 1,
+      "equals_hex": "01"
+    },
+    {
+      "name": "holdoff release exposes existing conjunction CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd017",
+      "size": 3,
+      "equals_hex": "010100"
+    },
+    {
+      "name": "holdoff release exposes existing conjunction triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd01a",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "profile7 resets counters and loads its calibrated thresholds",
+      "kind": "memory",
+      "address": "0xfebfd01d",
+      "size": 8,
+      "equals_hex": "0000640000000002"
+    },
+    {
+      "name": "profile7 clears transient CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd025",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "profile7 clears transient triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd028",
+      "size": 3,
+      "equals_hex": "010101"
+    },
+    {
+      "name": "original frames restore caller stack",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    }
+  ]
+}

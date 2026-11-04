@@ -1,0 +1,77 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_secoc_transition_pack_capacity_lowbyte_only",
+  "entry": {
+    "role": "retained",
+    "scope": "resolved-address",
+    "address": "0x90566"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00",
+    "r6": "0xfebf3000",
+    "r7": "0xfebf3020",
+    "r8": "0xfebf3030"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1e00",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack for original PREPARE frames; not global RAM initialization."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Synthetic input: Priority-mask saved-depth input0; PMR=FF00; original lock thunks execute."
+    },
+    {
+      "address": "0xfebf3000",
+      "hex": "01000000020000000300022e",
+      "evidence": "Synthetic input: Explicit freshness fields for native packing boundary."
+    },
+    {
+      "address": "0xfebf3020",
+      "hex": "cccccccccccc",
+      "evidence": "Synthetic input: Output packing canary."
+    },
+    {
+      "address": "0xfebf3030",
+      "hex": "2e010000",
+      "evidence": "Synthetic input: Native capacity check reads only low byte, then writes full word."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Exact original-byte return/checkpoint",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Exact packed wire bytes or untouched canary",
+      "kind": "memory",
+      "address": "0xfebf3020",
+      "size": 6,
+      "equals_hex": "000100002038"
+    },
+    {
+      "name": "Native output bit length/capacity result",
+      "kind": "memory",
+      "address": "0xfebf3030",
+      "size": 4,
+      "equals_hex": "2e000000"
+    }
+  ]
+}

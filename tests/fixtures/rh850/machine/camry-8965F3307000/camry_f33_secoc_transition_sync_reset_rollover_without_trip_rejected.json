@@ -1,0 +1,164 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_secoc_transition_sync_reset_rollover_without_trip_rejected",
+  "entry": {
+    "role": "retained",
+    "scope": "resolved-address",
+    "address": "0x90c5e"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00",
+    "r6": "0xfebf3000",
+    "r7": "0xfebf3030",
+    "r8": "0x0",
+    "r9": "0xfebf3040"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1e00",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack for original PREPARE frames; not global RAM initialization."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Synthetic input: Priority-mask saved-depth input0; PMR=FF00; original lock thunks execute."
+    },
+    {
+      "address": "0xfebf3000",
+      "hex": "00000000",
+      "evidence": "Synthetic input: Primary selector0; native sync candidate path."
+    },
+    {
+      "address": "0xfebf3020",
+      "hex": "0007000000",
+      "evidence": "Synthetic input: Synthetic 36-bit sync input trip16||reset20; low wire nibble padding."
+    },
+    {
+      "address": "0xfebf3030",
+      "hex": "2030bffe24000000",
+      "evidence": "Synthetic input: Native sync input pointer/bit-length36 descriptor."
+    },
+    {
+      "address": "0xfebf3040",
+      "hex": "6030bffe5030bffe",
+      "evidence": "Synthetic input: Native sync output descriptor."
+    },
+    {
+      "address": "0xfebf3050",
+      "hex": "24000000",
+      "evidence": "Synthetic input: Sync output bit capacity36."
+    },
+    {
+      "address": "0xfebf3060",
+      "hex": "cccccccccc",
+      "evidence": "Synthetic input: Encoded sync-output canary."
+    },
+    {
+      "address": "0xfebe55c0",
+      "hex": "07000000ffff0f001111000022220200",
+      "evidence": "Synthetic input: Current sync state and distinct pending sync canary."
+    },
+    {
+      "address": "0xfebe55d0",
+      "hex": "f8ffffff0000f0ff",
+      "evidence": "Synthetic input: Complements of initial current sync words."
+    },
+    {
+      "address": "0xfebe55da",
+      "hex": "00",
+      "evidence": "Synthetic input: Trip-wrap flag initiallyclear."
+    },
+    {
+      "address": "0xfebe55dc",
+      "hex": "0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f30",
+      "evidence": "Synthetic input: Both committed and both pending ordinary histories; bounded explicit record canaries."
+    },
+    {
+      "address": "0xfebe560c",
+      "hex": "3132333435363738393a3b3c3d3e3f404142434445464748",
+      "evidence": "Synthetic input: Committed/pending transmit histories canaries."
+    },
+    {
+      "address": "0xfebe5504",
+      "hex": "808182838485868788898a8b8c8d8e8f90919293",
+      "evidence": "Synthetic input: Software key descriptor canary, independent of freshness state."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Exact original-byte return/checkpoint",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Sync committed state changes only after successful callback",
+      "kind": "memory",
+      "address": "0xfebe55c0",
+      "size": 8,
+      "equals_hex": "07000000ffff0f00"
+    },
+    {
+      "name": "Sync candidate staging ownership",
+      "kind": "memory",
+      "address": "0xfebe55c8",
+      "size": 8,
+      "equals_hex": "1111000022220200"
+    },
+    {
+      "name": "Native sync packing or no output",
+      "kind": "memory",
+      "address": "0xfebf3060",
+      "size": 5,
+      "equals_hex": "cccccccccc"
+    },
+    {
+      "name": "Native wrap flag staging/consumption",
+      "kind": "memory",
+      "address": "0xfebe55da",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "Ordinary histories cleared only on accepted trip wrap",
+      "kind": "memory",
+      "address": "0xfebe55dc",
+      "size": 48,
+      "equals_hex": "0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f30"
+    },
+    {
+      "name": "Dependent transmit histories trip-wrap scope",
+      "kind": "memory",
+      "address": "0xfebe560c",
+      "size": 24,
+      "equals_hex": "3132333435363738393a3b3c3d3e3f404142434445464748"
+    },
+    {
+      "name": "Freshness transitions preserve software key descriptor",
+      "kind": "memory",
+      "address": "0xfebe5504",
+      "size": 20,
+      "equals_hex": "808182838485868788898a8b8c8d8e8f90919293"
+    },
+    {
+      "name": "Native sync candidate verdict",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0x22"
+    }
+  ]
+}

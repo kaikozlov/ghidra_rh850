@@ -1,0 +1,411 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_command_recovery_wrapped_multiple_gaps_and_step_ceiling",
+  "entry": {
+    "role": "synthetic-call-only-sequencer-for-original-command-supervision",
+    "scope": "resolved-address",
+    "address": "0xfebf8000"
+  },
+  "max_instructions": 100000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "PSW": "0x20",
+    "lp": "0x798"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1f00",
+      "hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "evidence": "Synthetic bounded caller stack for intact original PREPARE frames; not application initialization."
+    },
+    {
+      "address": "0xfebeac3c",
+      "hex": "00",
+      "evidence": "Synthetic calibration-set selector."
+    },
+    {
+      "address": "0xfebecb00",
+      "hex": "02",
+      "evidence": "Synthetic ID11 controller bank selected for isolated monitor calls."
+    },
+    {
+      "address": "0xfebecab6",
+      "hex": "00",
+      "evidence": "Synthetic holdoff input."
+    },
+    {
+      "address": "0xfebecaa4",
+      "hex": "0000",
+      "evidence": "Synthetic previous doubled controller target."
+    },
+    {
+      "address": "0xfebeaccc",
+      "hex": "00",
+      "evidence": "Synthetic ready gate."
+    },
+    {
+      "address": "0xfebeaccd",
+      "hex": "00",
+      "evidence": "Synthetic ready gate."
+    },
+    {
+      "address": "0xfebeadbf",
+      "hex": "00",
+      "evidence": "Synthetic ready request gate."
+    },
+    {
+      "address": "0xfebecad9",
+      "hex": "00",
+      "evidence": "Synthetic independent ready inhibit."
+    },
+    {
+      "address": "0xfebecab2",
+      "hex": "000000",
+      "evidence": "Synthetic triplicate readiness initial state."
+    },
+    {
+      "address": "0xfebecaae",
+      "hex": "0000",
+      "evidence": "Synthetic ready timeout initial state."
+    },
+    {
+      "address": "0xfebfc000",
+      "hex": "3c",
+      "evidence": "Synthetic native six-bit sequence; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc001",
+      "hex": "03",
+      "evidence": "Synthetic native six-bit sequence; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc002",
+      "hex": "3f",
+      "evidence": "Synthetic native six-bit sequence; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc003",
+      "hex": "07",
+      "evidence": "Synthetic native six-bit sequence; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc004",
+      "hex": "01",
+      "evidence": "Synthetic native six-bit sequence; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc005",
+      "hex": "9c00",
+      "evidence": "Synthetic signed target; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc007",
+      "hex": "9e00",
+      "evidence": "Synthetic prior doubled target; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc009",
+      "hex": "02",
+      "evidence": "Synthetic native sequence gap; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc00a",
+      "hex": "64ff",
+      "evidence": "Synthetic signed target; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc00c",
+      "hex": "62ff",
+      "evidence": "Synthetic prior doubled target; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc00e",
+      "hex": "03",
+      "evidence": "Synthetic native sequence gap; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc00f",
+      "hex": "c800",
+      "evidence": "Synthetic signed target; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc011",
+      "hex": "5a00",
+      "evidence": "Synthetic prior doubled target; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc013",
+      "hex": "05",
+      "evidence": "Synthetic native sequence gap; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc014",
+      "hex": "bc02",
+      "evidence": "Synthetic signed target; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc016",
+      "hex": "9a00",
+      "evidence": "Synthetic prior doubled target; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc018",
+      "hex": "0d",
+      "evidence": "Synthetic native sequence gap; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc019",
+      "hex": "bc02",
+      "evidence": "Synthetic signed target; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc01b",
+      "hex": "9800",
+      "evidence": "Synthetic prior doubled target; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc01d",
+      "hex": "15",
+      "evidence": "Synthetic native sequence gap; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc01e",
+      "hex": "bc02",
+      "evidence": "Synthetic signed target; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc020",
+      "hex": "9600",
+      "evidence": "Synthetic prior doubled target; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc022",
+      "hex": "1d",
+      "evidence": "Synthetic native sequence gap; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc023",
+      "hex": "bc02",
+      "evidence": "Synthetic signed target; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc025",
+      "hex": "9600",
+      "evidence": "Synthetic prior doubled target; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc027",
+      "hex": "26",
+      "evidence": "Synthetic native sequence gap; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc028",
+      "hex": "bc02",
+      "evidence": "Synthetic signed target; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc02a",
+      "hex": "9800",
+      "evidence": "Synthetic prior doubled target; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc02c",
+      "hex": "25",
+      "evidence": "Synthetic native sequence gap; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc02d",
+      "hex": "01",
+      "evidence": "Synthetic alternate calibration-set selector; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebf8000",
+      "hex": "3f060e80bffe21060cec0c0061002606bcadbefe270600c0bffe2806010000003f062e80bffe21062e9f080061003f063c80bffe21068aec0c006100260600d0bffe2706dacabefe2806060000003f065c80bffe21062e9f080061002606bcadbefe270601c0bffe2806010000003f067c80bffe21062e9f080061003f068a80bffe21068aec0c006100260606d0bffe2706dacabefe2806060000003f06aa80bffe21062e9f080061002606bcadbefe270602c0bffe2806010000003f06ca80bffe21062e9f080061003f06d880bffe21068aec0c00610026060cd0bffe2706dacabefe2806060000003f06f880bffe21062e9f080061002606bcadbefe270603c0bffe2806010000003f061881bffe21062e9f080061003f062681bffe21068aec0c006100260612d0bffe2706dacabefe2806060000003f064681bffe21062e9f080061002606bcadbefe270604c0bffe2806010000003f066681bffe21062e9f080061003f067481bffe21068aec0c006100260618d0bffe2706dacabefe2806060000003f069481bffe21062e9f08006100260690aebefe270605c0bffe2806020000003f06b481bffe21062e9f080061002606a4cabefe270607c0bffe2806020000003f06d481bffe21062e9f080061002606bcadbefe270609c0bffe2806010000003f06f481bffe21062e9f080061003f060282bffe21068aec0c0061003f061082bffe21067cee0c0061003f061e82bffe210672ec0c0061003f062c82bffe2106fee70c00610026061ed0bffe2706fbcabefe2806030000003f064c82bffe21062e9f08006100260621d0bffe2706b2cabefe2806030000003f066c82bffe21062e9f08006100260690aebefe27060ac0bffe2806020000003f068c82bffe21062e9f080061002606a4cabefe27060cc0bffe2806020000003f06ac82bffe21062e9f080061002606bcadbefe27060ec0bffe2806010000003f06cc82bffe21062e9f080061003f06da82bffe21068aec0c0061003f06e882bffe21067cee0c0061003f06f682bffe210672ec0c0061003f060483bffe2106fee70c006100260624d0bffe2706fbcabefe2806030000003f062483bffe21062e9f08006100260627d0bffe2706b2cabefe2806030000003f064483bffe21062e9f08006100260690aebefe27060fc0bffe2806020000003f066483bffe21062e9f080061002606a4cabefe270611c0bffe2806020000003f068483bffe21062e9f080061002606bcadbefe270613c0bffe2806010000003f06a483bffe21062e9f080061003f06b283bffe21068aec0c0061003f06c083bffe21067cee0c0061003f06ce83bffe210672ec0c0061003f06dc83bffe2106fee70c00610026062ad0bffe2706fbcabefe2806030000003f06fc83bffe21062e9f0800610026062dd0bffe2706b2cabefe2806030000003f061c84bffe21062e9f08006100260690aebefe270614c0bffe2806020000003f063c84bffe21062e9f080061002606a4cabefe270616c0bffe2806020000003f065c84bffe21062e9f080061002606bcadbefe270618c0bffe2806010000003f067c84bffe21062e9f080061003f068a84bffe21068aec0c0061003f069884bffe21067cee0c0061003f06a684bffe210672ec0c0061003f06b484bffe2106fee70c006100260630d0bffe2706fbcabefe2806030000003f06d484bffe21062e9f08006100260633d0bffe2706b2cabefe2806030000003f06f484bffe21062e9f08006100260690aebefe270619c0bffe2806020000003f061485bffe21062e9f080061002606a4cabefe27061bc0bffe2806020000003f063485bffe21062e9f080061002606bcadbefe27061dc0bffe2806010000003f065485bffe21062e9f080061003f066285bffe21068aec0c0061003f067085bffe21067cee0c0061003f067e85bffe210672ec0c0061003f068c85bffe2106fee70c006100260636d0bffe2706fbcabefe2806030000003f06ac85bffe21062e9f08006100260639d0bffe2706b2cabefe2806030000003f06cc85bffe21062e9f08006100260690aebefe27061ec0bffe2806020000003f06ec85bffe21062e9f080061002606a4cabefe270620c0bffe2806020000003f060c86bffe21062e9f080061002606bcadbefe270622c0bffe2806010000003f062c86bffe21062e9f080061003f063a86bffe21068aec0c0061003f064886bffe21067cee0c0061003f065686bffe210672ec0c0061003f066486bffe2106fee70c00610026063cd0bffe2706fbcabefe2806030000003f068486bffe21062e9f0800610026063fd0bffe2706b2cabefe2806030000003f06a486bffe21062e9f08006100260690aebefe270623c0bffe2806020000003f06c486bffe21062e9f080061002606a4cabefe270625c0bffe2806020000003f06e486bffe21062e9f080061002606bcadbefe270627c0bffe2806010000003f060487bffe21062e9f080061003f061287bffe21068aec0c0061003f062087bffe21067cee0c0061003f062e87bffe210672ec0c0061003f063c87bffe2106fee70c006100260642d0bffe2706fbcabefe2806030000003f065c87bffe21062e9f08006100260645d0bffe2706b2cabefe2806030000003f067c87bffe21062e9f08006100260690aebefe270628c0bffe2806020000003f069c87bffe21062e9f080061002606a4cabefe27062ac0bffe2806020000003f06bc87bffe21062e9f080061002606bcadbefe27062cc0bffe2806010000003f06dc87bffe21062e9f080061003f06ea87bffe21068aec0c0061003f06f887bffe21067cee0c0061003f060688bffe210672ec0c0061003f061488bffe2106fee70c006100260648d0bffe2706fbcabefe2806030000003f063488bffe21062e9f0800610026064bd0bffe2706b2cabefe2806030000003f065488bffe21062e9f0800610026063cacbefe27062dc0bffe2806010000003f067488bffe21062e9f080061003f068288bffe21067cee0c00610026064ed0bffe2706eacabefe2806040000003f06a288bffe21062e9f080061003f06b088bffe210672ec0c0061003f06be88bffe2106fee70c006100260652d0bffe2706fbcabefe2806030000003f06de88bffe21062e9f08006100260655d0bffe2706b2cabefe2806030000003f06fe88bffe21062e9f080061002106980700006100",
+      "evidence": "Synthetic call-only RAM sequencer: MOV imm32 encoding (0x0620|register), little-endian u32; MOV continuation,lp; MOV original entry,r1; JMP[r1]=6100. Only original 89F2E copies labeled request inputs/snapshots; no host predicates or flag writes. Immutable CodeFlash SHA256 42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7."
+    }
+  ],
+  "checks": [
+    {
+      "name": "wrapped-cap previous0 sequence60",
+      "kind": "memory",
+      "address": "0xfebfd000",
+      "size": 6,
+      "equals_hex": "3c003c000800"
+    },
+    {
+      "name": "wrapped-cap previous60 sequence3",
+      "kind": "memory",
+      "address": "0xfebfd006",
+      "size": 6,
+      "equals_hex": "030007000700"
+    },
+    {
+      "name": "wrapped-cap previous3 sequence63",
+      "kind": "memory",
+      "address": "0xfebfd00c",
+      "size": 6,
+      "equals_hex": "3f003c000800"
+    },
+    {
+      "name": "wrapped-cap previous63 sequence7",
+      "kind": "memory",
+      "address": "0xfebfd012",
+      "size": 6,
+      "equals_hex": "070008000800"
+    },
+    {
+      "name": "wrapped-cap previous7 sequence1",
+      "kind": "memory",
+      "address": "0xfebfd018",
+      "size": 6,
+      "equals_hex": "01003a000800"
+    },
+    {
+      "name": "target156 prior158 raw gap1 CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd01e",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "target156 prior158 raw gap1 triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd021",
+      "size": 3,
+      "equals_hex": "010101"
+    },
+    {
+      "name": "target-156 prior-158 raw gap1 CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd024",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "target-156 prior-158 raw gap1 triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd027",
+      "size": 3,
+      "equals_hex": "010101"
+    },
+    {
+      "name": "target200 prior90 raw gap2 CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd02a",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "target200 prior90 raw gap2 triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd02d",
+      "size": 3,
+      "equals_hex": "010101"
+    },
+    {
+      "name": "target700 prior154 raw gap8 CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd030",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "target700 prior154 raw gap8 triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd033",
+      "size": 3,
+      "equals_hex": "010101"
+    },
+    {
+      "name": "target700 prior152 raw gap8 CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd036",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "target700 prior152 raw gap8 triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd039",
+      "size": 3,
+      "equals_hex": "010101"
+    },
+    {
+      "name": "target700 prior150 raw gap8 CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd03c",
+      "size": 3,
+      "equals_hex": "010100"
+    },
+    {
+      "name": "target700 prior150 raw gap8 triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd03f",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "target700 prior150 raw gap9 CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd042",
+      "size": 3,
+      "equals_hex": "010100"
+    },
+    {
+      "name": "target700 prior150 raw gap9 triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd045",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "target700 prior152 raw gap63 CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd048",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "target700 prior152 raw gap63 triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd04b",
+      "size": 3,
+      "equals_hex": "010101"
+    },
+    {
+      "name": "alternate-set ID11 loads exact same absolute and step values",
+      "kind": "memory",
+      "address": "0xfebfd04e",
+      "size": 4,
+      "equals_hex": "d1064e00"
+    },
+    {
+      "name": "alternate-set valid request CAFB/CAFC/CAFD",
+      "kind": "memory",
+      "address": "0xfebfd052",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "alternate-set valid request triplicate ready",
+      "kind": "memory",
+      "address": "0xfebfd055",
+      "size": 3,
+      "equals_hex": "010101"
+    },
+    {
+      "name": "original frames restore caller stack",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    }
+  ]
+}

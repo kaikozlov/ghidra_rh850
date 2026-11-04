@@ -1,0 +1,158 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_command_recovery_sequence_mod64_and_original_reset",
+  "entry": {
+    "role": "synthetic-call-only-sequencer-for-original-command-supervision",
+    "scope": "resolved-address",
+    "address": "0xfebf8000"
+  },
+  "max_instructions": 100000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "PSW": "0x20",
+    "lp": "0x798"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1f00",
+      "hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "evidence": "Synthetic bounded caller stack for intact original PREPARE frames; not application initialization."
+    },
+    {
+      "address": "0xfebfc000",
+      "hex": "00",
+      "evidence": "Synthetic unpacked B6 modulo64 sequence; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc001",
+      "hex": "00",
+      "evidence": "Synthetic unpacked B6 modulo64 sequence; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc002",
+      "hex": "01",
+      "evidence": "Synthetic unpacked B6 modulo64 sequence; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc003",
+      "hex": "3f",
+      "evidence": "Synthetic unpacked B6 modulo64 sequence; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc004",
+      "hex": "00",
+      "evidence": "Synthetic unpacked B6 modulo64 sequence; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc005",
+      "hex": "02",
+      "evidence": "Synthetic unpacked B6 modulo64 sequence; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc006",
+      "hex": "0a",
+      "evidence": "Synthetic unpacked B6 modulo64 sequence; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc007",
+      "hex": "13",
+      "evidence": "Synthetic unpacked B6 modulo64 sequence; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebfc008",
+      "hex": "13",
+      "evidence": "Synthetic unpacked B6 modulo64 sequence; copied by intact original memcpy_forward 89F2E, never a matched-status edit."
+    },
+    {
+      "address": "0xfebf8000",
+      "hex": "3f060e80bffe21060cec0c0061002606bcadbefe270600c0bffe2806010000003f062e80bffe21062e9f080061003f063c80bffe21068aec0c006100260600d0bffe2706dacabefe2806060000003f065c80bffe21062e9f080061002606bcadbefe270601c0bffe2806010000003f067c80bffe21062e9f080061003f068a80bffe21068aec0c006100260606d0bffe2706dacabefe2806060000003f06aa80bffe21062e9f080061002606bcadbefe270602c0bffe2806010000003f06ca80bffe21062e9f080061003f06d880bffe21068aec0c00610026060cd0bffe2706dacabefe2806060000003f06f880bffe21062e9f080061002606bcadbefe270603c0bffe2806010000003f061881bffe21062e9f080061003f062681bffe21068aec0c006100260612d0bffe2706dacabefe2806060000003f064681bffe21062e9f080061002606bcadbefe270604c0bffe2806010000003f066681bffe21062e9f080061003f067481bffe21068aec0c006100260618d0bffe2706dacabefe2806060000003f069481bffe21062e9f080061002606bcadbefe270605c0bffe2806010000003f06b481bffe21062e9f080061003f06c281bffe21068aec0c00610026061ed0bffe2706dacabefe2806060000003f06e281bffe21062e9f080061002606bcadbefe270606c0bffe2806010000003f060282bffe21062e9f080061003f061082bffe21068aec0c006100260624d0bffe2706dacabefe2806060000003f063082bffe21062e9f080061002606bcadbefe270607c0bffe2806010000003f065082bffe21062e9f080061003f065e82bffe21068aec0c00610026062ad0bffe2706dacabefe2806060000003f067e82bffe21062e9f080061002606bcadbefe270608c0bffe2806010000003f069e82bffe21062e9f080061003f06ac82bffe21068aec0c006100260630d0bffe2706dacabefe2806060000003f06cc82bffe21062e9f080061003f06da82bffe21060cec0c0061003f06e882bffe21068aec0c006100260636d0bffe2706dacabefe2806060000003f060883bffe21062e9f080061002106980700006100",
+      "evidence": "Synthetic call-only RAM sequencer: MOV imm32 encoding (0x0620|register), little-endian u32; MOV continuation,lp; MOV original entry,r1; JMP[r1]=6100. Only original 89F2E copies labeled request inputs/snapshots; no host predicates or flag writes. Immutable CodeFlash SHA256 42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7."
+    }
+  ],
+  "checks": [
+    {
+      "name": "previous0 current0 raw/effective gap",
+      "kind": "memory",
+      "address": "0xfebfd000",
+      "size": 6,
+      "equals_hex": "000000000100"
+    },
+    {
+      "name": "previous0 current0 raw/effective gap",
+      "kind": "memory",
+      "address": "0xfebfd006",
+      "size": 6,
+      "equals_hex": "000000000100"
+    },
+    {
+      "name": "previous0 current1 raw/effective gap",
+      "kind": "memory",
+      "address": "0xfebfd00c",
+      "size": 6,
+      "equals_hex": "010001000100"
+    },
+    {
+      "name": "previous1 current63 raw/effective gap",
+      "kind": "memory",
+      "address": "0xfebfd012",
+      "size": 6,
+      "equals_hex": "3f003e000800"
+    },
+    {
+      "name": "previous63 current0 raw/effective gap",
+      "kind": "memory",
+      "address": "0xfebfd018",
+      "size": 6,
+      "equals_hex": "000001000100"
+    },
+    {
+      "name": "previous0 current2 raw/effective gap",
+      "kind": "memory",
+      "address": "0xfebfd01e",
+      "size": 6,
+      "equals_hex": "020002000200"
+    },
+    {
+      "name": "previous2 current10 raw/effective gap",
+      "kind": "memory",
+      "address": "0xfebfd024",
+      "size": 6,
+      "equals_hex": "0a0008000800"
+    },
+    {
+      "name": "previous10 current19 raw/effective gap",
+      "kind": "memory",
+      "address": "0xfebfd02a",
+      "size": 6,
+      "equals_hex": "130009000800"
+    },
+    {
+      "name": "previous19 current19 raw/effective gap",
+      "kind": "memory",
+      "address": "0xfebfd030",
+      "size": 6,
+      "equals_hex": "130000000100"
+    },
+    {
+      "name": "original initializer resets previous sequence to zero",
+      "kind": "memory",
+      "address": "0xfebfd036",
+      "size": 6,
+      "equals_hex": "130013000800"
+    },
+    {
+      "name": "original frames restore caller stack",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    }
+  ]
+}
