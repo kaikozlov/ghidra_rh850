@@ -1,0 +1,92 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_scheduler_publication_foreground_wait_no_service",
+  "entry": {
+    "role": "original-66062-foreground-poll-delay-and-EIRF-coalescing",
+    "scope": "resolved-address",
+    "address": "0x66062"
+  },
+  "max_instructions": 64,
+  "reset": "none",
+  "gpr_fill": "0",
+  "registers": {
+    "sp": "0xfebe7800",
+    "gp": "0xfebeb800",
+    "lp": "0x798",
+    "PSW": "0",
+    "PMR": "0"
+  },
+  "memory": [
+    {
+      "address": "0xfebe77f8",
+      "size": 8,
+      "fill": 165,
+      "evidence": "Bounded original foreground PREPARE frame."
+    },
+    {
+      "address": "0xffffb110",
+      "hex": "cf00",
+      "evidence": "Exact original reset EIC136 masked priority15 table-vector poll source. Original66066 tests EIRF and6606C clears only its request latch."
+    },
+    {
+      "address": "0xfebe39db",
+      "hex": "31",
+      "evidence": "Synthetic retained original foreground completion counter; no foreground body has serviced a timer request."
+    },
+    {
+      "address": "0xfebe547a",
+      "hex": "2000",
+      "evidence": "Synthetic retained SecOC profile2 queue-length marker; foreground79EDE/6A410 not entered in bounded delayed-service window."
+    },
+    {
+      "address": "0xfebe6af4",
+      "hex": "4523",
+      "evidence": "Synthetic retained selected motor-command generation; no new CH1 publication supplied during this foreground wait."
+    }
+  ],
+  "events": [],
+  "checks": [
+    {
+      "name": "foreground-completion-counter-retained",
+      "kind": "memory",
+      "address": "0xfebe39db",
+      "size": 1,
+      "equals_hex": "31"
+    },
+    {
+      "name": "foreground-owned-queued-marker-not-consumed",
+      "kind": "memory",
+      "address": "0xfebe547a",
+      "size": 2,
+      "equals_hex": "2000"
+    },
+    {
+      "name": "motor-command-retained",
+      "kind": "memory",
+      "address": "0xfebe6af4",
+      "size": 2,
+      "equals_hex": "4523"
+    },
+    {
+      "name": "one-bit-request-latch-cleared-or-idle",
+      "kind": "memory",
+      "address": "0xffffb110",
+      "size": 2,
+      "equals_hex": "cf00"
+    },
+    {
+      "name": "interrupt-enter",
+      "kind": "event-count",
+      "operation": "interrupt-enter",
+      "equals": "0"
+    },
+    {
+      "name": "interrupt-return",
+      "kind": "event-count",
+      "operation": "interrupt-return",
+      "equals": "0"
+    }
+  ],
+  "stop_addresses": [],
+  "expected_termination": "instruction-budget"
+}

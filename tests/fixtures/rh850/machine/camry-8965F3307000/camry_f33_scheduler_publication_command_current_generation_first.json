@@ -1,0 +1,220 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_scheduler_publication_command_current_generation_first",
+  "entry": {
+    "role": "original-byte-publication-sequence-not-interrupt-proof",
+    "scope": "resolved-address",
+    "address": "0xfebe0000"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0",
+  "registers": {
+    "sp": "0xfebe7800",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe6af4",
+      "hex": "0000",
+      "evidence": "Explicit synthetic exact reader inputs/external snapshots; original code owns all histories between calls, not captured live state."
+    },
+    {
+      "address": "0xfebeac2d",
+      "hex": "00",
+      "evidence": "Explicit synthetic exact reader inputs/external snapshots; original code owns all histories between calls, not captured live state."
+    },
+    {
+      "address": "0xfebeac39",
+      "hex": "00",
+      "evidence": "Explicit synthetic exact reader inputs/external snapshots; original code owns all histories between calls, not captured live state."
+    },
+    {
+      "address": "0xfebeac3e",
+      "hex": "00",
+      "evidence": "Explicit synthetic exact reader inputs/external snapshots; original code owns all histories between calls, not captured live state."
+    },
+    {
+      "address": "0xfebeac54",
+      "hex": "000000000000",
+      "evidence": "Explicit synthetic exact reader inputs/external snapshots; original code owns all histories between calls, not captured live state."
+    },
+    {
+      "address": "0xfebeac70",
+      "hex": "0000",
+      "evidence": "Explicit synthetic exact reader inputs/external snapshots; original code owns all histories between calls, not captured live state."
+    },
+    {
+      "address": "0xfebeac76",
+      "hex": "0000",
+      "evidence": "Explicit synthetic exact reader inputs/external snapshots; original code owns all histories between calls, not captured live state."
+    },
+    {
+      "address": "0xfebeac7a",
+      "hex": "0000",
+      "evidence": "Explicit synthetic exact reader inputs/external snapshots; original code owns all histories between calls, not captured live state."
+    },
+    {
+      "address": "0xfebeac7e",
+      "hex": "0000",
+      "evidence": "Explicit synthetic exact reader inputs/external snapshots; original code owns all histories between calls, not captured live state."
+    },
+    {
+      "address": "0xfebeb354",
+      "hex": "00",
+      "evidence": "Explicit synthetic exact reader inputs/external snapshots; original code owns all histories between calls, not captured live state."
+    },
+    {
+      "address": "0xfebeb3fc",
+      "hex": "00",
+      "evidence": "Explicit synthetic exact reader inputs/external snapshots; original code owns all histories between calls, not captured live state."
+    },
+    {
+      "address": "0xfebeb3fe",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic exact reader inputs/external snapshots; original code owns all histories between calls, not captured live state."
+    },
+    {
+      "address": "0xfebec128",
+      "hex": "0000",
+      "evidence": "Explicit synthetic exact reader inputs/external snapshots; original code owns all histories between calls, not captured live state."
+    },
+    {
+      "address": "0xfebec172",
+      "hex": "0000",
+      "evidence": "Explicit synthetic exact reader inputs/external snapshots; original code owns all histories between calls, not captured live state."
+    },
+    {
+      "address": "0xfebecc60",
+      "hex": "00003412452356340000",
+      "evidence": "Explicit synthetic exact reader inputs/external snapshots; original code owns all histories between calls, not captured live state."
+    },
+    {
+      "address": "0xfebecc98",
+      "hex": "00",
+      "evidence": "Explicit synthetic exact reader inputs/external snapshots; original code owns all histories between calls, not captured live state."
+    },
+    {
+      "address": "0xfebee406",
+      "hex": "00",
+      "evidence": "Explicit synthetic exact reader inputs/external snapshots; original code owns all histories between calls, not captured live state."
+    },
+    {
+      "address": "0xfebee40a",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic exact reader inputs/external snapshots; original code owns all histories between calls, not captured live state."
+    },
+    {
+      "address": "0xfebee410",
+      "hex": "0000",
+      "evidence": "Explicit synthetic exact reader inputs/external snapshots; original code owns all histories between calls, not captured live state."
+    },
+    {
+      "address": "0xfebee416",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic exact reader inputs/external snapshots; original code owns all histories between calls, not captured live state."
+    },
+    {
+      "address": "0xfebee780",
+      "hex": "00",
+      "evidence": "Explicit synthetic exact reader inputs/external snapshots; original code owns all histories between calls, not captured live state."
+    },
+    {
+      "address": "0xfebee782",
+      "hex": "0000",
+      "evidence": "Explicit synthetic exact reader inputs/external snapshots; original code owns all histories between calls, not captured live state."
+    },
+    {
+      "address": "0xfebeeb10",
+      "hex": "0000",
+      "evidence": "Explicit synthetic exact reader inputs/external snapshots; original code owns all histories between calls, not captured live state."
+    },
+    {
+      "address": "0xfebeeb1e",
+      "hex": "0000",
+      "evidence": "Explicit synthetic exact reader inputs/external snapshots; original code owns all histories between calls, not captured live state."
+    },
+    {
+      "address": "0xfebe7400",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "Bounded synthetic original-call stack."
+    },
+    {
+      "address": "0xfebe8ffc",
+      "size": 264,
+      "fill": 165,
+      "evidence": "Observation-only scratch with A5 canaries; original89F2E copies out only."
+    },
+    {
+      "address": "0xfebe0000",
+      "hex": "3f060e00befe2106ae0a0d0061003f061c00befe21063ef30b0061003f062a00befe21064c5c030061003f063800befe2106ba87030061002106980700006100",
+      "evidence": "Transparent synthetic MOV/JMP call-only sequencer. No internal-history stores, original-byte overlays or skipped callbacks. Original calls: 0xd0aae,0xbf33e,0x35c4c,0x387ba. Explicit new input snapshots use original89F2E; all observations are copied out only."
+    }
+  ],
+  "checks": [
+    {
+      "name": "original-sequence-return",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "diagnostic-AC56",
+      "kind": "memory",
+      "address": "0xfebeac56",
+      "size": 2,
+      "equals_hex": "3412"
+    },
+    {
+      "name": "motor-AC54",
+      "kind": "memory",
+      "address": "0xfebeac54",
+      "size": 2,
+      "equals_hex": "4523"
+    },
+    {
+      "name": "published-diagnostic-and-motor",
+      "kind": "memory",
+      "address": "0xfebee40a",
+      "size": 4,
+      "equals_hex": "34124523"
+    },
+    {
+      "name": "sampled-motor-versus-diagnostic",
+      "kind": "memory",
+      "address": "0xfebe6af4",
+      "size": 6,
+      "equals_hex": "bbdc34125634"
+    },
+    {
+      "name": "actual-current-consumer-input",
+      "kind": "memory",
+      "address": "0xfebe6e0a",
+      "size": 2,
+      "equals_hex": "bbdc"
+    },
+    {
+      "name": "lower-observation-canary",
+      "kind": "memory",
+      "address": "0xfebe8ffc",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    },
+    {
+      "name": "upper-observation-canary",
+      "kind": "memory",
+      "address": "0xfebe9100",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    }
+  ]
+}

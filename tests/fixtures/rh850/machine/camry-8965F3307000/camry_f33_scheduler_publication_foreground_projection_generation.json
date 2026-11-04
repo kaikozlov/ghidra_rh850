@@ -1,0 +1,573 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_scheduler_publication_foreground_projection_generation",
+  "entry": {
+    "role": "original-BCD62-snapshot-prefix-before-untouched-control-update",
+    "scope": "resolved-address",
+    "address": "0xbcd62"
+  },
+  "max_instructions": 10000,
+  "reset": "none",
+  "gpr_fill": "0",
+  "registers": {
+    "sp": "0xfebe7800",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0xbd812"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe7f50",
+      "hex": "000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebe8c19",
+      "hex": "01",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebeacc0",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebeaf44",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebeafd0",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebeafd4",
+      "hex": "000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebeafdc",
+      "hex": "78568000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebeafe4",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebeafe8",
+      "hex": "0000000000020000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebeb00a",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebeb040",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebeb04c",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebeb054",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebeb064",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebeb078",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebeb07a",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebeb080",
+      "hex": "000000000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebeb112",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebeb11a",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebeb121",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebeb138",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebeb13e",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebeb1a4",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebeb1a7",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebeb1ce",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebeb30c",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebeb446",
+      "hex": "000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebeb44c",
+      "hex": "000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebebca4",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebebca6",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebebcb0",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebebcc2",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebebd80",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebebd9e",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebebded",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebebe02",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebebe1c",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebebe54",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebebe90",
+      "hex": "0000000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebebe96",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebebe99",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebebe9f",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebebeb8",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebebed4",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebebede",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebebee2",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebebef0",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebebef8",
+      "hex": "0000000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebebf00",
+      "hex": "000000000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef000",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef013",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef028",
+      "hex": "000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef02e",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef030",
+      "hex": "0000000000000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef03a",
+      "hex": "000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef03f",
+      "hex": "000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef043",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef046",
+      "hex": "000000000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef059",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef05c",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef060",
+      "hex": "0000000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef068",
+      "hex": "000000000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef06f",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef072",
+      "hex": "000000000000000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef07c",
+      "hex": "00000000000000000000000000000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef08d",
+      "hex": "0000000000000000000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef09a",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef09d",
+      "hex": "000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef0a2",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef0a6",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef0c0",
+      "hex": "000000000000000000000000000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef0d0",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef0d6",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef0dc",
+      "hex": "00000000000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef0e4",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef0e8",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef0ea",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef0ed",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef0f0",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef0fa",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef10c",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef11b",
+      "hex": "00000000000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef124",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef12a",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef130",
+      "hex": "0000000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef136",
+      "hex": "00000000000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef13e",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef145",
+      "hex": "000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef14c",
+      "hex": "000000000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef154",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef158",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef16a",
+      "hex": "0000000000000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef174",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef184",
+      "hex": "640000000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef18c",
+      "hex": "0000000000000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef196",
+      "hex": "0000000000000000000000000000000000000000000000000000000000000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef1b8",
+      "hex": "0000000000000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef1c2",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef1cc",
+      "hex": "0000000000000000000000000000000000000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef1e2",
+      "hex": "0000000000000000000000000000000000000000000000000000000000000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebef22c",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse foreground acquisition/feedback snapshots consumed by original BCD62; no control-state/history injection."
+    },
+    {
+      "address": "0xfebe7400",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "Bounded original BCD62 PREPARE stack, including original fixed-point helper output slots."
+    }
+  ],
+  "checks": [
+    {
+      "name": "stop-before-original-D1130-control-call",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0xbd812"
+    },
+    {
+      "name": "foreground-32bit-scaled-generation",
+      "kind": "memory",
+      "address": "0xfebeaeec",
+      "size": 4,
+      "equals_hex": "2d000000"
+    },
+    {
+      "name": "foreground-32bit-raw-generation",
+      "kind": "memory",
+      "address": "0xfebeaee8",
+      "size": 4,
+      "equals_hex": "00020000"
+    },
+    {
+      "name": "foreground-16bit-raw-generation",
+      "kind": "memory",
+      "address": "0xfebeae3e",
+      "size": 2,
+      "equals_hex": "8000"
+    },
+    {
+      "name": "foreground-16bit-scaled-generation",
+      "kind": "memory",
+      "address": "0xfebeadf0",
+      "size": 2,
+      "equals_hex": "6801"
+    }
+  ]
+}

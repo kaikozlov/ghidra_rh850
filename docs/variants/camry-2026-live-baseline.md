@@ -3068,6 +3068,60 @@ Deterministic evidence is carried by
 `data/generated/camry_8965F3307000_internal_assist_oracles.json` and
 `tests/targets/camry/verify_camry_8965F3307000_internal_assist_oracles.py` (VAR-083).
 
+### Native scheduling and publication generations
+
+All 17 `camry_f33_scheduler_publication_*.json` scenarios passed in
+`build/out/firmware-question-campaign/scheduler-publication-final`.
+Native cases execute the immutable vector table at `20200`, original
+interrupt wrappers, task bodies and, where stated, original `EIRET`.
+
+| Owner | Original ordering relevant to command generation |
+|---|---|
+|CH0, EIC133, priority6|`713B0 -> 65FAE`; active `5E202` calls `387CE` then `387BA`, latching diagnostic and motor inputs respectively.|
+|CH1, EIC134, priority7|`7145A -> 65FEA -> 6679E -> 5899E`; `C2000` runs `BCAA6/BCBD8`, assist producers and `D0AAE` in captured modes300..522, then `BF33E`; later `5E420 -> 35C4C` runs for modes≥200.|
+|CH2, EIC135, priority9|`71506/71508 -> 66026 -> 58A50`; `C20F6/BCA62` runs `BC96A`, observer scaling, then `BCA08` and observer publication.|
+|Foreground|`66062/667E6 -> 58B5E -> C26A4 -> BCD62 -> D0EEC`; diagnostic/communication ordering is detailed in §68.3.|
+
+**The normal `D0AAE -> BF33E -> 35C4C` sequence belongs to one CH1 task.**
+`35C4C` cannot self-preempt the preceding `BF33E`. A native repeated CH1
+request during `BF33E` remains pending while `EE40A` is new and `EE40C`
+is old; three requests during the active handler coalesce into one additional
+invocation. Both invocations return through the original wrapper, preserving
+the saved system-register and stack state.
+
+**CH0 can consume a mixed diagnostic/motor generation.** Original `35C4C`
+stores `6AF6` at `35CDE`, `6AF8` at `35CE0`, then motor `6AF4` at `35CE2`.
+The native active-mode scenario requests CH0 immediately before `35CE2`.
+Original `5E202 -> 387CE/387BA` then observes new diagnostic `6E22/6E24=0x1111`
+alongside old motor `6E0A=0x3333`, with `EIPC=35CE2` and both priorities active.
+It stops after those actual consumers at `5E220`. A separate nested-interrupt
+case executes both complete wrappers and original returns.
+
+**Snapshot exclusion is owner-specific.** `5897A` masks with `PMR=FFC0`
+around CH1's acquisition snapshot, then restores the saved mask.
+`58A1C` uses `FFC0` for acquisition and `FF80` for feedback; foreground
+`58B1A` additionally uses `FF00` for monitor/health/service sources.
+These respectively mask priorities≥6, ≥7 and ≥8. The native mask scenario
+requests CH0 while `FFC0` is active, verifies it remains pending through the
+snapshot, then executes CH0 after the original restore. The completed
+snapshot retains the earlier source pair even when CH0 later updates it.
+The many-field banks are not one universal atomic generation; `AC3F` is
+not a seqlock consumed by `BF33E`.
+
+**Consumers retain their published generation.** Actual `BCBD8 -> C55B4`
+and `BCA08 -> C56C0` sequences distinguish changing the upstream snapshot
+from republishing `AC88` or `AC14`. Repeated consumers before republication
+keep the old input and zero new delta; republication exposes the new input
+and its exact delta. Additional cases exercise grouped inhibition and
+derived/raw fields from the same CH1 snapshot.
+
+**Foreground delay is not extra service invocations.** Original `66062`
+polling preserves the selected progress counter, SecOC queue-length marker
+and motor command through 64 instruction boundaries. Three native EIC136
+requests coalesce into one pending flag; original `6606C` clears it before
+the foreground body. These are invocation/order observations, not inferred
+elapsed-time measurements.
+
 ## 35. Hidden-ingress false-negative audit: no concrete alternate producer found; residuals closed in §36
 
 The exact B6-independent `D0218` path reaches physical actuation. This audit is a bounded false-negative census of hidden mutation/ingress mechanisms; those mechanisms are not required to explain the retained LTA/LCA observation.
@@ -6604,14 +6658,24 @@ The critical ordering is inside exact `0x7A254`:
 `79EDE` is the unique direct caller of `809FE`; `809FE` uniquely owns `808D6`, which uniquely
 owns `80884`. Controller-0 callback slot0 is exact CanIf receive function `0x810F2`, and all
 43 normal descriptor-control bytes are `0x01`, selecting that normal callback path. The
-low-level hardware receive ISR (`71508 -> ... -> 79EBA -> 83CE4 -> 83E0C`) fills the software
-receive ring; the foreground `79EDE/809FE` drain promotes those entries through CanIf/PduR.
+CH2 interrupt path (`71508 -> ... -> 79EBA -> 83CE4 -> 83E0C`) fills the
+software receive ring; foreground `79EDE/809FE` promotes it through CanIf/PduR.
 
 Therefore a protected B6 queue transaction can be created by `79EDE` and consumed later by
 `6A410` **inside one foreground invocation**. It need never exist immediately before the outer
 aggregate and need never persist into the between-tick wait. That is the structural reason
 Phase P and Phase-Q-v1 cannot be interpreted as queue-admission negatives. This also removes
 the need to race the active RSCFD head from foreground code.
+
+The complete outer `667E6` order is
+`69CA2 -> 7A254 -> 988C2(DCM) -> 69E7C -> 58B5E -> 66512`.
+Within `58B5E`, the snapshot precedes monitor `5F610`, control `C26A4`
+and diagnostic-mode `5F91C`. The foreground control projection `BCD62`
+publishes its fields before `D1130/D0EEC`; it is distinct from CH1
+`BCAA6/BCBD8` and CH2 `BC96A/BCA08`. A DCM change before `58B5E` can
+therefore affect that invocation, while the later diagnostic-mode step is
+not retroactively before control. §34 owns the native preemption,
+priority-mask, publication-generation and delayed-service evidence.
 
 ### 68.4 VAR-152 replaces Phase Q with a deterministic mid-aggregate observer
 

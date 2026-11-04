@@ -1,0 +1,674 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_scheduler_publication_native_ch1_self_request_returns_and_coalesces",
+  "entry": {
+    "role": "original-foreground-wait-with-native-ch1-preemption",
+    "scope": "resolved-address",
+    "address": "0x66062"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0",
+  "registers": {
+    "sp": "0xfebe7800",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0",
+    "PMR": "0",
+    "RBASE": "0",
+    "INTBP": "0x20200",
+    "EIWR": "0x12345678",
+    "CTPC": "0x87654320",
+    "CTPSW": "0",
+    "MPAT0": "0",
+    "MPAT1": "0",
+    "MPAT2": "0",
+    "MPAT3": "0",
+    "MPAT4": "0",
+    "MPAT5": "0",
+    "MPAT6": "0",
+    "MPAT7": "0",
+    "MPAT8": "0",
+    "MPAT9": "0",
+    "MPAT10": "0",
+    "MPAT11": "0",
+    "MPAT12": "0",
+    "MPAT13": "0",
+    "MPAT14": "0",
+    "MPAT15": "0"
+  },
+  "stop_addresses": [
+    "0x66066"
+  ],
+  "memory": [
+    {
+      "address": "0xfebeab80",
+      "size": 128,
+      "fill": 0,
+      "evidence": "Exact bounded32-word dummy-read window of original65D14: MOV AB80, MOV AC00, subtract/shift2, indexed SLD.W at65D30. Second original CH1 completion naturally takes65D38 odd-counter delay; no instructions skipped or history altered between invocations."
+    },
+    {
+      "address": "0xffe05000",
+      "hex": "4f000000",
+      "evidence": "Exact equivalent original60B26 unit0 configuration from ROM31238; no received frame supplied."
+    },
+    {
+      "address": "0xffe05010",
+      "hex": "0b040000",
+      "evidence": "Exact equivalent original60B26 unit0 configuration from ROM31240/31248."
+    },
+    {
+      "address": "0xffe05014",
+      "hex": "00040005",
+      "evidence": "Exact original60B26 unit0 RSCFG2 from ROM31248; separate registered32-bit preload."
+    },
+    {
+      "address": "0xffe0501c",
+      "hex": "05000000",
+      "evidence": "Exact equivalent original60BDA final MDC5 after configuration; permits native capture-status acknowledgement without inventing reception."
+    },
+    {
+      "address": "0xffe05024",
+      "hex": "05000000",
+      "evidence": "Exact matching native60AE0 mode echo after MDC5. RunP1MEMachine.Rsent.loadInitialState requires MST=MDC; this is idle operating mode, not pending-frame/interrupt state."
+    },
+    {
+      "address": "0xffe06000",
+      "hex": "4f000000",
+      "evidence": "Exact equivalent original60B26 unit1 configuration from ROM3123C; no received frame supplied."
+    },
+    {
+      "address": "0xffe06010",
+      "hex": "0b040000",
+      "evidence": "Exact equivalent original60B26 unit1 configuration from ROM31244/3124C."
+    },
+    {
+      "address": "0xffe06014",
+      "hex": "00040005",
+      "evidence": "Exact original60B26 unit1 RSCFG2 from ROM3124C; separate registered32-bit preload."
+    },
+    {
+      "address": "0xffe0601c",
+      "hex": "05000000",
+      "evidence": "Exact equivalent original60BDA final MDC5 after configuration; no received status or completion injected."
+    },
+    {
+      "address": "0xffe06024",
+      "hex": "05000000",
+      "evidence": "Exact matching native60AE0 mode echo after MDC5; no capture completion or received flags supplied."
+    },
+    {
+      "address": "0xfeef90f8",
+      "hex": "000000000000000000000000000000000000000000088000000000000000000000000000000000000000000000088000000000000000000000000000000000000000000000088000000000000000000000000000000000000000000000088000",
+      "evidence": "Exact equivalent original60AA8 reset for four24-byte capture records: five zero words then00800800. Not a received record or fabricated DMA completion."
+    },
+    {
+      "address": "0xfebe39d9",
+      "hex": "00",
+      "evidence": "Explicit synthetic original CH1 delay gate and completion counter; original65D38 reads before original66020 increments."
+    },
+    {
+      "address": "0xfebe5f28",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe5f34",
+      "hex": "0000000000000000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe5f40",
+      "hex": "0000000000000000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe686c",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe6878",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe68b4",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe6954",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe6a62",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe6a68",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe6abc",
+      "hex": "000000000000000000000000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe6af0",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe6d70",
+      "hex": "000000000000000000000000000000000000000000000000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe71ec",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe71f2",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe7567",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe7bbc",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe7d74",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe7da6",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe7db0",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe7df8",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe7e0c",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe7e1c",
+      "hex": "00000000000000000000000000000000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe7e2e",
+      "hex": "000000000000000000000000000000000000000000000000000000000000000000000000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe7e54",
+      "hex": "000000000000000000000000000000000000000000000000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe7ea8",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe7f3a",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe7f68",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe80a0",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe80a5",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe8152",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe81e6",
+      "hex": "000000000000000000000000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe8244",
+      "hex": "00000000000000000000000000000000000000000000000000000000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe8a1c",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe8b28",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe8b5e",
+      "hex": "0000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe8c02",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe8c0e",
+      "hex": "ffff",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe8db8",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebeac2d",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebeac39",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebeac3e",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebeac54",
+      "hex": "222211110000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebeac70",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebeac76",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebeac7a",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebeac7e",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebeacf1",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebeacf5",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebead0a",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebead39",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebead93",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebeae12",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebeae16",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebeae36",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebeae58",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebeaecc",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebeaf3d",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebeaf40",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebeb11a",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebeb13c",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebeb142",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebeb354",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebeb384",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebeb38a",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebeb3fc",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebeb3fe",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebebe60",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebebe6e",
+      "hex": "000000000000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebebe78",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebebe82",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebebe9b",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebebeb8",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebebee2",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebee8cc",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebeec00",
+      "hex": "000000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebeec04",
+      "hex": "0000000000000000000000000000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebeec14",
+      "hex": "0000000000000000000000000000000000000000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebf0668",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebf10a4",
+      "hex": "55555555",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebf10c8",
+      "hex": "aaaaaaaa",
+      "evidence": "Explicit synthetic sparse low-mode CH1 input/read state; exact load addresses recovered from original snapshot leaves. Not captured RAM or broad zero-fill."
+    },
+    {
+      "address": "0xfebe7400",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "Bounded synthetic interrupted foreground stack and full original IRQ context frame."
+    },
+    {
+      "address": "0xfebe0b00",
+      "size": 1280,
+      "fill": 165,
+      "evidence": "Bounded synthetic original fixed CH1 stack; original7145A saves/restores all context and71502 executes EIRET."
+    },
+    {
+      "address": "0xffffb10c",
+      "hex": "4700",
+      "evidence": "Original62DD0 setup EIC134 table-vector priority7; original immutable20200 vector table134 points7145A."
+    },
+    {
+      "address": "0xffffb110",
+      "hex": "cf00",
+      "evidence": "Original masked foreground poll EIC136; no timer request supplied."
+    },
+    {
+      "address": "0xfebe6af4",
+      "hex": "3333",
+      "evidence": "Synthetic retained motor-command generation; captured before foreground or CH1 recomputation."
+    },
+    {
+      "address": "0xfebe6e0a",
+      "hex": "4444",
+      "evidence": "Synthetic retained current-consumer generation; low mode must not advance control."
+    },
+    {
+      "address": "0xfebee40a",
+      "hex": "aaaa5555",
+      "evidence": "Synthetic old published diagnostic/motor command siblings; distinguish halfword generations at decisive stores."
+    }
+  ],
+  "events": [
+    {
+      "kind": "interrupt",
+      "channel": 134,
+      "after_instructions": 0,
+      "evidence": "Synthetic native CH1 scheduling edge; no task calls or callback replacement."
+    },
+    {
+      "kind": "interrupt",
+      "channel": 134,
+      "after_instructions": 724,
+      "evidence": "Synthetic repeat of original CH1 source while its own priority7 handler is active at BF34C publication boundary; INTC must retain and defer, not recursively call35C4C."
+    },
+    {
+      "kind": "interrupt",
+      "channel": 134,
+      "after_instructions": 725,
+      "evidence": "Synthetic repeat of original CH1 source while its own priority7 handler is active at BF34C publication boundary; INTC must retain and defer, not recursively call35C4C."
+    },
+    {
+      "kind": "interrupt",
+      "channel": 134,
+      "after_instructions": 726,
+      "evidence": "Synthetic repeat of original CH1 source while its own priority7 handler is active at BF34C publication boundary; INTC must retain and defer, not recursively call35C4C."
+    }
+  ],
+  "checks": [
+    {
+      "name": "original-boundary",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x66066"
+    },
+    {
+      "name": "diagnostic-new-generation",
+      "kind": "memory",
+      "address": "0xfebee40a",
+      "size": 2,
+      "equals_hex": "1111"
+    },
+    {
+      "name": "motor-generation",
+      "kind": "memory",
+      "address": "0xfebee40c",
+      "size": 2,
+      "equals_hex": "2222"
+    },
+    {
+      "name": "retained-motor-command-not-recomputed",
+      "kind": "memory",
+      "address": "0xfebe6af4",
+      "size": 2,
+      "equals_hex": "3333"
+    },
+    {
+      "name": "retained-current-consumer-not-recomputed",
+      "kind": "memory",
+      "address": "0xfebe6e0a",
+      "size": 2,
+      "equals_hex": "4444"
+    },
+    {
+      "name": "interrupt-enter",
+      "kind": "event-count",
+      "operation": "interrupt-enter",
+      "equals": "2"
+    },
+    {
+      "name": "interrupt-return",
+      "kind": "event-count",
+      "operation": "interrupt-return",
+      "equals": "2"
+    },
+    {
+      "name": "active-priority",
+      "kind": "register",
+      "register": "ISPR",
+      "equals": "0"
+    },
+    {
+      "name": "native-request-latch",
+      "kind": "memory",
+      "address": "0xffffb10c",
+      "size": 2,
+      "equals_hex": "4700"
+    },
+    {
+      "name": "EIWR-preserved",
+      "kind": "register",
+      "register": "EIWR",
+      "equals": "0x12345678"
+    },
+    {
+      "name": "CTPC-preserved",
+      "kind": "register",
+      "register": "CTPC",
+      "equals": "0x87654320"
+    },
+    {
+      "name": "CTPSW-preserved",
+      "kind": "register",
+      "register": "CTPSW",
+      "equals": "0"
+    },
+    {
+      "name": "stack-restored",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe77f8"
+    },
+    {
+      "name": "priority-mask-restored",
+      "kind": "register",
+      "register": "PMR",
+      "equals": "0"
+    },
+    {
+      "name": "original-ch1-completion-count",
+      "kind": "memory",
+      "address": "0xfebe39d9",
+      "size": 1,
+      "equals_hex": "02"
+    }
+  ],
+  "expected_termination": "stop-address"
+}

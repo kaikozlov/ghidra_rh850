@@ -1,0 +1,1067 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_scheduler_publication_native_mixed_current_consumer_probe",
+  "entry": {
+    "role": "original-foreground-wait-with-native-ch1-preemption",
+    "scope": "resolved-address",
+    "address": "0x66062"
+  },
+  "max_instructions": 200000,
+  "reset": "none",
+  "gpr_fill": "0",
+  "registers": {
+    "sp": "0xfebe7800",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0",
+    "PMR": "0",
+    "RBASE": "0",
+    "INTBP": "0x20200",
+    "EIWR": "0x12345678",
+    "CTPC": "0x87654320",
+    "CTPSW": "0",
+    "MPAT0": "0",
+    "MPAT1": "0",
+    "MPAT2": "0",
+    "MPAT3": "0",
+    "MPAT4": "0",
+    "MPAT5": "0",
+    "MPAT6": "0",
+    "MPAT7": "0",
+    "MPAT8": "0",
+    "MPAT9": "0",
+    "MPAT10": "0",
+    "MPAT11": "0",
+    "MPAT12": "0",
+    "MPAT13": "0",
+    "MPAT14": "0",
+    "MPAT15": "0"
+  },
+  "stop_addresses": [
+    "0x5e220"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe38a0",
+      "hex": "00000000000000000000000000000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe38c8",
+      "hex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe3900",
+      "hex": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe39d8",
+      "hex": "0100",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe5ec8",
+      "hex": "000000000000000000000000000000000000000000000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe5f12",
+      "hex": "0000000000000000000000000000000000000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe5f28",
+      "hex": "000000000000000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe5f34",
+      "hex": "0000000000000000000000000000000000000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe6798",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe686c",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe6878",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe689a",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe68b4",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe6906",
+      "hex": "000000000000000000000000000000000000000000000000000000000000000000000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe6954",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe6a62",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe6a68",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe6a7b",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe6abc",
+      "hex": "000000000000000000000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe6af0",
+      "hex": "0000000033330000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe6b2c",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe6b30",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe6b34",
+      "hex": "00000000000000000000000000000000000000000000000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe6b50",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe6b54",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe6b74",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe6b78",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe6be8",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe6bee",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe6bf4",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe6bfc",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe6c14",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe6c1a",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe6c20",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe6c28",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe6ce4",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe6d70",
+      "hex": "000000000000000000000000000000000000000000000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe6dca",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe6e00",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe6e0a",
+      "hex": "4444",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe71ec",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe71f2",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe754f",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe7562",
+      "hex": "00000000000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe7576",
+      "hex": "000000000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe77c4",
+      "hex": "00000000000000000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe78d4",
+      "hex": "00000000000000000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe7bbc",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe7d4e",
+      "hex": "000000000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe7d5a",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe7d68",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe7d74",
+      "hex": "000000000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe7d94",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe7da0",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe7da6",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe7db0",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe7df8",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe7e0c",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe7e10",
+      "hex": "00000000000000000000000000000000000000000000000000000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe7e2e",
+      "hex": "000000000000000000000000000000000000000000000000000000000000000000000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe7e54",
+      "hex": "000000000000000000000000000000000000000000000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe7ea8",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe7eb0",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe7f3a",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe7f68",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe80a0",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe80a5",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe8152",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe81e6",
+      "hex": "000000000000000000000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe822c",
+      "hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe8a14",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe8a1c",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe8a20",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe8b28",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe8b5e",
+      "hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe8b94",
+      "hex": "0000000000000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe8ba2",
+      "hex": "0000000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe8ba8",
+      "hex": "0000000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe8c00",
+      "hex": "00020002",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe8c0c",
+      "hex": "fffdfffd",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe8c16",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe8db0",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe8db8",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeac02",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeac08",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeac1c",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeac2d",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeac39",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeac3e",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeac54",
+      "hex": "222211110000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeac70",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeac76",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeac7a",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeac7e",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeacf1",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeacf5",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebead0a",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebead39",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebead93",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebead9e",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeae12",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeae16",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeae36",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeae58",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeae86",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeaecc",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeaf3d",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeaf40",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeb112",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeb11a",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeb138",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeb13c",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeb142",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeb1a7",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeb218",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeb354",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeb384",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeb38a",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeb3fc",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeb3fe",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebebe60",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebebe6e",
+      "hex": "000000000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebebe78",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebebe82",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebebe9b",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebebeb8",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebebede",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebebee2",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebebef0",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebee406",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebee40a",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebee410",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebee416",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebee5c3",
+      "hex": "000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebee740",
+      "hex": "000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebee744",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebee780",
+      "hex": "00",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebee782",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebee8cc",
+      "hex": "0002",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeeac0",
+      "hex": "000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeeac6",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeeb10",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeeb1e",
+      "hex": "0000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeec00",
+      "hex": "000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeec04",
+      "hex": "0000000000000000000000000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebeec14",
+      "hex": "0000000000000000000000000000000000000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebf0668",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebf10a4",
+      "hex": "55555555",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebf10c8",
+      "hex": "aaaaaaaa",
+      "evidence": "Explicit synthetic sparse original active CH0/CH1 mode200 reader/history state, including bounded five-slot flag banks and two three-halfword code-limit request arrays; original reduction/filter/control instructions remain active."
+    },
+    {
+      "address": "0xfebe7400",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "Bounded synthetic interrupted foreground stack and full original IRQ context frame."
+    },
+    {
+      "address": "0xfebe0b00",
+      "size": 1280,
+      "fill": 165,
+      "evidence": "Bounded synthetic original fixed CH1 stack; original7145A saves/restores all context and71502 executes EIRET."
+    },
+    {
+      "address": "0xffffb10c",
+      "hex": "4700",
+      "evidence": "Original62DD0 setup EIC134 table-vector priority7; original immutable20200 vector table134 points7145A."
+    },
+    {
+      "address": "0xffffb110",
+      "hex": "cf00",
+      "evidence": "Original masked foreground poll EIC136; no timer request supplied."
+    },
+    {
+      "address": "0xffffb10a",
+      "hex": "4600",
+      "evidence": "Exact original EIC133 priority6 table-vector configuration; immutable vector133 at20414 points713B0."
+    },
+    {
+      "address": "0xfebe0100",
+      "size": 1792,
+      "fill": 165,
+      "evidence": "Bounded original fixed CH0 ISR stack; native713B0 prologue and71456 EIRET unchanged."
+    },
+    {
+      "address": "0xfeef8888",
+      "hex": "000000000000000000000000000000000000000000000000",
+      "evidence": "Explicit synthetic last six group0 acquisition ring entries selected by reset DMA count0; no DMA completion or received status injected."
+    },
+    {
+      "address": "0xfeef90c8",
+      "hex": "000000000000000000000000000000000000000000000000",
+      "evidence": "Explicit synthetic last six group8 acquisition ring entries selected by reset DMA count0."
+    },
+    {
+      "address": "0xffd84000",
+      "hex": "e0",
+      "evidence": "Explicit exact equivalent of original60D8C ROM31420/31470 CSIH2/3 configuration, matching original-acquisition-reset-with-serial-inputs fixture; no completion/busy/RX status supplied."
+    },
+    {
+      "address": "0xffd84010",
+      "hex": "90000200",
+      "evidence": "Explicit exact equivalent of original60D8C ROM31420/31470 CSIH2/3 configuration, matching original-acquisition-reset-with-serial-inputs fixture; no completion/busy/RX status supplied."
+    },
+    {
+      "address": "0xffd84014",
+      "hex": "0000",
+      "evidence": "Explicit exact equivalent of original60D8C ROM31420/31470 CSIH2/3 configuration, matching original-acquisition-reset-with-serial-inputs fixture; no completion/busy/RX status supplied."
+    },
+    {
+      "address": "0xffd85040",
+      "hex": "0001",
+      "evidence": "Explicit exact equivalent of original60D8C ROM31420/31470 CSIH2/3 configuration, matching original-acquisition-reset-with-serial-inputs fixture; no completion/busy/RX status supplied."
+    },
+    {
+      "address": "0xffd85044",
+      "hex": "00000100",
+      "evidence": "Explicit exact equivalent of original60D8C ROM31420/31470 CSIH2/3 configuration, matching original-acquisition-reset-with-serial-inputs fixture; no completion/busy/RX status supplied."
+    },
+    {
+      "address": "0xffd85048",
+      "hex": "00000900",
+      "evidence": "Explicit exact equivalent of original60D8C ROM31420/31470 CSIH2/3 configuration, matching original-acquisition-reset-with-serial-inputs fixture; no completion/busy/RX status supplied."
+    },
+    {
+      "address": "0xffd8504c",
+      "hex": "00000900",
+      "evidence": "Explicit exact equivalent of original60D8C ROM31420/31470 CSIH2/3 configuration, matching original-acquisition-reset-with-serial-inputs fixture; no completion/busy/RX status supplied."
+    },
+    {
+      "address": "0xffd85050",
+      "hex": "00000900",
+      "evidence": "Explicit exact equivalent of original60D8C ROM31420/31470 CSIH2/3 configuration, matching original-acquisition-reset-with-serial-inputs fixture; no completion/busy/RX status supplied."
+    },
+    {
+      "address": "0xffd85054",
+      "hex": "00000900",
+      "evidence": "Explicit exact equivalent of original60D8C ROM31420/31470 CSIH2/3 configuration, matching original-acquisition-reset-with-serial-inputs fixture; no completion/busy/RX status supplied."
+    },
+    {
+      "address": "0xffd85058",
+      "hex": "00000900",
+      "evidence": "Explicit exact equivalent of original60D8C ROM31420/31470 CSIH2/3 configuration, matching original-acquisition-reset-with-serial-inputs fixture; no completion/busy/RX status supplied."
+    },
+    {
+      "address": "0xffd8505c",
+      "hex": "00000900",
+      "evidence": "Explicit exact equivalent of original60D8C ROM31420/31470 CSIH2/3 configuration, matching original-acquisition-reset-with-serial-inputs fixture; no completion/busy/RX status supplied."
+    },
+    {
+      "address": "0xffd85060",
+      "hex": "00000900",
+      "evidence": "Explicit exact equivalent of original60D8C ROM31420/31470 CSIH2/3 configuration, matching original-acquisition-reset-with-serial-inputs fixture; no completion/busy/RX status supplied."
+    },
+    {
+      "address": "0xffd85068",
+      "hex": "0a00",
+      "evidence": "Explicit exact equivalent of original60D8C ROM31420/31470 CSIH2/3 configuration, matching original-acquisition-reset-with-serial-inputs fixture; no completion/busy/RX status supplied."
+    },
+    {
+      "address": "0xffd8506c",
+      "hex": "0a00",
+      "evidence": "Explicit exact equivalent of original60D8C ROM31420/31470 CSIH2/3 configuration, matching original-acquisition-reset-with-serial-inputs fixture; no completion/busy/RX status supplied."
+    },
+    {
+      "address": "0xffd85070",
+      "hex": "0a00",
+      "evidence": "Explicit exact equivalent of original60D8C ROM31420/31470 CSIH2/3 configuration, matching original-acquisition-reset-with-serial-inputs fixture; no completion/busy/RX status supplied."
+    },
+    {
+      "address": "0xffd85074",
+      "hex": "0a00",
+      "evidence": "Explicit exact equivalent of original60D8C ROM31420/31470 CSIH2/3 configuration, matching original-acquisition-reset-with-serial-inputs fixture; no completion/busy/RX status supplied."
+    },
+    {
+      "address": "0xffd86000",
+      "hex": "e0",
+      "evidence": "Explicit exact equivalent of original60D8C ROM31420/31470 CSIH2/3 configuration, matching original-acquisition-reset-with-serial-inputs fixture; no completion/busy/RX status supplied."
+    },
+    {
+      "address": "0xffd86010",
+      "hex": "90000200",
+      "evidence": "Explicit exact equivalent of original60D8C ROM31420/31470 CSIH2/3 configuration, matching original-acquisition-reset-with-serial-inputs fixture; no completion/busy/RX status supplied."
+    },
+    {
+      "address": "0xffd86014",
+      "hex": "0000",
+      "evidence": "Explicit exact equivalent of original60D8C ROM31420/31470 CSIH2/3 configuration, matching original-acquisition-reset-with-serial-inputs fixture; no completion/busy/RX status supplied."
+    },
+    {
+      "address": "0xffd87040",
+      "hex": "0001",
+      "evidence": "Explicit exact equivalent of original60D8C ROM31420/31470 CSIH2/3 configuration, matching original-acquisition-reset-with-serial-inputs fixture; no completion/busy/RX status supplied."
+    },
+    {
+      "address": "0xffd87044",
+      "hex": "00000100",
+      "evidence": "Explicit exact equivalent of original60D8C ROM31420/31470 CSIH2/3 configuration, matching original-acquisition-reset-with-serial-inputs fixture; no completion/busy/RX status supplied."
+    },
+    {
+      "address": "0xffd87048",
+      "hex": "00000900",
+      "evidence": "Explicit exact equivalent of original60D8C ROM31420/31470 CSIH2/3 configuration, matching original-acquisition-reset-with-serial-inputs fixture; no completion/busy/RX status supplied."
+    },
+    {
+      "address": "0xffd8704c",
+      "hex": "00000900",
+      "evidence": "Explicit exact equivalent of original60D8C ROM31420/31470 CSIH2/3 configuration, matching original-acquisition-reset-with-serial-inputs fixture; no completion/busy/RX status supplied."
+    },
+    {
+      "address": "0xffd87050",
+      "hex": "00000900",
+      "evidence": "Explicit exact equivalent of original60D8C ROM31420/31470 CSIH2/3 configuration, matching original-acquisition-reset-with-serial-inputs fixture; no completion/busy/RX status supplied."
+    },
+    {
+      "address": "0xffd87054",
+      "hex": "00000900",
+      "evidence": "Explicit exact equivalent of original60D8C ROM31420/31470 CSIH2/3 configuration, matching original-acquisition-reset-with-serial-inputs fixture; no completion/busy/RX status supplied."
+    },
+    {
+      "address": "0xffd87058",
+      "hex": "00000900",
+      "evidence": "Explicit exact equivalent of original60D8C ROM31420/31470 CSIH2/3 configuration, matching original-acquisition-reset-with-serial-inputs fixture; no completion/busy/RX status supplied."
+    },
+    {
+      "address": "0xffd8705c",
+      "hex": "00000900",
+      "evidence": "Explicit exact equivalent of original60D8C ROM31420/31470 CSIH2/3 configuration, matching original-acquisition-reset-with-serial-inputs fixture; no completion/busy/RX status supplied."
+    },
+    {
+      "address": "0xffd87060",
+      "hex": "00000900",
+      "evidence": "Explicit exact equivalent of original60D8C ROM31420/31470 CSIH2/3 configuration, matching original-acquisition-reset-with-serial-inputs fixture; no completion/busy/RX status supplied."
+    },
+    {
+      "address": "0xffd87068",
+      "hex": "0a00",
+      "evidence": "Explicit exact equivalent of original60D8C ROM31420/31470 CSIH2/3 configuration, matching original-acquisition-reset-with-serial-inputs fixture; no completion/busy/RX status supplied."
+    },
+    {
+      "address": "0xffd8706c",
+      "hex": "0a00",
+      "evidence": "Explicit exact equivalent of original60D8C ROM31420/31470 CSIH2/3 configuration, matching original-acquisition-reset-with-serial-inputs fixture; no completion/busy/RX status supplied."
+    },
+    {
+      "address": "0xffd87070",
+      "hex": "0a00",
+      "evidence": "Explicit exact equivalent of original60D8C ROM31420/31470 CSIH2/3 configuration, matching original-acquisition-reset-with-serial-inputs fixture; no completion/busy/RX status supplied."
+    },
+    {
+      "address": "0xffd87074",
+      "hex": "0a00",
+      "evidence": "Explicit exact equivalent of original60D8C ROM31420/31470 CSIH2/3 configuration, matching original-acquisition-reset-with-serial-inputs fixture; no completion/busy/RX status supplied."
+    },
+    {
+      "address": "0xfebee40a",
+      "hex": "aaaa5555",
+      "evidence": "Old diagnostic/motor publication siblings before originalBF33E inCH1."
+    }
+  ],
+  "events": [
+    {
+      "kind": "interrupt",
+      "channel": 134,
+      "after_instructions": 0,
+      "evidence": "Synthetic native CH1 scheduling edge; no task calls or callback replacement."
+    },
+    {
+      "kind": "interrupt",
+      "channel": 133,
+      "after_instructions": 842,
+      "evidence": "Native CH0priority6 at verified842-retirement boundary35CE2 inside active originalCH1 mode200:6AF6new1111 but6AF4old3333. Original nativeCH0 acquisition/feedback/control dispatch remains intact."
+    }
+  ],
+  "checks": [
+    {
+      "name": "actual-current-reader-return-before-rest-control",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x5e220"
+    },
+    {
+      "name": "interrupt-enter",
+      "kind": "event-count",
+      "operation": "interrupt-enter",
+      "equals": "2"
+    },
+    {
+      "name": "interrupt-return",
+      "kind": "event-count",
+      "operation": "interrupt-return",
+      "equals": "0"
+    },
+    {
+      "name": "two-native-priorities-active",
+      "kind": "register",
+      "register": "ISPR",
+      "equals": "0xc0"
+    },
+    {
+      "name": "preempted-original-motor-store",
+      "kind": "register",
+      "register": "EIPC",
+      "equals": "0x35ce2"
+    },
+    {
+      "name": "foreground-published-pair-mixed-at-preemption",
+      "kind": "memory",
+      "address": "0xfebe6af4",
+      "size": 4,
+      "equals_hex": "33331111"
+    },
+    {
+      "name": "actual-motor-current-consumer-sees-old-generation",
+      "kind": "memory",
+      "address": "0xfebe6e0a",
+      "size": 2,
+      "equals_hex": "3333"
+    },
+    {
+      "name": "actual-diagnostic-consumer-sees-new-generation",
+      "kind": "memory",
+      "address": "0xfebe6e22",
+      "size": 4,
+      "equals_hex": "11111111"
+    }
+  ],
+  "expected_termination": "stop-address"
+}
