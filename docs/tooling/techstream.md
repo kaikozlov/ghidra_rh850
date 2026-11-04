@@ -4196,6 +4196,39 @@ actual confirmation, execution, session-ending, and window-closing IL.
 The Multi executable owns a separate local mutex and localized notice window;
 its Closing handler hides the window and lets the close event proceed.
 
+### Web-service request, response, and download contracts
+
+The auth/settings artifact's `service_contract_matrix` joins frontend calls,
+eight shipped user-type settings files, PF serialization annotations, and
+endpoint/credential-row/timeout selection. `WS000001` preserves general-service
+request parameters and raw responses, including acknowledgment envelopes.
+Offline typed calls return local JSON `{}` or XML `''`.
+
+`GeneralWebService.SendRequest` marks mapped HTTP errors `Result=true`.
+The adapter therefore serializes their raw bodies inside PF success; frontend
+business-status handling remains decisive. `GWS4004` invokes the revocation
+sequence. `GWS4005` instead updates cached secondary-login URL/request-ID fields.
+
+For `WS000002`, wire `authHeader:true` binds `AuthHeaderRemove`: it removes
+Bearer authorization while retaining the configured GUID, MSK, and Basic
+headers. GWS and file download have distinct retry/cancellation handling.
+Both adapter routes end file-edit ownership only on normal return; unexpected
+helper exceptions skip `EndFileEdit`. GWS's monitor still releases in `finally`.
+
+DTC upload handling is selective: rejection of the original PF request is
+swallowed and records the executed ECU, but response JSON parse failure and
+`MIR4000000` revocation reject without that marker. The caller handles revoke
+separately and does not continue normal result construction. Production-date
+settings persistence is not awaited, and some AISAC2 extraction/move/delete
+errors are caught and resolved.
+
+Actual IL execution joined `SendRequest` through normalization to the adapter's
+PF-success serializer arguments, exercised GWS4004/4005, and verified the
+metadata-bound download-header branch. Authenticated JS runs covered DTC
+transport/parse/revoke propagation and the frontend service continuations.
+Transport, settings, PF serialization, and revocation side effects were inert
+interfaces in those runs.
+
 ### VCI discovery, transport ownership, and disconnect
 
 [`lifecycle_vci_transport.json`](../../data/generated/gtsplus_2026/lifecycle_vci_transport.json)

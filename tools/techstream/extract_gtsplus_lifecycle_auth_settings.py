@@ -1616,9 +1616,9 @@ MANAGED = [{'id': 'auth_settings.web_init',
               {'offset': 1425, 'instruction': 'callvirt get_LSMUserInfo'},
               {'offset': 1430, 'instruction': 'dup '},
               {'offset': 1431, 'instruction': 'brtrue.s 0x59d'}],
-  'finding': 'Request makeHeader gate requires cached login data and configured serverId; routes configured general '
-             'service. Uses GUID/MSK/responseId plus calculated authentication hash/headers. GWS4003 triggers MSK '
-             'renewal+one retry; GWS4004/GWS4005 revoke credentials. Errors remain response detail codes.'},
+  'finding': 'General service requires cached login/MSK and configured serverId even when makeHeader absent/zero. '
+             'GWS4003 renews MSK then replays once; GWS4004 revokes,while GWS4005 only updates secondary-login URL/id. '
+             'Mapped HTTP errors have Result=true and survive as raw body inside PF success; only client failure maps detail code.'},
  {'id': 'auth_settings.license_filenames',
   'assembly': 'GTSPlusWebServiceAdaptMng.dll',
   'type': 'GTSPlusWebServiceAdaptationManager.WebServiceAdaptationManagerConstants',
@@ -2581,7 +2581,7 @@ TRANSITIONS = [{'id': 'auth_settings.startup_eula',
  {'id': 'auth_settings.token_revoke',
   'from': 'auth_settings.active',
   'to': 'auth_settings.revoked',
-  'trigger': 'UPM4000 or GWS4004/GWS4005',
+  'trigger': 'UPM4000 or GWS4004',
   'guard': 'Error classified revoked',
   'action': 'Attempt delete LIC/CRL/MSK and NotifyMSKRevoked; each deletion may fail independently',
   'evidence': ['auth_settings.msk_revoke', 'auth_settings.msk_delete', 'auth_settings.general_web_auth']},
@@ -3808,6 +3808,1282 @@ def _desktop_evidence(assemblies: dict[str, Any], roots: dict[str, Path]) -> lis
     ]
 
 
+
+# Non-login service contracts: exact installer-twin bodies and signed producers.
+INPUTS += [{'id': 'auth_settings.GtsPlus-GeneralWebService_dll_installed',
+  'root': 'installed',
+  'relative': 'GTSPlus/bin/GtsPlus-GeneralWebService.dll',
+  'sha256': '37155f9e19759d88d7e666c593c824b9900a82b0651bab7898130d5e30f22421',
+  'size': 57360,
+  'representation': 'installed protected PE'},
+ {'id': 'auth_settings.GtsPlus-GeneralWebService_dll_sidecar',
+  'root': 'installed',
+  'relative': 'GTSPlus/bin/GtsPlus-GeneralWebService.dll._',
+  'sha256': '1b7069e70bdc9d705394fa360ac937119d41dd3fc2190597e63a5ac6a725958a',
+  'size': 120592,
+  'representation': 'protector sidecar'},
+ {'id': 'auth_settings.GtsPlus-GeneralWebService_dll',
+  'root': 'recovered',
+  'relative': 'bin/GtsPlus-GeneralWebService.dll',
+  'sha256': '33a6f6a8a8e653aed1af4e5b48e3672b661e8d38e90e6c9b89e4e5ee28ecdfec',
+  'size': 38416,
+  'representation': 'installer-original plaintext twin',
+  'derived_from': ['auth_settings.GtsPlus-GeneralWebService_dll_installed',
+                   'auth_settings.GtsPlus-GeneralWebService_dll_sidecar'],
+  'recovery': {'command': 'tools/gts recover-bodies',
+               'manifest': 'build/out/gtsplus-unprotected/manifest.json',
+               'installer': 'Setup_PF.exe',
+               'cp_stub_matches_installed': True,
+               'cp_sidecar_matches_installed': True}},
+ {'id': 'auth_settings.GtsPlus-FileDownloadManager_dll_installed',
+  'root': 'installed',
+  'relative': 'GTSPlus/bin/GtsPlus-FileDownloadManager.dll',
+  'sha256': '881daa387f6d83863707e0c2b29cd838b597ca0ef9bf4f5c14348bcff8e4749d',
+  'size': 49168,
+  'representation': 'installed protected PE'},
+ {'id': 'auth_settings.GtsPlus-FileDownloadManager_dll_sidecar',
+  'root': 'installed',
+  'relative': 'GTSPlus/bin/GtsPlus-FileDownloadManager.dll._',
+  'sha256': '900ec23badfcff7abe51466f35e2b02bf47a9f3aee948e698b1c118f3a9fd49a',
+  'size': 118208,
+  'representation': 'protector sidecar'},
+ {'id': 'auth_settings.GtsPlus-FileDownloadManager_dll',
+  'root': 'recovered',
+  'relative': 'bin/GtsPlus-FileDownloadManager.dll',
+  'sha256': '662bb9793448f2442b0e2e618e2f75bb5c638ef95f1a7808142a80c8ead47c9f',
+  'size': 30224,
+  'representation': 'installer-original plaintext twin',
+  'derived_from': ['auth_settings.GtsPlus-FileDownloadManager_dll_installed',
+                   'auth_settings.GtsPlus-FileDownloadManager_dll_sidecar'],
+  'recovery': {'command': 'tools/gts recover-bodies',
+               'manifest': 'build/out/gtsplus-unprotected/manifest.json',
+               'installer': 'Setup_PF.exe',
+               'cp_stub_matches_installed': True,
+               'cp_sidecar_matches_installed': True}},
+ {'id': 'auth_settings.GTSPlusFileCryptographic_dll_installed',
+  'root': 'installed',
+  'relative': 'GTSPlus/bin/GTSPlusFileCryptographic.dll',
+  'sha256': '1d134a3298a522130eaaf398f9e71f67569e05356f30a84363e9f7cd5651b4d9',
+  'size': 36880,
+  'representation': 'installed protected PE'},
+ {'id': 'auth_settings.GTSPlusFileCryptographic_dll_sidecar',
+  'root': 'installed',
+  'relative': 'GTSPlus/bin/GTSPlusFileCryptographic.dll._',
+  'sha256': '795d61f99b1f06a16415e7ca531ef7b265621b7e669fa55bc66631e0011ee32f',
+  'size': 125984,
+  'representation': 'protector sidecar'},
+ {'id': 'auth_settings.GTSPlusFileCryptographic_dll',
+  'root': 'recovered',
+  'relative': 'bin/GTSPlusFileCryptographic.dll',
+  'sha256': '67c8daf7ebd4558fffceced7f08eaf21cee945b86f2ec94306b33ab7ed9c85f1',
+  'size': 23568,
+  'representation': 'installer-original plaintext twin',
+  'derived_from': ['auth_settings.GTSPlusFileCryptographic_dll_installed',
+                   'auth_settings.GTSPlusFileCryptographic_dll_sidecar'],
+  'recovery': {'command': 'tools/gts recover-bodies',
+               'manifest': 'build/out/gtsplus-unprotected/manifest.json',
+               'installer': 'Setup_PF.exe',
+               'cp_stub_matches_installed': True,
+               'cp_sidecar_matches_installed': True}},
+ {'id': 'auth_settings.service_config_canprivate1',
+  'root': 'installed',
+  'relative': 'GTSPlus/Env/UserTypeSettings/canprivate1.gstg',
+  'sha256': '275196bbdff6a76e671935eb91f7503223222f6445fb2045a8319da3b3c9d639',
+  'size': 12800,
+  'representation': 'shipped encrypted service configuration'},
+ {'id': 'auth_settings.service_config_canprivatetis',
+  'root': 'installed',
+  'relative': 'GTSPlus/Env/UserTypeSettings/canprivatetis.gstg',
+  'sha256': '70c1578cbb31319e1886ae20d998aefa0f389b1d8b20a54c7992ca3d70500efa',
+  'size': 12800,
+  'representation': 'shipped encrypted service configuration'},
+ {'id': 'auth_settings.service_config_nonusprivate1',
+  'root': 'installed',
+  'relative': 'GTSPlus/Env/UserTypeSettings/nonusprivate1.gstg',
+  'sha256': 'f617f8d2f60dfc6c1e1a6eb61586b4744976d6ce3591b4faed9991cd23db680a',
+  'size': 12704,
+  'representation': 'shipped encrypted service configuration'},
+ {'id': 'auth_settings.service_config_tmctema',
+  'root': 'installed',
+  'relative': 'GTSPlus/Env/UserTypeSettings/tmctema.gstg',
+  'sha256': '24d4db65c53e815cd7bb8c40795186c27affd3918fad539c01df8d118721f1cf',
+  'size': 12768,
+  'representation': 'shipped encrypted service configuration'},
+ {'id': 'auth_settings.service_config_uscorp',
+  'root': 'installed',
+  'relative': 'GTSPlus/Env/UserTypeSettings/uscorp.gstg',
+  'sha256': '6c71b3b4f1e256f1fab447cc70194d3b0a1fe925d622d19c49d128dde00f1f35',
+  'size': 12800,
+  'representation': 'shipped encrypted service configuration'},
+ {'id': 'auth_settings.service_config_usprivate1',
+  'root': 'installed',
+  'relative': 'GTSPlus/Env/UserTypeSettings/usprivate1.gstg',
+  'sha256': '2c4d8a574ed8471f24f12fc614b7ecfb0750a3c1c54098c9f608f9da6cee31ec',
+  'size': 12800,
+  'representation': 'shipped encrypted service configuration'},
+ {'id': 'auth_settings.service_config_uspublic',
+  'root': 'installed',
+  'relative': 'GTSPlus/Env/UserTypeSettings/uspublic.gstg',
+  'sha256': '95bcdda7455de1d9a2aa03b8f751ef34ff8589a8cf90355322274caa86eacc0e',
+  'size': 12544,
+  'representation': 'shipped encrypted service configuration'},
+ {'id': 'auth_settings.service_config_uswrc1',
+  'root': 'installed',
+  'relative': 'GTSPlus/Env/UserTypeSettings/uswrc1.gstg',
+  'sha256': 'c91a8f92f5175d52d44bcf9a79a520cfd8560c489ef402275d8d1a82cdb52bd4',
+  'size': 12800,
+  'representation': 'shipped encrypted service configuration'}]
+
+ASSEMBLIES.update({'GtsPlus-GeneralWebService.dll': 'bin/GtsPlus-GeneralWebService.dll',
+ 'GtsPlus-FileDownloadManager.dll': 'bin/GtsPlus-FileDownloadManager.dll'})
+
+SERVICE_MANAGED = [{'id': 'auth_settings.service_gws_GtsPlus_GeneralWebService_GeneralWebService_ctor',
+  'assembly': 'GtsPlus-GeneralWebService.dll',
+  'type': 'GtsPlus_GeneralWebService.GeneralWebService',
+  'method': '.ctor',
+  'index': 0,
+  'rva': 8272,
+  'body_size': 37,
+  'body_sha256': 'de0151b31c7c3183ce8fe38827c6a82ef4f6b42c39aa0a2a3183bead54f6ed71',
+  'anchors': [{'offset': 2, 'instruction': 'call System.Object::.ctor'},
+              {'offset': 8, 'instruction': 'call GetInstance'},
+              {'offset': 13, 'instruction': 'stfld logger'},
+              {'offset': 20, 'instruction': 'stfld settingArgs'},
+              {'offset': 31, 'instruction': 'stfld requiredAttribute'}],
+  'finding': 'Pinned non-login service client construction,download or asynchronous transport '
+             'implementation; see service_contract_matrix for joined client-observable semantics.',
+  'method_token': 100663297},
+ {'id': 'auth_settings.service_gws_GtsPlus_GeneralWebService_GeneralWebService_SendRequest',
+  'assembly': 'GtsPlus-GeneralWebService.dll',
+  'type': 'GtsPlus_GeneralWebService.GeneralWebService',
+  'method': 'SendRequest',
+  'index': 0,
+  'rva': 8312,
+  'body_size': 652,
+  'body_sha256': 'a8c7d0c5636fed42c8e785f7ff0e20add33a06e9055404ede3ad69f63c28db95',
+  'anchors': [{'offset': 18, 'instruction': "ldstr 'SendRequest API start.'"},
+              {'offset': 23, 'instruction': 'callvirt Info'},
+              {'offset': 36, 'instruction': 'call CheckApiArgs'},
+              {'offset': 57, 'instruction': 'callvirt get_RequestIntervalMilliseconds'},
+              {'offset': 68, 'instruction': 'callvirt get_MaxRetryCount'},
+              {'offset': 79, 'instruction': 'callvirt get_ConnectionTimeoutMilliseconds'},
+              {'offset': 97, 'instruction': 'callvirt get_Method'},
+              {'offset': 102, 'instruction': 'callvirt System.String::ToUpper'},
+              {'offset': 529, 'instruction': 'callvirt Error'},
+              {'offset': 536, 'instruction': "ldstr 'GWS9999'"},
+              {'offset': 543, 'instruction': 'call CreateResponse'},
+              {'offset': 557, 'instruction': "ldstr 'Processing completed. [RESULT: {0}] [ERROR_CODE: {1}]'"},
+              {'offset': 571, 'instruction': 'callvirt get_Result'},
+              {'offset': 585, 'instruction': 'callvirt get_ErrorCode'},
+              {'offset': 594, 'instruction': "ldstr 'NONE'"},
+              {'offset': 600, 'instruction': 'callvirt InfoFormat'},
+              {'offset': 611, 'instruction': "ldstr 'SendRequest API end.'"},
+              {'offset': 616, 'instruction': 'callvirt Info'}],
+  'finding': 'GET/POST/PUT/PATCH/DELETE dispatch passes URL and request string unchanged to RestClient; only '
+             'HTTP200/202/204 have empty ErrorCode. Mapped HTTP errors still Result=true; validation false '
+             '-> GWS9998, caught exception -> GWS9999 and Result=false.',
+  'method_token': 100663298},
+ {'id': 'auth_settings.service_gws_GtsPlus_GeneralWebService_GeneralWebService_CheckApiArgs',
+  'assembly': 'GtsPlus-GeneralWebService.dll',
+  'type': 'GtsPlus_GeneralWebService.GeneralWebService',
+  'method': 'CheckApiArgs',
+  'index': 0,
+  'rva': 8964,
+  'body_size': 71,
+  'body_sha256': 'e243806135fb7d793ba1b7822f6ca214341e68e997efed107589df2a6da0ca80',
+  'anchors': [{'offset': 20, 'instruction': 'stfld <>4__this'},
+              {'offset': 27, 'instruction': 'stfld apiArgs'},
+              {'offset': 38, 'instruction': 'callvirt System.Object::GetType'},
+              {'offset': 43, 'instruction': 'callvirt System.Type::GetProperties'},
+              {'offset': 48, 'instruction': 'call System.Linq.Enumerable::Cast'},
+              {'offset': 65, 'instruction': 'call System.Linq.Enumerable::All'}],
+  'finding': 'Reflect RequiredAttribute properties and validate; no URI allowlist or business schema '
+             'transformation in this method.',
+  'method_token': 100663299},
+ {'id': 'auth_settings.service_gws_GtsPlus_GeneralWebService_GeneralWebService_CreateParameterList',
+  'assembly': 'GtsPlus-GeneralWebService.dll',
+  'type': 'GtsPlus_GeneralWebService.GeneralWebService',
+  'method': 'CreateParameterList',
+  'index': 0,
+  'rva': 9036,
+  'body_size': 292,
+  'body_sha256': 'd75c3ad004835d72a93f895f3b3806873ffeb80bd825d671ca3de6ef1e46fcd1',
+  'anchors': [{'offset': 19, 'instruction': "ldstr 'X-GUID'"},
+              {'offset': 25, 'instruction': 'callvirt get_Guid'},
+              {'offset': 35, 'instruction': 'callvirt TypeSpec[15124d01151155020e0e]::Add'},
+              {'offset': 41, 'instruction': "ldstr 'X-MSK'"},
+              {'offset': 47, 'instruction': 'callvirt get_Msk'},
+              {'offset': 57, 'instruction': 'callvirt TypeSpec[15124d01151155020e0e]::Add'},
+              {'offset': 63, 'instruction': "ldstr 'Authorization'"},
+              {'offset': 68, 'instruction': "ldstr 'Bearer '"},
+              {'offset': 203, 'instruction': 'callvirt get_RequestHeaders'},
+              {'offset': 208, 'instruction': 'callvirt TypeSpec[151280ed01151155020e0e]::GetEnumerator'},
+              {'offset': 217, 'instruction': 'callvirt TypeSpec[15125901151155020e0e]::get_Current'},
+              {'offset': 225, 'instruction': 'call TypeSpec[151155020e0e]::get_Key'},
+              {'offset': 230, 'instruction': 'callvirt System.String::ToLower'},
+              {'offset': 235, 'instruction': "ldstr 'x-'"},
+              {'offset': 240, 'instruction': 'callvirt System.String::StartsWith'},
+              {'offset': 249, 'instruction': 'callvirt TypeSpec[15124d01151155020e0e]::Add'},
+              {'offset': 255, 'instruction': 'callvirt System.Collections.IEnumerator::MoveNext'},
+              {'offset': 268, 'instruction': 'callvirt System.IDisposable::Dispose'}],
+  'finding': 'Construct GUID/MSK/Bearer and Basic secondary headers; optional secondResponseID; caller extra '
+             'headers survive only when lowercase name starts x-. No request-body JSON/XML reserialization '
+             'here.',
+  'method_token': 100663300},
+ {'id': 'auth_settings.service_gws_GtsPlus_GeneralWebService_GeneralWebService_CreateResponse',
+  'assembly': 'GtsPlus-GeneralWebService.dll',
+  'type': 'GtsPlus_GeneralWebService.GeneralWebService',
+  'method': 'CreateResponse',
+  'index': 0,
+  'rva': 9328,
+  'body_size': 480,
+  'body_sha256': '25aa62112b03af272ea994e169568af68b0bad157d47ad34733fa2d0c18693a6',
+  'anchors': [{'offset': 19, 'instruction': 'callvirt set_Result'},
+              {'offset': 26, 'instruction': 'callvirt set_ErrorCode'},
+              {'offset': 33, 'instruction': 'callvirt set_ContentType'},
+              {'offset': 41, 'instruction': 'callvirt set_ResponseData'},
+              {'offset': 48, 'instruction': 'call System.String::IsNullOrEmpty'},
+              {'offset': 59, 'instruction': "ldstr 'GWS4005'"},
+              {'offset': 64, 'instruction': 'callvirt System.String::Equals'},
+              {'offset': 75, 'instruction': "ldstr 'XML'"},
+              {'offset': 381, 'instruction': 'callvirt get_RequestID'},
+              {'offset': 386, 'instruction': 'callvirt set_RequestId'},
+              {'offset': 394, 'instruction': 'callvirt get_SecureWebService'},
+              {'offset': 399, 'instruction': 'callvirt get_SsoURL'},
+              {'offset': 404, 'instruction': 'callvirt set_SsoUrl'},
+              {'offset': 417, 'instruction': "ldstr 'Unexpected content type:'"},
+              {'offset': 423, 'instruction': 'call System.String::Concat'},
+              {'offset': 428, 'instruction': 'callvirt Error'},
+              {'offset': 433, 'instruction': "ldstr 'Unexpected content type:'"},
+              {'offset': 439, 'instruction': 'call System.String::Concat'}],
+  'finding': 'Preserve ResponseData string. Only GWS4005 additionally extracts requestId/ssoUrl from XML or '
+             'JSON root/commonResult secureWebService. Parsing exceptions reach SendRequest catch.',
+  'method_token': 100663301},
+ {'id': 'auth_settings.service_gws_GtsPlus_GeneralWebService_GeneralWebService_GetErrorCode',
+  'assembly': 'GtsPlus-GeneralWebService.dll',
+  'type': 'GtsPlus_GeneralWebService.GeneralWebService',
+  'method': 'GetErrorCode',
+  'index': 0,
+  'rva': 9808,
+  'body_size': 378,
+  'body_sha256': '7a63f0177ff1edad3e610a62fb863e8ea9d6a4b715e28cd0c10ab78f897f5b73',
+  'anchors': [{'offset': 12, 'instruction': "ldstr ''"},
+              {'offset': 19, 'instruction': 'callvirt get_HttpStatusCode'},
+              {'offset': 83, 'instruction': 'call GetStatusCode'},
+              {'offset': 90, 'instruction': "ldstr '4010000'"},
+              {'offset': 95, 'instruction': 'callvirt System.String::EndsWith'},
+              {'offset': 102, 'instruction': "ldstr 'GWS4000'"},
+              {'offset': 114, 'instruction': "ldstr '4010001'"},
+              {'offset': 119, 'instruction': 'callvirt System.String::EndsWith'},
+              {'offset': 290, 'instruction': 'callvirt System.String::EndsWith'},
+              {'offset': 297, 'instruction': "ldstr 'GWS4004'"},
+              {'offset': 305, 'instruction': "ldstr 'Unexpected status code:'"},
+              {'offset': 312, 'instruction': 'call System.String::Concat'},
+              {'offset': 323, 'instruction': "ldstr 'GWS5000'"},
+              {'offset': 331, 'instruction': "ldstr 'GWS5001'"},
+              {'offset': 339, 'instruction': "ldstr 'Unexpected HTTP status code:'"},
+              {'offset': 345, 'instruction': 'callvirt get_HttpStatusCode'},
+              {'offset': 360, 'instruction': 'callvirt System.Object::ToString'},
+              {'offset': 365, 'instruction': 'call System.String::Concat'}],
+  'finding': 'HTTP400 suffix4000000 -> GWS4004;401 suffix4010000/1/2/3 -> GWS4000/1/5/6;403 suffix4030000/1 '
+             '-> GWS4002/3;500/503 -> GWS5000/1. Other HTTP/status combinations throw,including HTTP201 '
+             'and504.',
+  'method_token': 100663302},
+ {'id': 'auth_settings.service_gws_GtsPlus_GeneralWebService_GeneralWebService_GetStatusCode',
+  'assembly': 'GtsPlus-GeneralWebService.dll',
+  'type': 'GtsPlus_GeneralWebService.GeneralWebService',
+  'method': 'GetStatusCode',
+  'index': 0,
+  'rva': 10188,
+  'body_size': 396,
+  'body_sha256': 'aa77ef44382f558b0c79e6012823b5a2b02bca37cfb37d1020e6cb646944e9b5',
+  'anchors': [{'offset': 12, 'instruction': "ldstr ''"},
+              {'offset': 19, 'instruction': "ldstr 'JSON'"},
+              {'offset': 24, 'instruction': 'call System.String::op_Equality'},
+              {'offset': 32, 'instruction': "ldstr 'JSON_UTF-8'"},
+              {'offset': 37, 'instruction': 'call System.String::op_Equality'},
+              {'offset': 46, 'instruction': 'callvirt get_ResponseBody'},
+              {'offset': 51, 'instruction': 'call Deserialize'},
+              {'offset': 58, 'instruction': 'callvirt get_StatusCode'},
+              {'offset': 282, 'instruction': "ldstr 'Unexpected response XML:'"},
+              {'offset': 288, 'instruction': 'callvirt get_ResponseBody'},
+              {'offset': 293, 'instruction': 'call System.String::Concat'},
+              {'offset': 310, 'instruction': "ldstr 'Unexpected content type:'"},
+              {'offset': 316, 'instruction': 'callvirt get_ContentType'},
+              {'offset': 321, 'instruction': 'call System.String::Concat'},
+              {'offset': 326, 'instruction': 'callvirt Error'},
+              {'offset': 331, 'instruction': "ldstr 'Unexpected content type:'"},
+              {'offset': 337, 'instruction': 'callvirt get_ContentType'},
+              {'offset': 342, 'instruction': 'call System.String::Concat'}],
+  'finding': 'JSON/JSON_UTF-8 choose nonempty root statusCode else commonResult.statusCode; XML fragment '
+             'reader finds statusCode. Body parse/type errors throw.',
+  'method_token': 100663303},
+ {'id': 'auth_settings.service_gws_GtsPlus_GeneralWebService_GeneralWebService_GetGWSContentType',
+  'assembly': 'GtsPlus-GeneralWebService.dll',
+  'type': 'GtsPlus_GeneralWebService.GeneralWebService',
+  'method': 'GetGWSContentType',
+  'index': 0,
+  'rva': 10584,
+  'body_size': 187,
+  'body_sha256': 'd78f650191ce6fd8f170bebd3e98ea8c28df739ea8762be25ce2a18e8657ee9a',
+  'anchors': [{'offset': 12, 'instruction': "ldstr ''"},
+              {'offset': 19, 'instruction': 'callvirt get_ContentType'},
+              {'offset': 24, 'instruction': "ldstr 'application/xml'"},
+              {'offset': 29, 'instruction': 'call System.String::op_Equality'},
+              {'offset': 37, 'instruction': 'callvirt get_ContentType'},
+              {'offset': 42, 'instruction': "ldstr 'text/xml'"},
+              {'offset': 47, 'instruction': 'call System.String::op_Equality'},
+              {'offset': 54, 'instruction': "ldstr 'XML'"},
+              {'offset': 119, 'instruction': 'callvirt System.String::Contains'},
+              {'offset': 126, 'instruction': "ldstr 'JSON_UTF-8'"},
+              {'offset': 135, 'instruction': 'callvirt get_ContentType'},
+              {'offset': 140, 'instruction': "ldstr 'application/json'"},
+              {'offset': 145, 'instruction': 'call System.String::op_Equality'},
+              {'offset': 153, 'instruction': 'callvirt get_ContentType'},
+              {'offset': 158, 'instruction': "ldstr 'text/json'"},
+              {'offset': 163, 'instruction': 'call System.String::op_Equality'},
+              {'offset': 170, 'instruction': "ldstr 'JSON'"},
+              {'offset': 179, 'instruction': 'callvirt get_ContentType'}],
+  'finding': 'Recognize exact XML and JSON media types and application/json UTF-8 charset; unrecognized '
+             'types fall back to requested enum. No payload rewrite.',
+  'method_token': 100663304},
+ {'id': 'auth_settings.service_gws_GtsPlus_GeneralWebService_GeneralWebService_cctor',
+  'assembly': 'GtsPlus-GeneralWebService.dll',
+  'type': 'GtsPlus_GeneralWebService.GeneralWebService',
+  'method': '.cctor',
+  'index': 0,
+  'rva': 10771,
+  'body_size': 34,
+  'body_sha256': '83290a3767ce6dc9629802b739cf6bbd51a4f44fe58c3758564a5face4672eaa',
+  'anchors': [{'offset': 7, 'instruction': "ldstr '5000000'"},
+              {'offset': 12, 'instruction': 'callvirt TypeSpec[15124d010e]::Add'},
+              {'offset': 18, 'instruction': "ldstr '5030000'"},
+              {'offset': 23, 'instruction': 'callvirt TypeSpec[15124d010e]::Add'}],
+  'finding': 'Pinned non-login service client construction,download or asynchronous transport '
+             'implementation; see service_contract_matrix for joined client-observable semantics.',
+  'method_token': 100663305},
+ {'id': 'auth_settings.service_gws_GtsPlus_GeneralWebService_Client_RestClient_ctor',
+  'assembly': 'GtsPlus-GeneralWebService.dll',
+  'type': 'GtsPlus_GeneralWebService.Client.RestClient',
+  'method': '.ctor',
+  'index': 0,
+  'rva': 12452,
+  'body_size': 131,
+  'body_sha256': '374efbeb0ef4893cc22af963bbc3333ab39bd629a1e2da272f1f57ee6bd147df',
+  'anchors': [{'offset': 13, 'instruction': 'call System.Object::.ctor'},
+              {'offset': 19, 'instruction': 'call GetInstance'},
+              {'offset': 24, 'instruction': 'stfld logger'},
+              {'offset': 31, 'instruction': 'stfld retryTargetStatusCodeList'},
+              {'offset': 38, 'instruction': 'call System.Convert::ToInt32'},
+              {'offset': 44, 'instruction': 'call System.TimeSpan::FromMilliseconds'},
+              {'offset': 49, 'instruction': 'stfld requestIntervalMilliseconds'},
+              {'offset': 56, 'instruction': 'call System.Convert::ToInt32'},
+              {'offset': 61, 'instruction': 'stfld maxRetryCount'},
+              {'offset': 69, 'instruction': 'call System.Convert::ToInt32'},
+              {'offset': 74, 'instruction': 'stfld connectionTimeoutMilliseconds'},
+              {'offset': 79,
+               'instruction': 'call System.Net.ServicePointManager::get_ServerCertificateValidationCallback'},
+              {'offset': 115, 'instruction': 'call System.Delegate::Combine'},
+              {'offset': 125,
+               'instruction': 'call '
+                              'System.Net.ServicePointManager::set_ServerCertificateValidationCallback'}],
+  'finding': 'Pinned non-login service client construction,download or asynchronous transport '
+             'implementation; see service_contract_matrix for joined client-observable semantics.',
+  'method_token': 100663413},
+ {'id': 'auth_settings.service_gws_GtsPlus_GeneralWebService_Client_RestClient_DoRequest',
+  'assembly': 'GtsPlus-GeneralWebService.dll',
+  'type': 'GtsPlus_GeneralWebService.Client.RestClient',
+  'method': 'DoRequest',
+  'index': 0,
+  'rva': 12584,
+  'body_size': 612,
+  'body_sha256': '6820d3379ae488b3084d90a09a33f88c8f417bb9cb55cae45965f8fd46d2054f',
+  'anchors': [{'offset': 32, 'instruction': "ldstr 'Start DoRequest() httpMethod:'"},
+              {'offset': 48, 'instruction': 'callvirt System.Object::ToString'},
+              {'offset': 56, 'instruction': "ldstr ', url:'"},
+              {'offset': 68, 'instruction': "ldstr ', requestContentType:'"},
+              {'offset': 80, 'instruction': "ldstr ', body:'"},
+              {'offset': 91, 'instruction': 'call System.String::Concat'},
+              {'offset': 96, 'instruction': 'callvirt Info'},
+              {'offset': 103, 'instruction': 'callvirt TypeSpec[15124d01151155020e0e]::GetEnumerator'},
+              {'offset': 516, 'instruction': 'callvirt System.Object::ToString'},
+              {'offset': 524, 'instruction': "ldstr ', Content-Type:'"},
+              {'offset': 534, 'instruction': 'callvirt get_ContentType'},
+              {'offset': 542, 'instruction': "ldstr ', responseBody:'"},
+              {'offset': 552, 'instruction': 'callvirt get_ResponseBody'},
+              {'offset': 560, 'instruction': "ldstr ']'"},
+              {'offset': 566, 'instruction': 'call System.String::Concat'},
+              {'offset': 571, 'instruction': 'callvirt Info'},
+              {'offset': 582, 'instruction': "ldstr 'End DoRequest()'"},
+              {'offset': 587, 'instruction': 'callvirt Info'}],
+  'finding': 'Build actual transport request from caller string and headers; capture retry outcome and '
+             'normalize transport result.',
+  'method_token': 100663414},
+ {'id': 'auth_settings.service_gws_GtsPlus_GeneralWebService_Client_RestClient_ParseExecutionResult',
+  'assembly': 'GtsPlus-GeneralWebService.dll',
+  'type': 'GtsPlus_GeneralWebService.Client.RestClient',
+  'method': 'ParseExecutionResult',
+  'index': 0,
+  'rva': 13196,
+  'body_size': 424,
+  'body_sha256': '6f162632f1fb180e09b8d78ae2d08247775d5e7d637e165b8ba3a4642404fb67',
+  'anchors': [{'offset': 18, 'instruction': "ldstr 'Start ParseExecutionResult()'"},
+              {'offset': 23, 'instruction': 'callvirt Info'},
+              {'offset': 52, 'instruction': "ldstr 'Outcome:'"},
+              {'offset': 58, 'instruction': 'callvirt TypeSpec[151280a9011280ad]::get_Outcome'},
+              {'offset': 72, 'instruction': 'callvirt System.Object::ToString'},
+              {'offset': 77, 'instruction': 'call System.String::Concat'},
+              {'offset': 82, 'instruction': 'callvirt Info'},
+              {'offset': 88, 'instruction': 'callvirt TypeSpec[151280a9011280ad]::get_Outcome'},
+              {'offset': 308, 'instruction': 'callvirt RestSharp.IRestResponse::get_ErrorException'},
+              {'offset': 318, 'instruction': 'callvirt System.Net.WebException::get_Status'},
+              {'offset': 330, 'instruction': "ldstr 'WebException has occurred. Details: {0}'"},
+              {'offset': 351, 'instruction': 'callvirt System.Object::ToString'},
+              {'offset': 357, 'instruction': 'callvirt ErrorFormat'},
+              {'offset': 373, 'instruction': "ldstr 'webExceptionStatus is Timeout'"},
+              {'offset': 378, 'instruction': 'callvirt Info'},
+              {'offset': 396,
+               'instruction': "ldstr 'End ParseExecutionResult() httpStatusCode:{0}, contentType:{1}, "
+                              "responseBody:{2}'"},
+              {'offset': 413, 'instruction': 'call System.String::Format'},
+              {'offset': 418, 'instruction': 'callvirt Info'}],
+  'finding': 'Successful policy result preserves HTTP/type/body. Failed outcome defaults HTTP500/empty '
+             'strings; handled response without exception preserves final response; WebException Timeout '
+             'becomes504,which SendRequest maps to GWS9999.',
+  'method_token': 100663415},
+ {'id': 'auth_settings.service_gws_GtsPlus_GeneralWebService_Client_RestClient_GetRetryPolicy',
+  'assembly': 'GtsPlus-GeneralWebService.dll',
+  'type': 'GtsPlus_GeneralWebService.Client.RestClient',
+  'method': 'GetRetryPolicy',
+  'index': 0,
+  'rva': 13648,
+  'body_size': 78,
+  'body_sha256': '847f1c189368791e1099bc79bbb83f38167b164a2ade60f75e7bf20b54e8f0ce',
+  'anchors': [{'offset': 20, 'instruction': 'stfld <>4__this'},
+              {'offset': 27, 'instruction': 'stfld requestContentType'},
+              {'offset': 44, 'instruction': 'call Polly.Policy::HandleResult'},
+              {'offset': 49, 'instruction': 'callvirt TypeSpec[15128165011280ad]::Or'},
+              {'offset': 72, 'instruction': 'call Polly.RetryTResultSyntax::WaitAndRetry'}],
+  'finding': 'Polly WaitAndRetry uses configured count and fixed interval; response predicate and exception '
+             'policy are distinct from adapter one-time MSK refresh.',
+  'method_token': 100663417},
+ {'id': 'auth_settings.service_gws_GtsPlus_GeneralWebService_Client_RestClient_GetGWSContentType',
+  'assembly': 'GtsPlus-GeneralWebService.dll',
+  'type': 'GtsPlus_GeneralWebService.Client.RestClient',
+  'method': 'GetGWSContentType',
+  'index': 0,
+  'rva': 13728,
+  'body_size': 276,
+  'body_sha256': '7bb69671bc209533b5337b65a6df400f13c45a8832169e6a7c471a4a3d11d2b1',
+  'anchors': [{'offset': 18, 'instruction': "ldstr 'Start GetGWSContentType() requestContentType:'"},
+              {'offset': 24, 'instruction': "ldstr ', responseContentType:'"},
+              {'offset': 30, 'instruction': 'call System.String::Concat'},
+              {'offset': 35, 'instruction': 'callvirt Info'},
+              {'offset': 40, 'instruction': "ldstr ''"},
+              {'offset': 47, 'instruction': "ldstr 'application/json'"},
+              {'offset': 52, 'instruction': 'call System.String::op_Equality'},
+              {'offset': 60, 'instruction': "ldstr 'text/json'"},
+              {'offset': 204, 'instruction': "ldstr 'Content-Type is XML'"},
+              {'offset': 209, 'instruction': 'callvirt Info'},
+              {'offset': 214, 'instruction': "ldstr 'XML'"},
+              {'offset': 228, 'instruction': "ldstr 'Unexpected Content-Type:'"},
+              {'offset': 234, 'instruction': "ldstr '. Use request Content-Type:'"},
+              {'offset': 240, 'instruction': 'call System.String::Concat'},
+              {'offset': 245, 'instruction': 'callvirt Info'},
+              {'offset': 258, 'instruction': "ldstr 'End GetGWSContentType() returns '"},
+              {'offset': 264, 'instruction': 'call System.String::Concat'},
+              {'offset': 269, 'instruction': 'callvirt Info'}],
+  'finding': 'Recognize exact XML and JSON media types and application/json UTF-8 charset; unrecognized '
+             'types fall back to requested enum. No payload rewrite.',
+  'method_token': 100663418},
+ {'id': 'auth_settings.service_gws_c_ctor_b_5_0',
+  'assembly': 'GtsPlus-GeneralWebService.dll',
+  'type': '<>c',
+  'method': '<.ctor>b__5_0',
+  'index': 0,
+  'rva': 14082,
+  'body_size': 3,
+  'body_sha256': 'b067e5b062baca1d4308a7becd68a73068d1754d05d78bd9a9c43492da8fca4a',
+  'anchors': [],
+  'finding': 'Certificate validation callback unconditionally returns true; appended globally by RestClient '
+             'constructor.',
+  'method_token': 100663423},
+ {'id': 'auth_settings.service_gws_c_DisplayClass9_0_GetRetryPolicy_b_0',
+  'assembly': 'GtsPlus-GeneralWebService.dll',
+  'type': '<>c__DisplayClass9_0',
+  'method': '<GetRetryPolicy>b__0',
+  'index': 0,
+  'rva': 14120,
+  'body_size': 736,
+  'body_sha256': '5fc492d7c4a10a09b6c6c4265bd94179a068b0ef3e7668d21af8a40b6a33d672',
+  'anchors': [{'offset': 23, 'instruction': "ldstr 'Start HandleResult()'"},
+              {'offset': 28, 'instruction': 'callvirt Info'},
+              {'offset': 34, 'instruction': 'callvirt RestSharp.IRestResponse::get_Content'},
+              {'offset': 41, 'instruction': 'call System.String::IsNullOrWhiteSpace'},
+              {'offset': 59, 'instruction': "ldstr 'responseBody is null or whitespace'"},
+              {'offset': 64, 'instruction': 'callvirt Info'},
+              {'offset': 80, 'instruction': "ldstr 'End HandleResult() returns true'"},
+              {'offset': 85, 'instruction': 'callvirt Info'},
+              {'offset': 619, 'instruction': "ldstr 'End HandleResult() returns true'"},
+              {'offset': 624, 'instruction': 'callvirt Info'},
+              {'offset': 636, 'instruction': 'call TypeSpec[151180b1010e]::MoveNext'},
+              {'offset': 653, 'instruction': 'callvirt System.IDisposable::Dispose'},
+              {'offset': 670, 'instruction': "ldstr 'responseStatusCode:'"},
+              {'offset': 676, 'instruction': "ldstr ' is not RetryStatusCode'"},
+              {'offset': 681, 'instruction': 'call System.String::Concat'},
+              {'offset': 686, 'instruction': 'callvirt Info'},
+              {'offset': 702, 'instruction': "ldstr 'End HandleResult() returns false'"},
+              {'offset': 707, 'instruction': 'callvirt Info'}],
+  'finding': 'Retry blank body regardless HTTP; otherwise parse root/commonResult status and EndsWith5000000 '
+             'or5030000. JSON parse/predicate exceptions are policy failures; XML uses XDocument.Element,not '
+             'XmlReader descendant search.',
+  'method_token': 100663427},
+ {'id': 'auth_settings.service_gws_c_DisplayClass9_0_GetRetryPolicy_b_1',
+  'assembly': 'GtsPlus-GeneralWebService.dll',
+  'type': '<>c__DisplayClass9_0',
+  'method': '<GetRetryPolicy>b__1',
+  'index': 0,
+  'rva': 14856,
+  'body_size': 13,
+  'body_sha256': 'a95b713bcb1018f8be0015083a3691cc550fee8a1dfe43331082f6e7b0c0ca4e',
+  'anchors': [],
+  'finding': 'Return configured fixed retry interval; no exponential backoff.',
+  'method_token': 100663428},
+ {'id': 'auth_settings.service_fdm_GtsPlus_FileDownloadManager_FileDownloadManager_DownloadFile',
+  'assembly': 'GtsPlus-FileDownloadManager.dll',
+  'type': 'GtsPlus_FileDownloadManager.FileDownloadManager',
+  'method': 'DownloadFile',
+  'index': 0,
+  'rva': 8300,
+  'body_size': 728,
+  'body_sha256': '477d7be17ba0f9403e4320471d61d53394779a7be36df040b9e7ccaf35ea969e',
+  'anchors': [{'offset': 18, 'instruction': "ldstr 'DownloadFile API start.'"},
+              {'offset': 23, 'instruction': 'callvirt Info'},
+              {'offset': 30, 'instruction': 'stfld settingRequest'},
+              {'offset': 37, 'instruction': 'call CheckApiArgs'},
+              {'offset': 50, 'instruction': "ldstr 'Insufficient API execution parameters.'"},
+              {'offset': 55, 'instruction': 'callvirt Error'},
+              {'offset': 62, 'instruction': "ldstr 'FDM9998'"},
+              {'offset': 67, 'instruction': 'call CreateResponse'},
+              {'offset': 614, 'instruction': 'call CreateResponse'},
+              {'offset': 632, 'instruction': "ldstr 'Exception occurred during API execution.'"},
+              {'offset': 639, 'instruction': 'callvirt Error'},
+              {'offset': 645, 'instruction': 'callvirt get_Path'},
+              {'offset': 650, 'instruction': 'call System.IO.File::Delete'},
+              {'offset': 657, 'instruction': "ldstr 'FDM9999'"},
+              {'offset': 662, 'instruction': 'call CreateResponse'},
+              {'offset': 676, 'instruction': "ldstr 'DownloadFile API end.'"},
+              {'offset': 681, 'instruction': 'callvirt Info'},
+              {'offset': 689, 'instruction': 'call CreateResponse'}],
+  'finding': 'Validation FDM9998. Call synchronous downloader with newly-created unexposed '
+             'CancellationTokenSource token. Cancel -> FDM9999;401/403/400/500/503 -> FDM4000/1/2/5000/5001. '
+             'Require downloaded flag,nonzero size,HTTP200; delete destination on every failure path. '
+             'Cleanup deletion itself may throw. No group transaction or flush-to-disk guarantee.',
+  'method_token': 100663298},
+ {'id': 'auth_settings.service_fdm_GtsPlus_FileDownloadManager_FileDownloadManager_CreateParameterList',
+  'assembly': 'GtsPlus-FileDownloadManager.dll',
+  'type': 'GtsPlus_FileDownloadManager.FileDownloadManager',
+  'method': 'CreateParameterList',
+  'index': 0,
+  'rva': 9028,
+  'body_size': 211,
+  'body_sha256': '7955d915713c24fe46aca0b83f5f0a25377c0ca51e4089412efae74354d48c4f',
+  'anchors': [{'offset': 12, 'instruction': 'call System.Text.Encoding::get_UTF8'},
+              {'offset': 18, 'instruction': 'callvirt get_BasicAuthUser'},
+              {'offset': 23, 'instruction': "ldstr ':'"},
+              {'offset': 29, 'instruction': 'callvirt get_BasicAuthPassword'},
+              {'offset': 34, 'instruction': 'call System.String::Concat'},
+              {'offset': 39, 'instruction': 'callvirt System.Text.Encoding::GetBytes'},
+              {'offset': 44, 'instruction': 'call System.Convert::ToBase64String'},
+              {'offset': 56, 'instruction': "ldstr 'X-GUID'"},
+              {'offset': 142, 'instruction': 'callvirt TypeSpec[15124901151151020e0e]::Add'},
+              {'offset': 148, 'instruction': "ldstr 'Content-Type'"},
+              {'offset': 153, 'instruction': "ldstr 'application/zip'"},
+              {'offset': 163, 'instruction': 'callvirt TypeSpec[15124901151151020e0e]::Add'},
+              {'offset': 170, 'instruction': 'callvirt get_ResponseId'},
+              {'offset': 178, 'instruction': "ldstr 'Authorization'"},
+              {'offset': 183, 'instruction': "ldstr 'Bearer '"},
+              {'offset': 189, 'instruction': 'callvirt get_ResponseId'},
+              {'offset': 194, 'instruction': 'call System.String::Concat'},
+              {'offset': 204, 'instruction': 'callvirt TypeSpec[15124901151151020e0e]::Add'}],
+  'finding': 'GUID/MSK/X-Authorization Basic always present; Accept includes zip and Content-Type '
+             'application/zip. Authorization Bearer added only when responseId is non-null; authHeaderRemove '
+             'does not strip other credentials.',
+  'method_token': 100663299},
+ {'id': 'auth_settings.service_fdm_GtsPlus_FileDownloadManager_FileDownloadManager_CreateResponse',
+  'assembly': 'GtsPlus-FileDownloadManager.dll',
+  'type': 'GtsPlus_FileDownloadManager.FileDownloadManager',
+  'method': 'CreateResponse',
+  'index': 0,
+  'rva': 9239,
+  'body_size': 21,
+  'body_sha256': '329221dd78cf14358240e9439a50f3be9a63acb5b42ea13b75fcb423bec6e0bd',
+  'anchors': [{'offset': 8, 'instruction': 'callvirt set_Result'},
+              {'offset': 15, 'instruction': 'callvirt set_ErrorCode'}],
+  'finding': 'Construct FDM response Result and ErrorCode; no downloaded bytes returned through PF response.',
+  'method_token': 100663300},
+ {'id': 'auth_settings.service_fdm_GtsPlus_FileDownloadManager_FileDownloadManager_CheckApiArgs',
+  'assembly': 'GtsPlus-FileDownloadManager.dll',
+  'type': 'GtsPlus_FileDownloadManager.FileDownloadManager',
+  'method': 'CheckApiArgs',
+  'index': 0,
+  'rva': 9260,
+  'body_size': 102,
+  'body_sha256': '2e78a4f0800e394e03a9e7a3c358841c6ac31bff4dad54ccd9da7f851d6f0a5d',
+  'anchors': [{'offset': 20, 'instruction': 'stfld request'},
+              {'offset': 31, 'instruction': 'callvirt get_BasicAuthUser'},
+              {'offset': 36, 'instruction': 'call System.String::IsNullOrEmpty'},
+              {'offset': 49, 'instruction': 'callvirt get_BasicAuthPassword'},
+              {'offset': 54, 'instruction': 'call System.String::IsNullOrEmpty'},
+              {'offset': 69, 'instruction': 'callvirt System.Object::GetType'},
+              {'offset': 74, 'instruction': 'callvirt System.Type::GetProperties'},
+              {'offset': 79, 'instruction': 'call System.Linq.Enumerable::Cast'},
+              {'offset': 96, 'instruction': 'call System.Linq.Enumerable::All'}],
+  'finding': 'Reflect RequiredAttribute properties and validate; no URI allowlist or business schema '
+             'transformation in this method.',
+  'method_token': 100663301},
+ {'id': 'auth_settings.service_fdm_GtsPlus_FileDownloadManager_Client_RestClient_ctor',
+  'assembly': 'GtsPlus-FileDownloadManager.dll',
+  'type': 'GtsPlus_FileDownloadManager.Client.RestClient',
+  'method': '.ctor',
+  'index': 0,
+  'rva': 10664,
+  'body_size': 131,
+  'body_sha256': '69057ea38cb0ed55bedf21bd666c99fb74b7675b9d0ca8e006cf086f9462292a',
+  'anchors': [{'offset': 13, 'instruction': 'call System.Object::.ctor'},
+              {'offset': 19, 'instruction': 'call GetInstance'},
+              {'offset': 24, 'instruction': 'stfld logger'},
+              {'offset': 31, 'instruction': 'stfld retryTargetStatusCodeList'},
+              {'offset': 38, 'instruction': 'call System.Convert::ToInt32'},
+              {'offset': 44, 'instruction': 'call System.TimeSpan::FromMilliseconds'},
+              {'offset': 49, 'instruction': 'stfld requestIntervalMilliseconds'},
+              {'offset': 56, 'instruction': 'call System.Convert::ToInt32'},
+              {'offset': 61, 'instruction': 'stfld maxRetryCount'},
+              {'offset': 69, 'instruction': 'call System.Convert::ToInt32'},
+              {'offset': 74, 'instruction': 'stfld connectionTimeoutMilliseconds'},
+              {'offset': 79,
+               'instruction': 'call System.Net.ServicePointManager::get_ServerCertificateValidationCallback'},
+              {'offset': 115, 'instruction': 'call System.Delegate::Combine'},
+              {'offset': 125,
+               'instruction': 'call '
+                              'System.Net.ServicePointManager::set_ServerCertificateValidationCallback'}],
+  'finding': 'Pinned non-login service client construction,download or asynchronous transport '
+             'implementation; see service_contract_matrix for joined client-observable semantics.',
+  'method_token': 100663368},
+ {'id': 'auth_settings.service_fdm_GtsPlus_FileDownloadManager_Client_RestClient_DoRequest',
+  'assembly': 'GtsPlus-FileDownloadManager.dll',
+  'type': 'GtsPlus_FileDownloadManager.Client.RestClient',
+  'method': 'DoRequest',
+  'index': 0,
+  'rva': 10896,
+  'body_size': 151,
+  'body_sha256': '7e60dce563685489245caefd0dd409cee596379f1bf73cf29bb071e5975a4edb',
+  'anchors': [{'offset': 18, 'instruction': "ldstr 'Start {0} request to server.'"},
+              {'offset': 23, 'instruction': 'call System.Net.Http.HttpMethod::get_Get'},
+              {'offset': 28, 'instruction': 'callvirt System.Object::ToString'},
+              {'offset': 33, 'instruction': 'call System.String::Format'},
+              {'offset': 38, 'instruction': 'callvirt Info'},
+              {'offset': 49, 'instruction': 'call HttpRequest'},
+              {'offset': 54, 'instruction': 'callvirt System.Threading.Tasks.Task::Wait'},
+              {'offset': 71, 'instruction': 'callvirt set_HttpStatusCode'},
+              {'offset': 83, 'instruction': 'callvirt set_FileDownloadSuccessfully'},
+              {'offset': 95, 'instruction': 'callvirt set_FileSize'},
+              {'offset': 107, 'instruction': 'callvirt set_RequestCancel'},
+              {'offset': 119, 'instruction': "ldstr 'Request to server completed. [HTTP_STATUS_CODE: {0}]'"},
+              {'offset': 133, 'instruction': 'callvirt get_HttpStatusCode'},
+              {'offset': 144, 'instruction': 'callvirt InfoFormat'}],
+  'finding': 'Build actual transport request from caller string and headers; capture retry outcome and '
+             'normalize transport result.',
+  'method_token': 100663370},
+ {'id': 'auth_settings.service_fdm_GtsPlus_FileDownloadManager_Client_RestClient_GetRetryPolicy',
+  'assembly': 'GtsPlus-FileDownloadManager.dll',
+  'type': 'GtsPlus_FileDownloadManager.Client.RestClient',
+  'method': 'GetRetryPolicy',
+  'index': 0,
+  'rva': 11148,
+  'body_size': 47,
+  'body_sha256': '1a634717822d39a6e73b84ea7753feab90dab4f5fb1f51d694166d534c68ea97',
+  'anchors': [{'offset': 13, 'instruction': 'call Polly.Policy::HandleResult'},
+              {'offset': 18, 'instruction': 'callvirt TypeSpec[1512815101151280a9011280ad]::Or'},
+              {'offset': 41, 'instruction': 'call Polly.RetryTResultSyntax::WaitAndRetry'}],
+  'finding': 'Polly handles Task<HttpResponseMessage> results and exceptions with configured fixed '
+             'WaitAndRetry; canceled task not retried; nonpositive ContentLength,500/503 or inspection '
+             'exception retried.',
+  'method_token': 100663372},
+ {'id': 'auth_settings.service_fdm_GtsPlus_FileDownloadManager_Client_RestClient_cctor',
+  'assembly': 'GtsPlus-FileDownloadManager.dll',
+  'type': 'GtsPlus_FileDownloadManager.Client.RestClient',
+  'method': '.cctor',
+  'index': 0,
+  'rva': 11195,
+  'body_size': 12,
+  'body_sha256': '48ff2028576b9c2b3440566e244a9728f43c397a2a16b04ea9a392163e90c282',
+  'anchors': [],
+  'finding': 'Pinned non-login service client construction,download or asynchronous transport '
+             'implementation; see service_contract_matrix for joined client-observable semantics.',
+  'method_token': 100663373},
+ {'id': 'auth_settings.service_fdm_GtsPlus_FileDownloadManager_Client_RestClient_GetRetryPolicy_b_15_0',
+  'assembly': 'GtsPlus-FileDownloadManager.dll',
+  'type': 'GtsPlus_FileDownloadManager.Client.RestClient',
+  'method': '<GetRetryPolicy>b__15_0',
+  'index': 0,
+  'rva': 11208,
+  'body_size': 220,
+  'body_sha256': '4e3b042913eec2ba6b3d1db5e91211f5f7836c01eb405a8aa4f65e70e654c655',
+  'anchors': [{'offset': 13, 'instruction': 'callvirt System.Threading.Tasks.Task::get_IsCanceled'},
+              {'offset': 28, 'instruction': 'callvirt TypeSpec[151280a9011280ad]::get_Result'},
+              {'offset': 33, 'instruction': 'callvirt System.Net.Http.HttpResponseMessage::get_Content'},
+              {'offset': 38, 'instruction': 'callvirt System.Net.Http.HttpContent::get_Headers'},
+              {'offset': 43,
+               'instruction': 'callvirt System.Net.Http.Headers.HttpContentHeaders::get_ContentLength'},
+              {'offset': 54, 'instruction': 'call TypeSpec[151180b1010a]::GetValueOrDefault'},
+              {'offset': 67, 'instruction': 'call TypeSpec[151180b1010a]::get_HasValue'},
+              {'offset': 85, 'instruction': 'callvirt TypeSpec[15124901114d]::GetEnumerator'},
+              {'offset': 95, 'instruction': 'call TypeSpec[151180b501114d]::get_Current'},
+              {'offset': 103, 'instruction': 'callvirt TypeSpec[151280a9011280ad]::get_Result'},
+              {'offset': 108, 'instruction': 'callvirt System.Net.Http.HttpResponseMessage::get_StatusCode'},
+              {'offset': 130, 'instruction': 'callvirt System.Object::Equals'},
+              {'offset': 143, 'instruction': 'call TypeSpec[151180b501114d]::MoveNext'},
+              {'offset': 160, 'instruction': 'callvirt System.IDisposable::Dispose'},
+              {'offset': 172, 'instruction': 'callvirt System.Threading.Tasks.Task::get_IsCanceled'}],
+  'finding': 'Pinned non-login service client construction,download or asynchronous transport '
+             'implementation; see service_contract_matrix for joined client-observable semantics.',
+  'method_token': 100663374},
+ {'id': 'auth_settings.service_fdm_GtsPlus_FileDownloadManager_Client_RestClient_GetRetryPolicy_b_15_1',
+  'assembly': 'GtsPlus-FileDownloadManager.dll',
+  'type': 'GtsPlus_FileDownloadManager.Client.RestClient',
+  'method': '<GetRetryPolicy>b__15_1',
+  'index': 0,
+  'rva': 11428,
+  'body_size': 8,
+  'body_sha256': '9f281ccf8ef1d2f5a06e6a1b9d5c1c318cf602208cff2315dba7c697899cfdeb',
+  'anchors': [],
+  'finding': 'Pinned non-login service client construction,download or asynchronous transport '
+             'implementation; see service_contract_matrix for joined client-observable semantics.',
+  'method_token': 100663375},
+ {'id': 'auth_settings.service_fdm_c_DisplayClass14_0_HttpRequest_b_0',
+  'assembly': 'GtsPlus-FileDownloadManager.dll',
+  'type': '<>c__DisplayClass14_0',
+  'method': '<HttpRequest>b__0',
+  'index': 0,
+  'rva': 11520,
+  'body_size': 200,
+  'body_sha256': '3cbbe2374d819014d1dbb850e4e5743c34e0b0e71ba2f26c74cd0954565a3aee',
+  'anchors': [{'offset': 26, 'instruction': 'callvirt System.Net.Http.HttpRequestMessage::Dispose'},
+              {'offset': 32, 'instruction': 'call System.Net.Http.HttpMethod::get_Get'},
+              {'offset': 48, 'instruction': 'stfld request'},
+              {'offset': 59, 'instruction': 'callvirt TypeSpec[15124901151151020e0e]::GetEnumerator'},
+              {'offset': 69, 'instruction': 'call TypeSpec[151180b501151151020e0e]::get_Current'},
+              {'offset': 77, 'instruction': 'call TypeSpec[151151020e0e]::get_Key'},
+              {'offset': 82, 'instruction': "ldstr 'Content-Type'"},
+              {'offset': 87, 'instruction': 'callvirt System.String::Equals'},
+              {'offset': 100, 'instruction': 'callvirt System.Net.Http.HttpRequestMessage::get_Headers'},
+              {'offset': 107, 'instruction': 'call TypeSpec[151151020e0e]::get_Key'},
+              {'offset': 114, 'instruction': 'call TypeSpec[151151020e0e]::get_Value'},
+              {'offset': 119, 'instruction': 'callvirt System.Net.Http.Headers.HttpHeaders::Add'},
+              {'offset': 126, 'instruction': 'call TypeSpec[151180b501151151020e0e]::MoveNext'},
+              {'offset': 143, 'instruction': 'callvirt System.IDisposable::Dispose'},
+              {'offset': 160, 'instruction': 'call GetHttpClient'},
+              {'offset': 178, 'instruction': 'callvirt System.Net.Http.HttpClient::SendAsync'}],
+  'finding': 'Pinned non-login service client construction,download or asynchronous transport '
+             'implementation; see service_contract_matrix for joined client-observable semantics.',
+  'method_token': 100663382},
+ {'id': 'auth_settings.service_fdm_HttpRequest_d_14_MoveNext',
+  'assembly': 'GtsPlus-FileDownloadManager.dll',
+  'type': '<HttpRequest>d__14',
+  'method': 'MoveNext',
+  'index': 0,
+  'rva': 11720,
+  'body_size': 692,
+  'body_sha256': 'cc0a32ea2a23374b63be273a7353705eb7f2e76866d286654800a262791d767e',
+  'anchors': [{'offset': 45, 'instruction': 'stfld url'},
+              {'offset': 57, 'instruction': 'stfld parameterList'},
+              {'offset': 69, 'instruction': 'stfld <>4__this'},
+              {'offset': 81, 'instruction': 'stfld token'},
+              {'offset': 87, 'instruction': 'call System.Net.Http.HttpMethod::get_Get'},
+              {'offset': 103, 'instruction': 'stfld request'},
+              {'offset': 109, 'instruction': 'call GetRetryPolicy'},
+              {'offset': 126,
+               'instruction': 'callvirt TypeSpec[1512818101151280a9011280ad]::ExecuteAndCapture'},
+              {'offset': 490, 'instruction': 'callvirt System.IDisposable::Dispose'},
+              {'offset': 498, 'instruction': 'stfld <content>5__2'},
+              {'offset': 509, 'instruction': 'call System.IO.File::Exists'},
+              {'offset': 518, 'instruction': 'stfld fileDownloadSuccessfully'},
+              {'offset': 535, 'instruction': 'call System.IO.FileInfo::get_Length'},
+              {'offset': 540, 'instruction': 'stfld fileSize'},
+              {'offset': 552, 'instruction': 'stfld <>1__state'},
+              {'offset': 565,
+               'instruction': 'call System.Runtime.CompilerServices.AsyncTaskMethodBuilder::SetException'},
+              {'offset': 575, 'instruction': 'stfld <>1__state'},
+              {'offset': 586,
+               'instruction': 'call System.Runtime.CompilerServices.AsyncTaskMethodBuilder::SetResult'}],
+  'finding': 'Pinned non-login service client construction,download or asynchronous transport '
+             'implementation; see service_contract_matrix for joined client-observable semantics.',
+  'method_token': 100663383},
+ {'id': 'auth_settings.service_adapter_DownloadFile',
+  'assembly': 'GTSPlusWebServiceAdaptMng.dll',
+  'type': 'GTSPlusWebServiceAdaptationManager.WebServiceAdaptationManager',
+  'method': 'DownloadFile',
+  'index': 0,
+  'rva': 39396,
+  'body_size': 776,
+  'body_sha256': '50a415ed9c7df1d0496711f6d79daac0af539deff88f00635cbbfdc8b3a5908d',
+  'anchors': [{'offset': 21,
+               'instruction': 'call GTSPlusPFCommon.Function.CommonFunction::GetResultInfoData'},
+              {'offset': 37,
+               'instruction': 'callvirt GTSPlusBaseAdaptation.BaseAdaptation::MessageDeserialize'},
+              {'offset': 68,
+               'instruction': 'callvirt GTSPlusBaseAdaptation.BaseAdaptation::MakeResponseMessage'},
+              {'offset': 91, 'instruction': 'call GTSPlusSettingFileWrapper.SettingFileWrapper::GetFileData'},
+              {'offset': 122,
+               'instruction': 'callvirt GTSPlusBaseAdaptation.BaseAdaptation::MakeResponseMessage'},
+              {'offset': 148,
+               'instruction': 'call GTSPlusPFCommon.Function.CommonFunction::GetResultInfoData'},
+              {'offset': 158,
+               'instruction': 'callvirt GTSPlusPFCommon.Function.ErrorReportStringData::set_Level'},
+              {'offset': 171,
+               'instruction': 'callvirt GTSPlusPFCommon.Function.ErrorReportStringData::set_Type'},
+              {'offset': 673,
+               'instruction': 'call '
+                              'GTSPlusPFCommon.Function.CommonFunction::ReplaceDetailCodeForResponseString'},
+              {'offset': 689,
+               'instruction': 'callvirt GTSPlusPFCommon.Function.ErrorReportStringData::set_Level'},
+              {'offset': 702,
+               'instruction': 'callvirt GTSPlusPFCommon.Function.ErrorReportStringData::set_Type'},
+              {'offset': 717,
+               'instruction': 'callvirt GtsPlus_FileDownloadManager.Entity.FDMResponseEntity::get_ErrorCode'},
+              {'offset': 722, 'instruction': 'call System.String::Format'},
+              {'offset': 727,
+               'instruction': 'callvirt GTSPlusPFCommon.Function.ErrorReportStringData::set_ErrorMessage'},
+              {'offset': 736,
+               'instruction': 'callvirt GTSPlusPFCommon.Function.ErrorReportStringData::set_RequestMessage'},
+              {'offset': 746, 'instruction': 'callvirt GTSPlusPFCommon.Message.ResultInfoData::ToLog'},
+              {'offset': 751,
+               'instruction': 'callvirt GTSPlusPFCommon.Function.ErrorReportStringData::set_ResultInfoData'},
+              {'offset': 759,
+               'instruction': 'call '
+                              'GTSPlusPFCommon.Function.ErrorReportFunction::OutputErrorReportActionLog'}],
+  'finding': 'Requires local login/MSK even with authHeaderRemove. Populate FDM URL/path from request; '
+             'authHeaderRemove removes Bearer only. No MSK renewal here; failure maps FDM detail code. '
+             'Success is local downloaded-file completion,not ECU or remote commit.',
+  'method_token': 100663404},
+ {'id': 'auth_settings.service_adapter_CalculateAuthenticationHash',
+  'assembly': 'GTSPlusWebServiceAdaptMng.dll',
+  'type': 'GTSPlusWebServiceAdaptationManager.WebServiceAdaptationManager',
+  'method': 'CalculateAuthenticationHash',
+  'index': 0,
+  'rva': 38660,
+  'body_size': 736,
+  'body_sha256': 'eb3a5ee59a9c7fe24f69541e3ef06957704135f160b5e2b6bf55ac70cba84354',
+  'anchors': [{'offset': 41, 'instruction': 'call get_CurrentWebServiceParameter'},
+              {'offset': 46, 'instruction': 'callvirt get_LSMUserInfo'},
+              {'offset': 58,
+               'instruction': 'call '
+                              'GtsPlus_LoginSequenceManager.Entity.LSMGetUserInfoResultEntity::get_ResponseId'},
+              {'offset': 63, 'instruction': 'call System.Convert::FromBase64String'},
+              {'offset': 69, 'instruction': 'call System.Text.Encoding::get_UTF8'},
+              {'offset': 75, 'instruction': 'callvirt System.Text.Encoding::GetString'},
+              {'offset': 93, 'instruction': 'callvirt System.String::Split'},
+              {'offset': 106, 'instruction': 'call System.Array::Resize'},
+              {'offset': 604,
+               'instruction': 'callvirt GTSPlusPFCommon.Function.ErrorReportStringData::set_Level'},
+              {'offset': 617,
+               'instruction': 'callvirt GTSPlusPFCommon.Function.ErrorReportStringData::set_Type'},
+              {'offset': 630, 'instruction': 'call System.Array::Empty'},
+              {'offset': 635, 'instruction': 'call System.String::Format'},
+              {'offset': 640,
+               'instruction': 'callvirt GTSPlusPFCommon.Function.ErrorReportStringData::set_ErrorMessage'},
+              {'offset': 650,
+               'instruction': 'callvirt GTSPlusPFCommon.Function.ErrorReportStringData::set_ExceptionInfo'},
+              {'offset': 660, 'instruction': 'callvirt GTSPlusPFCommon.Message.ResultInfoData::ToLog'},
+              {'offset': 665,
+               'instruction': 'callvirt GTSPlusPFCommon.Function.ErrorReportStringData::set_ResultInfoData'},
+              {'offset': 673,
+               'instruction': 'call '
+                              'GTSPlusPFCommon.Function.ErrorReportFunction::OutputErrorReportActionLog'},
+              {'offset': 693,
+               'instruction': 'call GTSPlusPFCommon.Function.CommonFunction::GetResultInfoData'}],
+  'finding': 'Decode responseId,split semicolons,drop final component,require four fields; remove spaces and '
+             'truncate second field to100 characters; concatenate fields for native HMAC-SHA256,retain '
+             'semicolon-separated normalized fields. Native output lowercased/freed. makeHeader1 replaces '
+             'Bearer with base64(normalizedFields;hash).',
+  'method_token': 100663403}]
+
+SERVICE_MANAGED += [{'id': 'auth_settings.service_adapter_dispatch_boundary',
+ 'assembly': 'GTSPlusWebServiceAdaptMng.dll',
+ 'type': 'GTSPlusWebServiceAdaptationManager.WebServiceAdaptationManager',
+ 'method': 'ExecuteAdaptation',
+ 'index': 0,
+ 'rva': 10436,
+ 'body_size': 1932,
+ 'body_sha256': 'e0eb61560f643faf5918303758326b00ae81c71b3841a0c5479e0c3c2c76a47f',
+ 'method_token': 100663372,
+ 'anchors': [{'offset': 1623, 'instruction': 'ldarg.0 '},
+             {'offset': 1624, 'instruction': 'call GTSPlusBaseAdaptation.BaseAdaptation::BeginFileEdit'},
+             {'offset': 1629, 'instruction': 'nop '},
+             {'offset': 1630, 'instruction': 'ldarg.0 '},
+             {'offset': 1631, 'instruction': 'call get_LicenseFileLockObject'},
+             {'offset': 1636, 'instruction': 'stloc.s local(0x0015)'},
+             {'offset': 1638, 'instruction': 'ldc.i4.0 '},
+             {'offset': 1639, 'instruction': 'stloc.s local(0x0016)'},
+             {'offset': 1641, 'instruction': 'ldloc.s local(0x0015)'},
+             {'offset': 1643, 'instruction': 'ldloca.s local(0x0016)'},
+             {'offset': 1645, 'instruction': 'call System.Threading.Monitor::Enter'},
+             {'offset': 1650, 'instruction': 'nop '},
+             {'offset': 1651, 'instruction': 'nop '},
+             {'offset': 1652, 'instruction': 'ldarg.0 '},
+             {'offset': 1653, 'instruction': 'ldarg.3 '},
+             {'offset': 1654, 'instruction': 'ldarg.s argument(0x0004)'},
+             {'offset': 1656, 'instruction': 'call GeneralWebService'},
+             {'offset': 1661, 'instruction': 'stloc.0 '},
+             {'offset': 1662, 'instruction': 'nop '},
+             {'offset': 1663, 'instruction': 'leave.s 0x1152'},
+             {'offset': 1665, 'instruction': 'ldloc.s local(0x0016)'},
+             {'offset': 1667, 'instruction': 'brfalse.s 0x1151'},
+             {'offset': 1669, 'instruction': 'ldloc.s local(0x0015)'},
+             {'offset': 1671, 'instruction': 'call System.Threading.Monitor::Exit'},
+             {'offset': 1676, 'instruction': 'nop '},
+             {'offset': 1677, 'instruction': 'endfinally '},
+             {'offset': 1678, 'instruction': 'ldarg.0 '},
+             {'offset': 1679, 'instruction': 'call GTSPlusBaseAdaptation.BaseAdaptation::EndFileEdit'},
+             {'offset': 1684, 'instruction': 'nop '},
+             {'offset': 1685, 'instruction': 'br.s 0x11d5'},
+             {'offset': 1687, 'instruction': 'ldarg.0 '},
+             {'offset': 1688, 'instruction': 'call GTSPlusBaseAdaptation.BaseAdaptation::BeginFileEdit'},
+             {'offset': 1693, 'instruction': 'nop '},
+             {'offset': 1694, 'instruction': 'ldarg.0 '},
+             {'offset': 1695, 'instruction': 'ldarg.3 '},
+             {'offset': 1696, 'instruction': 'ldarg.s argument(0x0004)'},
+             {'offset': 1698, 'instruction': 'call DownloadFile'},
+             {'offset': 1703, 'instruction': 'stloc.0 '},
+             {'offset': 1704, 'instruction': 'ldarg.0 '},
+             {'offset': 1705, 'instruction': 'call GTSPlusBaseAdaptation.BaseAdaptation::EndFileEdit'},
+             {'offset': 1710, 'instruction': 'nop '},
+             {'offset': 1711, 'instruction': 'br.s 0x11d5'}],
+ 'finding': 'WS000001 BeginFileEdit then shared LicenseFileLockObject Monitor.Enter around '
+            'GeneralWebService; Monitor.Exit in finally,EndFileEdit only after normal return. WS000002 '
+            'BeginFileEdit/DownloadFile/EndFileEdit without license monitor. Neither route has enclosing '
+            'catch or EndFileEdit finally: unexpected adapter/helper/file-delete exceptions propagate and '
+            'skip EndFileEdit; GWS monitor still releases. Client-handled failures return their normal PF '
+            'error/body contracts.'}]
+
+NATIVE += [{'id': 'auth_settings.service_native_hmac',
+ 'source': 'auth_settings.GTSPlusFileCryptographic_dll',
+ 'kind': 'native-x86',
+ 'locator': {'export': 'CalculateAuthenticationHash', 'export_rva': 5648, 'rva': 5680, 'length': 576},
+ 'sha256': 'c6eb6a2a8f15f076a33bac218c2cb6489872ab3a64bc8aba0957fbbc576dca34',
+ 'decisive_instructions': [{'va': '0x10001643',
+                            'bytes': '6a08',
+                            'instruction': 'PUSH 8 (BCRYPT_ALG_HANDLE_HMAC_FLAG)'}],
+ 'finding': 'Export RVA0x1610 supplies embedded packaging key (not emitted) to callee RVA0x1630. '
+            'BCryptOpenAlgorithmProvider SHA256 with flag8,BCryptCreateHash with supplied '
+            'key,HashData,FinishHash; output uppercase UTF-16 hex,managed caller lowercases and FreeMemory. '
+            'This is keyed HMAC-SHA256,not plain SHA256; source hash pins implementation without disclosing '
+            'key.'}]
+
+
+def _service_managed_evidence(assemblies: dict[str, Any]) -> list[dict[str, Any]]:
+    records = []
+    for spec in SERVICE_MANAGED:
+        pe = assemblies[spec["assembly"]]
+        row = pe.net.mdtables.MethodDef.rows[(spec["method_token"] & 0xffffff) - 1]
+        body = _body(pe, row)
+        pin = _method_pin(row, body)
+        if str(row.Name) != spec["method"] or any(pin[k] != spec[k] for k in pin):
+            raise ValueError(f"service body drift: {spec['id']}")
+        records.append({
+            "id": spec["id"], "source": "auth_settings." + spec["assembly"].replace(".", "_"),
+            "kind": "managed-il", "locator": {"type": spec["type"], "method": spec["method"],
+                "method_token": hex(spec["method_token"]), "offset_base": "method header", **pin},
+            "anchors": copy.deepcopy(spec["anchors"]), "finding": spec["finding"],
+        })
+    for name in ("GtsPlus-GeneralWebService.dll", "GtsPlus-FileDownloadManager.dll"):
+        pe = assemblies[name]
+        defaults = {}
+        for attr in pe.net.mdtables.CustomAttribute:
+            owner = getattr(getattr(attr.Type.row, "Class", None), "row", None)
+            if owner is None or type_name(owner) != "System.Configuration.DefaultSettingValueAttribute":
+                continue
+            key = str(attr.Parent.row.Name)
+            if key not in ("DefaultRequestIntervalMilliseconds", "DefaultMaxRetryCount", "DefaultConnectionTimeoutMilliseconds"):
+                continue
+            blob = bytes(attr.Value.value)
+            defaults[key] = blob[3:3 + blob[2]].decode("ascii")
+        if defaults != {"DefaultRequestIntervalMilliseconds": "1000", "DefaultMaxRetryCount": "5", "DefaultConnectionTimeoutMilliseconds": "60000"}:
+            raise ValueError(f"service retry defaults drift: {name}")
+        records.append({"id": "auth_settings.service_defaults_" + name.replace(".", "_"),
+            "source": "auth_settings." + name.replace(".", "_"), "kind": "managed-custom-attributes",
+            "locator": "Settings DefaultSettingValueAttribute blobs", "values": defaults,
+            "finding": "Five fixed-interval retries after initial attempt;1000ms interval,60000ms timeout. GWS adapter overrides timeout from matching distributor basicAuthentication row when present."})
+    common = assemblies["GTSPlusPFCommon.dll"]
+    wire_types = ("GeneralWebServiceRequestApiArgs", "GeneralWebServiceResponseApiArgs", "DownloadFileRequestApiArgs")
+    schemas = {}
+    for short_name in wire_types:
+        full_name = "GTSPlusPFCommon.Message.WSMessage." + short_name
+        td = next(td for td in common.net.mdtables.TypeDef if type_name(td) == full_name)
+        properties = next(pm.PropertyList for pm in common.net.mdtables.PropertyMap if pm.Parent.row is td)
+        fields = []
+        for item in properties:
+            for attr in common.net.mdtables.CustomAttribute:
+                owner = getattr(getattr(attr.Type.row, "Class", None), "row", None)
+                if attr.Parent.row is not item.row or owner is None or type_name(owner) != "Newtonsoft.Json.JsonPropertyAttribute":
+                    continue
+                blob = bytes(attr.Value.value)
+                offset = blob.index(b"PropertyName") + len(b"PropertyName")
+                wire_name = blob[offset + 1:offset + 1 + blob[offset]].decode("ascii")
+                fields.append({"managed_property": str(item.row.Name), "wire_name": wire_name,
+                               "custom_attribute_blob": blob.hex()})
+        schemas[short_name] = fields
+    records.append({"id": "auth_settings.service_wire_schema", "source": "auth_settings.GTSPlusPFCommon_dll",
+        "kind": "managed-custom-attributes", "locator": "WSMessage request/response PropertyMap JsonPropertyAttribute blobs",
+        "schemas": schemas,
+        "finding": "Raw/typed names are managed wire names,not an inferred SDK schema. Crucial inversion: wire authHeader binds AuthHeaderRemove;true removes Bearer only. Absent bool defaults false. folderPath is required destination file path. requestData and responseData remain strings."})
+    return records
+
+
+def _service_js_sections(text: str) -> list[tuple[str, int, str]]:
+    # Top-level prototype assignments are the shipped frontend's method boundaries.
+    matches = list(re.finditer(r"([A-Za-z_$][\w$]*\.prototype\.[\w$]+)\s*=\s*(?:async\s+)?function", text))
+    return [(m.group(1), m.start(), text[m.start():matches[i + 1].start() if i + 1 < len(matches) else len(text)])
+            for i, m in enumerate(matches)]
+
+
+def _public_service_rows(text: str) -> list[dict[str, Any]]:
+    """Extract only public URL/routing scalars; never serialize arbitrary YAML values."""
+    rows = []
+    current = None
+    for line_no, line in enumerate(text.splitlines(), 1):
+        top = re.match(r"^(\w+)\s*:\s*(?:#.*)?$", line)
+        if top:
+            current = {"setting": top.group(1), "line": line_no}
+            rows.append(current)
+            continue
+        if line and not line[0].isspace():
+            current = None
+        match = re.match(r"^  (\w+)\s*:\s*(.*?)\s*(?:#.*)?$", line)
+        if current is None or match is None:
+            continue
+        key, value = match.groups()
+        if key == "url" or key.endswith("_url"):
+            value = value.strip('"')
+            if value and not (value.startswith(("https://", "http://", "C:\\"))):
+                raise ValueError(f"unexpected public service URL format: {key}")
+            current[key] = value
+        elif key in ("id", "formatFlg") and re.fullmatch(r"\d+", value):
+            current[key] = int(value)
+    return [row for row in rows if any(k == "url" or k.endswith("_url") for k in row)]
+
+
+def _service_surface(assets: dict[str, bytes], roots: dict[str, Path], sources: list[dict[str, Any]],
+                     evidence: list[dict[str, Any]]) -> dict[str, Any]:
+    source_ids = {s["id"] for s in sources}
+    sections = {}
+    producers = []
+    for member, data in sorted(assets.items()):
+        if not member.endswith(".js") or not member.startswith("js/gts/"):
+            continue
+        text = data.decode("utf-8")
+        for marker, start, segment in _service_js_sections(text):
+            sections[marker] = (member, start, segment)
+            calls = list(re.finditer(r"(?:gts\.util|gtsPFApi|this\.gtsPFRawInterface|gtsPFRawInterface)\.(executeGenWebService|downloadFile)\(([^)]*)\)", segment))
+            if not calls:
+                continue
+            eid = "auth_settings.service_producer_" + marker.replace(".", "_")
+            producers.append({"evidence": eid, "member": member, "function": marker,
+                "calls": [{"operation": m[1], "argument_expression": m[2], "character_offset": start + m.start()} for m in calls],
+                "serializers": sorted(set(re.findall(r"JSON\.stringify\(([^)]*)\)", segment))),
+                "status_literals": sorted(set(re.findall(r"['\"]((?:MIR|TGD|GWS|AISAC)[0-9]+)['\"]", segment))),
+                "cancellation_fields": sorted(set(re.findall(r"\b(?:model|cacheData)\.(?:isCancel|cancelFlag|isCancelRequested)\b", segment))),
+                "persistence_calls": sorted(set(re.findall(r"gtsPFApi\.(writeFile|saveSettingFileInfo|downloadFile|extractFile|moveFile|deleteFile)\(", segment)))})
+            _service_js_record(member, data, marker, start, segment, eid, sources, source_ids, evidence,
+                "Actual frontend service producer; request serializers,status literals,cancel guards and local persistence calls are indexed in service_contract_matrix.frontend_producers. PF completion is not remote commit evidence.")
+    curated = [
+        ("raw", "js/gts/common/gts_platform_raw_interface.js", "GtsPFRawInterface.prototype.executeGenWebService", "Raw WS000001 send passes identical param and receiveAck references; no service-specific request/response translation."),
+        ("raw_download", "js/gts/common/gts_platform_raw_interface.js", "GtsPFRawInterface.prototype.downloadFile", "Raw WS000002 send passes identical param/receiveAck and returns send promise; destination file path and optional header flags are not translated."),
+        ("typed", "js/gts/common/gts_platform_api.js", "GtsPFApi.prototype.executeGenWebService", "Online typed wrapper passes identical param/receiveAck and resolved response object. Ack envelope is retained; only nested response promise is translated. Offline loginMode2 performs no raw request and resolves JSON '{}' or XML '' with no resultInfo: this is a local no-op,not remote success."),
+        ("download_typed", "js/gts/common/gts_platform_api.js", "GtsPFApi.prototype.downloadFile", "Download typed API passes param/receiveAck and response unchanged,including ack envelope. Unlike general-service typed wrapper,it has no offline shortcut."),
+        ("calibration", "js/gts/health_check/health_check_worker.js", "HealthCheckWorkerModel.prototype._webServiceCalibrationUpdateCheckFunc", "Skip canceled,empty VIN/IDs,invalid URL or healthCheckCid undefined/truthy. POST JSON scantoolVersion/domain/language/calibrationId array. Parse failure becomes empty objects; transport rejection resolves; MIR4000000/TGD4000000 rejects revoke; otherwise cache commonResult/apiResult and fault messages."),
+        ("production", "js/gts/health_check/health_check_worker.js", "HealthCheckWorkerModel.prototype._webServiceGetProductionDateFunc", "Only initial required or optional transition with SSC/CID enabled and absent cached production date. POST JSON vin; successful parse caches commonResult/apiResult and calls overwriteProductionDate WITHOUT awaiting its promise. Transport rejection resolves; business revoke rejects; service completion is not stored-data write completion."),
+        ("production_persistence", "js/gts/health_check/health_check_worker.js", "HealthCheckWorkerModel.prototype.overwriteProductionDate", "Truthy date updates commonInfo immediately,then asynchronously reads StoredDataManager vehicleInfo storedId0/allData=true,sets productionDate,and returns overwirteVehicleInfo promise. Calling service handler does not await this promise. Backend write/hash-refresh semantics belong to persistence_commit."),
+        ("health_revoke", "js/gts/health_check/health_check_worker.js", "HealthCheckWorkerModel.prototype.isRevoke", "MIR4000000 or TGD4000000 sets isRunning=false and reports revoke; other business codes do not imply revoke."),
+        ("datalist", "js/gts/datalist/datalist_worker.js", "DatalistWorkerModel.prototype.executeGenWebService", "POST JSON milInput with session/version/VIN/date/language/userTypeCode/type DataListData/dd. Response JSON is returned to caller; transport/body parse rejection is not a durable upload receipt."),
+        ("dtc", "js/gts/dtc/dtc_worker.js", "DtcWorkerModel.prototype.saveSystemDtc", "POST JSON milInput type SystemDTC plus status/DTC arrays; systemDtc/selected URL/id and already-executed ECU gates. Only rejection of original PF request is swallowed. Fulfillment JSON.parse failure and MIR4000000 revoke reject through final handler; executed-ECU marker is appended only on resolved path,including swallowed transport rejection."),
+        ("dtc_caller", "js/gts/dtc/dtc_worker.js", "DtcWorkerModel.prototype.getDtcOfStart", "Await saveSystemDtc before createReturnValue. Catch resolves revoke reason without createReturnValue; other failures reject using reason.resultInfo.code/detailCode. Parse SyntaxError lacks resultInfo,so this catch can itself throw TypeError; it does not turn parsing failure into successful diagnostic continuation."),
+        ("download_prepare", "js/gts/software_as_a_part_aisac2/software_as_a_part_aisac2_worker.js", "SoftwareAsAPartAisac2WorkerModel.prototype.sendDownloadCalFile", "POST downloadtoCalFile SoftwareID/ID and reqData swNo/fileName/filePath. Require MIR2000000 and no fault. Direct apiResult.URL skips polling; otherwise uppercase SHA256(ID) forms requestDownloadtoCalFileURL ID/HashValue. Errors resolve isShowDl007=true."),
+        ("download_poll", "js/gts/software_as_a_part_aisac2/software_as_a_part_aisac2_worker.js", "SoftwareAsAPartAisac2WorkerModel.prototype.receiveDownloadCalFile", "Wait1000ms before first request; POST correlation body repeatedly on MIR2020000 or MIR2000000 without URL;15-minute accumulated timer,not wall-clock deadline. This polling body has no isCancel guard. Failure/fault/timeout resolves dialog flag,not an exception to outer workflow."),
+        ("download_install", "js/gts/software_as_a_part_aisac2/software_as_a_part_aisac2_worker.js", "SoftwareAsAPartAisac2WorkerModel.prototype.downloadtocalFile", "WS000002 downloads returned URL to timestamp.zip with wire authHeader:true (AuthHeaderRemove: remove Bearer,retain GUID/MSK/Basic),then enumerate all *.zip,extract tmp,move selected calibration/package extensions overwrite=true,delete tmp and ZIP. Each extraction/move/delete failure is swallowed. A false dialog flag is not proof all calibration files were installed; failed ZIP deletion can leave repeated enumeration."),
+        ("help", "js/gts/active_test/active_test_controller.js", "ActiveTestController.prototype.showHelp", "Help uses createHelpInfoUrl and window.open _blank; it is browser navigation,not WS000001/GeneralWebService. No client entitlement or remote receipt inferred."),
+        ("settings_selection", "js/gts/GTSWorker.js", "WorkerController.prototype.initUserTypeSettings", "Resolve country/user-type configuration selection before service consumers; filePath drives getSettingFileInfo. See source-pinned country/userType mapping and per-file public endpoint rows."),
+    ]
+    curated_records = []
+    for key, member, marker, finding in curated:
+        if marker not in sections:
+            raise ValueError(f"service producer missing: {marker}")
+        _, start, segment = sections[marker]
+        eid = "auth_settings.service_contract_" + key
+        _service_js_record(member, assets[member], marker, start, segment, eid, sources, source_ids, evidence, finding)
+        curated_records.append({"contract": key, "evidence": eid, "finding": finding})
+    for member, marker, finding in [
+        ("js/gts/common/gts_worker_util.js", "gts.util.executeGenWebService", "Utility wrapper inspects XML statusCode or JSON root/commonResult only for JSON enum (not JSON_UTF-8). Suffix4010002 plus nested commonResult.secureWebService.ssoURL starts secondary login; success replays identical request once,login rejection resolves original response. Second reply is not inspected recursively."),
+        ("js/gts/common/gts_utility.js", "gts.util.createHelpInfoUrl", "Help concatenates commonInfo.getHelpInfoUrl() and specification/function ID verbatim; no request serialization or native web-service call."),
+    ]:
+        text = assets[member].decode("utf-8")
+        start = text.index(marker + "=")
+        end = text.find(";gts.util.", start)
+        segment = text[start:end + 1 if end >= 0 else len(text)]
+        _service_js_record(member, assets[member], marker, start, segment, "auth_settings.service_" + marker.rsplit(".", 1)[1], sources, source_ids, evidence, finding)
+    config_rows = []
+    decoder = roots["aux"] / "ContentServer/GtsPlus-CM.dll"
+    for spec in INPUTS:
+        if not spec["id"].startswith("auth_settings.service_config_"):
+            continue
+        clear = decrypt_file(roots["installed"] / spec["relative"], roots["installed"] / "GTSPlus/Env/GTSPlus.pp", decoder, key_type=2)
+        text = clear.decode("utf-8-sig").rstrip("\x00")
+        eid = spec["id"] + "_public_rows"
+        rows = _public_service_rows(text)
+        config_rows.append({"source": spec["id"], "evidence": eid, "file": spec["relative"], "services": rows})
+        evidence.append({"id": eid, "source": spec["id"], "kind": "decrypted-config-allowlist", "plaintext_sha256": _digest(clear),
+            "locator": "top-level service sections; only URL,id,formatFlg emitted", "services": rows,
+            "finding": "Deployed selectable user-type service surface,including empty disabled endpoints. Public endpoint names/routing only; credentials and arbitrary scalars are excluded."})
+    setting_keys = {row["setting"] for config in config_rows for row in config["services"]}
+    references: dict[str, list[dict[str, str]]] = {key: [] for key in setting_keys}
+    folded = {key.lower(): key for key in setting_keys}
+    for marker, (member, _, segment) in sections.items():
+        for word in set(re.findall(r"\b[A-Za-z_][A-Za-z_0-9]*\b", segment)):
+            key = folded.get(word.lower())
+            if key:
+                references[key].append({"member": member, "function": marker})
+    for config in config_rows:
+        for row in config["services"]:
+            row["frontend_references"] = references[row["setting"]]
+    routing = _service_routing(roots, decoder, evidence)
+    return {"frontend_producers": producers, "contracts": curated_records, "deployed_user_type_endpoints": config_rows,
+        "deployed_routing": routing,
+        "api_to_client": [{"api": "WS000001", "raw": "executeGenWebService", "adapter": "GeneralWebService", "client": "GtsPlus-GeneralWebService.GeneralWebService.SendRequest"},
+                          {"api": "WS000002", "raw": "downloadFile", "adapter": "DownloadFile", "client": "GtsPlus-FileDownloadManager.FileDownloadManager.DownloadFile"}],
+        "selection": "Country/userType selects UserTypeSettings filePath; each service URL and id are frontend input. Native adapter Find(basicAuthentication.id==serverId) chooses credentials and optional timeout,not endpoint URL. Secure IDs100..199 add secondResponseID,Tascal200..299 add X-Requested-With and ticket; selected installed credential rows1,2,3,101,102 have timeouts60000,5000,300000,60000,60000ms. No URL-to-serverId binding is enforced here.",
+        "envelopes": "Raw and online typed API preserve request and response; native forwards requestData unchanged. RestClient adds protocol media type and headers. HTTP200/202/204 -> Result=true,error=null; mapped HTTP errors also Result=true,so adapter returns PF result0 with raw responseData. Only Result=false becomes PF5001 with GWS detail. GUI business commonResult/status/fault handling remains per service.",
+        "error_layers": {"MSK": "GWS4003 -> RenewalMSK and one replay with updated MSK; no regenerated auth hash on replay. GWS4004 -> credential deletion/revoke sequence. GWS4005 -> cache new requestId/ssoUrl,not revoke.",
+            "transport": "GWS retries empty body or status suffix5000000/5030000,plus policy exception handling,5 retries at1000ms by default. FDM retries500/503 or nonpositive ContentLength/inspection exceptions,not canceled Task. Neither public GWS API nor PF download message exposes caller cancellation; FDM creates its own unexposed token.",
+            "escaping_exceptions": "Unexpected adapter/helper/cleanup exceptions are not caught by ExecuteAdaptation. GWS license Monitor exits in finally,but EndFileEdit is normal-only. FDM has no license Monitor; EndFileEdit also skipped on throw. No fabricated PF result is assigned to these escaping exceptions.",
+            "observable": "Local PF completion,parsed business status,cache mutation,file operation ordering only. No remote durability,OEM entitlement,server-side idempotence or ECU write success is established."}}
+
+
+def _service_js_record(member: str, data: bytes, marker: str, start: int, segment: str, eid: str,
+                       sources: list[dict[str, Any]], source_ids: set[str], evidence: list[dict[str, Any]], finding: str) -> None:
+    sid = "auth_settings.service_asset_" + member.replace("/", "_").replace(".", "_")
+    if sid not in source_ids:
+        sources.append({"id": sid, "path": next(s["path"] for s in sources if s["id"] == "auth_settings.gts_gui"),
+            "member": member, "sha256": _digest(data), "size": len(data), "representation": "authenticated decoded ZIP member",
+            "derived_from": ["auth_settings.gts_gui", "auth_settings.dist_crt"],
+            "recovery": "fresh gtsplus_local_crypto.decode_gui; shipped ZIP hash and RSA authentication"})
+        source_ids.add(sid)
+    evidence.append({"id": eid, "source": sid, "kind": "signed-javascript", "locator": {"member": member,
+        "function": marker, "character_start": start, "character_length": len(segment), "segment_sha256": _digest(segment.encode())}, "finding": finding})
+
+
+def _service_routing(roots: dict[str, Path], decoder: Path, evidence: list[dict[str, Any]]) -> dict[str, Any]:
+    decoded = {}
+    for name in ("DistDep", "GTSPlusCommon"):
+        clear = decrypt_file(roots["installed"] / f"GTSPlus/Env/{name}.gstg",
+                             roots["installed"] / "GTSPlus/Env/GTSPlus.pp", decoder, key_type=2)
+        decoded[name] = (clear, clear.decode("utf-8-sig").rstrip("\x00"))
+    clear, dist = decoded["DistDep"]
+    auth = dist[dist.index("basicAuthentication:"):dist.index("\nfileDownloadAuthentication:")]
+    auth_rows = [{"serverId": int(m[1]), "timeout_ms": int(m[2])} for m in
+                 re.finditer(r"  - id:\s*(\d+)[\s\S]*?    timeout:\s*(\d+)", auth)]
+    country = None
+    user_type = None
+    selections = []
+    for line in dist[dist.index("countryInformation:"):dist.index("\ncompensationTirePressure:")].splitlines():
+        match = re.match(r'  - code: "([^"]+)"', line)
+        if match:
+            country = match[1]
+        match = re.match(r'      - code: "([^"]+)"', line)
+        if match:
+            user_type = match[1]
+        match = re.match(r'        fileName: "([^"]+)"', line)
+        if match:
+            selections.append({"country": country, "user_type": user_type, "file": match[1]})
+    evidence.append({"id": "auth_settings.service_routing_distributor", "source": "auth_settings.DistDep_gstg",
+        "kind": "decrypted-config-allowlist", "plaintext_sha256": _digest(clear),
+        "locator": "basicAuthentication id/timeout and countryInformation userType code/fileName only",
+        "authentication_routes": auth_rows, "settings_selection": selections,
+        "finding": "Credentials are deliberately omitted; serverId chooses credential row independently of caller URL. Country/userType selects deployed service settings file,not remote entitlement."})
+    clear, common = decoded["GTSPlusCommon"]
+    ranges = {key: int(re.search(r"^  " + key + r":\s*(\d+)", common, re.M)[1])
+              for key in ("secureServerIdMin", "secureServerIdMax", "tascalServerIdMin", "tascalServerIdMax")}
+    evidence.append({"id": "auth_settings.service_routing_ranges", "source": "auth_settings.GTSPlusCommon_gstg",
+        "kind": "decrypted-config-allowlist", "plaintext_sha256": _digest(clear),
+        "locator": "webServiceInfo routing-range scalars only", "values": ranges,
+        "finding": "Inclusive secure range adds secondResponseID; inclusive Tascal range adds X-Requested-With and ticket headers. DistDep seed contains no Tascal200..299 authentication row."})
+    return {"authentication_routes": auth_rows, "settings_selection": selections, "header_ranges": ranges}
+
+
+STATES += [
+    {"id": "auth_settings.service_request", "owner": "GeneralWebService", "meaning": "Request serialized by frontend; service adapter selecting credentials/headers"},
+    {"id": "auth_settings.service_reply", "owner": "GWS adapter/frontend", "meaning": "Raw body delivered in PF success; business result not yet interpreted"},
+    {"id": "auth_settings.service_local_error", "owner": "GWS adapter", "meaning": "Validation/exception/policy failure surfaced as PF error"},
+    {"id": "auth_settings.calibration_download", "owner": "AISAC2/FDM", "meaning": "Correlation polling or local calibration ZIP download/extraction"},
+]
+TRANSITIONS += [
+    {"id": "auth_settings.service_offline", "from": "auth_settings.active", "to": "auth_settings.active",
+     "trigger": "typed executeGenWebService", "guard": "loginMode2 offline",
+     "action": "Resolve local JSON '{}' or XML '' without raw call; do not infer server success",
+     "evidence": ["auth_settings.service_contract_typed"]},
+    {"id": "auth_settings.service_submit", "from": "auth_settings.active", "to": "auth_settings.service_request",
+     "trigger": "WS000001", "guard": "Online,local LSMUserInfo/MSK,matching basicAuthentication serverId",
+     "action": "Forward URL/method/contentType/requestData; add selected protocol headers and timeout",
+     "evidence": ["auth_settings.general_web_auth", "auth_settings.service_routing_distributor", "auth_settings.service_routing_ranges"]},
+    {"id": "auth_settings.service_raw_reply", "from": "auth_settings.service_request", "to": "auth_settings.service_reply",
+     "trigger": "GWS Result=true", "guard": "HTTP200/202/204 or mapped400/401/403/500/503 response",
+     "action": "Return PF success with raw responseData even when ErrorCode set; frontend handles business status/fault separately",
+     "evidence": ["auth_settings.general_web_auth", "auth_settings.service_contract_typed"]},
+    {"id": "auth_settings.service_secondary_login", "from": "auth_settings.service_reply", "to": "auth_settings.service_request",
+     "trigger": "Utility wrapper inspects raw reply", "guard": "status suffix4010002 and nested ssoURL; secondary login resolves",
+     "action": "Replay identical param once; login rejection instead resolves original reply. JSON_UTF-8 enum not inspected",
+     "evidence": ["auth_settings.service_executeGenWebService"]},
+    {"id": "auth_settings.service_calibration_request", "from": "auth_settings.active", "to": "auth_settings.calibration_download",
+     "trigger": "AISAC2 sendDownloadCalFile", "guard": "Configured route and MIR2000000 without fault",
+     "action": "Use direct URL or correlate ID/uppercase SHA256 and poll1000ms up to15 accumulated minutes",
+     "evidence": ["auth_settings.service_contract_download_prepare", "auth_settings.service_contract_download_poll"]},
+    {"id": "auth_settings.service_calibration_files", "from": "auth_settings.calibration_download", "to": "auth_settings.active",
+     "trigger": "downloadtocalFile continuation", "guard": "FDM HTTP200,nonzero local file; later file operations may still fail",
+     "action": "Enumerate ZIPs,extract tmp,move allowed package files,delete tmp/ZIP; extraction/move/delete exceptions swallowed",
+     "evidence": ["auth_settings.service_contract_download_install", "auth_settings.service_adapter_DownloadFile"]},
+    {"id": "auth_settings.service_failed_result", "from": "auth_settings.service_request", "to": "auth_settings.service_local_error",
+     "trigger": "GWS Result=false or local adapter validation/settings failure",
+     "guard": "Invalid parameters,unmapped status,parse/transport exception,or unavailable local prerequisite",
+     "action": "Return PF error; client exception/validation code preserved as detail when GWS response exists",
+     "evidence": ["auth_settings.general_web_auth"]},
+]
+PERSISTENCE += [
+    {"path_pattern": "StoredDataManager storedId0 vehicleInfo.productionDate",
+     "producer": "HealthCheck overwriteProductionDate", "consumer": "Stored vehicle metadata",
+     "created": "Set commonInfo synchronously; async read and overwirteVehicleInfo promise",
+     "flushed": "Service handler discards promise; service completion does not establish write/hash completion",
+     "deleted": "No deletion in this service continuation",
+     "evidence": ["auth_settings.service_contract_production", "auth_settings.service_contract_production_persistence"]},
+    {"path_pattern": "Caller-supplied WS000002 folderPath (destination file,not merely directory)",
+     "producer": "FDM HttpRequest MoveNext", "consumer": "AISAC2 calibration extraction",
+     "created": "HTTP200 creates parent; FileStream Create/Write/FileShare.None copies response stream",
+     "flushed": "Stream disposal completes before size/readiness result; no fsync/atomic rename/ECU installation asserted",
+     "deleted": "Cancel/status/empty/exception branches attempt File.Delete; delete exception can escape cleanup",
+     "evidence": ["auth_settings.service_adapter_DownloadFile", "auth_settings.service_contract_download_install"]},
+    {"path_pattern": "AISAC2 calFilePath/{timestamp.zip,tmp,*.cuw,*.scuw,*.cuwd,*.tup}",
+     "producer": "downloadtocalFile", "consumer": "Subsequent calibration/package selection",
+     "created": "WS000002 then extractFile and moveFile overwrite=true",
+     "flushed": "Each PF file operation is independent; false dialog flag is not all-files commit evidence",
+     "deleted": "tmp and ZIP deletion attempted despite swallowed extraction/move errors",
+     "evidence": ["auth_settings.service_contract_download_install"]},
+]
+HANDOFFS += [
+    {"to_domain": "operations", "caller": "Diagnostic/calibration/data frontend producers",
+     "callee": "WS000001 GeneralWebService / WS000002 FDM", "mechanism": "Raw/typed PF service API",
+     "payload": "User-type URL/id plus caller JSON/XML request string; raw business response preserved",
+     "evidence": ["auth_settings.service_contract_typed", "auth_settings.service_contract_calibration",
+                  "auth_settings.service_contract_datalist", "auth_settings.service_contract_download_prepare"]},
+]
 def _digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
@@ -3900,6 +5176,7 @@ def build(
                 "anchors": spec["anchors"], "finding": spec["finding"],
             })
         evidence.extend(_desktop_evidence(assemblies, roots))
+        evidence.extend(_service_managed_evidence(assemblies))
     finally:
         for pe in assemblies.values():
             pe.close()
@@ -3968,17 +5245,19 @@ def build(
         "plaintext_sha256": _digest(clear), "values": scalars,
         "finding": "Installed NA distributor policy: region1,30-day offline/profile retention,10-minute clock tolerance,7-day license refresh,60-second clock cycle; normal logout server API disabled. Empty licenseTypeValue is the actual comparison input, not a wildcard assertion.",
     })
+    service_contract_matrix = _service_surface(assets, roots, sources, evidence)
     return {
         "schema": "gtsplus-lifecycle-domain-v1", "domain": "auth_settings",
         "sources": sources, "evidence": evidence, "states": copy.deepcopy(STATES),
         "transitions": copy.deepcopy(TRANSITIONS), "handoffs": copy.deepcopy(HANDOFFS),
         "persistence": copy.deepcopy(PERSISTENCE),
         "coverage": {
-            "components": sorted(ASSEMBLIES) + ["GTSPlusSettingFileManager.dll", "GtsPlus-LV.dll", "signed GTS GUI login/user/PC settings"],
-            "entrypoints": [x["type"] + "::" + x["method"] for x in MANAGED] + [x["locator"] for x in JAVASCRIPT],
+            "components": sorted(ASSEMBLIES) + ["GTSPlusSettingFileManager.dll", "GTSPlusFileCryptographic.dll", "GtsPlus-LV.dll", "signed GTS GUI login/user/PC settings and non-login service producers"],
+            "entrypoints": [x["type"] + "::" + x["method"] for x in MANAGED + SERVICE_MANAGED] + [x["locator"] for x in JAVASCRIPT] + [x["function"] for x in service_contract_matrix["frontend_producers"]],
             "branches": [x["guard"] for x in TRANSITIONS],
         },
         "materialization": proof,
+        "service_contract_matrix": service_contract_matrix,
         "license_status": {"0": "valid", "-1": "invalid/absent offline artifacts", "-2": "expired beyond tolerance", "-3": "offline-use window expired", "-4": "local read/clock/parse/native verification error"},
         "residuals": copy.deepcopy(RESIDUALS),
         "execution_scope": "Offline parsing, signed-package/config decode and static executable evidence only; no target DLL invocation,network,vehicle,credential use.",
