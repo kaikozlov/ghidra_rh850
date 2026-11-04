@@ -1,0 +1,291 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_cantp_actual_z_timeout_then_fresh_ff_readmission_cts",
+  "entry": {
+    "role": "retained",
+    "scope": "resolved-address",
+    "address": "0x7a408"
+  },
+  "max_instructions": 180000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0xfebf2000",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "Synthetic bounded 1-KiB stack below SP=FEBE2000; A5 fill exposes stack use"
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Synthetic zero OS priority-mask nesting depth for original interrupt guards"
+    },
+    {
+      "address": "0xfebe4f3c",
+      "hex": "a5aa",
+      "evidence": "Synthetic CanTp fault sentinel A5 and initialized guard AA"
+    },
+    {
+      "address": "0xfebe4f40",
+      "hex": "00000000ffff0000e1ff000000000000",
+      "evidence": "Synthetic idle channel0 TX state: owner FFFF, timeout0, state E1, sequence FF"
+    },
+    {
+      "address": "0xfebe4f50",
+      "hex": "020000000208010003005a080100f041",
+      "evidence": "Synthetic active channel0 RX per F33CanTpRxState: remaining2, owner0802, timeout1, stateZ, DLC8, sequence1, generation41"
+    },
+    {
+      "address": "0xfebe4f60",
+      "hex": "00000000ffff0000e1ff000000000000",
+      "evidence": "Synthetic idle channel1 TX state: owner FFFF, timeout0, state E1, sequence FF"
+    },
+    {
+      "address": "0xfebe4f70",
+      "hex": "00000000ffff00000000e100ff00f000",
+      "evidence": "Synthetic idle channel1 RX state per F33CanTpRxState; generation0"
+    },
+    {
+      "address": "0xfebe4f80",
+      "hex": "00000000ffff0000e1ff000000000000",
+      "evidence": "Synthetic idle channel2 TX state: owner FFFF, timeout0, state E1, sequence FF"
+    },
+    {
+      "address": "0xfebe4f90",
+      "hex": "00000000ffff00000000e100ff00f000",
+      "evidence": "Synthetic idle channel2 RX state per F33CanTpRxState; generation0"
+    },
+    {
+      "address": "0xfebe564c",
+      "hex": "02000200",
+      "evidence": "Synthetic DCM communication-slot modes 2,0 for both configured slots"
+    },
+    {
+      "address": "0xfebe5651",
+      "hex": "220204112233445566778899aabbccdd",
+      "evidence": "Synthetic stale DCM request payload at ROM-configured slot0 base; tracks prefix-only overwrite"
+    },
+    {
+      "address": "0xfebe5960",
+      "hex": "01",
+      "evidence": "Synthetic DCM phase1 selects inactivity timer cancellation and re-admission path"
+    },
+    {
+      "address": "0xfebe5964",
+      "hex": "40",
+      "evidence": "Synthetic response coordinator40 sentinel for receive-only cleanup"
+    },
+    {
+      "address": "0xfebe59d8",
+      "hex": "a1a2a3a4a5a6a7a8",
+      "evidence": "Synthetic unrelated DCM owner-bookkeeping sentinels for preservation checks"
+    },
+    {
+      "address": "0xfebe59e0",
+      "hex": "00000000",
+      "evidence": "Synthetic pending/current DCM dispatch receive-slot indices both0"
+    },
+    {
+      "address": "0xfebe59ea",
+      "hex": "01",
+      "evidence": "Synthetic pending-transport-accepted1 sentinel for receive-only cleanup"
+    },
+    {
+      "address": "0xfebe59f0",
+      "hex": "5756befe0600b6b7fa00010001ddeeff",
+      "evidence": "Synthetic slot0 ownership per F33DcmReceiveBufferState: base+6 cursor, length6, capacity250, receiving1, participant1; opaque sentinels"
+    },
+    {
+      "address": "0xfebe5a00",
+      "hex": "5157befe000000000001000000000000",
+      "evidence": "Synthetic idle DCM slot1 at ROM-configured base FEBE5751, capacity256, no receiving participant"
+    },
+    {
+      "address": "0xfebe5a10",
+      "hex": "5158befe000000000001000000000000",
+      "evidence": "Synthetic idle DCM slot2 at ROM-configured base FEBE5851, capacity256, no receiving participant"
+    },
+    {
+      "address": "0xfebe5a20",
+      "hex": "7f3178aabbccddee",
+      "evidence": "Synthetic shared-response payload sentinels outside receive-only reset"
+    },
+    {
+      "address": "0xfebe5e74",
+      "hex": "1122334401a1a2a3",
+      "evidence": "Synthetic timer0 active1 with deadline44332211 and A1-A3 padding sentinels"
+    },
+    {
+      "address": "0xfebe5e9c",
+      "hex": "5566778800b1b2b3",
+      "evidence": "Synthetic timer5 inactive0 with deadline88776655 and B1-B3 padding sentinels"
+    },
+    {
+      "address": "0xfebe1000",
+      "hex": "0011befe0800",
+      "evidence": "Synthetic F33PduInfo: data FEBE1100, length8 for original receive entry"
+    },
+    {
+      "address": "0xfebe1100",
+      "hex": "100c31011004a1b2",
+      "evidence": "Synthetic fresh FF 10 0C 31 01 10 04 A1 B2: total12, six initial payload bytes"
+    },
+    {
+      "address": "0xfebe48d8",
+      "hex": "a857",
+      "evidence": "Synthetic controller0 request-cache gate57A8 permits original CTS queue admission"
+    },
+    {
+      "address": "0xfebe4903",
+      "hex": "5a",
+      "evidence": "Synthetic controller0 request-mode gate5A permits original CTS queue admission"
+    },
+    {
+      "address": "0xfebe48fe",
+      "hex": "5555",
+      "evidence": "Synthetic controller0 availability gate5555 permits original CTS queue admission"
+    },
+    {
+      "address": "0xfebe48e6",
+      "hex": "0000aabb0000",
+      "evidence": "Synthetic empty CTS queue2 cursors0,0 with opaque middle-halfword BBAA sentinel"
+    },
+    {
+      "address": "0xfebe4fa0",
+      "hex": "00ff28d7",
+      "evidence": "Synthetic valid flow pairs block-size00/FF and STmin28/D7 with bitwise complements"
+    },
+    {
+      "address": "0xfebf2000",
+      "hex": "2036040827060010befe3f061820bffe21067aa5070061003f062620bffe210608a4070061002106980700006100",
+      "evidence": "Synthetic transparent RAM sequencer: load route0804/PDU FEBE1000, jump original 7A57A, then original 7A408, then stop798; no state writes"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Fresh FF accepted after actual timeout: remaining6 id0802 timer202 stateZ seq1 generation42",
+      "kind": "memory",
+      "address": "0xfebe4f50",
+      "size": 16,
+      "equals_hex": "060000000208ca0000005a080100f042"
+    },
+    {
+      "name": "DCM slot re-owned with six copied bytes and250 remaining capacity; opaque tail survives",
+      "kind": "memory",
+      "address": "0xfebe59f0",
+      "size": 16,
+      "equals_hex": "5756befe0600b6b7fa00010001ddeeff"
+    },
+    {
+      "name": "Fresh six-byte FF overwrites only request prefix, old tail survives",
+      "kind": "memory",
+      "address": "0xfebe5651",
+      "size": 16,
+      "equals_hex": "31011004a1b2445566778899aabbccdd"
+    },
+    {
+      "name": "Fresh receive re-arms timer0 from ROM 0x25E84 duration1000000 plus tick5 minus1",
+      "kind": "memory",
+      "address": "0xfebe5e74",
+      "size": 8,
+      "equals_hex": "44420f0001a1a2a3"
+    },
+    {
+      "name": "Phase1 re-admission cancels inactivity timer5 but retains abort-produced5004 deadline",
+      "kind": "memory",
+      "address": "0xfebe5e9c",
+      "size": 8,
+      "equals_hex": "8c13000000b1b2b3"
+    },
+    {
+      "name": "Configured CTS only queued: class84 source0801 CAN7A9 payload30 00 28 and five padding bytes",
+      "kind": "memory",
+      "address": "0xfebe3e48",
+      "size": 20,
+      "equals_hex": "08840108f77bfef7a90700003000280000000000"
+    },
+    {
+      "name": "Queue2 gains five words preserving opaque middle halfword",
+      "kind": "memory",
+      "address": "0xfebe48e6",
+      "size": 6,
+      "equals_hex": "0500aabb0500"
+    },
+    {
+      "name": "Valid flow complements remain intact",
+      "kind": "memory",
+      "address": "0xfebe4fa0",
+      "size": 4,
+      "equals_hex": "00ff28d7"
+    },
+    {
+      "name": "Unrelated DCM owner bookkeeping survives",
+      "kind": "memory",
+      "address": "0xfebe59d8",
+      "size": 8,
+      "equals_hex": "a1a2a3a4a5a6a7a8"
+    },
+    {
+      "name": "Phase remains1",
+      "kind": "memory",
+      "address": "0xfebe5960",
+      "size": 1,
+      "equals_hex": "01"
+    },
+    {
+      "name": "Response coordinator remains40",
+      "kind": "memory",
+      "address": "0xfebe5964",
+      "size": 1,
+      "equals_hex": "40"
+    },
+    {
+      "name": "Shared response bytes survive receive-only reset",
+      "kind": "memory",
+      "address": "0xfebe5a20",
+      "size": 8,
+      "equals_hex": "7f3178aabbccddee"
+    },
+    {
+      "name": "Pending transport accepted byte survives receive-only reset",
+      "kind": "memory",
+      "address": "0xfebe59ea",
+      "size": 1,
+      "equals_hex": "01"
+    },
+    {
+      "name": "Other DCM slot1 remains idle and untouched",
+      "kind": "memory",
+      "address": "0xfebe5a00",
+      "size": 16,
+      "equals_hex": "5157befe000000000001000000000000"
+    },
+    {
+      "name": "Other DCM slot2 remains idle and untouched",
+      "kind": "memory",
+      "address": "0xfebe5a10",
+      "size": 16,
+      "equals_hex": "5158befe000000000001000000000000"
+    },
+    {
+      "name": "No CanTp fault recorded; initialized guard staysAA",
+      "kind": "memory",
+      "address": "0xfebe4f3c",
+      "size": 2,
+      "equals_hex": "a5aa"
+    }
+  ]
+}

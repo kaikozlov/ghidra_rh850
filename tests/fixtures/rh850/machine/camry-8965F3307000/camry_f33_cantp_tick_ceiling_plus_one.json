@@ -1,0 +1,118 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_cantp_tick_ceiling_plus_one",
+  "entry": {
+    "role": "retained",
+    "scope": "resolved-address",
+    "address": "0x7b248"
+  },
+  "max_instructions": 180000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "Synthetic bounded 1-KiB stack below SP=FEBE2000; A5 fill exposes stack use"
+    },
+    {
+      "address": "0xfebe4f3c",
+      "hex": "a5aa",
+      "evidence": "Synthetic CanTp fault sentinel A5 and initialized guard AA"
+    },
+    {
+      "address": "0xfebe4f46",
+      "hex": "e903",
+      "evidence": "Synthetic channel0 TX timeout1001; exercises ROM ceiling1000 and saturating decrement"
+    },
+    {
+      "address": "0xfebe4f56",
+      "hex": "e903",
+      "evidence": "Synthetic channel0 RX timeout1001; exercises ROM ceiling1000 and saturating decrement"
+    },
+    {
+      "address": "0xfebe4f66",
+      "hex": "0000",
+      "evidence": "Synthetic channel1 TX timeout0; exercises ROM ceiling1000 and saturating decrement"
+    },
+    {
+      "address": "0xfebe4f76",
+      "hex": "0100",
+      "evidence": "Synthetic channel1 RX timeout1; exercises ROM ceiling1000 and saturating decrement"
+    },
+    {
+      "address": "0xfebe4f86",
+      "hex": "0200",
+      "evidence": "Synthetic channel2 TX timeout2; exercises ROM ceiling1000 and saturating decrement"
+    },
+    {
+      "address": "0xfebe4f96",
+      "hex": "e703",
+      "evidence": "Synthetic channel2 RX timeout999; exercises ROM ceiling1000 and saturating decrement"
+    }
+  ],
+  "checks": [
+    {
+      "name": "TX/RX timeout at 0xfebe4f46 follows unsigned ceiling and saturating decrement",
+      "kind": "memory",
+      "address": "0xfebe4f46",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "TX/RX timeout at 0xfebe4f56 follows unsigned ceiling and saturating decrement",
+      "kind": "memory",
+      "address": "0xfebe4f56",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "TX/RX timeout at 0xfebe4f66 follows unsigned ceiling and saturating decrement",
+      "kind": "memory",
+      "address": "0xfebe4f66",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "TX/RX timeout at 0xfebe4f76 follows unsigned ceiling and saturating decrement",
+      "kind": "memory",
+      "address": "0xfebe4f76",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "TX/RX timeout at 0xfebe4f86 follows unsigned ceiling and saturating decrement",
+      "kind": "memory",
+      "address": "0xfebe4f86",
+      "size": 2,
+      "equals_hex": "0100"
+    },
+    {
+      "name": "TX/RX timeout at 0xfebe4f96 follows unsigned ceiling and saturating decrement",
+      "kind": "memory",
+      "address": "0xfebe4f96",
+      "size": 2,
+      "equals_hex": "e603"
+    },
+    {
+      "name": "Above-ceiling timeout latches0F",
+      "kind": "memory",
+      "address": "0xfebe4f3c",
+      "size": 2,
+      "equals_hex": "0faa"
+    }
+  ]
+}

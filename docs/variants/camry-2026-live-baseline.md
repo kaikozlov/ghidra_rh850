@@ -1391,6 +1391,92 @@ composition. It is not a whole-image absence proof. Reads that stay inside the
 receive slot but pass the declared request length are real on this image; they
 are recorded in §13.12.
 
+#### 13.11.1 Original CanTp timeout and re-admission contract
+
+**Exact-image timeout, ceiling and re-admission captures complete.**
+All five scenarios passed exact-image machine capture with
+`verified-local-execution`: 703, 697, 86, 88 and 2638 instructions,
+respectively (4212 total), with no overlays, stubs or faults. Reconstructed
+bodies were read with `tools/toyota decomp source`; decisive instructions and ROM
+values were checked with `tools/gtarget camry-8965F3307000 disasm` / `memory read`.
+
+`cantp_foreground_cycle @ 0x7A408` calls the timeout tick (`0x7B248`), receive
+runner (`0x7AAF2`), then transmit runner (`0x7B894`). Each of three channel
+pairs has TX timeout at `0xFEBE4F46 + 0x20*n` and RX timeout at
+`0xFEBE4F56 + 0x20*n`; the RX cell begins six bytes earlier. ROM u16
+`[0x22C44] = 1000`. The unsigned comparisons at `0x7B27C/0x7B290` accept
+equality: 1000 becomes 999. A value of 1001 becomes zero and stores `0x0F`
+to fault byte `0xFEBE4F3C`; zero remains zero. These are timeout-tick invocation
+counts, not milliseconds or wall-clock durations.
+
+An RX timeout of one becomes zero before that same foreground call dispatches
+state `Z` to `0x7AAA2` or state `K` to `0x7AACE`. Both reset the owner and
+indicate result 1 through `0x7A79E → 0x81A00 → 0x8182E → 0x7BE90 →
+0x921D2`. The exact ROM router maps upper ID `0x0802` to DCM receive ID 2,
+slot 0. The `Z` arm additionally calls the original return-only `0x7B246`.
+RX reset clears remaining length, timeout, wait count, DLC and block count;
+sets owner `FFFF`, state `E1`, sequence `FF`, and flow marker `F0`; and retains
+the admission-generation byte at cell+15.
+
+DCM cleanup requires the slot's receiving flag to be 1. Its result-nonzero
+arm calls `0x93C9A(slot,1)`: cursor returns to configured buffer
+`0xFEBE5651`, length becomes zero, capacity becomes `0x100`, receiving and
+inactivity-participant flags clear, and **only the first payload byte is
+zeroed**. The remaining payload, slot opaque bytes, abort-pending byte,
+shared response at `0xFEBE5A20`, phase, and pending-transport byte survive.
+Timer 0 is cancelled without erasing its deadline. In phase 1, with prior
+participant=1 and no other participant, `0x91F26` arms timer 5: ROM tick
+`[0x26AEC]=5` and protocol timeout `[0x25EC8]=5000` give deadline 5004.
+
+ROM receive rows `0x22BDE/0x22BFE/0x22C1E` have u16 fields
+`(+16,+18,+20,+24)` of `(200,20,200,10)`, `(0,0,0,0)`, and
+`(200,20,200,10)`, respectively; the middle row is single-frame-only.
+The exact-image recovery capture shows that on lower route `0x0804`, a fresh
+eight-byte FF `10 0C 31 01 10 04 A1 B2` re-owns the reset slot, copying six
+bytes while retaining its old tail. The recovery scenario checks the next foreground
+call's CTS queue entry: `30 00 28 00 00 00 00 00`, source PDU `0x0801`, CAN ID
+`0x7A9`; expected RX state is `Z`, remaining=6, timeout=202, sequence=1,
+generation=`0x42`. Phase-1 re-admission cancels timer 5 but leaves its
+abort-produced deadline, and re-arms timer 0 at **1000004**. The latter uses
+u32 `0x25E84=1000000` (`40 42 0F 00`), loaded by `0x9213C`, plus quantum 5
+minus one in `0x98B3A`.
+
+The canonical evidence owner is the
+[exact-machine fixture directory](../../tests/fixtures/rh850/machine/camry-8965F3307000/):
+`tests/fixtures/rh850/machine/camry-8965F3307000`, with one JSON object per file:
+`camry_f33_cantp_foreground_{z,k}_timeout_dcm_cleanup.json`,
+`camry_f33_cantp_tick_ceiling_{equal,plus_one}.json`, and
+`camry_f33_cantp_actual_z_timeout_then_fresh_ff_readmission_cts.json`.
+All five use sparse **synthetic** RAM inputs, not captured retained RAM.
+Each input row identifies its source-defined role: bounded 1-KiB stack,
+channel ownership/state/timeout/generation, DCM ownership and stale payload,
+timer and preservation sentinels, or CTS ring gates/cursors and fresh FF.
+The recovery sequence preserves RAM across original `0x7A408` timeout
+cleanup, original `cantp_receive_can_frame @ 0x7A57A` with route `0x0804`
+and the fresh FF, then original `0x7A408` to queue CTS. Its explicit RAM
+sequencer at `0xFEBF2000` only loads call arguments/return addresses and
+jumps to those original functions, then terminal `0x798`; it does not write
+the transport or DCM state under test. Checks cover CTS queue contents and
+cursors, admission generation, stale-tail preservation, and both timers.
+There is no peripheral-file bypass. The recovery capture passed the complete
+original timeout-abort, fresh-FF re-admission and CTS-queue sequence under these
+synthetic inputs.
+
+Replay exactly these five fixtures from the repository root (Bash):
+
+```bash
+fixtures=tests/fixtures/rh850/machine/camry-8965F3307000
+tools/rh850 test firmware camry-8965F3307000 \
+  "$fixtures"/camry_f33_cantp_foreground_{z,k}_timeout_dcm_cleanup.json \
+  "$fixtures"/camry_f33_cantp_tick_ceiling_{equal,plus_one}.json \
+  "$fixtures"/camry_f33_cantp_actual_z_timeout_then_fresh_ff_readmission_cts.json \
+  --output-dir build/out/rh850-machine/cantp-timeout-readmission
+tools/test rh850_firmware
+```
+
+The `rh850_firmware` gate automatically discovers these retained fixtures.
+
+
 ### 13.12 2026-10-25 lifecycle-prefix memory-access audit: real read findings
 
 `fuzz_camry_f33_stateful_coverage.py` prefixes every seed request with its own
