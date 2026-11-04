@@ -1,0 +1,177 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_handoff_boot_before_serial_exchange",
+  "entry": {
+    "role": "retained-original",
+    "scope": "resolved-address",
+    "address": "0x56cf6"
+  },
+  "reset": "none",
+  "max_instructions": 500000,
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x16f2"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack only; PREPARE frames may read caller-save canaries."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Synthetic priority-mask saved-depth input, no active caller lock frames."
+    },
+    {
+      "address": "0xfebf0308",
+      "hex": "3131313131313131313131313131313131313131313131313131313131313131",
+      "evidence": "Synthetic family0 statuses: all32 have no class20; 67984 scans original ROM count."
+    },
+    {
+      "address": "0xfebf0328",
+      "hex": "31313131313131313131313131313131",
+      "evidence": "Synthetic family1 raw statuses;681AA scans all16."
+    },
+    {
+      "address": "0xfebf1088",
+      "hex": "64646464646464646464646464646464",
+      "evidence": "Synthetic family1 xor55 status mirror, consistent with raw31."
+    },
+    {
+      "address": "0xfebf10ac",
+      "hex": "9b9b9b9b9b9b9b9b9b9b9b9b9b9b9b9b",
+      "evidence": "Synthetic family1 xorAA status mirror, consistent with raw31."
+    },
+    {
+      "address": "0xfebf0690",
+      "hex": "0000",
+      "evidence": "Synthetic NvM family busy bytes consumed by68924/68A4A."
+    },
+    {
+      "address": "0xfebf0673",
+      "hex": "00",
+      "evidence": "Synthetic 66F1E additional readiness gate GP+4E73."
+    },
+    {
+      "address": "0xfebe8ac4",
+      "hex": "1305",
+      "evidence": "Synthetic nonzero threshold-minus-one counter remains unchanged on nonreturning ready path."
+    },
+    {
+      "address": "0xffc0a000",
+      "hex": "78563412",
+      "evidence": "Synthetic BRAMDAT0 input; R01UH0585EJ0120 section36.3.2 defines retention, not initial data. Each mapped register is exactly four bytes."
+    },
+    {
+      "address": "0xffc0a004",
+      "hex": "efcdab89",
+      "evidence": "Synthetic distinct BRAMDAT1 input."
+    },
+    {
+      "address": "0xffc0a008",
+      "hex": "98badcfe",
+      "evidence": "Synthetic distinct BRAMDAT2 input."
+    },
+    {
+      "address": "0xffc0a00c",
+      "hex": "10325476",
+      "evidence": "Synthetic distinct BRAMDAT3 input."
+    }
+  ],
+  "checks": [
+    {
+      "name": "PC boundary",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x16f2"
+    },
+    {
+      "name": "No timed fallback counter store before nonreturning handoff",
+      "kind": "memory",
+      "address": "0xfebe8ac4",
+      "size": 2,
+      "equals_hex": "1305"
+    },
+    {
+      "name": "Backup boundary",
+      "kind": "memory",
+      "address": "0xffc0a000",
+      "size": 16,
+      "equals_hex": "00000000000000000000000000000000"
+    },
+    {
+      "name": "PSW boundary",
+      "kind": "register",
+      "register": "PSW",
+      "equals": "0x18029"
+    },
+    {
+      "name": "PMR boundary",
+      "kind": "register",
+      "register": "PMR",
+      "equals": "0xffff"
+    },
+    {
+      "name": "gp boundary",
+      "kind": "register",
+      "register": "gp",
+      "equals": "0xfebf9800"
+    },
+    {
+      "name": "tp boundary",
+      "kind": "register",
+      "register": "tp",
+      "equals": "0x869c"
+    },
+    {
+      "name": "EBASE boundary",
+      "kind": "register",
+      "register": "EBASE",
+      "equals": "0x1"
+    },
+    {
+      "name": "INTBP boundary",
+      "kind": "register",
+      "register": "INTBP",
+      "equals": "0x0"
+    },
+    {
+      "name": "MPM boundary",
+      "kind": "register",
+      "register": "MPM",
+      "equals": "0x0"
+    },
+    {
+      "name": "Nine immutable handoff words retained",
+      "kind": "memory",
+      "address": "0xfebf2908",
+      "size": 36,
+      "equals_hex": "00000000a107000000000000000000000200000000000000000000000000000000000000"
+    },
+    {
+      "name": "Boot initialization writes mode byte before serial hardware exchange",
+      "kind": "memory",
+      "address": "0xfebf2904",
+      "size": 1,
+      "equals_hex": "01"
+    },
+    {
+      "name": "Boot initialization clears status word before serial hardware exchange",
+      "kind": "memory",
+      "address": "0xfebf2900",
+      "size": 4,
+      "equals_hex": "00000000"
+    }
+  ]
+}

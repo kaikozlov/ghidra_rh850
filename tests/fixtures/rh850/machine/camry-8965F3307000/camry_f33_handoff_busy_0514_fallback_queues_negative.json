@@ -1,0 +1,203 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_handoff_busy_0514_fallback_queues_negative",
+  "entry": {
+    "role": "retained-original",
+    "scope": "resolved-address",
+    "address": "0x56cf6"
+  },
+  "reset": "none",
+  "max_instructions": 500000,
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack only; PREPARE frames may read caller-save canaries."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Synthetic priority-mask saved-depth input, no active caller lock frames."
+    },
+    {
+      "address": "0xfebe5091",
+      "hex": "01",
+      "evidence": "Synthetic preexisting active crypto-direct software lifecycle, read by original6A156 session notification. No crypto result or key material is supplied."
+    },
+    {
+      "address": "0xfebe5095",
+      "hex": "a5",
+      "evidence": "Synthetic prior abort-request canary; original6A156 must replace it with5A on default-session notification."
+    },
+    {
+      "address": "0xfebe819b",
+      "hex": "0102030405060708090a0b0c0d0e0f10",
+      "evidence": "Synthetic sixteen routine-result bytes read by original5088A in the session-notification path. Running result1 is preserved; other results are reset. This is a software lifecycle input, not hardware completion."
+    },
+    {
+      "address": "0xfebe59e2",
+      "hex": "0000",
+      "evidence": "Synthetic valid current DCM slot0 at entry. Original9887C resets response state through93CE6 before93ABA initializes this selector;25EE8 has three descriptors, so FFFF is not a valid initializer input."
+    },
+    {
+      "address": "0xfebf0308",
+      "hex": "20",
+      "evidence": "Synthetic family0 class20 makes actual66F1E not ready."
+    },
+    {
+      "address": "0xfebe48d8",
+      "hex": "a857",
+      "evidence": "Synthetic CAN software controller initialized signature, not peripheral readiness."
+    },
+    {
+      "address": "0xfebe4903",
+      "hex": "5a",
+      "evidence": "Synthetic CAN software controller enqueue-enabled byte."
+    },
+    {
+      "address": "0xfebe48fe",
+      "hex": "5555",
+      "evidence": "Synthetic CAN software transmission mode."
+    },
+    {
+      "address": "0xfebe48e6",
+      "hex": "000000000000",
+      "evidence": "Synthetic queue2 producer/consumer/occupied words; empty software queue at21A54[2]."
+    },
+    {
+      "address": "0xfebeb098",
+      "hex": "00000000",
+      "evidence": "Synthetic indexed request bitset initially clear; request0E must be raised by originalB15AC."
+    },
+    {
+      "address": "0xfebeb090",
+      "hex": "ffffffff",
+      "evidence": "Synthetic complement request bitset initially set; request0E must be cleared."
+    },
+    {
+      "address": "0xfebeb0c4",
+      "hex": "3412",
+      "evidence": "Synthetic indexed request0E return-status word read byB1C34; not a forged success."
+    },
+    {
+      "address": "0xfebf4958",
+      "hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "evidence": "Synthetic challenge/result canaries before actual8E62A security reset."
+    },
+    {
+      "address": "0xfebf3b14",
+      "hex": "a5a5a5a5a5a5a5a5a5a5",
+      "evidence": "Synthetic programming admission canaries before actual8B134 reset."
+    },
+    {
+      "address": "0xfebe8ac4",
+      "hex": "1405",
+      "evidence": "Synthetic counter at or above immutable threshold0514."
+    }
+  ],
+  "checks": [
+    {
+      "name": "PC boundary",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Threshold fallback resets counter",
+      "kind": "memory",
+      "address": "0xfebe8ac4",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "Original98898 initializes and enables diagnostic foreground",
+      "kind": "memory",
+      "address": "0xfebe5e50",
+      "size": 1,
+      "equals_hex": "a5"
+    },
+    {
+      "name": "Default session selected",
+      "kind": "memory",
+      "address": "0xfebe595c",
+      "size": 1,
+      "equals_hex": "01"
+    },
+    {
+      "name": "Request phase reset",
+      "kind": "memory",
+      "address": "0xfebe5960",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "Request0E raised",
+      "kind": "memory",
+      "address": "0xfebeb098",
+      "size": 4,
+      "equals_hex": "00400000"
+    },
+    {
+      "name": "Request0E complement cleared",
+      "kind": "memory",
+      "address": "0xfebeb090",
+      "size": 4,
+      "equals_hex": "ffbfffff"
+    },
+    {
+      "name": "Application programming admission reset",
+      "kind": "memory",
+      "address": "0xfebf3b14",
+      "size": 10,
+      "equals_hex": "000000000000000101ff"
+    },
+    {
+      "name": "Challenge and comparison material reset",
+      "kind": "memory",
+      "address": "0xfebf4958",
+      "size": 50,
+      "equals_hex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "name": "Queue2 appends five words",
+      "kind": "memory",
+      "address": "0xfebe48e6",
+      "size": 6,
+      "equals_hex": "050000000500"
+    },
+    {
+      "name": "Original queued response header complement ID and eight payload bytes",
+      "kind": "memory",
+      "address": "0xfebe3e48",
+      "size": 20,
+      "equals_hex": "08840008f77bfff7a9070000037f101000000000"
+    },
+    {
+      "name": "Default session requests cleanup of active crypto-direct lifecycle",
+      "kind": "memory",
+      "address": "0xfebe5095",
+      "size": 1,
+      "equals_hex": "5a"
+    },
+    {
+      "name": "sp boundary",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    }
+  ]
+}

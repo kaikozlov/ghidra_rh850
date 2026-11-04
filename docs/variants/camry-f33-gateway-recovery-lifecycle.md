@@ -785,3 +785,154 @@ not supply the target-side programming executor. In the reconstructed terminal
 EPS fault, changing routing cannot repair the bad instruction. An actual EPS
 response after a changed network condition is required to overturn that premise;
 none was observed in this pass.
+
+## Native software handoff and timed fallback
+
+2026-11-03. Exact stock target `camry-8965F3307000`, immutable CodeFlash
+SHA-256 `42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7`.
+Reconstructed C was checked against original instructions at `56CF0..56D74`,
+`58B5E..58C80`, `5F5F4..5F60C`, `5F9BC..5F9CA`, `65F5E..65F86`,
+`9F00..9F62`, `1478..149C`, `1338`, `16F2/169C`, and `5086/55AA`.
+This subsection owns the native handoff result; the
+[exception follow-up](camry-f33-recovery-exception-followup.md#2-a-receive-callback-can-run-without-executing-its-diagnostic-request)
+owns foreground ordering relative to the malformed call.
+
+### Readiness wins before the timeout comparison
+
+`56CF6` snapshots the u16 at `FEBE8AC4` into `r29` **before** calling intact
+`66F1E`. Return value exactly **1** calls nonreturning `65F5E`; this happens
+before the threshold comparison, even with counter `FFFF`. The original
+readiness contract is recorded in
+[the NvM subsection](camry-f33-eps-recovery-2026-09-11.md#exact-f33-nvm-readiness-and-recovery-state).
+
+ROM `30D5E` contains `14 05`, threshold **0514 = 1300**. On a busy return,
+snapshot `<0514` increments once. Equality and every greater u16 take the
+fallback and finally store zero. These are invocation counts, not proved time
+units. A call starting at `0513` stores `0514`; the next busy invocation takes
+the fallback. A ready handoff never reaches that final counter store.
+
+The fallback's actual call sequence is:
+
+```text
+98898 diagnostic initialization
+91B50 default-session restoration when phase<2 and no slot is receiving
+917A4(0) communication-mode update
+8E62A application diagnostic/security/admission initialization
+FDFFC -> B15AC(0E) indexed request publication
+8B114 -> 8B134 programming-admission reset
+7FEF8(0800, {data, length=8}) -> software CAN transmit queue
+FEBE8AC4 = 0
+```
+
+No call in this chain is replaced by a successful return. `98898` itself runs
+the DCM timer, event-ring, callback, service, session and receive initializers.
+Its immutable condition word `26AE4` is zero. Response initialization uses the
+previous current-slot selector **before** receive initialization resets it;
+fixtures explicitly provide valid current slot 0. Session notification also
+reads sixteen routine-result bytes at `FEBE819B`; their synthetic values are
+named inputs, and original `5088A` preserves running result 1.
+
+The negative response is built by original stores as
+`03 7F 10 10 00 00 00 00`. ROM `2199C -> 21F80` selects raw CAN ID `7A9`,
+controller 0, route class 2. `218E4 -> 21ACC`, descriptor index 2, selects
+software queue 2 with seven-word capacity; `21A5C` selects `FEBE3E48`.
+The expected five-word record is
+`08008408, F7FF7BF7, 000007A9, 10107F03, 00000000`.
+Only the software controller signature, enable/mode fields and an empty queue
+are preloaded; no peripheral transmit completion is supplied.
+
+### Mode entry, steady state and integrity fallback differ
+
+Real `58B5E` first checks restart/status redundancy, then `58B1A` executes its
+six original snapshot-copy bodies. With an intact previous-mode complement,
+a changed current mode takes the redundant mode vote and the entry-dispatch
+chain ending at `5F464`. An unchanged mode takes the steady chain ending at
+`5F91C`. A bad previous-mode complement instead republishes the current mode
+and its complement and takes the **steady** chain, even when the old raw mode
+differs. A valid restart request `A55A` with valid triplicate status selects
+reinitialization at `5886C`; unrecoverable restart redundancy clears the request.
+
+Both diagnostic dispatchers select `56CF6` for unsigned mode **>=0900**;
+`08FF` does not select it. Only entry `5F464` additionally calls `56CF0`
+to clear the counter when the previous mode was `<0900`. A transition already
+inside that band preserves the count. `5F91C` never performs the entry reset.
+
+The full-generation fixtures enter **58B5E**, execute acquisition, and stop at
+the selected monitor dispatcher `5EC24` or `5F610`, before its body. Their
+558 sparse source fields each cite the exact original copy-function load PC.
+Separate post-acquisition fixtures start at `58BFA`; terminal diagnostic-band
+fixtures start at `5F5F4` or `5F9BC`, execute the actual comparison/reset/caller,
+and stop before output publication at `58074`. These checkpoints isolate the
+mode gates; they do not claim one continuous execution of all intervening
+monitor, thermal, control and diagnostic-service bodies.
+
+### Live transfer sanitizes CPU context before boot diagnostics initialize
+
+`65F5E` raises PMR and writes zero separately to the four backup registers
+`FFC0A000/4/8/C`, reads the last word back, synchronizes, and calls
+`9F00(31788)`. The model accepts each **four-byte BRAMDATn register**, not a
+single sixteen-byte preload. R01UH0585EJ0120 section 36.3.2 specifies retention
+across reset and leaves initial backup data unspecified; four distinct synthetic
+pre-handoff words expose every clear.
+
+At `9F00`, the backup words are already zero but application SP/GP/TP have not
+yet changed. At `148E`, original code has established PMR `FFFF`, PSW `18020`,
+SP `FEBE8000`, GP `FEBF9800`, TP `869C`, EBASE 1, INTBP 0 and MPM 0.
+`r6=31788` still identifies the original ROM record. `148E ->1478` copies its
+nine words into `FEBF2908..FEBF292B`:
+`0,7A1,0,0,2,0,0,0,0`. At `1398`, SP is `FEBE7FFC`; the record copy is
+complete and diagnostic initialization has **not** run. PSW is now `18029`:
+the final `LOOP r8` at `1488` adds `FFFFFFFF` to 1, setting CY and Z and clearing
+S and OV (RH850G3M R01US0123EJ0140 p.256). This arithmetic-flag change does not
+undo the context sanitization.
+
+`1398 ->1338` sets `FEBF2904=1`, clears `FEBF2900`, then enters the real CSIH1
+exchange at `16F2`, before CAN/boot-diagnostic initialization. `169C` checks
+`FFD82004` and `FFD83004`, then requires four receive halfwords from
+`FFD83014`; `16F2` limits receive polls to 201 invocations and checks the
+received record through `15C0`, with failure loop `17C2`. Central execution of
+the complete ready handoff with no serial input reaches **17C2**. A genuine
+CSIH1 peripheral reply is the remaining hardware input before boot CAN and
+diagnostic initialization can proceed. No synthetic ready status or reply is
+provided by the native-handoff scenarios.
+
+The separately labeled software-reset closures enter original `5086`, or
+sequence intact `69D2 ->6A22` after an explicit handoff-record checkpoint.
+They exercise the master enable gate, default session, cleared diagnostic
+privileges, and original security-material initialization. The continuation
+stops at `152A` before relocated flash-driver preparation. It is a later-entry
+software closure, not evidence that the preceding serial/CAN hardware
+initialization completed. In particular, CPU context reset at `9F00`, record
+copy at `1398`, and diagnostic session/security reset at `5086/55AA` are
+different boundaries.
+
+### Executable evidence
+
+Standalone `camry_f33_handoff_*.json` scenarios live in
+[`tests/fixtures/rh850/machine/camry-8965F3307000/`](../../tests/fixtures/rh850/machine/camry-8965F3307000/).
+All **40/40** handoff scenarios passed central original-byte execution with
+status `verified-local-execution`. Coverage includes readiness versus busy,
+threshold-minus-one and two-invocation threshold crossing, at/over-threshold
+fallback initialization, session/admission/security reset, request `0E`, the
+queued negative response, all four backup clears, CPU context replacement,
+record copying, full acquisition-mode selection, restart/integrity
+discrimination, both terminal mode-band gates, and the no-reply terminal at
+`17C2`. The separately entered boot reset runs through `69D2 ->6A22`.
+Fallback also executes `6A156`, publishing abort request `5A` for an explicitly
+active crypto-direct lifecycle. Every synthetic entry-state contract is explicit.
+
+Two-call fixtures use only the fourteen-byte RAM sequencer
+`MOV 798,lp; MOV original_function,r1; JMP [r1]`; no firmware state changes occur
+between the two original calls. The `56CF6` encoding is
+`3F 06 98 07 00 00 21 06 F6 6C 05 00 61 00`; the `6A22` variant substitutes
+`22 6A 00 00` for the target immediate. No CodeFlash overlays, callback stubs,
+blanket RAM initialization, fabricated hardware authentication or external ECU
+traffic are used.
+
+```sh
+tools/rh850 test firmware camry-8965F3307000 \
+  tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_handoff_*.json
+```
+
+The fixtures are automatically discovered by `tools/test rh850_firmware`.
+These software transitions establish no working physical network-recovery path.

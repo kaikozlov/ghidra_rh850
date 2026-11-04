@@ -1,0 +1,82 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_handoff_boot_session_full_reset",
+  "entry": {
+    "role": "retained-original",
+    "scope": "resolved-address",
+    "address": "0x5086"
+  },
+  "reset": "none",
+  "max_instructions": 500000,
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe8000",
+    "gp": "0xfebf9800",
+    "tp": "0x869c",
+    "lp": "0x798",
+    "PSW": "0x18020",
+    "PMR": "0xffff"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe7e00",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Synthetic bounded boot software-reset caller stack."
+    },
+    {
+      "address": "0xfebf2b00",
+      "hex": "4433221188776655",
+      "evidence": "Synthetic two boot transfer-configuration words copied by original4F9E into2AB8/2ABC. These arbitrary distinct data canaries are not readiness or authentication results."
+    },
+    {
+      "address": "0xfebf2b0e",
+      "hex": "a5a5a5a5a5a5a5a5a5a5",
+      "evidence": "Synthetic boot session/service/privilege canaries."
+    },
+    {
+      "address": "0xfebf2b24",
+      "hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "evidence": "Synthetic boot challenge/client-material canaries, cleared by original55AA."
+    }
+  ],
+  "checks": [
+    {
+      "name": "PC boundary",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Default session with zeroed service/verification privileges",
+      "kind": "memory",
+      "address": "0xfebf2b0e",
+      "size": 10,
+      "equals_hex": "01010000000002000000"
+    },
+    {
+      "name": "Security reset clears complete three sixteen-byte arrays",
+      "kind": "memory",
+      "address": "0xfebf2b24",
+      "size": 48,
+      "equals_hex": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "name": "Security lifecycle reset",
+      "kind": "memory",
+      "address": "0xfebf2b54",
+      "size": 4,
+      "equals_hex": "00010100"
+    },
+    {
+      "name": "sp boundary",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe8000"
+    }
+  ]
+}

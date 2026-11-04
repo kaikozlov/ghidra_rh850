@@ -1,0 +1,65 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_handoff_generation_restart_absent",
+  "entry": {
+    "role": "retained-original",
+    "scope": "resolved-address",
+    "address": "0x58b5e"
+  },
+  "reset": "none",
+  "max_instructions": 500000,
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x58b1a"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack only; PREPARE frames may read caller-save canaries."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Synthetic priority-mask saved-depth input, no active caller lock frames."
+    },
+    {
+      "address": "0xfebe8c1a",
+      "hex": "0055aa",
+      "evidence": "Synthetic consistent status triplicate read by58AD8."
+    },
+    {
+      "address": "0xfebe8c08",
+      "hex": "0000",
+      "evidence": "Synthetic restart request raw word."
+    },
+    {
+      "address": "0xfebe8c0a",
+      "hex": "5555",
+      "evidence": "Synthetic restart request xor5555 mirror."
+    },
+    {
+      "address": "0xfebe8c14",
+      "hex": "aaaa",
+      "evidence": "Synthetic restart request xorAAAA mirror."
+    }
+  ],
+  "checks": [
+    {
+      "name": "PC boundary",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x58b1a"
+    }
+  ]
+}

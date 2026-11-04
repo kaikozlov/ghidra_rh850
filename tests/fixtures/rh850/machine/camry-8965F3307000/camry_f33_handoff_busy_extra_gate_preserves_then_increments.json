@@ -1,0 +1,93 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_handoff_busy_extra_gate_preserves_then_increments",
+  "entry": {
+    "role": "retained-original",
+    "scope": "resolved-address",
+    "address": "0x56cf6"
+  },
+  "reset": "none",
+  "max_instructions": 500000,
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack only; PREPARE frames may read caller-save canaries."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Synthetic priority-mask saved-depth input, no active caller lock frames."
+    },
+    {
+      "address": "0xfebf0308",
+      "hex": "3131313131313131313131313131313131313131313131313131313131313131",
+      "evidence": "Synthetic family0 statuses: all32 have no class20; 67984 scans original ROM count."
+    },
+    {
+      "address": "0xfebf0328",
+      "hex": "31313131313131313131313131313131",
+      "evidence": "Synthetic family1 raw statuses;681AA scans all16."
+    },
+    {
+      "address": "0xfebf1088",
+      "hex": "64646464646464646464646464646464",
+      "evidence": "Synthetic family1 xor55 status mirror, consistent with raw31."
+    },
+    {
+      "address": "0xfebf10ac",
+      "hex": "9b9b9b9b9b9b9b9b9b9b9b9b9b9b9b9b",
+      "evidence": "Synthetic family1 xorAA status mirror, consistent with raw31."
+    },
+    {
+      "address": "0xfebf0690",
+      "hex": "0000",
+      "evidence": "Synthetic actual NvM busy-byte gate, both complete status scans still execute."
+    },
+    {
+      "address": "0xfebf0673",
+      "hex": "01",
+      "evidence": "Synthetic actual extra readiness byte consumed only after status and busy-byte gates."
+    },
+    {
+      "address": "0xfebe8ac4",
+      "hex": "1305",
+      "evidence": "Synthetic counter threshold-minus-one at entry."
+    }
+  ],
+  "checks": [
+    {
+      "name": "PC boundary",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Busy readiness rejects transfer and increments snapshotted count",
+      "kind": "memory",
+      "address": "0xfebe8ac4",
+      "size": 2,
+      "equals_hex": "1405"
+    },
+    {
+      "name": "sp boundary",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    }
+  ]
+}

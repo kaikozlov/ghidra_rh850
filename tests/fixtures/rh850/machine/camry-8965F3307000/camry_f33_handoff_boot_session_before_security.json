@@ -1,0 +1,52 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_handoff_boot_session_before_security",
+  "entry": {
+    "role": "retained-original",
+    "scope": "resolved-address",
+    "address": "0x5086"
+  },
+  "reset": "none",
+  "max_instructions": 500000,
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe8000",
+    "gp": "0xfebf9800",
+    "tp": "0x869c",
+    "lp": "0x798",
+    "PSW": "0x18020",
+    "PMR": "0xffff"
+  },
+  "stop_addresses": [
+    "0x55aa"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe7e00",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Synthetic bounded boot initializer caller stack."
+    },
+    {
+      "address": "0xfebf2b0e",
+      "hex": "a5a5a5a5a5a5a5a5a5a5",
+      "evidence": "Synthetic boot diagnostic session, service, and privilege canaries before5086."
+    }
+  ],
+  "checks": [
+    {
+      "name": "PC boundary",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x55aa"
+    },
+    {
+      "name": "Session1 and diagnostic privileges cleared by original5086",
+      "kind": "memory",
+      "address": "0xfebf2b0e",
+      "size": 10,
+      "equals_hex": "01010000000002000000"
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_handoff_entry_band_0900_to_0901",
+  "entry": {
+    "role": "original-terminal-mode-band-checkpoint",
+    "scope": "resolved-address",
+    "address": "0x5f5f4"
+  },
+  "reset": "none",
+  "max_instructions": 500000,
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00",
+    "r29": "0x901",
+    "r28": "0x900"
+  },
+  "stop_addresses": [
+    "0x58074"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack only; PREPARE frames may read caller-save canaries."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Synthetic priority-mask saved-depth input, no active caller lock frames."
+    },
+    {
+      "address": "0xfebf0308",
+      "hex": "20",
+      "evidence": "Synthetic actual66F1E busy early exit; no NvM stub."
+    },
+    {
+      "address": "0xfebe8ac4",
+      "hex": "0700",
+      "evidence": "Synthetic nonzero existing invocation count exposes reset/preservation."
+    }
+  ],
+  "checks": [
+    {
+      "name": "PC boundary",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x58074"
+    },
+    {
+      "name": "Terminal mode-band counter behavior",
+      "kind": "memory",
+      "address": "0xfebe8ac4",
+      "size": 2,
+      "equals_hex": "0800"
+    }
+  ]
+}

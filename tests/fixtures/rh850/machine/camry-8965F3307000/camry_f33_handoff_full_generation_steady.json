@@ -1,0 +1,2906 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_handoff_full_generation_steady",
+  "entry": {
+    "role": "retained-original",
+    "scope": "resolved-address",
+    "address": "0x58b5e"
+  },
+  "reset": "none",
+  "max_instructions": 500000,
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x5f610"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack only; PREPARE frames may read caller-save canaries."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Synthetic priority-mask saved-depth input, no active caller lock frames."
+    },
+    {
+      "address": "0xfebe822c",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d130 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe822e",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d136 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8230",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d13c in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8232",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d142 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8234",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d148 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8236",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d14e in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8238",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d154 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe823a",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d15a in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe823c",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d160 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe823e",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d166 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8240",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d16c in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8242",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d172 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe824c",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d17c in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe824e",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d182 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8250",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d188 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8252",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d18e in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8254",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d194 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8256",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d19a in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8244",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d1a0 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8245",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d1a6 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8246",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d1ac in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8247",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d1b2 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8248",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d1b8 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8249",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d1be in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe824a",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d1c4 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe824b",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d1ca in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8258",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d1d0 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe825a",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d1d6 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe825c",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d1dc in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe825e",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d1e2 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8b60",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d1e8 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8b62",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d1f4 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8b64",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d1fa in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8b66",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d200 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8b68",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d206 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8b6a",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d20c in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8b6c",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d212 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8b6e",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d218 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8b70",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d21e in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8b72",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d224 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8b74",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d22a in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8b76",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d230 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8b78",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d236 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8b7a",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d23c in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8b7c",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d244 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8b7e",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d24a in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8b80",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d250 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8b82",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d256 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8b5e",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d25e in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8b5f",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d264 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e2e",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d26a in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e30",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d276 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e32",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d27c in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e34",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d282 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e36",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d288 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e38",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d28e in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e3a",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d294 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e3c",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d29a in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e3e",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d2a0 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e40",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d2a6 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e42",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d2ac in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e44",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d2b2 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e46",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d2bc in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e48",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d2c2 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e4a",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d2c8 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e4c",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d2ce in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e4e",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d2d4 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e50",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d2da in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e1c",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d2e0 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e1d",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d2e6 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e1e",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d2ec in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e1f",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d2f2 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e20",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d2f8 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e21",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d2fe in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e22",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d304 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e23",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d30a in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e24",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d310 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e25",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d316 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e26",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d31c in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e27",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d322 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e28",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d328 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e29",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d32e in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e2a",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d334 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e2b",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d33a in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e54",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 0005d342 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e58",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 0005d348 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e5c",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 0005d34e in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e60",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 0005d354 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e64",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 0005d35a in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e68",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 0005d360 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7d74",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 0005d36a in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6960",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d36e in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7d4a",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d376 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6968",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d37c in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7d4c",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d384 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7d4e",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d38a in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7d50",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d390 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7d54",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d396 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7d56",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d39c in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7d58",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d3a2 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7d5a",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d3a8 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7d5c",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d3ae in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7d60",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d3b4 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7d62",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d3ba in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7d66",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d3c0 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7d68",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 0005d3c6 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe5f34",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d3d0 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe5f36",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d3d6 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe5f38",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 0005d3dc in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe5f40",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 0005d3e2 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe5f44",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 0005d3e8 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7ea8",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d3f2 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7eaa",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d3f8 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe696a",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d400 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe69de",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d408 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe696c",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d40e in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe69e0",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d414 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe696e",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d41a in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6970",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d422 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe69e2",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d426 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6972",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d42c in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe69e4",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d432 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6974",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d438 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6976",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d440 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6978",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d446 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe697a",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d44c in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe697c",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d452 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe697e",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d458 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe698c",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d45e in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe698e",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d464 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6990",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d46a in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6992",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d470 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6994",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d476 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6996",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d47c in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6998",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d482 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe699a",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d488 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe699c",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d48e in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe699e",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d494 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe69a0",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d49a in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe69a2",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d4a0 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe69c8",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d4a6 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe69ca",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d4ac in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe69cc",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d4b2 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe69ce",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d4b8 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe69d0",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d4be in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe69d2",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d4c4 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe69d4",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d4ca in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe69d6",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d4d0 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe69d8",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d4d6 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe69da",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d4dc in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe69dc",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d4e2 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6e12",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d4ec in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6e14",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d4f2 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6e16",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d4f8 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6e18",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d4fe in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6e28",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 0005d504 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6e2c",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 0005d50a in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6e30",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 0005d510 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6e34",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 0005d516 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6e1a",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d51c in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6e1c",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d522 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6e1e",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d528 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6e20",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d52e in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6e22",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d534 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6e24",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d53a in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6e0c",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d540 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6e0d",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d546 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6e0e",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d54c in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6e0f",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d552 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6e10",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d558 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6e26",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d55e in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6d78",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 0005d568 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6d70",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d56e in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6d72",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d574 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6d74",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d57a in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6d76",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d580 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6e00",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d58a in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6d7c",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d592 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6d7e",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d598 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6d80",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d59e in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6d82",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d5a4 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6d84",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d5aa in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6d86",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d5b0 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6c40",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d5ba in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6c42",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d5c0 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6c44",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d5c6 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6c46",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d5cc in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6c60",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 0005d5d2 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6c4a",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d5d8 in copy function5D12C; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeec04",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1ca2 in copy functionC1C9E; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeec06",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1ca8 in copy functionC1C9E; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeec08",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1cae in copy functionC1C9E; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeec0a",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1cb4 in copy functionC1C9E; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeec0c",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1cba in copy functionC1C9E; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeec14",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 000c1cc0 in copy functionC1C9E; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeec18",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 000c1cc6 in copy functionC1C9E; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeec1c",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 000c1ccc in copy functionC1C9E; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeec20",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 000c1cd2 in copy functionC1C9E; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeec0e",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1cd8 in copy functionC1C9E; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeec24",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 000c1cde in copy functionC1C9E; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeec00",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1ce4 in copy functionC1C9E; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeec01",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1cea in copy functionC1C9E; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeec02",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1cf0 in copy functionC1C9E; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeec10",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1cf6 in copy functionC1C9E; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe81f4",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d5e4 in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe81f6",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d5ea in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe81f8",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d5f0 in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe81fa",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d5f6 in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe81fc",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d5fc in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe81fe",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d602 in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8200",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d608 in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8202",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d60e in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8204",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d614 in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8206",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d61a in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8208",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d620 in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe820a",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d626 in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7dea",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d630 in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7dec",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d636 in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7dee",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d63c in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7df0",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d642 in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7df2",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d648 in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7df4",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d64e in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7df6",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d654 in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7df8",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d65a in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e0c",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d664 in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7bfc",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d66c in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebee408",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d674 in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebee40a",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d67a in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebee40c",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d680 in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebee40e",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d686 in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebee400",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d68c in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebee410",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d692 in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebee412",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d698 in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebee401",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d69e in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebee402",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d6a4 in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebee403",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d6aa in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebee404",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d6b0 in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebee414",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d6b6 in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebee405",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d6bc in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebee416",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d6c2 in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebee406",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d6c8 in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebee418",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d6ce in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebee407",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d6d4 in copy function5D5E0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeb354",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1cfe in copy functionC1CFE; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeb3a6",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1d0a in copy functionC1CFE; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeb3a0",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1d10 in copy functionC1CFE; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeb436",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1d1a in copy functionC1CFE; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeb430",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1d20 in copy functionC1CFE; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeac54",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1d2a in copy functionC1CFE; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeac56",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1d30 in copy functionC1CFE; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeac2d",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1d36 in copy functionC1CFE; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeac58",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1d3c in copy functionC1CFE; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeac94",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 000c1d42 in copy functionC1CFE; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeac68",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1d48 in copy functionC1CFE; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeac70",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1d4e in copy functionC1CFE; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeac76",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1d54 in copy functionC1CFE; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeac7a",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1d5a in copy functionC1CFE; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeac39",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1d60 in copy functionC1CFE; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeac7e",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1d68 in copy functionC1CFE; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeac3b",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1d6e in copy functionC1CFE; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeac3e",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1d76 in copy functionC1CFE; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeac82",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1d7e in copy functionC1CFE; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeac3f",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1d86 in copy functionC1CFE; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeac40",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1d8c in copy functionC1CFE; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeed04",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1d96 in copy functionC1CFE; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeed06",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1d9c in copy functionC1CFE; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeed08",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1da2 in copy functionC1CFE; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeed0a",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1da8 in copy functionC1CFE; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeed0c",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1dae in copy functionC1CFE; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeed0e",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1db4 in copy functionC1CFE; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeed10",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1dba in copy functionC1CFE; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeed00",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1dc0 in copy functionC1CFE; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeed01",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1dc6 in copy functionC1CFE; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeed02",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1dcc in copy functionC1CFE; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeed03",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1dd2 in copy functionC1CFE; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeed12",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1dd8 in copy functionC1CFE; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe820c",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d6e0 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe820e",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d6e6 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8210",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d6ec in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8212",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d6f2 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8214",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d6f8 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8216",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d6fe in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8218",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d704 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe821a",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d70a in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe821c",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d710 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe821e",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d716 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8220",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d71c in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8222",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d722 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8224",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d728 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8226",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d72e in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8228",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d734 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8274",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 0005d73e in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8b28",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 0005d746 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8b24",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d74c in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8b25",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d752 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8b18",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 0005d75c in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8ae4",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 0005d764 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8ac8",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d76a in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8acb",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d770 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8af0",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 0005d77a in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8a84",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 0005d782 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8a68",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d788 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8a6b",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d78e in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8aa4",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 0005d798 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8a44",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 0005d7a0 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8a64",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 0005d7a8 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e9c",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d7b0 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7e9e",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d7b6 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7ea0",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d7bc in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7ea2",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d7c2 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7ea4",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d7c8 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7ea6",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d7ce in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7da6",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d7d8 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7da8",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d7de in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7daa",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d7e4 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7dac",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d7ea in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7dae",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d7f0 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7db0",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d7f6 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7db2",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d7fc in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7da4",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d802 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7db4",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d808 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7db6",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d80e in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe74a8",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d814 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7826",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d81a in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe74a9",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d822 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe74aa",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d828 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe74ab",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d82e in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe74ac",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d834 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe74ad",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d83a in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7818",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d844 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7819",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d84a in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe781a",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d850 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe781b",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d856 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe781c",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d85c in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe781d",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d862 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe781e",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d868 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe781f",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d86e in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7820",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d874 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7821",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d87a in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7822",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d880 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7823",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d886 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7824",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d88c in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7825",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d892 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7827",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d89a in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7828",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d8a2 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7936",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d8a8 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7928",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d8b0 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7929",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d8b6 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe792a",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d8bc in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe792b",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d8c2 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe792c",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d8c8 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe792d",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d8ce in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe792e",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d8d4 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe792f",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d8da in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7930",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d8e0 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7931",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d8e6 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7932",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d8ec in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7933",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d8f2 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7934",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d8f8 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7935",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d8fe in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7937",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d906 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7938",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d90e in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe79e5",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d914 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe79dc",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d91c in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe79dd",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d922 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe79de",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d928 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe79df",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d92e in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe79e0",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d934 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe79e1",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d93a in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe79e2",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d940 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe79e3",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d946 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe79e4",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d94c in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7575",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d954 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe755c",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d95a in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe755d",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d966 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe755e",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d96c in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe755f",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d972 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7560",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d978 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7561",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d97e in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7562",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d984 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7563",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d98a in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7564",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d990 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7565",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d996 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7566",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d9a0 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7567",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d9a6 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7568",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d9ac in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7569",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d9b2 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7574",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d9bc in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7578",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 0005d9c6 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7576",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005d9cc in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7cac",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d9d2 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7cb7",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d9d8 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7cad",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d9e0 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7cae",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d9e6 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7caf",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d9ec in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7cb0",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d9f2 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7cb1",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d9f8 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7cb2",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005d9fe in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7cb3",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005da04 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7cb4",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005da0a in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7cb5",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005da10 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7cb6",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005da16 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7cb8",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005da1e in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7cc4",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005da26 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7cc5",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005da2c in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe686c",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005da36 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6870",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005da3c in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe71ec",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005da46 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe71f2",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005da4c in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7bbc",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005da56 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7bbd",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005da5c in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7bbe",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005da62 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7bbf",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005da68 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7bc0",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005da6e in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7bc1",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005da74 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7bc2",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005da7a in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe7bc3",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005da80 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6906",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005da86 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6904",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005da8c in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6908",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005da94 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe690a",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005da9a in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe690c",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005daa0 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe690e",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005daa6 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6910",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005daac in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6912",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005dab2 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6914",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005dab8 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6916",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005dabe in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6918",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005dac4 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe691a",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005daca in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe691c",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005dad0 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe691e",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005dad6 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6920",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005dadc in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6922",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005dae2 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6924",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005dae8 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6926",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005daee in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6928",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005daf4 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6905",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005dafc in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6a26",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005db08 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6a28",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005db10 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6a2a",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005db16 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6a2c",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005db1c in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6a2e",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005db22 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6a30",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005db28 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6a32",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005db2e in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6a34",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005db34 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6a36",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005db3a in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6a38",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005db40 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6a3a",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005db46 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6a3c",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005db4c in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6a3e",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005db52 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6a40",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005db58 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6a42",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005db5e in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6a44",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005db64 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6a46",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005db6a in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6a48",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005db70 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6a4a",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005db78 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6a4c",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005db7e in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6a4e",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005db84 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6a50",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005db8a in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6a52",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005db90 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6a54",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005db96 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6a56",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005db9c in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6a58",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005dba2 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6a5a",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005dba8 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6a24",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005dbb0 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6a25",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005dbb6 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe689a",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005dbbc in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe689c",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005dbc6 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe689e",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005dbcc in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe68a0",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005dbd2 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe68a2",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005dbd8 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6891",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005dbde in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6892",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005dbe4 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6893",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005dbea in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6894",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005dbf0 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6895",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005dbf6 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6896",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005dbfc in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6897",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005dc02 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6898",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005dc08 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6ad2",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005dc0e in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6ad4",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005dc18 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6ad6",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005dc1e in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6ad8",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005dc24 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6ad0",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005dc2a in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe6ad1",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005dc30 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebee608",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005dc3a in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebee600",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005dc40 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebee610",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 0005dc46 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebee601",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005dc4c in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebee602",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005dc52 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebee603",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005dc58 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebee60a",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005dc5e in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebee604",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005dc64 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebee605",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005dc6a in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebee606",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 0005dc70 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebee60c",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 0005dc76 in copy function5D6DC; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebebe20",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1de4 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebebe21",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1dea in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebebe22",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1df0 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebebe23",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1df6 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebebdb2",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1e00 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebebdb4",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1e06 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebebcf0",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1e10 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeaf3c",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1e18 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeaf40",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1e1e in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeaf3d",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1e24 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeaf3e",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1e2a in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeaf42",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1e30 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebebd34",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1e36 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebebd36",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1e40 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebebd38",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1e46 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebebd3a",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1e4c in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebebd3c",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1e52 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebebd3e",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1e58 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebebd40",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1e5e in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebebd42",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1e64 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebebd44",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1e6a in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebebd46",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1e70 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeac01",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1e76 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeac02",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1e80 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeac05",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1e86 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeac08",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1e8c in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeac1c",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 000c1e92 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeac09",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1e98 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeee1c",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1ea4 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeee00",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1eaa in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeee01",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1eb0 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeee02",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1eb6 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeee1e",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1ebc in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeee20",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1ec2 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeee03",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1eca in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeee04",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1ed0 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeee05",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1ed6 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeee06",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1edc in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeee07",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1ee2 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeee08",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1ee8 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeee09",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1eee in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeee0a",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1ef4 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeee0b",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1efa in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeee0c",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1f00 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeee0d",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1f06 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeee0e",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1f0c in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeee0f",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1f12 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeee22",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1f1a in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeee10",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1f20 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeee11",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1f26 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeee24",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1f2c in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeee28",
+      "hex": "00000000",
+      "evidence": "Synthetic snapshot source field, original load 000c1f34 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeee12",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1f3c in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeee26",
+      "hex": "0000",
+      "evidence": "Synthetic snapshot source field, original load 000c1f42 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeee13",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1f48 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeee14",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1f4e in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeee15",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1f54 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeee16",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1f5a in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeee17",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1f60 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeee18",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1f66 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeee19",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1f6c in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebeee1a",
+      "hex": "00",
+      "evidence": "Synthetic snapshot source field, original load 000c1f72 in copy functionC1DE0; explicit neutral field input, not initialized RAM padding."
+    },
+    {
+      "address": "0xfebe8c1a",
+      "hex": "0055aa",
+      "evidence": "Synthetic status byte and consistent XOR mirrors for58AD8."
+    },
+    {
+      "address": "0xfebe8c08",
+      "hex": "0000",
+      "evidence": "Synthetic no restart request; actual58B5E gate bypasses reinitialization."
+    },
+    {
+      "address": "0xfebe8c17",
+      "hex": "00",
+      "evidence": "Synthetic generation at original58B5E entry."
+    },
+    {
+      "address": "0xfebe8c06",
+      "hex": "0009",
+      "evidence": "Synthetic mode/control field at real dispatcher entry; overrides only a specifically named copied source if overlapping."
+    },
+    {
+      "address": "0xfebe8c12",
+      "hex": "fff6",
+      "evidence": "Synthetic mode/control field at real dispatcher entry; overrides only a specifically named copied source if overlapping."
+    },
+    {
+      "address": "0xfebee8cc",
+      "hex": "0009",
+      "evidence": "Synthetic mode/control field at real dispatcher entry; overrides only a specifically named copied source if overlapping."
+    },
+    {
+      "address": "0xfebeb11a",
+      "hex": "0009",
+      "evidence": "Synthetic mode/control field at real dispatcher entry; overrides only a specifically named copied source if overlapping."
+    },
+    {
+      "address": "0xfebeb0a0",
+      "hex": "555c",
+      "evidence": "Synthetic mode/control field at real dispatcher entry; overrides only a specifically named copied source if overlapping."
+    },
+    {
+      "address": "0xfebeb0a4",
+      "hex": "aaa3",
+      "evidence": "Synthetic mode/control field at real dispatcher entry; overrides only a specifically named copied source if overlapping."
+    }
+  ],
+  "checks": [
+    {
+      "name": "PC boundary",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x5f610"
+    },
+    {
+      "name": "r6 boundary",
+      "kind": "register",
+      "register": "r6",
+      "equals": "0x3"
+    },
+    {
+      "name": "r7 boundary",
+      "kind": "register",
+      "register": "r7",
+      "equals": "0x900"
+    },
+    {
+      "name": "Original snapshot and mode selection publishes new/steady mode",
+      "kind": "memory",
+      "address": "0xfebe8c06",
+      "size": 2,
+      "equals_hex": "0009"
+    },
+    {
+      "name": "Mode complement preserved or repaired",
+      "kind": "memory",
+      "address": "0xfebe8c12",
+      "size": 2,
+      "equals_hex": "fff6"
+    }
+  ]
+}

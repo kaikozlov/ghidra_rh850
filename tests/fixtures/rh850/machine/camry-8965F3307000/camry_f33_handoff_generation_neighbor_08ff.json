@@ -1,0 +1,106 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_handoff_generation_neighbor_08ff",
+  "entry": {
+    "role": "original-post-acquisition-checkpoint",
+    "scope": "resolved-address",
+    "address": "0x58bfa"
+  },
+  "reset": "none",
+  "max_instructions": 500000,
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x5f610"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack only; PREPARE frames may read caller-save canaries."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Synthetic priority-mask saved-depth input, no active caller lock frames."
+    },
+    {
+      "address": "0xfebe8c17",
+      "hex": "00",
+      "evidence": "Synthetic generation byte at checkpoint after original58B1A acquisition; no acquisition result is host-computed."
+    },
+    {
+      "address": "0xfebe8c06",
+      "hex": "ff08",
+      "evidence": "Synthetic previous foreground mode checkpoint."
+    },
+    {
+      "address": "0xfebe8c12",
+      "hex": "00f7",
+      "evidence": "Synthetic previous mode complement checkpoint."
+    },
+    {
+      "address": "0xfebee8cc",
+      "hex": "ff08",
+      "evidence": "Synthetic snapshotted current mode input at checkpoint."
+    },
+    {
+      "address": "0xfebeb11a",
+      "hex": "ff08",
+      "evidence": "Synthetic new application mode raw, read by originalB1C64 on transition."
+    },
+    {
+      "address": "0xfebeb0a0",
+      "hex": "aa5d",
+      "evidence": "Synthetic new application mode xor5555 mirror."
+    },
+    {
+      "address": "0xfebeb0a4",
+      "hex": "55a2",
+      "evidence": "Synthetic new application mode xorAAAA mirror."
+    }
+  ],
+  "checks": [
+    {
+      "name": "PC boundary",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x5f610"
+    },
+    {
+      "name": "r6 boundary",
+      "kind": "register",
+      "register": "r6",
+      "equals": "0x3"
+    },
+    {
+      "name": "r7 boundary",
+      "kind": "register",
+      "register": "r7",
+      "equals": "0x8ff"
+    },
+    {
+      "name": "Mode published before selected mode dispatcher",
+      "kind": "memory",
+      "address": "0xfebe8c06",
+      "size": 2,
+      "equals_hex": "ff08"
+    },
+    {
+      "name": "Previous mode integrity restored/preserved",
+      "kind": "memory",
+      "address": "0xfebe8c12",
+      "size": 2,
+      "equals_hex": "00f7"
+    }
+  ]
+}

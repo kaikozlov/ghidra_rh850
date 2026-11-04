@@ -1,0 +1,110 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_handoff_boot_diagnostic_reset_before_relocated_driver",
+  "entry": {
+    "role": "original-post-hardware-diagnostic-initializers",
+    "scope": "resolved-address",
+    "address": "0x69d2"
+  },
+  "reset": "none",
+  "max_instructions": 500000,
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe8000",
+    "gp": "0xfebf9800",
+    "tp": "0x869c",
+    "lp": "0xfebf2000",
+    "PSW": "0x18020",
+    "PMR": "0xffff"
+  },
+  "stop_addresses": [
+    "0x152a"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe7d00",
+      "size": 768,
+      "fill": 165,
+      "evidence": "Synthetic bounded boot diagnostic initializer stack."
+    },
+    {
+      "address": "0xfebf2b00",
+      "hex": "4433221188776655",
+      "evidence": "Synthetic two boot transfer-configuration words copied by original4F9E into2AB8/2ABC. These arbitrary distinct data canaries are not readiness or authentication results."
+    },
+    {
+      "address": "0xfebf2908",
+      "hex": "00000000a107000000000000000000000200000000000000000000000000000000000000",
+      "evidence": "Synthetic handoff-record checkpoint, exactly original ROM31788 nine words already copied at148E. This later-entry closure does not skip hardware in a claimed continuous run."
+    },
+    {
+      "address": "0xfebf2900",
+      "hex": "00000000",
+      "evidence": "Synthetic post1338 boot event word checkpoint before69D2 bit0 update."
+    },
+    {
+      "address": "0xfebf2bd0",
+      "hex": "a5a5a5",
+      "evidence": "Synthetic canaries before actual69D2 master gate and6A22 phase reset."
+    },
+    {
+      "address": "0xfebf2b0e",
+      "hex": "a5a5a5a5a5a5a5a5a5a5",
+      "evidence": "Synthetic diagnostic session/service/privilege canaries before5086."
+    },
+    {
+      "address": "0xfebf2b24",
+      "hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "evidence": "Synthetic security material canaries before55AA."
+    },
+    {
+      "address": "0xfebf2000",
+      "hex": "3f06980700002106226a00006100",
+      "evidence": "Synthetic transparent sequencer MOV798,lp;MOV6A22,r1;JMP[r1]. First69D2 returns here; only invokes intact6A22, preserving all firmware state."
+    }
+  ],
+  "checks": [
+    {
+      "name": "PC boundary",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x152a"
+    },
+    {
+      "name": "Original69D2 master gate then6A22 phase initialization",
+      "kind": "memory",
+      "address": "0xfebf2bd0",
+      "size": 3,
+      "equals_hex": "010100"
+    },
+    {
+      "name": "Original5086 resets session and privileges",
+      "kind": "memory",
+      "address": "0xfebf2b0e",
+      "size": 10,
+      "equals_hex": "01010000000002000000"
+    },
+    {
+      "name": "Original55AA clears challenge and client material",
+      "kind": "memory",
+      "address": "0xfebf2b24",
+      "size": 48,
+      "equals_hex": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "name": "Mode0 deadline initialized before relocated driver",
+      "kind": "memory",
+      "address": "0xfebf2bcc",
+      "size": 4,
+      "equals_hex": "ffffffff"
+    },
+    {
+      "name": "Enable path raises event0 through original14BE",
+      "kind": "memory",
+      "address": "0xfebf2900",
+      "size": 4,
+      "equals_hex": "01000000"
+    }
+  ]
+}

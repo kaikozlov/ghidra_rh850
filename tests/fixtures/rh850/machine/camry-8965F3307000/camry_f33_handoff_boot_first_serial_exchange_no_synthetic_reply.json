@@ -1,0 +1,105 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_handoff_boot_first_serial_exchange_no_synthetic_reply",
+  "entry": {
+    "role": "retained-original",
+    "scope": "resolved-address",
+    "address": "0x56cf6"
+  },
+  "reset": "none",
+  "max_instructions": 1000000,
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x17c2"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack only; PREPARE frames may read caller-save canaries."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Synthetic priority-mask saved-depth input, no active caller lock frames."
+    },
+    {
+      "address": "0xfebf0308",
+      "hex": "3131313131313131313131313131313131313131313131313131313131313131",
+      "evidence": "Synthetic family0 statuses: all32 have no class20; 67984 scans original ROM count."
+    },
+    {
+      "address": "0xfebf0328",
+      "hex": "31313131313131313131313131313131",
+      "evidence": "Synthetic family1 raw statuses;681AA scans all16."
+    },
+    {
+      "address": "0xfebf1088",
+      "hex": "64646464646464646464646464646464",
+      "evidence": "Synthetic family1 xor55 status mirror, consistent with raw31."
+    },
+    {
+      "address": "0xfebf10ac",
+      "hex": "9b9b9b9b9b9b9b9b9b9b9b9b9b9b9b9b",
+      "evidence": "Synthetic family1 xorAA status mirror, consistent with raw31."
+    },
+    {
+      "address": "0xfebf0690",
+      "hex": "0000",
+      "evidence": "Synthetic NvM family busy bytes consumed by68924/68A4A."
+    },
+    {
+      "address": "0xfebf0673",
+      "hex": "00",
+      "evidence": "Synthetic 66F1E additional readiness gate GP+4E73."
+    },
+    {
+      "address": "0xfebe8ac4",
+      "hex": "1305",
+      "evidence": "Synthetic ready handoff counter retained."
+    }
+  ],
+  "checks": [
+    {
+      "name": "PC boundary",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x17c2"
+    },
+    {
+      "name": "gp boundary",
+      "kind": "register",
+      "register": "gp",
+      "equals": "0xfebf9800"
+    },
+    {
+      "name": "tp boundary",
+      "kind": "register",
+      "register": "tp",
+      "equals": "0x869c"
+    },
+    {
+      "name": "PMR boundary",
+      "kind": "register",
+      "register": "PMR",
+      "equals": "0xffff"
+    },
+    {
+      "name": "Live handoff record retained at original no-reply checksum failure",
+      "kind": "memory",
+      "address": "0xfebf2908",
+      "size": 36,
+      "equals_hex": "00000000a107000000000000000000000200000000000000000000000000000000000000"
+    }
+  ]
+}
