@@ -4013,6 +4013,42 @@ signatures verified during offline extraction; all **4,642** decoded assets
 matched an independent decode. A ciphertext-byte modification was rejected.
 Decoded sources live under `build/out/gts-lifecycle-ui/{gts,cuw,qdc}`.
 
+### Bootstrap, process ownership, and shutdown
+
+[`lifecycle_bootstrap.json`](../../data/generated/gtsplus_2026/lifecycle_bootstrap.json)
+pins both managed entrypoints, the decrypted `ABSystem.yml` roster, adapter
+table, startup/error branches, named-pipe handoffs, and teardown.
+
+`GTSPlusArbitration.exe` owns `Global\ABAppMutex`; `GTSPlus.exe` separately owns
+`Global\GTSPlusMutex`. Contended invocation launches InfoCenter's Multi helper.
+The normal child order is **InfoCenter → GTSPlus → CUW backend**. DataSync and
+GTS+GUIServer are externally owned Windows services monitored by arbitration.
+Distributor-settings failure selects the InfoCenter-only fallback.
+
+Child startup waits up to 180 seconds for a matching-PID `ER_ApplicationStart`
+reply. A different PID repeats the wait with the remaining time. Launch errors,
+timeouts, and matching error replies are reported while the roster continues;
+version-check errors also notify without vetoing startup.
+
+PF loads UserInfo, TGD, diagnostic, web-service, and file adapters in XML order,
+initializes five API workers, and starts the main sequence. Its
+`InitializePlatform` immediately overwrites the `StartMainSequence` result with
+a settings-lookup result. Executing the pinned IL slice with synthetic return
+values confirmed that a successful settings lookup can mask the earlier failure.
+
+Shutdown first queries `ER_EndingConfirm_<name>`. A participant's nonempty reply
+or report-saving timeout vetoes exit; veto sends execute=false to release the
+participants. Approved exit sends `ER_EndingExecute_<name>`, drains the pipe,
+and waits for matching child processes. Individual pipe errors are logged and
+skipped; the outer confirmation exception handler returns approval.
+
+PF teardown cancels the shared token, stops WebSocket handling, joins the main
+and worker tasks, finalizes adapters, joins the settings receiver, and stops its
+timer. Several joins/process waits are unbounded. Arbitration's liveness
+monitor reports failures without automatically restarting processes. Retention
+timers fire once after 60 seconds and keep the newest 300 GTSE files or combined
+send/unsend autosaved reports, ordered by last-write time.
+
 ### Vehicle workspace, ECU selection, and healthcheck
 
 [`lifecycle_vehicle_session.json`](../../data/generated/gtsplus_2026/lifecycle_vehicle_session.json)

@@ -1,0 +1,5190 @@
+{
+  "schema": "gtsplus-lifecycle-domain-v1",
+  "domain": "bootstrap",
+  "sources": [
+    {
+      "id": "bootstrap.arb.recovered",
+      "path": "build/out/gtsplus-unprotected/bin/GTSPlusArbitration.exe",
+      "sha256": "f324c24f21eaa0deed85f71720eaa17222912b85ef920bec19347d043dad126e",
+      "size": 76304,
+      "representation": "same-release installer-original plaintext; tools/gts recover-bodies"
+    },
+    {
+      "id": "bootstrap.arb.installed",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/GTSPlusArbitration.exe",
+      "sha256": "9f48c65cca6a91ec1e8f6dae15f04fe3f2f016f6bef7661ad2b3d3a852a5276b",
+      "size": 98320,
+      "representation": "installed CP stub"
+    },
+    {
+      "id": "bootstrap.arb.sidecar",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/GTSPlusArbitration.exe._",
+      "sha256": "059648a21aca063c1135122c7e14124af7944930d1e21685c29f030be55a7dcc",
+      "size": 178160,
+      "representation": "installed CP sidecar"
+    },
+    {
+      "id": "bootstrap.pf.recovered",
+      "path": "build/out/gtsplus-unprotected/bin/GTSPlus.exe",
+      "sha256": "31f2d0d7f77517d5336433e211d33f44e54cb65b1522fcdd22730d3f3214220d",
+      "size": 200208,
+      "representation": "same-release installer-original plaintext; tools/gts recover-bodies"
+    },
+    {
+      "id": "bootstrap.pf.installed",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/GTSPlus.exe",
+      "sha256": "c2dc6d5ceefadf41165ff6be3bfc049f7bffb96f9f8bb63f26da0d851432cc24",
+      "size": 221200,
+      "representation": "installed CP stub"
+    },
+    {
+      "id": "bootstrap.pf.sidecar",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/GTSPlus.exe._",
+      "sha256": "d5399208fc0aa9a625b82c24c83b294f0c345ae79c0820d9a7afc8b352d90cab",
+      "size": 202960,
+      "representation": "installed CP sidecar"
+    },
+    {
+      "id": "bootstrap.common.recovered",
+      "path": "build/out/gtsplus-unprotected/bin/GTSPlusCommon.dll",
+      "sha256": "5cae3724989fc6be25f16eb421d635fb4a2e5ff193f3aa493446456054a5454c",
+      "size": 29200,
+      "representation": "same-release installer-original plaintext; tools/gts recover-bodies"
+    },
+    {
+      "id": "bootstrap.common.installed",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/GTSPlusCommon.dll",
+      "sha256": "3c1aef55d0875309217099877e7b5c3043327ff75897fdadcdc24fddcc2a883a",
+      "size": 53264,
+      "representation": "installed CP stub"
+    },
+    {
+      "id": "bootstrap.common.sidecar",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/GTSPlusCommon.dll._",
+      "sha256": "cbd0c6ae327f8be22e2fa7933c48fc3d884460216451d7d7bc309224dbd5d386",
+      "size": 118960,
+      "representation": "installed CP sidecar"
+    },
+    {
+      "id": "bootstrap.msg.recovered",
+      "path": "build/out/gtsplus-unprotected/bin/MsgDatComm.dll",
+      "sha256": "ef073fde46c751d9b7afa0a3a669ccc017f55c83fa73eff5c808cb1c56b389ad",
+      "size": 48144,
+      "representation": "same-release installer-original plaintext; tools/gts recover-bodies"
+    },
+    {
+      "id": "bootstrap.msg.installed",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/MsgDatComm.dll",
+      "sha256": "4c513b522e58f98350d9e94c0db0b6ed3cbd30ed0d69f317e4b5921714321ccf",
+      "size": 69648,
+      "representation": "installed CP stub"
+    },
+    {
+      "id": "bootstrap.msg.sidecar",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/MsgDatComm.dll._",
+      "sha256": "6ef555bcfa2990c6ce1e9c122bcd44138f6009f94bd8668cc07317a5dd4440db",
+      "size": 125168,
+      "representation": "installed CP sidecar"
+    },
+    {
+      "id": "bootstrap.adapt.recovered",
+      "path": "build/out/gtsplus-unprotected/bin/GTSPlusAdaptIF.dll",
+      "sha256": "d354d507208dd7a6f2d99ed8516112da27a1b1a8e8b5ea51d8e4fbd9e4d6da41",
+      "size": 22544,
+      "representation": "same-release installer-original plaintext; tools/gts recover-bodies"
+    },
+    {
+      "id": "bootstrap.adapt.installed",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/GTSPlusAdaptIF.dll",
+      "sha256": "fd1868ee2cb490b0648cfe981074f03ae9c5b0f2a7adfd0646e8f866e4a4f4c4",
+      "size": 40976,
+      "representation": "installed CP stub"
+    },
+    {
+      "id": "bootstrap.adapt.sidecar",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/GTSPlusAdaptIF.dll._",
+      "sha256": "6671e80d4cdaa98e591375a997295b52057479cab992419db52c16eec0a876a4",
+      "size": 117648,
+      "representation": "installed CP sidecar"
+    },
+    {
+      "id": "bootstrap.err.recovered",
+      "path": "build/out/gtsplus-unprotected/bin/GTSPlusErrorReport.dll",
+      "sha256": "13cf4d66b321d308cb191a40cd173d3a4097d4d20a12b0a80f9e423d292c40c4",
+      "size": 83472,
+      "representation": "same-release installer-original plaintext; tools/gts recover-bodies"
+    },
+    {
+      "id": "bootstrap.err.installed",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/GTSPlusErrorReport.dll",
+      "sha256": "d4ba836a35c8397b5fde725f06c0effe21772819746942963c111528c06242d5",
+      "size": 102416,
+      "representation": "installed CP stub"
+    },
+    {
+      "id": "bootstrap.err.sidecar",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/GTSPlusErrorReport.dll._",
+      "sha256": "9eef9b62fb6e83ac9c69f66440afb5353f1be6a50b955bbb93a00f1deeae2073",
+      "size": 131888,
+      "representation": "installed CP sidecar"
+    },
+    {
+      "id": "bootstrap.cm.recovered",
+      "path": "build/out/gtsplus-unprotected/bin/GtsPlus-CM.dll",
+      "sha256": "9d66e36d939181543bca6e42bf0f3288d81327f2bf6dace2a5b106229dddeac8",
+      "size": 1886736,
+      "representation": "same-release installer-original plaintext; tools/gts recover-bodies"
+    },
+    {
+      "id": "bootstrap.cm.installed",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/GtsPlus-CM.dll",
+      "sha256": "22735bf1cad71320164a92ed14071b16d1547f63a76d85b88d612d888c459f95",
+      "size": 540688,
+      "representation": "installed CP stub"
+    },
+    {
+      "id": "bootstrap.cm.sidecar",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/GtsPlus-CM.dll._",
+      "sha256": "db69e562601efdea05a06e924a9c06baf9ecee207ac3447cd0b7399e88ebce8f",
+      "size": 1350800,
+      "representation": "installed CP sidecar"
+    },
+    {
+      "id": "bootstrap.pfc.recovered",
+      "path": "build/out/gtsplus-unprotected/bin/GTSPlusPFCommon.dll",
+      "sha256": "d1972962a04b711eeb78c940b5d1c02b43d72959f7db61823a11df3c1d30227a",
+      "size": 152592,
+      "representation": "same-release installer-original plaintext; tools/gts recover-bodies"
+    },
+    {
+      "id": "bootstrap.pfc.installed",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/GTSPlusPFCommon.dll",
+      "sha256": "47a9e9a5b5623a37cdb7bd5d8e7616bfeb6c2fa9b2d0f5d37509e75562807079",
+      "size": 172048,
+      "representation": "installed CP stub"
+    },
+    {
+      "id": "bootstrap.pfc.sidecar",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/GTSPlusPFCommon.dll._",
+      "sha256": "ffd6f98fdeee317635ab52e7f6ec02f08596d62d0a63e7f36e293605a964ab2e",
+      "size": 123360,
+      "representation": "installed CP sidecar"
+    },
+    {
+      "id": "bootstrap.input.ABSystem.yml",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/Env/ABSystem.yml",
+      "sha256": "efdb6658fe0d9388177d74099170b92a243db47968688e7ca3ef1c045ac2996b",
+      "size": 1632,
+      "representation": "shipped encrypted configuration/packaging input"
+    },
+    {
+      "id": "bootstrap.input.GTSPlus.pp",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/Env/GTSPlus.pp",
+      "sha256": "3db86bbac46d10b0a81cefe23a922b77382db03e1b59ae95dc5a588424c61e4d",
+      "size": 256,
+      "representation": "shipped encrypted configuration/packaging input"
+    },
+    {
+      "id": "bootstrap.input.GTSPlusInfo.ini",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/Env/GTSPlusInfo.ini",
+      "sha256": "6551ef8b53268645e2c690c4053f09830fc76d1d764a65fc2dbd32e3f3f6861f",
+      "size": 784,
+      "representation": "shipped encrypted configuration/packaging input"
+    },
+    {
+      "id": "bootstrap.input.GTSPlusSetting.ini",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/Env/GTSPlusSetting.ini",
+      "sha256": "3b49eb5facfc3c0a4bbdeeda99ae0928dc62357a3d120cc9540bfda8e5e7a117",
+      "size": 656,
+      "representation": "shipped encrypted configuration/packaging input"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "bootstrap.arb.materialized",
+      "source": "bootstrap.arb.recovered",
+      "kind": "recovery-provenance",
+      "locator": "CLI MethodDef bodies",
+      "method_def_count": 225,
+      "method_body_rva_count": 213,
+      "method_body_materialized_count": 213,
+      "original_sources": [
+        "bootstrap.arb.installed",
+        "bootstrap.arb.sidecar"
+      ],
+      "finding": "Every nonzero managed MethodDef RVA is materialized; exact installer twin identity pinned."
+    },
+    {
+      "id": "bootstrap.pf.materialized",
+      "source": "bootstrap.pf.recovered",
+      "kind": "recovery-provenance",
+      "locator": "CLI MethodDef bodies",
+      "method_def_count": 706,
+      "method_body_rva_count": 667,
+      "method_body_materialized_count": 667,
+      "original_sources": [
+        "bootstrap.pf.installed",
+        "bootstrap.pf.sidecar"
+      ],
+      "finding": "Every nonzero managed MethodDef RVA is materialized; exact installer twin identity pinned."
+    },
+    {
+      "id": "bootstrap.common.materialized",
+      "source": "bootstrap.common.recovered",
+      "kind": "recovery-provenance",
+      "locator": "CLI MethodDef bodies",
+      "method_def_count": 75,
+      "method_body_rva_count": 69,
+      "method_body_materialized_count": 69,
+      "original_sources": [
+        "bootstrap.common.installed",
+        "bootstrap.common.sidecar"
+      ],
+      "finding": "Every nonzero managed MethodDef RVA is materialized; exact installer twin identity pinned."
+    },
+    {
+      "id": "bootstrap.msg.materialized",
+      "source": "bootstrap.msg.recovered",
+      "kind": "recovery-provenance",
+      "locator": "CLI MethodDef bodies",
+      "method_def_count": 103,
+      "method_body_rva_count": 75,
+      "method_body_materialized_count": 75,
+      "original_sources": [
+        "bootstrap.msg.installed",
+        "bootstrap.msg.sidecar"
+      ],
+      "finding": "Every nonzero managed MethodDef RVA is materialized; exact installer twin identity pinned."
+    },
+    {
+      "id": "bootstrap.adapt.materialized",
+      "source": "bootstrap.adapt.recovered",
+      "kind": "recovery-provenance",
+      "locator": "CLI MethodDef bodies",
+      "method_def_count": 24,
+      "method_body_rva_count": 24,
+      "method_body_materialized_count": 24,
+      "original_sources": [
+        "bootstrap.adapt.installed",
+        "bootstrap.adapt.sidecar"
+      ],
+      "finding": "Every nonzero managed MethodDef RVA is materialized; exact installer twin identity pinned."
+    },
+    {
+      "id": "bootstrap.err.materialized",
+      "source": "bootstrap.err.recovered",
+      "kind": "recovery-provenance",
+      "locator": "CLI MethodDef bodies",
+      "method_def_count": 311,
+      "method_body_rva_count": 302,
+      "method_body_materialized_count": 302,
+      "original_sources": [
+        "bootstrap.err.installed",
+        "bootstrap.err.sidecar"
+      ],
+      "finding": "Every nonzero managed MethodDef RVA is materialized; exact installer twin identity pinned."
+    },
+    {
+      "id": "bootstrap.cm.provenance",
+      "source": "bootstrap.cm.recovered",
+      "kind": "recovery-provenance",
+      "locator": "same-release native CM plaintext",
+      "original_sources": [
+        "bootstrap.cm.installed",
+        "bootstrap.cm.sidecar"
+      ],
+      "finding": "Native packaging decoder is the pinned installer-original twin; reused local decoder checks native byte anchor."
+    },
+    {
+      "id": "bootstrap.pfc.materialized",
+      "source": "bootstrap.pfc.recovered",
+      "kind": "recovery-provenance",
+      "locator": "CLI MethodDef bodies",
+      "method_def_count": 1229,
+      "method_body_rva_count": 1228,
+      "method_body_materialized_count": 1228,
+      "original_sources": [
+        "bootstrap.pfc.installed",
+        "bootstrap.pfc.sidecar"
+      ],
+      "finding": "Every nonzero managed MethodDef RVA is materialized; exact installer twin identity pinned."
+    },
+    {
+      "id": "bootstrap.arb-entry",
+      "source": "bootstrap.arb.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusArbitration.Program::Main",
+      "rva": 21396,
+      "body_size": 456,
+      "body_sha256": "738cc39233882a6d460e082df3666c6bc934ab05089009940d8ce27b5b252761",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_001F",
+          "opcode": "ldstr",
+          "operand": "'Global\\\\ABAppMutex'",
+          "bytes": "72990e0070"
+        },
+        {
+          "il": "IL_0035",
+          "opcode": "brfalse.s",
+          "operand": "IL_0061",
+          "bytes": "2c2a"
+        },
+        {
+          "il": "IL_004E",
+          "opcode": "brfalse.s",
+          "operand": "IL_0056",
+          "bytes": "2c06"
+        },
+        {
+          "il": "IL_0092",
+          "opcode": "call",
+          "operand": "System.Diagnostics.Process::Start",
+          "bytes": "28ca00000a"
+        },
+        {
+          "il": "IL_00FF",
+          "opcode": "brfalse.s",
+          "operand": "IL_0107",
+          "bytes": "2c06"
+        }
+      ],
+      "exception_regions": [
+        {
+          "try_start": 98,
+          "try_end": 154,
+          "handler_start": 154,
+          "handler_end": 252,
+          "kind": 0
+        },
+        {
+          "try_start": 45,
+          "try_end": 254,
+          "handler_start": 254,
+          "handler_end": 264,
+          "kind": 2
+        },
+        {
+          "try_start": 0,
+          "try_end": 266,
+          "handler_start": 266,
+          "handler_end": 364,
+          "kind": 0
+        }
+      ],
+      "finding": "Global\\ABAppMutex WaitOne(0,false); owner InitializeForm/Run/release; contention launches InfoCenter_Multi with cwd=executable parent. Exceptions log and return; no args parser or retry."
+    },
+    {
+      "id": "bootstrap.pf-entry",
+      "source": "bootstrap.pf.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusController.Program::Main",
+      "rva": 40420,
+      "body_size": 101,
+      "body_sha256": "faa455adb37b27d5ed01a07c83a17df98a87970863561cd4dba5571024c15dfe",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_0028",
+          "opcode": "brtrue.s",
+          "operand": "IL_0041",
+          "bytes": "2d17"
+        }
+      ],
+      "exception_regions": [],
+      "finding": "Main() ignores CoInitializeSecurity HRESULT (auth1,impersonation3), starts STA thread and joins."
+    },
+    {
+      "id": "bootstrap.pf-single-instance",
+      "source": "bootstrap.pf.recovered",
+      "kind": "managed-il",
+      "locator": "<>c::<Main>b__4_0",
+      "rva": 89000,
+      "body_size": 432,
+      "body_sha256": "849e788f234d5f00e9e7774f95fafc60b8562012495d9898163fcac7f66656bc",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_001F",
+          "opcode": "ldstr",
+          "operand": "'Global\\\\GTSPlusMutex'",
+          "bytes": "72074d0070"
+        },
+        {
+          "il": "IL_0035",
+          "opcode": "brfalse.s",
+          "operand": "IL_0066",
+          "bytes": "2c2f"
+        },
+        {
+          "il": "IL_0053",
+          "opcode": "brtrue.s",
+          "operand": "IL_005B",
+          "bytes": "2d06"
+        },
+        {
+          "il": "IL_0097",
+          "opcode": "call",
+          "operand": "System.Diagnostics.Process::Start",
+          "bytes": "280b03000a"
+        },
+        {
+          "il": "IL_00F6",
+          "opcode": "brfalse.s",
+          "operand": "IL_00FE",
+          "bytes": "2c06"
+        }
+      ],
+      "exception_regions": [
+        {
+          "try_start": 103,
+          "try_end": 159,
+          "handler_start": 159,
+          "handler_end": 243,
+          "kind": 0
+        },
+        {
+          "try_start": 45,
+          "try_end": 245,
+          "handler_start": 245,
+          "handler_end": 255,
+          "kind": 2
+        },
+        {
+          "try_start": 0,
+          "try_end": 257,
+          "handler_start": 257,
+          "handler_end": 341,
+          "kind": 0
+        }
+      ],
+      "finding": "Global\\GTSPlusMutex nonblocking; owner constructs MainTask/Form1, Run only if not disposed; contention launches InfoCenter_Multi; exceptions log/return."
+    },
+    {
+      "id": "bootstrap.arb-initialize",
+      "source": "bootstrap.arb.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusArbitration.Form1::InitializeForm",
+      "rva": 8724,
+      "body_size": 756,
+      "body_sha256": "9bc0de78899f33d71e431642f3c6cf4390aed9a8feb810188ed066743c1aff61",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_0019",
+          "opcode": "brtrue.s",
+          "operand": "IL_0023",
+          "bytes": "2d08"
+        },
+        {
+          "il": "IL_004E",
+          "opcode": "brtrue.s",
+          "operand": "IL_0087",
+          "bytes": "2d37"
+        },
+        {
+          "il": "IL_013E",
+          "opcode": "call",
+          "operand": "StartApplication",
+          "bytes": "2834000006"
+        },
+        {
+          "il": "IL_0159",
+          "opcode": "brtrue.s",
+          "operand": "IL_0169",
+          "bytes": "2d0e"
+        },
+        {
+          "il": "IL_0197",
+          "opcode": "brtrue.s",
+          "operand": "IL_019F",
+          "bytes": "2d06"
+        },
+        {
+          "il": "IL_01B8",
+          "opcode": "brfalse.s",
+          "operand": "IL_0203",
+          "bytes": "2c49"
+        },
+        {
+          "il": "IL_020A",
+          "opcode": "brtrue.s",
+          "operand": "IL_01A8",
+          "bytes": "2d9c"
+        }
+      ],
+      "exception_regions": [
+        {
+          "try_start": 422,
+          "try_end": 526,
+          "handler_start": 526,
+          "handler_end": 540,
+          "kind": 2
+        },
+        {
+          "try_start": 0,
+          "try_end": 586,
+          "handler_start": 586,
+          "handler_end": 687,
+          "kind": 0
+        }
+      ],
+      "finding": "Subscribe session-ending; require ABSystem decode; read distributor fallback; end receiver; error-report initialization; hook/hotkey/end/report workers; StartApplication; version check; service monitors; alive monitor and communication. Exception returns false."
+    },
+    {
+      "id": "bootstrap.arb-settings",
+      "source": "bootstrap.arb.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusArbitration.Form1::ReadABSystemSetting",
+      "rva": 10628,
+      "body_size": 400,
+      "body_sha256": "2710cfc46c98cec29e71af8c107ce4a184cf5db169b5f159574ef1aea78b6e0b",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_0019",
+          "opcode": "brfalse.s",
+          "operand": "IL_0075",
+          "bytes": "2c5a"
+        },
+        {
+          "il": "IL_0099",
+          "opcode": "brtrue.s",
+          "operand": "IL_00B2",
+          "bytes": "2d17"
+        },
+        {
+          "il": "IL_00B8",
+          "opcode": "brtrue.s",
+          "operand": "IL_00D1",
+          "bytes": "2d17"
+        },
+        {
+          "il": "IL_00F3",
+          "opcode": "brfalse.s",
+          "operand": "IL_00FC",
+          "bytes": "2c07"
+        }
+      ],
+      "exception_regions": [
+        {
+          "try_start": 142,
+          "try_end": 241,
+          "handler_start": 241,
+          "handler_end": 253,
+          "kind": 2
+        },
+        {
+          "try_start": 0,
+          "try_end": 253,
+          "handler_start": 253,
+          "handler_end": 354,
+          "kind": 0
+        }
+      ],
+      "finding": "Decrypt install/Env/ABSystem.yml with kind1; nonzero aborts; strip header line; validating YamlDotNet deserialize. Exception returns false."
+    },
+    {
+      "id": "bootstrap.arb-distributor",
+      "source": "bootstrap.arb.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusArbitration.Form1::ReadDistributorDepending",
+      "rva": 11028,
+      "body_size": 280,
+      "body_sha256": "34b3e8f695654a829e52e71eb0d6bca7f3f5b2034eb8c9b5d426afe8ab2a9e64",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_0010",
+          "opcode": "brtrue.s",
+          "operand": "IL_0021",
+          "bytes": "2d0f"
+        }
+      ],
+      "exception_regions": [],
+      "finding": "Distributor setting read type2: success disables DefaultStart; failure constructs loglevel3/compression3/level9/hotkey121 modifier2 defaults and enables restricted DefaultStart."
+    },
+    {
+      "id": "bootstrap.arb-launch",
+      "source": "bootstrap.arb.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusArbitration.Form1::StartApplication",
+      "rva": 15060,
+      "body_size": 1312,
+      "body_sha256": "d2c3632733ba058b2a859c2edeb4b68d466443f4187947cdfd5dbaeae022457d",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_0029",
+          "opcode": "brtrue.s",
+          "operand": "IL_0031",
+          "bytes": "2d06"
+        },
+        {
+          "il": "IL_0057",
+          "opcode": "brfalse.s",
+          "operand": "IL_0079",
+          "bytes": "2c20"
+        },
+        {
+          "il": "IL_005F",
+          "opcode": "brfalse",
+          "operand": "IL_037D",
+          "bytes": "3919030000"
+        },
+        {
+          "il": "IL_006B",
+          "opcode": "beq.s",
+          "operand": "IL_0079",
+          "bytes": "2e0c"
+        },
+        {
+          "il": "IL_0074",
+          "opcode": "bne.un",
+          "operand": "IL_037D",
+          "bytes": "4004030000"
+        },
+        {
+          "il": "IL_02BF",
+          "opcode": "brfalse.s",
+          "operand": "IL_02C8",
+          "bytes": "2c07"
+        },
+        {
+          "il": "IL_0373",
+          "opcode": "brfalse.s",
+          "operand": "IL_037C",
+          "bytes": "2c07"
+        },
+        {
+          "il": "IL_0386",
+          "opcode": "brfalse.s",
+          "operand": "IL_03FD",
+          "bytes": "2c75"
+        },
+        {
+          "il": "IL_039E",
+          "opcode": "brfalse.s",
+          "operand": "IL_03E3",
+          "bytes": "2c43"
+        },
+        {
+          "il": "IL_0404",
+          "opcode": "brtrue",
+          "operand": "IL_003C",
+          "bytes": "3a33fcffff"
+        }
+      ],
+      "exception_regions": [
+        {
+          "try_start": 192,
+          "try_end": 206,
+          "handler_start": 206,
+          "handler_end": 371,
+          "kind": 0
+        },
+        {
+          "try_start": 534,
+          "try_end": 701,
+          "handler_start": 701,
+          "handler_end": 713,
+          "kind": 2
+        },
+        {
+          "try_start": 501,
+          "try_end": 718,
+          "handler_start": 718,
+          "handler_end": 876,
+          "kind": 0
+        },
+        {
+          "try_start": 485,
+          "try_end": 881,
+          "handler_start": 881,
+          "handler_end": 893,
+          "kind": 2
+        },
+        {
+          "try_start": 55,
+          "try_end": 1035,
+          "handler_start": 1035,
+          "handler_end": 1049,
+          "kind": 2
+        },
+        {
+          "try_start": 0,
+          "try_end": 1051,
+          "handler_start": 1051,
+          "handler_end": 1149,
+          "kind": 0
+        }
+      ],
+      "finding": "Sequential applications; normal launches all, DefaultStart only StartMode2/3; relative path from install root, cwd=exe parent, no arguments assigned. Modes1/3 wait ER_ApplicationStart using remaining timeout; mismatched PID loops, matching nonempty ResultCode notifies failure. Timeout/exception marks failed and continues; no retry launch."
+    },
+    {
+      "id": "bootstrap.arb-version",
+      "source": "bootstrap.arb.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusArbitration.Form1::ConfirmApplicationVersion",
+      "rva": 16932,
+      "body_size": 856,
+      "body_sha256": "0d0fa8d407fa9756b0611dd81446cd01713c5e981b9697755ca3f35e5f3db9f6",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_0017",
+          "opcode": "brtrue.s",
+          "operand": "IL_0041",
+          "bytes": "2d28"
+        },
+        {
+          "il": "IL_0071",
+          "opcode": "brfalse.s",
+          "operand": "IL_0079",
+          "bytes": "2c06"
+        },
+        {
+          "il": "IL_00FC",
+          "opcode": "brfalse",
+          "operand": "IL_0183",
+          "bytes": "3982000000"
+        },
+        {
+          "il": "IL_0187",
+          "opcode": "brfalse.s",
+          "operand": "IL_0190",
+          "bytes": "2c07"
+        },
+        {
+          "il": "IL_0211",
+          "opcode": "brtrue",
+          "operand": "IL_009F",
+          "bytes": "3a89feffff"
+        },
+        {
+          "il": "IL_022D",
+          "opcode": "brtrue",
+          "operand": "IL_0087",
+          "bytes": "3a55feffff"
+        }
+      ],
+      "exception_regions": [
+        {
+          "try_start": 98,
+          "try_end": 112,
+          "handler_start": 112,
+          "handler_end": 122,
+          "kind": 2
+        },
+        {
+          "try_start": 219,
+          "try_end": 389,
+          "handler_start": 389,
+          "handler_end": 401,
+          "kind": 2
+        },
+        {
+          "try_start": 168,
+          "try_end": 403,
+          "handler_start": 403,
+          "handler_end": 522,
+          "kind": 0
+        },
+        {
+          "try_start": 154,
+          "try_end": 536,
+          "handler_start": 536,
+          "handler_end": 550,
+          "kind": 2
+        },
+        {
+          "try_start": 130,
+          "try_end": 564,
+          "handler_start": 564,
+          "handler_end": 578,
+          "kind": 2
+        },
+        {
+          "try_start": 0,
+          "try_end": 580,
+          "handler_start": 580,
+          "handler_end": 693,
+          "kind": 0
+        }
+      ],
+      "finding": "Postlaunch manifest/component version mismatch AB000005+name; component-read failure AB000004+name; manifest failure AB000003. Notify/log and continue, not startup veto."
+    },
+    {
+      "id": "bootstrap.arb-confirm",
+      "source": "bootstrap.arb.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusArbitration.Form1::ConfirmEnding",
+      "rva": 12268,
+      "body_size": 1428,
+      "body_sha256": "9fd97feb1d02a5caf48429a2a5a1bae02abe9649c9964bb94270e096ed0c5103",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_000C",
+          "opcode": "brtrue.s",
+          "operand": "IL_0014",
+          "bytes": "2d06"
+        },
+        {
+          "il": "IL_002E",
+          "opcode": "bne.un",
+          "operand": "IL_01A5",
+          "bytes": "4072010000"
+        },
+        {
+          "il": "IL_0033",
+          "opcode": "ldstr",
+          "operand": "'ER_EndingConfirm_'",
+          "bytes": "72d9020070"
+        },
+        {
+          "il": "IL_008D",
+          "opcode": "brtrue.s",
+          "operand": "IL_0108",
+          "bytes": "2d79"
+        },
+        {
+          "il": "IL_010C",
+          "opcode": "brfalse.s",
+          "operand": "IL_0115",
+          "bytes": "2c07"
+        },
+        {
+          "il": "IL_02E3",
+          "opcode": "brfalse.s",
+          "operand": "IL_02EC",
+          "bytes": "2c07"
+        },
+        {
+          "il": "IL_0379",
+          "opcode": "brtrue",
+          "operand": "IL_01E1",
+          "bytes": "3a63feffff"
+        },
+        {
+          "il": "IL_03A5",
+          "opcode": "brfalse",
+          "operand": "IL_0442",
+          "bytes": "3998000000"
+        },
+        {
+          "il": "IL_03C1",
+          "opcode": "ble.s",
+          "operand": "IL_0414",
+          "bytes": "3151"
+        },
+        {
+          "il": "IL_041A",
+          "opcode": "brtrue.s",
+          "operand": "IL_0433",
+          "bytes": "2d17"
+        }
+      ],
+      "exception_regions": [
+        {
+          "try_start": 119,
+          "try_end": 266,
+          "handler_start": 266,
+          "handler_end": 278,
+          "kind": 2
+        },
+        {
+          "try_start": 82,
+          "try_end": 280,
+          "handler_start": 280,
+          "handler_end": 292,
+          "kind": 2
+        },
+        {
+          "try_start": 51,
+          "try_end": 294,
+          "handler_start": 294,
+          "handler_end": 421,
+          "kind": 0
+        },
+        {
+          "try_start": 26,
+          "try_end": 435,
+          "handler_start": 435,
+          "handler_end": 449,
+          "kind": 2
+        },
+        {
+          "try_start": 574,
+          "try_end": 723,
+          "handler_start": 723,
+          "handler_end": 735,
+          "kind": 2
+        },
+        {
+          "try_start": 537,
+          "try_end": 737,
+          "handler_start": 737,
+          "handler_end": 749,
+          "kind": 2
+        },
+        {
+          "try_start": 503,
+          "try_end": 754,
+          "handler_start": 754,
+          "handler_end": 882,
+          "kind": 0
+        },
+        {
+          "try_start": 476,
+          "try_end": 896,
+          "handler_start": 896,
+          "handler_end": 910,
+          "kind": 2
+        },
+        {
+          "try_start": 0,
+          "try_end": 1092,
+          "handler_start": 1092,
+          "handler_end": 1189,
+          "kind": 0
+        }
+      ],
+      "finding": "Only EndMode1 app/service confirmations; nonempty ResultCode vetoes. Pipe exceptions log/continue. Saving report waits until configured ABAppConfirmEndTimeout then AB000002 veto. Outer exception logs then returns true (fail-open)."
+    },
+    {
+      "id": "bootstrap.arb-execute",
+      "source": "bootstrap.arb.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusArbitration.Form1::ExecuteEnding",
+      "rva": 13696,
+      "body_size": 1364,
+      "body_sha256": "7518f85e51ef899ef86361e786c52a04e59a8c969f642273691479c961508669",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_003D",
+          "opcode": "brtrue.s",
+          "operand": "IL_0045",
+          "bytes": "2d06"
+        },
+        {
+          "il": "IL_0069",
+          "opcode": "brtrue.s",
+          "operand": "IL_007A",
+          "bytes": "2d0f"
+        },
+        {
+          "il": "IL_0082",
+          "opcode": "bne.un",
+          "operand": "IL_01E3",
+          "bytes": "405c010000"
+        },
+        {
+          "il": "IL_0087",
+          "opcode": "ldstr",
+          "operand": "'ER_EndingExecute_'",
+          "bytes": "7203050070"
+        },
+        {
+          "il": "IL_00E9",
+          "opcode": "brfalse.s",
+          "operand": "IL_00F2",
+          "bytes": "2c07"
+        },
+        {
+          "il": "IL_02A3",
+          "opcode": "ldstr",
+          "operand": "'ER_EndingExecute_'",
+          "bytes": "7203050070"
+        },
+        {
+          "il": "IL_0305",
+          "opcode": "brfalse.s",
+          "operand": "IL_030E",
+          "bytes": "2c07"
+        },
+        {
+          "il": "IL_0313",
+          "opcode": "brfalse.s",
+          "operand": "IL_031C",
+          "bytes": "2c07"
+        },
+        {
+          "il": "IL_03AA",
+          "opcode": "brtrue",
+          "operand": "IL_028D",
+          "bytes": "3adefeffff"
+        },
+        {
+          "il": "IL_03C0",
+          "opcode": "brfalse.s",
+          "operand": "IL_03D5",
+          "bytes": "2c13"
+        }
+      ],
+      "exception_regions": [
+        {
+          "try_start": 206,
+          "try_end": 231,
+          "handler_start": 231,
+          "handler_end": 243,
+          "kind": 2
+        },
+        {
+          "try_start": 169,
+          "try_end": 245,
+          "handler_start": 245,
+          "handler_end": 257,
+          "kind": 2
+        },
+        {
+          "try_start": 296,
+          "try_end": 312,
+          "handler_start": 312,
+          "handler_end": 315,
+          "kind": 0
+        },
+        {
+          "try_start": 135,
+          "try_end": 354,
+          "handler_start": 354,
+          "handler_end": 483,
+          "kind": 0
+        },
+        {
+          "try_start": 522,
+          "try_end": 538,
+          "handler_start": 538,
+          "handler_end": 541,
+          "kind": 0
+        },
+        {
+          "try_start": 75,
+          "try_end": 607,
+          "handler_start": 607,
+          "handler_end": 621,
+          "kind": 2
+        },
+        {
+          "try_start": 746,
+          "try_end": 771,
+          "handler_start": 771,
+          "handler_end": 783,
+          "kind": 2
+        },
+        {
+          "try_start": 709,
+          "try_end": 785,
+          "handler_start": 785,
+          "handler_end": 797,
+          "kind": 2
+        },
+        {
+          "try_start": 675,
+          "try_end": 802,
+          "handler_start": 802,
+          "handler_end": 931,
+          "kind": 0
+        },
+        {
+          "try_start": 648,
+          "try_end": 945,
+          "handler_start": 945,
+          "handler_end": 959,
+          "kind": 2
+        },
+        {
+          "try_start": 0,
+          "try_end": 983,
+          "handler_start": 983,
+          "handler_end": 1081,
+          "kind": 0
+        }
+      ],
+      "finding": "Send Shutdown/Exucute over ER_EndingExecute_<name> to EndMode1 apps/services; flush/drain. Execute=true waits unbounded for full-path-matching app exit. Other EndMode apps are killed only if execute=true, after remove monitor. Execute=true closes own form. Per-target exception logs/continues."
+    },
+    {
+      "id": "bootstrap.arb-session",
+      "source": "bootstrap.arb.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusArbitration.Form1::SystemEvents_SessionEnding",
+      "rva": 10468,
+      "body_size": 160,
+      "body_sha256": "ed915a55e2781a2cf3bd08c4e869cea3c93b87fa05903df8fea9580ea3acdf1f",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_0008",
+          "opcode": "brfalse.s",
+          "operand": "IL_0015",
+          "bytes": "2c0b"
+        },
+        {
+          "il": "IL_001E",
+          "opcode": "brtrue.s",
+          "operand": "IL_0027",
+          "bytes": "2d07"
+        },
+        {
+          "il": "IL_0022",
+          "opcode": "callvirt",
+          "operand": "Microsoft.Win32.SessionEndingEventArgs::set_Cancel",
+          "bytes": "6f5f00000a"
+        }
+      ],
+      "exception_regions": [
+        {
+          "try_start": 0,
+          "try_end": 41,
+          "handler_start": 41,
+          "handler_end": 131,
+          "kind": 0
+        }
+      ],
+      "finding": "ConfirmEnding then SetAppEndState only on approval; ExecuteEnding(true,approval); veto cancels Windows session end."
+    },
+    {
+      "id": "bootstrap.arb-end-request",
+      "source": "bootstrap.arb.recovered",
+      "kind": "managed-il",
+      "locator": "<EndABAppAsync>d__92::MoveNext",
+      "rva": 23868,
+      "body_size": 612,
+      "body_sha256": "a717252f1f7e9161719a8324a1e10dfbbaa2806d54598e946da3b4f9404be934",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_0012",
+          "opcode": "brfalse.s",
+          "operand": "IL_002C",
+          "bytes": "2c18"
+        },
+        {
+          "il": "IL_0015",
+          "opcode": "ldstr",
+          "operand": "'ER_ABAppEnd'",
+          "bytes": "7289100070"
+        },
+        {
+          "il": "IL_0031",
+          "opcode": "brfalse.s",
+          "operand": "IL_0085",
+          "bytes": "2c52"
+        },
+        {
+          "il": "IL_003A",
+          "opcode": "call",
+          "operand": "get_TaskCancel",
+          "bytes": "2814000006"
+        },
+        {
+          "il": "IL_003F",
+          "opcode": "callvirt",
+          "operand": "System.Threading.CancellationTokenSource::get_Token",
+          "bytes": "6fcd00000a"
+        },
+        {
+          "il": "IL_00C8",
+          "opcode": "brfalse.s",
+          "operand": "IL_00D5",
+          "bytes": "2c0b"
+        },
+        {
+          "il": "IL_0113",
+          "opcode": "bge.s",
+          "operand": "IL_0120",
+          "bytes": "2f0b"
+        },
+        {
+          "il": "IL_0117",
+          "opcode": "brfalse.s",
+          "operand": "IL_0120",
+          "bytes": "2c07"
+        },
+        {
+          "il": "IL_0125",
+          "opcode": "bge.s",
+          "operand": "IL_013A",
+          "bytes": "2f13"
+        },
+        {
+          "il": "IL_012D",
+          "opcode": "brfalse.s",
+          "operand": "IL_013A",
+          "bytes": "2c0b"
+        }
+      ],
+      "exception_regions": [
+        {
+          "try_start": 48,
+          "try_end": 170,
+          "handler_start": 170,
+          "handler_end": 176,
+          "kind": 0
+        },
+        {
+          "try_start": 244,
+          "try_end": 273,
+          "handler_start": 273,
+          "handler_end": 289,
+          "kind": 2
+        },
+        {
+          "try_start": 45,
+          "try_end": 291,
+          "handler_start": 291,
+          "handler_end": 315,
+          "kind": 2
+        },
+        {
+          "try_start": 17,
+          "try_end": 329,
+          "handler_start": 329,
+          "handler_end": 426,
+          "kind": 0
+        },
+        {
+          "try_start": 14,
+          "try_end": 428,
+          "handler_start": 428,
+          "handler_end": 453,
+          "kind": 0
+        }
+      ],
+      "finding": "ER_ABAppEnd async server: cancellation-aware wait, confirm, mark end state on approval, ExecuteEnding(false,approval), reply ABAppEndData.Result flush/drain, loop; cancellation exits, other exception logs/stops receiver."
+    },
+    {
+      "id": "bootstrap.arb-child-end",
+      "source": "bootstrap.arb.recovered",
+      "kind": "managed-il",
+      "locator": "<EndApplicationAsync>d__96::MoveNext",
+      "rva": 24496,
+      "body_size": 556,
+      "body_sha256": "03938c7876391294b00a80529372ff674fd608cfcda6486c02d49f5e26e96ecf",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_0012",
+          "opcode": "brfalse.s",
+          "operand": "IL_002C",
+          "bytes": "2c18"
+        },
+        {
+          "il": "IL_0015",
+          "opcode": "ldstr",
+          "operand": "'ER_ApplicationEnd'",
+          "bytes": "72d7100070"
+        },
+        {
+          "il": "IL_0031",
+          "opcode": "brfalse.s",
+          "operand": "IL_0084",
+          "bytes": "2c51"
+        },
+        {
+          "il": "IL_003A",
+          "opcode": "call",
+          "operand": "get_TaskCancel",
+          "bytes": "2814000006"
+        },
+        {
+          "il": "IL_003F",
+          "opcode": "callvirt",
+          "operand": "System.Threading.CancellationTokenSource::get_Token",
+          "bytes": "6fcd00000a"
+        },
+        {
+          "il": "IL_005F",
+          "opcode": "brtrue.s",
+          "operand": "IL_00A0",
+          "bytes": "2d3f"
+        },
+        {
+          "il": "IL_00DE",
+          "opcode": "bge.s",
+          "operand": "IL_00EB",
+          "bytes": "2f0b"
+        },
+        {
+          "il": "IL_00E2",
+          "opcode": "brfalse.s",
+          "operand": "IL_00EB",
+          "bytes": "2c07"
+        },
+        {
+          "il": "IL_00F0",
+          "opcode": "bge.s",
+          "operand": "IL_0105",
+          "bytes": "2f13"
+        },
+        {
+          "il": "IL_00F8",
+          "opcode": "brfalse.s",
+          "operand": "IL_0105",
+          "bytes": "2c0b"
+        }
+      ],
+      "exception_regions": [
+        {
+          "try_start": 48,
+          "try_end": 169,
+          "handler_start": 169,
+          "handler_end": 172,
+          "kind": 0
+        },
+        {
+          "try_start": 190,
+          "try_end": 220,
+          "handler_start": 220,
+          "handler_end": 236,
+          "kind": 2
+        },
+        {
+          "try_start": 45,
+          "try_end": 238,
+          "handler_start": 238,
+          "handler_end": 262,
+          "kind": 2
+        },
+        {
+          "try_start": 17,
+          "try_end": 276,
+          "handler_start": 276,
+          "handler_end": 373,
+          "kind": 0
+        },
+        {
+          "try_start": 14,
+          "try_end": 375,
+          "handler_start": 375,
+          "handler_end": 400,
+          "kind": 0
+        }
+      ],
+      "finding": "ER_ApplicationEnd async receiver removes monitor for received ProcessId then loops; cancellation exits and other exception logs/stops. No restart."
+    },
+    {
+      "id": "bootstrap.arb-close",
+      "source": "bootstrap.arb.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusArbitration.Form1::Form1_FormClosed",
+      "rva": 10204,
+      "body_size": 264,
+      "body_sha256": "6eadf008c78060f341d45e80411d07f276593ecb7a5824e03f455f08bbcaff56",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_0001",
+          "opcode": "call",
+          "operand": "get_TaskCancel",
+          "bytes": "2814000006"
+        },
+        {
+          "il": "IL_0006",
+          "opcode": "callvirt",
+          "operand": "System.Threading.CancellationTokenSource::Cancel",
+          "bytes": "6f5800000a"
+        },
+        {
+          "il": "IL_0033",
+          "opcode": "brfalse.s",
+          "operand": "IL_003B",
+          "bytes": "2c06"
+        },
+        {
+          "il": "IL_006D",
+          "opcode": "callvirt",
+          "operand": "GTSPlusErrorReport.ErrorReport::FinalizeErrorReport",
+          "bytes": "6f5c00000a"
+        }
+      ],
+      "exception_regions": [
+        {
+          "try_start": 41,
+          "try_end": 50,
+          "handler_start": 50,
+          "handler_end": 60,
+          "kind": 2
+        },
+        {
+          "try_start": 0,
+          "try_end": 133,
+          "handler_start": 133,
+          "handler_end": 223,
+          "kind": 0
+        }
+      ],
+      "finding": "Cancel token; EndAppCommunication; StopAliveMonitor; signal AB_ErrorReportSave; join save/end/hotkey tasks; keyboard unhook; FinalizeErrorReport; unsubscribe session-end. Exception aborts remaining teardown after log."
+    },
+    {
+      "id": "bootstrap.pf-form-init",
+      "source": "bootstrap.pf.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusController.Form1::.ctor",
+      "rva": 30736,
+      "body_size": 231,
+      "body_sha256": "b0dcd54d4ce0f20afc98bb39bebb2c29e19593625721905da48bdd443f8aa0df",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_0025",
+          "opcode": "brtrue.s",
+          "operand": "IL_002B",
+          "bytes": "2d04"
+        },
+        {
+          "il": "IL_002B",
+          "opcode": "call",
+          "operand": "InitializePlatform",
+          "bytes": "2837010006"
+        },
+        {
+          "il": "IL_0035",
+          "opcode": "brtrue.s",
+          "operand": "IL_00B6",
+          "bytes": "2d7f"
+        },
+        {
+          "il": "IL_0053",
+          "opcode": "callvirt",
+          "operand": "MsgDatComm.CExternalMethod::ER_StartAppCommunicationCS",
+          "bytes": "6fce00000a"
+        },
+        {
+          "il": "IL_0075",
+          "opcode": "callvirt",
+          "operand": "MsgDatComm.CExternalMethod::ER_StartAliveMonitorRunningCS",
+          "bytes": "6fd000000a"
+        },
+        {
+          "il": "IL_0086",
+          "opcode": "callvirt",
+          "operand": "MsgDatComm.CExternalMethod::ER_StartApplicationCS",
+          "bytes": "6fd100000a"
+        },
+        {
+          "il": "IL_00AF",
+          "opcode": "callvirt",
+          "operand": "MsgDatComm.CExternalMethod::ER_StartWaitForEndingCS",
+          "bytes": "6fd400000a"
+        },
+        {
+          "il": "IL_00C3",
+          "opcode": "brtrue.s",
+          "operand": "IL_00C9",
+          "bytes": "2d04"
+        },
+        {
+          "il": "IL_00CE",
+          "opcode": "callvirt",
+          "operand": "MsgDatComm.CExternalMethod::ER_StartApplicationCS",
+          "bytes": "6fd100000a"
+        }
+      ],
+      "exception_regions": [],
+      "finding": "InitializePlatform result0 registers GTS+ PF communication/alive callbacks, sends successful startup notification, registers ending callbacks. Nonzero sends remembered error then closes form; IPC boolean returns ignored."
+    },
+    {
+      "id": "bootstrap.pf-init",
+      "source": "bootstrap.pf.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusController.MainTask::InitializePlatform",
+      "rva": 32832,
+      "body_size": 852,
+      "body_sha256": "8ebcf3149fbb10861c61d7bf14189a9fa702259d46d16e14118e0a8137cc1e59",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_001E",
+          "opcode": "brfalse.s",
+          "operand": "IL_0032",
+          "bytes": "2c12"
+        },
+        {
+          "il": "IL_0038",
+          "opcode": "callvirt",
+          "operand": "ResetPFConfig",
+          "bytes": "6fc3000006"
+        },
+        {
+          "il": "IL_0044",
+          "opcode": "brfalse.s",
+          "operand": "IL_0058",
+          "bytes": "2c12"
+        },
+        {
+          "il": "IL_006A",
+          "opcode": "brfalse.s",
+          "operand": "IL_007E",
+          "bytes": "2c12"
+        },
+        {
+          "il": "IL_009D",
+          "opcode": "call",
+          "operand": "get_TaskCancelToken",
+          "bytes": "282d010006"
+        },
+        {
+          "il": "IL_0210",
+          "opcode": "call",
+          "operand": "StartMainSequence",
+          "bytes": "2839010006"
+        },
+        {
+          "il": "IL_0215",
+          "opcode": "stloc.0",
+          "operand": "",
+          "bytes": "0a"
+        },
+        {
+          "il": "IL_0216",
+          "opcode": "call",
+          "operand": "GTSPlusPFCommon.Constants.PFCommonConstants::get_GTSP_SECTION_AUTO_DELETE",
+          "bytes": "280701000a"
+        },
+        {
+          "il": "IL_021B",
+          "opcode": "call",
+          "operand": "GTSPlusPFCommon.Constants.PFCommonConstants::get_GTSP_KEY_START_TIME",
+          "bytes": "280801000a"
+        },
+        {
+          "il": "IL_0220",
+          "opcode": "ldloca.s",
+          "operand": "local(0x0001)",
+          "bytes": "1201"
+        },
+        {
+          "il": "IL_0222",
+          "opcode": "call",
+          "operand": "GTSPlusPFCommon.Function.CommonFunction::GetGTSPlusSetting",
+          "bytes": "280901000a"
+        },
+        {
+          "il": "IL_0227",
+          "opcode": "stloc.0",
+          "operand": "",
+          "bytes": "0a"
+        },
+        {
+          "il": "IL_0228",
+          "opcode": "ldloc.0",
+          "operand": "",
+          "bytes": "06"
+        },
+        {
+          "il": "IL_0229",
+          "opcode": "callvirt",
+          "operand": "GTSPlusPFCommon.Message.ResultInfoData::get_Result",
+          "bytes": "6f5a00000a"
+        },
+        {
+          "il": "IL_022E",
+          "opcode": "brtrue.s",
+          "operand": "IL_0234",
+          "bytes": "2d04"
+        },
+        {
+          "il": "IL_0230",
+          "opcode": "ldloc.1",
+          "operand": "",
+          "bytes": "07"
+        },
+        {
+          "il": "IL_0231",
+          "opcode": "ldc.i4.0",
+          "operand": "",
+          "bytes": "16"
+        },
+        {
+          "il": "IL_0232",
+          "opcode": "bgt.s",
+          "operand": "IL_023B",
+          "bytes": "3007"
+        },
+        {
+          "il": "IL_0234",
+          "opcode": "ldloc.0",
+          "operand": "",
+          "bytes": "06"
+        },
+        {
+          "il": "IL_0235",
+          "opcode": "stloc.3",
+          "operand": "",
+          "bytes": "0d"
+        },
+        {
+          "il": "IL_0236",
+          "opcode": "leave",
+          "operand": "IL_0327",
+          "bytes": "ddec000000"
+        },
+        {
+          "il": "IL_0276",
+          "opcode": "call",
+          "operand": "GTSPlusPFCommon.Function.CommonFunction::GetGTSPlusSetting",
+          "bytes": "280901000a"
+        },
+        {
+          "il": "IL_0282",
+          "opcode": "brfalse.s",
+          "operand": "IL_028B",
+          "bytes": "2c07"
+        },
+        {
+          "il": "IL_028D",
+          "opcode": "ble.s",
+          "operand": "IL_02BE",
+          "bytes": "312f"
+        }
+      ],
+      "exception_regions": [
+        {
+          "try_start": 0,
+          "try_end": 704,
+          "handler_start": 704,
+          "handler_end": 788,
+          "kind": 0
+        }
+      ],
+      "finding": "ConnectionManager, SetApplicationInfo, ResetPFConfig, InitializeAdaptation, five worker construction/init, sleep timer50000ms, StartMainSequence, AutoDelete/AutoSaveDelete timers. Early info/config/adaptation/worker failure returns. StartMainSequence result overwritten by setting lookup; AutoDelete StartTime<=0 returns current result, possibly success. Exceptions return logged failure."
+    },
+    {
+      "id": "bootstrap.pf-reset-config",
+      "source": "bootstrap.pf.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusController.ConnectionManager::ResetPFConfig",
+      "rva": 28692,
+      "body_size": 248,
+      "body_sha256": "e92675532a44eb52e58faa20115b91b905fcc1deb8fb53e91bdd6f2acb74973c",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_0031",
+          "opcode": "brfalse.s",
+          "operand": "IL_006E",
+          "bytes": "2c3b"
+        },
+        {
+          "il": "IL_0081",
+          "opcode": "brfalse.s",
+          "operand": "IL_008C",
+          "bytes": "2c09"
+        }
+      ],
+      "exception_regions": [
+        {
+          "try_start": 123,
+          "try_end": 142,
+          "handler_start": 142,
+          "handler_end": 203,
+          "kind": 0
+        }
+      ],
+      "finding": "Copy install Env/DefaultPF.cfg over SettingFileWrapper folder/current PF.cfg when default exists. Missing default tolerated; folder/copy failure returns error."
+    },
+    {
+      "id": "bootstrap.pf-sequence",
+      "source": "bootstrap.pf.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusController.MainTask::StartMainSequence",
+      "rva": 34344,
+      "body_size": 150,
+      "body_sha256": "6a2fcd28c7bda55da71228356c3d1ee17d04af8c08eb60ed97258f25dd26db65",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_001B",
+          "opcode": "brtrue.s",
+          "operand": "IL_0020",
+          "bytes": "2d03"
+        },
+        {
+          "il": "IL_002D",
+          "opcode": "blt.s",
+          "operand": "IL_0017",
+          "bytes": "32e8"
+        },
+        {
+          "il": "IL_004B",
+          "opcode": "brtrue.s",
+          "operand": "IL_007C",
+          "bytes": "2d2f"
+        }
+      ],
+      "exception_regions": [],
+      "finding": "Start settings receiver, workers, managed WebSocket StartProcess, then main-task async before testing WebSocket result. False stores PF000002 and returns failure; no child Process.Start here."
+    },
+    {
+      "id": "bootstrap.pf-loop",
+      "source": "bootstrap.pf.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusController.MainTask::StartMainTask",
+      "rva": 34564,
+      "body_size": 1684,
+      "body_sha256": "e070eb5b3413844d9d3b66d53e9a2d215a098f9825f9c8f567d447aa2bc70537",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_00F0",
+          "opcode": "brfalse",
+          "operand": "IL_0574",
+          "bytes": "397f040000"
+        },
+        {
+          "il": "IL_00FB",
+          "opcode": "brfalse.s",
+          "operand": "IL_0104",
+          "bytes": "2c07"
+        },
+        {
+          "il": "IL_011D",
+          "opcode": "brfalse.s",
+          "operand": "IL_0130",
+          "bytes": "2c11"
+        },
+        {
+          "il": "IL_0154",
+          "opcode": "brfalse",
+          "operand": "IL_03CD",
+          "bytes": "3974020000"
+        },
+        {
+          "il": "IL_0165",
+          "opcode": "bne.un",
+          "operand": "IL_03CD",
+          "bytes": "4063020000"
+        },
+        {
+          "il": "IL_05A1",
+          "opcode": "brfalse.s",
+          "operand": "IL_05AA",
+          "bytes": "2c07"
+        },
+        {
+          "il": "IL_05AD",
+          "opcode": "brfalse.s",
+          "operand": "IL_05B6",
+          "bytes": "2c07"
+        },
+        {
+          "il": "IL_05B9",
+          "opcode": "brfalse.s",
+          "operand": "IL_05C2",
+          "bytes": "2c07"
+        },
+        {
+          "il": "IL_05C5",
+          "opcode": "brfalse.s",
+          "operand": "IL_05CE",
+          "bytes": "2c07"
+        },
+        {
+          "il": "IL_05D0",
+          "opcode": "brfalse.s",
+          "operand": "IL_05D8",
+          "bytes": "2c06"
+        }
+      ],
+      "exception_regions": [
+        {
+          "try_start": 312,
+          "try_end": 1382,
+          "handler_start": 1382,
+          "handler_end": 1396,
+          "kind": 2
+        },
+        {
+          "try_start": 195,
+          "try_end": 1427,
+          "handler_start": 1427,
+          "handler_end": 1439,
+          "kind": 2
+        },
+        {
+          "try_start": 173,
+          "try_end": 1439,
+          "handler_start": 1439,
+          "handler_end": 1451,
+          "kind": 2
+        },
+        {
+          "try_start": 151,
+          "try_end": 1451,
+          "handler_start": 1451,
+          "handler_end": 1463,
+          "kind": 2
+        },
+        {
+          "try_start": 129,
+          "try_end": 1463,
+          "handler_start": 1463,
+          "handler_end": 1475,
+          "kind": 2
+        },
+        {
+          "try_start": 107,
+          "try_end": 1475,
+          "handler_start": 1475,
+          "handler_end": 1487,
+          "kind": 2
+        },
+        {
+          "try_start": 85,
+          "try_end": 1487,
+          "handler_start": 1487,
+          "handler_end": 1497,
+          "kind": 2
+        }
+      ],
+      "finding": "Poll/fetch/analyze/queue messages until cancellation requested. EndCheckFlag waits main confirmation barrier; EndFlag alone does not stop loop. Named events wake API workers."
+    },
+    {
+      "id": "bootstrap.pf-confirm",
+      "source": "bootstrap.pf.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusController.MainTask::AbAppEndConfirmSequence",
+      "rva": 36844,
+      "body_size": 215,
+      "body_sha256": "a39d8be537b23017cc765a540af5c000384aeeb638c3fc491b048607f73f4d1a",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_0074",
+          "opcode": "ldstr",
+          "operand": "'GTSP_WEB_SERVICE_TIMER_END_CONFIRM_EVENT_MESSAGE'",
+          "bytes": "72a82f0070"
+        },
+        {
+          "il": "IL_009B",
+          "opcode": "brfalse.s",
+          "operand": "IL_00A4",
+          "bytes": "2c07"
+        },
+        {
+          "il": "IL_00AC",
+          "opcode": "blt.s",
+          "operand": "IL_0096",
+          "bytes": "32e8"
+        },
+        {
+          "il": "IL_00B4",
+          "opcode": "callvirt",
+          "operand": "GTSPlusAdaptationIF.AdaptationInterface::CheckEditFile",
+          "bytes": "6f2801000a"
+        },
+        {
+          "il": "IL_00B9",
+          "opcode": "brfalse.s",
+          "operand": "IL_00C3",
+          "bytes": "2c08"
+        }
+      ],
+      "exception_regions": [],
+      "finding": "Reset seven confirmation barriers; set main/worker EndCheckFlag; CheckEditFile true returns PF000003 veto, false empty approval. Does not itself wait barriers."
+    },
+    {
+      "id": "bootstrap.pf-execute",
+      "source": "bootstrap.pf.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusController.MainTask::AbAppEndExecuteSequence",
+      "rva": 37060,
+      "body_size": 202,
+      "body_sha256": "ec23fb9a3feb1caf9be1c442cdf1d33062bc825483a7a273f6c1b16a6d654a36",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_0001",
+          "opcode": "brfalse",
+          "operand": "IL_00B7",
+          "bytes": "39b1000000"
+        },
+        {
+          "il": "IL_001C",
+          "opcode": "ble.s",
+          "operand": "IL_000A",
+          "bytes": "31ec"
+        },
+        {
+          "il": "IL_001F",
+          "opcode": "brtrue.s",
+          "operand": "IL_0085",
+          "bytes": "2d64"
+        },
+        {
+          "il": "IL_0099",
+          "opcode": "brfalse.s",
+          "operand": "IL_00A3",
+          "bytes": "2c08"
+        },
+        {
+          "il": "IL_00AE",
+          "opcode": "blt.s",
+          "operand": "IL_0091",
+          "bytes": "32e1"
+        }
+      ],
+      "exception_regions": [],
+      "finding": "Execute=true clears queues IDs1..6; nonshutdown sends CN000008/id10 GUI broadcast; sets worker/main EndFlag. Always ResetEndCheckFlag. Execute=false resumes operation."
+    },
+    {
+      "id": "bootstrap.pf-unfreeze",
+      "source": "bootstrap.pf.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusController.MainTask::ResetEndCheckFlag",
+      "rva": 36660,
+      "body_size": 181,
+      "body_sha256": "63ee4d78eb5c5b944d5b7e26e0343e3e3aa15de1e5aa5b85a443a58a892bb1a9",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_0017",
+          "opcode": "brfalse.s",
+          "operand": "IL_0020",
+          "bytes": "2c07"
+        },
+        {
+          "il": "IL_0028",
+          "opcode": "blt.s",
+          "operand": "IL_0012",
+          "bytes": "32e8"
+        },
+        {
+          "il": "IL_0098",
+          "opcode": "ldstr",
+          "operand": "'GTSP_WEB_SERVICE_TIMER_END_CONFIRM_EVENT_MESSAGE'",
+          "bytes": "72a82f0070"
+        }
+      ],
+      "exception_regions": [],
+      "finding": "Clear EndCheckFlag on main/workers and Set all seven confirmation barriers, releasing paused work."
+    },
+    {
+      "id": "bootstrap.pf-execute-callback",
+      "source": "bootstrap.pf.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusController.Form1::CallbackAbAppEndExecute",
+      "rva": 31324,
+      "body_size": 88,
+      "body_sha256": "7bb9825c6e49a4abc14efa9c66a6fecc26fdbe1a9abcb95b4624bc0cac5b899c",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_0007",
+          "opcode": "brtrue.s",
+          "operand": "IL_000C",
+          "bytes": "2d03"
+        },
+        {
+          "il": "IL_0014",
+          "opcode": "brfalse.s",
+          "operand": "IL_001E",
+          "bytes": "2c08"
+        },
+        {
+          "il": "IL_0025",
+          "opcode": "brtrue.s",
+          "operand": "IL_002A",
+          "bytes": "2d03"
+        },
+        {
+          "il": "IL_0030",
+          "opcode": "brfalse.s",
+          "operand": "IL_004B",
+          "bytes": "2c19"
+        }
+      ],
+      "exception_regions": [],
+      "finding": "Delegate end execution; execute=true closes form, false resets barriers; shutdown stores EndExecuteFlag and Set GTSP_END_SESSION_EVENT."
+    },
+    {
+      "id": "bootstrap.pf-session",
+      "source": "bootstrap.pf.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusController.Form1::SystemEvents_SessionEnding",
+      "rva": 31176,
+      "body_size": 120,
+      "body_sha256": "bd465f682db37b6485ca95a898e2a5a5120d4b2e9a6bb08de20935e62e7f5112",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_001B",
+          "opcode": "brfalse.s",
+          "operand": "IL_002E",
+          "bytes": "2c11"
+        },
+        {
+          "il": "IL_0023",
+          "opcode": "brtrue.s",
+          "operand": "IL_004E",
+          "bytes": "2d29"
+        },
+        {
+          "il": "IL_0027",
+          "opcode": "callvirt",
+          "operand": "Microsoft.Win32.SessionEndingEventArgs::set_Cancel",
+          "bytes": "6fe500000a"
+        },
+        {
+          "il": "IL_0035",
+          "opcode": "brtrue.s",
+          "operand": "IL_003B",
+          "bytes": "2d04"
+        },
+        {
+          "il": "IL_0045",
+          "opcode": "brtrue.s",
+          "operand": "IL_004E",
+          "bytes": "2d07"
+        },
+        {
+          "il": "IL_0049",
+          "opcode": "callvirt",
+          "operand": "Microsoft.Win32.SessionEndingEventArgs::set_Cancel",
+          "bytes": "6fe500000a"
+        },
+        {
+          "il": "IL_0051",
+          "opcode": "brfalse.s",
+          "operand": "IL_0059",
+          "bytes": "2c06"
+        }
+      ],
+      "exception_regions": [
+        {
+          "try_start": 13,
+          "try_end": 80,
+          "handler_start": 80,
+          "handler_end": 90,
+          "kind": 2
+        }
+      ],
+      "finding": "Wait GTSP_END_SESSION_EVENT for configured timeout; signaled plus EndExecuteFlag=false vetoes; timeout runs own end confirmation and vetoes nonempty result."
+    },
+    {
+      "id": "bootstrap.pf-timeout",
+      "source": "bootstrap.pf.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusController.Form1::GetSessionEndTimeOut",
+      "rva": 31412,
+      "body_size": 79,
+      "body_sha256": "73377b8b1cdc7aeffe5b09ddf4a5d6c2db55fb639878806b3da6ea30f6adbe04",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_0021",
+          "opcode": "brtrue.s",
+          "operand": "IL_0025",
+          "bytes": "2d02"
+        },
+        {
+          "il": "IL_003D",
+          "opcode": "ble.s",
+          "operand": "IL_0041",
+          "bytes": "3102"
+        }
+      ],
+      "exception_regions": [],
+      "finding": "Default session coordination10000ms; encrypted GTSPlusInfo.ini AppInfo/SessionEndCheckTimeout overrides only when positive; failed decode retains default."
+    },
+    {
+      "id": "bootstrap.pf-close",
+      "source": "bootstrap.pf.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusController.Form1::Form1_FormClosed",
+      "rva": 30968,
+      "body_size": 129,
+      "body_sha256": "22ab1ea159a13bc6038b65214d31c96a28e3b4393fadf26b5a47be682ae03525",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_0007",
+          "opcode": "brtrue.s",
+          "operand": "IL_000C",
+          "bytes": "2d03"
+        },
+        {
+          "il": "IL_000C",
+          "opcode": "call",
+          "operand": "FinalizePlatform",
+          "bytes": "2838010006"
+        },
+        {
+          "il": "IL_0017",
+          "opcode": "callvirt",
+          "operand": "MsgDatComm.CExternalMethod::ER_EndApplicationCS",
+          "bytes": "6fd600000a"
+        },
+        {
+          "il": "IL_0023",
+          "opcode": "callvirt",
+          "operand": "MsgDatComm.CExternalMethod::ER_EndAliveMonitorRunningCS",
+          "bytes": "6fd700000a"
+        },
+        {
+          "il": "IL_002F",
+          "opcode": "callvirt",
+          "operand": "MsgDatComm.CExternalMethod::ER_EndWaitForEndingCS",
+          "bytes": "6fd800000a"
+        },
+        {
+          "il": "IL_003B",
+          "opcode": "callvirt",
+          "operand": "MsgDatComm.CExternalMethod::ER_EndAppCommunicationCS",
+          "bytes": "6fd900000a"
+        },
+        {
+          "il": "IL_0048",
+          "opcode": "brtrue.s",
+          "operand": "IL_004D",
+          "bytes": "2d03"
+        }
+      ],
+      "exception_regions": [],
+      "finding": "FinalizePlatform; ER_EndApplicationCS; stop alive/ending/communication workers; reset barriers; unsubscribe Windows session/network events."
+    },
+    {
+      "id": "bootstrap.pf-finalize",
+      "source": "bootstrap.pf.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusController.MainTask::FinalizePlatform",
+      "rva": 33684,
+      "body_size": 660,
+      "body_sha256": "e1a67a40fceb16528355e802ca154f73325c33d96cb60f087fd08a68caab5b72",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_0000",
+          "opcode": "call",
+          "operand": "get_TaskCancelToken",
+          "bytes": "282d010006"
+        },
+        {
+          "il": "IL_0005",
+          "opcode": "callvirt",
+          "operand": "System.Threading.CancellationTokenSource::Cancel",
+          "bytes": "6f0b01000a"
+        },
+        {
+          "il": "IL_009B",
+          "opcode": "brtrue.s",
+          "operand": "IL_00B4",
+          "bytes": "2d17"
+        },
+        {
+          "il": "IL_00D2",
+          "opcode": "brfalse.s",
+          "operand": "IL_00F4",
+          "bytes": "2c20"
+        },
+        {
+          "il": "IL_00FB",
+          "opcode": "brtrue.s",
+          "operand": "IL_00C2",
+          "bytes": "2dc5"
+        },
+        {
+          "il": "IL_0136",
+          "opcode": "brfalse.s",
+          "operand": "IL_013E",
+          "bytes": "2c06"
+        },
+        {
+          "il": "IL_0142",
+          "opcode": "brfalse.s",
+          "operand": "IL_014A",
+          "bytes": "2c06"
+        },
+        {
+          "il": "IL_0151",
+          "opcode": "callvirt",
+          "operand": "GTSPlusAdaptationIF.AdaptationInterface::FinalizeAdaptation",
+          "bytes": "6f1401000a"
+        },
+        {
+          "il": "IL_01A2",
+          "opcode": "ldstr",
+          "operand": "'Failed To Finalize MainTask.'",
+          "bytes": "72ca2b0070"
+        },
+        {
+          "il": "IL_01CE",
+          "opcode": "ldstr",
+          "operand": "'MainTask Finalize Completed.'",
+          "bytes": "72042c0070"
+        }
+      ],
+      "exception_regions": [
+        {
+          "try_start": 192,
+          "try_end": 255,
+          "handler_start": 255,
+          "handler_end": 267,
+          "kind": 2
+        },
+        {
+          "try_start": 143,
+          "try_end": 269,
+          "handler_start": 269,
+          "handler_end": 281,
+          "kind": 2
+        },
+        {
+          "try_start": 121,
+          "try_end": 283,
+          "handler_start": 283,
+          "handler_end": 295,
+          "kind": 2
+        },
+        {
+          "try_start": 99,
+          "try_end": 297,
+          "handler_start": 297,
+          "handler_end": 307,
+          "kind": 2
+        },
+        {
+          "try_start": 78,
+          "try_end": 309,
+          "handler_start": 309,
+          "handler_end": 319,
+          "kind": 2
+        },
+        {
+          "try_start": 59,
+          "try_end": 321,
+          "handler_start": 321,
+          "handler_end": 331,
+          "kind": 2
+        },
+        {
+          "try_start": 0,
+          "try_end": 372,
+          "handler_start": 372,
+          "handler_end": 456,
+          "kind": 0
+        }
+      ],
+      "finding": "Cancel token; stop WebSocket; wait main; signal worker events and wait each worker; FinalizeAdaptation; wait settings receiver; stop sleep timer. Waits unbounded; broad exception logs then aborts remaining teardown, no retry."
+    },
+    {
+      "id": "bootstrap.pf-alive",
+      "source": "bootstrap.pf.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusController.MainTask::CallbackAbAppAliveMonitorCheck",
+      "rva": 36248,
+      "body_size": 129,
+      "body_sha256": "1f740563395e03543ded1120c2cba6bb81647a54454f370ff8967ddecc1f3bc9",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_0012",
+          "opcode": "beq.s",
+          "operand": "IL_001A",
+          "bytes": "2e06"
+        },
+        {
+          "il": "IL_0026",
+          "opcode": "brfalse.s",
+          "operand": "IL_0043",
+          "bytes": "2c1b"
+        },
+        {
+          "il": "IL_003B",
+          "opcode": "beq.s",
+          "operand": "IL_0043",
+          "bytes": "2e06"
+        },
+        {
+          "il": "IL_0053",
+          "opcode": "blt.s",
+          "operand": "IL_001E",
+          "bytes": "32c9"
+        },
+        {
+          "il": "IL_0066",
+          "opcode": "beq.s",
+          "operand": "IL_006E",
+          "bytes": "2e06"
+        }
+      ],
+      "exception_regions": [],
+      "finding": "Main task, worker tasks and inner settings receiver task must have TaskStatus1 (WaitingForActivation) else PF000005; otherwise return remembered error or empty."
+    },
+    {
+      "id": "bootstrap.pf-settings-error",
+      "source": "bootstrap.pf.recovered",
+      "kind": "managed-il",
+      "locator": "<SettingFileErrorReceive>d__82::MoveNext",
+      "rva": 87500,
+      "body_size": 728,
+      "body_sha256": "dfd2cd02f346e6ed946a4c95caf7d0014d086c8c781f7f5121399cece7a8e461",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_0012",
+          "opcode": "brfalse.s",
+          "operand": "IL_0045",
+          "bytes": "2c31"
+        },
+        {
+          "il": "IL_004A",
+          "opcode": "brfalse.s",
+          "operand": "IL_009F",
+          "bytes": "2c53"
+        },
+        {
+          "il": "IL_0052",
+          "opcode": "call",
+          "operand": "get_TaskCancelToken",
+          "bytes": "282d010006"
+        },
+        {
+          "il": "IL_0057",
+          "opcode": "callvirt",
+          "operand": "System.Threading.CancellationTokenSource::get_Token",
+          "bytes": "6f0201000a"
+        },
+        {
+          "il": "IL_005C",
+          "opcode": "callvirt",
+          "operand": "System.IO.Pipes.NamedPipeServerStream::WaitForConnectionAsync",
+          "bytes": "6fe002000a"
+        },
+        {
+          "il": "IL_015B",
+          "opcode": "brfalse.s",
+          "operand": "IL_01A5",
+          "bytes": "2c48"
+        },
+        {
+          "il": "IL_0169",
+          "opcode": "brfalse.s",
+          "operand": "IL_01A5",
+          "bytes": "2c3a"
+        },
+        {
+          "il": "IL_017C",
+          "opcode": "brtrue.s",
+          "operand": "IL_0195",
+          "bytes": "2d17"
+        },
+        {
+          "il": "IL_01A9",
+          "opcode": "bge.s",
+          "operand": "IL_01BE",
+          "bytes": "2f13"
+        },
+        {
+          "il": "IL_01B1",
+          "opcode": "brfalse.s",
+          "operand": "IL_01BE",
+          "bytes": "2c0b"
+        }
+      ],
+      "exception_regions": [
+        {
+          "try_start": 73,
+          "try_end": 197,
+          "handler_start": 197,
+          "handler_end": 203,
+          "kind": 0
+        },
+        {
+          "try_start": 229,
+          "try_end": 240,
+          "handler_start": 240,
+          "handler_end": 256,
+          "kind": 2
+        },
+        {
+          "try_start": 70,
+          "try_end": 423,
+          "handler_start": 423,
+          "handler_end": 447,
+          "kind": 2
+        },
+        {
+          "try_start": 17,
+          "try_end": 461,
+          "handler_start": 461,
+          "handler_end": 545,
+          "kind": 0
+        },
+        {
+          "try_start": 14,
+          "try_end": 547,
+          "handler_start": 547,
+          "handler_end": 572,
+          "kind": 0
+        }
+      ],
+      "finding": "SettingFileTampering_<PID> server reads UTF8; UserProfile/VehicleConfigure excluded from global flag; other messages set all GUI tamper flags and remember PF000004. Successful receive loops; cancellation exits; other exception logs/stops."
+    },
+    {
+      "id": "bootstrap.path",
+      "source": "bootstrap.common.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusCommon.Function.PathFunction::GetInstallFolderPathCS",
+      "rva": 9340,
+      "body_size": 368,
+      "body_sha256": "93399d4ad3d79e29aea097e9380b2e4f6143b30cba53e434052fdeea04bb9fd9",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_001E",
+          "opcode": "brfalse.s",
+          "operand": "IL_008E",
+          "bytes": "2c6e"
+        },
+        {
+          "il": "IL_007D",
+          "opcode": "brfalse.s",
+          "operand": "IL_0086",
+          "bytes": "2c07"
+        },
+        {
+          "il": "IL_008F",
+          "opcode": "brfalse.s",
+          "operand": "IL_00D7",
+          "bytes": "2c46"
+        },
+        {
+          "il": "IL_009B",
+          "opcode": "brfalse.s",
+          "operand": "IL_00D5",
+          "bytes": "2c38"
+        },
+        {
+          "il": "IL_00A9",
+          "opcode": "brfalse.s",
+          "operand": "IL_00D1",
+          "bytes": "2c26"
+        },
+        {
+          "il": "IL_00C7",
+          "opcode": "brtrue.s",
+          "operand": "IL_00CD",
+          "bytes": "2d04"
+        },
+        {
+          "il": "IL_00D8",
+          "opcode": "brfalse.s",
+          "operand": "IL_011A",
+          "bytes": "2c40"
+        },
+        {
+          "il": "IL_00EA",
+          "opcode": "brfalse.s",
+          "operand": "IL_010C",
+          "bytes": "2c20"
+        },
+        {
+          "il": "IL_0104",
+          "opcode": "brfalse.s",
+          "operand": "IL_010C",
+          "bytes": "2c06"
+        },
+        {
+          "il": "IL_0110",
+          "opcode": "brfalse.s",
+          "operand": "IL_0119",
+          "bytes": "2c07"
+        }
+      ],
+      "exception_regions": [
+        {
+          "try_start": 49,
+          "try_end": 123,
+          "handler_start": 123,
+          "handler_end": 135,
+          "kind": 2
+        },
+        {
+          "try_start": 32,
+          "try_end": 137,
+          "handler_start": 137,
+          "handler_end": 142,
+          "kind": 0
+        },
+        {
+          "try_start": 232,
+          "try_end": 270,
+          "handler_start": 270,
+          "handler_end": 282,
+          "kind": 2
+        }
+      ],
+      "finding": "CustomSetting.yml InstallFolderPathGetRegistry defaulttrue; read exceptions reverttrue. Relative GTSPlusInfo.ini provides registry path; HKLM RootFolder used if config allows, missing registry yields empty. Disabled/failed config gate falls back to parent of DLL directory."
+    },
+    {
+      "id": "bootstrap.path-constants",
+      "source": "bootstrap.common.recovered",
+      "kind": "managed-il",
+      "locator": "PathFunctionConstants::.cctor",
+      "rva": 10936,
+      "body_size": 103,
+      "body_sha256": "907e4de61a75b9e2564c8dafbc55b1b0b3c9288ddeba709d964041306cd8c421",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [],
+      "exception_regions": [],
+      "finding": "Relative files ..\\Env\\GTSPlusInfo.ini and ..\\Env\\CustomSetting.yml; registry RootFolder; duplicate target GtsPlus-InfoCenter\\GtsPlus-InfoCenter_Multi\\GtsPlus-InfoCenter_Multi.exe."
+    },
+    {
+      "id": "bootstrap.decrypt",
+      "source": "bootstrap.common.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusCommon.Wrapper.CryptManagerWrapper::DecryptFileCS",
+      "rva": 8516,
+      "body_size": 127,
+      "body_sha256": "8534c38493713c47b5602dbcea11ae9057cb6a544a651a51cab3e9dfcd547352",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_0005",
+          "opcode": "brtrue.s",
+          "operand": "IL_001B",
+          "bytes": "2d14"
+        },
+        {
+          "il": "IL_000C",
+          "opcode": "brtrue.s",
+          "operand": "IL_001B",
+          "bytes": "2d0d"
+        },
+        {
+          "il": "IL_003C",
+          "opcode": "call",
+          "operand": "DoFileDecryptionCS",
+          "bytes": "2805000006"
+        },
+        {
+          "il": "IL_0042",
+          "opcode": "brtrue.s",
+          "operand": "IL_006B",
+          "bytes": "2d27"
+        },
+        {
+          "il": "IL_005A",
+          "opcode": "blt.s",
+          "operand": "IL_0067",
+          "bytes": "320b"
+        }
+      ],
+      "exception_regions": [],
+      "finding": "Managed native boundary authenticates CM once, selects packaged passphrase profile, calls DoFileDecryptionCS with SecretKeyType2; status0 UTF8 strips NUL, failure outputs empty."
+    },
+    {
+      "id": "bootstrap.packaging-profile",
+      "source": "bootstrap.common.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusCommon.Wrapper.CryptManagerWrapper::GetPassphraseFilePath",
+      "rva": 9000,
+      "body_size": 232,
+      "body_sha256": "86c2ab18b1067b27cb86221d23ba1108bd26f411842b9f693cfc1f871c05f576",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_000E",
+          "opcode": "bne.un.s",
+          "operand": "IL_0018",
+          "bytes": "3308"
+        },
+        {
+          "il": "IL_0028",
+          "opcode": "brfalse",
+          "operand": "IL_00B3",
+          "bytes": "3986000000"
+        },
+        {
+          "il": "IL_0061",
+          "opcode": "bne.un.s",
+          "operand": "IL_0080",
+          "bytes": "331d"
+        },
+        {
+          "il": "IL_00A5",
+          "opcode": "brfalse.s",
+          "operand": "IL_00AD",
+          "bytes": "2c06"
+        }
+      ],
+      "exception_regions": [
+        {
+          "try_start": 61,
+          "try_end": 164,
+          "handler_start": 164,
+          "handler_end": 174,
+          "kind": 2
+        },
+        {
+          "try_start": 45,
+          "try_end": 176,
+          "handler_start": 176,
+          "handler_end": 179,
+          "kind": 0
+        }
+      ],
+      "finding": "Kind2 selects error-report passphrase profile; other kinds ordinary profile; CustomSetting override optional; combines with install root."
+    },
+    {
+      "id": "bootstrap.ini-decrypt",
+      "source": "bootstrap.common.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusCommon.Function.CryptographicFunction::LoadEncryptFile",
+      "rva": 9760,
+      "body_size": 268,
+      "body_sha256": "e31907c3972a539de01e94ed4c878dbc199246228a13912348144c6713dfe0d6",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_002E",
+          "opcode": "brfalse.s",
+          "operand": "IL_0037",
+          "bytes": "2c07"
+        },
+        {
+          "il": "IL_0090",
+          "opcode": "callvirt",
+          "operand": "System.Security.Cryptography.SymmetricAlgorithm::CreateDecryptor",
+          "bytes": "6f3300000a"
+        },
+        {
+          "il": "IL_00B5",
+          "opcode": "brfalse.s",
+          "operand": "IL_00BE",
+          "bytes": "2c07"
+        }
+      ],
+      "exception_regions": [
+        {
+          "try_start": 15,
+          "try_end": 44,
+          "handler_start": 44,
+          "handler_end": 56,
+          "kind": 2
+        },
+        {
+          "try_start": 5,
+          "try_end": 58,
+          "handler_start": 58,
+          "handler_end": 67,
+          "kind": 0
+        },
+        {
+          "try_start": 122,
+          "try_end": 179,
+          "handler_start": 179,
+          "handler_end": 191,
+          "kind": 2
+        },
+        {
+          "try_start": 115,
+          "try_end": 193,
+          "handler_start": 193,
+          "handler_end": 199,
+          "kind": 0
+        }
+      ],
+      "finding": "LoadEncryptFile reads IV prefix then AES-CBC decrypts remaining bytes with fixed embedded packaging material; UTF8 output; read/decrypt exception returns false."
+    },
+    {
+      "id": "bootstrap.ini-material",
+      "source": "bootstrap.common.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusCommon.Function.CryptographicFunction::.cctor",
+      "rva": 10028,
+      "body_size": 32,
+      "body_sha256": "e94be829d1d68280be35af491da01a704f5c451e456e68f99c5784da406277f0",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [],
+      "exception_regions": [],
+      "finding": "AES IV size16 and key byte-array populated from FieldRva via RuntimeHelpers.InitializeArray; extractor derives material without disclosing it."
+    },
+    {
+      "id": "bootstrap.msg-start",
+      "source": "bootstrap.msg.recovered",
+      "kind": "managed-il",
+      "locator": "MsgDatComm.CExternalMethod::ER_StartApplicationCS",
+      "rva": 8448,
+      "body_size": 268,
+      "body_sha256": "91d7fda103cb9138070c30d63aca426c1c220b42b9321330dbc976526ba689c4",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_0022",
+          "opcode": "ldstr",
+          "operand": "'ER_ApplicationStart'",
+          "bytes": "72f7040070"
+        },
+        {
+          "il": "IL_0058",
+          "opcode": "brfalse.s",
+          "operand": "IL_0060",
+          "bytes": "2c06"
+        },
+        {
+          "il": "IL_0064",
+          "opcode": "brfalse.s",
+          "operand": "IL_006C",
+          "bytes": "2c06"
+        }
+      ],
+      "exception_regions": [
+        {
+          "try_start": 65,
+          "try_end": 87,
+          "handler_start": 87,
+          "handler_end": 97,
+          "kind": 2
+        },
+        {
+          "try_start": 46,
+          "try_end": 99,
+          "handler_start": 99,
+          "handler_end": 109,
+          "kind": 2
+        },
+        {
+          "try_start": 0,
+          "try_end": 113,
+          "handler_start": 113,
+          "handler_end": 213,
+          "kind": 0
+        }
+      ],
+      "finding": "ER_ApplicationStart client sends current PID/ResultCode; Connect(1ms), serialize, flush/drain. Failure logs false; caller ignores."
+    },
+    {
+      "id": "bootstrap.msg-end",
+      "source": "bootstrap.msg.recovered",
+      "kind": "managed-il",
+      "locator": "MsgDatComm.CExternalMethod::ER_EndApplicationCS",
+      "rva": 8716,
+      "body_size": 260,
+      "body_sha256": "17e8fe3bc92bca6f951510497d86835adfb87920b9be3cd0cb88a14ce4c9cac2",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_001B",
+          "opcode": "ldstr",
+          "operand": "'ER_ApplicationEnd'",
+          "bytes": "7269050070"
+        },
+        {
+          "il": "IL_0051",
+          "opcode": "brfalse.s",
+          "operand": "IL_0059",
+          "bytes": "2c06"
+        },
+        {
+          "il": "IL_005D",
+          "opcode": "brfalse.s",
+          "operand": "IL_0065",
+          "bytes": "2c06"
+        }
+      ],
+      "exception_regions": [
+        {
+          "try_start": 58,
+          "try_end": 80,
+          "handler_start": 80,
+          "handler_end": 90,
+          "kind": 2
+        },
+        {
+          "try_start": 39,
+          "try_end": 92,
+          "handler_start": 92,
+          "handler_end": 102,
+          "kind": 2
+        },
+        {
+          "try_start": 0,
+          "try_end": 106,
+          "handler_start": 106,
+          "handler_end": 205,
+          "kind": 0
+        }
+      ],
+      "finding": "ER_ApplicationEnd client sends current PID; Connect(1ms), serialize, flush/drain; failure logs false."
+    },
+    {
+      "id": "bootstrap.msg-end-servers",
+      "source": "bootstrap.msg.recovered",
+      "kind": "managed-il",
+      "locator": "MsgDatComm.CExternalMethod::ER_StartWaitForEndingCS",
+      "rva": 11180,
+      "body_size": 264,
+      "body_sha256": "eacbbcb655d9167f5a006f0d4869136edcd59d47d4c638c785a1cea2758f616e",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_000C",
+          "opcode": "ble.s",
+          "operand": "IL_004B",
+          "bytes": "313d"
+        },
+        {
+          "il": "IL_0051",
+          "opcode": "call",
+          "operand": "set_EndingCancel",
+          "bytes": "2806000006"
+        }
+      ],
+      "exception_regions": [
+        {
+          "try_start": 0,
+          "try_end": 132,
+          "handler_start": 132,
+          "handler_end": 232,
+          "kind": 0
+        }
+      ],
+      "finding": "Duplicate registration rejected; start cancellation-owned confirm/execute server tasks, store for joining."
+    },
+    {
+      "id": "bootstrap.msg-confirm",
+      "source": "bootstrap.msg.recovered",
+      "kind": "managed-il",
+      "locator": "<ConfirmEndingAsync>d__87::MoveNext",
+      "rva": 18100,
+      "body_size": 612,
+      "body_sha256": "524d9ed5dc4fd6dcbff74d415a02d9464c971f3fb4f3bdca8214f684e8c274ae",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_0012",
+          "opcode": "brfalse.s",
+          "operand": "IL_0043",
+          "bytes": "2c2f"
+        },
+        {
+          "il": "IL_0015",
+          "opcode": "ldstr",
+          "operand": "'ER_EndingConfirm_'",
+          "bytes": "7275010070"
+        },
+        {
+          "il": "IL_0048",
+          "opcode": "brfalse.s",
+          "operand": "IL_009C",
+          "bytes": "2c52"
+        },
+        {
+          "il": "IL_0051",
+          "opcode": "call",
+          "operand": "get_EndingCancel",
+          "bytes": "2805000006"
+        },
+        {
+          "il": "IL_0056",
+          "opcode": "callvirt",
+          "operand": "System.Threading.CancellationTokenSource::get_Token",
+          "bytes": "6f1200000a"
+        },
+        {
+          "il": "IL_0077",
+          "opcode": "brtrue.s",
+          "operand": "IL_00B8",
+          "bytes": "2d3f"
+        },
+        {
+          "il": "IL_010C",
+          "opcode": "bge.s",
+          "operand": "IL_0119",
+          "bytes": "2f0b"
+        },
+        {
+          "il": "IL_0110",
+          "opcode": "brfalse.s",
+          "operand": "IL_0119",
+          "bytes": "2c07"
+        },
+        {
+          "il": "IL_011E",
+          "opcode": "bge.s",
+          "operand": "IL_0133",
+          "bytes": "2f13"
+        },
+        {
+          "il": "IL_0126",
+          "opcode": "brfalse.s",
+          "operand": "IL_0133",
+          "bytes": "2c0b"
+        }
+      ],
+      "exception_regions": [
+        {
+          "try_start": 71,
+          "try_end": 193,
+          "handler_start": 193,
+          "handler_end": 196,
+          "kind": 0
+        },
+        {
+          "try_start": 237,
+          "try_end": 266,
+          "handler_start": 266,
+          "handler_end": 282,
+          "kind": 2
+        },
+        {
+          "try_start": 68,
+          "try_end": 284,
+          "handler_start": 284,
+          "handler_end": 308,
+          "kind": 2
+        },
+        {
+          "try_start": 17,
+          "try_end": 329,
+          "handler_start": 329,
+          "handler_end": 426,
+          "kind": 0
+        },
+        {
+          "try_start": 14,
+          "try_end": 428,
+          "handler_start": 428,
+          "handler_end": 453,
+          "kind": 0
+        }
+      ],
+      "finding": "ER_EndingConfirm_<name> waits cancelably, invokes callback, writes result, flush/drain, repeats. Wait cancellation exits; other exception logs/stops."
+    },
+    {
+      "id": "bootstrap.msg-execute",
+      "source": "bootstrap.msg.recovered",
+      "kind": "managed-il",
+      "locator": "<ExecuteEndingAsync>d__88::MoveNext",
+      "rva": 20332,
+      "body_size": 596,
+      "body_sha256": "a30fe593b267d30f6f50e638e512db3be12b697f894d4d3dcb3fba06c69990cb",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_0012",
+          "opcode": "brfalse.s",
+          "operand": "IL_0043",
+          "bytes": "2c2f"
+        },
+        {
+          "il": "IL_0015",
+          "opcode": "ldstr",
+          "operand": "'ER_EndingExecute_'",
+          "bytes": "7221040070"
+        },
+        {
+          "il": "IL_0048",
+          "opcode": "brfalse.s",
+          "operand": "IL_009B",
+          "bytes": "2c51"
+        },
+        {
+          "il": "IL_0051",
+          "opcode": "call",
+          "operand": "get_EndingCancel",
+          "bytes": "2805000006"
+        },
+        {
+          "il": "IL_0056",
+          "opcode": "callvirt",
+          "operand": "System.Threading.CancellationTokenSource::get_Token",
+          "bytes": "6f1200000a"
+        },
+        {
+          "il": "IL_0076",
+          "opcode": "brtrue.s",
+          "operand": "IL_00B7",
+          "bytes": "2d3f"
+        },
+        {
+          "il": "IL_00FC",
+          "opcode": "bge.s",
+          "operand": "IL_0109",
+          "bytes": "2f0b"
+        },
+        {
+          "il": "IL_0100",
+          "opcode": "brfalse.s",
+          "operand": "IL_0109",
+          "bytes": "2c07"
+        },
+        {
+          "il": "IL_010E",
+          "opcode": "bge.s",
+          "operand": "IL_0123",
+          "bytes": "2f13"
+        },
+        {
+          "il": "IL_0116",
+          "opcode": "brfalse.s",
+          "operand": "IL_0123",
+          "bytes": "2c0b"
+        }
+      ],
+      "exception_regions": [
+        {
+          "try_start": 71,
+          "try_end": 192,
+          "handler_start": 192,
+          "handler_end": 195,
+          "kind": 0
+        },
+        {
+          "try_start": 213,
+          "try_end": 250,
+          "handler_start": 250,
+          "handler_end": 266,
+          "kind": 2
+        },
+        {
+          "try_start": 68,
+          "try_end": 268,
+          "handler_start": 268,
+          "handler_end": 292,
+          "kind": 2
+        },
+        {
+          "try_start": 17,
+          "try_end": 313,
+          "handler_start": 313,
+          "handler_end": 411,
+          "kind": 0
+        },
+        {
+          "try_start": 14,
+          "try_end": 413,
+          "handler_start": 413,
+          "handler_end": 438,
+          "kind": 0
+        }
+      ],
+      "finding": "ER_EndingExecute_<name> waits cancelably, reads Shutdown/Exucute and invokes callback, repeats. Cancellation exits, other errors log/stop."
+    },
+    {
+      "id": "bootstrap.msg-alive",
+      "source": "bootstrap.msg.recovered",
+      "kind": "managed-il",
+      "locator": "<AliveMonitorAsync>d__86::MoveNext",
+      "rva": 16672,
+      "body_size": 612,
+      "body_sha256": "2a683cecf2a8b54494ff1cb36400362781a2955dec091828a382fc8701c2d441",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_0012",
+          "opcode": "brfalse.s",
+          "operand": "IL_0043",
+          "bytes": "2c2f"
+        },
+        {
+          "il": "IL_0015",
+          "opcode": "ldstr",
+          "operand": "'ER_AliveMonitor_'",
+          "bytes": "7201000070"
+        },
+        {
+          "il": "IL_0048",
+          "opcode": "brfalse.s",
+          "operand": "IL_009C",
+          "bytes": "2c52"
+        },
+        {
+          "il": "IL_0051",
+          "opcode": "call",
+          "operand": "get_AliveMonitorRunningCancel",
+          "bytes": "2801000006"
+        },
+        {
+          "il": "IL_0056",
+          "opcode": "callvirt",
+          "operand": "System.Threading.CancellationTokenSource::get_Token",
+          "bytes": "6f1200000a"
+        },
+        {
+          "il": "IL_0077",
+          "opcode": "brtrue.s",
+          "operand": "IL_00B8",
+          "bytes": "2d3f"
+        },
+        {
+          "il": "IL_010C",
+          "opcode": "bge.s",
+          "operand": "IL_0119",
+          "bytes": "2f0b"
+        },
+        {
+          "il": "IL_0110",
+          "opcode": "brfalse.s",
+          "operand": "IL_0119",
+          "bytes": "2c07"
+        },
+        {
+          "il": "IL_011E",
+          "opcode": "bge.s",
+          "operand": "IL_0133",
+          "bytes": "2f13"
+        },
+        {
+          "il": "IL_0126",
+          "opcode": "brfalse.s",
+          "operand": "IL_0133",
+          "bytes": "2c0b"
+        }
+      ],
+      "exception_regions": [
+        {
+          "try_start": 71,
+          "try_end": 193,
+          "handler_start": 193,
+          "handler_end": 196,
+          "kind": 0
+        },
+        {
+          "try_start": 237,
+          "try_end": 266,
+          "handler_start": 266,
+          "handler_end": 282,
+          "kind": 2
+        },
+        {
+          "try_start": 68,
+          "try_end": 284,
+          "handler_start": 284,
+          "handler_end": 308,
+          "kind": 2
+        },
+        {
+          "try_start": 17,
+          "try_end": 329,
+          "handler_start": 329,
+          "handler_end": 426,
+          "kind": 0
+        },
+        {
+          "try_start": 14,
+          "try_end": 428,
+          "handler_start": 428,
+          "handler_end": 453,
+          "kind": 0
+        }
+      ],
+      "finding": "ER_AliveMonitor_<name> server callback produces ResultCode; flush/drain; loops; canceled wait exits, other error logs/stops."
+    },
+    {
+      "id": "bootstrap.adapt-init",
+      "source": "bootstrap.adapt.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusAdaptationIF.AdaptationInterface::InitializeAdaptation",
+      "rva": 8384,
+      "body_size": 1112,
+      "body_sha256": "d1b69135337513b1fdd9efb9ba0e55fb34899ae6513cbcaf8c317152ac10234f",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_00BB",
+          "opcode": "brfalse",
+          "operand": "IL_0365",
+          "bytes": "39a5020000"
+        },
+        {
+          "il": "IL_00F9",
+          "opcode": "brfalse",
+          "operand": "IL_02BF",
+          "bytes": "39c1010000"
+        },
+        {
+          "il": "IL_012B",
+          "opcode": "brfalse.s",
+          "operand": "IL_01A1",
+          "bytes": "2c74"
+        },
+        {
+          "il": "IL_0247",
+          "opcode": "brtrue.s",
+          "operand": "IL_02B1",
+          "bytes": "2d68"
+        },
+        {
+          "il": "IL_02B5",
+          "opcode": "brfalse.s",
+          "operand": "IL_02BE",
+          "bytes": "2c07"
+        },
+        {
+          "il": "IL_02D0",
+          "opcode": "brfalse.s",
+          "operand": "IL_0302",
+          "bytes": "2c30"
+        },
+        {
+          "il": "IL_03C0",
+          "opcode": "brtrue",
+          "operand": "IL_009C",
+          "bytes": "3ad7fcffff"
+        }
+      ],
+      "exception_regions": [
+        {
+          "try_start": 6,
+          "try_end": 54,
+          "handler_start": 54,
+          "handler_end": 127,
+          "kind": 0
+        },
+        {
+          "try_start": 271,
+          "try_end": 691,
+          "handler_start": 691,
+          "handler_end": 703,
+          "kind": 2
+        },
+        {
+          "try_start": 198,
+          "try_end": 775,
+          "handler_start": 775,
+          "handler_end": 869,
+          "kind": 0
+        },
+        {
+          "try_start": 151,
+          "try_end": 967,
+          "handler_start": 967,
+          "handler_end": 981,
+          "kind": 2
+        }
+      ],
+      "finding": "Embedded XML table order: require module file; Assembly.LoadFrom/CreateInstance; AuthenticateAdaptation challenge/authorization with packaged configuration; InitializeAdaptation. Missing/load/auth/init failures return error, no retry."
+    },
+    {
+      "id": "bootstrap.adapt-finalize",
+      "source": "bootstrap.adapt.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusAdaptationIF.AdaptationInterface::FinalizeAdaptation",
+      "rva": 9496,
+      "body_size": 292,
+      "body_sha256": "7d99002c332a4897a95b27f2de7384814832f3aa1d5b1ca06c96b975d1ed7ad5",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_0040",
+          "opcode": "callvirt",
+          "operand": "GTSPlusBaseAdaptation.BaseAdaptation::FinalizeAdaptation",
+          "bytes": "6f4a00000a"
+        },
+        {
+          "il": "IL_004C",
+          "opcode": "brfalse.s",
+          "operand": "IL_006C",
+          "bytes": "2c1e"
+        },
+        {
+          "il": "IL_009A",
+          "opcode": "ldstr",
+          "operand": "'Occured Exception At Finalize Adaptation'",
+          "bytes": "72e3010070"
+        },
+        {
+          "il": "IL_00E2",
+          "opcode": "brtrue",
+          "operand": "IL_0032",
+          "bytes": "3a4bffffff"
+        }
+      ],
+      "exception_regions": [
+        {
+          "try_start": 58,
+          "try_end": 110,
+          "handler_start": 110,
+          "handler_end": 219,
+          "kind": 0
+        },
+        {
+          "try_start": 45,
+          "try_end": 233,
+          "handler_start": 233,
+          "handler_end": 247,
+          "kind": 2
+        }
+      ],
+      "finding": "Finalize modules in original table order; per-module error logs/aggregates and continues. Platform ignores aggregate result."
+    },
+    {
+      "id": "bootstrap.arb-notify",
+      "source": "bootstrap.arb.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusArbitration.Form1::NotifyError",
+      "rva": 16440,
+      "body_size": 492,
+      "body_sha256": "11e17f05bb28aa56d07355c245fc041ca387cf489ea7f5d60b27a6a04d68cdba",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_0028",
+          "opcode": "brtrue.s",
+          "operand": "IL_0035",
+          "bytes": "2d0b"
+        },
+        {
+          "il": "IL_0041",
+          "opcode": "ldstr",
+          "operand": "'ER_ErrorNotify'",
+          "bytes": "726b070070"
+        },
+        {
+          "il": "IL_0075",
+          "opcode": "brfalse.s",
+          "operand": "IL_007E",
+          "bytes": "2c07"
+        },
+        {
+          "il": "IL_0082",
+          "opcode": "brfalse.s",
+          "operand": "IL_008A",
+          "bytes": "2c06"
+        },
+        {
+          "il": "IL_0092",
+          "opcode": "call",
+          "operand": "get_ERROR_REPORT_TRACE_FOLDER_PATH",
+          "bytes": "2807000006"
+        },
+        {
+          "il": "IL_010C",
+          "opcode": "blt.s",
+          "operand": "IL_00E7",
+          "bytes": "32d9"
+        }
+      ],
+      "exception_regions": [
+        {
+          "try_start": 97,
+          "try_end": 115,
+          "handler_start": 115,
+          "handler_end": 127,
+          "kind": 2
+        },
+        {
+          "try_start": 77,
+          "try_end": 129,
+          "handler_start": 129,
+          "handler_end": 139,
+          "kind": 2
+        },
+        {
+          "try_start": 0,
+          "try_end": 302,
+          "handler_start": 302,
+          "handler_end": 400,
+          "kind": 0
+        }
+      ],
+      "finding": "Send ErrorNotifyData timestamp/source/code via ER_ErrorNotify then save trace/screen bounds using configured trigger count; errors log; no restart."
+    },
+    {
+      "id": "bootstrap.alive-app",
+      "source": "bootstrap.err.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusErrorReport.AliveMonitorTask::ConfirmAliveMonitorApplication",
+      "rva": 9496,
+      "body_size": 1316,
+      "body_sha256": "991d0ebc1ad0d644a8f8bae36e31767c74f3e16406836adcf8f4bc712acded1b",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_0013",
+          "opcode": "brtrue",
+          "operand": "IL_041C",
+          "bytes": "3a04040000"
+        },
+        {
+          "il": "IL_0030",
+          "opcode": "brfalse",
+          "operand": "IL_0402",
+          "bytes": "39cd030000"
+        },
+        {
+          "il": "IL_0059",
+          "opcode": "bne.un",
+          "operand": "IL_014B",
+          "bytes": "40ed000000"
+        },
+        {
+          "il": "IL_0071",
+          "opcode": "brfalse",
+          "operand": "IL_014B",
+          "bytes": "39d5000000"
+        },
+        {
+          "il": "IL_0083",
+          "opcode": "brtrue.s",
+          "operand": "IL_008C",
+          "bytes": "2d07"
+        },
+        {
+          "il": "IL_0303",
+          "opcode": "brfalse.s",
+          "operand": "IL_030C",
+          "bytes": "2c07"
+        },
+        {
+          "il": "IL_0311",
+          "opcode": "brfalse.s",
+          "operand": "IL_031A",
+          "bytes": "2c07"
+        },
+        {
+          "il": "IL_032B",
+          "opcode": "brfalse",
+          "operand": "IL_03CC",
+          "bytes": "399c000000"
+        },
+        {
+          "il": "IL_03F8",
+          "opcode": "brfalse.s",
+          "operand": "IL_0401",
+          "bytes": "2c07"
+        },
+        {
+          "il": "IL_0417",
+          "opcode": "blt",
+          "operand": "IL_000D",
+          "bytes": "3ff1fbffff"
+        }
+      ],
+      "exception_regions": [
+        {
+          "try_start": 378,
+          "try_end": 396,
+          "handler_start": 396,
+          "handler_end": 408,
+          "kind": 2
+        },
+        {
+          "try_start": 610,
+          "try_end": 769,
+          "handler_start": 769,
+          "handler_end": 781,
+          "kind": 2
+        },
+        {
+          "try_start": 588,
+          "try_end": 783,
+          "handler_start": 783,
+          "handler_end": 795,
+          "kind": 2
+        },
+        {
+          "try_start": 573,
+          "try_end": 800,
+          "handler_start": 800,
+          "handler_end": 974,
+          "kind": 0
+        },
+        {
+          "try_start": 995,
+          "try_end": 1014,
+          "handler_start": 1014,
+          "handler_end": 1026,
+          "kind": 2
+        },
+        {
+          "try_start": 0,
+          "try_end": 1054,
+          "handler_start": 1054,
+          "handler_end": 1152,
+          "kind": 0
+        }
+      ],
+      "finding": "Match PID; probe main window using SendMessageTimeout; mode2 additionally queries ER_AliveMonitor_<name>. Missing process disables monitor. Prior healthy-to-failure notifies AB010001/AB010002 or returned code, store last result; no restart/kill."
+    },
+    {
+      "id": "bootstrap.alive-service",
+      "source": "bootstrap.err.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusErrorReport.AliveMonitorTask::ConfirmAliveMonitorService",
+      "rva": 10812,
+      "body_size": 1168,
+      "body_sha256": "e3ad9ce73de36e9ad34965330634d664a9f7343e8833c4c00f8bfb988183494a",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_000D",
+          "opcode": "brtrue",
+          "operand": "IL_038B",
+          "bytes": "3a79030000"
+        },
+        {
+          "il": "IL_002A",
+          "opcode": "brfalse",
+          "operand": "IL_0371",
+          "bytes": "3942030000"
+        },
+        {
+          "il": "IL_0044",
+          "opcode": "beq",
+          "operand": "IL_00D9",
+          "bytes": "3b90000000"
+        },
+        {
+          "il": "IL_0051",
+          "opcode": "brfalse",
+          "operand": "IL_00D9",
+          "bytes": "3983000000"
+        },
+        {
+          "il": "IL_00E8",
+          "opcode": "brfalse",
+          "operand": "IL_0189",
+          "bytes": "399c000000"
+        },
+        {
+          "il": "IL_0274",
+          "opcode": "brfalse.s",
+          "operand": "IL_027D",
+          "bytes": "2c07"
+        },
+        {
+          "il": "IL_0282",
+          "opcode": "brfalse.s",
+          "operand": "IL_028B",
+          "bytes": "2c07"
+        },
+        {
+          "il": "IL_029B",
+          "opcode": "brfalse",
+          "operand": "IL_033C",
+          "bytes": "399c000000"
+        },
+        {
+          "il": "IL_0367",
+          "opcode": "brfalse.s",
+          "operand": "IL_0370",
+          "bytes": "2c07"
+        },
+        {
+          "il": "IL_0386",
+          "opcode": "blt",
+          "operand": "IL_0007",
+          "bytes": "3f7cfcffff"
+        }
+      ],
+      "exception_regions": [
+        {
+          "try_start": 49,
+          "try_end": 222,
+          "handler_start": 222,
+          "handler_end": 395,
+          "kind": 0
+        },
+        {
+          "try_start": 468,
+          "try_end": 626,
+          "handler_start": 626,
+          "handler_end": 638,
+          "kind": 2
+        },
+        {
+          "try_start": 446,
+          "try_end": 640,
+          "handler_start": 640,
+          "handler_end": 652,
+          "kind": 2
+        },
+        {
+          "try_start": 431,
+          "try_end": 657,
+          "handler_start": 657,
+          "handler_end": 830,
+          "kind": 0
+        },
+        {
+          "try_start": 851,
+          "try_end": 869,
+          "handler_start": 869,
+          "handler_end": 881,
+          "kind": 2
+        },
+        {
+          "try_start": 0,
+          "try_end": 909,
+          "handler_start": 909,
+          "handler_end": 1007,
+          "kind": 0
+        }
+      ],
+      "finding": "ServiceController.Status==Running(4), mode2 additionally queries ER_AliveMonitor_<name>; prior healthy-to-failure notifies AB010001/AB010002 or returned code then stores result; does not start/restart service."
+    },
+    {
+      "id": "bootstrap.arb-paths",
+      "source": "bootstrap.arb.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusArbitration.Form1::.cctor",
+      "rva": 20876,
+      "body_size": 103,
+      "body_sha256": "8178d71648f1ec7d5dd90fda24d71cb150ecf84ff4cc1d4f49ac8fec7c9f7101",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [],
+      "exception_regions": [],
+      "finding": "Default reports GTSPlus/ErrorReport/{ActLog,ComLog,Trace,TraceAutoSave,Unsend,Send}, DataSync/Logs/GTS-E02; ABSystem Env/ABSystem.yml; .gtsr extension."
+    },
+    {
+      "id": "bootstrap.retention-setting",
+      "source": "bootstrap.pfc.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusPFCommon.Function.CommonFunction::GetGTSPlusSetting",
+      "rva": 19612,
+      "body_size": 283,
+      "body_sha256": "c581a31022d4a545df628f3dcb03f7b102aa8a92ee184697356c5dc03b2595ff",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_0002",
+          "opcode": "ldstr",
+          "operand": "'Common'",
+          "bytes": "720f010070"
+        },
+        {
+          "il": "IL_0039",
+          "opcode": "ldstr",
+          "operand": "'Common'",
+          "bytes": "720f010070"
+        },
+        {
+          "il": "IL_004E",
+          "opcode": "ldstr",
+          "operand": "'Common'",
+          "bytes": "720f010070"
+        },
+        {
+          "il": "IL_0059",
+          "opcode": "ldstr",
+          "operand": "'GTSPlusSetting.ini Not Exist'",
+          "bytes": "7265070070"
+        },
+        {
+          "il": "IL_0084",
+          "opcode": "call",
+          "operand": "GTSPlusCommon.Wrapper.CryptManagerWrapper::DecryptFileCS",
+          "bytes": "286900000a"
+        },
+        {
+          "il": "IL_00C7",
+          "opcode": "ldstr",
+          "operand": "'Common'",
+          "bytes": "720f010070"
+        },
+        {
+          "il": "IL_00DC",
+          "opcode": "ldstr",
+          "operand": "'Common'",
+          "bytes": "720f010070"
+        },
+        {
+          "il": "IL_00E7",
+          "opcode": "ldstr",
+          "operand": "'Failed To Decrypt GTSPlusSetting.ini. ErrorCode = {0}'",
+          "bytes": "729f070070"
+        }
+      ],
+      "exception_regions": [],
+      "finding": "Read install/Env/GTSPlusSetting.ini; require file/decrypt(kind1) success, strip header, parse requested integer. Missing file/decrypt error returns failure; out value defaults0."
+    },
+    {
+      "id": "bootstrap.retention-constants",
+      "source": "bootstrap.pfc.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusPFCommon.Constants.PFCommonConstants::.cctor",
+      "rva": 21760,
+      "body_size": 173,
+      "body_sha256": "d4f1dbd08b4dd8d75b6f23fadf5d89318b5342810506c29df1976ac3d55d2cb5",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_0000",
+          "opcode": "ldstr",
+          "operand": "'LIC'",
+          "bytes": "72070a0070"
+        },
+        {
+          "il": "IL_000A",
+          "opcode": "ldstr",
+          "operand": "'Env'",
+          "bytes": "720f0a0070"
+        },
+        {
+          "il": "IL_0014",
+          "opcode": "ldstr",
+          "operand": "'PF.cfg'",
+          "bytes": "72170a0070"
+        },
+        {
+          "il": "IL_001E",
+          "opcode": "ldstr",
+          "operand": "'GTSPlusSetting.ini'",
+          "bytes": "72250a0070"
+        },
+        {
+          "il": "IL_0028",
+          "opcode": "ldstr",
+          "operand": "'Function'",
+          "bytes": "724b0a0070"
+        },
+        {
+          "il": "IL_0032",
+          "opcode": "ldstr",
+          "operand": "'LocalTimeCheck'",
+          "bytes": "725d0a0070"
+        },
+        {
+          "il": "IL_003C",
+          "opcode": "ldstr",
+          "operand": "'ShutDown'",
+          "bytes": "727b0a0070"
+        },
+        {
+          "il": "IL_0046",
+          "opcode": "ldstr",
+          "operand": "'ConfirmTime'",
+          "bytes": "728d0a0070"
+        },
+        {
+          "il": "IL_0050",
+          "opcode": "ldstr",
+          "operand": "'CassetteeVbBrokerDll'",
+          "bytes": "72a50a0070"
+        },
+        {
+          "il": "IL_005A",
+          "opcode": "ldstr",
+          "operand": "'Cassette_'",
+          "bytes": "72cf0a0070"
+        },
+        {
+          "il": "IL_0064",
+          "opcode": "ldstr",
+          "operand": "'AutoDeleteGTSE'",
+          "bytes": "72e30a0070"
+        },
+        {
+          "il": "IL_006E",
+          "opcode": "ldstr",
+          "operand": "'AutoDeleteAutoSaveErrorReport'",
+          "bytes": "72010b0070"
+        },
+        {
+          "il": "IL_0078",
+          "opcode": "ldstr",
+          "operand": "'MaxCount'",
+          "bytes": "723d0b0070"
+        },
+        {
+          "il": "IL_0082",
+          "opcode": "ldstr",
+          "operand": "'StartTime'",
+          "bytes": "724f0b0070"
+        },
+        {
+          "il": "IL_008C",
+          "opcode": "ldstr",
+          "operand": "'FileInfo'",
+          "bytes": "72630b0070"
+        },
+        {
+          "il": "IL_0096",
+          "opcode": "ldstr",
+          "operand": "'HashFileEncryptionKey'",
+          "bytes": "72750b0070"
+        }
+      ],
+      "exception_regions": [],
+      "finding": "Startup timer sections AutoDeleteGTSE and AutoDeleteAutoSaveErrorReport; keys MaxCount/StartTime; current PF config PF.cfg, settings under Env."
+    },
+    {
+      "id": "bootstrap.delete-gtse",
+      "source": "bootstrap.pf.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusController.MainTask::DeleteGTSEFileTimerElapsed",
+      "rva": 38484,
+      "body_size": 620,
+      "body_sha256": "174c9e146d2501a115ba9b246bec7054aff7a3be1fef457a3aa7fb6b420be9d7",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_0001",
+          "opcode": "call",
+          "operand": "get_DeleteGTSEFileTimer",
+          "bytes": "2819010006"
+        },
+        {
+          "il": "IL_0006",
+          "opcode": "callvirt",
+          "operand": "System.Timers.Timer::Stop",
+          "bytes": "6f1601000a"
+        },
+        {
+          "il": "IL_0022",
+          "opcode": "ldstr",
+          "operand": "'AppCtrl'",
+          "bytes": "72eb070070"
+        },
+        {
+          "il": "IL_0038",
+          "opcode": "ldstr",
+          "operand": "'AppCtrl'",
+          "bytes": "72eb070070"
+        },
+        {
+          "il": "IL_0043",
+          "opcode": "ldstr",
+          "operand": "'Failed To Get GTSPlusCommon.gstg Data. ErrorCode={0}'",
+          "bytes": "7266310070"
+        },
+        {
+          "il": "IL_00C2",
+          "opcode": "ldstr",
+          "operand": "'AppCtrl'",
+          "bytes": "72eb070070"
+        },
+        {
+          "il": "IL_00D8",
+          "opcode": "ldstr",
+          "operand": "'AppCtrl'",
+          "bytes": "72eb070070"
+        },
+        {
+          "il": "IL_00E3",
+          "opcode": "ldstr",
+          "operand": "'Failed To Get DistDep.gstg Data. ErrorCode={0}'",
+          "bytes": "72d0310070"
+        },
+        {
+          "il": "IL_0146",
+          "opcode": "call",
+          "operand": "GTSPlusPFCommon.Function.CommonFunction::GetGTSPlusSetting",
+          "bytes": "280901000a"
+        },
+        {
+          "il": "IL_015E",
+          "opcode": "ldstr",
+          "operand": "'*.gtse'",
+          "bytes": "722e320070"
+        },
+        {
+          "il": "IL_01B4",
+          "opcode": "call",
+          "operand": "System.IO.File::Delete",
+          "bytes": "286b01000a"
+        },
+        {
+          "il": "IL_01E1",
+          "opcode": "ldstr",
+          "operand": "'AppCtrl'",
+          "bytes": "72eb070070"
+        },
+        {
+          "il": "IL_01F7",
+          "opcode": "ldstr",
+          "operand": "'AppCtrl'",
+          "bytes": "72eb070070"
+        },
+        {
+          "il": "IL_0202",
+          "opcode": "ldstr",
+          "operand": "'Occured Exception At DeleteGTSEFileTimerElapsed'",
+          "bytes": "723c320070"
+        }
+      ],
+      "exception_regions": [
+        {
+          "try_start": 415,
+          "try_end": 452,
+          "handler_start": 452,
+          "handler_end": 466,
+          "kind": 2
+        },
+        {
+          "try_start": 0,
+          "try_end": 468,
+          "handler_start": 468,
+          "handler_end": 552,
+          "kind": 0
+        }
+      ],
+      "finding": "One-shot timer stops itself; resolve configured UserStoredData folder, read MaxCount and if nonnegative enumerate *.gtse, order descending by LastWriteTime, skip newest MaxCount, delete remaining until EndFlag. Exceptions log; no timer restart here."
+    },
+    {
+      "id": "bootstrap.delete-report",
+      "source": "bootstrap.pf.recovered",
+      "kind": "managed-il",
+      "locator": "GTSPlusController.MainTask::DeleteErrorReportAutoSaveFileTimerElapsed",
+      "rva": 39104,
+      "body_size": 724,
+      "body_sha256": "51f74fffac01f528ac37ad7cc01e0758b00386b0d199b4fc22ff602c22f21f7f",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_0001",
+          "opcode": "call",
+          "operand": "get_DeleteReportAutoSaveErrorTimer",
+          "bytes": "281b010006"
+        },
+        {
+          "il": "IL_0006",
+          "opcode": "callvirt",
+          "operand": "System.Timers.Timer::Stop",
+          "bytes": "6f1601000a"
+        },
+        {
+          "il": "IL_0022",
+          "opcode": "ldstr",
+          "operand": "'AppCtrl'",
+          "bytes": "72eb070070"
+        },
+        {
+          "il": "IL_0038",
+          "opcode": "ldstr",
+          "operand": "'AppCtrl'",
+          "bytes": "72eb070070"
+        },
+        {
+          "il": "IL_0043",
+          "opcode": "ldstr",
+          "operand": "'Failed To Get GTSPlusCommon.gstg Data. ErrorCode={0}'",
+          "bytes": "7266310070"
+        },
+        {
+          "il": "IL_010D",
+          "opcode": "call",
+          "operand": "GTSPlusPFCommon.Function.CommonFunction::GetGTSPlusSetting",
+          "bytes": "280901000a"
+        },
+        {
+          "il": "IL_012D",
+          "opcode": "ldstr",
+          "operand": "'AppCtrl'",
+          "bytes": "72eb070070"
+        },
+        {
+          "il": "IL_0143",
+          "opcode": "ldstr",
+          "operand": "'AppCtrl'",
+          "bytes": "72eb070070"
+        },
+        {
+          "il": "IL_014E",
+          "opcode": "ldstr",
+          "operand": "'Failed To Get GTSPlusSetting.ini maxCount or 0. ErrorCode={0}'",
+          "bytes": "729c320070"
+        },
+        {
+          "il": "IL_0194",
+          "opcode": "ldstr",
+          "operand": "'*.gtsr'",
+          "bytes": "7218330070"
+        },
+        {
+          "il": "IL_01B5",
+          "opcode": "ldstr",
+          "operand": "'*.gtsr'",
+          "bytes": "7218330070"
+        },
+        {
+          "il": "IL_0221",
+          "opcode": "call",
+          "operand": "System.IO.File::Delete",
+          "bytes": "286b01000a"
+        },
+        {
+          "il": "IL_024C",
+          "opcode": "ldstr",
+          "operand": "'AppCtrl'",
+          "bytes": "72eb070070"
+        },
+        {
+          "il": "IL_0262",
+          "opcode": "ldstr",
+          "operand": "'AppCtrl'",
+          "bytes": "72eb070070"
+        },
+        {
+          "il": "IL_026D",
+          "opcode": "ldstr",
+          "operand": "'Occured Exception At DeleteErrorReportAutoSaveFileTimerElapsed'",
+          "bytes": "7226330070"
+        }
+      ],
+      "exception_regions": [
+        {
+          "try_start": 524,
+          "try_end": 561,
+          "handler_start": 561,
+          "handler_end": 573,
+          "kind": 2
+        },
+        {
+          "try_start": 0,
+          "try_end": 575,
+          "handler_start": 575,
+          "handler_end": 659,
+          "kind": 0
+        }
+      ],
+      "finding": "One-shot autosave cleanup stops timer; combine configured ErrorReport AutoSaveUnsend/AutoSaveSend folders, read nonnegative MaxCount, combine *.gtsr, order descending by LastWriteTime, skip newest MaxCount and delete remaining until EndFlag. Exceptions log; no restart here."
+    },
+    {
+      "id": "bootstrap.retention-order-key",
+      "source": "bootstrap.pf.recovered",
+      "kind": "managed-il",
+      "locator": "<>c::<DeleteGTSEFileTimerElapsed>b__84_1",
+      "rva": 87458,
+      "body_size": 8,
+      "body_sha256": "4a1541f0a572908d22e2ea7fece28e9520d8f4cd0bff7352352d5d933649f6d6",
+      "offset_basis": "IL offsets relative to first instruction, excluding method header",
+      "anchors": [
+        {
+          "il": "IL_0001",
+          "opcode": "call",
+          "operand": "System.IO.File::GetLastWriteTime",
+          "bytes": "28dc02000a"
+        }
+      ],
+      "exception_regions": [],
+      "finding": "Shared cleanup order key is File.GetLastWriteTime; both methods OrderByDescending then Skip(MaxCount)."
+    },
+    {
+      "id": "bootstrap.arb.entry-token",
+      "source": "bootstrap.arb.recovered",
+      "kind": "cli-header",
+      "locator": "EntryPointToken=0x0600005A",
+      "signature_hex": "000001",
+      "finding": "Real CLR entry point is static void Main() with zero parameters."
+    },
+    {
+      "id": "bootstrap.pf.entry-token",
+      "source": "bootstrap.pf.recovered",
+      "kind": "cli-header",
+      "locator": "EntryPointToken=0x06000156",
+      "signature_hex": "000001",
+      "finding": "Real CLR entry point is static void Main() with zero parameters."
+    },
+    {
+      "id": "bootstrap.config",
+      "source": "bootstrap.input.ABSystem.yml",
+      "kind": "decoded-packaged-config",
+      "locator": "ABSystem application/service roster, timeout and reporting policy",
+      "packaging_sources": [
+        "bootstrap.input.GTSPlus.pp",
+        "bootstrap.cm.recovered"
+      ],
+      "plaintext_sha256": "9f034f95a6bda7a8d16f92f7593f2a38695609ad21e5b2ed31c6957ac5afed09",
+      "plaintext_size": 1596,
+      "finding": "Decoded locally using native CM key-type2. Exact plaintext hash pins the exported nonsecret configuration.",
+      "configuration": {
+        "applications": [
+          {
+            "name": "GTS+ InfoCenter",
+            "file_path": "GtsPlus-InfoCenter\\GtsPlus-InfoCenter.exe",
+            "start_mode": 3,
+            "end_mode": 1,
+            "alive_monitor_mode": 0
+          },
+          {
+            "name": "GTS+ PF",
+            "file_path": "bin\\GTSPlus.exe",
+            "start_mode": 1,
+            "end_mode": 1,
+            "alive_monitor_mode": 2
+          },
+          {
+            "name": "CUW+ PF",
+            "file_path": "..\\CUWPlus\\CuwBackendServiceConsoleApp.exe",
+            "start_mode": 1,
+            "end_mode": 1,
+            "alive_monitor_mode": 2
+          }
+        ],
+        "services": [
+          {
+            "name": "GTS+ DataSync",
+            "end_mode": 0,
+            "alive_monitor_mode": 2
+          },
+          {
+            "name": "GTS+GUIServer",
+            "end_mode": 0,
+            "alive_monitor_mode": 2
+          }
+        ],
+        "timeouts_ms": {
+          "application_confirm_start": 180000,
+          "application_confirm_end": 5000,
+          "ab_app_confirm_end": 5000,
+          "alive_monitor_interval": 2000,
+          "alive_monitor_freeze_timeout": 60000,
+          "session_end_check": 10000
+        },
+        "version": {
+          "folder": "Ver",
+          "manifest": "Manifest.json",
+          "component_extension": "json"
+        },
+        "report_limits": {
+          "trace_trigger_max_count": 4,
+          "action_log": {
+            "string_max_length": 2000,
+            "buffer_max_count": 10000,
+            "temp_save_interval": 1000,
+            "temp_file_max_size": 10485760,
+            "temp_file_max_count": 5
+          },
+          "communication_log": {
+            "string_max_length": 20647,
+            "buffer_max_count": 3000,
+            "temp_save_interval": 1000,
+            "temp_file_max_size": 10485760,
+            "temp_file_max_count": 5
+          }
+        },
+        "report_includes": [
+          "Env\\GTSPlusCommon.gstg",
+          "Env\\DistDep.gstg",
+          "Env\\PcSettings.gstg",
+          "Env\\VehicleConfigure.gstg",
+          "Env\\PF.cfg",
+          "Work\\TSE1\\activityreport.json"
+        ],
+        "report_include_one": {
+          "extension": ".txt",
+          "folder": "%PUBLIC%\\Documents\\GTSPlus\\ReproLog",
+          "order_by": 1
+        }
+      }
+    },
+    {
+      "id": "bootstrap.info-config",
+      "source": "bootstrap.input.GTSPlusInfo.ini",
+      "kind": "decoded-packaged-config",
+      "locator": "AppInfo/SessionEndCheckTimeout",
+      "plaintext_sha256": "a09bd0e8bfc0d2b03dfb1c2a7cc923116efbcef3e3eb13463c4d8dfbde62feba",
+      "material_source": "bootstrap.common.recovered",
+      "value_ms": 10000,
+      "finding": "Distinct managed AES IV-prefix encoding, not CM salt/IV envelope; key material is derived and not emitted."
+    },
+    {
+      "id": "bootstrap.retention-config",
+      "source": "bootstrap.input.GTSPlusSetting.ini",
+      "kind": "decoded-packaged-config",
+      "locator": "AutoDeleteGTSE/AutoDeleteAutoSaveErrorReport",
+      "packaging_sources": [
+        "bootstrap.input.GTSPlus.pp",
+        "bootstrap.cm.recovered"
+      ],
+      "plaintext_sha256": "e27a124952d6ff4dfaa69f7b63e844c8e2062f30ca88034428d6b9722583ad14",
+      "policy": {
+        "AutoDeleteGTSE": {
+          "start_time_ms": 60000,
+          "max_count": 300
+        },
+        "AutoDeleteAutoSaveErrorReport": {
+          "start_time_ms": 60000,
+          "max_count": 300
+        }
+      },
+      "finding": "Both one-shot cleanup timers start after60000ms and retain newest300 files by LastWriteTime."
+    },
+    {
+      "id": "bootstrap.adaptation-table",
+      "source": "bootstrap.adapt.recovered",
+      "kind": "managed-resource",
+      "locator": "GTSPlusAdaptationInterface.AdaptationTable.xml",
+      "resource_sha256": "1fad76a8c94a6dca2a120ddf41a81f44909dc43b023df0ba53c947a1563b0ac9",
+      "initialization_and_finalization_order": [
+        {
+          "file": "bin\\GTSPlusUserInfoAdapt.dll",
+          "class": "GTSPlusUserInformationAdaptation.UserInformationAdaptation",
+          "categories": [
+            "IF",
+            "EX"
+          ]
+        },
+        {
+          "file": "bin\\GTSPlusTGDFileAdapt.dll",
+          "class": "GTSPlusTGDFileAdaptation.TGDFileAdaptation",
+          "categories": [
+            "TG"
+          ]
+        },
+        {
+          "file": "bin\\GTSPlusDiagAdaptMng.dll",
+          "class": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "categories": [
+            "SC",
+            "DV",
+            "UG"
+          ]
+        },
+        {
+          "file": "bin\\GTSPlusWebServiceAdaptMng.dll",
+          "class": "GTSPlusWebServiceAdaptationManager.WebServiceAdaptationManager",
+          "categories": [
+            "UP",
+            "LN",
+            "WS"
+          ]
+        },
+        {
+          "file": "bin\\GTSPlusFileAdapt.dll",
+          "class": "GTSPlusFileAdaptation.FileAdaptation",
+          "categories": [
+            "FL"
+          ]
+        }
+      ],
+      "finding": "UserInfo, TGD, DiagAdaptationManager, WebServiceAdaptationManager, FileAdaptation in table order."
+    },
+    {
+      "id": "bootstrap.arb.dependencies",
+      "source": "bootstrap.arb.recovered",
+      "kind": "cli-metadata",
+      "locator": "AssemblyRef/ImplMap",
+      "assemblies": [
+        "mscorlib",
+        "System.Windows.Forms",
+        "GTSPlusSettingFileWrapper",
+        "GTSPlusErrorReport",
+        "GTSPlusCommon",
+        "GTSPlusErrorReportData",
+        "System",
+        "YamlDotNet",
+        "System.Core",
+        "System.ComponentModel.DataAnnotations",
+        "System.Drawing",
+        "Newtonsoft.Json"
+      ],
+      "pinvoke": [
+        {
+          "dll": "user32.dll",
+          "export": "SetWindowsHookEx",
+          "method": "SetWindowsHookEx"
+        },
+        {
+          "dll": "user32.dll",
+          "export": "CallNextHookEx",
+          "method": "CallNextHookEx"
+        },
+        {
+          "dll": "user32.dll",
+          "export": "UnhookWindowsHookEx",
+          "method": "UnhookWindowsHookEx"
+        },
+        {
+          "dll": "user32.dll",
+          "export": "GetKeyState",
+          "method": "GetKeyState"
+        }
+      ],
+      "finding": "Exact managed dependencies and native import boundaries; roles are established by the pinned method bodies."
+    },
+    {
+      "id": "bootstrap.pf.dependencies",
+      "source": "bootstrap.pf.recovered",
+      "kind": "cli-metadata",
+      "locator": "AssemblyRef/ImplMap",
+      "assemblies": [
+        "mscorlib",
+        "GTSPlusPFCommon",
+        "GTSPlusCommon",
+        "GtsPlus-WebSocketManager",
+        "GtsPlus-AuthenticationManager",
+        "System.Windows.Forms",
+        "MsgDatComm",
+        "System",
+        "GTSPlusAdaptIF",
+        "GTSPlusSettingFileWrapper",
+        "GTSPlusErrorReportData",
+        "System.Core",
+        "Newtonsoft.Json",
+        "System.Drawing"
+      ],
+      "pinvoke": [
+        {
+          "dll": "kernel32.dll",
+          "export": "LoadLibrary",
+          "method": "LoadLibrary"
+        },
+        {
+          "dll": "kernel32.dll",
+          "export": "GetProcAddress",
+          "method": "GetProcAddress"
+        },
+        {
+          "dll": "kernel32.dll",
+          "export": "FreeLibrary",
+          "method": "FreeLibrary"
+        },
+        {
+          "dll": "kernel32.dll",
+          "export": "SetThreadExecutionState",
+          "method": "SetThreadExecutionState"
+        },
+        {
+          "dll": "ole32.dll",
+          "export": "CoInitializeSecurity",
+          "method": "CoInitializeSecurity"
+        },
+        {
+          "dll": "kernel32.dll",
+          "export": "LoadLibrary",
+          "method": "LoadLibrary"
+        },
+        {
+          "dll": "kernel32.dll",
+          "export": "GetProcAddress",
+          "method": "GetProcAddress"
+        },
+        {
+          "dll": "kernel32.dll",
+          "export": "FreeLibrary",
+          "method": "FreeLibrary"
+        }
+      ],
+      "finding": "Exact managed dependencies and native import boundaries; roles are established by the pinned method bodies."
+    },
+    {
+      "id": "bootstrap.common.dependencies",
+      "source": "bootstrap.common.recovered",
+      "kind": "cli-metadata",
+      "locator": "AssemblyRef/ImplMap",
+      "assemblies": [
+        "mscorlib",
+        "System.Core",
+        "YamlDotNet",
+        "INIFileParser",
+        "Newtonsoft.Json"
+      ],
+      "pinvoke": [
+        {
+          "dll": "GtsPlus-CM.dll",
+          "export": "CreateChallengeCode",
+          "method": "CreateChallengeCode"
+        },
+        {
+          "dll": "GtsPlus-CM.dll",
+          "export": "CheckAuthenticationCode",
+          "method": "CheckAuthenticationCode"
+        },
+        {
+          "dll": "GtsPlus-CM.dll",
+          "export": "DoFileEncryption",
+          "method": "DoFileEncryptionCS"
+        },
+        {
+          "dll": "GtsPlus-CM.dll",
+          "export": "DoFileEncryption",
+          "method": "DoFileEncryption"
+        },
+        {
+          "dll": "GtsPlus-CM.dll",
+          "export": "DoFileDecryption",
+          "method": "DoFileDecryptionCS"
+        },
+        {
+          "dll": "GtsPlus-CM.dll",
+          "export": "DoFileDecryption",
+          "method": "DoFileDecryption"
+        }
+      ],
+      "finding": "Exact managed dependencies and native import boundaries; roles are established by the pinned method bodies."
+    },
+    {
+      "id": "bootstrap.msg.dependencies",
+      "source": "bootstrap.msg.recovered",
+      "kind": "cli-metadata",
+      "locator": "AssemblyRef/ImplMap",
+      "assemblies": [
+        "mscorlib",
+        "GTSPlusErrorReportData",
+        "System.Core",
+        "System",
+        "GTSPlusCommon"
+      ],
+      "pinvoke": [],
+      "finding": "Exact managed dependencies and native import boundaries; roles are established by the pinned method bodies."
+    },
+    {
+      "id": "bootstrap.adapt.dependencies",
+      "source": "bootstrap.adapt.recovered",
+      "kind": "cli-metadata",
+      "locator": "AssemblyRef/ImplMap",
+      "assemblies": [
+        "mscorlib",
+        "System.Xml",
+        "GTSPlusBaseAdapt",
+        "GTSPlusPFCommon",
+        "System.Core",
+        "System",
+        "GTSPlusCommon"
+      ],
+      "pinvoke": [],
+      "finding": "Exact managed dependencies and native import boundaries; roles are established by the pinned method bodies."
+    },
+    {
+      "id": "bootstrap.err.dependencies",
+      "source": "bootstrap.err.recovered",
+      "kind": "cli-metadata",
+      "locator": "AssemblyRef/ImplMap",
+      "assemblies": [
+        "mscorlib",
+        "GTSPlusCommon",
+        "GTSPlusErrorReportData",
+        "System",
+        "System.Core",
+        "System.ServiceProcess",
+        "GTSPlusArchiver",
+        "CsvHelper",
+        "System.Management",
+        "System.Drawing",
+        "Newtonsoft.Json"
+      ],
+      "pinvoke": [
+        {
+          "dll": "user32.dll",
+          "export": "SendMessageTimeout",
+          "method": "SendMessageTimeout"
+        }
+      ],
+      "finding": "Exact managed dependencies and native import boundaries; roles are established by the pinned method bodies."
+    },
+    {
+      "id": "bootstrap.pfc.dependencies",
+      "source": "bootstrap.pfc.recovered",
+      "kind": "cli-metadata",
+      "locator": "AssemblyRef/ImplMap",
+      "assemblies": [
+        "mscorlib",
+        "Newtonsoft.Json",
+        "GTSPlusSettingFileWrapper",
+        "GTSPlusCommon",
+        "System.Core",
+        "MsgDatComm",
+        "GTSPlusErrorReportData",
+        "Microsoft.CSharp",
+        "YamlDotNet"
+      ],
+      "pinvoke": [
+        {
+          "dll": "GtsPlus-GM.dll",
+          "export": "GenerateGUID",
+          "method": "GenerateGuid"
+        }
+      ],
+      "finding": "Exact managed dependencies and native import boundaries; roles are established by the pinned method bodies."
+    }
+  ],
+  "states": [
+    {
+      "id": "bootstrap.off",
+      "owner": "OS",
+      "meaning": "No owned GTS+ bootstrap process"
+    },
+    {
+      "id": "bootstrap.arb-configuring",
+      "owner": "GTSPlusArbitration.exe",
+      "meaning": "Own ABAppMutex; configure supervisors"
+    },
+    {
+      "id": "bootstrap.arb-launching",
+      "owner": "GTSPlusArbitration.exe",
+      "meaning": "Launch configured apps sequentially"
+    },
+    {
+      "id": "bootstrap.arb-running",
+      "owner": "GTSPlusArbitration.exe",
+      "meaning": "Supervise children/services; GUI runs separately"
+    },
+    {
+      "id": "bootstrap.duplicate",
+      "owner": "second invocation",
+      "meaning": "Launch InfoCenter_Multi instead of second core"
+    },
+    {
+      "id": "bootstrap.startup-error",
+      "owner": "bootstrap caller",
+      "meaning": "Initialization failed/logged; partial children may remain"
+    },
+    {
+      "id": "bootstrap.pf-initializing",
+      "owner": "GTSPlus.exe",
+      "meaning": "Own GTSPlusMutex; initialize adapters/workers"
+    },
+    {
+      "id": "bootstrap.pf-running",
+      "owner": "GTSPlus.exe",
+      "meaning": "API workers and WebSocket dispatcher active"
+    },
+    {
+      "id": "bootstrap.degraded",
+      "owner": "GTSPlusArbitration.exe/GTSPlus.exe",
+      "meaning": "Error notification/trace without restart"
+    },
+    {
+      "id": "bootstrap.end-confirming",
+      "owner": "GTSPlusArbitration.exe",
+      "meaning": "Query EndMode1 participants, wait report saving"
+    },
+    {
+      "id": "bootstrap.pf-paused",
+      "owner": "GTSPlus.exe",
+      "meaning": "EndCheckFlag with confirmation barriers reset"
+    },
+    {
+      "id": "bootstrap.end-veto",
+      "owner": "GTSPlusArbitration.exe",
+      "meaning": "Participant busy or report-save timeout; do not execute exit"
+    },
+    {
+      "id": "bootstrap.ending",
+      "owner": "GTSPlusArbitration.exe",
+      "meaning": "Execute exit across participants"
+    },
+    {
+      "id": "bootstrap.pf-finalizing",
+      "owner": "GTSPlus.exe",
+      "meaning": "Cancel token, stop sockets, wake/join workers, finalize adapters"
+    },
+    {
+      "id": "bootstrap.closed",
+      "owner": "process owner",
+      "meaning": "Form loop exited; mutex released/disposed"
+    }
+  ],
+  "transitions": [
+    {
+      "id": "bootstrap.launch-arb",
+      "from": "bootstrap.off",
+      "to": "bootstrap.arb-configuring",
+      "trigger": "GTSPlusArbitration.Program.Main",
+      "guard": "ABAppMutex acquired",
+      "action": "InitializeForm; no command-line arguments consumed",
+      "evidence": [
+        "bootstrap.arb-entry"
+      ]
+    },
+    {
+      "id": "bootstrap.duplicate-arb",
+      "from": "bootstrap.off",
+      "to": "bootstrap.duplicate",
+      "trigger": "arbitration invocation",
+      "guard": "ABAppMutex unavailable",
+      "action": "Start InfoCenter_Multi.exe cwd=its parent; return",
+      "evidence": [
+        "bootstrap.arb-entry",
+        "bootstrap.path-constants"
+      ]
+    },
+    {
+      "id": "bootstrap.arb-config-error",
+      "from": "bootstrap.arb-configuring",
+      "to": "bootstrap.startup-error",
+      "trigger": "ReadABSystemSetting/InitializeForm",
+      "guard": "decode/validation false or exception",
+      "action": "Do not Run form; release mutex; no recovery launch",
+      "evidence": [
+        "bootstrap.arb-settings",
+        "bootstrap.arb-initialize",
+        "bootstrap.arb-entry"
+      ]
+    },
+    {
+      "id": "bootstrap.start-children",
+      "from": "bootstrap.arb-configuring",
+      "to": "bootstrap.arb-launching",
+      "trigger": "InitializeForm",
+      "guard": "ABSystem valid; distributor normal or default",
+      "action": "StartApplication in exact config order",
+      "evidence": [
+        "bootstrap.arb-initialize",
+        "bootstrap.arb-launch"
+      ]
+    },
+    {
+      "id": "bootstrap.restricted-launch",
+      "from": "bootstrap.arb-launching",
+      "to": "bootstrap.arb-running",
+      "trigger": "DistributorDepending read failure",
+      "guard": "DefaultStart=true",
+      "action": "Only InfoCenter StartMode3 runs; PF/CUW mode1 skipped; flag AB000006",
+      "evidence": [
+        "bootstrap.arb-distributor",
+        "bootstrap.arb-launch",
+        "bootstrap.arb-initialize"
+      ]
+    },
+    {
+      "id": "bootstrap.normal-launch",
+      "from": "bootstrap.arb-launching",
+      "to": "bootstrap.arb-running",
+      "trigger": "ordered child launches complete",
+      "guard": "DefaultStart=false",
+      "action": "Launch InfoCenter then PF then CUW; confirm each startup PID/result; monitor services but never start them here",
+      "evidence": [
+        "bootstrap.arb-launch",
+        "bootstrap.arb-initialize"
+      ]
+    },
+    {
+      "id": "bootstrap.child-start-error",
+      "from": "bootstrap.arb-launching",
+      "to": "bootstrap.degraded",
+      "trigger": "Process.Start/confirmation",
+      "guard": "launch exception, timeout, nonempty matching startup result",
+      "action": "Notify failure; continue next child; no launch retry",
+      "evidence": [
+        "bootstrap.arb-launch",
+        "bootstrap.arb-notify"
+      ]
+    },
+    {
+      "id": "bootstrap.pid-mismatch",
+      "from": "bootstrap.arb-launching",
+      "to": "bootstrap.arb-launching",
+      "trigger": "ER_ApplicationStart data",
+      "guard": "received PID != new child PID",
+      "action": "Recreate server and wait remaining start timeout; no relaunch",
+      "evidence": [
+        "bootstrap.arb-launch"
+      ]
+    },
+    {
+      "id": "bootstrap.version-error",
+      "from": "bootstrap.arb-running",
+      "to": "bootstrap.degraded",
+      "trigger": "version confirmation",
+      "guard": "manifest/component error or mismatch",
+      "action": "Notify AB000003/4/5; no startup veto",
+      "evidence": [
+        "bootstrap.arb-version"
+      ]
+    },
+    {
+      "id": "bootstrap.start-pf",
+      "from": "bootstrap.off",
+      "to": "bootstrap.pf-initializing",
+      "trigger": "GTSPlusController.Program.Main",
+      "guard": "GTSPlusMutex acquired on STA thread",
+      "action": "CoInitializeSecurity; MainTask and hidden Form1",
+      "evidence": [
+        "bootstrap.pf-entry",
+        "bootstrap.pf-single-instance",
+        "bootstrap.pf-form-init"
+      ]
+    },
+    {
+      "id": "bootstrap.duplicate-pf",
+      "from": "bootstrap.off",
+      "to": "bootstrap.duplicate",
+      "trigger": "GTSPlus invocation",
+      "guard": "GTSPlusMutex unavailable",
+      "action": "Launch InfoCenter_Multi, no second core",
+      "evidence": [
+        "bootstrap.pf-single-instance",
+        "bootstrap.path-constants"
+      ]
+    },
+    {
+      "id": "bootstrap.pf-start-error",
+      "from": "bootstrap.pf-initializing",
+      "to": "bootstrap.startup-error",
+      "trigger": "InitializePlatform",
+      "guard": "info/config/adaptation/worker or caught exception failure",
+      "action": "ER_StartApplicationCS(error); close form",
+      "evidence": [
+        "bootstrap.pf-init",
+        "bootstrap.pf-form-init",
+        "bootstrap.msg-start"
+      ]
+    },
+    {
+      "id": "bootstrap.pf-ready",
+      "from": "bootstrap.pf-initializing",
+      "to": "bootstrap.pf-running",
+      "trigger": "InitializePlatform result0",
+      "guard": "startup return path succeeds",
+      "action": "Start receiver/workers/socket/main and notify arbitration",
+      "evidence": [
+        "bootstrap.pf-init",
+        "bootstrap.pf-sequence",
+        "bootstrap.pf-form-init"
+      ]
+    },
+    {
+      "id": "bootstrap.socket-error-overwrite",
+      "from": "bootstrap.pf-initializing",
+      "to": "bootstrap.degraded",
+      "trigger": "StartMainSequence false WSM result",
+      "guard": "subsequent settings lookup returns success",
+      "action": "Remember PF000002; overwritten status may still let InitializePlatform return0",
+      "evidence": [
+        "bootstrap.pf-sequence",
+        "bootstrap.pf-init"
+      ]
+    },
+    {
+      "id": "bootstrap.settings-tamper",
+      "from": "bootstrap.pf-running",
+      "to": "bootstrap.degraded",
+      "trigger": "SettingFileTampering_<PID>",
+      "guard": "message not UserProfile/VehicleConfigure",
+      "action": "Mark common GUI flags; remember PF000004; receive next message",
+      "evidence": [
+        "bootstrap.pf-settings-error"
+      ]
+    },
+    {
+      "id": "bootstrap.task-failure",
+      "from": "bootstrap.pf-running",
+      "to": "bootstrap.degraded",
+      "trigger": "arbitration alive query",
+      "guard": "any watched Task.Status !=1",
+      "action": "Reply PF000005; supervisor reports/records, no restart",
+      "evidence": [
+        "bootstrap.pf-alive",
+        "bootstrap.msg-alive",
+        "bootstrap.alive-app"
+      ]
+    },
+    {
+      "id": "bootstrap.child-crash",
+      "from": "bootstrap.arb-running",
+      "to": "bootstrap.degraded",
+      "trigger": "alive monitor tick",
+      "guard": "configured mode nonzero and previously healthy child PID absent/unresponsive",
+      "action": "Notify once on state change; absent child disables monitor; no restart",
+      "evidence": [
+        "bootstrap.alive-app",
+        "bootstrap.arb-notify"
+      ]
+    },
+    {
+      "id": "bootstrap.service-failure",
+      "from": "bootstrap.arb-running",
+      "to": "bootstrap.degraded",
+      "trigger": "alive monitor tick",
+      "guard": "service not Running or mode2 reply error",
+      "action": "Notify last-result transition; keep monitoring; no start/restart",
+      "evidence": [
+        "bootstrap.alive-service"
+      ]
+    },
+    {
+      "id": "bootstrap.request-end",
+      "from": "bootstrap.arb-running",
+      "to": "bootstrap.end-confirming",
+      "trigger": "ER_ABAppEnd or Windows SessionEnding",
+      "guard": "request received",
+      "action": "ConfirmEnding; distinguish shutdown bool",
+      "evidence": [
+        "bootstrap.arb-end-request",
+        "bootstrap.arb-session"
+      ]
+    },
+    {
+      "id": "bootstrap.pause-pf",
+      "from": "bootstrap.pf-running",
+      "to": "bootstrap.pf-paused",
+      "trigger": "ER_EndingConfirm_GTS+ PF",
+      "guard": "registered callback",
+      "action": "Reset barriers and set EndCheckFlag; CheckEditFile returns veto/empty",
+      "evidence": [
+        "bootstrap.msg-confirm",
+        "bootstrap.pf-confirm",
+        "bootstrap.pf-loop"
+      ]
+    },
+    {
+      "id": "bootstrap.busy-veto",
+      "from": "bootstrap.end-confirming",
+      "to": "bootstrap.end-veto",
+      "trigger": "participant confirmation",
+      "guard": "nonempty ResultCode or report-saving timeout",
+      "action": "Notify and return false",
+      "evidence": [
+        "bootstrap.arb-confirm"
+      ]
+    },
+    {
+      "id": "bootstrap.confirm-fail-open",
+      "from": "bootstrap.end-confirming",
+      "to": "bootstrap.end-confirming",
+      "trigger": "pipe participant exception",
+      "guard": "connection/read failure",
+      "action": "Log and continue confirmation of remaining participants",
+      "evidence": [
+        "bootstrap.arb-confirm"
+      ]
+    },
+    {
+      "id": "bootstrap.approved-end",
+      "from": "bootstrap.end-confirming",
+      "to": "bootstrap.ending",
+      "trigger": "ConfirmEnding returns true",
+      "guard": "no observed veto; includes outer exception fail-open",
+      "action": "SetAppEndState then ExecuteEnding",
+      "evidence": [
+        "bootstrap.arb-confirm",
+        "bootstrap.arb-end-request",
+        "bootstrap.arb-session"
+      ]
+    },
+    {
+      "id": "bootstrap.veto-resume",
+      "from": "bootstrap.end-veto",
+      "to": "bootstrap.arb-running",
+      "trigger": "ExecuteEnding(shutdown,false)",
+      "guard": "not approved",
+      "action": "Send execute=false to EndMode1 participants; no kill/close; Windows session cancelled if relevant",
+      "evidence": [
+        "bootstrap.arb-execute",
+        "bootstrap.arb-session",
+        "bootstrap.arb-end-request"
+      ]
+    },
+    {
+      "id": "bootstrap.resume-pf",
+      "from": "bootstrap.pf-paused",
+      "to": "bootstrap.pf-running",
+      "trigger": "EndingExecuteData.Exucute=false",
+      "guard": "veto/cancel path",
+      "action": "Reset flags and Set barriers; keep form alive",
+      "evidence": [
+        "bootstrap.msg-execute",
+        "bootstrap.pf-execute",
+        "bootstrap.pf-execute-callback",
+        "bootstrap.pf-unfreeze"
+      ]
+    },
+    {
+      "id": "bootstrap.execute-pf",
+      "from": "bootstrap.pf-paused",
+      "to": "bootstrap.pf-finalizing",
+      "trigger": "EndingExecuteData.Exucute=true",
+      "guard": "approved exit",
+      "action": "Clear queues; optional nonshutdown GUI broadcast; end flags; close form",
+      "evidence": [
+        "bootstrap.msg-execute",
+        "bootstrap.pf-execute",
+        "bootstrap.pf-execute-callback",
+        "bootstrap.pf-close"
+      ]
+    },
+    {
+      "id": "bootstrap.close-running-pf",
+      "from": "bootstrap.pf-running",
+      "to": "bootstrap.pf-finalizing",
+      "trigger": "FormClosed",
+      "guard": "direct close or initialization failure",
+      "action": "FinalizePlatform even after partial initialization",
+      "evidence": [
+        "bootstrap.pf-close",
+        "bootstrap.pf-finalize"
+      ]
+    },
+    {
+      "id": "bootstrap.finalize-pf",
+      "from": "bootstrap.pf-finalizing",
+      "to": "bootstrap.closed",
+      "trigger": "FinalizePlatform and FormClosed",
+      "guard": "waited tasks complete or caught teardown exception",
+      "action": "Cancel/wake/join; adapter finalize; notify ER_ApplicationEnd; unregister IPC; release mutex",
+      "evidence": [
+        "bootstrap.pf-finalize",
+        "bootstrap.pf-close",
+        "bootstrap.msg-end",
+        "bootstrap.pf-single-instance"
+      ]
+    },
+    {
+      "id": "bootstrap.release-child-monitor",
+      "from": "bootstrap.arb-running",
+      "to": "bootstrap.arb-running",
+      "trigger": "ER_ApplicationEnd(PID)",
+      "guard": "PID monitored",
+      "action": "RemoveAliveMonitor; no process restart",
+      "evidence": [
+        "bootstrap.arb-child-end"
+      ]
+    },
+    {
+      "id": "bootstrap.finish-arb",
+      "from": "bootstrap.ending",
+      "to": "bootstrap.closed",
+      "trigger": "participants exit",
+      "guard": "execute=true; no indefinitely blocked WaitForExit/pipe drain",
+      "action": "Close own form; cancel/report flush and join workers; release mutex",
+      "evidence": [
+        "bootstrap.arb-execute",
+        "bootstrap.arb-close",
+        "bootstrap.arb-entry"
+      ]
+    },
+    {
+      "id": "bootstrap.pf-session-veto",
+      "from": "bootstrap.pf-running",
+      "to": "bootstrap.pf-running",
+      "trigger": "Windows SessionEnding",
+      "guard": "coordination signal without execution or local CheckEditFile veto at timeout",
+      "action": "set SessionEndingEventArgs.Cancel; default timeout10000ms",
+      "evidence": [
+        "bootstrap.pf-session",
+        "bootstrap.pf-timeout",
+        "bootstrap.pf-execute-callback"
+      ]
+    },
+    {
+      "id": "bootstrap.retention-timers",
+      "from": "bootstrap.pf-running",
+      "to": "bootstrap.pf-running",
+      "trigger": "GTSE/autosave cleanup timers expire",
+      "guard": "configured60000ms elapsed; configuration reads succeed; MaxCount>=0",
+      "action": "Stop timer; enumerate configured files; descending LastWriteTime; retain newest300; delete excess until EndFlag; log exceptions; no restart",
+      "evidence": [
+        "bootstrap.pf-init",
+        "bootstrap.retention-setting",
+        "bootstrap.retention-config",
+        "bootstrap.retention-order-key",
+        "bootstrap.delete-gtse",
+        "bootstrap.delete-report"
+      ]
+    }
+  ],
+  "handoffs": [
+    {
+      "to_domain": "ui_ipc",
+      "caller": "GTSPlusArbitration.Form1.StartApplication",
+      "callee": "GtsPlus-InfoCenter/GtsPlus-InfoCenter.exe",
+      "mechanism": "Process.Start; no args; cwd executable directory",
+      "payload": "first normal child; StartMode3 means start even on distributor fallback; EndMode1; alive mode0",
+      "evidence": [
+        "bootstrap.config",
+        "bootstrap.arb-launch"
+      ]
+    },
+    {
+      "to_domain": "ui_ipc",
+      "caller": "second arbitration/PF invocation",
+      "callee": "GtsPlus-InfoCenter/GtsPlus-InfoCenter_Multi/GtsPlus-InfoCenter_Multi.exe",
+      "mechanism": "Process.Start after nonblocking global mutex contention",
+      "payload": "no arguments; cwd executable directory; original instance remains owner",
+      "evidence": [
+        "bootstrap.arb-entry",
+        "bootstrap.pf-single-instance",
+        "bootstrap.path-constants"
+      ]
+    },
+    {
+      "to_domain": "cuw_utility",
+      "caller": "GTSPlusArbitration.Form1.StartApplication",
+      "callee": "CUWPlus/CuwBackendServiceConsoleApp.exe",
+      "mechanism": "third sequential child, Process.Start and startup named-pipe handshake",
+      "payload": "StartMode1,EndMode1,alive2; startup timeout180000ms; cwd CUWPlus; no args",
+      "evidence": [
+        "bootstrap.config",
+        "bootstrap.arb-launch"
+      ]
+    },
+    {
+      "to_domain": "sync_upload",
+      "caller": "GTSPlusArbitration.InitializeForm",
+      "callee": "GTS+ DataSync and GTS+GUIServer Windows services",
+      "mechanism": "monitor externally-owned services; no ServiceController.Start in arbitration launch path",
+      "payload": "both EndMode0/alive2; query service Running and ER_AliveMonitor_<name>",
+      "evidence": [
+        "bootstrap.config",
+        "bootstrap.arb-initialize",
+        "bootstrap.alive-service"
+      ]
+    },
+    {
+      "to_domain": "operations",
+      "caller": "MainTask.InitializePlatform/FinalizePlatform",
+      "callee": "GTSPlusAdaptIF AdaptationInterface",
+      "mechanism": "managed XML ordered Assembly.LoadFrom/CreateInstance/init/finalize",
+      "payload": "DiagAdaptationManager third adapter; five scheduler lanes; shared cancellation source; queue event wake/join",
+      "evidence": [
+        "bootstrap.pf-init",
+        "bootstrap.pf-finalize",
+        "bootstrap.adapt-init",
+        "bootstrap.adapt-finalize",
+        "bootstrap.adaptation-table"
+      ]
+    },
+    {
+      "to_domain": "ui_ipc",
+      "caller": "MainTask.StartMainSequence/FinalizePlatform",
+      "callee": "GtsPlus-WebSocketManager.WebSocketManager.StartProcess/StopProcess",
+      "mechanism": "in-process managed method, not OS Process.Start",
+      "payload": "StartProcess(false); message fetch queue; cancellation teardown",
+      "evidence": [
+        "bootstrap.pf-sequence",
+        "bootstrap.pf-loop",
+        "bootstrap.pf-finalize"
+      ]
+    },
+    {
+      "to_domain": "auth_settings",
+      "caller": "InitializePlatform / ReadDistributorDepending / ResetPFConfig",
+      "callee": "SettingFileWrapper and CM packaged configuration decoder",
+      "mechanism": "managed wrapper + native CM PInvoke",
+      "payload": "type2 distributor fallback; restore PF.cfg from DefaultPF.cfg; tamper notification per-process pipe",
+      "evidence": [
+        "bootstrap.arb-distributor",
+        "bootstrap.pf-reset-config",
+        "bootstrap.decrypt",
+        "bootstrap.packaging-profile",
+        "bootstrap.pf-settings-error"
+      ]
+    },
+    {
+      "to_domain": "persistence",
+      "caller": "Arbitration.FormClosed/ErrorReport",
+      "callee": "local report/log persistence and DataSync upload pipeline",
+      "mechanism": "cancel/join reporting workers, local error traces",
+      "payload": "ABSystem log limits and report include paths; no upload/network execution in this extractor",
+      "evidence": [
+        "bootstrap.arb-close",
+        "bootstrap.arb-notify",
+        "bootstrap.arb-paths",
+        "bootstrap.config"
+      ]
+    }
+  ],
+  "persistence": [
+    {
+      "path_pattern": "<install>/Env/ABSystem.yml; <install>/Env/GTSPlus.pp",
+      "producer": "shipped installation",
+      "consumer": "GTSPlusArbitration.ReadABSystemSetting / GTSPlusCommon.CryptManagerWrapper",
+      "created": "installer input, not created by observed bootstrap code",
+      "flushed": "read/decrypt before children launch",
+      "deleted": "not deleted by examined bootstrap methods",
+      "evidence": [
+        "bootstrap.arb-settings",
+        "bootstrap.decrypt",
+        "bootstrap.packaging-profile",
+        "bootstrap.config"
+      ]
+    },
+    {
+      "path_pattern": "<SettingFileWrapper folder>/PF.cfg",
+      "producer": "ConnectionManager.ResetPFConfig",
+      "consumer": "PF configuration users",
+      "created": "copy <install>/Env/DefaultPF.cfg if present; overwrite existing",
+      "flushed": "File.Copy returns before startup adapters initialize; no explicit fsync",
+      "deleted": "not deleted; overwritten on reset",
+      "evidence": [
+        "bootstrap.pf-reset-config",
+        "bootstrap.pf-init"
+      ]
+    },
+    {
+      "path_pattern": "<LocalApplicationData>/GTSPlus/ErrorReport/{ActLog,Trace,TraceAutoSave,Unsend,Send}; communication-log temp path may resolve from install root",
+      "producer": "Arbitration/ErrorReport workers",
+      "consumer": "report tasks and DataSync/report domain",
+      "created": "report infrastructure InitializeErrorReport and NotifyError trace save; config supplies log file size/count limits",
+      "flushed": "FormClosed signals AB_ErrorReportSave and joins report tasks before FinalizeErrorReport; this does not establish fsync or success after process crash",
+      "deleted": "retention/packaging owned by reporting/persistence domain, not inferred from form teardown",
+      "evidence": [
+        "bootstrap.arb-paths",
+        "bootstrap.arb-initialize",
+        "bootstrap.arb-close",
+        "bootstrap.arb-notify",
+        "bootstrap.config"
+      ]
+    },
+    {
+      "path_pattern": "<install>/Ver/Manifest.json; <install>/Ver/<component>.json",
+      "producer": "installer/update components",
+      "consumer": "ConfirmApplicationVersion",
+      "created": "preexisting shipped/update state",
+      "flushed": "read after child launch",
+      "deleted": "not modified by version checks",
+      "evidence": [
+        "bootstrap.arb-version",
+        "bootstrap.config"
+      ]
+    },
+    {
+      "path_pattern": "<configured UserStoredData>/*.gtse; <configured ErrorReportFileAutoSave{Unsend,Send}>/*.gtsr",
+      "producer": "diagnostic recorder / error-report tasks",
+      "consumer": "MainTask one-shot retention cleanup",
+      "created": "producer domain, not created by cleanup",
+      "flushed": "not established by retention code",
+      "deleted": "60000ms startup timer; retain newest300 by LastWriteTime; GTSE folder independently, combined autosave send/unsend pool; stop early on EndFlag",
+      "evidence": [
+        "bootstrap.retention-config",
+        "bootstrap.retention-order-key",
+        "bootstrap.delete-gtse",
+        "bootstrap.delete-report"
+      ]
+    }
+  ],
+  "coverage": {
+    "components": [
+      "GTSPlusArbitration.exe",
+      "GTSPlus.exe",
+      "GTSPlusCommon.dll",
+      "MsgDatComm.dll",
+      "GTSPlusAdaptIF.dll",
+      "GTSPlusErrorReport.dll",
+      "GtsPlus-CM.dll",
+      "Env/ABSystem.yml",
+      "Env/GTSPlus.pp",
+      "Env/GTSPlusInfo.ini",
+      "embedded AdaptationTable.xml",
+      "GTSPlusPFCommon.dll",
+      "Env/GTSPlusSetting.ini"
+    ],
+    "entrypoints": [
+      "GTSPlusArbitration.Program.Main token0x0600005A RVA0x5394 void()",
+      "GTSPlusController.Program.Main token0x06000156 RVA0x9DE4 void()",
+      "GTSPlusController.Program nested STA callback RVA0x15BA8",
+      "Windows SessionEnding/FormClosed and MsgDatComm callbacks"
+    ],
+    "branches": [
+      "mutex owner/contention/exception",
+      "ABSystem decrypt/validation/exception",
+      "normal/distributor-default launch",
+      "PID mismatch/start result/timeout/launch failure",
+      "version mismatch/component-read/manifest failure",
+      "end approval/veto/pipe fail-open/report-save timeout",
+      "shutdown versus ordinary requested end",
+      "cancel/resume barriers",
+      "token-canceled workers and unbounded join paths",
+      "task liveness and crash/hung process monitor with no restart",
+      "settings tamper exclusions/global error",
+      "StartMainSequence result overwritten by settings result",
+      "one-shot retention cleanup, negative MaxCount, EndFlag interruption and file-operation exception"
+    ],
+    "execution_limits": [
+      "Offline decode and IL parsing only; no vehicle, network, account use or Windows application run",
+      "Fixed shipped packaging material derived only from pinned binary/resource inputs; not emitted"
+    ]
+  },
+  "residuals": [
+    {
+      "question": "Windows named-pipe timing, global mutex ACL behavior, abandoned mutex, COM security result and shutdown event ordering under live OS execution",
+      "why_unclosed": "Executable branches and config pinned offline; no Windows runtime/vehicle/network execution performed. Main ignores COM HRESULT; WaitOne exception path logs rather than a dedicated abandoned-owner recovery.",
+      "next_evidence": "Isolated Windows harness with synthetic IPC peers, registry/temp folders and no vehicle or real account; verify startup PID handshake, veto/resume and bounded/unbounded waits."
+    },
+    {
+      "question": "Bootstrap process crash before FormClosed or while waiting on child/task",
+      "why_unclosed": "Inspected entrypoints have local catches, no global unhandled-exception/relaunch handler. Forced process termination does not run guaranteed FormClosed persistence; unbounded Task.Wait/WaitForExit/WaitForPipeDrain can stop forward progress.",
+      "next_evidence": "Throwaway Windows crash/kill harness and storage-worker flush implementation; do not label crash as graceful teardown."
+    }
+  ]
+}
