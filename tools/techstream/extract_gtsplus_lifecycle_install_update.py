@@ -117,6 +117,115 @@ LAUNCHER_CLIENT_KEYS = ['{5A03CEC0-8805-11D4-ADFB-00000EFB3A77}',
  '{5630FDEF-3804-410B-AC11-FC9EBEC698C5}',
  '{980B1A1F-AF81-49C2-A247-10A4CA9B678B}']
 
+CERT_METHODS.extend([{'finding': 'Probe HKLM Registry64 first; only null result falls back to Registry32. Empty string '
+             'suppresses fallback.',
+  'index': 0,
+  'key': 'cert.Program.GetFirefoxPreferred',
+  'method': 'GetInstallPathOfFirefox',
+  'needles': ['ldc.i4.1', 'brtrue.s', 'ldc.i4.0'],
+  'pin': {'body_sha256': '4988ee19d2636bc6f5d199bb64e8b39266837dc227bbe52fc355cf1bbf5b25f1',
+          'body_size': 20,
+          'rva': 9675},
+  'source': 'cert',
+  'type': 'ConsoleApp1.Program'},
+ {'finding': 'HKLM SOFTWARE\\Mozilla\\Mozilla Firefox: selects greatest version subkey by String.Compare, '
+             'not semantic version; reads <version>\\Main Install Directory. Missing key/Main returns null; '
+             'registry exceptions escape.',
+  'index': 1,
+  'key': 'cert.Program.GetFirefoxView',
+  'method': 'GetInstallPathOfFirefox',
+  'needles': ['0x100', '0x200', 'GetSubKeyNames', 'Compare', '\\\\Main', 'GetValue'],
+  'pin': {'body_sha256': 'b6e880569c83f2646c73cb40de5d4e7263bb57b8894c9d48a569e14edbb9dd5b',
+          'body_size': 170,
+          'rva': 9696},
+  'source': 'cert',
+  'type': 'ConsoleApp1.Program'},
+ {'finding': 'Enabled local WMI accounts union domain-SID user profiles through HashSet<NTAccount>; '
+             'translated names, not Win32_UserProfile.LocalPath, construct c:\\Users candidates. '
+             'WMI/SID/translation failures escape; finally disposes enumerators.',
+  'index': 0,
+  'key': 'cert.Program.GetUserNameListFromComputer',
+  'method': 'GetUserNameListFromComputer',
+  'needles': ['Win32_UserAccount', 'disabled', 'Win32_UserProfile', 'Translate'],
+  'pin': {'body_sha256': '0c779e25ca6abea2b5e5b9bb25bd0a46dfaf95111eee670cf72b93b26a69e367',
+          'body_size': 352,
+          'rva': 9232},
+  'source': 'cert',
+  'type': 'ConsoleApp1.Program'},
+ {'finding': 'Source certificate directory is executable directory (baseDir), not baseDir\\certs. '
+             'installCerts mode may fail copying because shipped public certificates are nested under certs; '
+             'ordinary installer invokes no installCerts argument.',
+  'index': 0,
+  'key': 'cert.Program.ctor',
+  'method': '.ctor',
+  'needles': ['get_Location', 'Split', 'Join', 'baseDir'],
+  'pin': {'body_sha256': '1a4a5f3ee77c0361a34ffba51d51f08cd17ab8925e04fb4057c93f9969aa34fd',
+          'body_size': 88,
+          'rva': 8860},
+  'source': 'cert',
+  'type': 'ConsoleApp1.Program'},
+ {'finding': 'Install-array duplicate predicate is case-sensitive String.Equals negated; differently cased '
+             'names remain and exact rca.crt/ica.crt are appended.',
+  'key': 'cert.PolicyEditer.CertificateNamePredicate',
+  'method': '<ImportCerts>b__0',
+  'needles': ['Equals', 'ceq'],
+  'pin': {'body_sha256': 'd634124f88cbaa0b1b01ad5238b84e255183b5f3a7766693df6cf4f0598a75f4',
+          'body_size': 17,
+          'rva': 9866},
+  'source': 'cert',
+  'type': '<>c__DisplayClass2_0'}])
+
+CERTIFICATE_SCRIPT_PINS = {'Setup_GuiServer.exe': {'OnFirstUIAfter': ['1493d45cbcddc320ee2a8b7b6602a3c5de875d712d3bcd65b58e281e4b323384',
+                                            'd0fa3df230940c9793cb9e67faac8941c697606b7de06115219af0d7971bb59b'],
+                         'OnMaintUIAfter': ['55055411088ee72ef1dacedd5d3c7c90ce0ce4646277e50377e0bf7b87e7ffc8',
+                                            'fb406148ef68ffae3f5318a2160f1998b82baa2faec5c41495ee1eda21b674fc'],
+                         'OnUpdateUIAfter': ['0a2824cbd4f06e23419049fddd032f56a995e382745e95010aacc7ec2e30848b',
+                                             '800e12dd19dc21e65ca53493a502772e8d565dc22bb1101bb35c45185f2f34f2'],
+                         'GTSPlusGUIServer_UnInstalling': ['169d19ed2c0fac6a5ce25823e65c765ad98ed94e82be8d251a9fb70e09948726',
+                                                           '812d9b202da062e80287a85a62dacba395f01357c4ed847214a416bdded00066'],
+                         'OnMoving': ['4c04581e13e2cb65f92242822522a72a028e674257dee17f427419790912fd7d',
+                                      'c13d91787e3449e768fba9f11afbca612f3fd230f097f29d0d2b2e67f8c80da1'],
+                         'OnAbort': ['9de629289be929f09a10455e993c27d5f3458f083cab6074c6ea6103f168ae79',
+                                     'a13b5b8af8e7c635f2f2b84450c1d8c296c2c2e061f19ee728ff7aa088b72513'],
+                         'OnRebooted': ['d15e9a7aa92734d79b3326daf5fffe0cc0eac643bb749784547de4a29d64ee39',
+                                        '5073945dace9fe1d8e32a3685d490fb73cfd1663e5c59971f73bc964f8e963bf'],
+                         'Func_585': ['14ad92866cfcb79afd6ef548169c42d5b56845c6f19a5de70f38d209608bc204',
+                                      '77efcd5e404b1b1f8c596b36c97a45c3f56692f801ea82bac0518146684d300c'],
+                         'Func_586': ['2b775982a2e4dbe2c77ef368b5b74dc64955f2438f529ee8a4d617193fbf2da2',
+                                      'a210349812366a7509e8ae3883e2e0e6381e5f105fe5d608ef7c01a61c97ae31'],
+                         'Func_609': ['1cedb089ae104a6815600bef72585779556991331587691136dcc8c1289a27a5',
+                                      '9ebd300360012824361f776cff2cc5bbd1467bf6c2afa3df12f739a9debe341e'],
+                         'Func_624': ['2d1a4ed50c846caea7555aaa5cee06f78cb598a9a59d7f3c3f9905097d8ceb6a',
+                                      'faa3a88f5ddd23f94c480982db2873ef40ea27a31829f336ff92ff85fe61350a'],
+                         'Func_631': ['6cc824d7c80eac49e3fb623def000b5509b4d76b7000006df8f7415222fa51b1',
+                                      '4dec764533bc52bc5d1de977de4e81d72bd6c45c43b50f777bd075b91c33a744'],
+                         'Func_651': ['8f4c8be5a2591c12d4d074f64183d8c790874cc86d2091421884507d34f5b659',
+                                      '8b22f874adb57d1c0d3ac7ef7bbac71846ffbc0d95976655410d03a7a5a14175'],
+                         'Func_727': ['6ab24bd4b888d5563afe6deb321cafdd5c1e750c563e74d3bde91c91c0720e05',
+                                      '22c18e5e321210e2a7e77b7a554eb2c0af3648f1ad2ac99c0f8aa5cea5143772'],
+                         'Func_1929': ['0cb443b2c5f55f7d4a20650059fe1ce232eb5ab0addfd4308facfbc5dfc33d31',
+                                       '1b8581a18dadebaf23fc6fff0f92f22bcb4e45db45b2171d425beb787114d897'],
+                         'Func_1989': ['0be2f54c7a7970c42c20b41ec9bd906a6ddf596f6e07e7f4b3a3e65d8223bf83',
+                                       'b9cc1b2bad23fd360c28a34d8f899232a18df713f58f22f9bed63574e70a59dd'],
+                         'Func_2306': ['77242d69b6d00a7ab54659fb8584146a705bb4dcfed4863c463bc20d4594b549',
+                                       '8e52312163dcfb87e5577ba3197f4ec990356fa11695e00abf5a1b1e57ec7745'],
+                         'Func_2318': ['5e0112d65d32a5de51fcaaab05384735f63bb38a2e0335b7208eedba9306a670',
+                                       '53df029a3be6820215a5bd117a9bafb38ec1d6879be8a71c5119680634c668ca'],
+                         'Func_1928': ['9d6eac5ed13baa17df62ed85226cf48b4d83ee7166c1dd48f241cf2f46684b9b',
+                                       '7b6cd8538c7459eda13ca57894706250c875ef560dbacc8d767c966a82df90ef'],
+                         'Func_1980': ['c5c0246f17de40e7c4ecea697bfa953f4dc650c12ae3469bf8a3bdffc652cb96',
+                                       'b59fcc908c5636afe71886159372ee89191c7f22153d84996b549643c83b0d7b'],
+                         'Func_2391': ['934a9c6c389be1222b67a4283a365735a878be3dd3bdd8fb2d8e0eb27d0e5f43',
+                                       'c22670b3c417435157beca579446853df198a8f5a01dda1fb2b74e54f9d73daa'],
+                         'Func_2524': ['3664ffb5144eb7363091d9964ff9600a72903c29fd2029d861c230e90c570ac0',
+                                       'fa9dee8801bba3255cb9b0548c2f5d9bbe27ea049e5ecbb344613ceaf56cf4ff'],
+                         'OnShowUI': ['61c6109dac50a50445ca3bbaa3f0175839c490dce96a45f97665a2f57ca33439',
+                                      'b8f18dea10794655914da1f624fabe844934c2a739bafbe4ba2d89e85c0102da']},
+ 'Setup_PF.exe': {'GTSPlus_CA_Installed': ['ac4c5d24e59bc82f09169a7479284d46a2529b4af088dd535c477281d4846e75',
+                                           'c97753709afe87b3b46761cb9b14334513af20645254273b7898eb8d6f703ae8'],
+                  'GTSPlus_CA_UnInstalling': ['4b708a3c2eda830132d434c8f9c6d15d3984a090216a1282f19d014b2d6deff2',
+                                              '9a6fed19d4c40634175a85db28545abfcb3ed1f2214849e0c855d064c183ca7e']}}
+
 
 def _id(key: str) -> str:
     return f"{DOMAIN}.{key}"
@@ -229,7 +338,7 @@ def _managed_evidence(pes: dict[str, Any], methods: list[dict[str, Any]] = METHO
     rows = []
     for spec in methods:
         pe = pes[spec["source"]]
-        row, ins, body = _instructions(pe, spec["type"], spec["method"])
+        row, ins, body = _instructions(pe, spec["type"], spec["method"], index=spec.get("index", 0))
         if _method_pin(row, body) != spec["pin"]:
             raise ValueError(f"IL body drift: {spec['key']}")
         lines = [f"{instruction.opcode} {_operand(pe, instruction.operand)}".rstrip() for instruction in ins]
@@ -516,6 +625,22 @@ def _component_evidence(archive: Path, directory: Path, decoder: Path,
                              "registry_root": "HKLM/0x80000002", "registry_prefix": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\",
                              "shared_client_keys": LAUNCHER_CLIENT_KEYS, "abort_threshold": ">1 existing keys",
                              "finding": "Func_2116 returns GblVarNum63, set from engine option38 by Func_2284; OnSuiteMaintBefore classifies this predicate as removal303. OnBegin sets HKLM via bound registry root, counts exactly12 uninstall keys and aborts only in remove-only mode with count>1. Initialization calls OnBegin before feature removal. Outer CUWPlusPF_UnInstalled does not inspect launch/exit result; outer removal can continue while launcher and associations remain."})
+        if name in CERTIFICATE_SCRIPT_PINS:
+            evidence.append(_certificate_script_evidence(name, rul, actions))
+        if name == "Setup_PF.exe":
+            ca_out = work / "public-ca"
+            subprocess.run(["unshield", "-g", "GTSPlus_CA", "-d", str(ca_out),
+                            "x", str(work / "data1.cab")], check=True, capture_output=True, text=True)
+            ca_path = ca_out / "GTSPlus_CA/ca.crt"
+            _pin(ca_path, "e3ac980851b2dfa220d668d4633327c6ea81ff3aaf976d3e1c425bce198c3b82")
+            sources.append({"id": _id("cert-public.pf-ca"), "path": source_path + ":[0]:Disk1\\data1.cab:GTSPlus_CA\\ca.crt",
+                            "sha256": sha256_file(ca_path), "size": ca_path.stat().st_size,
+                            "representation": "original public CA certificate", "container": source_id})
+            evidence.append({"id": _id("certificate-pf-root"), "source": _id("cert-public.pf-ca"),
+                             "kind": "public-x509-metadata", "locator": "GTSPlus_CA/ca.crt -> installed bin/ca.crt",
+                             "target_store": "LocalMachine/ROOT",
+                             **_public_certificate(ca_path, "e3ac980851b2dfa220d668d4633327c6ea81ff3aaf976d3e1c425bce198c3b82"),
+                             "finding": "GTS+ Root CA is a separate DENSO certificate, not SS-RCA/SS-ICA/server chain. Installed-file existence gates PF addstore; removal uses subject selector GTS+ Root CA, not fingerprint, without ownership/reference counting. Both command failures are ignored by empty script branches."})
         if name == "Setup_GUI.exe":
             _gui_shortcut_evidence(work, source_path, source_id, sources, evidence)
         if name == "Setup_GuiServer.exe":
@@ -527,6 +652,9 @@ def _component_evidence(archive: Path, directory: Path, decoder: Path,
                 ("cert", "CertInstaller.exe", "407b6b2a11d9b297ffc3ed240dfd332241c867232218f8ec510f2b17f54d612b"),
                 ("cert-import-batch", "importCerts_SS.bat", "fab4e18d8f57b8881357dfbc928cb347ae011b6a8d4398c0b1c2d154c4c03878"),
                 ("cert-remove-batch", "removeCerts.bat", "027d2d37b4e5f2015f063c827a625cde04830b9868b7f512c584112058f0d2e0"),
+                ("cert-public.rca", "certs/rca.crt", "419f07c526c96e5a3f522b2f8402cc3b2c3ed1861048e7ddb922ed0b820abae5"),
+                ("cert-public.ica", "certs/ica.crt", "70f477ba72fa586cb981c082a3e28d3a42293fe560b1f0e7327d4e48de71239c"),
+                ("cert-public.server", "certs/server.pfx", "72270c9763956d37924cabbf45e72f45cda1cfcc6801b010f2c0ac65bb6558c0"),
             ):
                 extracted = cert_dir / filename
                 if sha256_file(extracted) != expected:
@@ -545,7 +673,112 @@ def _component_evidence(archive: Path, directory: Path, decoder: Path,
             evidence.append({"id": _id("certificate-batches"), "source": _id("cert-import-batch"),
                              "kind": "packaged-batch-commands", "locator": "importCerts_SS.bat + removeCerts.bat",
                              "anchors": required, "removal_source": _id("cert-remove-batch"),
-                             "finding": "Import batch removes prior local binding/certificates, adds packaged root/ICA/server certificates and binds127.0.0.1:50005. Removal deletes binding and certificates. Source inspection only; no certificate/password imported or used."})
+                             "finding": "Import/removal batches describe attempted destructive store/binding replacement, not established outcomes. Certificate callbacks attempt direct CreateProcess of .bat without cmd.exe and ignore launch/child failures; see certificate-failure-prefixes. No Windows certificate store or installer is executed by extraction."})
+            _certificate_contract(cert_dir, evidence)
+
+
+def _certificate_script_evidence(name: str, rul: str, actions: str) -> dict[str, Any]:
+    names = re.findall(r"^function [^\n]+\b([A-Za-z_][A-Za-z0-9_]*)\(", rul, re.M)
+    sections = [s.rstrip() for s in re.split(r"(?=^(?:export )?prototype )", actions, flags=re.M)
+                if s.strip() and not s.startswith("export prototype VOID program\n")]
+    functions = []
+    for function, (rul_hash, action_hash) in CERTIFICATE_SCRIPT_PINS[name].items():
+        sec, act = _rul_section(rul, function), sections[names.index(function)]
+        if _hash(sec.encode()) != rul_hash or _hash(act.encode()) != action_hash:
+            raise ValueError(f"certificate lifecycle script drift: {name}:{function}")
+        offsets = re.findall(r"^([0-9a-f]+):", act, re.M)
+        functions.append({"name": function, "decompiled_sha256": rul_hash, "actions_sha256": action_hash,
+                          "action_offset_first": "0x" + offsets[0], "action_offset_last": "0x" + offsets[-1]})
+    return {"id": _id("certificate-script." + name), "source": _id("child." + name + ".inx"),
+            "kind": "decoded-installscript-control-flow", "locator": "certificate feature/route and full launch/service wrapper bodies",
+            "functions": functions,
+            "url_acl_registration": {"netsh_urlacl_commands": [], "scope": "complete decoded component script plus its two certificate batches; SSL binding is not a URL reservation"},
+            "finding": ("OnShowUI selects update before maintenance before first-install after-handler. Only OnFirstUIAfter with maintenance=false attempts import batch, CertInstaller with EMPTY arguments, remover copy, then service create/change/start. OnUpdateUIAfter/OnMaintUIAfter only finish UI; no certificate refresh, policy refresh or remover repair. UnInstalling attempts saved remover and ignores its result."
+                        if name == "Setup_GuiServer.exe" else
+                        "CA feature checks installed bin/ca.crt existence before cmd.exe /C certutil -addstore Root. Uninstall unconditionally attempts cmd.exe /C certutil -delstore Root by subject GTS+ Root CA. Empty failure branches ignore wrapper errors; child certutil exit code is not tested.")}
+
+
+def _public_certificate(path: Path, expected_der_sha256: str, *, public_pem: bytes | None = None) -> dict[str, Any]:
+    # OpenSSL receives only a public certificate, never a PFX in this helper.
+    data = path.read_bytes() if public_pem is None else public_pem
+    der = subprocess.run(["openssl", "x509", "-outform", "DER"], input=data,
+                         check=True, capture_output=True).stdout
+    if _hash(der) != expected_der_sha256:
+        raise ValueError("public certificate DER identity drift")
+    metadata = subprocess.run(["openssl", "x509", "-noout", "-subject", "-issuer", "-serial", "-dates",
+                               "-ext", "subjectAltName,basicConstraints,keyUsage,extendedKeyUsage"],
+                              input=der, check=True, capture_output=True).stdout.decode()
+    details = subprocess.run(["openssl", "x509", "-noout", "-text"], input=der,
+                             check=True, capture_output=True).stdout.decode()
+    return {"der_sha256": _hash(der), "sha1_thumbprint": hashlib.sha1(der).hexdigest(),
+            "public_metadata": metadata.splitlines(),
+            "public_key_algorithm": re.search(r"Public Key Algorithm: ([^\n]+)", details).group(1),
+            "public_key_bits": int(re.search(r"Public-Key: \((\d+) bit\)", details).group(1)),
+            "signature_algorithm": re.search(r"Signature Algorithm: ([^\n]+)", details).group(1)}
+
+
+def _certificate_contract(cert_dir: Path, evidence: list[dict[str, Any]]) -> None:
+    imp = (cert_dir / "importCerts_SS.bat").read_text()
+    # Decrypt only the certificate bag: -nokeys forbids private-key output. The
+    # packaging password is sent on stdin, never argv, evidence or a new file.
+    password = re.search(r"certutil -p (\S+) -importPFX", imp).group(1)
+    public_pem = subprocess.run(["openssl", "pkcs12", "-legacy", "-nokeys", "-in",
+                                 str(cert_dir / "certs/server.pfx"), "-passin", "stdin"],
+                                input=(password + "\n").encode(), check=True, capture_output=True).stdout
+    del password
+    certificates = []
+    for key, filename, digest, store in (
+        ("rca", "rca.crt", "872a65d447f6e6e656a0ce811c8170c14d8a71d22dca336647ebd8054503d23f", "LocalMachine/ROOT"),
+        ("ica", "ica.crt", "500da1991f1db01258ab7b4504eb199f18b16f41ab51bf9fb3f71bbc4b5e7d11", "LocalMachine/CA"),
+        ("server", "server.pfx", "0775ed039c456a15542bb90d5d48e7263978fe01fed26ce9072076bd197ed16b", "LocalMachine/My"),
+    ):
+        certificates.append({"source": _id("cert-public." + key), "target_store": store,
+                             **_public_certificate(cert_dir / "certs" / filename, digest,
+                                                   public_pem=public_pem if key == "server" else None)})
+    del public_pem
+    thumbprint = "eb95376e91340877cc7b2950c68a693a1b52eba6"
+    if certificates[-1]["sha1_thumbprint"] != thumbprint:
+        raise ValueError("binding certhash does not identify the packaged server certificate")
+    # Batch commands are data, not executed. Remove the one secret operand before
+    # retaining any command. Reject drift instead of redacting a guessed shape.
+    commands = [line.strip() for line in imp.splitlines() if line.startswith(("netsh ", "certutil "))]
+    commands = [re.sub(r"(?<=certutil )-p \S+ ", "-p <redacted> ", line) for line in commands]
+    rem = (cert_dir / "removeCerts.bat").read_text()
+    remove = [line.strip() for line in rem.splitlines() if line.startswith(("netsh ", "certutil "))]
+    evidence.append({"id": _id("certificate-public-identities"), "source": _id("cert-public.server"),
+                     "kind": "public-x509-metadata", "locator": "certs/{rca.crt,ica.crt,server.pfx certificate bag only}",
+                     "certificates": certificates, "binding": {"ipport": "127.0.0.1:50005", "certhash": thumbprint,
+                     "appid": "{ed1dce3e-2c21-4e5b-a9c7-d1cd7b728462}", "certificate_store": "MY (netsh default)",
+                     "url_acl": "No URL ACL command is present in either batch; add sslcert installs an SSL binding, not a URL reservation."},
+                     "finding": "Three distinct SS chain identities are separate from PF's GTS+ Root CA. certutil commands lack -user and therefore target machine stores; PFX import lacks -user/-enterprise and uses My by default. Public fingerprint is checked against exact binding hash; metadata does not prove host trust or successful import."})
+    evidence.append({"id": _id("certificate-failure-prefixes"), "source": _id("cert-import-batch"),
+                     "kind": "batch-sequential-operation-contract", "locator": "complete import/remove command sequence",
+                     "attempted_import_operations": commands, "attempted_remove_operations": remove,
+                     "failure_prefix_contract": "No IF ERRORLEVEL, &&, ||, exit /b, rollback or reboot handling: a failed command does not gate any later command. Every prefix of effects may remain; command results and effects are separate, and later commands may still succeed. No all-or-nothing certificate/store/binding transaction.",
+                     "stdout_redirection": "Literal > null creates/truncates a file named null, NOT Windows NUL; stderr is not redirected. Import first cd /d %~dp0 > null; remover has no cd and its relative null path depends on launch working directory.",
+                     "exit_code_contract": "No explicit batch exit code. Command-processor completion (if used) exposes last netsh/certutil command status, not aggregated earlier failures. InstallScript does NOT invoke cmd.exe for these two batches: Func_651 options1 -> Func_586 options1537 uses CreateProcess, not ShellExecuteExW (bit256 clear). Thus these are attempted direct process launches; no command interpreter or successful .bat execution is inferred. Even launch failure is ignored by certificate callbacks.",
+                     "finding": "First-install destructive prefix deletes existing SSL binding, then My thumbprint, CA SS-ICA and ROOT SS-RCA before attempting additions and replacement binding. Removal targets only that binding and those three store selectors, no Firefox policy/profile files, PF root or URL ACL. All command external outcomes remain inputs, not reported successes."})
+    evidence.append({"id": _id("certificate-sequencing"), "source": _id("child.Setup_GuiServer.exe.inx"),
+                     "kind": "source-owned-install-update-remove-contract", "locator": "OnShowUI/OnFirstUIAfter/OnMaintUIAfter/OnUpdateUIAfter/UnInstalling -> Func_651 -> Func_586/609/631; Func_1929",
+                     "first_install_attempt_order": ["direct CreateProcess importCerts_SS.bat; wait option1", "direct CreateProcess CertInstaller.exe with empty arguments; wait option1", "copy removeCerts.bat to uninstall location", "create or change GTS+GUIServer service and attempt start"],
+                     "existing_install": "Update route and maintenance repair/modify finish handlers do not call the certificate/policy/import/copy/service-create sequence; they do not repair missing remover or migrate stale binding. Removal feature invokes persisted remover independently of these after-handlers.",
+                     "process_result_channels": {"wrapper": "CreateProcess failure sets nLaunchResult=LastDllError and returns -1 through Func_631; successful creation eventually returns0 even when child exit is nonzero. Func_631 restores saved show/current-dir state and returns wrapper status unchanged.",
+                     "child": "GetExitCodeProcess writes nLaunchResult; return value of GetExitCodeProcess and Func_609 wait status are not gates in Func_586. Certificate callers overwrite local wrapper status then discard it; neither status nor nLaunchResult aborts or stops the sequence.",
+                     "wait": "Func_585 defaults nTimeOut=-1, wait-input-idle max2000ms; Func_651 adds512|1024 to1. Func_609 waits through MsgWaitForMultipleObjects; no finite default deadline and no child-tree wait bit2048. Early wait termination does not prove child completion."},
+                     "partial_failure": "Failed batch launch/import, Firefox helper, remover copy or service setup does not gate later attempts here; no compensating operation in empty OnAbort/OnRebooted. Signature verification in the installed feature is a separate earlier abort gate.",
+                     "reboot": "These certificate launch options omit16, so no Func_639 pending-RunOnce comparison and no special3010/1641 handling. Service wrapper may set GblVarNum1 for an existing-service condition; certificate child result does not set it. Update/maintenance finish selects reboot UI using GblVarNum1, while first-install after-handler has no finish/reboot dialog in this script.",
+                     "service": "Func_1928 defaults own-process16, auto-start2, null account/password; Func_1929 opens existing service or creates it, applies description, optionally starts, then logs Service Added. All returns ignored by caller. This service setup is not URL ACL registration.",
+                     "evidence": [_id("certificate-script.Setup_GuiServer.exe"), _id("certificate-script.Setup_PF.exe")],
+                     "finding": "Precise attempted-operation order is recoverable without Windows; store/process/filesystem/service outcomes are not. Missing/failed direct batch launch can be followed by apparently successful policy and service setup; successful child exit is not installer certificate success."})
+    evidence.append({"id": _id("firefox-policy-failure-contract"), "source": _id("cert"),
+                     "kind": "managed-il-dataflow-and-exception-contract", "locator": "Program.Main/Start/GetInstallPathOfFirefox; PolicyEditer.AddCertificationPolicies/ReadJson/ImportCerts/WriteJson",
+                     "normal_installer_mode": "Empty arguments -> installCerts=false -> if Firefox found, ImportEnterpriseRoots=true. It does not invoke InstallCerts2OS, add Install filenames or copy CA files.",
+                     "merge": "Missing/zero-byte file creates JObject. Existing nonempty JSON must parse as JObject; policies and Certificates must be JObjects if present, otherwise cast fails. Missing objects are inserted; unrelated properties survive. ImportEnterpriseRoots is overwritten with true in default mode. Explicit installCerts reuses only an array-valued Install; nonarray Install is replaced by fresh JArray, retaining other certificate keys. Exact case-sensitive rca.crt/ica.crt duplicates are suppressed; existing array order and differently cased names remain.",
+                     "failure": "AddCertificationPolicies catches Exception, Console.WriteLine(exception.ToString()), returns void, no status/exit-code change. Invalid JSON/object shape or write failure skips remaining policy steps, not process failure. WriteJson creates distribution parent then WriteAllText directly, no atomic replace/backup/rollback; a write failure cannot establish old-file survival.",
+                     "explicit_copy_mode": "installCerts=true still copies after missing Firefox or caught policy failure. WMI/registry/SID/copy errors outside AddCertificationPolicies escape Main. Profile iteration tests c:\\Users\\fullName then name, not WMI LocalPath; always attempts Default afterward. Each directory overwrites rca then ica; no per-profile catch/cleanup. Failure on ica leaves prior rca/profile writes attempted and stops later profiles/Default. baseDir is exe directory while packaged public CAs reside in certs subdirectory, so packaged explicit copy path is not an established successful deployment.",
+                     "uninstall": "Saved removeCerts.bat never invokes CertInstaller and never edits/deletes Firefox distribution/policies.json or profile certificate files. PF root removal is a separate feature, not SS remover ownership.",
+                     "evidence": [_id(s["key"]) for s in CERT_METHODS],
+                     "finding": "Policy edit is a targeted merge with two intentional replacements (ImportEnterpriseRoots and non-array Install), not wholesale policy replacement. Caught policy failure may produce normal helper termination; unhandled platform/copy failure may terminate helper, but enclosing installer ignores both channels."})
 
 
 def _decoder_provenance(decoder: Path, checkout: Path, sources: list[dict[str, Any]]) -> dict[str, Any]:
@@ -735,6 +968,9 @@ def build(root: Path = DEFAULT_ROOT, recovered_root: Path = DEFAULT_RECOVERED,
         ("setup-route", "parent setup.inx", "Select initial/update/maintenance branch"),
         ("transferring", "parent setup.inx + InstallShield runtime", "Transfer settings and prepare uninstall metadata"),
         ("children", "parent setup.inx", "Optional sibling components processed serially"),
+        ("certificate-setup-attempts", "GuiServer first-install after-handler", "Ordered import-process, Firefox helper, remover-copy and service-setup attempts; no aggregate success gate"),
+        ("certificate-setup-continued", "GuiServer installer", "Sequence returned without establishing HTTPS trust/binding success"),
+        ("certificate-removal-attempted", "GuiServer uninstall feature", "Saved remover launch attempted; Firefox policy/files retained"),
         ("shortcuts-installed", "GUI installer + native InstallShield engine", "Generated desktop/menu InternetShortcut files for local GTS/CUW pages"),
         ("browser-navigation-requested", "Windows shell/default HTTPS handler", "User activates an installed .url to request the local frontend"),
         ("setup-aborted", "InstallShield runtime", "Abort after explicit script failure/cancel or component error"),
@@ -781,6 +1017,12 @@ def build(root: Path = DEFAULT_ROOT, recovered_root: Path = DEFAULT_RECOVERED,
     transition("pc-recovery-failed", "process-recovery", "process-recovery-failed", "recovery execution", "no PIDs OR10000ms exit wait fails OR restart PID absent OR exception", "show failure; Finish available", "pc.<ExecReboot>d__7.MoveNext", "pc.<DoReboot>d__6.MoveNext")
     transition("pc-recovery-ok", "process-recovery", "process-recovered", "restart complete", "kill waits complete; Arbitration PID>0 after10000ms delay", "show completed; Finish available", "pc.<ExecReboot>d__7.MoveNext", "pc.<DoReboot>d__6.MoveNext")
     transition("pc-exit", "pc-complete", "closed", "Finish", "user click", "close main window; OnExit; mutex finally released", "pc.CheckCompletePage.FinishButtonClick", "pc.App.OnExit", "pc.App.Main")
+    transition("certificate-first-attempt", "children", "certificate-setup-attempts", "GuiServer OnFirstUIAfter", "update=false and maintenance=false", "attempt import batch -> CertInstaller empty arguments -> save remover -> service create/change/start; batch is direct CreateProcess, not cmd.exe", "certificate-script.Setup_GuiServer.exe", "certificate-sequencing", "certificate-public-identities")
+    transition("certificate-partial-failure-continues", "certificate-setup-attempts", "certificate-setup-continued", "each attempted operation returns", "any launch/copy/service status or child exit including failure", "discard failure channels; later operations still attempted; no rollback or certificate-driven reboot status", "certificate-sequencing", "certificate-failure-prefixes", "firefox-policy-failure-contract")
+    transition("certificate-existing-no-refresh", "children", "children", "GuiServer OnUpdateUIAfter or OnMaintUIAfter", "existing install update/repair/modify route", "finish UI only; no certificate refresh, Firefox edit, remover repair or service registration here", "certificate-script.Setup_GuiServer.exe", "certificate-sequencing")
+    transition("certificate-uninstall-attempt", "uninstall", "certificate-removal-attempted", "GTSPlusGUIServer_UnInstalling", "feature selected for removal", "attempt persisted removeCerts.bat; ignore wrapper/child status; remove binding and SS store selectors only if batch actually executes; leave Firefox policy/files", "certificate-script.Setup_GuiServer.exe", "certificate-failure-prefixes", "firefox-policy-failure-contract")
+    transition("certificate-pf-root-attempt", "children", "children", "GTSPlus_CA_Installed", "installed bin/ca.crt exists", "cmd.exe /C certutil -addstore Root; no launch/exit failure abort; separate DENSO root identity", "certificate-script.Setup_PF.exe", "certificate-pf-root")
+    transition("certificate-pf-root-remove-attempt", "uninstall", "uninstall", "GTSPlus_CA_UnInstalling", "CA feature selected for removal", "cmd.exe /C certutil -delstore Root by GTS+ Root CA subject; ignore errors; no shared-use count", "certificate-script.Setup_PF.exe", "certificate-pf-root")
     transition("component-service-stop", "children", "children", "DataSync/GuiServer OnMoving", "service exists and not stopped", "bounded service-stop attempts separated by1000ms; stop failure does not itself abort feature transfer; DataSync also attempts bounded ProxyManager taskkill", "component.Setup_DataSync.exe", "component.Setup_GuiServer.exe")
     transition("component-trust-failure", "children", "setup-aborted", "feature certificate verification", "VerifyTest2 returns0 for installed DLL/exe or NI engine", "feature callback aborts; prior completed sibling installers are not compensated by empty OnAbort callbacks", "component.Setup_PF.exe", "component.Setup_GUI.exe", "component.Setup_DataSync.exe", "component.Setup_InfoCenter.exe", "component.Setup_GuiServer.exe", "component.CUWPlusPF.exe", "component.Setup_NativeGraphViewer.exe", "component.Setup_PCSDataViewer.exe", "component.Setup_TSEConverter.exe", "native.verify")
     transition("datasync-service-start", "children", "children", "DataSync OnMoved", "not pure uninstall", "create/change GTS+ DataSync service then start; start ProxyManager if absent; ignored command/service failures are not mapped to abort here", "component.Setup_DataSync.exe")
@@ -803,7 +1045,7 @@ def build(root: Path = DEFAULT_ROOT, recovered_root: Path = DEFAULT_RECOVERED,
         {"to_domain": "sync_upload", "caller": "DataSync component OnMoving/OnMoved", "callee": "GTS+ DataSync and GtsPlus-ProxyManager", "mechanism": "service control and bounded process termination/relaunch", "payload": "service root from registry/config, stop waits, executable path, startup shortcut", "evidence": ev("component.Setup_DataSync.exe")},
         {"to_domain": "cuw_utility", "caller": "CUWPlusPF feature hook -> nested CUWLauncher setup", "callee": "CUWLauncher.exe", "mechanism": "nested silent installer and Windows shell file associations", "payload": ".cuw/.cuwc/.scuw/.cuwd/.usbrepro quoted file argument", "evidence": ev("component.CUWPlusPF.exe", "component.CUWLauncher_Setup.exe")},
         {"to_domain": "bootstrap", "caller": "PF OnMoved/NativeUtilityReg feature hook", "callee": "Arbitration startup and ReplaceFromLegasy COM registration", "mechanism": "startup shortcut plus RegAsm /codebase or /u", "payload": "installed executable/DLL paths", "evidence": ev("component.Setup_PF.exe")},
-        {"to_domain": "ui_ipc", "caller": "GuiServer certificate support package", "callee": "local HTTPS certificate binding and Firefox trust policy helper", "mechanism": "packaged batch/managed helper; runtime caller ownership is separate", "payload": "127.0.0.1:50005; public CA filenames and Firefox policies.json; no secret emitted or used", "evidence": ev("certificate-batches", "cert.Program.Main", "cert.Program.Start", "component.Setup_GuiServer.exe")},
+        {"to_domain": "ui_ipc", "caller": "GuiServer first-install after-handler", "callee": "local HTTPS binding and Firefox enterprise-root helper", "mechanism": "direct CreateProcess batch attempts then CertInstaller empty arguments; no URL ACL command in these paths", "payload": "127.0.0.1:50005, exact public chain/thumbprint/appid; update/maintenance does not refresh; failure not propagated as certificate failure", "evidence": ev("certificate-public-identities", "certificate-sequencing", "certificate-failure-prefixes", "firefox-policy-failure-contract")},
         {"to_domain": "ui_ipc", "caller": "Windows shell:GUI-installed desktop/menu InternetShortcut", "callee": "https://127.0.0.1:50005/GetResource/{gts/GTSMain.html,cuw/CUWMain.html}", "mechanism": "user activation of generated .url through default HTTPS handler", "payload": "GTS+ desktop and GTS+/CUW+ Programs labels; no automatic browser startup", "evidence": ev("declarative-shortcuts", "native.shortcut-engine")},
     ]
     persistence = [
@@ -817,8 +1059,8 @@ def build(root: Path = DEFAULT_ROOT, recovered_root: Path = DEFAULT_RECOVERED,
         {"path_pattern": "startup/Arbitration shortcut; startup/GtsPlus-ProxyManager shortcut", "producer": "PF OnMoved and DataSync proxy feature", "consumer": "Windows user startup", "created": "selected first install/feature-installed callbacks", "flushed": "AddIcon installer wrapper", "deleted": "component removal ownership", "evidence": ev("component.Setup_PF.exe", "component.Setup_DataSync.exe")},
         {"path_pattern": "HKCR/.gtse + gtse_auto_file; HKCR/{.cuw,.cuwc,.scuw,.cuwd,.usbrepro} shell associations", "producer": "GUI OnEnd and nested CUWLauncher feature", "consumer": "Windows shell", "created": "component completion/feature install; launcher clears prior keys first", "flushed": "registry setup wrapper", "deleted": "CUWLauncher uninstall deletes extension keys only after OnBegin admits removal; shared-client count>1 preserves launcher/associations while outer removal continues; GUI deletion not specified by inspected OnEnd", "evidence": ev("component.Setup_GUI.exe", "component.CUWLauncher_Setup.exe", "component.CUWPlusPF.exe", "launcher-preservation-gate")},
         {"path_pattern": "PublicDocuments/GTSPlus/temp/{component-marker}.txt", "producer": "component OnEnd callbacks", "consumer": "external progress integration not recovered", "created": "except pure uninstall where guarded", "flushed": "create/close marker file; no application data payload", "deleted": "not specified by these callbacks", "evidence": ev("component.Setup_GUI.exe", "component.Setup_GuiServer.exe", "component.Setup_NativeGraphViewer.exe", "component.Setup_PCSDataViewer.exe", "component.CUWPlusPF.exe", "component.Setup_TSEConverter.exe")},
-        {"path_pattern": "Windows certificate stores and HTTP.sys binding127.0.0.1:50005", "producer": "packaged importCerts_SS.bat; PF CA feature", "consumer": "local service TLS and root trust", "created": "when explicit certificate import/feature hook invoked", "flushed": "certutil/netsh commands; no verified environment result asserted", "deleted": "removeCerts.bat and PF root-CA uninstall hook", "evidence": ev("certificate-batches", "component.Setup_PF.exe", "component.Setup_GuiServer.exe")},
-        {"path_pattern": "Firefox/distribution/policies.json; Users/{profile,Default}/AppData/Roaming/Mozilla/Certificates/{rca,ica}.crt", "producer": "packaged CertInstaller managed helper", "consumer": "Firefox certificate policy", "created": "installCerts first argument adds filenames/copies public CAs; other mode sets enterprise roots", "flushed": "File.WriteAllText and overwrite File.Copy; policy edit exceptions printed/caught", "deleted": "no certificate-file deletion in Main/Start path; alternate mode retains files", "evidence": ev("cert.Program.Main", "cert.Program.Start", "cert.Program.CopyCerts2AppData", "cert.Program.copyCertFiles", "cert.PolicyEditer.AddCertificationPolicies", "cert.PolicyEditer.WriteJson")},
+        {"path_pattern": "LocalMachine/{ROOT,CA,My}; HTTP.sys SSL binding127.0.0.1:50005", "producer": "GuiServer first-install batch launch attempt; separate PF CA feature", "consumer": "local service TLS and machine root trust", "created": "batch commands describe destructive replacement; direct batch launch is not proven interpreter execution", "flushed": "individual certutil/netsh results unobserved; no transactional/aggregate success claim", "deleted": "persisted SS remover binding/thumbprint/subject selectors; separate PF subject-based root removal; no URL ACL operation", "evidence": ev("certificate-public-identities", "certificate-failure-prefixes", "certificate-sequencing", "certificate-pf-root")},
+        {"path_pattern": "Firefox/distribution/policies.json; c:/Users/{fullName,name,Default}/AppData/Roaming/Mozilla/Certificates/{rca,ica}.crt", "producer": "CertInstaller", "consumer": "Firefox trust policy", "created": "normal installer empty args only enables enterprise roots; explicit installCerts adds filenames and attempts profile copies from executable directory", "flushed": "targeted JSON merge then direct WriteAllText; caught policy errors do not fail helper; profile copies overwrite rca then ica without compensation; packaged files actually nested under certs", "deleted": "uninstall/maintenance never removes Firefox policy/profile certs in recovered paths", "evidence": ev("firefox-policy-failure-contract", "certificate-sequencing", "cert.Program.ctor", "cert.Program.CopyCerts2AppData")},
         {"path_pattern": "Desktop/GTS+.url; Programs/GTS+/{GTS+,CUW+}.url", "producer": "GUI declarative header + native ISSetup engine", "consumer": "Windows shell/default HTTPS handler", "created": "GUI-selected component shortcut phase", "flushed": "WritePrivateProfileStringW writes InternetShortcut URL/icon/working-directory properties; API result not checked here", "deleted": "GUI OnBegin deletes legacy Public/Desktop/GTSPlus.url; generated shortcut removal is InstallShield engine/log ownership", "evidence": ev("declarative-shortcuts", "native.shortcut-engine", "component.Setup_GUI.exe")},
     ]
     residuals = [
@@ -832,11 +1074,18 @@ def build(root: Path = DEFAULT_ROOT, recovered_root: Path = DEFAULT_RECOVERED,
             "states": [{"id": _id(key), "owner": owner, "meaning": meaning} for key, owner, meaning in states],
             "transitions": transitions, "handoffs": handoffs, "persistence": persistence,
             "coverage": {"components": families + ["CUWLauncher", "parent installer", "VerifyTest2", "GTSPlusNotifyEnd", "CertInstaller", "PcCheckerTool", "InfoCenter", "AgentLite retained runtime state"] + [s["installer"] for s in COMPONENTS],
-                         "entrypoints": [f"{s['type']}::{s['method']}" for s in METHODS + CERT_METHODS] + [s["name"] for s in SCRIPTS] + [s["installer"] + ":" + fn["name"] for s in COMPONENTS for fn in s["functions"]] + ["CUWLauncher_Setup.exe:" + fn["name"] for fn in LAUNCHER_GATE_FUNCTIONS],
+                         "entrypoints": [f"{s['type']}::{s['method']}" for s in METHODS + CERT_METHODS] + [s["name"] for s in SCRIPTS] + [s["installer"] + ":" + fn["name"] for s in COMPONENTS for fn in s["functions"]] + ["CUWLauncher_Setup.exe:" + fn["name"] for fn in LAUNCHER_GATE_FUNCTIONS] + [name + ":" + fn for name, functions in CERTIFICATE_SCRIPT_PINS.items() for fn in functions],
                          "branches": [t["id"] for t in transitions]},
             "installer_child_order": CHILD_ORDER,
             "residuals": residuals,
-            "tool_provenance": {"installscript_decoder": decoder_provenance},
+            "tool_provenance": {"installscript_decoder": decoder_provenance,
+                                "public_x509": {"dependency": "OpenSSL 3+ with legacy provider for this packaged certificate bag",
+                                                "commands": ["openssl pkcs12 -legacy -nokeys -in <pinned server.pfx> -passin stdin",
+                                                             "openssl x509 -outform DER",
+                                                             "openssl x509 -noout -subject -issuer -serial -dates -ext subjectAltName,basicConstraints,keyUsage,extendedKeyUsage",
+                                                             "openssl x509 -noout -text (selected public algorithm/key-size fields only)"],
+                                                "identity": "Pinned original members and canonical DER SHA256/SHA1 calculated directly over DER bytes",
+                                                "secret_handling": "Packaging password passed only through stdin to -nokeys; no argv, generated evidence, private-key output or persistent cleartext file"}},
             "analysis_projects": ["lc_install_update", "lc_install_update_verify", "lc_install_update_verify_legacy", "lc_install_update_shortcuts"],
             "safety": "Static PE/IL/InstallScript/config inspection and local package decryption only; no Windows application, installer, vehicle, authentication or network execution."}
 

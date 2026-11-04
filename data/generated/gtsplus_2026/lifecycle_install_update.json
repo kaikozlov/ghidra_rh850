@@ -623,6 +623,30 @@
       "container": "install_update.child.Setup_GuiServer.exe"
     },
     {
+      "id": "install_update.cert-public.rca",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/gtsplus_msi.7z:2026.03.002.02/Setup_GuiServer.exe:[0]:Disk1\\data1.cab:<Support>Language Independent OS Independent Files\\CertsInstall\\certs/rca.crt",
+      "sha256": "419f07c526c96e5a3f522b2f8402cc3b2c3ed1861048e7ddb922ed0b820abae5",
+      "size": 1241,
+      "representation": "original cabinet support member",
+      "container": "install_update.child.Setup_GuiServer.exe"
+    },
+    {
+      "id": "install_update.cert-public.ica",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/gtsplus_msi.7z:2026.03.002.02/Setup_GuiServer.exe:[0]:Disk1\\data1.cab:<Support>Language Independent OS Independent Files\\CertsInstall\\certs/ica.crt",
+      "sha256": "70f477ba72fa586cb981c082a3e28d3a42293fe560b1f0e7327d4e48de71239c",
+      "size": 1261,
+      "representation": "original cabinet support member",
+      "container": "install_update.child.Setup_GuiServer.exe"
+    },
+    {
+      "id": "install_update.cert-public.server",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/gtsplus_msi.7z:2026.03.002.02/Setup_GuiServer.exe:[0]:Disk1\\data1.cab:<Support>Language Independent OS Independent Files\\CertsInstall\\certs/server.pfx",
+      "sha256": "72270c9763956d37924cabbf45e72f45cda1cfcc6801b010f2c0ac65bb6558c0",
+      "size": 2581,
+      "representation": "original cabinet support member",
+      "container": "install_update.child.Setup_GuiServer.exe"
+    },
+    {
       "id": "install_update.child.Setup_InfoCenter.exe",
       "path": "software/Techstream/gtsplus/unpacked/gtsplus/gtsplus_msi.7z:2026.03.002.02/Setup_InfoCenter.exe",
       "sha256": "0d2b32bf441291b52764183ba9595e13102bf869fec2b4917c15a202a1b8655d",
@@ -756,6 +780,14 @@
       "sha256": "f94f90a141e16f9b5f7961e2b6d84ee3bb3d273a01c4ef6b7e279c5ef1dbf096",
       "size": 10752,
       "representation": "original native cabinet helper",
+      "container": "install_update.child.Setup_PF.exe"
+    },
+    {
+      "id": "install_update.cert-public.pf-ca",
+      "path": "software/Techstream/gtsplus/unpacked/gtsplus/gtsplus_msi.7z:2026.03.002.02/Setup_PF.exe:[0]:Disk1\\data1.cab:GTSPlus_CA\\ca.crt",
+      "sha256": "e3ac980851b2dfa220d668d4633327c6ea81ff3aaf976d3e1c425bce198c3b82",
+      "size": 937,
+      "representation": "original public CA certificate",
       "container": "install_update.child.Setup_PF.exe"
     },
     {
@@ -4143,6 +4175,180 @@
       "finding": "Before transfer bounded service-stop retry with1000ms sleeps; failure does not abort this hook. Feature hook verifies ContentServer DLL/exe sets; uninstall hook launches persisted removeCerts.bat; completion writes GTS+GUIServer.txt. CertInstaller helper and local TLS batch are separately pinned. OnAbort and OnRebooted return without custom compensation."
     },
     {
+      "id": "install_update.certificate-script.Setup_GuiServer.exe",
+      "source": "install_update.child.Setup_GuiServer.exe.inx",
+      "kind": "decoded-installscript-control-flow",
+      "locator": "certificate feature/route and full launch/service wrapper bodies",
+      "functions": [
+        {
+          "name": "OnFirstUIAfter",
+          "decompiled_sha256": "1493d45cbcddc320ee2a8b7b6602a3c5de875d712d3bcd65b58e281e4b323384",
+          "actions_sha256": "d0fa3df230940c9793cb9e67faac8941c697606b7de06115219af0d7971bb59b",
+          "action_offset_first": "0x7d57",
+          "action_offset_last": "0x7f1b"
+        },
+        {
+          "name": "OnMaintUIAfter",
+          "decompiled_sha256": "55055411088ee72ef1dacedd5d3c7c90ce0ce4646277e50377e0bf7b87e7ffc8",
+          "actions_sha256": "fb406148ef68ffae3f5318a2160f1998b82baa2faec5c41495ee1eda21b674fc",
+          "action_offset_first": "0xad50",
+          "action_offset_last": "0xae64"
+        },
+        {
+          "name": "OnUpdateUIAfter",
+          "decompiled_sha256": "0a2824cbd4f06e23419049fddd032f56a995e382745e95010aacc7ec2e30848b",
+          "actions_sha256": "800e12dd19dc21e65ca53493a502772e8d565dc22bb1101bb35c45185f2f34f2",
+          "action_offset_first": "0xae76",
+          "action_offset_last": "0xaf37"
+        },
+        {
+          "name": "GTSPlusGUIServer_UnInstalling",
+          "decompiled_sha256": "169d19ed2c0fac6a5ce25823e65c765ad98ed94e82be8d251a9fb70e09948726",
+          "actions_sha256": "812d9b202da062e80287a85a62dacba395f01357c4ed847214a416bdded00066",
+          "action_offset_first": "0x8596",
+          "action_offset_last": "0x8596"
+        },
+        {
+          "name": "OnMoving",
+          "decompiled_sha256": "4c04581e13e2cb65f92242822522a72a028e674257dee17f427419790912fd7d",
+          "actions_sha256": "c13d91787e3449e768fba9f11afbca612f3fd230f097f29d0d2b2e67f8c80da1",
+          "action_offset_first": "0x8be1",
+          "action_offset_last": "0x8d7d"
+        },
+        {
+          "name": "OnAbort",
+          "decompiled_sha256": "9de629289be929f09a10455e993c27d5f3458f083cab6074c6ea6103f168ae79",
+          "actions_sha256": "a13b5b8af8e7c635f2f2b84450c1d8c296c2c2e061f19ee728ff7aa088b72513",
+          "action_offset_first": "0xb168",
+          "action_offset_last": "0xb168"
+        },
+        {
+          "name": "OnRebooted",
+          "decompiled_sha256": "d15e9a7aa92734d79b3326daf5fffe0cc0eac643bb749784547de4a29d64ee39",
+          "actions_sha256": "5073945dace9fe1d8e32a3685d490fb73cfd1663e5c59971f73bc964f8e963bf",
+          "action_offset_first": "0xb2a0",
+          "action_offset_last": "0xb2a0"
+        },
+        {
+          "name": "Func_585",
+          "decompiled_sha256": "14ad92866cfcb79afd6ef548169c42d5b56845c6f19a5de70f38d209608bc204",
+          "actions_sha256": "77efcd5e404b1b1f8c596b36c97a45c3f56692f801ea82bac0518146684d300c",
+          "action_offset_first": "0x108b5",
+          "action_offset_last": "0x108b5"
+        },
+        {
+          "name": "Func_586",
+          "decompiled_sha256": "2b775982a2e4dbe2c77ef368b5b74dc64955f2438f529ee8a4d617193fbf2da2",
+          "actions_sha256": "a210349812366a7509e8ae3883e2e0e6381e5f105fe5d608ef7c01a61c97ae31",
+          "action_offset_first": "0x10cf2",
+          "action_offset_last": "0x118ba"
+        },
+        {
+          "name": "Func_609",
+          "decompiled_sha256": "1cedb089ae104a6815600bef72585779556991331587691136dcc8c1289a27a5",
+          "actions_sha256": "9ebd300360012824361f776cff2cc5bbd1467bf6c2afa3df12f739a9debe341e",
+          "action_offset_first": "0x11941",
+          "action_offset_last": "0x11dfc"
+        },
+        {
+          "name": "Func_624",
+          "decompiled_sha256": "2d1a4ed50c846caea7555aaa5cee06f78cb598a9a59d7f3c3f9905097d8ceb6a",
+          "actions_sha256": "faa3a88f5ddd23f94c480982db2873ef40ea27a31829f336ff92ff85fe61350a",
+          "action_offset_first": "0x11e0a",
+          "action_offset_last": "0x1210d"
+        },
+        {
+          "name": "Func_631",
+          "decompiled_sha256": "6cc824d7c80eac49e3fb623def000b5509b4d76b7000006df8f7415222fa51b1",
+          "actions_sha256": "4dec764533bc52bc5d1de977de4e81d72bd6c45c43b50f777bd075b91c33a744",
+          "action_offset_first": "0x1211f",
+          "action_offset_last": "0x12543"
+        },
+        {
+          "name": "Func_651",
+          "decompiled_sha256": "8f4c8be5a2591c12d4d074f64183d8c790874cc86d2091421884507d34f5b659",
+          "actions_sha256": "8b22f874adb57d1c0d3ac7ef7bbac71846ffbc0d95976655410d03a7a5a14175",
+          "action_offset_first": "0x12a8c",
+          "action_offset_last": "0x12a8c"
+        },
+        {
+          "name": "Func_727",
+          "decompiled_sha256": "6ab24bd4b888d5563afe6deb321cafdd5c1e750c563e74d3bde91c91c0720e05",
+          "actions_sha256": "22c18e5e321210e2a7e77b7a554eb2c0af3648f1ad2ac99c0f8aa5cea5143772",
+          "action_offset_first": "0x14038",
+          "action_offset_last": "0x1425b"
+        },
+        {
+          "name": "Func_1929",
+          "decompiled_sha256": "0cb443b2c5f55f7d4a20650059fe1ce232eb5ab0addfd4308facfbc5dfc33d31",
+          "actions_sha256": "1b8581a18dadebaf23fc6fff0f92f22bcb4e45db45b2171d425beb787114d897",
+          "action_offset_first": "0x2f572",
+          "action_offset_last": "0x2fc56"
+        },
+        {
+          "name": "Func_1989",
+          "decompiled_sha256": "0be2f54c7a7970c42c20b41ec9bd906a6ddf596f6e07e7f4b3a3e65d8223bf83",
+          "actions_sha256": "b9cc1b2bad23fd360c28a34d8f899232a18df713f58f22f9bed63574e70a59dd",
+          "action_offset_first": "0x30ff5",
+          "action_offset_last": "0x31114"
+        },
+        {
+          "name": "Func_2306",
+          "decompiled_sha256": "77242d69b6d00a7ab54659fb8584146a705bb4dcfed4863c463bc20d4594b549",
+          "actions_sha256": "8e52312163dcfb87e5577ba3197f4ec990356fa11695e00abf5a1b1e57ec7745",
+          "action_offset_first": "0x361de",
+          "action_offset_last": "0x361de"
+        },
+        {
+          "name": "Func_2318",
+          "decompiled_sha256": "5e0112d65d32a5de51fcaaab05384735f63bb38a2e0335b7208eedba9306a670",
+          "actions_sha256": "53df029a3be6820215a5bd117a9bafb38ec1d6879be8a71c5119680634c668ca",
+          "action_offset_first": "0x3640c",
+          "action_offset_last": "0x3640c"
+        },
+        {
+          "name": "Func_1928",
+          "decompiled_sha256": "9d6eac5ed13baa17df62ed85226cf48b4d83ee7166c1dd48f241cf2f46684b9b",
+          "actions_sha256": "7b6cd8538c7459eda13ca57894706250c875ef560dbacc8d767c966a82df90ef",
+          "action_offset_first": "0x2f3a0",
+          "action_offset_last": "0x2f3a0"
+        },
+        {
+          "name": "Func_1980",
+          "decompiled_sha256": "c5c0246f17de40e7c4ecea697bfa953f4dc650c12ae3469bf8a3bdffc652cb96",
+          "actions_sha256": "b59fcc908c5636afe71886159372ee89191c7f22153d84996b549643c83b0d7b",
+          "action_offset_first": "0x30c33",
+          "action_offset_last": "0x30fd4"
+        },
+        {
+          "name": "Func_2391",
+          "decompiled_sha256": "934a9c6c389be1222b67a4283a365735a878be3dd3bdd8fb2d8e0eb27d0e5f43",
+          "actions_sha256": "c22670b3c417435157beca579446853df198a8f5a01dda1fb2b74e54f9d73daa",
+          "action_offset_first": "0x37bf3",
+          "action_offset_last": "0x37bf3"
+        },
+        {
+          "name": "Func_2524",
+          "decompiled_sha256": "3664ffb5144eb7363091d9964ff9600a72903c29fd2029d861c230e90c570ac0",
+          "actions_sha256": "fa9dee8801bba3255cb9b0548c2f5d9bbe27ea049e5ecbb344613ceaf56cf4ff",
+          "action_offset_first": "0x3afa3",
+          "action_offset_last": "0x3afa3"
+        },
+        {
+          "name": "OnShowUI",
+          "decompiled_sha256": "61c6109dac50a50445ca3bbaa3f0175839c490dce96a45f97665a2f57ca33439",
+          "actions_sha256": "b8f18dea10794655914da1f624fabe844934c2a739bafbe4ba2d89e85c0102da",
+          "action_offset_first": "0xbcb1",
+          "action_offset_last": "0xbdab"
+        }
+      ],
+      "url_acl_registration": {
+        "netsh_urlacl_commands": [],
+        "scope": "complete decoded component script plus its two certificate batches; SSL binding is not a URL reservation"
+      },
+      "finding": "OnShowUI selects update before maintenance before first-install after-handler. Only OnFirstUIAfter with maintenance=false attempts import batch, CertInstaller with EMPTY arguments, remover copy, then service create/change/start. OnUpdateUIAfter/OnMaintUIAfter only finish UI; no certificate refresh, policy refresh or remover repair. UnInstalling attempts saved remover and ignores its result."
+    },
+    {
       "id": "install_update.cert.Program.Main",
       "source": "install_update.cert",
       "kind": "managed-il",
@@ -4493,6 +4699,161 @@
       "finding": "Defined shell-launch helper has no call from Main/Start; cannot substitute its mere presence for OS certificate import execution."
     },
     {
+      "id": "install_update.cert.Program.GetFirefoxPreferred",
+      "source": "install_update.cert",
+      "kind": "managed-il",
+      "locator": "ConsoleApp1.Program::GetInstallPathOfFirefox",
+      "body_sha256": "4988ee19d2636bc6f5d199bb64e8b39266837dc227bbe52fc355cf1bbf5b25f1",
+      "body_size": 20,
+      "rva": 9675,
+      "anchors": [
+        {
+          "file_offset": 1997,
+          "text": "ldc.i4.1",
+          "bytes": "17"
+        },
+        {
+          "file_offset": 2004,
+          "text": "brtrue.s 0x7de",
+          "bytes": "2d08"
+        },
+        {
+          "file_offset": 2008,
+          "text": "ldc.i4.0",
+          "bytes": "16"
+        }
+      ],
+      "finding": "Probe HKLM Registry64 first; only null result falls back to Registry32. Empty string suppresses fallback."
+    },
+    {
+      "id": "install_update.cert.Program.GetFirefoxView",
+      "source": "install_update.cert",
+      "kind": "managed-il",
+      "locator": "ConsoleApp1.Program::GetInstallPathOfFirefox",
+      "body_sha256": "b6e880569c83f2646c73cb40de5d4e7263bb57b8894c9d48a569e14edbb9dd5b",
+      "body_size": 170,
+      "rva": 9696,
+      "anchors": [
+        {
+          "file_offset": 2050,
+          "text": "ldc.i4 0x100",
+          "bytes": "2000010000"
+        },
+        {
+          "file_offset": 2074,
+          "text": "ldc.i4 0x200",
+          "bytes": "2000020000"
+        },
+        {
+          "file_offset": 2103,
+          "text": "callvirt Microsoft.Win32.RegistryKey::GetSubKeyNames",
+          "bytes": "6f5000000a"
+        },
+        {
+          "file_offset": 2125,
+          "text": "call System.String::Compare",
+          "bytes": "285100000a"
+        },
+        {
+          "file_offset": 2152,
+          "text": "ldstr '\\\\Main'",
+          "bytes": "7299020070"
+        },
+        {
+          "file_offset": 2175,
+          "text": "callvirt Microsoft.Win32.RegistryKey::GetValue",
+          "bytes": "6f5200000a"
+        }
+      ],
+      "finding": "HKLM SOFTWARE\\Mozilla\\Mozilla Firefox: selects greatest version subkey by String.Compare, not semantic version; reads <version>\\Main Install Directory. Missing key/Main returns null; registry exceptions escape."
+    },
+    {
+      "id": "install_update.cert.Program.GetUserNameListFromComputer",
+      "source": "install_update.cert",
+      "kind": "managed-il",
+      "locator": "ConsoleApp1.Program::GetUserNameListFromComputer",
+      "body_sha256": "0c779e25ca6abea2b5e5b9bb25bd0a46dfaf95111eee670cf72b93b26a69e367",
+      "body_size": 352,
+      "rva": 9232,
+      "anchors": [
+        {
+          "file_offset": 1570,
+          "text": "ldstr \"select * from Win32_UserAccount where domain='{0}'\"",
+          "bytes": "7273010070"
+        },
+        {
+          "file_offset": 1616,
+          "text": "ldstr 'disabled'",
+          "bytes": "72d9010070"
+        },
+        {
+          "file_offset": 1703,
+          "text": "ldstr 'select * from Win32_UserProfile'",
+          "bytes": "72f3010070"
+        },
+        {
+          "file_offset": 1664,
+          "text": "callvirt System.Security.Principal.IdentityReference::Translate",
+          "bytes": "6f4400000a"
+        }
+      ],
+      "finding": "Enabled local WMI accounts union domain-SID user profiles through HashSet<NTAccount>; translated names, not Win32_UserProfile.LocalPath, construct c:\\Users candidates. WMI/SID/translation failures escape; finally disposes enumerators."
+    },
+    {
+      "id": "install_update.cert.Program.ctor",
+      "source": "install_update.cert",
+      "kind": "managed-il",
+      "locator": "ConsoleApp1.Program::.ctor",
+      "body_sha256": "1a4a5f3ee77c0361a34ffba51d51f08cd17ab8925e04fb4057c93f9969aa34fd",
+      "body_size": 88,
+      "rva": 8860,
+      "anchors": [
+        {
+          "file_offset": 1216,
+          "text": "callvirt System.Reflection.Assembly::get_Location",
+          "bytes": "6f2d00000a"
+        },
+        {
+          "file_offset": 1232,
+          "text": "callvirt System.String::Split",
+          "bytes": "6f2e00000a"
+        },
+        {
+          "file_offset": 1257,
+          "text": "call System.String::Join",
+          "bytes": "282f00000a"
+        },
+        {
+          "file_offset": 1262,
+          "text": "stfld baseDir",
+          "bytes": "7d02000004"
+        }
+      ],
+      "finding": "Source certificate directory is executable directory (baseDir), not baseDir\\certs. installCerts mode may fail copying because shipped public certificates are nested under certs; ordinary installer invokes no installCerts argument."
+    },
+    {
+      "id": "install_update.cert.PolicyEditer.CertificateNamePredicate",
+      "source": "install_update.cert",
+      "kind": "managed-il",
+      "locator": "<>c__DisplayClass2_0::<ImportCerts>b__0",
+      "body_sha256": "d634124f88cbaa0b1b01ad5238b84e255183b5f3a7766693df6cf4f0598a75f4",
+      "body_size": 17,
+      "rva": 9866,
+      "anchors": [
+        {
+          "file_offset": 2194,
+          "text": "call System.String::Equals",
+          "bytes": "285300000a"
+        },
+        {
+          "file_offset": 2200,
+          "text": "ceq",
+          "bytes": "fe01"
+        }
+      ],
+      "finding": "Install-array duplicate predicate is case-sensitive String.Equals negated; differently cased names remain and exact rca.crt/ica.crt are appended."
+    },
+    {
       "id": "install_update.certificate-batches",
       "source": "install_update.cert-import-batch",
       "kind": "packaged-batch-commands",
@@ -4505,7 +4866,164 @@
         "netsh http add sslcert ipport=127.0.0.1:50005"
       ],
       "removal_source": "install_update.cert-remove-batch",
-      "finding": "Import batch removes prior local binding/certificates, adds packaged root/ICA/server certificates and binds127.0.0.1:50005. Removal deletes binding and certificates. Source inspection only; no certificate/password imported or used."
+      "finding": "Import/removal batches describe attempted destructive store/binding replacement, not established outcomes. Certificate callbacks attempt direct CreateProcess of .bat without cmd.exe and ignore launch/child failures; see certificate-failure-prefixes. No Windows certificate store or installer is executed by extraction."
+    },
+    {
+      "id": "install_update.certificate-public-identities",
+      "source": "install_update.cert-public.server",
+      "kind": "public-x509-metadata",
+      "locator": "certs/{rca.crt,ica.crt,server.pfx certificate bag only}",
+      "certificates": [
+        {
+          "source": "install_update.cert-public.rca",
+          "target_store": "LocalMachine/ROOT",
+          "der_sha256": "872a65d447f6e6e656a0ce811c8170c14d8a71d22dca336647ebd8054503d23f",
+          "sha1_thumbprint": "f9e4ed0fd4aea78535004a07a88d7bca0c5b7758",
+          "public_metadata": [
+            "subject=C=SS, ST=SS, O=SS, OU=SS, CN=SS-RCA",
+            "issuer=C=SS, ST=SS, O=SS, OU=SS, CN=SS-RCA",
+            "serial=01",
+            "notBefore=Jan 19 00:21:26 2022 GMT",
+            "notAfter=Nov 28 00:21:26 2031 GMT",
+            "X509v3 Basic Constraints: ",
+            "    CA:TRUE"
+          ],
+          "public_key_algorithm": "rsaEncryption",
+          "public_key_bits": 2048,
+          "signature_algorithm": "sha256WithRSAEncryption"
+        },
+        {
+          "source": "install_update.cert-public.ica",
+          "target_store": "LocalMachine/CA",
+          "der_sha256": "500da1991f1db01258ab7b4504eb199f18b16f41ab51bf9fb3f71bbc4b5e7d11",
+          "sha1_thumbprint": "5089017c67895088f66bb8b6408727e0f06bf826",
+          "public_metadata": [
+            "subject=C=SS, ST=SS, L=SS, O=SS, OU=SS, CN=SS-ICA",
+            "issuer=C=SS, ST=SS, O=SS, OU=SS, CN=SS-RCA",
+            "serial=02",
+            "notBefore=Jan 19 00:21:38 2022 GMT",
+            "notAfter=Jan 17 00:21:38 2032 GMT",
+            "X509v3 Basic Constraints: ",
+            "    CA:TRUE"
+          ],
+          "public_key_algorithm": "rsaEncryption",
+          "public_key_bits": 2048,
+          "signature_algorithm": "sha256WithRSAEncryption"
+        },
+        {
+          "source": "install_update.cert-public.server",
+          "target_store": "LocalMachine/My",
+          "der_sha256": "0775ed039c456a15542bb90d5d48e7263978fe01fed26ce9072076bd197ed16b",
+          "sha1_thumbprint": "eb95376e91340877cc7b2950c68a693a1b52eba6",
+          "public_metadata": [
+            "subject=C=SS, ST=SS, L=SS, O=SS, OU=SS, CN=127.0.0.1",
+            "issuer=C=SS, ST=SS, L=SS, O=SS, OU=SS, CN=SS-ICA",
+            "serial=07",
+            "notBefore=Jan 19 01:18:55 2022 GMT",
+            "notAfter=Nov 28 01:18:55 2031 GMT",
+            "X509v3 Basic Constraints: ",
+            "    CA:FALSE",
+            "X509v3 Key Usage: ",
+            "    Digital Signature, Key Encipherment",
+            "X509v3 Extended Key Usage: ",
+            "    TLS Web Server Authentication",
+            "X509v3 Subject Alternative Name: ",
+            "    DNS:localhost, DNS:127.0.0.1, IP Address:127.0.0.1"
+          ],
+          "public_key_algorithm": "rsaEncryption",
+          "public_key_bits": 2048,
+          "signature_algorithm": "sha256WithRSAEncryption"
+        }
+      ],
+      "binding": {
+        "ipport": "127.0.0.1:50005",
+        "certhash": "eb95376e91340877cc7b2950c68a693a1b52eba6",
+        "appid": "{ed1dce3e-2c21-4e5b-a9c7-d1cd7b728462}",
+        "certificate_store": "MY (netsh default)",
+        "url_acl": "No URL ACL command is present in either batch; add sslcert installs an SSL binding, not a URL reservation."
+      },
+      "finding": "Three distinct SS chain identities are separate from PF's GTS+ Root CA. certutil commands lack -user and therefore target machine stores; PFX import lacks -user/-enterprise and uses My by default. Public fingerprint is checked against exact binding hash; metadata does not prove host trust or successful import."
+    },
+    {
+      "id": "install_update.certificate-failure-prefixes",
+      "source": "install_update.cert-import-batch",
+      "kind": "batch-sequential-operation-contract",
+      "locator": "complete import/remove command sequence",
+      "attempted_import_operations": [
+        "netsh http delete sslcert ipport=127.0.0.1:50005 > null",
+        "certutil -delstore My eb95376e91340877cc7b2950c68a693a1b52eba6 > null",
+        "certutil -delstore CA \"SS-ICA\" > null",
+        "certutil -delstore ROOT \"SS-RCA\" > null",
+        "certutil -addstore ROOT .\\certs\\rca.crt > null",
+        "certutil -addstore CA .\\certs\\ica.crt > null",
+        "certutil -p <redacted> -importPFX .\\certs\\server.pfx > null",
+        "netsh http add sslcert ipport=127.0.0.1:50005 certhash=eb95376e91340877cc7b2950c68a693a1b52eba6 appid={ed1dce3e-2c21-4e5b-a9c7-d1cd7b728462} > null"
+      ],
+      "attempted_remove_operations": [
+        "netsh http delete sslcert ipport=127.0.0.1:50005 > null",
+        "certutil -delstore My eb95376e91340877cc7b2950c68a693a1b52eba6 > null",
+        "certutil -delstore CA \"SS-ICA\" > null",
+        "certutil -delstore ROOT \"SS-RCA\" > null"
+      ],
+      "failure_prefix_contract": "No IF ERRORLEVEL, &&, ||, exit /b, rollback or reboot handling: a failed command does not gate any later command. Every prefix of effects may remain; command results and effects are separate, and later commands may still succeed. No all-or-nothing certificate/store/binding transaction.",
+      "stdout_redirection": "Literal > null creates/truncates a file named null, NOT Windows NUL; stderr is not redirected. Import first cd /d %~dp0 > null; remover has no cd and its relative null path depends on launch working directory.",
+      "exit_code_contract": "No explicit batch exit code. Command-processor completion (if used) exposes last netsh/certutil command status, not aggregated earlier failures. InstallScript does NOT invoke cmd.exe for these two batches: Func_651 options1 -> Func_586 options1537 uses CreateProcess, not ShellExecuteExW (bit256 clear). Thus these are attempted direct process launches; no command interpreter or successful .bat execution is inferred. Even launch failure is ignored by certificate callbacks.",
+      "finding": "First-install destructive prefix deletes existing SSL binding, then My thumbprint, CA SS-ICA and ROOT SS-RCA before attempting additions and replacement binding. Removal targets only that binding and those three store selectors, no Firefox policy/profile files, PF root or URL ACL. All command external outcomes remain inputs, not reported successes."
+    },
+    {
+      "id": "install_update.certificate-sequencing",
+      "source": "install_update.child.Setup_GuiServer.exe.inx",
+      "kind": "source-owned-install-update-remove-contract",
+      "locator": "OnShowUI/OnFirstUIAfter/OnMaintUIAfter/OnUpdateUIAfter/UnInstalling -> Func_651 -> Func_586/609/631; Func_1929",
+      "first_install_attempt_order": [
+        "direct CreateProcess importCerts_SS.bat; wait option1",
+        "direct CreateProcess CertInstaller.exe with empty arguments; wait option1",
+        "copy removeCerts.bat to uninstall location",
+        "create or change GTS+GUIServer service and attempt start"
+      ],
+      "existing_install": "Update route and maintenance repair/modify finish handlers do not call the certificate/policy/import/copy/service-create sequence; they do not repair missing remover or migrate stale binding. Removal feature invokes persisted remover independently of these after-handlers.",
+      "process_result_channels": {
+        "wrapper": "CreateProcess failure sets nLaunchResult=LastDllError and returns -1 through Func_631; successful creation eventually returns0 even when child exit is nonzero. Func_631 restores saved show/current-dir state and returns wrapper status unchanged.",
+        "child": "GetExitCodeProcess writes nLaunchResult; return value of GetExitCodeProcess and Func_609 wait status are not gates in Func_586. Certificate callers overwrite local wrapper status then discard it; neither status nor nLaunchResult aborts or stops the sequence.",
+        "wait": "Func_585 defaults nTimeOut=-1, wait-input-idle max2000ms; Func_651 adds512|1024 to1. Func_609 waits through MsgWaitForMultipleObjects; no finite default deadline and no child-tree wait bit2048. Early wait termination does not prove child completion."
+      },
+      "partial_failure": "Failed batch launch/import, Firefox helper, remover copy or service setup does not gate later attempts here; no compensating operation in empty OnAbort/OnRebooted. Signature verification in the installed feature is a separate earlier abort gate.",
+      "reboot": "These certificate launch options omit16, so no Func_639 pending-RunOnce comparison and no special3010/1641 handling. Service wrapper may set GblVarNum1 for an existing-service condition; certificate child result does not set it. Update/maintenance finish selects reboot UI using GblVarNum1, while first-install after-handler has no finish/reboot dialog in this script.",
+      "service": "Func_1928 defaults own-process16, auto-start2, null account/password; Func_1929 opens existing service or creates it, applies description, optionally starts, then logs Service Added. All returns ignored by caller. This service setup is not URL ACL registration.",
+      "evidence": [
+        "install_update.certificate-script.Setup_GuiServer.exe",
+        "install_update.certificate-script.Setup_PF.exe"
+      ],
+      "finding": "Precise attempted-operation order is recoverable without Windows; store/process/filesystem/service outcomes are not. Missing/failed direct batch launch can be followed by apparently successful policy and service setup; successful child exit is not installer certificate success."
+    },
+    {
+      "id": "install_update.firefox-policy-failure-contract",
+      "source": "install_update.cert",
+      "kind": "managed-il-dataflow-and-exception-contract",
+      "locator": "Program.Main/Start/GetInstallPathOfFirefox; PolicyEditer.AddCertificationPolicies/ReadJson/ImportCerts/WriteJson",
+      "normal_installer_mode": "Empty arguments -> installCerts=false -> if Firefox found, ImportEnterpriseRoots=true. It does not invoke InstallCerts2OS, add Install filenames or copy CA files.",
+      "merge": "Missing/zero-byte file creates JObject. Existing nonempty JSON must parse as JObject; policies and Certificates must be JObjects if present, otherwise cast fails. Missing objects are inserted; unrelated properties survive. ImportEnterpriseRoots is overwritten with true in default mode. Explicit installCerts reuses only an array-valued Install; nonarray Install is replaced by fresh JArray, retaining other certificate keys. Exact case-sensitive rca.crt/ica.crt duplicates are suppressed; existing array order and differently cased names remain.",
+      "failure": "AddCertificationPolicies catches Exception, Console.WriteLine(exception.ToString()), returns void, no status/exit-code change. Invalid JSON/object shape or write failure skips remaining policy steps, not process failure. WriteJson creates distribution parent then WriteAllText directly, no atomic replace/backup/rollback; a write failure cannot establish old-file survival.",
+      "explicit_copy_mode": "installCerts=true still copies after missing Firefox or caught policy failure. WMI/registry/SID/copy errors outside AddCertificationPolicies escape Main. Profile iteration tests c:\\Users\\fullName then name, not WMI LocalPath; always attempts Default afterward. Each directory overwrites rca then ica; no per-profile catch/cleanup. Failure on ica leaves prior rca/profile writes attempted and stops later profiles/Default. baseDir is exe directory while packaged public CAs reside in certs subdirectory, so packaged explicit copy path is not an established successful deployment.",
+      "uninstall": "Saved removeCerts.bat never invokes CertInstaller and never edits/deletes Firefox distribution/policies.json or profile certificate files. PF root removal is a separate feature, not SS remover ownership.",
+      "evidence": [
+        "install_update.cert.Program.Main",
+        "install_update.cert.Program.Start",
+        "install_update.cert.Program.CopyCerts2AppData",
+        "install_update.cert.Program.copyCertFiles",
+        "install_update.cert.PolicyEditer.AddCertificationPolicies",
+        "install_update.cert.PolicyEditer.ImportRoots",
+        "install_update.cert.PolicyEditer.ImportCerts",
+        "install_update.cert.PolicyEditer.ReadJson",
+        "install_update.cert.PolicyEditer.WriteJson",
+        "install_update.cert.Program.InstallCerts2OS",
+        "install_update.cert.Program.GetFirefoxPreferred",
+        "install_update.cert.Program.GetFirefoxView",
+        "install_update.cert.Program.GetUserNameListFromComputer",
+        "install_update.cert.Program.ctor",
+        "install_update.cert.PolicyEditer.CertificateNamePredicate"
+      ],
+      "finding": "Policy edit is a targeted merge with two intentional replacements (ImportEnterpriseRoots and non-array Install), not wholesale policy replacement. Caught policy failure may produce normal helper termination; unhandled platform/copy failure may terminate helper, but enclosing installer ignores both channels."
     },
     {
       "id": "install_update.verifier.Setup_InfoCenter.exe",
@@ -5511,6 +6029,55 @@
       "finding": "Creates Arbitration startup shortcut on first install; feature hooks verify GTSPlus/GTSPlusCP/DS4/DS4CP/native-registration groups. NativeUtilityReg runs RegAsm ReplaceFromLegasy.dll /codebase and /u. CA hook runs certutil addstore Root ca.crt, removal deletes GTS+ Root CA; command failures ignored by empty branches. OnAbort and OnRebooted return without custom compensation."
     },
     {
+      "id": "install_update.certificate-script.Setup_PF.exe",
+      "source": "install_update.child.Setup_PF.exe.inx",
+      "kind": "decoded-installscript-control-flow",
+      "locator": "certificate feature/route and full launch/service wrapper bodies",
+      "functions": [
+        {
+          "name": "GTSPlus_CA_Installed",
+          "decompiled_sha256": "ac4c5d24e59bc82f09169a7479284d46a2529b4af088dd535c477281d4846e75",
+          "actions_sha256": "c97753709afe87b3b46761cb9b14334513af20645254273b7898eb8d6f703ae8",
+          "action_offset_first": "0x8cb9",
+          "action_offset_last": "0x8dda"
+        },
+        {
+          "name": "GTSPlus_CA_UnInstalling",
+          "decompiled_sha256": "4b708a3c2eda830132d434c8f9c6d15d3984a090216a1282f19d014b2d6deff2",
+          "actions_sha256": "9a6fed19d4c40634175a85db28545abfcb3ed1f2214849e0c855d064c183ca7e",
+          "action_offset_first": "0x8ef6",
+          "action_offset_last": "0x8fcb"
+        }
+      ],
+      "url_acl_registration": {
+        "netsh_urlacl_commands": [],
+        "scope": "complete decoded component script plus its two certificate batches; SSL binding is not a URL reservation"
+      },
+      "finding": "CA feature checks installed bin/ca.crt existence before cmd.exe /C certutil -addstore Root. Uninstall unconditionally attempts cmd.exe /C certutil -delstore Root by subject GTS+ Root CA. Empty failure branches ignore wrapper errors; child certutil exit code is not tested."
+    },
+    {
+      "id": "install_update.certificate-pf-root",
+      "source": "install_update.cert-public.pf-ca",
+      "kind": "public-x509-metadata",
+      "locator": "GTSPlus_CA/ca.crt -> installed bin/ca.crt",
+      "target_store": "LocalMachine/ROOT",
+      "der_sha256": "e3ac980851b2dfa220d668d4633327c6ea81ff3aaf976d3e1c425bce198c3b82",
+      "sha1_thumbprint": "d3bdd3a4b6fb4dcc65d52df67c1b585d7e9cb9a1",
+      "public_metadata": [
+        "subject=C=JP, ST=Aichi-ken, L=Kariya-shi, O=DENSO CORPORATION, CN=GTS+ Root CA",
+        "issuer=C=JP, ST=Aichi-ken, L=Kariya-shi, O=DENSO CORPORATION, CN=GTS+ Root CA",
+        "serial=E19D6EE31628ECBA",
+        "notBefore=Apr 18 05:27:42 2019 GMT",
+        "notAfter=Apr 10 05:27:42 2049 GMT",
+        "X509v3 Basic Constraints: ",
+        "    CA:TRUE"
+      ],
+      "public_key_algorithm": "rsaEncryption",
+      "public_key_bits": 2048,
+      "signature_algorithm": "sha256WithRSAEncryption",
+      "finding": "GTS+ Root CA is a separate DENSO certificate, not SS-RCA/SS-ICA/server chain. Installed-file existence gates PF addstore; removal uses subject selector GTS+ Root CA, not fingerprint, without ownership/reference counting. Both command failures are ignored by empty script branches."
+    },
+    {
       "id": "install_update.verifier.Setup_TSEConverter.exe",
       "source": "install_update.verifier.Setup_TSEConverter.exe",
       "kind": "native-bytes-and-decompilation",
@@ -6204,6 +6771,21 @@
       "meaning": "Optional sibling components processed serially"
     },
     {
+      "id": "install_update.certificate-setup-attempts",
+      "owner": "GuiServer first-install after-handler",
+      "meaning": "Ordered import-process, Firefox helper, remover-copy and service-setup attempts; no aggregate success gate"
+    },
+    {
+      "id": "install_update.certificate-setup-continued",
+      "owner": "GuiServer installer",
+      "meaning": "Sequence returned without establishing HTTPS trust/binding success"
+    },
+    {
+      "id": "install_update.certificate-removal-attempted",
+      "owner": "GuiServer uninstall feature",
+      "meaning": "Saved remover launch attempted; Firefox policy/files retained"
+    },
+    {
       "id": "install_update.shortcuts-installed",
       "owner": "GUI installer + native InstallShield engine",
       "meaning": "Generated desktop/menu InternetShortcut files for local GTS/CUW pages"
@@ -6579,6 +7161,81 @@
       ]
     },
     {
+      "id": "install_update.certificate-first-attempt",
+      "from": "install_update.children",
+      "to": "install_update.certificate-setup-attempts",
+      "trigger": "GuiServer OnFirstUIAfter",
+      "guard": "update=false and maintenance=false",
+      "action": "attempt import batch -> CertInstaller empty arguments -> save remover -> service create/change/start; batch is direct CreateProcess, not cmd.exe",
+      "evidence": [
+        "install_update.certificate-script.Setup_GuiServer.exe",
+        "install_update.certificate-sequencing",
+        "install_update.certificate-public-identities"
+      ]
+    },
+    {
+      "id": "install_update.certificate-partial-failure-continues",
+      "from": "install_update.certificate-setup-attempts",
+      "to": "install_update.certificate-setup-continued",
+      "trigger": "each attempted operation returns",
+      "guard": "any launch/copy/service status or child exit including failure",
+      "action": "discard failure channels; later operations still attempted; no rollback or certificate-driven reboot status",
+      "evidence": [
+        "install_update.certificate-sequencing",
+        "install_update.certificate-failure-prefixes",
+        "install_update.firefox-policy-failure-contract"
+      ]
+    },
+    {
+      "id": "install_update.certificate-existing-no-refresh",
+      "from": "install_update.children",
+      "to": "install_update.children",
+      "trigger": "GuiServer OnUpdateUIAfter or OnMaintUIAfter",
+      "guard": "existing install update/repair/modify route",
+      "action": "finish UI only; no certificate refresh, Firefox edit, remover repair or service registration here",
+      "evidence": [
+        "install_update.certificate-script.Setup_GuiServer.exe",
+        "install_update.certificate-sequencing"
+      ]
+    },
+    {
+      "id": "install_update.certificate-uninstall-attempt",
+      "from": "install_update.uninstall",
+      "to": "install_update.certificate-removal-attempted",
+      "trigger": "GTSPlusGUIServer_UnInstalling",
+      "guard": "feature selected for removal",
+      "action": "attempt persisted removeCerts.bat; ignore wrapper/child status; remove binding and SS store selectors only if batch actually executes; leave Firefox policy/files",
+      "evidence": [
+        "install_update.certificate-script.Setup_GuiServer.exe",
+        "install_update.certificate-failure-prefixes",
+        "install_update.firefox-policy-failure-contract"
+      ]
+    },
+    {
+      "id": "install_update.certificate-pf-root-attempt",
+      "from": "install_update.children",
+      "to": "install_update.children",
+      "trigger": "GTSPlus_CA_Installed",
+      "guard": "installed bin/ca.crt exists",
+      "action": "cmd.exe /C certutil -addstore Root; no launch/exit failure abort; separate DENSO root identity",
+      "evidence": [
+        "install_update.certificate-script.Setup_PF.exe",
+        "install_update.certificate-pf-root"
+      ]
+    },
+    {
+      "id": "install_update.certificate-pf-root-remove-attempt",
+      "from": "install_update.uninstall",
+      "to": "install_update.uninstall",
+      "trigger": "GTSPlus_CA_UnInstalling",
+      "guard": "CA feature selected for removal",
+      "action": "cmd.exe /C certutil -delstore Root by GTS+ Root CA subject; ignore errors; no shared-use count",
+      "evidence": [
+        "install_update.certificate-script.Setup_PF.exe",
+        "install_update.certificate-pf-root"
+      ]
+    },
+    {
       "id": "install_update.component-service-stop",
       "from": "install_update.children",
       "to": "install_update.children",
@@ -6838,15 +7495,15 @@
     },
     {
       "to_domain": "ui_ipc",
-      "caller": "GuiServer certificate support package",
-      "callee": "local HTTPS certificate binding and Firefox trust policy helper",
-      "mechanism": "packaged batch/managed helper; runtime caller ownership is separate",
-      "payload": "127.0.0.1:50005; public CA filenames and Firefox policies.json; no secret emitted or used",
+      "caller": "GuiServer first-install after-handler",
+      "callee": "local HTTPS binding and Firefox enterprise-root helper",
+      "mechanism": "direct CreateProcess batch attempts then CertInstaller empty arguments; no URL ACL command in these paths",
+      "payload": "127.0.0.1:50005, exact public chain/thumbprint/appid; update/maintenance does not refresh; failure not propagated as certificate failure",
       "evidence": [
-        "install_update.certificate-batches",
-        "install_update.cert.Program.Main",
-        "install_update.cert.Program.Start",
-        "install_update.component.Setup_GuiServer.exe"
+        "install_update.certificate-public-identities",
+        "install_update.certificate-sequencing",
+        "install_update.certificate-failure-prefixes",
+        "install_update.firefox-policy-failure-contract"
       ]
     },
     {
@@ -6990,32 +7647,31 @@
       ]
     },
     {
-      "path_pattern": "Windows certificate stores and HTTP.sys binding127.0.0.1:50005",
-      "producer": "packaged importCerts_SS.bat; PF CA feature",
-      "consumer": "local service TLS and root trust",
-      "created": "when explicit certificate import/feature hook invoked",
-      "flushed": "certutil/netsh commands; no verified environment result asserted",
-      "deleted": "removeCerts.bat and PF root-CA uninstall hook",
+      "path_pattern": "LocalMachine/{ROOT,CA,My}; HTTP.sys SSL binding127.0.0.1:50005",
+      "producer": "GuiServer first-install batch launch attempt; separate PF CA feature",
+      "consumer": "local service TLS and machine root trust",
+      "created": "batch commands describe destructive replacement; direct batch launch is not proven interpreter execution",
+      "flushed": "individual certutil/netsh results unobserved; no transactional/aggregate success claim",
+      "deleted": "persisted SS remover binding/thumbprint/subject selectors; separate PF subject-based root removal; no URL ACL operation",
       "evidence": [
-        "install_update.certificate-batches",
-        "install_update.component.Setup_PF.exe",
-        "install_update.component.Setup_GuiServer.exe"
+        "install_update.certificate-public-identities",
+        "install_update.certificate-failure-prefixes",
+        "install_update.certificate-sequencing",
+        "install_update.certificate-pf-root"
       ]
     },
     {
-      "path_pattern": "Firefox/distribution/policies.json; Users/{profile,Default}/AppData/Roaming/Mozilla/Certificates/{rca,ica}.crt",
-      "producer": "packaged CertInstaller managed helper",
-      "consumer": "Firefox certificate policy",
-      "created": "installCerts first argument adds filenames/copies public CAs; other mode sets enterprise roots",
-      "flushed": "File.WriteAllText and overwrite File.Copy; policy edit exceptions printed/caught",
-      "deleted": "no certificate-file deletion in Main/Start path; alternate mode retains files",
+      "path_pattern": "Firefox/distribution/policies.json; c:/Users/{fullName,name,Default}/AppData/Roaming/Mozilla/Certificates/{rca,ica}.crt",
+      "producer": "CertInstaller",
+      "consumer": "Firefox trust policy",
+      "created": "normal installer empty args only enables enterprise roots; explicit installCerts adds filenames and attempts profile copies from executable directory",
+      "flushed": "targeted JSON merge then direct WriteAllText; caught policy errors do not fail helper; profile copies overwrite rca then ica without compensation; packaged files actually nested under certs",
+      "deleted": "uninstall/maintenance never removes Firefox policy/profile certs in recovered paths",
       "evidence": [
-        "install_update.cert.Program.Main",
-        "install_update.cert.Program.Start",
-        "install_update.cert.Program.CopyCerts2AppData",
-        "install_update.cert.Program.copyCertFiles",
-        "install_update.cert.PolicyEditer.AddCertificationPolicies",
-        "install_update.cert.PolicyEditer.WriteJson"
+        "install_update.firefox-policy-failure-contract",
+        "install_update.certificate-sequencing",
+        "install_update.cert.Program.ctor",
+        "install_update.cert.Program.CopyCerts2AppData"
       ]
     },
     {
@@ -7116,6 +7772,11 @@
       "ConsoleApp1.PolicyEditer::ReadJson",
       "ConsoleApp1.PolicyEditer::WriteJson",
       "ConsoleApp1.Program::InstallCerts2OS",
+      "ConsoleApp1.Program::GetInstallPathOfFirefox",
+      "ConsoleApp1.Program::GetInstallPathOfFirefox",
+      "ConsoleApp1.Program::GetUserNameListFromComputer",
+      "ConsoleApp1.Program::.ctor",
+      "<>c__DisplayClass2_0::<ImportCerts>b__0",
       "OnShowUI",
       "OnFirstUIBefore",
       "OnMaintUIBefore",
@@ -7333,7 +7994,32 @@
       "CUWLauncher_Setup.exe:Func_2191",
       "CUWLauncher_Setup.exe:Func_1581",
       "CUWLauncher_Setup.exe:IfxOnInitInstall",
-      "CUWLauncher_Setup.exe:OnSuiteMaintBefore"
+      "CUWLauncher_Setup.exe:OnSuiteMaintBefore",
+      "Setup_GuiServer.exe:OnFirstUIAfter",
+      "Setup_GuiServer.exe:OnMaintUIAfter",
+      "Setup_GuiServer.exe:OnUpdateUIAfter",
+      "Setup_GuiServer.exe:GTSPlusGUIServer_UnInstalling",
+      "Setup_GuiServer.exe:OnMoving",
+      "Setup_GuiServer.exe:OnAbort",
+      "Setup_GuiServer.exe:OnRebooted",
+      "Setup_GuiServer.exe:Func_585",
+      "Setup_GuiServer.exe:Func_586",
+      "Setup_GuiServer.exe:Func_609",
+      "Setup_GuiServer.exe:Func_624",
+      "Setup_GuiServer.exe:Func_631",
+      "Setup_GuiServer.exe:Func_651",
+      "Setup_GuiServer.exe:Func_727",
+      "Setup_GuiServer.exe:Func_1929",
+      "Setup_GuiServer.exe:Func_1989",
+      "Setup_GuiServer.exe:Func_2306",
+      "Setup_GuiServer.exe:Func_2318",
+      "Setup_GuiServer.exe:Func_1928",
+      "Setup_GuiServer.exe:Func_1980",
+      "Setup_GuiServer.exe:Func_2391",
+      "Setup_GuiServer.exe:Func_2524",
+      "Setup_GuiServer.exe:OnShowUI",
+      "Setup_PF.exe:GTSPlus_CA_Installed",
+      "Setup_PF.exe:GTSPlus_CA_UnInstalling"
     ],
     "branches": [
       "install_update.manifest-failure",
@@ -7359,6 +8045,12 @@
       "install_update.pc-recovery-failed",
       "install_update.pc-recovery-ok",
       "install_update.pc-exit",
+      "install_update.certificate-first-attempt",
+      "install_update.certificate-partial-failure-continues",
+      "install_update.certificate-existing-no-refresh",
+      "install_update.certificate-uninstall-attempt",
+      "install_update.certificate-pf-root-attempt",
+      "install_update.certificate-pf-root-remove-attempt",
       "install_update.component-service-stop",
       "install_update.component-trust-failure",
       "install_update.datasync-service-start",
@@ -7437,6 +8129,17 @@
         ]
       ],
       "identity_contract": "Exact upstream revision and locked source inputs are checked; executable SHA identifies this local platform build. Decisive decompiled/action hashes enforce the expected output representation; no universal cross-platform binary digest is claimed."
+    },
+    "public_x509": {
+      "dependency": "OpenSSL 3+ with legacy provider for this packaged certificate bag",
+      "commands": [
+        "openssl pkcs12 -legacy -nokeys -in <pinned server.pfx> -passin stdin",
+        "openssl x509 -outform DER",
+        "openssl x509 -noout -subject -issuer -serial -dates -ext subjectAltName,basicConstraints,keyUsage,extendedKeyUsage",
+        "openssl x509 -noout -text (selected public algorithm/key-size fields only)"
+      ],
+      "identity": "Pinned original members and canonical DER SHA256/SHA1 calculated directly over DER bytes",
+      "secret_handling": "Packaging password passed only through stdin to -nokeys; no argv, generated evidence, private-key output or persistent cleartext file"
     }
   },
   "analysis_projects": [

@@ -3981,9 +3981,26 @@ Parent-level signature gates cover the DataSync and GUI installers; component
 scripts have their own payload checks. Empty first-party `OnAbort` callbacks
 provide no compensation for earlier completed child installations.
 Service hooks stop/start DataSync and GUIServer; other hooks register COM,
-local certificate trust/bindings, the arbitration startup shortcut, and file
-associations. Maintenance invokes `GTSPlusNotifyEnd`, whose error/no-reply
+create the arbitration startup shortcut and file associations, and invoke
+certificate helpers. Maintenance invokes `GTSPlusNotifyEnd`, whose error/no-reply
 returns abort parent removal.
+
+GuiServer's first-install finish handler orders `importCerts_SS.bat`,
+`CertInstaller` with empty arguments, remover persistence, then service setup.
+The installer wrapper selects direct `CreateProcess` for the batch path,
+without a command interpreter; the callback ignores launch and child results.
+That establishes an import attempt, not successful Windows batch execution.
+Update and maintenance finish handlers omit this trust refresh.
+
+The certificate artifact pins the SS root/intermediate, localhost certificate,
+separate DENSO GTS+ root, machine-store targets, and HTTP.sys binding operations.
+The batch binding thumbprint is `eb95376e91340877cc7b2950c68a693a1b52eba6`.
+Its operations have destructive failure prefixes without aggregate rollback.
+Normal `CertInstaller` execution merges Firefox's
+`Certificates.ImportEnterpriseRoots=true` policy; explicit certificate-copy
+mode is separate. Removal retains the Firefox policy. Offline execution covered
+decoded installer launch/wait/remove branches and actual policy-merge/write IL
+with inert process and filesystem interfaces.
 
 Nested launcher removal counts twelve specific uninstall keys. More than one
 existing key aborts that removal; the outer CUW uninstaller ignores the nested
