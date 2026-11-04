@@ -179,6 +179,14 @@ static uint32_t camry_icctrl_busy;
 static uint32_t camry_flmd_stage;
 static uint32_t camry_flmd_desired;
 static uint32_t camry_faci_pending_command;
+static uint32_t camry_faci_operation;
+static uint64_t camry_faci_deadline = UINT64_MAX;
+static uint32_t camry_faci_blank_first;
+/* Physical geometry: 32KiB DataFlash, one state per four-byte word.
+ * 0 is unknown, 1 programmed, and 2 erased; payload bytes are independent. */
+#define CAMRY_DATAFLASH_BASE 0xFF200000u
+#define CAMRY_DATAFLASH_SIZE 0x8000u
+static uint8_t camry_dataflash_cells[CAMRY_DATAFLASH_SIZE / 4u];
 /* Match the primary machine's existing raw-peripheral scenario mode. */
 uint32_t camry_peripheral_file;
 
@@ -194,6 +202,26 @@ static const CamryNativeInput *camry_native_inputs;
 static uint32_t camry_native_input_count;
 static uint32_t camry_native_input_index;
 static uint32_t camry_native_instructions;
+static uint32_t camry_native_cycles_per_instruction;
+static uint64_t camry_native_hsb_cycles;
+
+void camry_native_set_clock(uint32_t cycles_per_instruction) {
+    camry_native_cycles_per_instruction = cycles_per_instruction;
+}
+
+void camry_native_add_dataflash_cells(uint32_t address, uint32_t size,
+                                      uint32_t programmed) {
+    if (address < CAMRY_DATAFLASH_BASE || address - CAMRY_DATAFLASH_BASE >= CAMRY_DATAFLASH_SIZE
+        || size == 0 || (address & 3u) != 0 || (size & 3u) != 0
+        || size > CAMRY_DATAFLASH_SIZE - (address - CAMRY_DATAFLASH_BASE)
+        || programmed > 1u) {
+        fprintf(stderr, "invalid camry DataFlash cell range at %#x size %u state %u\n",
+            address, size, programmed);
+        abort();
+    }
+    memset(camry_dataflash_cells + (address - CAMRY_DATAFLASH_BASE) / 4u,
+        programmed ? 1 : 2, size / 4u);
+}
 
 /* Only bus identity and instruction positions enter this clock. Read values
  * are always produced by the linked C and its current device backing. */
@@ -212,6 +240,7 @@ void camry_native_set_accesses(const CamryNativeAccess *accesses, uint32_t count
     camry_native_accesses = accesses;
     camry_native_access_count = count;
     camry_native_access_index = 0;
+    camry_native_workflow = count != 0 || camry_native_input_count != 0;
 }
 
 void camry_native_set_inputs(const CamryNativeInput *inputs, uint32_t count) {
@@ -220,7 +249,7 @@ void camry_native_set_inputs(const CamryNativeInput *inputs, uint32_t count) {
     camry_native_input_count = 0;
     camry_native_input_index = 0;
     camry_native_instructions = 0;
-    camry_native_workflow = 0;
+    camry_native_workflow = camry_native_access_count != 0;
     if (inputs == NULL || count == 0)
         return;
     for (index = 0; index < count; index += 1) {
@@ -310,6 +339,12 @@ void camry_host_reset(void) {
     camry_flmd_stage = 0;
     camry_flmd_desired = 0;
     camry_faci_pending_command = 0;
+    camry_faci_operation = 0;
+    camry_faci_deadline = UINT64_MAX;
+    camry_faci_blank_first = UINT32_MAX;
+    memset(camry_dataflash_cells, 0, sizeof(camry_dataflash_cells));
+    camry_native_cycles_per_instruction = 0;
+    camry_native_hsb_cycles = 0;
     camry_peripheral_file = 0;
     camry_native_set_inputs(NULL, 0);
     camry_native_set_accesses(NULL, 0);
@@ -392,23 +427,39 @@ static uint8_t *camry_host_find(uint32_t address, uint32_t width) {
     }
 }
 
-/* instructions specifies the absolute workflow clock. Inputs are external
- * register changes: bypass firmware write hooks and their side effects. */
-void camry_native_advance(uint32_t instructions) {
+static void camry_faci_complete(void);
+
+static void camry_native_clock_to(uint32_t instructions) {
+    uint64_t elapsed = (uint64_t)(instructions - camry_native_instructions)
+        * camry_native_cycles_per_instruction;
+    uint64_t target;
+    if (elapsed > UINT64_MAX - camry_native_hsb_cycles)
+        abort();
+    target = camry_native_hsb_cycles + elapsed;
+    if (camry_faci_deadline != UINT64_MAX && camry_faci_deadline <= target) {
+        camry_native_hsb_cycles = camry_faci_deadline;
+        camry_faci_complete();
+    }
+    camry_native_hsb_cycles = target;
+    camry_native_instructions = instructions;
+}
+
+/* Inputs run after the preceding retirement's clock, before the next bus
+ * access. The terminal retirement advances hardware but dispatches no input. */
+static void camry_native_advance_inputs(uint32_t instructions, int inclusive) {
     if (instructions < camry_native_instructions) {
         fprintf(stderr, "camry native clock reversal from %u to %u\n",
             camry_native_instructions, instructions);
         abort();
     }
-    camry_native_instructions = instructions;
-    if (!camry_native_workflow)
-        return;
     while (camry_native_input_index < camry_native_input_count) {
         const CamryNativeInput *input = &camry_native_inputs[camry_native_input_index];
         uint8_t *bytes;
         uint32_t index;
-        if (input->after_instructions > instructions)
+        if (input->after_instructions > instructions
+            || (!inclusive && input->after_instructions == instructions))
             break;
+        camry_native_clock_to(input->after_instructions);
         bytes = camry_host_find(input->address, input->width);
         if (bytes == NULL) {
             fprintf(stderr, "unmapped camry native input at %#x width %u\n",
@@ -424,6 +475,11 @@ void camry_native_advance(uint32_t instructions) {
         }
         camry_native_input_index += 1;
     }
+    camry_native_clock_to(instructions);
+}
+
+void camry_native_advance(uint32_t instructions) {
+    camry_native_advance_inputs(instructions, 1);
 }
 
 static void camry_native_access(uint32_t address, uint32_t width, uint32_t write) {
@@ -452,7 +508,7 @@ void camry_native_finish(uint32_t instructions) {
             camry_native_access_index, camry_native_access_count);
         abort();
     }
-    camry_native_advance(instructions);
+    camry_native_advance_inputs(instructions, 0);
     camry_native_set_inputs(NULL, 0);
     camry_native_set_accesses(NULL, 0);
 }
@@ -575,6 +631,34 @@ static void camry_store_value(uint32_t address, uint32_t value, uint32_t width) 
     }
 }
 
+static uint64_t camry_faci_after(uint64_t cycles) {
+    if (cycles >= UINT64_MAX - camry_native_hsb_cycles)
+        abort();
+    return camry_native_hsb_cycles + cycles;
+}
+
+static void camry_faci_complete(void) {
+    uint32_t access = camry_stored_value(0xFFA10010u, 1);
+    uint32_t previous_status = camry_stored_value(0xFFA10080u, 4);
+    uint32_t status = previous_status | 0x8000u;
+    camry_faci_deadline = UINT64_MAX;
+    if ((access & 0x88u) != 0) {
+        status |= 0x4000u;
+        access |= 0x10u;
+    }
+    if (camry_faci_operation == 0x71u) {
+        camry_store_value(0xFFA100D4u, camry_faci_blank_first == UINT32_MAX ? 0 : 1, 1);
+        if (camry_faci_blank_first != UINT32_MAX)
+            camry_store_value(0xFFA100D8u, camry_faci_blank_first, 4);
+    }
+    camry_store_value(0xFFA10080u, status, 4);
+    camry_store_value(0xFFA10010u, access, 1);
+    /* INTFLENDNM is a synchronous edge request, even when EIMK masks delivery. */
+    if ((previous_status & 0x8000u) == 0)
+        camry_store_value(0xFFFFB2F6u, camry_stored_value(0xFFFFB2F6u, 2) | 0x1000u, 2);
+    camry_faci_operation = 0;
+}
+
 static void camry_faci_command(uint32_t command) {
     uint32_t status = camry_stored_value(0xFFA10080u, 4);
     uint32_t access = camry_stored_value(0xFFA10010u, 1);
@@ -582,6 +666,7 @@ static void camry_faci_command(uint32_t command) {
     uint32_t control = camry_stored_value(0xFFA10084u, 2) & 0x81u;
     uint32_t next_status;
     uint32_t next_access;
+    uint64_t blank_cycles = 0;
     /* RunP1MEMachine.validateFaciWrite: only these modeled sequences exist. */
     if (command != 0x50u && command != 0x71u && command != 0xD0u && command != 0xB3u)
         camry_device_fault("unsupported-faci-command", 0xFFA20000u, 1, 1);
@@ -598,7 +683,7 @@ static void camry_faci_command(uint32_t command) {
         uint32_t first;
         uint32_t last;
         if ((access & 0x10u) != 0 || control != 0x80u
-            || camry_stored_value(0xFFA100D0u, 1) != 0
+            || (camry_stored_value(0xFFA100D0u, 1) & ~1u) != 0
             || camry_stored_value(0xFFA100F0u, 1) != 0
             || camry_stored_value(0xFFF8A430u, 4) != 1u
             || camry_stored_value(0xFFF82410u, 4) != 1u)
@@ -609,20 +694,47 @@ static void camry_faci_command(uint32_t command) {
         }
         first = camry_stored_value(0xFFA10030u, 4) & 0x7FFFCu;
         last = camry_stored_value(0xFFA10034u, 4) & 0x7FFFCu;
-        if (first > last || last - first + 4u > 0x10000u
-            || camry_host_find(0xFF200000u + first, last - first + 4u) == NULL)
-            camry_device_fault("unsupported-faci-range", 0xFFA20000u, 1, 1);
+        {
+            int decrement = (camry_stored_value(0xFFA100D0u, 1) & 1u) != 0;
+            uint32_t low = first < last ? first : last;
+            uint32_t high = first > last ? first : last;
+            uint32_t offset;
+            uint32_t scanned = 0;
+            uint32_t remainder;
+            if ((decrement ? first < last : first > last)
+                || high >= CAMRY_DATAFLASH_SIZE || high - low + 4u > 0x10000u)
+                camry_device_fault("unsupported-faci-range", 0xFFA20000u, 1, 1);
+            camry_faci_blank_first = UINT32_MAX;
+            for (offset = first;; offset = decrement ? offset - 4u : offset + 4u) {
+                uint8_t state = camry_dataflash_cells[offset / 4u];
+                if (state == 0)
+                    camry_device_fault("missing-dataflash-cell-state",
+                        CAMRY_DATAFLASH_BASE + offset, 4, 0);
+                scanned += 4u;
+                if (state == 1) {
+                    camry_faci_blank_first = offset;
+                    break;
+                }
+                if (offset == last)
+                    break;
+            }
+            /* Hardware manual Table37.14's functional upper envelope at 80MHz. */
+            remainder = scanned % 64u;
+            blank_cycles = ((uint64_t)(scanned / 64u) * 100u
+                + (remainder == 0 ? 0u : remainder == 4u ? 30u : 100u)) * 80u;
+        }
     }
     if (command == 0xD0u) {
         camry_store_value(0xFFA100A0u, 0xD071u, 2);
         camry_store_value(0xFFA10080u, status & ~0x8000u, 4);
-        /* FRDY, blankness and first-nonblank address are external inputs. */
+        camry_faci_operation = 0x71u;
+        camry_faci_deadline = camry_faci_after(blank_cycles);
     } else {
         if (command == 0xB3u) {
             next_status = status & ~(0x3703Cu | 0x8B40u);
             next_access = (access & 0x88u) != 0 ? access : access & ~0x10u;
-            if ((status & 0x10014u) != 0)
-                next_access &= ~1u;
+            camry_faci_operation = 0xB3u;
+            camry_faci_deadline = camry_faci_after(20u * 80u);
         } else {
             next_status = status & ~0x3703Cu;
             if ((access & 0x88u) != 0)
@@ -630,6 +742,8 @@ static void camry_faci_command(uint32_t command) {
             next_access = (next_status & 0x27068u) != 0
                 ? access | 0x10u : access & ~0x10u;
         }
+        if ((status & 0x10014u) != 0)
+            next_access &= ~1u;
         camry_store_value(0xFFA100A0u, (command << 8) | ((history >> 8) & 0xFFu), 2);
         camry_store_value(0xFFA10080u, next_status, 4);
         camry_store_value(0xFFA10010u, next_access, 1);
@@ -693,7 +807,9 @@ static uint32_t camry_flash_write(uint32_t address, uint32_t value, uint32_t wid
             camry_device_fault("prohibited-dataflash-read-cycle", address, width, 1);
         return value & 0xFu;
     }
-    if (address == 0xFFA20000u && width == 1u) {
+    if (address == 0xFFA20000u) {
+        if (width != 1u)
+            camry_device_fault("unsupported-faci-width", address, width, 1);
         camry_faci_command(value & 0xFFu);
     } else if (address == 0xFFA10084u && width == 2u) {
         uint32_t previous = camry_stored_value(address, 2);
@@ -710,6 +826,9 @@ static uint32_t camry_flash_write(uint32_t address, uint32_t value, uint32_t wid
         return (camry_stored_value(0xFFA10080u, 4) & 0x8000u) != 0
             ? value & ~3u : camry_stored_value(address, 4);
     } else if ((address == 0xFFF82410u || address == 0xFFF8A430u) && width == 4u) {
+        if ((camry_stored_value(0xFFA10080u, 4) & 0x8000u) == 0
+            && (value & 1u) != camry_stored_value(address, 4))
+            camry_device_fault("prohibited-faci-enable-change", address, width, 1);
         return value & 1u;
     } else if (address == 0xFFC5B008u && (value & 1u) != 0) {
         camry_store_value(0xFFC5B004u, camry_stored_value(0xFFC5B004u, 4) & ~3u, 4);

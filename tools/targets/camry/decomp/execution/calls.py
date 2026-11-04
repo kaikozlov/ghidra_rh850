@@ -14,7 +14,10 @@ from tools.project.analysis_target import target as resolve_target
 from .. import c_text
 from ..tree import SYSTEM_REGISTERS, load_oracles, load_symbols
 from .build import NATIVE_SIGNATURES
-from .memory import MEMORY_MODEL_SHA256, MACHINE_REGISTERS, configure_native_model, pointer
+from .memory import (
+    MEMORY_MODEL_SHA256, MACHINE_REGISTERS, configure_native_model,
+    native_model_inputs, pointer,
+)
 
 
 SIGNATURES = {
@@ -481,24 +484,54 @@ class NativeAccess(ctypes.Structure):
     )]
 
 
+def _needs_native_timing(scenario: dict | None) -> bool:
+    return bool(scenario and (
+        scenario.get("events") or scenario.get("hsb_cycles_per_instruction")
+    ))
+
+
+def _native_timing_identity(scenario: dict, code_sha: str) -> dict:
+    from tools.emulation.p1me_machine import SCRIPT
+
+    canonical = json.dumps(scenario, sort_keys=True, separators=(",", ":"))
+    return {
+        "input_sha256": hashlib.sha256(canonical.encode("utf-8")).hexdigest(),
+        "codeflash_sha256": code_sha,
+        "model_sha256": MEMORY_MODEL_SHA256,
+        "primary_sha256": hashlib.sha256(SCRIPT.read_bytes()).hexdigest(),
+    }
+
+
+def _cached_native_timing(path: Path, identity: dict) -> dict:
+    cached = json.loads(path.read_text(encoding="utf-8"))
+    if cached.get("native_timing_identity") != identity or not isinstance(cached.get("report"), dict):
+        raise AssertionError("primary timing cache input/content identity mismatch")
+    return cached["report"]
+
+
 def _native_timing(library: ctypes.CDLL, scenario: dict | None):
-    events = (scenario or {}).get("events") or []
-    if not events:
+    if not _needs_native_timing(scenario):
         return None
+    events = scenario.get("events") or []
+    quantum, _cells = native_model_inputs(scenario)
     name = scenario["name"]
     if Path(name).name != name:
         raise AssertionError("invalid native timing scenario name")
     # The primary's timing is reusable only with the original tracked inputs.
     retained = next((row for row in load_oracles() if row["name"] == name), None)
-    input_fields = (
-        "entry", "registers", "gpr_fill", "memory", "pre_reset_memory",
-        "peripheral_file", "reset", "max_instructions", "stop_addresses", "events",
-    )
+    output_fields = {"checks", "expected_fault", "expected_termination"}
+    input_fields = (set(scenario) | set(retained or {})) - output_fields
     if retained is None or any(scenario.get(key) != retained.get(key) for key in input_fields):
         raise AssertionError(f"{name}: timing requires the original retained inputs")
-    path = REPO_ROOT / "build" / "tmp" / f"{name}.timing-report.json"
+    metadata = resolve_target("camry-8965F3307000")[1]
+    code_sha = hashlib.sha256((REPO_ROOT / metadata["codeflash"]).read_bytes()).hexdigest()
+    if code_sha != metadata["codeflash_sha256"]:
+        raise AssertionError(f"{name}: primary CodeFlash identity mismatch")
+    identity = _native_timing_identity(retained, code_sha)
+    digest = hashlib.sha256(json.dumps(identity, sort_keys=True).encode("utf-8")).hexdigest()
+    path = REPO_ROOT / "build" / "tmp" / f"{name}.{digest}.timing-report.json"
     if path.is_file():
-        report = json.loads(path.read_text(encoding="utf-8"))
+        report = _cached_native_timing(path, identity)
     else:
         from tools.emulation.p1me_machine import run
 
@@ -507,8 +540,9 @@ def _native_timing(library: ctypes.CDLL, scenario: dict | None):
             original = Path(tmp) / "scenario.json"
             original.write_text(json.dumps(retained) + "\n", encoding="utf-8")
             report = run("camry-8965F3307000", original, path)
-    metadata = resolve_target("camry-8965F3307000")[1]
-    code_sha = hashlib.sha256((REPO_ROOT / metadata["codeflash"]).read_bytes()).hexdigest()
+        path.write_text(json.dumps({
+            "native_timing_identity": identity, "report": report,
+        }) + "\n", encoding="utf-8")
     contract = report.get("resolved_run_contract") or {}
     if (
         report.get("schema") != "rh850-p1me-machine-report-v2"
@@ -525,6 +559,7 @@ def _native_timing(library: ctypes.CDLL, scenario: dict | None):
         or contract.get("stop_addresses") != scenario.get("stop_addresses", [])
         or contract.get("max_instructions") != scenario.get("max_instructions")
         or contract.get("reset") != scenario.get("reset", "none")
+        or contract.get("hsb_cycles_per_instruction") != (quantum or None)
     ):
         raise AssertionError(f"{name}: primary timing identity/contract mismatch")
     event_fields = ("kind", "after_instructions", "register", "value", "evidence")
@@ -538,7 +573,7 @@ def _native_timing(library: ctypes.CDLL, scenario: dict | None):
             raise AssertionError(f"{name}: unsupported native timed event {event['kind']}")
         register = MACHINE_REGISTERS[event["register"]]
         tick, value, width = event["after_instructions"], int(event["value"], 16), int(register["size"])
-        if not 0 <= tick <= 0xFFFFFFFF or width not in (1, 2, 4) or not 0 <= value < 1 << (width * 8):
+        if type(tick) is not int or not 0 <= tick <= 0xFFFFFFFF or width not in (1, 2, 4) or not 0 <= value < 1 << (width * 8):
             raise AssertionError(f"{name}: unsupported native input width/value/clock")
         inputs.append(NativeInput(tick, int(register["address"]), value, width))
     accesses = []
@@ -552,12 +587,17 @@ def _native_timing(library: ctypes.CDLL, scenario: dict | None):
         if address < 0xFF000000:
             continue
         tick = access["instruction"]
-        if not previous <= tick <= 0xFFFFFFFF or access["kind"] not in {"read", "write"}:
+        if (
+            type(tick) is not int or not previous <= tick <= 0xFFFFFFFF
+            or not 0 <= address <= 0xFFFFFFFF
+            or type(access["size"]) is not int or access["size"] not in (1, 2, 4)
+            or access["kind"] not in {"read", "write"}
+        ):
             raise AssertionError(f"{name}: invalid primary bus ordering")
         previous = tick
         accesses.append(NativeAccess(tick, address, access["size"], access["kind"] == "write"))
     final_tick = report["instruction_count"]
-    if not accesses or not previous < final_tick <= 0xFFFFFFFF:
+    if not accesses or type(final_tick) is not int or not previous < final_tick <= 0xFFFFFFFF:
         raise AssertionError(f"{name}: incomplete primary bus timing")
     input_view = (NativeInput * len(inputs))(*inputs)
     access_view = (NativeAccess * len(accesses))(*accesses)
@@ -569,8 +609,8 @@ def _native_timing(library: ctypes.CDLL, scenario: dict | None):
     library.camry_native_finish.restype = None
     library.camry_native_set_inputs(input_view, len(inputs))
     library.camry_native_set_accesses(access_view, len(accesses))
-    # The primary stops before dispatching events at instruction_count.
-    return input_view, access_view, final_tick - 1
+    # Finish clocks through the last retirement, but never dispatch terminal inputs.
+    return input_view, access_view, final_tick
 
 
 def call_corpus(
@@ -598,7 +638,7 @@ def call_corpus(
     fill = 0x11111111
     if scenario is not None and scenario.get("gpr_fill"):
         fill = int(scenario["gpr_fill"], 16)
-    if scenario and scenario.get("events") and registers != scenario.get("registers", {}):
+    if _needs_native_timing(scenario) and registers != scenario.get("registers", {}):
         raise AssertionError(f"{name}: timing requires the original retained register inputs")
     load_registers(library, registers, fill)
     configure_native_model(library, scenario)
@@ -700,8 +740,8 @@ def call_matched(
     signature: str | None = None,
     scenario: dict | None = None,
 ) -> int | None:
-    if scenario and scenario.get("events") and form != "corpus":
-        raise AssertionError(f"{name}: timed external inputs require native corpus C")
+    if _needs_native_timing(scenario) and form != "corpus":
+        raise AssertionError(f"{name}: timed inputs/clocks require native corpus C")
     if scenario is not None:
         ctypes.c_uint32.in_dll(library, "camry_peripheral_file").value = bool(
             scenario.get("peripheral_file", False)

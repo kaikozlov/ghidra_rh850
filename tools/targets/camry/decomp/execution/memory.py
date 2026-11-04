@@ -4,7 +4,7 @@ from __future__ import annotations
 import ctypes
 
 from tools import REPO_ROOT
-from tools.emulation.p1me_machine import _load_model
+from tools.emulation.p1me_machine import _load_model, _validate_dataflash_cells
 from tools.project.analysis_target import target as resolve_target
 
 from ..tree import _machine_registers
@@ -249,14 +249,40 @@ def install_regions(library: ctypes.CDLL, code_view, code_size: int, regions: li
     return views
 
 
+def native_model_inputs(scenario: dict) -> tuple[int, list[dict]]:
+    quantum = scenario.get("hsb_cycles_per_instruction")
+    if quantum is not None and (
+        type(quantum) is not int or not 0 < quantum <= 0xFFFFFFFF
+    ):
+        raise AssertionError("native hsb_cycles_per_instruction requires a positive unsigned-32 integer")
+    rows = scenario.get("dataflash_cells", [])
+    # The shared schema validator normalizes addresses in place.
+    cells = _validate_dataflash_cells(
+        [dict(row) if isinstance(row, dict) else row for row in rows]
+        if isinstance(rows, list) else rows,
+        f"{scenario.get('name', 'native')}.dataflash_cells",
+    )
+    metadata = resolve_target("camry-8965F3307000")[1]
+    base = int(metadata["dataflash_base"], 16)
+    for row in cells:
+        if not covers(base, 0x8000, int(row["address"], 16), row["size"]):
+            raise AssertionError("native dataflash_cells must stay within the physical 32KiB DataFlash")
+    return quantum or 0, cells
+
+
 def configure_native_model(library: ctypes.CDLL, scenario: dict | None) -> None:
     if scenario is None or scenario.get("peripheral_file", False):
         return
+    quantum, cells = native_model_inputs(scenario)
     if getattr(library, "_camry_model_configured", False):
         return
     u32 = ctypes.c_uint32
     library.camry_host_add_register.argtypes = [u32, u32, u32, u32, u32]
     library.camry_host_add_register.restype = None
+    library.camry_native_set_clock.argtypes = [u32]
+    library.camry_native_set_clock.restype = None
+    library.camry_native_add_dataflash_cells.argtypes = [u32, u32, u32]
+    library.camry_native_add_dataflash_cells.restype = None
     rows = [*scenario.get("pre_reset_memory", []), *scenario.get("memory", [])]
     for register in MACHINE_REGISTERS.values():
         address, size = int(register["address"]), int(register["size"])
@@ -270,6 +296,11 @@ def configure_native_model(library: ctypes.CDLL, scenario: dict | None) -> None:
         widths = sum(1 << width for width in register["access_widths"])
         access = (1 if "r" in register["access"] else 0) | (2 if "w" in register["access"] else 0)
         library.camry_host_add_register(address, size, widths, access, initialized)
+    library.camry_native_set_clock(quantum)
+    for row in cells:
+        library.camry_native_add_dataflash_cells(
+            int(row["address"], 16), row["size"], row["state"] == "programmed",
+        )
     library._camry_model_configured = True
 
 

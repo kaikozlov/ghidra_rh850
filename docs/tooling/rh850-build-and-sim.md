@@ -539,6 +539,14 @@ The native oracle grows its region and register tables during scenario
 installation and retains their allocation across resets. Sparse device pages
 keep newest-region overlay precedence and coherent LocalRAM aliases; device
 width, access, initialization and unmapped-address faults remain enforced.
+Clocked retained scenarios advance native FACI from the primary execution's bus
+identity/order and retired-instruction positions, even without external events.
+Read values and completion results are computed independently from declared
+physical cells and the HSB quantum. Timing caches bind the complete retained
+scenario content, CodeFlash/model hashes and primary runner source hash; obsolete
+name-only caches are not consumed. Native clock quanta must fit unsigned32.
+The native model supports clocked blank checks and forced stop; program/erase
+execution remains owned by the strict primary machine.
 
 Each report embeds the resolved run contract: unique candidate count or
 dump-contract source, resolved entry, exact entry-instruction hash,
