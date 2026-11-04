@@ -16,3 +16,12 @@ The bootloader region `0x00000..0x17FFF` is absent from this CUW. The separate
 not a CodeFlash bootloader. For both CPUs' programming offsets, application
 UDS/DID evidence, and the precise unresolved bootloader dispatch boundary, see
 [the Tundra dual-CPU report](../tundra-8965F3401200/README.md).
+
+## SecOC Gate 2
+
+The exact RAV4 Prime/Camry Gate-2 context `E0 D1 9A 0D 1A 38 BF FF` occurs once
+at `0x809E4`, inside the 134-byte receive-verification worker at `0x80998`.
+Result zero takes the normal status/delivery arm and nonzero takes the
+retry/failure arm, matching CPU11 and the named Camry Gate-2 structure. Its
+`0x80000..0x87FFF` stock erase-block SHA-256 is
+`8a196b3ac98ea9eb581aa4b57f60c9ea3a0395f7817910365a0b25bf7a925c3b`.

@@ -1,10 +1,8 @@
-# Community persistent SecOC patch — pre-acquisition target analysis
+# Community persistent SecOC patch target analysis
 
-> **Scope:** blurbdust/yc persistent CodeFlash patch signature and future
-> `8965F3`/`8965F4` CodeFlash images
+> **Scope:** community persistent CodeFlash patch signatures across analyzed EPS applications
 >
-> **Status:** tooling complete; target semantics artifact-blocked until an
-> F3/F4 image is acquired
+> **Status:** active; Tundra `8965F3401200/2200` semantics resolved from the Toyota CUW applications
 >
 > **Verification:** `tests/tooling/verify_community_patch_target_analyzer.py` and
 > `tests/tooling/verify_community_tooling.py`
@@ -141,30 +139,56 @@ Only after these checks should the target be described as one of:
 - generic helper used by SecOC and unrelated paths;
 - unrelated false positive.
 
-## 4. What is already closed and what remains blocked
+## 4. Tundra F340: the two community signatures select different functions
 
-Closed now:
+Toyota `T-0035-22.cuw` supplies CMAC-valid application images for both Tundra
+processors. They close the F340 target question directly.
 
-- exact signature and replacement semantics;
-- robust raw-location triage;
-- instruction-aware semantic-report workflow;
-- known `4512000` false-positive reference result;
-- rule preventing raw-callsite or prologue overinterpretation;
-- a separate calibration-independent Level-1 semantic resolver that ignores the
-  blurbdust egg entirely and rediscovers the Sienna authenticated-delivery gate
-  from machine/CFG/data-flow structure; see
-  [secoc-semantic-patch-resolver.md](secoc-semantic-patch-resolver.md).
+The blurbdust immediate-success egg `88 00 01 52 00 0A E5 0D` occurs once in
+each image:
 
-Still blocked on an F3/F4 CodeFlash artifact:
+| CPU | Egg address | Containing function | Direct callers | Semantics |
+|---|---:|---:|---:|---|
+| `8965F3401200` | `0x30C22` | `0x30C22` | 11 | generic byte-array equality comparator |
+| `8965F3402200` | `0x2F8E2` | `0x2F8E2` | 11 | generic byte-array equality comparator |
 
-- containing function for `8965F3401200`, `8965F4207000`, or `8965F4201000`;
-- its callers and SecOC/ICU relationship;
-- whether the unchanged semantic resolver finds the same acceptance gate on
-  those images;
-- whether that resolved gate is the same semantic object as the blurbdust egg
-  target, or whether the successful live patch forced a broader/different
-  predicate true.
+Both functions are the same 40-byte loop: compare `param3 & 0xFF` bytes and
+return 1 only when every byte matches. Replacing their entry with unconditional
+success therefore changes a shared comparison primitive; it is not the Tundra
+SecOC acceptance predicate.
 
-A post-patch dump is sufficient if the surrounding image is intact: the
-original first four bytes are known from the egg, so the target can be restored
-for static analysis without requiring a separate pre-patch dump.
+The later RAV4 Prime field patch uses a different signature and operation:
+
+```text
+E0 D1 9A 0D 1A 38 BF FF  ->  E0 01 9A 0D 1A 38 BF FF
+cmp r0,r26                    cmp r0,r0
+```
+
+That exact eight-byte context also occurs once in each Tundra application:
+
+| CPU | Compare | Worker | Result-zero path |
+|---|---:|---:|---|
+| `8965F3401200` | `0x88406` | `0x883BA` | status notification then secured-payload delivery |
+| `8965F3402200` | `0x809E4` | `0x80998` | status notification then secured-payload delivery |
+
+Both workers are 134 bytes and preserve the same control-flow structure as the
+named Camry `finish_secoc_receive_verification_8f906`: the result is compared
+against zero; zero takes the normal delivery arm and nonzero takes the
+retry/failure arm. The compare-neutralization patch is therefore the transferred
+Gate-2 operation on both Tundra CPUs.
+
+This distinction matters when reconstructing historical Tundra experiments:
+the blurbdust egg patch and the R4P/Camry Gate-2 compare patch are different
+patches against different functions.
+
+## 5. Remaining boundary
+
+The Tundra application findings are closed for `8965F3401200/2200`. The exact
+`8965F4207000` and `8965F4201000` targets still require their own firmware
+images before assigning either signature a semantic role.
+
+A post-patch Tundra dump remains valuable for a different reason: it can identify
+which historical patch was actually applied and whether the containing erase
+block suffered collateral changes. The stock CPU1 `0x88000..0x8FFFF` block is
+especially diagnostic because it contains both Gate 2 and application diagnostic
+session code; see the Tundra target report.

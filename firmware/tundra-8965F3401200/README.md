@@ -116,10 +116,14 @@ Tundra bootloader or a programming trace.
 
 ## CPU11 application: entry to programming mode
 
-The Tundra CPU11 application has an independent `10 02` programming-session
-handoff. The application SID `10` service at `0x25B10` uses a subfunction table
-at `0x258A8`; its `02` callback is `0x8DCE6`. Decompilation and disassembly
-recover this chain:
+The Tundra CPU11 application SID `10` service at `0x25B10` uses a
+subfunction table at `0x258A8`. Its wrappers are `01 -> 0x8DCD6`,
+`02 -> 0x8DCE6`, and `03 -> 0x8DCF6`. The current-session allow lists are
+`01:{01,02,03}`, `02:{02,03}`, and `03:{01,03}`. The session records at
+`0x26016` show transition kinds `0`, `2`, and `0` respectively, so EXTENDED
+`10 03` is an ordinary immediate transition while PROGRAMMING `10 02` uses the
+asynchronous handoff. Decompilation and disassembly recover the programming
+chain:
 
 - `0x8DCE6 -> 0x8DC1C -> 0x8DA10 -> 0x8DCC8 -> 0x83D82 ->
   0x45AAE`: a request for session 2 is rejected when the application speed
@@ -140,3 +144,52 @@ CAN-traffic-volume gate. The effect of missing or additional CAN messages on
 the underlying status/speed snapshots is a separate dependency to trace. A
 Tundra bootloader SecurityAccess anti-bruteforce policy cannot be read from the
 CUW's application images because its first `0x18000` CodeFlash bytes are absent.
+
+## SecOC Gate 2 and the CPU1 recovery-risk overlap
+
+The RAV4 Prime/Camry compare-neutralization signature
+`E0 D1 9A 0D 1A 38 BF FF` occurs exactly once in each Tundra application. Ghidra
+places each occurrence inside the same 134-byte SecOC receive-verification worker
+shape as the named Camry Gate-2 function:
+
+| CPU | Worker | Gate-2 compare | 32-KiB erase block |
+|---|---:|---:|---|
+| CPU11 `8965F3401200` | `0x883BA` | `0x88406` | `0x88000..0x8FFFF` |
+| CPU12 `8965F3402200` | `0x80998` | `0x809E4` | `0x80000..0x87FFF` |
+
+At both compare sites, result zero falls through to the normal status/delivery
+calls while nonzero branches to the retry/failure call. The two-byte operation
+`E0 D1 -> E0 01` changes `cmp r0,r26` to `cmp r0,r0`, so the following BNE cannot
+take the nonzero-result arm.
+
+CPU11 has an important flash-recovery property: its application diagnostic
+session machinery is in the **same `0x88000..0x8FFFF` erase block** as Gate 2.
+This includes the `0x8DCF6` EXTENDED-session wrapper, so a rack that still
+answers application F181 but times out on `10 03` matches a failure localized
+away from the independent F181 callback/table and into this sector or its
+session state path.
+That block contains the session wrappers `0x8DCD6/0x8DCE6/0x8DCF6`, common
+session worker `0x8DC1C`, request worker `0x8DA10`, and asynchronous worker
+`0x8DB5A`. The stock CUW-derived block SHA-256 is
+`a082fa7685573b6784c32ce4ca02f1ca87f398f8c85e1bb530dab52ae3331cf8`.
+CPU12's stock Gate-2 block SHA-256 is
+`8a196b3ac98ea9eb581aa4b57f60c9ea3a0395f7817910365a0b25bf7a925c3b`.
+
+A logical two-byte CPU1 Gate-2 patch therefore requires read-modify-erase-program
+of a sector that also owns `10 01/02/03` application session code. Collateral
+sector corruption can leave the independent F181 path operational while breaking
+session transitions. A writer that computes the terminal CodeFlash CRC from the
+post-write flash contents can also make such collateral changes boot-valid.
+
+The retained blurbdust persistent writer is evidence that this failure mode was
+possible in community tooling, not evidence that it occurred on a particular
+rack. It rewrites whole `0x8000` blocks and its historical program loop used the
+wrong FACI halfword-pacing condition; Toyota's exact T-0035 manufacturer routine
+uses post-write `FSTATR & 0x400` (`DBFULL`). The exact writer and target bytes used in the reported Tundra attempt are not
+retained here, so attribution requires that patch script or a post-patch CPU11
+dump.
+
+For a rack that still answers application F181 but no longer enters EXTENDED,
+the highest-value artifact is the current CPU11 `0x88000..0x8FFFF` sector. A
+byte diff against the CUW stock sector would distinguish a clean Gate-2 edit
+from collateral programming damage or an unrelated patch target.
