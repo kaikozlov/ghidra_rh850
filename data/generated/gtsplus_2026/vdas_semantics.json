@@ -194,13 +194,3772 @@
       }
     }
   },
+  "managed_identities": {
+    "bin/GTSPlusArchiver.dll": {
+      "methods": [
+        {
+          "flags": 150,
+          "full_nested_name": "GTSPlusArchiver.CompressionFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x06000001",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000001",
+          "name": "JudgeCompressionType",
+          "owner_identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000002",
+          "rva": 8272,
+          "signature_hex": "0001111c0e",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 150,
+          "full_nested_name": "GTSPlusArchiver.CompressionFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x06000002",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000002",
+          "name": "JudgeCompressionType",
+          "owner_identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000002",
+          "rva": 8368,
+          "signature_hex": "0001111c1d05",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 6278,
+          "full_nested_name": "GTSPlusArchiver.CompressionFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x06000003",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000003",
+          "name": ".ctor",
+          "owner_identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000002",
+          "rva": 8492,
+          "signature_hex": "200001",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 150,
+          "full_nested_name": "GTSPlusArchiver.GZipFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x06000004",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000004",
+          "name": "CompressFolderToFile",
+          "owner_identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000003",
+          "rva": 8500,
+          "signature_hex": "0003010e0e08",
+          "typedef_token": "0x02000003"
+        },
+        {
+          "flags": 150,
+          "full_nested_name": "GTSPlusArchiver.GZipFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x06000005",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000005",
+          "name": "CompressFileToFile",
+          "owner_identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000003",
+          "rva": 8592,
+          "signature_hex": "0003010e0e08",
+          "typedef_token": "0x02000003"
+        },
+        {
+          "flags": 150,
+          "full_nested_name": "GTSPlusArchiver.GZipFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x06000006",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000006",
+          "name": "CompressStreamToStream",
+          "owner_identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000003",
+          "rva": 8684,
+          "signature_hex": "0004010e1251125108",
+          "typedef_token": "0x02000003"
+        },
+        {
+          "flags": 150,
+          "full_nested_name": "GTSPlusArchiver.GZipFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x06000007",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000007",
+          "name": "DecompressFileToFile",
+          "owner_identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000003",
+          "rva": 8748,
+          "signature_hex": "0002010e0e",
+          "typedef_token": "0x02000003"
+        },
+        {
+          "flags": 150,
+          "full_nested_name": "GTSPlusArchiver.GZipFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x06000008",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000008",
+          "name": "DecompressStreamToStream",
+          "owner_identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000003",
+          "rva": 8832,
+          "signature_hex": "0002011259101259",
+          "typedef_token": "0x02000003"
+        },
+        {
+          "flags": 150,
+          "full_nested_name": "GTSPlusArchiver.GZipFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x06000009",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000009",
+          "name": "DecompressStreamToStream",
+          "owner_identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000003",
+          "rva": 8844,
+          "signature_hex": "0003011251100e1251",
+          "typedef_token": "0x02000003"
+        },
+        {
+          "flags": 150,
+          "full_nested_name": "GTSPlusArchiver.GZipFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x0600000A",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600000A",
+          "name": "DecompressStreamToFile",
+          "owner_identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000003",
+          "rva": 8908,
+          "signature_hex": "00020112510e",
+          "typedef_token": "0x02000003"
+        },
+        {
+          "flags": 6278,
+          "full_nested_name": "GTSPlusArchiver.GZipFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x0600000B",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600000B",
+          "name": ".ctor",
+          "owner_identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000003",
+          "rva": 8492,
+          "signature_hex": "200001",
+          "typedef_token": "0x02000003"
+        },
+        {
+          "flags": 150,
+          "full_nested_name": "GTSPlusArchiver.TarFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x0600000C",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600000C",
+          "name": "ArchiveFolderToFile",
+          "owner_identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000004",
+          "rva": 8964,
+          "signature_hex": "0002010e0e",
+          "typedef_token": "0x02000004"
+        },
+        {
+          "flags": 150,
+          "full_nested_name": "GTSPlusArchiver.TarFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x0600000D",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600000D",
+          "name": "ArchiveFolderToStream",
+          "owner_identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000004",
+          "rva": 9020,
+          "signature_hex": "0002010e1259",
+          "typedef_token": "0x02000004"
+        },
+        {
+          "flags": 150,
+          "full_nested_name": "GTSPlusArchiver.TarFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x0600000E",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600000E",
+          "name": "ArchiveFileToStream",
+          "owner_identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000004",
+          "rva": 9260,
+          "signature_hex": "0002010e1259",
+          "typedef_token": "0x02000004"
+        },
+        {
+          "flags": 150,
+          "full_nested_name": "GTSPlusArchiver.TarFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x0600000F",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600000F",
+          "name": "ArchiveStreamToStream",
+          "owner_identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000004",
+          "rva": 9400,
+          "signature_hex": "0003010e12511259",
+          "typedef_token": "0x02000004"
+        },
+        {
+          "flags": 150,
+          "full_nested_name": "GTSPlusArchiver.TarFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x06000010",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000010",
+          "name": "ExtractStreamToStream",
+          "owner_identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000004",
+          "rva": 9528,
+          "signature_hex": "0003011259100e1251",
+          "typedef_token": "0x02000004"
+        },
+        {
+          "flags": 150,
+          "full_nested_name": "GTSPlusArchiver.TarFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x06000011",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000011",
+          "name": "ExtractStreamToFile",
+          "owner_identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000004",
+          "rva": 9644,
+          "signature_hex": "00020112590e",
+          "typedef_token": "0x02000004"
+        },
+        {
+          "flags": 6278,
+          "full_nested_name": "GTSPlusArchiver.TarFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x06000012",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000012",
+          "name": ".ctor",
+          "owner_identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000004",
+          "rva": 8492,
+          "signature_hex": "200001",
+          "typedef_token": "0x02000004"
+        },
+        {
+          "flags": 150,
+          "full_nested_name": "GTSPlusArchiver.ZipFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x06000013",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000013",
+          "name": "CompressFolderToFile",
+          "owner_identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000005",
+          "rva": 9704,
+          "signature_hex": "0003010e0e08",
+          "typedef_token": "0x02000005"
+        },
+        {
+          "flags": 150,
+          "full_nested_name": "GTSPlusArchiver.ZipFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x06000014",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000014",
+          "name": "CompressFileToFile",
+          "owner_identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000005",
+          "rva": 9748,
+          "signature_hex": "0003010e0e08",
+          "typedef_token": "0x02000005"
+        },
+        {
+          "flags": 150,
+          "full_nested_name": "GTSPlusArchiver.ZipFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x06000015",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000015",
+          "name": "CompressStreamToStream",
+          "owner_identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000005",
+          "rva": 9852,
+          "signature_hex": "0004010e1251125108",
+          "typedef_token": "0x02000005"
+        },
+        {
+          "flags": 150,
+          "full_nested_name": "GTSPlusArchiver.ZipFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x06000016",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000016",
+          "name": "DecompressFileToFile",
+          "owner_identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000005",
+          "rva": 9960,
+          "signature_hex": "0002010e0e",
+          "typedef_token": "0x02000005"
+        },
+        {
+          "flags": 150,
+          "full_nested_name": "GTSPlusArchiver.ZipFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x06000017",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000017",
+          "name": "DecompressStreamToStream",
+          "owner_identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000005",
+          "rva": 10132,
+          "signature_hex": "0003011251100e1251",
+          "typedef_token": "0x02000005"
+        },
+        {
+          "flags": 150,
+          "full_nested_name": "GTSPlusArchiver.ZipFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x06000018",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000018",
+          "name": "DecompressStreamToFile",
+          "owner_identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000005",
+          "rva": 10288,
+          "signature_hex": "00020112510e",
+          "typedef_token": "0x02000005"
+        },
+        {
+          "flags": 150,
+          "full_nested_name": "GTSPlusArchiver.ZipFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x06000019",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000019",
+          "name": "CompressionLevelConversion",
+          "owner_identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000005",
+          "rva": 10472,
+          "signature_hex": "0001117108",
+          "typedef_token": "0x02000005"
+        },
+        {
+          "flags": 6278,
+          "full_nested_name": "GTSPlusArchiver.ZipFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x0600001A",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600001A",
+          "name": ".ctor",
+          "owner_identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000005",
+          "rva": 8492,
+          "signature_hex": "200001",
+          "typedef_token": "0x02000005"
+        },
+        {
+          "flags": 150,
+          "full_nested_name": "GTSPlusArchiver.ZstandardFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x0600001B",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600001B",
+          "name": "CompressFolderToFile",
+          "owner_identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000006",
+          "rva": 10508,
+          "signature_hex": "0003010e0e08",
+          "typedef_token": "0x02000006"
+        },
+        {
+          "flags": 150,
+          "full_nested_name": "GTSPlusArchiver.ZstandardFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x0600001C",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600001C",
+          "name": "CompressStreamToStream",
+          "owner_identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000006",
+          "rva": 10624,
+          "signature_hex": "0004010e1251125108",
+          "typedef_token": "0x02000006"
+        },
+        {
+          "flags": 150,
+          "full_nested_name": "GTSPlusArchiver.ZstandardFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x0600001D",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600001D",
+          "name": "DecompressFileToFile",
+          "owner_identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000006",
+          "rva": 10712,
+          "signature_hex": "0002010e0e",
+          "typedef_token": "0x02000006"
+        },
+        {
+          "flags": 150,
+          "full_nested_name": "GTSPlusArchiver.ZstandardFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x0600001E",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600001E",
+          "name": "DecompressStreamToStream",
+          "owner_identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000006",
+          "rva": 10796,
+          "signature_hex": "0003011251100e1251",
+          "typedef_token": "0x02000006"
+        },
+        {
+          "flags": 150,
+          "full_nested_name": "GTSPlusArchiver.ZstandardFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x0600001F",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600001F",
+          "name": "DecompressStreamToFile",
+          "owner_identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000006",
+          "rva": 10860,
+          "signature_hex": "00020112510e",
+          "typedef_token": "0x02000006"
+        },
+        {
+          "flags": 6278,
+          "full_nested_name": "GTSPlusArchiver.ZstandardFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x06000020",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000020",
+          "name": ".ctor",
+          "owner_identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000006",
+          "rva": 8492,
+          "signature_hex": "200001",
+          "typedef_token": "0x02000006"
+        }
+      ],
+      "module_mvid": "6872bf9f-2f56-488a-b778-13e71fc46822",
+      "nested_classes": [
+        {
+          "enclosing_typedef_token": "0x02000002",
+          "nested_typedef_token": "0x02000007"
+        }
+      ],
+      "source_sha256": "ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2",
+      "type_definitions": [
+        {
+          "full_nested_name": "<Module>",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000001",
+          "method_tokens": [],
+          "name": "<Module>",
+          "namespace": "",
+          "owner_chain": [
+            "0x02000001"
+          ],
+          "typedef_token": "0x02000001"
+        },
+        {
+          "full_nested_name": "GTSPlusArchiver.CompressionFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000002",
+          "method_tokens": [
+            "0x06000001",
+            "0x06000002",
+            "0x06000003"
+          ],
+          "name": "CompressionFile",
+          "namespace": "GTSPlusArchiver",
+          "owner_chain": [
+            "0x02000002"
+          ],
+          "typedef_token": "0x02000002"
+        },
+        {
+          "full_nested_name": "GTSPlusArchiver.GZipFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000003",
+          "method_tokens": [
+            "0x06000004",
+            "0x06000005",
+            "0x06000006",
+            "0x06000007",
+            "0x06000008",
+            "0x06000009",
+            "0x0600000A",
+            "0x0600000B"
+          ],
+          "name": "GZipFile",
+          "namespace": "GTSPlusArchiver",
+          "owner_chain": [
+            "0x02000003"
+          ],
+          "typedef_token": "0x02000003"
+        },
+        {
+          "full_nested_name": "GTSPlusArchiver.TarFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000004",
+          "method_tokens": [
+            "0x0600000C",
+            "0x0600000D",
+            "0x0600000E",
+            "0x0600000F",
+            "0x06000010",
+            "0x06000011",
+            "0x06000012"
+          ],
+          "name": "TarFile",
+          "namespace": "GTSPlusArchiver",
+          "owner_chain": [
+            "0x02000004"
+          ],
+          "typedef_token": "0x02000004"
+        },
+        {
+          "full_nested_name": "GTSPlusArchiver.ZipFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000005",
+          "method_tokens": [
+            "0x06000013",
+            "0x06000014",
+            "0x06000015",
+            "0x06000016",
+            "0x06000017",
+            "0x06000018",
+            "0x06000019",
+            "0x0600001A"
+          ],
+          "name": "ZipFile",
+          "namespace": "GTSPlusArchiver",
+          "owner_chain": [
+            "0x02000005"
+          ],
+          "typedef_token": "0x02000005"
+        },
+        {
+          "full_nested_name": "GTSPlusArchiver.ZstandardFile",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000006",
+          "method_tokens": [
+            "0x0600001B",
+            "0x0600001C",
+            "0x0600001D",
+            "0x0600001E",
+            "0x0600001F",
+            "0x06000020"
+          ],
+          "name": "ZstandardFile",
+          "namespace": "GTSPlusArchiver",
+          "owner_chain": [
+            "0x02000006"
+          ],
+          "typedef_token": "0x02000006"
+        },
+        {
+          "full_nested_name": "GTSPlusArchiver.CompressionFile+CompressionType",
+          "identity": "sha256:ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2:module:6872bf9f-2f56-488a-b778-13e71fc46822:0x02000007",
+          "method_tokens": [],
+          "name": "CompressionType",
+          "namespace": "",
+          "owner_chain": [
+            "0x02000002",
+            "0x02000007"
+          ],
+          "typedef_token": "0x02000007"
+        }
+      ]
+    },
+    "bin/GTSPlusDiagAdaptMng.dll": {
+      "methods": [
+        {
+          "flags": 8337,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000001",
+          "impl_flags": 128,
+          "methoddef_token": "0x06000001",
+          "name": "LoadLibraryEx",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 0,
+          "signature_hex": "0003180e1809",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 8337,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000002",
+          "impl_flags": 128,
+          "methoddef_token": "0x06000002",
+          "name": "GetProcAddress",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 0,
+          "signature_hex": "000218180e",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 8337,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000003",
+          "impl_flags": 128,
+          "methoddef_token": "0x06000003",
+          "name": "FreeLibrary",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 0,
+          "signature_hex": "00010218",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 8337,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000004",
+          "impl_flags": 128,
+          "methoddef_token": "0x06000004",
+          "name": "CalculateImgOpeDdrHash",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 0,
+          "signature_hex": "0003081d05081018",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 8337,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000005",
+          "impl_flags": 128,
+          "methoddef_token": "0x06000005",
+          "name": "FreeMemory",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 0,
+          "signature_hex": "00010118",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 2177,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000006",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000006",
+          "name": "get_DiagAdaptationHandle",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 8272,
+          "signature_hex": "200018",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 2177,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000007",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000007",
+          "name": "set_DiagAdaptationHandle",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 8280,
+          "signature_hex": "20010118",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 2177,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000008",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000008",
+          "name": "get_DiagAdaptationInstance",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 8289,
+          "signature_hex": "200018",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 2177,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000009",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000009",
+          "name": "set_DiagAdaptationInstance",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 8297,
+          "signature_hex": "20010118",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 2177,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600000A",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600000A",
+          "name": "get_DiagAdaptationCreate",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 8306,
+          "signature_hex": "2000125c",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 2177,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600000B",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600000B",
+          "name": "set_DiagAdaptationCreate",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 8314,
+          "signature_hex": "200101125c",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 2177,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600000C",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600000C",
+          "name": "get_DiagAdaptationDestroy",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 8323,
+          "signature_hex": "20001260",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 2177,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600000D",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600000D",
+          "name": "set_DiagAdaptationDestroy",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 8331,
+          "signature_hex": "2001011260",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 2177,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600000E",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600000E",
+          "name": "get_DiagAdaptationExecute",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 8340,
+          "signature_hex": "20001264",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 2177,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600000F",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600000F",
+          "name": "set_DiagAdaptationExecute",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 8348,
+          "signature_hex": "2001011264",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 2177,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000010",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000010",
+          "name": "get_DiagAdaptationCancel",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 8357,
+          "signature_hex": "20001268",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 2177,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000011",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000011",
+          "name": "set_DiagAdaptationCancel",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 8365,
+          "signature_hex": "2001011268",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 2177,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000012",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000012",
+          "name": "get_DiagAdaptationFreememory",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 8374,
+          "signature_hex": "2000126c",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 2177,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000013",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000013",
+          "name": "set_DiagAdaptationFreememory",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 8382,
+          "signature_hex": "200101126c",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 2177,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000014",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000014",
+          "name": "get_DiagAdaptationManagerInformation",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 8391,
+          "signature_hex": "20001210",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 2177,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000015",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000015",
+          "name": "set_DiagAdaptationManagerInformation",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 8399,
+          "signature_hex": "2001011210",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 198,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000016",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000016",
+          "name": "InitializeAdaptation",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 8408,
+          "signature_hex": "2000124d",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 198,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000017",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000017",
+          "name": "FinalizeAdaptation",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 8423,
+          "signature_hex": "2000124d",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 129,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000018",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000018",
+          "name": "LoadDiagAdaptation",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 8464,
+          "signature_hex": "2001124d08",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 129,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000019",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000019",
+          "name": "UnloadDiagAdaptation",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 9992,
+          "signature_hex": "2000124d",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 198,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600001A",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600001A",
+          "name": "ExecuteAdaptation",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 10184,
+          "signature_hex": "2005124d0e0e0e100e0e",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 129,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600001B",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600001B",
+          "name": "StartDiagnosis",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 10400,
+          "signature_hex": "2003124d0e0e100e",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 129,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600001C",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600001C",
+          "name": "EndDiagnosis",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 11636,
+          "signature_hex": "2003124d0e0e100e",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 129,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600001D",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600001D",
+          "name": "DiagFunction",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 12092,
+          "signature_hex": "2003124d0e0e100e",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 129,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600001E",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600001E",
+          "name": "ConvertFromUtf8ToUtf16",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 12744,
+          "signature_hex": "20010e18",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 129,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600001F",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600001F",
+          "name": "GetStartDiagnosisInformation",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 12824,
+          "signature_hex": "2003124d0e0e100e",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 129,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000020",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000020",
+          "name": "CreateVdasFile",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 13044,
+          "signature_hex": "2002124d0e100e",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 129,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000021",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000021",
+          "name": "GetImgOpeDdrEcuDataFolderPath",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 14020,
+          "signature_hex": "20000e",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 129,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000022",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000022",
+          "name": "GetSpecificFolder",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 14040,
+          "signature_hex": "20010e08",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 129,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000023",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000023",
+          "name": "MakeImgOpeDdrJsonData",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 14204,
+          "signature_hex": "200412240e0e11790e",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 129,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000024",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000024",
+          "name": "ReadLogFile",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 15776,
+          "signature_hex": "20020e0e0e",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 129,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000025",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000025",
+          "name": "ConvertVdastoCsvFile",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 15952,
+          "signature_hex": "2002124d0e100e",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 129,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000026",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000026",
+          "name": "FlashWiredVehicleData",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 16892,
+          "signature_hex": "2002124d0e100e",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 129,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000027",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000027",
+          "name": "MakeImgOpeDdrCsvData",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 18228,
+          "signature_hex": "2002124d0e100e",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 129,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000028",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000028",
+          "name": "CalculateImgOpeDdrHash",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 18540,
+          "signature_hex": "2002124d0e100e",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 6278,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000029",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000029",
+          "name": ".ctor",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 18706,
+          "signature_hex": "200001",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 6289,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600002A",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600002A",
+          "name": ".cctor",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "rva": 18758,
+          "signature_hex": "000001",
+          "typedef_token": "0x02000002"
+        },
+        {
+          "flags": 2198,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManagerConstants",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600002B",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600002B",
+          "name": "get_GTSP_CREATE_CHALLENGE_CODE",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000003",
+          "rva": 18766,
+          "signature_hex": "00000e",
+          "typedef_token": "0x02000003"
+        },
+        {
+          "flags": 2198,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManagerConstants",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600002C",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600002C",
+          "name": "get_GTSP_CHECK_AUTHENTICATION_CODE",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000003",
+          "rva": 18773,
+          "signature_hex": "00000e",
+          "typedef_token": "0x02000003"
+        },
+        {
+          "flags": 2198,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManagerConstants",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600002D",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600002D",
+          "name": "get_GTSP_GTS_PLUS_SETTING_FILE_NAME",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000003",
+          "rva": 18780,
+          "signature_hex": "00000e",
+          "typedef_token": "0x02000003"
+        },
+        {
+          "flags": 2198,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManagerConstants",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600002E",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600002E",
+          "name": "get_GTSP_GTS_PLUS_SETTING_SECTION_DIAG_ADAPTATION",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000003",
+          "rva": 18787,
+          "signature_hex": "00000e",
+          "typedef_token": "0x02000003"
+        },
+        {
+          "flags": 2198,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManagerConstants",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600002F",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600002F",
+          "name": "get_GTSP_GTS_PLUS_SETTING_KEY_PATH",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000003",
+          "rva": 18794,
+          "signature_hex": "00000e",
+          "typedef_token": "0x02000003"
+        },
+        {
+          "flags": 6278,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManagerConstants",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000030",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000030",
+          "name": ".ctor",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000003",
+          "rva": 18801,
+          "signature_hex": "200001",
+          "typedef_token": "0x02000003"
+        },
+        {
+          "flags": 6289,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManagerConstants",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000031",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000031",
+          "name": ".cctor",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000003",
+          "rva": 18809,
+          "signature_hex": "000001",
+          "typedef_token": "0x02000003"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManagerInformation",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000032",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000032",
+          "name": "get_DiagAdaptationRegionId",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000004",
+          "rva": 18861,
+          "signature_hex": "200015116d0108",
+          "typedef_token": "0x02000004"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManagerInformation",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000033",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000033",
+          "name": "set_DiagAdaptationRegionId",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000004",
+          "rva": 18869,
+          "signature_hex": "20010115116d0108",
+          "typedef_token": "0x02000004"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManagerInformation",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000034",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000034",
+          "name": "get_DiagAdaptationLanguageCode",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000004",
+          "rva": 18878,
+          "signature_hex": "20000e",
+          "typedef_token": "0x02000004"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManagerInformation",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000035",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000035",
+          "name": "set_DiagAdaptationLanguageCode",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000004",
+          "rva": 18886,
+          "signature_hex": "2001010e",
+          "typedef_token": "0x02000004"
+        },
+        {
+          "flags": 134,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManagerInformation",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000036",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000036",
+          "name": "Clear",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000004",
+          "rva": 18896,
+          "signature_hex": "200001",
+          "typedef_token": "0x02000004"
+        },
+        {
+          "flags": 6278,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManagerInformation",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000037",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000037",
+          "name": ".ctor",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000004",
+          "rva": 18931,
+          "signature_hex": "200001",
+          "typedef_token": "0x02000004"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BDCorrectedResultData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000038",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000038",
+          "name": "get_CommonInfo",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000005",
+          "rva": 18945,
+          "signature_hex": "20001218",
+          "typedef_token": "0x02000005"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BDCorrectedResultData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000039",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000039",
+          "name": "set_CommonInfo",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000005",
+          "rva": 18953,
+          "signature_hex": "2001011218",
+          "typedef_token": "0x02000005"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BDCorrectedResultData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600003A",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600003A",
+          "name": "get_AppSpecificInfo",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000005",
+          "rva": 18962,
+          "signature_hex": "2000121c",
+          "typedef_token": "0x02000005"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BDCorrectedResultData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600003B",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600003B",
+          "name": "set_AppSpecificInfo",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000005",
+          "rva": 18970,
+          "signature_hex": "200101121c",
+          "typedef_token": "0x02000005"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BDCorrectedResultData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600003C",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600003C",
+          "name": "get_Data",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000005",
+          "rva": 18979,
+          "signature_hex": "20001220",
+          "typedef_token": "0x02000005"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BDCorrectedResultData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600003D",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600003D",
+          "name": "set_Data",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000005",
+          "rva": 18987,
+          "signature_hex": "2001011220",
+          "typedef_token": "0x02000005"
+        },
+        {
+          "flags": 6278,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BDCorrectedResultData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600003E",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600003E",
+          "name": ".ctor",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000005",
+          "rva": 18801,
+          "signature_hex": "200001",
+          "typedef_token": "0x02000005"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BdcCommonInfo",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600003F",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600003F",
+          "name": "get_LogType",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000006",
+          "rva": 18996,
+          "signature_hex": "20000e",
+          "typedef_token": "0x02000006"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BdcCommonInfo",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000040",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000040",
+          "name": "set_LogType",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000006",
+          "rva": 19004,
+          "signature_hex": "2001010e",
+          "typedef_token": "0x02000006"
+        },
+        {
+          "flags": 6278,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BdcCommonInfo",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000041",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000041",
+          "name": ".ctor",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000006",
+          "rva": 18801,
+          "signature_hex": "200001",
+          "typedef_token": "0x02000006"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BdcAppSpecificInfo",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000042",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000042",
+          "name": "get_FileVer",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000007",
+          "rva": 19013,
+          "signature_hex": "20000e",
+          "typedef_token": "0x02000007"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BdcAppSpecificInfo",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000043",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000043",
+          "name": "set_FileVer",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000007",
+          "rva": 19021,
+          "signature_hex": "2001010e",
+          "typedef_token": "0x02000007"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BdcAppSpecificInfo",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000044",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000044",
+          "name": "get_DefFileVer2",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000007",
+          "rva": 19030,
+          "signature_hex": "20001d0e",
+          "typedef_token": "0x02000007"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BdcAppSpecificInfo",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000045",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000045",
+          "name": "set_DefFileVer2",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000007",
+          "rva": 19038,
+          "signature_hex": "2001011d0e",
+          "typedef_token": "0x02000007"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BdcAppSpecificInfo",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000046",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000046",
+          "name": "get_FileGenDateTimeStamp",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000007",
+          "rva": 19047,
+          "signature_hex": "20000e",
+          "typedef_token": "0x02000007"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BdcAppSpecificInfo",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000047",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000047",
+          "name": "set_FileGenDateTimeStamp",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000007",
+          "rva": 19055,
+          "signature_hex": "2001010e",
+          "typedef_token": "0x02000007"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BdcAppSpecificInfo",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000048",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000048",
+          "name": "get_Vin",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000007",
+          "rva": 19064,
+          "signature_hex": "20000e",
+          "typedef_token": "0x02000007"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BdcAppSpecificInfo",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000049",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000049",
+          "name": "set_Vin",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000007",
+          "rva": 19072,
+          "signature_hex": "2001010e",
+          "typedef_token": "0x02000007"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BdcAppSpecificInfo",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600004A",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600004A",
+          "name": "get_Mileage",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000007",
+          "rva": 19081,
+          "signature_hex": "200008",
+          "typedef_token": "0x02000007"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BdcAppSpecificInfo",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600004B",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600004B",
+          "name": "set_Mileage",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000007",
+          "rva": 19089,
+          "signature_hex": "20010108",
+          "typedef_token": "0x02000007"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BdcAppSpecificInfo",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600004C",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600004C",
+          "name": "get_MileageUnit",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000007",
+          "rva": 19098,
+          "signature_hex": "20000e",
+          "typedef_token": "0x02000007"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BdcAppSpecificInfo",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600004D",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600004D",
+          "name": "set_MileageUnit",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000007",
+          "rva": 19106,
+          "signature_hex": "2001010e",
+          "typedef_token": "0x02000007"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BdcAppSpecificInfo",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600004E",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600004E",
+          "name": "get_DealerCode",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000007",
+          "rva": 19115,
+          "signature_hex": "20000e",
+          "typedef_token": "0x02000007"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BdcAppSpecificInfo",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600004F",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600004F",
+          "name": "set_DealerCode",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000007",
+          "rva": 19123,
+          "signature_hex": "2001010e",
+          "typedef_token": "0x02000007"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BdcAppSpecificInfo",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000050",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000050",
+          "name": "get_CountryCode",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000007",
+          "rva": 19132,
+          "signature_hex": "20000e",
+          "typedef_token": "0x02000007"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BdcAppSpecificInfo",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000051",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000051",
+          "name": "set_CountryCode",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000007",
+          "rva": 19140,
+          "signature_hex": "2001010e",
+          "typedef_token": "0x02000007"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BdcAppSpecificInfo",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000052",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000052",
+          "name": "get_Destination",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000007",
+          "rva": 19149,
+          "signature_hex": "20000e",
+          "typedef_token": "0x02000007"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BdcAppSpecificInfo",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000053",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000053",
+          "name": "set_Destination",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000007",
+          "rva": 19157,
+          "signature_hex": "2001010e",
+          "typedef_token": "0x02000007"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BdcAppSpecificInfo",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000054",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000054",
+          "name": "get_UserType",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000007",
+          "rva": 19166,
+          "signature_hex": "20000e",
+          "typedef_token": "0x02000007"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BdcAppSpecificInfo",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000055",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000055",
+          "name": "set_UserType",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000007",
+          "rva": 19174,
+          "signature_hex": "2001010e",
+          "typedef_token": "0x02000007"
+        },
+        {
+          "flags": 6278,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BdcAppSpecificInfo",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000056",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000056",
+          "name": ".ctor",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000007",
+          "rva": 18801,
+          "signature_hex": "200001",
+          "typedef_token": "0x02000007"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BdcData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000057",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000057",
+          "name": "get_Record",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000008",
+          "rva": 19183,
+          "signature_hex": "20001d0e",
+          "typedef_token": "0x02000008"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BdcData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000058",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000058",
+          "name": "set_Record",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000008",
+          "rva": 19191,
+          "signature_hex": "2001011d0e",
+          "typedef_token": "0x02000008"
+        },
+        {
+          "flags": 6278,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BdcData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000059",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000059",
+          "name": ".ctor",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000008",
+          "rva": 18801,
+          "signature_hex": "200001",
+          "typedef_token": "0x02000008"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.ImgOpeDdrJsonData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600005A",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600005A",
+          "name": "get_Gts",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000009",
+          "rva": 19200,
+          "signature_hex": "20001228",
+          "typedef_token": "0x02000009"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.ImgOpeDdrJsonData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600005B",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600005B",
+          "name": "set_Gts",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000009",
+          "rva": 19208,
+          "signature_hex": "2001011228",
+          "typedef_token": "0x02000009"
+        },
+        {
+          "flags": 6278,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.ImgOpeDdrJsonData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600005C",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600005C",
+          "name": ".ctor",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000009",
+          "rva": 18801,
+          "signature_hex": "200001",
+          "typedef_token": "0x02000009"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600005D",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600005D",
+          "name": "get_FormatVersion",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "rva": 19217,
+          "signature_hex": "2000122c",
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600005E",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600005E",
+          "name": "set_FormatVersion",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "rva": 19225,
+          "signature_hex": "200101122c",
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600005F",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600005F",
+          "name": "get_CarInfo",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "rva": 19234,
+          "signature_hex": "20001230",
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000060",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000060",
+          "name": "set_CarInfo",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "rva": 19242,
+          "signature_hex": "2001011230",
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000061",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000061",
+          "name": "get_CmnInfo",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "rva": 19251,
+          "signature_hex": "20001244",
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000062",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000062",
+          "name": "set_CmnInfo",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "rva": 19259,
+          "signature_hex": "2001011244",
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000063",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000063",
+          "name": "get_Ddr",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "rva": 19268,
+          "signature_hex": "2000124c",
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000064",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000064",
+          "name": "set_Ddr",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "rva": 19276,
+          "signature_hex": "200101124c",
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000065",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000065",
+          "name": "get_AduDdr",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "rva": 19285,
+          "signature_hex": "2000124c",
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000066",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000066",
+          "name": "set_AduDdr",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "rva": 19293,
+          "signature_hex": "200101124c",
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000067",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000067",
+          "name": "get_PcsFfd",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "rva": 19302,
+          "signature_hex": "2000124c",
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000068",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000068",
+          "name": "set_PcsFfd",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "rva": 19310,
+          "signature_hex": "200101124c",
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000069",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000069",
+          "name": "get_LcsFfd",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "rva": 19319,
+          "signature_hex": "2000124c",
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600006A",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600006A",
+          "name": "set_LcsFfd",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "rva": 19327,
+          "signature_hex": "200101124c",
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600006B",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600006B",
+          "name": "get_Tss3Ffd",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "rva": 19336,
+          "signature_hex": "2000124c",
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600006C",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600006C",
+          "name": "set_Tss3Ffd",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "rva": 19344,
+          "signature_hex": "200101124c",
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600006D",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600006D",
+          "name": "get_AdsFfd",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "rva": 19353,
+          "signature_hex": "2000124c",
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600006E",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600006E",
+          "name": "set_AdsFfd",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "rva": 19361,
+          "signature_hex": "200101124c",
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600006F",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600006F",
+          "name": "get_AdsEng",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "rva": 19370,
+          "signature_hex": "2000124c",
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000070",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000070",
+          "name": "set_AdsEng",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "rva": 19378,
+          "signature_hex": "200101124c",
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000071",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000071",
+          "name": "get_AduFfd",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "rva": 19387,
+          "signature_hex": "2000124c",
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000072",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000072",
+          "name": "set_AduFfd",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "rva": 19395,
+          "signature_hex": "200101124c",
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000073",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000073",
+          "name": "get_PcsImg",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "rva": 19404,
+          "signature_hex": "2000124c",
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000074",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000074",
+          "name": "set_PcsImg",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "rva": 19412,
+          "signature_hex": "200101124c",
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000075",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000075",
+          "name": "get_PvmImg",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "rva": 19421,
+          "signature_hex": "2000124c",
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000076",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000076",
+          "name": "set_PvmImg",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "rva": 19429,
+          "signature_hex": "200101124c",
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000077",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000077",
+          "name": "get_AdsImg",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "rva": 19438,
+          "signature_hex": "2000124c",
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000078",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000078",
+          "name": "set_AdsImg",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "rva": 19446,
+          "signature_hex": "200101124c",
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000079",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000079",
+          "name": "get_RcImg",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "rva": 19455,
+          "signature_hex": "2000124c",
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600007A",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600007A",
+          "name": "set_RcImg",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "rva": 19463,
+          "signature_hex": "200101124c",
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600007B",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600007B",
+          "name": "get_DmcImg",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "rva": 19472,
+          "signature_hex": "2000124c",
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600007C",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600007C",
+          "name": "set_DmcImg",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "rva": 19480,
+          "signature_hex": "200101124c",
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600007D",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600007D",
+          "name": "get_AbsoluteTime",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "rva": 19489,
+          "signature_hex": "2000124c",
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600007E",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600007E",
+          "name": "set_AbsoluteTime",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "rva": 19497,
+          "signature_hex": "200101124c",
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "flags": 6278,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600007F",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600007F",
+          "name": ".ctor",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "rva": 18801,
+          "signature_hex": "200001",
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.FormatVersionData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000080",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000080",
+          "name": "get_Version",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000B",
+          "rva": 19506,
+          "signature_hex": "20000e",
+          "typedef_token": "0x0200000B"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.FormatVersionData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000081",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000081",
+          "name": "set_Version",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000B",
+          "rva": 19514,
+          "signature_hex": "2001010e",
+          "typedef_token": "0x0200000B"
+        },
+        {
+          "flags": 6278,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.FormatVersionData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000082",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000082",
+          "name": ".ctor",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000B",
+          "rva": 18801,
+          "signature_hex": "200001",
+          "typedef_token": "0x0200000B"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.CarInfoData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000083",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000083",
+          "name": "get_Vin",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000C",
+          "rva": 19523,
+          "signature_hex": "20000e",
+          "typedef_token": "0x0200000C"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.CarInfoData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000084",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000084",
+          "name": "set_Vin",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000C",
+          "rva": 19531,
+          "signature_hex": "2001010e",
+          "typedef_token": "0x0200000C"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.CarInfoData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000085",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000085",
+          "name": "get_EcuInfo",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000C",
+          "rva": 19540,
+          "signature_hex": "20001234",
+          "typedef_token": "0x0200000C"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.CarInfoData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000086",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000086",
+          "name": "set_EcuInfo",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000C",
+          "rva": 19548,
+          "signature_hex": "2001011234",
+          "typedef_token": "0x0200000C"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.CarInfoData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000087",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000087",
+          "name": "get_TripCount",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000C",
+          "rva": 19557,
+          "signature_hex": "20000e",
+          "typedef_token": "0x0200000C"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.CarInfoData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000088",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000088",
+          "name": "set_TripCount",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000C",
+          "rva": 19565,
+          "signature_hex": "2001010e",
+          "typedef_token": "0x0200000C"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.CarInfoData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000089",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000089",
+          "name": "get_OdoMeter",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000C",
+          "rva": 19574,
+          "signature_hex": "20000e",
+          "typedef_token": "0x0200000C"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.CarInfoData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600008A",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600008A",
+          "name": "set_OdoMeter",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000C",
+          "rva": 19582,
+          "signature_hex": "2001010e",
+          "typedef_token": "0x0200000C"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.CarInfoData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600008B",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600008B",
+          "name": "get_OdoUnit",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000C",
+          "rva": 19591,
+          "signature_hex": "20000e",
+          "typedef_token": "0x0200000C"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.CarInfoData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600008C",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600008C",
+          "name": "set_OdoUnit",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000C",
+          "rva": 19599,
+          "signature_hex": "2001010e",
+          "typedef_token": "0x0200000C"
+        },
+        {
+          "flags": 6278,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.CarInfoData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600008D",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600008D",
+          "name": ".ctor",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000C",
+          "rva": 18801,
+          "signature_hex": "200001",
+          "typedef_token": "0x0200000C"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.EcuInfoData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600008E",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600008E",
+          "name": "get_Airbag",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000D",
+          "rva": 19608,
+          "signature_hex": "20001238",
+          "typedef_token": "0x0200000D"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.EcuInfoData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600008F",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600008F",
+          "name": "set_Airbag",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000D",
+          "rva": 19616,
+          "signature_hex": "2001011238",
+          "typedef_token": "0x0200000D"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.EcuInfoData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000090",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000090",
+          "name": "get_Adu",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000D",
+          "rva": 19625,
+          "signature_hex": "2000123c",
+          "typedef_token": "0x0200000D"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.EcuInfoData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000091",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000091",
+          "name": "set_Adu",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000D",
+          "rva": 19633,
+          "signature_hex": "200101123c",
+          "typedef_token": "0x0200000D"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.EcuInfoData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000092",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000092",
+          "name": "get_Csp",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000D",
+          "rva": 19642,
+          "signature_hex": "20001240",
+          "typedef_token": "0x0200000D"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.EcuInfoData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000093",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000093",
+          "name": "set_Csp",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000D",
+          "rva": 19650,
+          "signature_hex": "2001011240",
+          "typedef_token": "0x0200000D"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.EcuInfoData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000094",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000094",
+          "name": "get_Pcs",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000D",
+          "rva": 19659,
+          "signature_hex": "20001240",
+          "typedef_token": "0x0200000D"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.EcuInfoData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000095",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000095",
+          "name": "set_Pcs",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000D",
+          "rva": 19667,
+          "signature_hex": "2001011240",
+          "typedef_token": "0x0200000D"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.EcuInfoData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000096",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000096",
+          "name": "get_Fcm",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000D",
+          "rva": 19676,
+          "signature_hex": "20001240",
+          "typedef_token": "0x0200000D"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.EcuInfoData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000097",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000097",
+          "name": "set_Fcm",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000D",
+          "rva": 19684,
+          "signature_hex": "2001011240",
+          "typedef_token": "0x0200000D"
+        },
+        {
+          "flags": 6278,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.EcuInfoData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000098",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000098",
+          "name": ".ctor",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000D",
+          "rva": 18801,
+          "signature_hex": "200001",
+          "typedef_token": "0x0200000D"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.AirbagData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x06000099",
+          "impl_flags": 0,
+          "methoddef_token": "0x06000099",
+          "name": "get_Hinban",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000E",
+          "rva": 19693,
+          "signature_hex": "20000e",
+          "typedef_token": "0x0200000E"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.AirbagData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600009A",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600009A",
+          "name": "set_Hinban",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000E",
+          "rva": 19701,
+          "signature_hex": "2001010e",
+          "typedef_token": "0x0200000E"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.AirbagData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600009B",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600009B",
+          "name": "get_Software",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000E",
+          "rva": 19710,
+          "signature_hex": "20000e",
+          "typedef_token": "0x0200000E"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.AirbagData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600009C",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600009C",
+          "name": "set_Software",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000E",
+          "rva": 19718,
+          "signature_hex": "2001010e",
+          "typedef_token": "0x0200000E"
+        },
+        {
+          "flags": 6278,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.AirbagData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600009D",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600009D",
+          "name": ".ctor",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000E",
+          "rva": 18801,
+          "signature_hex": "200001",
+          "typedef_token": "0x0200000E"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.AduData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600009E",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600009E",
+          "name": "get_Hinban",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000F",
+          "rva": 19727,
+          "signature_hex": "20000e",
+          "typedef_token": "0x0200000F"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.AduData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0600009F",
+          "impl_flags": 0,
+          "methoddef_token": "0x0600009F",
+          "name": "set_Hinban",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000F",
+          "rva": 19735,
+          "signature_hex": "2001010e",
+          "typedef_token": "0x0200000F"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.AduData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000A0",
+          "impl_flags": 0,
+          "methoddef_token": "0x060000A0",
+          "name": "get_Software",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000F",
+          "rva": 19744,
+          "signature_hex": "20000e",
+          "typedef_token": "0x0200000F"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.AduData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000A1",
+          "impl_flags": 0,
+          "methoddef_token": "0x060000A1",
+          "name": "set_Software",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000F",
+          "rva": 19752,
+          "signature_hex": "2001010e",
+          "typedef_token": "0x0200000F"
+        },
+        {
+          "flags": 6278,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.AduData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000A2",
+          "impl_flags": 0,
+          "methoddef_token": "0x060000A2",
+          "name": ".ctor",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000F",
+          "rva": 18801,
+          "signature_hex": "200001",
+          "typedef_token": "0x0200000F"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.EcuCommonData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000A3",
+          "impl_flags": 0,
+          "methoddef_token": "0x060000A3",
+          "name": "get_MakerId",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000010",
+          "rva": 19761,
+          "signature_hex": "20000e",
+          "typedef_token": "0x02000010"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.EcuCommonData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000A4",
+          "impl_flags": 0,
+          "methoddef_token": "0x060000A4",
+          "name": "set_MakerId",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000010",
+          "rva": 19769,
+          "signature_hex": "2001010e",
+          "typedef_token": "0x02000010"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.EcuCommonData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000A5",
+          "impl_flags": 0,
+          "methoddef_token": "0x060000A5",
+          "name": "get_Hinban",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000010",
+          "rva": 19778,
+          "signature_hex": "20000e",
+          "typedef_token": "0x02000010"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.EcuCommonData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000A6",
+          "impl_flags": 0,
+          "methoddef_token": "0x060000A6",
+          "name": "set_Hinban",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000010",
+          "rva": 19786,
+          "signature_hex": "2001010e",
+          "typedef_token": "0x02000010"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.EcuCommonData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000A7",
+          "impl_flags": 0,
+          "methoddef_token": "0x060000A7",
+          "name": "get_Serial",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000010",
+          "rva": 19795,
+          "signature_hex": "20000e",
+          "typedef_token": "0x02000010"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.EcuCommonData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000A8",
+          "impl_flags": 0,
+          "methoddef_token": "0x060000A8",
+          "name": "set_Serial",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000010",
+          "rva": 19803,
+          "signature_hex": "2001010e",
+          "typedef_token": "0x02000010"
+        },
+        {
+          "flags": 6278,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.EcuCommonData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000A9",
+          "impl_flags": 0,
+          "methoddef_token": "0x060000A9",
+          "name": ".ctor",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000010",
+          "rva": 18801,
+          "signature_hex": "200001",
+          "typedef_token": "0x02000010"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.CommonInfoData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000AA",
+          "impl_flags": 0,
+          "methoddef_token": "0x060000AA",
+          "name": "get_Profile",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000011",
+          "rva": 19812,
+          "signature_hex": "20001248",
+          "typedef_token": "0x02000011"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.CommonInfoData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000AB",
+          "impl_flags": 0,
+          "methoddef_token": "0x060000AB",
+          "name": "set_Profile",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000011",
+          "rva": 19820,
+          "signature_hex": "2001011248",
+          "typedef_token": "0x02000011"
+        },
+        {
+          "flags": 6278,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.CommonInfoData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000AC",
+          "impl_flags": 0,
+          "methoddef_token": "0x060000AC",
+          "name": ".ctor",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000011",
+          "rva": 18801,
+          "signature_hex": "200001",
+          "typedef_token": "0x02000011"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.ProfileData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000AD",
+          "impl_flags": 0,
+          "methoddef_token": "0x060000AD",
+          "name": "get_DealerCode",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000012",
+          "rva": 19829,
+          "signature_hex": "20000e",
+          "typedef_token": "0x02000012"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.ProfileData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000AE",
+          "impl_flags": 0,
+          "methoddef_token": "0x060000AE",
+          "name": "set_DealerCode",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000012",
+          "rva": 19837,
+          "signature_hex": "2001010e",
+          "typedef_token": "0x02000012"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.ProfileData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000AF",
+          "impl_flags": 0,
+          "methoddef_token": "0x060000AF",
+          "name": "get_IncomingDate",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000012",
+          "rva": 19846,
+          "signature_hex": "20000e",
+          "typedef_token": "0x02000012"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.ProfileData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000B0",
+          "impl_flags": 0,
+          "methoddef_token": "0x060000B0",
+          "name": "set_IncomingDate",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000012",
+          "rva": 19854,
+          "signature_hex": "2001010e",
+          "typedef_token": "0x02000012"
+        },
+        {
+          "flags": 6278,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.ProfileData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000B1",
+          "impl_flags": 0,
+          "methoddef_token": "0x060000B1",
+          "name": ".ctor",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000012",
+          "rva": 18801,
+          "signature_hex": "200001",
+          "typedef_token": "0x02000012"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.CommunicationData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000B2",
+          "impl_flags": 0,
+          "methoddef_token": "0x060000B2",
+          "name": "get_Data",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000013",
+          "rva": 19863,
+          "signature_hex": "20000e",
+          "typedef_token": "0x02000013"
+        },
+        {
+          "flags": 2182,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.CommunicationData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000B3",
+          "impl_flags": 0,
+          "methoddef_token": "0x060000B3",
+          "name": "set_Data",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000013",
+          "rva": 19871,
+          "signature_hex": "2001010e",
+          "typedef_token": "0x02000013"
+        },
+        {
+          "flags": 6278,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.CommunicationData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000B4",
+          "impl_flags": 0,
+          "methoddef_token": "0x060000B4",
+          "name": ".ctor",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000013",
+          "rva": 18801,
+          "signature_hex": "200001",
+          "typedef_token": "0x02000013"
+        },
+        {
+          "flags": 6278,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+DiagAdaptationCreateChallengeCodeDelegate",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000B5",
+          "impl_flags": 3,
+          "methoddef_token": "0x060000B5",
+          "name": ".ctor",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000015",
+          "rva": 0,
+          "signature_hex": "2002011c18",
+          "typedef_token": "0x02000015"
+        },
+        {
+          "flags": 454,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+DiagAdaptationCreateChallengeCodeDelegate",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000B6",
+          "impl_flags": 3,
+          "methoddef_token": "0x060000B6",
+          "name": "Invoke",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000015",
+          "rva": 0,
+          "signature_hex": "20020210181008",
+          "typedef_token": "0x02000015"
+        },
+        {
+          "flags": 454,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+DiagAdaptationCreateChallengeCodeDelegate",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000B7",
+          "impl_flags": 3,
+          "methoddef_token": "0x060000B7",
+          "name": "BeginInvoke",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000015",
+          "rva": 0,
+          "signature_hex": "20041280a9101810081280ad1c",
+          "typedef_token": "0x02000015"
+        },
+        {
+          "flags": 454,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+DiagAdaptationCreateChallengeCodeDelegate",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000B8",
+          "impl_flags": 3,
+          "methoddef_token": "0x060000B8",
+          "name": "EndInvoke",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000015",
+          "rva": 0,
+          "signature_hex": "200302101810081280a9",
+          "typedef_token": "0x02000015"
+        },
+        {
+          "flags": 6278,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+DiagAdaptationCheckAuthenticationCodeDelegate",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000B9",
+          "impl_flags": 3,
+          "methoddef_token": "0x060000B9",
+          "name": ".ctor",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000016",
+          "rva": 0,
+          "signature_hex": "2002011c18",
+          "typedef_token": "0x02000016"
+        },
+        {
+          "flags": 454,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+DiagAdaptationCheckAuthenticationCodeDelegate",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000BA",
+          "impl_flags": 3,
+          "methoddef_token": "0x060000BA",
+          "name": "Invoke",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000016",
+          "rva": 0,
+          "signature_hex": "2002021d0508",
+          "typedef_token": "0x02000016"
+        },
+        {
+          "flags": 454,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+DiagAdaptationCheckAuthenticationCodeDelegate",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000BB",
+          "impl_flags": 3,
+          "methoddef_token": "0x060000BB",
+          "name": "BeginInvoke",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000016",
+          "rva": 0,
+          "signature_hex": "20041280a91d05081280ad1c",
+          "typedef_token": "0x02000016"
+        },
+        {
+          "flags": 454,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+DiagAdaptationCheckAuthenticationCodeDelegate",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000BC",
+          "impl_flags": 3,
+          "methoddef_token": "0x060000BC",
+          "name": "EndInvoke",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000016",
+          "rva": 0,
+          "signature_hex": "2001021280a9",
+          "typedef_token": "0x02000016"
+        },
+        {
+          "flags": 6278,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+DiagAdaptationCreateDelegate",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000BD",
+          "impl_flags": 3,
+          "methoddef_token": "0x060000BD",
+          "name": ".ctor",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000017",
+          "rva": 0,
+          "signature_hex": "2002011c18",
+          "typedef_token": "0x02000017"
+        },
+        {
+          "flags": 454,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+DiagAdaptationCreateDelegate",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000BE",
+          "impl_flags": 3,
+          "methoddef_token": "0x060000BE",
+          "name": "Invoke",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000017",
+          "rva": 0,
+          "signature_hex": "200018",
+          "typedef_token": "0x02000017"
+        },
+        {
+          "flags": 454,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+DiagAdaptationCreateDelegate",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000BF",
+          "impl_flags": 3,
+          "methoddef_token": "0x060000BF",
+          "name": "BeginInvoke",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000017",
+          "rva": 0,
+          "signature_hex": "20021280a91280ad1c",
+          "typedef_token": "0x02000017"
+        },
+        {
+          "flags": 454,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+DiagAdaptationCreateDelegate",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000C0",
+          "impl_flags": 3,
+          "methoddef_token": "0x060000C0",
+          "name": "EndInvoke",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000017",
+          "rva": 0,
+          "signature_hex": "2001181280a9",
+          "typedef_token": "0x02000017"
+        },
+        {
+          "flags": 6278,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+DiagAdaptationDestroyDelegate",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000C1",
+          "impl_flags": 3,
+          "methoddef_token": "0x060000C1",
+          "name": ".ctor",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000018",
+          "rva": 0,
+          "signature_hex": "2002011c18",
+          "typedef_token": "0x02000018"
+        },
+        {
+          "flags": 454,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+DiagAdaptationDestroyDelegate",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000C2",
+          "impl_flags": 3,
+          "methoddef_token": "0x060000C2",
+          "name": "Invoke",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000018",
+          "rva": 0,
+          "signature_hex": "20010218",
+          "typedef_token": "0x02000018"
+        },
+        {
+          "flags": 454,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+DiagAdaptationDestroyDelegate",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000C3",
+          "impl_flags": 3,
+          "methoddef_token": "0x060000C3",
+          "name": "BeginInvoke",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000018",
+          "rva": 0,
+          "signature_hex": "20031280a9181280ad1c",
+          "typedef_token": "0x02000018"
+        },
+        {
+          "flags": 454,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+DiagAdaptationDestroyDelegate",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000C4",
+          "impl_flags": 3,
+          "methoddef_token": "0x060000C4",
+          "name": "EndInvoke",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000018",
+          "rva": 0,
+          "signature_hex": "2001021280a9",
+          "typedef_token": "0x02000018"
+        },
+        {
+          "flags": 6278,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+DiagAdaptationExecuteDelegate",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000C5",
+          "impl_flags": 3,
+          "methoddef_token": "0x060000C5",
+          "name": ".ctor",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000019",
+          "rva": 0,
+          "signature_hex": "2002011c18",
+          "typedef_token": "0x02000019"
+        },
+        {
+          "flags": 454,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+DiagAdaptationExecuteDelegate",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000C6",
+          "impl_flags": 3,
+          "methoddef_token": "0x060000C6",
+          "name": "Invoke",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000019",
+          "rva": 0,
+          "signature_hex": "200302180e1018",
+          "typedef_token": "0x02000019"
+        },
+        {
+          "flags": 454,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+DiagAdaptationExecuteDelegate",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000C7",
+          "impl_flags": 3,
+          "methoddef_token": "0x060000C7",
+          "name": "BeginInvoke",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000019",
+          "rva": 0,
+          "signature_hex": "20051280a9180e10181280ad1c",
+          "typedef_token": "0x02000019"
+        },
+        {
+          "flags": 454,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+DiagAdaptationExecuteDelegate",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000C8",
+          "impl_flags": 3,
+          "methoddef_token": "0x060000C8",
+          "name": "EndInvoke",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000019",
+          "rva": 0,
+          "signature_hex": "20020210181280a9",
+          "typedef_token": "0x02000019"
+        },
+        {
+          "flags": 6278,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+DiagAdaptationCancelDelegate",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000C9",
+          "impl_flags": 3,
+          "methoddef_token": "0x060000C9",
+          "name": ".ctor",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200001A",
+          "rva": 0,
+          "signature_hex": "2002011c18",
+          "typedef_token": "0x0200001A"
+        },
+        {
+          "flags": 454,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+DiagAdaptationCancelDelegate",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000CA",
+          "impl_flags": 3,
+          "methoddef_token": "0x060000CA",
+          "name": "Invoke",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200001A",
+          "rva": 0,
+          "signature_hex": "20010218",
+          "typedef_token": "0x0200001A"
+        },
+        {
+          "flags": 454,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+DiagAdaptationCancelDelegate",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000CB",
+          "impl_flags": 3,
+          "methoddef_token": "0x060000CB",
+          "name": "BeginInvoke",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200001A",
+          "rva": 0,
+          "signature_hex": "20031280a9181280ad1c",
+          "typedef_token": "0x0200001A"
+        },
+        {
+          "flags": 454,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+DiagAdaptationCancelDelegate",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000CC",
+          "impl_flags": 3,
+          "methoddef_token": "0x060000CC",
+          "name": "EndInvoke",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200001A",
+          "rva": 0,
+          "signature_hex": "2001021280a9",
+          "typedef_token": "0x0200001A"
+        },
+        {
+          "flags": 6278,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+DiagAdaptationFreememoryDelegate",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000CD",
+          "impl_flags": 3,
+          "methoddef_token": "0x060000CD",
+          "name": ".ctor",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200001B",
+          "rva": 0,
+          "signature_hex": "2002011c18",
+          "typedef_token": "0x0200001B"
+        },
+        {
+          "flags": 454,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+DiagAdaptationFreememoryDelegate",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000CE",
+          "impl_flags": 3,
+          "methoddef_token": "0x060000CE",
+          "name": "Invoke",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200001B",
+          "rva": 0,
+          "signature_hex": "200202181018",
+          "typedef_token": "0x0200001B"
+        },
+        {
+          "flags": 454,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+DiagAdaptationFreememoryDelegate",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000CF",
+          "impl_flags": 3,
+          "methoddef_token": "0x060000CF",
+          "name": "BeginInvoke",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200001B",
+          "rva": 0,
+          "signature_hex": "20041280a91810181280ad1c",
+          "typedef_token": "0x0200001B"
+        },
+        {
+          "flags": 454,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+DiagAdaptationFreememoryDelegate",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000D0",
+          "impl_flags": 3,
+          "methoddef_token": "0x060000D0",
+          "name": "EndInvoke",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200001B",
+          "rva": 0,
+          "signature_hex": "20020210181280a9",
+          "typedef_token": "0x0200001B"
+        },
+        {
+          "flags": 6289,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+<>c",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000D1",
+          "impl_flags": 0,
+          "methoddef_token": "0x060000D1",
+          "name": ".cctor",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200001C",
+          "rva": 19880,
+          "signature_hex": "000001",
+          "typedef_token": "0x0200001C"
+        },
+        {
+          "flags": 6278,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+<>c",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000D2",
+          "impl_flags": 0,
+          "methoddef_token": "0x060000D2",
+          "name": ".ctor",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200001C",
+          "rva": 18801,
+          "signature_hex": "200001",
+          "typedef_token": "0x0200001C"
+        },
+        {
+          "flags": 131,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+<>c",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000D3",
+          "impl_flags": 0,
+          "methoddef_token": "0x060000D3",
+          "name": "<FlashWiredVehicleData>b__94_0",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200001C",
+          "rva": 19892,
+          "signature_hex": "20010e0e",
+          "typedef_token": "0x0200001C"
+        },
+        {
+          "flags": 6278,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+<>c__DisplayClass90_0",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000D4",
+          "impl_flags": 0,
+          "methoddef_token": "0x060000D4",
+          "name": ".ctor",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200001D",
+          "rva": 18801,
+          "signature_hex": "200001",
+          "typedef_token": "0x0200001D"
+        },
+        {
+          "flags": 131,
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+<>c__DisplayClass90_0",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x060000D5",
+          "impl_flags": 0,
+          "methoddef_token": "0x060000D5",
+          "name": "<GetSpecificFolder>b__0",
+          "owner_identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200001D",
+          "rva": 19896,
+          "signature_hex": "2001021280b5",
+          "typedef_token": "0x0200001D"
+        }
+      ],
+      "module_mvid": "72925019-f67e-45b6-878f-43e097367cef",
+      "nested_classes": [
+        {
+          "enclosing_typedef_token": "0x02000002",
+          "nested_typedef_token": "0x02000015"
+        },
+        {
+          "enclosing_typedef_token": "0x02000002",
+          "nested_typedef_token": "0x02000016"
+        },
+        {
+          "enclosing_typedef_token": "0x02000002",
+          "nested_typedef_token": "0x02000017"
+        },
+        {
+          "enclosing_typedef_token": "0x02000002",
+          "nested_typedef_token": "0x02000018"
+        },
+        {
+          "enclosing_typedef_token": "0x02000002",
+          "nested_typedef_token": "0x02000019"
+        },
+        {
+          "enclosing_typedef_token": "0x02000002",
+          "nested_typedef_token": "0x0200001A"
+        },
+        {
+          "enclosing_typedef_token": "0x02000002",
+          "nested_typedef_token": "0x0200001B"
+        },
+        {
+          "enclosing_typedef_token": "0x02000002",
+          "nested_typedef_token": "0x0200001C"
+        },
+        {
+          "enclosing_typedef_token": "0x02000002",
+          "nested_typedef_token": "0x0200001D"
+        },
+        {
+          "enclosing_typedef_token": "0x02000003",
+          "nested_typedef_token": "0x0200001E"
+        },
+        {
+          "enclosing_typedef_token": "0x02000014",
+          "nested_typedef_token": "0x0200001F"
+        }
+      ],
+      "source_sha256": "7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e",
+      "type_definitions": [
+        {
+          "full_nested_name": "<Module>",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000001",
+          "method_tokens": [],
+          "name": "<Module>",
+          "namespace": "",
+          "owner_chain": [
+            "0x02000001"
+          ],
+          "typedef_token": "0x02000001"
+        },
+        {
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000002",
+          "method_tokens": [
+            "0x06000001",
+            "0x06000002",
+            "0x06000003",
+            "0x06000004",
+            "0x06000005",
+            "0x06000006",
+            "0x06000007",
+            "0x06000008",
+            "0x06000009",
+            "0x0600000A",
+            "0x0600000B",
+            "0x0600000C",
+            "0x0600000D",
+            "0x0600000E",
+            "0x0600000F",
+            "0x06000010",
+            "0x06000011",
+            "0x06000012",
+            "0x06000013",
+            "0x06000014",
+            "0x06000015",
+            "0x06000016",
+            "0x06000017",
+            "0x06000018",
+            "0x06000019",
+            "0x0600001A",
+            "0x0600001B",
+            "0x0600001C",
+            "0x0600001D",
+            "0x0600001E",
+            "0x0600001F",
+            "0x06000020",
+            "0x06000021",
+            "0x06000022",
+            "0x06000023",
+            "0x06000024",
+            "0x06000025",
+            "0x06000026",
+            "0x06000027",
+            "0x06000028",
+            "0x06000029",
+            "0x0600002A"
+          ],
+          "name": "DiagAdaptationManager",
+          "namespace": "GTSPlusDiagAdaptationManager",
+          "owner_chain": [
+            "0x02000002"
+          ],
+          "typedef_token": "0x02000002"
+        },
+        {
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManagerConstants",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000003",
+          "method_tokens": [
+            "0x0600002B",
+            "0x0600002C",
+            "0x0600002D",
+            "0x0600002E",
+            "0x0600002F",
+            "0x06000030",
+            "0x06000031"
+          ],
+          "name": "DiagAdaptationManagerConstants",
+          "namespace": "GTSPlusDiagAdaptationManager",
+          "owner_chain": [
+            "0x02000003"
+          ],
+          "typedef_token": "0x02000003"
+        },
+        {
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManagerInformation",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000004",
+          "method_tokens": [
+            "0x06000032",
+            "0x06000033",
+            "0x06000034",
+            "0x06000035",
+            "0x06000036",
+            "0x06000037"
+          ],
+          "name": "DiagAdaptationManagerInformation",
+          "namespace": "GTSPlusDiagAdaptationManager",
+          "owner_chain": [
+            "0x02000004"
+          ],
+          "typedef_token": "0x02000004"
+        },
+        {
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BDCorrectedResultData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000005",
+          "method_tokens": [
+            "0x06000038",
+            "0x06000039",
+            "0x0600003A",
+            "0x0600003B",
+            "0x0600003C",
+            "0x0600003D",
+            "0x0600003E"
+          ],
+          "name": "BDCorrectedResultData",
+          "namespace": "GTSPlusDiagAdaptationManager",
+          "owner_chain": [
+            "0x02000005"
+          ],
+          "typedef_token": "0x02000005"
+        },
+        {
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BdcCommonInfo",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000006",
+          "method_tokens": [
+            "0x0600003F",
+            "0x06000040",
+            "0x06000041"
+          ],
+          "name": "BdcCommonInfo",
+          "namespace": "GTSPlusDiagAdaptationManager",
+          "owner_chain": [
+            "0x02000006"
+          ],
+          "typedef_token": "0x02000006"
+        },
+        {
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BdcAppSpecificInfo",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000007",
+          "method_tokens": [
+            "0x06000042",
+            "0x06000043",
+            "0x06000044",
+            "0x06000045",
+            "0x06000046",
+            "0x06000047",
+            "0x06000048",
+            "0x06000049",
+            "0x0600004A",
+            "0x0600004B",
+            "0x0600004C",
+            "0x0600004D",
+            "0x0600004E",
+            "0x0600004F",
+            "0x06000050",
+            "0x06000051",
+            "0x06000052",
+            "0x06000053",
+            "0x06000054",
+            "0x06000055",
+            "0x06000056"
+          ],
+          "name": "BdcAppSpecificInfo",
+          "namespace": "GTSPlusDiagAdaptationManager",
+          "owner_chain": [
+            "0x02000007"
+          ],
+          "typedef_token": "0x02000007"
+        },
+        {
+          "full_nested_name": "GTSPlusDiagAdaptationManager.BdcData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000008",
+          "method_tokens": [
+            "0x06000057",
+            "0x06000058",
+            "0x06000059"
+          ],
+          "name": "BdcData",
+          "namespace": "GTSPlusDiagAdaptationManager",
+          "owner_chain": [
+            "0x02000008"
+          ],
+          "typedef_token": "0x02000008"
+        },
+        {
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.ImgOpeDdrJsonData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000009",
+          "method_tokens": [
+            "0x0600005A",
+            "0x0600005B",
+            "0x0600005C"
+          ],
+          "name": "ImgOpeDdrJsonData",
+          "namespace": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR",
+          "owner_chain": [
+            "0x02000009"
+          ],
+          "typedef_token": "0x02000009"
+        },
+        {
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.GtsData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000A",
+          "method_tokens": [
+            "0x0600005D",
+            "0x0600005E",
+            "0x0600005F",
+            "0x06000060",
+            "0x06000061",
+            "0x06000062",
+            "0x06000063",
+            "0x06000064",
+            "0x06000065",
+            "0x06000066",
+            "0x06000067",
+            "0x06000068",
+            "0x06000069",
+            "0x0600006A",
+            "0x0600006B",
+            "0x0600006C",
+            "0x0600006D",
+            "0x0600006E",
+            "0x0600006F",
+            "0x06000070",
+            "0x06000071",
+            "0x06000072",
+            "0x06000073",
+            "0x06000074",
+            "0x06000075",
+            "0x06000076",
+            "0x06000077",
+            "0x06000078",
+            "0x06000079",
+            "0x0600007A",
+            "0x0600007B",
+            "0x0600007C",
+            "0x0600007D",
+            "0x0600007E",
+            "0x0600007F"
+          ],
+          "name": "GtsData",
+          "namespace": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR",
+          "owner_chain": [
+            "0x0200000A"
+          ],
+          "typedef_token": "0x0200000A"
+        },
+        {
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.FormatVersionData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000B",
+          "method_tokens": [
+            "0x06000080",
+            "0x06000081",
+            "0x06000082"
+          ],
+          "name": "FormatVersionData",
+          "namespace": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR",
+          "owner_chain": [
+            "0x0200000B"
+          ],
+          "typedef_token": "0x0200000B"
+        },
+        {
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.CarInfoData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000C",
+          "method_tokens": [
+            "0x06000083",
+            "0x06000084",
+            "0x06000085",
+            "0x06000086",
+            "0x06000087",
+            "0x06000088",
+            "0x06000089",
+            "0x0600008A",
+            "0x0600008B",
+            "0x0600008C",
+            "0x0600008D"
+          ],
+          "name": "CarInfoData",
+          "namespace": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR",
+          "owner_chain": [
+            "0x0200000C"
+          ],
+          "typedef_token": "0x0200000C"
+        },
+        {
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.EcuInfoData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000D",
+          "method_tokens": [
+            "0x0600008E",
+            "0x0600008F",
+            "0x06000090",
+            "0x06000091",
+            "0x06000092",
+            "0x06000093",
+            "0x06000094",
+            "0x06000095",
+            "0x06000096",
+            "0x06000097",
+            "0x06000098"
+          ],
+          "name": "EcuInfoData",
+          "namespace": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR",
+          "owner_chain": [
+            "0x0200000D"
+          ],
+          "typedef_token": "0x0200000D"
+        },
+        {
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.AirbagData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000E",
+          "method_tokens": [
+            "0x06000099",
+            "0x0600009A",
+            "0x0600009B",
+            "0x0600009C",
+            "0x0600009D"
+          ],
+          "name": "AirbagData",
+          "namespace": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR",
+          "owner_chain": [
+            "0x0200000E"
+          ],
+          "typedef_token": "0x0200000E"
+        },
+        {
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.AduData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200000F",
+          "method_tokens": [
+            "0x0600009E",
+            "0x0600009F",
+            "0x060000A0",
+            "0x060000A1",
+            "0x060000A2"
+          ],
+          "name": "AduData",
+          "namespace": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR",
+          "owner_chain": [
+            "0x0200000F"
+          ],
+          "typedef_token": "0x0200000F"
+        },
+        {
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.EcuCommonData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000010",
+          "method_tokens": [
+            "0x060000A3",
+            "0x060000A4",
+            "0x060000A5",
+            "0x060000A6",
+            "0x060000A7",
+            "0x060000A8",
+            "0x060000A9"
+          ],
+          "name": "EcuCommonData",
+          "namespace": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR",
+          "owner_chain": [
+            "0x02000010"
+          ],
+          "typedef_token": "0x02000010"
+        },
+        {
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.CommonInfoData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000011",
+          "method_tokens": [
+            "0x060000AA",
+            "0x060000AB",
+            "0x060000AC"
+          ],
+          "name": "CommonInfoData",
+          "namespace": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR",
+          "owner_chain": [
+            "0x02000011"
+          ],
+          "typedef_token": "0x02000011"
+        },
+        {
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.ProfileData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000012",
+          "method_tokens": [
+            "0x060000AD",
+            "0x060000AE",
+            "0x060000AF",
+            "0x060000B0",
+            "0x060000B1"
+          ],
+          "name": "ProfileData",
+          "namespace": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR",
+          "owner_chain": [
+            "0x02000012"
+          ],
+          "typedef_token": "0x02000012"
+        },
+        {
+          "full_nested_name": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR.CommunicationData",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000013",
+          "method_tokens": [
+            "0x060000B2",
+            "0x060000B3",
+            "0x060000B4"
+          ],
+          "name": "CommunicationData",
+          "namespace": "GTSPlusDiagAdaptationManager.IMG_OPE_DDR",
+          "owner_chain": [
+            "0x02000013"
+          ],
+          "typedef_token": "0x02000013"
+        },
+        {
+          "full_nested_name": "<PrivateImplementationDetails>",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000014",
+          "method_tokens": [],
+          "name": "<PrivateImplementationDetails>",
+          "namespace": "",
+          "owner_chain": [
+            "0x02000014"
+          ],
+          "typedef_token": "0x02000014"
+        },
+        {
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+DiagAdaptationCreateChallengeCodeDelegate",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000015",
+          "method_tokens": [
+            "0x060000B5",
+            "0x060000B6",
+            "0x060000B7",
+            "0x060000B8"
+          ],
+          "name": "DiagAdaptationCreateChallengeCodeDelegate",
+          "namespace": "",
+          "owner_chain": [
+            "0x02000002",
+            "0x02000015"
+          ],
+          "typedef_token": "0x02000015"
+        },
+        {
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+DiagAdaptationCheckAuthenticationCodeDelegate",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000016",
+          "method_tokens": [
+            "0x060000B9",
+            "0x060000BA",
+            "0x060000BB",
+            "0x060000BC"
+          ],
+          "name": "DiagAdaptationCheckAuthenticationCodeDelegate",
+          "namespace": "",
+          "owner_chain": [
+            "0x02000002",
+            "0x02000016"
+          ],
+          "typedef_token": "0x02000016"
+        },
+        {
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+DiagAdaptationCreateDelegate",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000017",
+          "method_tokens": [
+            "0x060000BD",
+            "0x060000BE",
+            "0x060000BF",
+            "0x060000C0"
+          ],
+          "name": "DiagAdaptationCreateDelegate",
+          "namespace": "",
+          "owner_chain": [
+            "0x02000002",
+            "0x02000017"
+          ],
+          "typedef_token": "0x02000017"
+        },
+        {
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+DiagAdaptationDestroyDelegate",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000018",
+          "method_tokens": [
+            "0x060000C1",
+            "0x060000C2",
+            "0x060000C3",
+            "0x060000C4"
+          ],
+          "name": "DiagAdaptationDestroyDelegate",
+          "namespace": "",
+          "owner_chain": [
+            "0x02000002",
+            "0x02000018"
+          ],
+          "typedef_token": "0x02000018"
+        },
+        {
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+DiagAdaptationExecuteDelegate",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x02000019",
+          "method_tokens": [
+            "0x060000C5",
+            "0x060000C6",
+            "0x060000C7",
+            "0x060000C8"
+          ],
+          "name": "DiagAdaptationExecuteDelegate",
+          "namespace": "",
+          "owner_chain": [
+            "0x02000002",
+            "0x02000019"
+          ],
+          "typedef_token": "0x02000019"
+        },
+        {
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+DiagAdaptationCancelDelegate",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200001A",
+          "method_tokens": [
+            "0x060000C9",
+            "0x060000CA",
+            "0x060000CB",
+            "0x060000CC"
+          ],
+          "name": "DiagAdaptationCancelDelegate",
+          "namespace": "",
+          "owner_chain": [
+            "0x02000002",
+            "0x0200001A"
+          ],
+          "typedef_token": "0x0200001A"
+        },
+        {
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+DiagAdaptationFreememoryDelegate",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200001B",
+          "method_tokens": [
+            "0x060000CD",
+            "0x060000CE",
+            "0x060000CF",
+            "0x060000D0"
+          ],
+          "name": "DiagAdaptationFreememoryDelegate",
+          "namespace": "",
+          "owner_chain": [
+            "0x02000002",
+            "0x0200001B"
+          ],
+          "typedef_token": "0x0200001B"
+        },
+        {
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+<>c",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200001C",
+          "method_tokens": [
+            "0x060000D1",
+            "0x060000D2",
+            "0x060000D3"
+          ],
+          "name": "<>c",
+          "namespace": "",
+          "owner_chain": [
+            "0x02000002",
+            "0x0200001C"
+          ],
+          "typedef_token": "0x0200001C"
+        },
+        {
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManager+<>c__DisplayClass90_0",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200001D",
+          "method_tokens": [
+            "0x060000D4",
+            "0x060000D5"
+          ],
+          "name": "<>c__DisplayClass90_0",
+          "namespace": "",
+          "owner_chain": [
+            "0x02000002",
+            "0x0200001D"
+          ],
+          "typedef_token": "0x0200001D"
+        },
+        {
+          "full_nested_name": "GTSPlusDiagAdaptationManager.DiagAdaptationManagerConstants+ResultCode",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200001E",
+          "method_tokens": [],
+          "name": "ResultCode",
+          "namespace": "",
+          "owner_chain": [
+            "0x02000003",
+            "0x0200001E"
+          ],
+          "typedef_token": "0x0200001E"
+        },
+        {
+          "full_nested_name": "<PrivateImplementationDetails>+__StaticArrayInitTypeSize=16",
+          "identity": "sha256:7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e:module:72925019-f67e-45b6-878f-43e097367cef:0x0200001F",
+          "method_tokens": [],
+          "name": "__StaticArrayInitTypeSize=16",
+          "namespace": "",
+          "owner_chain": [
+            "0x02000014",
+            "0x0200001F"
+          ],
+          "typedef_token": "0x0200001F"
+        }
+      ]
+    }
+  },
   "schema": "gtsplus-vdas-semantics-v1",
   "sources": {
     "GTSPlusArchiver.dll": {
+      "qualification": {
+        "manifest": "/Volumes/data/altdev/inspect/repos/ghidra_rh850_analysis/build/out/gts-all-unprotected/GTSPlus/manifest.json",
+        "manifest_sha256": "90f5ff8ec45f0bd7bcb9dda0ec7cb82240720421523a571b056a59cade9b3d35",
+        "method": "extract the Toyota installer GTSPlus group paired with GTSPlusCP; no runtime decryption/emulation is required",
+        "protected_sidecar_sha256": "f410ef03ee8411af182e4d08e49a45b593e9350536c2fcf24c84327348f4955f",
+        "protected_stub_sha256": "104f0c85b61e47ac938eb47bae32d837d1867260ea375add0c9a7050f9de821b",
+        "recovered_sha256": "ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2",
+        "relative_path": "bin/GTSPlusArchiver.dll"
+      },
+      "recovery_proof": {
+        "assembly_name": "GTSPlusArchiver",
+        "classification_counts": {
+          "il": 32
+        },
+        "method_body_materialized_count": 32,
+        "method_body_rva_count": 32,
+        "method_def_count": 32,
+        "module_mvid": "6872bf9f-2f56-488a-b778-13e71fc46822",
+        "source_sha256": "ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2"
+      },
       "sha256": "ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2",
       "size": 19472
     },
     "GTSPlusDiagAdaptMng.dll": {
+      "qualification": {
+        "manifest": "/Volumes/data/altdev/inspect/repos/ghidra_rh850_analysis/build/out/gts-all-unprotected/GTSPlus/manifest.json",
+        "manifest_sha256": "90f5ff8ec45f0bd7bcb9dda0ec7cb82240720421523a571b056a59cade9b3d35",
+        "method": "extract the Toyota installer GTSPlus group paired with GTSPlusCP; no runtime decryption/emulation is required",
+        "protected_sidecar_sha256": "0fd228a9ed15971385d60e34b511b1ac4370adba05a376942c790d2296035748",
+        "protected_stub_sha256": "c3dd32e0ae0ba3816a1878785862d8cf1d0819d0c4cb5a1d2abf1873cfd9135d",
+        "recovered_sha256": "7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e",
+        "relative_path": "bin/GTSPlusDiagAdaptMng.dll"
+      },
+      "recovery_proof": {
+        "assembly_name": "GTSPlusDiagAdaptMng",
+        "classification_counts": {
+          "il": 180,
+          "pinvoke": 5,
+          "runtime": 28
+        },
+        "method_body_materialized_count": 180,
+        "method_body_rva_count": 180,
+        "method_def_count": 213,
+        "module_mvid": "72925019-f67e-45b6-878f-43e097367cef",
+        "source_sha256": "7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e"
+      },
       "sha256": "7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e",
       "size": 57360
     },

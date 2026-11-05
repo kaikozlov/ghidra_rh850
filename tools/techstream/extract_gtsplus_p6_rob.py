@@ -18,14 +18,15 @@ from typing import Any
 
 from tools import REPO_ROOT
 from tools.techstream.ddb_semantics import _physical_info, records
-from tools.techstream.ddb_strings import load_string_db
-from tools.techstream.gts.master import _master_frame_rows, _master_variable
+from tools.techstream.gts.master import _master_variable
+from tools.techstream.extract_gtsplus_p6_data_list import native_frame_witness, native_source_census
 from tools.techstream.parse_ddb import DDBParser, _fixed_utf16le
-from tools.techstream.techstream_paths import gts_db_root, resolve_gts_root
+from tools.techstream.techstream_paths import resolve_gts_root
 from tools.techstream.extract_gtsplus_tss3_native_recorder import pe_info, read_va
+from tools.techstream.recover_all_gtsplus_bodies import DEFAULT_OUTPUT, qualify_recovered_source
 
 DEFAULT_OUT = REPO_ROOT / "data/generated/gtsplus_2026/p6_rob_semantics.json"
-DEFAULT_RECOVERED_ROOT = REPO_ROOT / "build/out/gtsplus-unprotected"
+DEFAULT_RECOVERED_ROOT = DEFAULT_OUTPUT / "GTSPlus"
 REGIONS = ("NA", "EU", "JP")
 SELECTORS = (0xCC, 0x12A, 0x12B, 0x12C, 0x12D)
 TABLES = (13, 14, 15, 66, 89, 90, 91, 118, 151, 152, 153, 163, 164)
@@ -139,6 +140,10 @@ def native_evidence(root: Path, recovered_root: Path) -> dict[str, Any]:
     for name, expected in PINNED_SHA256.items():
         source_root = recovered_root if name == "CommandCommon.dll" else root
         path = source_root / "bin" / name
+        qualification = (
+            qualify_recovered_source(path, root / "bin" / name, component_root=recovered_root)
+            if name == "CommandCommon.dll" else None
+        )
         src = identity(path, source_root)
         if src["sha256"] != expected:
             raise ValueError(f"unsupported current-release bytes: {path}: {src['sha256']}")
@@ -158,6 +163,8 @@ def native_evidence(root: Path, recovered_root: Path) -> dict[str, Any]:
             anchors[role] = {"va": f"0x{va:08X}", "rva": f"0x{va-base:X}", "bytes": hex_bytes}
         out[name] = {"source": src, "source_kind": "installer-original plaintext twin" if name == "CommandCommon.dll" else "installed plaintext PE",
                      "image_base": f"0x{base:X}", "functions": functions, "instruction_anchors": anchors}
+        if qualification is not None:
+            out[name]["qualification"] = qualification
     return out
 
 
@@ -307,14 +314,14 @@ def catalog(db: Any, strings: Any, master: Any) -> dict[str, Any]:
             "physical_formula": "converted_integer=low32(trunc_toward_zero(sign_interpret(raw)*mul/div)+offset); divisor0/1 skips division; decimal precision is separate metadata; patterns compare converted_integer"}
 
 
-def request_witnesses(category: int, db: Any, master: Any, parser: DDBParser) -> dict[str, Any]:
+def request_witnesses(category: int, db: Any, context: Any) -> dict[str, Any]:
     codes = raw_rows(db, 163)
     dtc = u32(codes[0], 0x2C)
     mask_rows = raw_rows(db, 66)
     comparison = 0
     for row in mask_rows:
         comparison |= row[9]
-    return {"selectors": [row for s in SELECTORS for row in _master_frame_rows(parser, master, category, s)],
+    return {"selectors": {f"0x{s:X}": native_frame_witness(context, category, s) for s in SELECTORS},
             "status_mask_rows": [r.hex() for r in mask_rows], "example_dtc": dtc,
             "all_db_status_keys_mask": sum({u32(r, 0) for r in mask_rows}),
             "behavior_queries": [(bytes((0x19, 0x17, comparison, memory))).hex() for memory in (0x11, 0x12, 0x13)],
@@ -331,28 +338,22 @@ def extract(root: Path, recovered_root: Path) -> dict[str, Any]:
     regions = {}
     selected = {}
     for region in REGIONS:
-        db_root = gts_db_root(root, region, "Gen")
-        master_path = db_root / "Toyota.ddb"
-        master = parser.parse_master_db(master_path)
-        string_path = db_root / "M_English.ddb"
-        strings = load_string_db(parser, string_path)
-        bindings = {r.category_id for r in parser.extract_master_dlls(master.sections[19])
-                    if r.dll_role_id == 0xA0 and r.dll_name == "GetRoBP6_DT.dll"}
+        context, sources, selection = native_source_census(parser, root, region, 0xA0, "GetRoBP6_DT.dll")
         rows = []
         missing = []
         mode_examples: dict[str, Any] = {}
-        for cat in sorted(parser.extract_master_ecu_categories(master.sections[16]), key=lambda c: c.category_id):
-            if cat.category_id not in bindings:
-                continue
-            path = db_root / cat.database_name
+        for occurrence, cat, master, strings in sources:
+            path = Path(occurrence.source.path).parent / cat.database_name
             if path.suffix != ".ddb":
                 path = path.with_suffix(".ddb")
-            if not path.is_file():
-                missing.append({"category": cat.category_id, "database": cat.database_name})
+            if not cat.database_name or not path.is_file():
+                missing.append({"category": cat.category_id, "database": cat.database_name,
+                                "category_occurrence": occurrence.as_dict()})
                 continue
             db = parser.parse_ecu_db(path)
             rr = raw_rows(db, 164)
             row = {"category": cat.category_id, "database": cat.database_name, "source": identity(path, root),
+                   "category_occurrence": occurrence.as_dict(),
                    "tables": table_census(db), "extraction_modes": histogram(r[0x28] for r in rr),
                    "presentation_modes": histogram(r[0x29] for r in rr),
                    "support_conditions_nonzero": sum(bool(u16(r, 0x16)) for r in rr),
@@ -360,20 +361,20 @@ def extract(root: Path, recovered_root: Path) -> dict[str, Any]:
                    "fixed_length_dids": sum(bool(u16(r, 4)) for r in raw_rows(db, 90)),
                    "wire_length_dids": sum(not u16(r, 4) for r in raw_rows(db, 90)),
                    "wide_scalar_rows": [{"record": i, "key": u16(r, 0x14),
-                                         "name": strings.get_string(u32(r, 0x10)), "raw": r.hex()}
+                                         "name": None if strings is None else strings.get_string(u32(r, 0x10)), "raw": r.hex()}
                                         for i, r in enumerate(rr) if u16(r, 0x1C) - u16(r, 0x1A) + 1 > 32],
-                   "selector_witnesses": [f for s in SELECTORS for f in _master_frame_rows(parser, master, cat.category_id, s)]}
+                   "selector_witnesses": {f"0x{s:X}": native_frame_witness(context, cat.category_id, s) for s in SELECTORS}}
             rows.append(row)
             for i, raw in enumerate(rr):
                 mode = str(raw[0x28])
                 if mode not in mode_examples:
                     mode_examples[mode] = {"category": cat.category_id, "database": cat.database_name, "record": i,
-                                           "name": strings.get_string(u32(raw, 0x10)), "raw": raw.hex()}
-            if region == "NA" and path.stem in ("ADCU_P6", "Engine_CM_P6", "NCM_P6", "BSCM_A_P6"):
-                key = f"{region}:{row['source']['sha256']}"
+                                           "name": None if strings is None else strings.get_string(u32(raw, 0x10)), "raw": raw.hex()}
+            if region == "NA" and strings is not None and path.stem in ("ADCU_P6", "Engine_CM_P6", "NCM_P6", "BSCM_A_P6"):
+                key = f"{region}:{occurrence.source.family}:{occurrence.ordinal}:{row['source']['sha256']}"
                 if key not in selected:
                     selected[key] = catalog(db, strings, master)
-                    selected[key]["request_witnesses"] = request_witnesses(cat.category_id, db, master, parser)
+                    selected[key]["request_witnesses"] = request_witnesses(cat.category_id, db, context)
                     selected[key]["source"] = row["source"]
                 row["selected_catalog"] = key
         totals = Counter()
@@ -384,12 +385,12 @@ def extract(root: Path, recovered_root: Path) -> dict[str, Any]:
                 totals[table] += meta["count"]
             modes.update(row["extraction_modes"])
             presentation.update(row["presentation_modes"])
-        regions[region] = {"master_source": identity(master_path, root), "string_source": identity(string_path, root),
-                           "role": "0xA0", "plugin": "GetRoBP6_DT.dll", "binding_count": len(bindings),
-                           "catalog_count": len(rows), "missing_databases": missing, "table_totals": dict(sorted(totals.items(), key=lambda p: int(p[0]))),
+        regions[region] = {**selection,
+                           "role": "0xA0", "plugin": "GetRoBP6_DT.dll",
+                           "source_occurrence_count": len(rows), "missing_databases": missing, "table_totals": dict(sorted(totals.items(), key=lambda p: int(p[0]))),
                            "extraction_modes": dict(sorted(modes.items())), "presentation_modes": dict(sorted(presentation.items())),
                            "mode_examples": mode_examples, "categories": rows}
-    return {"schema": "gtsplus-current-p6-rob-semantics-1", "scope": "offline current-release host acquisition and DDB signal interpretation",
+    return {"schema": "gtsplus-current-p6-rob-semantics-3", "scope": "offline current-release host acquisition and DDB signal interpretation",
             "native_evidence": native, "regions": regions, "selected_catalogs": selected,
             "transport_contract": {
                 "behavior": "12A:19 17 status memory ->59 17; memory11/12/13; response byte3 availability, entries4 DTCbe24/status8",
@@ -420,7 +421,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--gts-root", type=Path)
     ap.add_argument("--recovered-root", type=Path, default=DEFAULT_RECOVERED_ROOT,
-                    help="root containing bin/CommandCommon.dll recovered from this installer")
+                    help="Qualified aggregate GTSPlus component root")
     ap.add_argument("--out", type=Path, default=DEFAULT_OUT)
     args = ap.parse_args()
     result = extract(resolve_gts_root(args.gts_root), args.recovered_root)

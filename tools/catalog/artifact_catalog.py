@@ -79,7 +79,7 @@ def _path_expr(node: ast.AST) -> Path | None:
 
 @cache
 def _declared_outputs(tool: str) -> tuple[str, ...]:
-    """Recover conventional OUT/OUTPUT constants from a Python producer."""
+    """Recover output files and tracked members of explicit artifact directories."""
     path = REPO / tool
     if path.suffix != ".py":
         return ()
@@ -102,7 +102,10 @@ def _declared_outputs(tool: str) -> tuple[str, ...]:
                 if resolved is not None:
                     rel = resolved.as_posix().lstrip("./")
                     if rel.startswith(("data/", "ghidra/ghidra_v850/data/")):
-                        out.append(rel)
+                        if "ARTIFACT_OUTPUT_DIR" in names:
+                            out.extend(_git_files(rel))
+                        else:
+                            out.append(rel)
     # Generic tools often declare their artifact only as argparse --out/--output
     # defaults rather than module constants. Recover those defaults as local
     # producer metadata too.

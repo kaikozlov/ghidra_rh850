@@ -3094,7 +3094,7 @@
         "bytes": 86714,
         "sha256": "57ecfef044f57709d97fe8588ea84d6045f9c555e49ef041537724a679e99fce"
       },
-      "registry": "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json"
+      "registry": "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json.gz"
     },
     "mirror_frames": 184,
     "mirror_tail_zero_frames": 184,

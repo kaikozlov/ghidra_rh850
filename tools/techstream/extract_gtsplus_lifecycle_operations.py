@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
 """Extract offline, byte/IL-pinned GTS+ diagnostic operation lifecycle evidence.
 
-Requires installer-original body recovery and auxiliary recovery. GUI members are
+Requires qualified aggregate recovery and the installed protected source pairs. GUI members are
 redecoded and signature-verified on every build; build/out JS is never trusted.
 No application, network, credentials, vehicle, or Windows DLL entry is invoked.
 """
 from __future__ import annotations
 
 import argparse
+import gzip
 import hashlib
+import io
+import os
 import json
 from pathlib import Path
 
@@ -17,15 +20,16 @@ import pefile
 from tools import REPO_ROOT
 from tools.techstream.extract_diagnostic_execution_model import anchor
 from tools.techstream.extract_gtsplus_tse_managed_semantics import (
-    _instructions, _lines, _method_pin, _open, _recovery_proof,
+    _instructions, _lines, _method_pin, _open,
 )
 from tools.techstream.gtsplus_local_crypto import decode_gui
-from tools.techstream.inspect_dotnet_il import format_operand
+from tools.techstream.inspect_dotnet_il import format_operand, validate_managed_bodies, managed_method_identities
+from tools.techstream.recover_all_gtsplus_bodies import DEFAULT_OUTPUT as DEFAULT_RECOVERED, qualify_recovered_source
 
 DEFAULT_ROOT = REPO_ROOT / "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics"
-DEFAULT_RECOVERED = REPO_ROOT / "build/out/gtsplus-unprotected"
-DEFAULT_AUX = REPO_ROOT / "build/out/gts-lifecycle-aux"
-DEFAULT_OUT = REPO_ROOT / "data/generated/gtsplus_2026/lifecycle_operations.json"
+DEFAULT_MAIN = DEFAULT_RECOVERED / "GTSPlus"
+DEFAULT_AUX = DEFAULT_RECOVERED / "Auxiliary"
+DEFAULT_OUT = REPO_ROOT / "data/generated/gtsplus_2026/lifecycle_operations.json.gz"
 MANAGED_TYPE = "GTSPlusDiagAdaptationManager.DiagAdaptationManager"
 
 SOURCE_SHA256 = {'aux-installed/CryptgraphCommon.dll': 'a70a55a78b3bea044bffa624a9c2aa668d4621e1a03c213cc0d5eb3ff302b073',
@@ -3015,20 +3019,12 @@ UTILITY_CALLSITE_PINS = {'depth_IT3UtilityTY_EntranceDLL': [(269877651, 'e8ee2c0
                              (268452844, 'e89fd0ffff', '0x10001490', []),
                              (268452854, 'e8b7af0000', '0x1000f3b2', [])]}
 
-def _utility_depth(paths: dict, assets: dict, sources: list, evidence: list, manifest: dict) -> dict:
+def _utility_depth(paths: dict, assets: dict, sources: list, evidence: list) -> dict:
     """Close the compiled cassette and authenticated JavaScript execution owners."""
     import re
     import struct
     from tools.techstream.extract_gtsplus_lifecycle_ui_ipc import _operand
 
-    for key, expected in UTILITY_SOURCE_SHA256.items():
-        if key.startswith("recovered/"):
-            filename = key.split("/", 1)[1]
-            row = next(v for v in manifest["binaries"] if v["path"] == "bin/" + filename)
-            if (row["plaintext"]["sha256"] != expected
-                    or row["protected"]["stub_sha256"] != SOURCE_SHA256["installed/" + filename]
-                    or row["protected"]["sidecar_sha256"] != SOURCE_SHA256["sidecar/" + filename]):
-                raise ValueError("utility recovery provenance drift: " + filename)
     known = {s["id"] for s in sources}
     for member, expected in UTILITY_ASSET_SHA256.items():
         body = assets[member]
@@ -3043,6 +3039,15 @@ def _utility_depth(paths: dict, assets: dict, sources: list, evidence: list, man
                                 recovery="gtsplus_local_crypto.decode_gui; freshly decoded in build()"))
             known.add(sid)
     assembly = _open(paths["recovered/GTSPlus.exe"])
+    admission = validate_managed_bodies(paths["recovered/GTSPlus.exe"])
+    identities = managed_method_identities(assembly, admission["source_sha256"])
+    selected_rvas = {pin["rva"] for pin in UTILITY_MANAGED_PINS.values()}
+    evidence.append(dict(id="operations.utility_managed.admission",
+                         source="operations.source.recovered/GTSPlus.exe", kind="managed-body-admission",
+                         **admission, identities={
+                             "module_mvid": identities["module_mvid"],
+                             "methods": [method for method in identities["methods"]
+                                         if method["rva"] in selected_rvas]}))
     for locator, expected in UTILITY_MANAGED_PINS.items():
         typename, method = locator.split("::")
         row, instructions, body = _instructions(assembly, typename, method)
@@ -3055,7 +3060,8 @@ def _utility_depth(paths: dict, assets: dict, sources: list, evidence: list, man
             operand = _operand(assembly, instruction.operand)
             if isinstance(instruction.operand, int) and opcode.startswith(("br", "beq", "bne", "leave")):
                 operand = "IL_" + format(instruction.operand - start, "04X")
-            anchors.append(dict(offset=instruction.offset - start, opcode=opcode, operand=operand))
+            if opcode.startswith(("call", "newobj", "br", "beq", "bne", "blt", "bgt", "bge", "ble", "leave", "ldfld", "stfld", "ldsfld", "stsfld", "ldstr", "ldc.i4")) or opcode in ("switch", "ret", "throw", "rethrow", "endfinally"):
+                anchors.append(dict(offset=instruction.offset - start, opcode=opcode, operand=operand))
         evidence.append(dict(id="operations.utility_managed." + locator, kind="managed-IL-body-pin",
                              source="operations.source.recovered/GTSPlus.exe", locator=locator,
                              **expected, anchors=anchors))
@@ -3301,14 +3307,374 @@ def _ui_method(text: str, cls: str, method: str) -> str:
     return text[start:end if end != -1 else len(text)]
 
 
-def build(root: Path = DEFAULT_ROOT, recovered_root: Path = DEFAULT_RECOVERED,
+OPERATION_SPEC_ROOT = REPO_ROOT / "data/gtsplus_lifecycle_operations"
+OPERATION_SPEC_INPUTS = [('admission', 'admission', 'admission.json'),
+ ('calls', 'calls', 'shared_calls.json'),
+ ('core', 'core', 'operation_paths.json'),
+ ('bindings.DS-4', 'bindings', 'bindings_DS-4.json'),
+ ('bindings.GTSPlus', 'bindings', 'bindings_GTSPlus.json'),
+ ('frontend.ActiveTestFrontend', 'frontend', 'frontend_ActiveTestFrontend.json'),
+ ('frontend.CustomizationFrontend', 'frontend', 'frontend_CustomizationFrontend.json'),
+ ('frontend.ReadDtcFrontend', 'frontend', 'frontend_ReadDtcFrontend.json'),
+ ('frontend.ToyotaAdasBrowser', 'frontend', 'frontend_ToyotaAdasBrowser.json'),
+ ('frontend.ToyotaBodyBrowser', 'frontend', 'frontend_ToyotaBodyBrowser.json'),
+ ('frontend.HinoBrowser', 'frontend', 'frontend_HinoBrowser.json'),
+ ('frontend.MenuShell', 'frontend', 'frontend_MenuShell.json'),
+ ('frontend.DataCaptureReports', 'frontend', 'frontend_DataCaptureReports.json'),
+ ('frontend.LegacyHistoryBrowser', 'frontend', 'frontend_LegacyHistoryBrowser.json'),
+ ('frontend.FlashingFrontend', 'frontend', 'frontend_FlashingFrontend.json'),
+ ('frontend.IdentityFrontend', 'frontend', 'frontend_IdentityFrontend.json'),
+ ('frontend.SecurityBrowser', 'frontend', 'frontend_SecurityBrowser.json'),
+ ('frontend.ToyotaPowertrainBrowser', 'frontend', 'frontend_ToyotaPowertrainBrowser.json'),
+ ('frontend.SuzukiSubaruBrowser', 'frontend', 'frontend_SuzukiSubaruBrowser.json'),
+ ('native.InformationReads', 'native', 'native_InformationReads.json'),
+ ('native.MonitorReads', 'native', 'native_MonitorReads.json'),
+ ('native.DtcCodes', 'native', 'native_DtcCodes.json'),
+ ('native.FreezeReadiness', 'native', 'native_FreezeReadiness.json'),
+ ('native.Actuation', 'native', 'native_Actuation.json'),
+ ('native.RecorderNative', 'native', 'native_RecorderNative.json'),
+ ('native.CompiledUtilities', 'native', 'native_CompiledUtilities.json'),
+ ('native.OtherPluginsA', 'native', 'native_OtherPluginsA.json'),
+ ('native.OtherPluginsB', 'native', 'native_OtherPluginsB.json'),
+ ('native.Configuration', 'native', 'native_Configuration.json'),
+ ('families.MonitorReads', 'families', 'families_MonitorReads.json'),
+ ('families.DtcCodes', 'families', 'families_DtcCodes.json'),
+ ('families.Actuation', 'families', 'families_Actuation.json'),
+ ('families.RecorderNative', 'families', 'families_RecorderNative.json'),
+ ('families.CompiledUtilities', 'families', 'families_CompiledUtilities.json.gz'),
+ ('families.OtherPluginsB', 'families', 'families_OtherPluginsB.json'),
+ ('families.PlatformAdapters', 'families', 'families_PlatformAdapters.json.gz'),
+ ('families.InformationReads', 'families', 'families_InformationReads.json'),
+ ('families.FreezeReadiness', 'families', 'families_FreezeReadiness.json'),
+ ('families.OtherPluginsA', 'families', 'families_OtherPluginsA.json')]
+
+OPERATION_PROOF_FAMILY = "gts-lifecycle-native-body-proofs-second-pass"
+OPERATION_PROOF_SCHEMA = "gtsplus-operation-native-proof-shard-v1"
+
+
+def _operation_proof_specs(specs: dict, sources: list) -> list:
+    """Admit only explicitly declared, hash-qualified native and operational proof shards."""
+    family = specs["families.CompiledUtilities"][OPERATION_PROOF_FAMILY]
+    containers = {name: family.get(name, {}) for name in
+                  ("native_evidence", "operational_evidence", "bodies")}
+    manifest = family.get("native_evidence_shards", [])
+    source_bindings = specs["admission"]["native"]
+    owner_sources = specs["families.PlatformAdapters"][
+        "gts-platform-canonical-source-identities"]["sources"]
+    owner_analysis = {pair["installed"]["path"]: pair["analysis"]["sha256"]
+                      for pair in owner_sources.values()
+                      if isinstance(pair.get("analysis"), dict)}
+    for entry in manifest:
+        container = entry.get("record_container", "native_evidence")
+        records = containers[container]
+        path = OPERATION_SPEC_ROOT / entry["path"]
+        raw = path.read_bytes()
+        if sha(raw) != entry["sha256"] or len(raw) != entry["size"]:
+            raise ValueError("operation native proof shard drift: " + entry["id"])
+        document = json.loads(gzip.decompress(raw))
+        if (document["schema"] != OPERATION_PROOF_SCHEMA
+                or document["id"] != entry["id"]
+                or len(document["records"]) != entry["record_count"]
+                or document.get("record_container", "native_evidence") != container):
+            raise ValueError("operation native proof shard schema drift: " + entry["id"])
+        expected = {ident for ident, record in records.items()
+                    if record.get("proof_location", {}).get("shard_id") == entry["id"]}
+        if set(document["records"]) != expected:
+            raise ValueError("operation native proof shard record drift: " + entry["id"])
+        for ident, payload in document["records"].items():
+            reference = records[ident]
+            if (reference["proof_location"] != {
+                    "shard_id": entry["id"], "record_id": ident,
+                    "json_pointer": "/records/" + ident}
+                    or reference["source_ref"] != payload["source_ref"]
+                    or reference["source_sha256"] != payload["source_sha256"]):
+                raise ValueError("operation native proof record/source drift: " + ident)
+            key = payload["source_ref"]
+            if key in source_bindings:
+                binding = source_bindings[key]
+                analysis_sha = binding.get("recovered", {}).get(
+                    "sha256", binding["installed_sha256"])
+                if (payload["source_sha256"] != analysis_sha
+                        or owner_analysis.get(key, analysis_sha) != analysis_sha):
+                    raise ValueError("operation proof/owner analysis source drift: " + ident)
+        sources.append(dict(id=entry["id"], path=path.relative_to(REPO_ROOT).as_posix(),
+                            sha256=entry["sha256"], size=len(raw),
+                            record_container=container,
+                            representation="curated-operation-native-proof-shard"))
+    declared = {entry["id"]: entry.get("record_container", "native_evidence")
+                for entry in manifest}
+    if any(declared.get(record["proof_location"]["shard_id"]) != container
+           for container, records in containers.items()
+           for record in records.values() if "proof_location" in record):
+        raise ValueError("operation native proof references an undeclared shard/container")
+    return manifest
+
+
+def _operation_specs(sources: list) -> dict:
+    """Load only the explicit, domain-owned curated inputs; never scan a directory."""
+    result = {}
+    for key, kind, filename in OPERATION_SPEC_INPUTS:
+        path = OPERATION_SPEC_ROOT / filename
+        raw = path.read_bytes()
+        document = json.loads(gzip.decompress(raw) if path.suffix == ".gz" else raw)
+        if (set(document) != {"schema", "id", "kind", "data"}
+                or document["schema"] != "gtsplus-lifecycle-operations-spec-v1"
+                or document["id"] != key or document["kind"] != kind):
+            raise ValueError("operation specification schema drift: " + filename)
+        result[key] = document["data"]
+        sources.append(dict(id="operations.spec." + key,
+                            path=path.relative_to(REPO_ROOT).as_posix(),
+                            sha256=sha(raw), size=len(raw),
+                            representation="curated-operation-evidence-specification"))
+    result["native_proof_shards"] = _operation_proof_specs(result, sources)
+    return result
+
+
+def _operation_contract_links(native: dict, families: dict, links: list) -> tuple[dict, list]:
+    """Resolve published typed provider IDs to curated semantic definitions."""
+    definitions = {}
+    reference_only_keys = {
+        "id", "contract_id", "kind", "artifact", "status", "owner", "source", "source_ref", "source_sha256",
+        "va", "name", "qualification", "contract_ref", "provider_owner", "proof",
+        "body_sha256", "sha256", "native_entry", "VA", "ordinal", "symbol",
+        "actual_public_contract_id",
+    }
+    reference_collections = {
+        "canonical_joins", "typed_provider_joins", "actual_shared_private_provider_joins",
+        "typed_joins", "typed_engine_callee_join",
+    }
+    reference_artifacts = {"artifact", "canonical_artifact", "interface_artifact"}
+    reference_descriptor_keys = reference_only_keys | reference_artifacts | {
+        "types", "scope", "selector", "proof_artifact", "binding", "join",
+        "obligation", "product", "contract", "ABI", "abi", "facet",
+    }
+    export_reference_keys = reference_descriptor_keys | {
+        "ordinal", "rva", "evidence", "virtual_dispatch",
+    }
+    body_proxy_fields = {
+        "native_evidence_ref", "native_evidence_refs", "operational_program_ref",
+        "native_body_ref", "json_pointer",
+    }
+
+    def visit(value, pointer, join_reference_context=False):
+        if isinstance(value, dict):
+            keys = value.keys()
+            reference_only = keys <= reference_only_keys or (
+                "ordinal" in value
+                and isinstance(value.get("contract"), str)
+                and all(
+                    key in export_reference_keys
+                    or (key.startswith("critical_section_") and isinstance(value[key], bool))
+                    for key in keys
+                )
+            ) or (
+                any(value.get(key) for key in reference_artifacts)
+                and (
+                    keys <= reference_descriptor_keys
+                    or (
+                        join_reference_context
+                        and not any(value.get(key) for key in body_proxy_fields)
+                    )
+                )
+            )
+            ident = None if reference_only else value.get("id")
+            if not reference_only and not isinstance(ident, str):
+                ident = value.get("contract_id")
+            if not reference_only and not isinstance(ident, str) and any(
+                    key in value for key in ("algorithm", "va", "wire", "ABI", "abi", "behavior")):
+                ident = value.get("contract")
+            if isinstance(ident, str):
+                definitions.setdefault(ident, []).append(pointer)
+            for key, child in value.items():
+                escaped = str(key).replace("~", "~0").replace("/", "~1")
+                visit(child, pointer + "/" + escaped,
+                      join_reference_context or key in reference_collections)
+        elif isinstance(value, list):
+            for index, child in enumerate(value):
+                visit(child, pointer + "/" + str(index), join_reference_context)
+
+    visit(native, "/native_contracts")
+    visit(families, "/shared_family_contracts")
+    semantic_root = {"native_contracts": native, "shared_family_contracts": families}
+
+    def selected_callee(pointer, link_id):
+        value = semantic_root
+        try:
+            for token in pointer.removeprefix("/").split("/"):
+                token = token.replace("~1", "/").replace("~0", "~")
+                value = value[int(token)] if isinstance(value, list) else value[token]
+        except (KeyError, IndexError, TypeError, ValueError) as exc:
+            raise ValueError("operation selected callee missing: " + link_id) from exc
+
+    resolved = []
+    for link in links:
+        target = link["provider_contract_id"]
+        if target not in definitions:
+            raise ValueError("operation typed provider definition missing: " + link["id"])
+        if link.get("provider_selected_callee_location"):
+            selected_callee(link["provider_selected_callee_location"], link["id"])
+        resolved.append(dict(link, provider_definition_locations=definitions[target]))
+    return definitions, resolved
+
+
+def _operation_depth(root: Path, recovered: Path, aux: Path, assets: dict,
+                     sources: list, evidence: list) -> dict:
+    """Admit each source/method/call once, then compose exact business contracts."""
+    specs = _operation_specs(sources)
+    admission, calls, core = specs["admission"], specs["calls"], specs["core"]
+    bindings = sorted((row for key, value in specs.items() if key.startswith("bindings.")
+                       for row in value), key=lambda row: row["workset_ordinal"])
+    frontends = {key.removeprefix("frontend."): value for key, value in specs.items()
+                 if key.startswith("frontend.")}
+    native = {key.removeprefix("native."): value for key, value in specs.items()
+              if key.startswith("native.")}
+    families = {name: contract for key, value in specs.items() if key.startswith("families.")
+                for name, contract in value.items()}
+    contract_definitions, provider_links = _operation_contract_links(
+        native, families, calls.get("provider_links", []))
+    known = {(s["path"], s["sha256"]): s["id"] for s in sources}
+    source_bindings, source_paths = {}, {}
+    for key, spec in admission["native"].items():
+        installed = root / spec["installed"]
+        installed_raw = installed.read_bytes()
+        if sha(installed_raw) != spec["installed_sha256"]:
+            raise ValueError("operation installed source drift: " + key)
+        path, qualification = installed, None
+        recovery = spec.get("recovered")
+        if recovery:
+            component = recovered if recovery["component"] == "main" else aux
+            path = component / recovery["path"]
+            qualification = qualify_recovered_source(path, installed, component_root=component)
+            expected = recovery["sha256"]
+        else:
+            expected = spec["installed_sha256"]
+        raw = path.read_bytes() if recovery else installed_raw
+        if sha(raw) != expected:
+            raise ValueError("operation implementation drift: " + key)
+        identity = (path.relative_to(REPO_ROOT).as_posix(), expected)
+        sid = known.get(identity)
+        if sid is None:
+            sid = "operations.native.source." + key
+            entry = dict(id=sid, path=identity[0], sha256=expected, size=len(raw),
+                         representation="recovered-executable-body" if recovery else "shipped")
+            if qualification:
+                entry["qualification"] = qualification
+                entry["derived_from_installed"] = dict(
+                    path=installed.relative_to(REPO_ROOT).as_posix(),
+                    sha256=spec["installed_sha256"])
+                evidence.append(dict(id=sid + ".qualification", source=sid,
+                                     kind="recovered-source-qualification", **qualification))
+            sources.append(entry)
+            known[identity] = sid
+        source_bindings[key], source_paths[key] = sid, path
+    known_members = {s.get("member", s["id"].removeprefix("operations.ui.")): s["id"]
+                     for s in sources if s["id"].startswith("operations.ui.")}
+    for member, pin in admission["ui"].items():
+        raw = assets[member]
+        if sha(raw) != pin["raw_sha256"]:
+            raise ValueError("operation frontend source drift: " + member)
+        if sha(raw.decode("utf-8-sig").encode()) != pin["text_sha256"]:
+            raise ValueError("operation frontend normalized source drift: " + member)
+        if member not in known_members:
+            sid = "operations.ui." + member
+            sources.append(dict(id=sid, member=member, sha256=pin["raw_sha256"],
+                                normalized_utf8_sha256=pin["text_sha256"], size=len(raw),
+                                path=(root / "GTSPlusGUI/gts.gui").relative_to(REPO_ROOT).as_posix(),
+                                representation="authenticated-decoded-GUI-member",
+                                derived_from=["operations.source.gui", "operations.source.cpf"]))
+            known_members[member] = sid
+    images = {}
+
+    def image_for(key: str):
+        if key not in images:
+            images[key] = pefile.PE(str(source_paths[key]))
+        return images[key]
+
+    for pin in admission["methods"]:
+        key = pin["source_key"]
+        spec = admission["native"][key]
+        expected_source = spec.get("recovered", {}).get("sha256", spec["installed_sha256"])
+        if pin["source_sha256"] != expected_source:
+            raise ValueError("operation method/source identity mismatch: " + pin["id"])
+        body = image_for(key).get_data(pin["rva"], pin.get("entry_size", 64))
+        if sha(body) != pin["entry_64_sha256"]:
+            raise ValueError("operation method entry drift: " + pin["id"])
+        evidence.append(dict(pin, source=source_bindings[key],
+                             revalidated="whole-source identity and mapped entry-byte window"))
+    for ident, pin in calls["native_call_sites"].items():
+        key = pin["source_key"]
+        image = image_for(key)
+        address = int(pin["va"], 16)
+        instruction = bytes.fromhex(pin["instruction_hex"])
+        if image.get_data(address - image.OPTIONAL_HEADER.ImageBase, len(instruction)) != instruction:
+            raise ValueError("operation native callsite drift: " + ident)
+        if pin["interface_ref"] not in calls["native_interfaces"]:
+            raise ValueError("operation native interface reference missing: " + ident)
+        evidence.append(dict(pin, id=ident, source=source_bindings[key],
+                             kind="native-callsite-instruction"))
+    frontend_calls = {}
+    for ident, call in calls["frontend"].items():
+        member = call["source_member"]
+        raw = assets[member]
+        expected = call.get("source_sha256")
+        if expected is not None and expected not in {sha(raw), sha(raw.decode("utf-8-sig").encode())}:
+            raise ValueError("operation frontend caller source drift: " + ident)
+        frontend_calls[ident] = dict(call, source=known_members[member])
+    role_candidates = {}
+    for binding in bindings:
+        roles = role_candidates.setdefault(binding["product"], {})
+        for role in binding["roles"]:
+            roles.setdefault(str(role), []).append(binding["plugin_id"])
+    return dict(
+        source_bindings=source_bindings,
+        plugin_bindings=bindings,
+        role_candidates=role_candidates,
+        selection=core["selection"],
+        frontend_contracts=frontends,
+        frontend_calls=frontend_calls,
+        native_contracts=native,
+        shared_family_contracts=families,
+        contract_definition_locations=contract_definitions,
+        typed_provider_links=provider_links,
+        native_proof_shards=specs["native_proof_shards"],
+        native_callee_interfaces=calls["native_interfaces"],
+        native_call_evidence_ids=list(calls["native_call_sites"]),
+        api_adapters=core["api_adapters"],
+        end_to_end=core["paths"],
+        mutation_sinks=core["mutation_sinks"],
+        owner_handoffs=core["owner_handoffs"],
+        source_present_open_work=core["source_present_open_work"],
+        interpretation={
+            "selection": "Role candidates are static qualified bindings, not runtime choices. Preserve category, product, ordered correspondence history, Gen/Spe order and native index cardinality.",
+            "reachability": "A facade declaration is not a browser caller. Actual per-site guards/arguments/results/cancel paths are retained; native-only modes and off-master modules remain distinct.",
+            "proof": "Whole-source, mapped method entries and native call instructions are independently admitted once. Owner-listed-body digests are supplementary, not an exhaustive switch/EH/CFG claim.",
+            "proof_containers": {
+                "native_evidence": "Complete source-qualified native/managed instruction and function evidence.",
+                "bodies": "Retained source-qualified native bodies and exact caller metadata.",
+                "operational_evidence": "Complete source-qualified operational program payloads; root operational_program_ref resolves through the declared record proof_location.",
+                "package": "Each explicit shard has source/owner admission, SHA256, size, record count and record_container. No directory or session discovery.",
+                "standalone_JSON": "All declared containers are expanded in place; every operational_program_ref becomes the full original payload without field projection or dropping evidence.",
+            },
+            "results": "Read/list names do not imply read-only behavior. Status, published results, physical mutation, persistence and displayed success are separate observations.",
+            "external_inputs": "Vehicle replies, selected database context, provider acceptance and Windows/driver timing are runtime inputs, not missing source algorithms.",
+            "typed_providers": "Provider links resolve explicit published IDs to curated semantic definitions. Per-site source, ABI, argument/result and mutation ordering remain separate; neither successful ID resolution nor entry-byte admission implies whole-pipeline closure.",
+            "provider_provenance": "provider_packet_provenance identifies the packet that supplied a join, not its semantic owner. Ownership resolves through provider_contract_id and provider_definition_locations; an optional selected-callee JSON pointer retains the exact source-qualified helper/argument context.",
+        })
+
+
+def build(root: Path = DEFAULT_ROOT, recovered_root: Path = DEFAULT_MAIN,
           aux_root: Path = DEFAULT_AUX) -> dict:
     root, recovered_root, aux_root = (p.resolve() for p in (root, recovered_root, aux_root))
     paths = {key: _source_path(key, root, recovered_root, aux_root) for key in SOURCE_SHA256}
     sources = []
     for key, path in paths.items():
         raw = path.read_bytes()
-        if sha(raw) != SOURCE_SHA256[key]:
+        qualification = None
+        if key.startswith(("recovered/", "aux-recovered/")):
+            protected_key = key.replace("aux-recovered/", "aux-installed/").replace("recovered/", "installed/")
+            component_root = aux_root if key.startswith("aux-recovered/") else recovered_root
+            qualification = qualify_recovered_source(path, paths[protected_key], component_root=component_root)
+        elif sha(raw) != SOURCE_SHA256[key]:
             raise ValueError(f"source drift: {key}")
         representation = "shipped"
         if "recovered/" in key:
@@ -3317,33 +3683,22 @@ def build(root: Path = DEFAULT_ROOT, recovered_root: Path = DEFAULT_RECOVERED,
             representation = "shipped-CP-sidecar"
         entry = {"id": "operations.source." + key, "path": path.relative_to(REPO_ROOT).as_posix(),
                  "sha256": sha(raw), "size": len(raw), "representation": representation}
+        if qualification is not None:
+            entry["qualification"] = qualification
         if key.startswith("recovered/"):
             filename = key.split("/", 1)[1]
             entry["derived_from"] = ["operations.source.installed/" + filename,
                                      "operations.source.sidecar/" + filename]
-            entry["recovery"] = "tools.techstream.recover_gtsplus_bodies installer-original plaintext recovery"
+            entry["recovery"] = "qualified component manifest and installed protected pair"
         elif key.startswith("aux-recovered/"):
             filename = key.split("/", 1)[1]
             entry["derived_from"] = ["operations.source.aux-installed/" + filename,
                                      "operations.source.aux-sidecar/" + filename]
-            entry["recovery"] = "tools.techstream.recover_cp_bodies; see auxiliary manifest"
+            entry["recovery"] = "qualified component manifest and installed protected pair"
         sources.append(entry)
-    # Validate recovery provenance, not just a same-name plaintext file.
-    manifest = json.loads((recovered_root / "manifest.json").read_text())
-    for filename in ("CommandCommon.dll", "DiagAdaptation.dll", "GTSPlusDiagAdaptMng.dll"):
-        row = next(v for v in manifest["binaries"] if v["path"] == "bin/" + filename)
-        if (row["plaintext"]["sha256"] != SOURCE_SHA256["recovered/" + filename]
-                or row["protected"]["stub_sha256"] != SOURCE_SHA256["installed/" + filename]
-                or row["protected"]["sidecar_sha256"] != SOURCE_SHA256["sidecar/" + filename]):
-            raise ValueError(f"recovery provenance drift: {filename}")
-    aux_manifest = json.loads((aux_root / "manifest.json").read_text())
-    for filename in ("GtsPlus-CM.dll", "CryptgraphResource.dll", "CryptgraphCommon.dll"):
-        row = next(v for v in aux_manifest["entries"] if v["relative_path"] == "ContentServer/" + filename)
-        if (row["output_sha256"] != SOURCE_SHA256["aux-recovered/" + filename]
-                or row["stub_sha256"] != SOURCE_SHA256["aux-installed/" + filename]
-                or row["sidecar_sha256"] != SOURCE_SHA256["aux-sidecar/" + filename]):
-            raise ValueError(f"auxiliary recovery provenance drift: {filename}")
-    evidence = []
+    evidence = [{"id": source["id"] + ".qualification", "source": source["id"],
+                 "kind": "recovered-source-qualification", **source["qualification"]}
+                for source in sources if "qualification" in source]
     for ident, spec in NATIVE.items():
         filename = spec["file"]
         key = ("recovered/" if "recovered/" + filename in paths else "installed/") + filename
@@ -3358,8 +3713,9 @@ def build(root: Path = DEFAULT_ROOT, recovered_root: Path = DEFAULT_RECOVERED,
                          "va": hex(spec["va"]), "size": spec["size"], "body_sha256": spec["sha256"],
                          "anchors": windows, "finding": spec["finding"]})
     assembly = paths["recovered/GTSPlusDiagAdaptMng.dll"]
-    materialization = _recovery_proof(assembly)
+    materialization = validate_managed_bodies(assembly)
     pe = _open(assembly)
+    materialization["identities"] = managed_method_identities(pe, materialization["source_sha256"])
     managed_findings = {
         "ExecuteAdaptation": "SC000001/002 start/end, SCXX0003 startup information; SC000010/011/015 file-edit-bracketed exports; other APIs DiagFunction.",
         "StartDiagnosis": "Rejects existing instance; reads PC/PF settings and builds native AppPath/region/language JSON; LoadDiagAdaptation,create,DiagFunction. Null/missing/nonzero response result destroys instance and unloads module; successful creation retains singleton.",
@@ -3423,7 +3779,17 @@ def build(root: Path = DEFAULT_ROOT, recovered_root: Path = DEFAULT_RECOVERED,
                      "kind": "authenticated-frontend-API-constants", "locator": "PFCMD_* + send wrappers",
                      "api_ids": api_map,
                      "finding": "Current JavaScript operation APIs send DV/SC IDs through platform raw interface to adaptation manager; CommandAPI.dll is a V18 predecessor, absent from current bin."})
-    utility_execution = _utility_depth(paths, assets, sources, evidence, manifest)
+    utility_execution = _utility_depth(paths, assets, sources, evidence)
+    operation_execution = _operation_depth(root, recovered_root, aux_root, assets, sources, evidence)
+    utility_execution["browser"]["workflow_contracts_ref"] = "diagnostic_operations.frontend_contracts"
+    utility_execution["browser"]["native_handoffs_ref"] = "diagnostic_operations.api_adapters"
+    utility_execution["boundaries"] = [
+        "Authenticated browser business contracts, exact PF calls and selected native contracts are composed below; registration and facade declarations alone do not establish runtime menu reachability.",
+        "Compiled/native work still being completed by its named owner is listed in diagnostic_operations.source_present_open_work, never described as unavailable source.",
+        "Menu/vehicle/security/flash/persistence engines retain typed handoffs to their existing canonical lifecycle domains.",
+        "Fcm13's registered VIN-error view is absent from the authenticated GUI; Szcom03's preloaded-worker/uncached-controller collision remains an actual loading failure, not a fabricated fallback.",
+        "Live vehicle/provider responses and observed Windows/VCI timing remain unexecuted runtime inputs.",
+    ]
     lifecycle = json.loads(json.dumps(LIFECYCLE))
     lifecycle["states"].extend([
         dict(id="operations.cassette_bound", owner="UtilitySequencer/EVbBroker", meaning="OEM-selected parameters bound to compiled native cassette"),
@@ -3456,6 +3822,18 @@ def build(root: Path = DEFAULT_ROOT, recovered_root: Path = DEFAULT_RECOVERED,
         "UtilityPlusFrontNK complete implemented SC/UG selector table; UtilityGene primitive wrappers and send/timer cleanup",
         "Authenticated utility-module registration/handler/PF-reference inventory and Abg03/CheckMode control flows",
     ])
+    lifecycle["coverage"]["components"].extend([
+        "Source-qualified configuration catalog/value/bitfield/default/VIN/aftersales algorithms",
+        "Active-test, DTC/read, monitor, recorder and utility native family contracts with actual mutating sinks",
+        "All14 browser owner contracts composed as business workflows or typed existing-domain handoffs",
+    ])
+    lifecycle["coverage"]["branches"].extend([
+        "Configuration per-item publication versus later flush overwrite and frontend discarded successList",
+        "P4SA catalog security on existing nonempty output; native mounted-ECU mode2 destructive clear",
+        "Factory-default99 fast path, grouped writes, sticky normalization and absence of application readback",
+        "Source-qualified OEM/generation errors, cancellation and partial result/persistence lifetimes",
+    ])
+    lifecycle["handoffs"].extend(operation_execution["owner_handoffs"])
     lifecycle["handoffs"].append(dict(to_domain="vehicle_context",
         caller="PF ExecuteEndDiagAdaptation", callee="DiagAdaptationManager.EndDiagnosis",
         mechanism="Common diagnosis identity clear versus native-handle ownership are separate layers",
@@ -3464,6 +3842,7 @@ def build(root: Path = DEFAULT_ROOT, recovered_root: Path = DEFAULT_RECOVERED,
     return {"schema": "gtsplus-lifecycle-domain-v1", "domain": "operations", "sources": sources,
             "evidence": evidence, **lifecycle,
             "utility_execution": utility_execution,
+            "diagnostic_operations": operation_execution,
             "managed_materialization": materialization,
             "provenance": {"main_recovery_manifest": (recovered_root / "manifest.json").relative_to(REPO_ROOT).as_posix(),
                            "aux_recovery_manifest": (aux_root / "manifest.json").relative_to(REPO_ROOT).as_posix(),
@@ -3471,16 +3850,116 @@ def build(root: Path = DEFAULT_ROOT, recovered_root: Path = DEFAULT_RECOVERED,
             "safety": "Offline extraction only; no diagnostic, auth, network, or vehicle operation executed."}
 
 
+def load_operation_report(path: Path = DEFAULT_OUT) -> dict:
+    """Resolve the retained report's hash-qualified canonical contract inputs."""
+    with gzip.open(path, "rt", encoding="utf-8") as stream:
+        result = json.load(stream)
+    inputs = result.pop("operation_contract_inputs")
+    operation = result["diagnostic_operations"]
+    fields = {"frontend": "frontend_contracts", "native": "native_contracts",
+              "families": "shared_family_contracts"}
+    for field in fields.values():
+        if field in operation:
+            raise ValueError("operation report repeats a canonical contract field: " + field)
+        operation[field] = {}
+    for entry in inputs:
+        source = path.parent / entry["path"]
+        raw = source.read_bytes()
+        if len(raw) != entry["size"] or sha(raw) != entry["sha256"]:
+            raise ValueError("operation contract input drift: " + entry["id"])
+        document = json.loads(gzip.decompress(raw) if source.suffix == ".gz" else raw)
+        if (set(document) != {"schema", "id", "kind", "data"}
+                or document["schema"] != "gtsplus-lifecycle-operations-spec-v1"
+                or document["id"] != entry["id"] or document["kind"] != entry["kind"]):
+            raise ValueError("operation contract input schema drift: " + entry["id"])
+        group, name = entry["id"].split(".", 1)
+        target = operation[fields[group]]
+        values = document["data"] if group == "families" else {name: document["data"]}
+        target.update(values)
+    family = operation["shared_family_contracts"][OPERATION_PROOF_FAMILY]
+    family["native_evidence_shards"] = operation["native_proof_shards"]
+    return result
+
+
+def _write_operation_report(result: dict, path: Path, *, proof_root: Path | None = None) -> None:
+    """Retain canonical input references, or export a fully expanded standalone JSON."""
+    operation = result["diagnostic_operations"]
+    family = operation["shared_family_contracts"][OPERATION_PROOF_FAMILY]
+    manifest = operation["native_proof_shards"]
+    if path.suffix == ".gz":
+        sources = {entry["id"]: entry for entry in result["sources"]}
+        inputs = []
+        for key, kind, filename in OPERATION_SPEC_INPUTS:
+            if not key.startswith(("frontend.", "native.", "families.")):
+                continue
+            source = sources["operations.spec." + key]
+            inputs.append(dict(id=key, kind=kind, sha256=source["sha256"], size=source["size"],
+                               path=os.path.relpath(OPERATION_SPEC_ROOT / filename, path.parent)))
+        retained = dict(result, operation_contract_inputs=inputs)
+        retained_operation = dict(operation)
+        for field in ("frontend_contracts", "native_contracts", "shared_family_contracts"):
+            del retained_operation[field]
+        retained_operation["native_proof_shards"] = [
+            dict(entry, path=os.path.relpath(
+                proof_root / entry["path"] if proof_root is not None
+                else REPO_ROOT / sources[entry["id"]]["path"], path.parent))
+            for entry in manifest
+        ]
+        retained["diagnostic_operations"] = retained_operation
+        with (
+            path.open("wb") as raw,
+            gzip.GzipFile(filename="", mode="wb", fileobj=raw, mtime=0) as compressed,
+            io.TextIOWrapper(compressed, encoding="utf-8") as stream,
+        ):
+            json.dump(retained, stream, indent=2, sort_keys=True)
+            stream.write("\n")
+    else:
+        sources = {entry["id"]: entry for entry in result["sources"]}
+        for entry in manifest:
+            source = (proof_root / entry["path"] if proof_root is not None
+                      else REPO_ROOT / sources[entry["id"]]["path"])
+            raw = source.read_bytes()
+            if sha(raw) != entry["sha256"] or len(raw) != entry["size"]:
+                raise ValueError("operation proof input drift: " + entry["id"])
+            document = json.loads(gzip.decompress(raw))
+            container = entry.get("record_container", "native_evidence")
+            family[container].update(document["records"])
+            entry.pop("path")
+            entry["expanded_into"] = (
+                "/diagnostic_operations/shared_family_contracts/"
+                + OPERATION_PROOF_FAMILY + "/" + container)
+        def expand_programs(value):
+            if isinstance(value, dict):
+                if set(value) == {"operational_program_ref"}:
+                    record = family["operational_evidence"][value["operational_program_ref"]]
+                    return expand_programs(record["payload"])
+                for key, child in value.items():
+                    value[key] = expand_programs(child)
+            elif isinstance(value, list):
+                for index, child in enumerate(value):
+                    value[index] = expand_programs(child)
+            return value
+
+        result = expand_programs(result)
+        with path.open("w", encoding="utf-8") as stream:
+            json.dump(result, stream, indent=2, sort_keys=True)
+            stream.write("\n")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--root", type=Path, default=DEFAULT_ROOT)
-    ap.add_argument("--recovered-root", type=Path, default=DEFAULT_RECOVERED)
+    ap.add_argument("--recovered-root", type=Path, default=DEFAULT_MAIN)
     ap.add_argument("--aux-root", type=Path, default=DEFAULT_AUX)
     ap.add_argument("--out", type=Path, default=DEFAULT_OUT)
+    ap.add_argument("--from-report", type=Path,
+                    help="Export retained evidence without the vendor distributions")
     args = ap.parse_args()
-    result = build(args.root, args.recovered_root, args.aux_root)
+    result = (load_operation_report(args.from_report) if args.from_report else
+              build(args.root, args.recovered_root, args.aux_root))
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
+    _write_operation_report(result, args.out,
+                            proof_root=args.from_report.parent if args.from_report else None)
     print(args.out)
 
 

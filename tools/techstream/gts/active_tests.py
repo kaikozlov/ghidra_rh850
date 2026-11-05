@@ -7,13 +7,15 @@ from pathlib import Path
 from typing import Any
 
 from tools.techstream.gts.ddb import _monitor_rows
+from tools.techstream.ddb_semantics import native_context
+from tools.techstream.gts.query import _raw_catalog_source, native_ecu_catalog_category
 from tools.techstream.gts.master import _master_frame_rows, _master_variable
 from tools.techstream.parse_ddb import ECU_TABLE_CLASS_NAMES, DDBParser, StringDataBase
 
 
 def _active_test_list_category_plan(parser: DDBParser, category: dict[str, Any], db_root: Path) -> dict[str, Any]:
     mode = int(category["generation"]) & 0xE0
-    db_path = db_root / str(category["database"])
+    db_path = Path(category.get("catalog_database_path") or db_root / str(category["database"]))
     db = parser.parse_ecu_db(db_path)
     direct = db.sections.get(68)
     routine = db.sections.get(71)
@@ -25,6 +27,7 @@ def _active_test_list_category_plan(parser: DDBParser, category: dict[str, Any],
     direct_count = 0 if direct is None else direct.header.record_count
     routine_count = 0 if routine is None else routine.header.record_count
     return {
+        "catalog_context": {**_raw_catalog_source(db_path), "category": category},
         "generation": int(category["generation"]),
         "generation_mode": f"0x{mode:X}",
         "direct_table": 68,
@@ -61,7 +64,7 @@ def _direct_active_test_selected_row(
     active_test_id: int,
     strings: StringDataBase | None = None,
 ) -> tuple[Any, Path, dict[str, Any]]:
-    db_path = db_root / str(category["database"])
+    db_path = Path(category.get("catalog_database_path") or db_root / str(category["database"]))
     db = parser.parse_ecu_db(db_path)
     section = db.sections.get(68)
     if section is None:
@@ -80,6 +83,7 @@ def _direct_active_test_selected_row(
     index, raw = matches[0]
     name_index = struct.unpack_from("<I", raw, 0x0C)[0]
     selected = {
+        "catalog_context": {**_raw_catalog_source(db_path), "category": category},
         "record": index,
         "active_test_id": active_test_id,
         "active_test_id_hex": f"0x{active_test_id:X}",
@@ -113,7 +117,7 @@ def _routine_active_test_selected_row(
     strings: StringDataBase | None = None,
 ) -> tuple[Any, Path, dict[str, Any]]:
     """Resolve one current 72-byte type-71 P5 routine Active-Test row."""
-    db_path = db_root / str(category["database"])
+    db_path = Path(category.get("catalog_database_path") or db_root / str(category["database"]))
     db = parser.parse_ecu_db(db_path)
     section = db.sections.get(71)
     if section is None:
@@ -134,6 +138,7 @@ def _routine_active_test_selected_row(
     index, raw = matches[0]
     name_index = struct.unpack_from("<I", raw, 0x08)[0]
     selected = {
+        "catalog_context": {**_raw_catalog_source(db_path), "category": category},
         "record": index,
         "active_test_id": active_test_id,
         "active_test_id_hex": f"0x{active_test_id:X}",
@@ -161,43 +166,44 @@ def _routine_active_test_executor_plan(
     selected: dict[str, Any],
 ) -> dict[str, Any]:
     """Materialize the current GTS+ P5 UDS RoutineControl contract."""
+    master = native_context(master)
     category_id = int(category["category_id"])
     rid = int(selected["routine_id"])
 
     def phase(selector: int, subfunction: int, variable_field: str | None) -> dict[str, Any]:
         rows = _master_frame_rows(parser, master, category_id, selector)
-        if len(rows) != 1:
-            raise ValueError(
-                f"category {category_id}: routine selector 0x{selector:X} resolved {len(rows)} frames"
-            )
-        frame = rows[0]
-        expected = bytes((0x31, subfunction, 0xFF, 0xFF))
-        send = bytes.fromhex(frame["send"]["bytes"])
-        if send != expected:
-            raise ValueError(
-                f"category {category_id}: selector 0x{selector:X} base request {send.hex()} != {expected.hex()}"
-            )
-        expected_reply = bytes((0x71, subfunction)).hex()
-        if frame["receive_check"]["bytes"] != expected_reply:
-            raise ValueError(
-                f"category {category_id}: selector 0x{selector:X} positive check "
-                f"{frame['receive_check']['bytes']} != {expected_reply}"
-            )
-        request = bytearray(send)
-        request[2] = (rid >> 8) & 0xFF
-        request[3] = rid & 0xFF
-        variable = None
-        if variable_field is not None:
-            variable_id = int(selected[variable_field])
-            variable = _master_variable(master, variable_id)
-            if variable_id:
-                request.extend(bytes.fromhex(variable["bytes"]))
+        materialized = []
+        for frame in rows:
+            expected = bytes((0x31, subfunction, 0xFF, 0xFF))
+            send = bytes.fromhex(frame["send"]["bytes"])
+            if send != expected:
+                raise ValueError(
+                    f"category {category_id}: selector 0x{selector:X} base request {send.hex()} != {expected.hex()}"
+                )
+            expected_reply = bytes((0x71, subfunction)).hex()
+            if frame["receive_check"]["bytes"] != expected_reply:
+                raise ValueError(
+                    f"category {category_id}: selector 0x{selector:X} positive check "
+                    f"{frame['receive_check']['bytes']} != {expected_reply}"
+                )
+            request = bytearray(send)
+            request[2] = (rid >> 8) & 0xFF
+            request[3] = rid & 0xFF
+            variable = None
+            if variable_field is not None:
+                variable_id = int(selected[variable_field])
+                variable = _master_variable(master, variable_id)
+                if variable_id:
+                    request.extend(bytes.fromhex(variable["bytes"]))
+            materialized.append({
+                "base_frame": frame,
+                "static_command_variable": variable,
+                "materialized_static_request": request.hex(),
+            })
         return {
             "selector": f"0x{selector:X}",
             "subfunction": f"0x{subfunction:02X}",
-            "base_frame": frame,
-            "static_command_variable": variable,
-            "materialized_static_request": request.hex(),
+            "frames": materialized,
         }
 
     start = phase(0xD5, 0x01, "routine_command_variable")
@@ -212,6 +218,7 @@ def _routine_active_test_executor_plan(
         or int(selected["output_mask_button_variable"])
     )
     return {
+        "native_context": master.as_dict(),
         "service": "0x31",
         "service_name": "RoutineControl",
         "positive_response": "0x71",
@@ -230,7 +237,8 @@ def _routine_active_test_executor_plan(
         ),
         "transport": (
             "DataMonitorPhase5 passes buffer+1/length-1 to the shared active_test_start interface with "
-            "ActiveTestType=1; DataListIF re-prepends 0x31, queues/replaces by RID, accepts 0x71, "
+            "ActiveTestType=1; DataListIF re-prepends 0x31 and appends a new active node. Only the STOP "
+            "chain deduplicates by SID+RID, retaining its existing bytes. The event accepts 0x71, "
             "and the common P5 J2534 worker sends the queued frame via SendIntExt"
         ),
         "boundary": "static plan only; does not execute RoutineControl or prove outer session/authentication requirements",
@@ -245,11 +253,8 @@ def _direct_active_test_executor_plan(
     db_path: Path,
     selected: dict[str, Any],
 ) -> dict[str, Any]:
-    """Materialize the static P5 direct Active-Test executor contract.
-
-    The total DID data length is intentionally left symbolic because the
-    current DataMonitorPhase5 runtime reads it from CCmdDataIdLengthList.
-    """
+    """Describe current-main P5/P6 direct packing with runtime DID length N."""
+    master = native_context(master)
     section = db.sections.get(67)
     if section is None:
         raise ValueError(f"{db_path.name}: direct Active-Test table 67 is absent")
@@ -263,13 +268,7 @@ def _direct_active_test_executor_plan(
             matches.append((index, raw))
     if not matches:
         raise ValueError(f"{db_path.name}: DID 0x{did:04X} resolved no type-67 rows")
-    encoding_modes = {raw[0x0A] for _, raw in matches}
-    if len(encoding_modes) != 1:
-        raise ValueError(
-            f"{db_path.name}: DID 0x{did:04X} type-67 rows disagree on encoding mode: "
-            + ", ".join(str(value) for value in sorted(encoding_modes))
-        )
-    encoding_mode = next(iter(encoding_modes))
+    encoding_mode = matches[0][1][0x0A]
     type67_records = [
         {
             "record": index,
@@ -285,38 +284,41 @@ def _direct_active_test_executor_plan(
         for index, raw in matches
     ]
 
-    def frame(selector: int, expected: bytes) -> dict[str, Any]:
+    def frames(selector: int, expected: bytes, positive: str) -> list[dict[str, Any]]:
         rows = _master_frame_rows(parser, master, int(category["category_id"]), selector)
-        if len(rows) != 1:
-            raise ValueError(
-                f"category {category['category_id']}: Active-Test selector 0x{selector:X} resolved {len(rows)} frames"
-            )
-        row = rows[0]
-        send = bytes.fromhex(row["send"]["bytes"])
-        if send != expected:
-            raise ValueError(
-                f"category {category['category_id']}: selector 0x{selector:X} base request {send.hex()} != {expected.hex()}"
-            )
-        return row
+        materialized = []
+        for row in rows:
+            send = bytearray.fromhex(row["send"]["bytes"])
+            if send != expected:
+                raise ValueError(
+                    f"category {category['category_id']}: selector 0x{selector:X} base request {send.hex()} != {expected.hex()}"
+                )
+            if row["receive_check"]["bytes"] != positive:
+                raise ValueError(
+                    f"category {category['category_id']}: selector 0x{selector:X} positive response != {positive}"
+                )
+            send[1] = (did >> 8) & 0xFF
+            send[2] = did & 0xFF
+            materialized.append({"base_frame": row, "request": send.hex(), "positive_check": positive})
+        return materialized
 
-    start_frame = frame(0x9D, bytes.fromhex("2fffff03"))
-    stop_frame = frame(0x64, bytes.fromhex("2fffff00"))
-    length_frame = frame(0xCA, bytes.fromhex("22ffff"))
-    if start_frame["receive_check"]["bytes"] != "6f" or stop_frame["receive_check"]["bytes"] != "6f":
-        raise ValueError(f"category {category['category_id']}: Active-Test positive response is no longer 0x6F")
-    if length_frame["receive_check"]["bytes"] != "62":
-        raise ValueError(f"category {category['category_id']}: Active-Test DID-length probe positive response is no longer 0x62")
-
-    start_prefix = bytearray.fromhex(start_frame["send"]["bytes"])
-    stop_prefix = bytearray.fromhex(stop_frame["send"]["bytes"])
-    length_request = bytearray.fromhex(length_frame["send"]["bytes"])
-    for buf in (start_prefix, stop_prefix, length_request):
-        buf[1] = (did >> 8) & 0xFF
-        buf[2] = did & 0xFF
+    starts = frames(0x9D, bytes.fromhex("2fffff03"), "6f")
+    stops = frames(0x64, bytes.fromhex("2fffff00"), "6f")
+    lengths = frames(0xCA, bytes.fromhex("22ffff"), "62")
     bit_start = selected["bit_start"]
     bit_end = selected["bit_end"]
     minimum_length = bit_end // 8 + 1
+    payloads = {
+        0: ("N-byte value payload || L-byte type-67 enable mask", "L-byte type-67 enable mask"),
+        1: ("N-byte value payload || N-byte control-enable mask", "N-byte control-enable mask"),
+        3: ("N-byte value payload", "empty"),
+        4: ("N-byte shifted value payload || N-byte control-enable mask", "N-byte control-enable mask"),
+        5: ("N-byte shifted value payload || L-byte exact-match type-67 enable mask", "FF"),
+        6: ("N-byte value payload", "empty"),
+    }
+    start_payload, stop_payload = payloads.get(encoding_mode, ("unsupported", "unsupported"))
     plan: dict[str, Any] = {
+        "native_context": master.as_dict(),
         "service": "0x2F",
         "service_name": "InputOutputControlByIdentifier",
         "positive_response": "0x6F",
@@ -326,23 +328,28 @@ def _direct_active_test_executor_plan(
             "did": did,
             "did_hex": f"0x{did:04X}",
             "encoding_mode": encoding_mode,
+            "encoding_mode_source_record": matches[0][0],
             "records": type67_records,
         },
         "start": {
             "selector": "0x9D",
             "control_parameter": "0x03",
             "control_name": "shortTermAdjustment",
-            "base_frame": start_frame,
-            "materialized_prefix": start_prefix.hex(),
-            "formula": f"{start_prefix.hex()} || N-byte value payload",
+            "frames": [{
+                "base_frame": row["base_frame"],
+                "materialized_prefix": row["request"],
+                "formula": f"{row['request']} || {start_payload}",
+            } for row in starts],
         },
         "stop": {
             "selector": "0x64",
             "control_parameter": "0x00",
             "control_name": "returnControlToECU",
-            "base_frame": stop_frame,
-            "materialized_prefix": stop_prefix.hex(),
-            "formula": f"{stop_prefix.hex()} || N-byte control-enable mask",
+            "frames": [{
+                "base_frame": row["base_frame"],
+                "materialized_prefix": row["request"],
+                "formula": f"{row['request']} || {stop_payload}",
+            } for row in stops],
         },
         "runtime_data_length": {
             "symbol": "N",
@@ -351,9 +358,11 @@ def _direct_active_test_executor_plan(
             "probe": {
                 "kind": "read_data_by_identifier_value_length",
                 "selector": "0xCA",
-                "base_frame": length_frame,
-                "materialized_request": length_request.hex(),
-                "positive_check": "62",
+                "frames": [{
+                    "base_frame": row["base_frame"],
+                    "materialized_request": row["request"],
+                    "positive_check": row["positive_check"],
+                } for row in lengths],
                 "response_prefix_length": 3,
                 "received_length_formula": "N = received UDS payload length - 3 (positive SID 0x62 + echoed DID)",
                 "decoded_value_formula": "N = len(ReadDataByIdentifier value bytes after stripping 0x62 || DID)",
@@ -365,37 +374,66 @@ def _direct_active_test_executor_plan(
             "boundary": "static DDB geometry gives only a minimum; the exact length is materialized from the live 0x22 response",
         },
         "bit_range": {"start": bit_start, "end": bit_end},
+        "encoding_requirements": {
+            "source_scope": "current main GTSPlus DataMonitorPhase5_DT.dll and DataMonitorPhase6_DT.dll",
+            "p5_supported": encoding_mode in {0, 1, 3, 4, 5},
+            "p6_supported": encoding_mode in {0, 1, 3, 4, 6},
+            "unsupported_status": "0xC0040102",
+            "value_input": "CStartActTstSnd raw u32 +0x24 and alternate u32 +0x28",
+            "adapter": "DiagAdaptation logical-value conversion writes these fields directly; SetValue is a separate native-caller path",
+            "engine_selection": (
+                "ordinary category generation low5bits 0x14/0x15 selects P5 and 0x16 selects P6; "
+                "controller mode, multi-ECU flags and populated connection state can instead select Dual/Fuel. "
+                "The category alone does not establish the loaded executor."
+            ),
+        },
         "control_enable_mask": {
             "start": (
-                "type67_rows_for_selected_byte_span" if encoding_mode == 0 else "none"
+                "type67_rows_for_selected_byte_span" if encoding_mode == 0
+                else "selected_bit_range_or_alternate" if encoding_mode == 1
+                else "selected_bit_range" if encoding_mode == 4
+                else "first_exact_type67_row" if encoding_mode == 5
+                else "none"
             ),
             "stop": (
                 "type67_rows_for_selected_byte_span" if encoding_mode == 0
-                else "none" if encoding_mode == 3
-                else "selected_bit_range" if encoding_mode in {1, 4}
-                else "none" if encoding_mode == 6
-                else "mode_specific"
+                else "selected_bit_range_or_alternate" if encoding_mode == 1
+                else "selected_bit_range" if encoding_mode == 4
+                else "single_FF_byte" if encoding_mode == 5
+                else "none"
             ),
             "type67_rule": (
-                "for mode 0, include each type-67 row whose data_byte_offset/data_byte_length lies fully "
-                "inside the selected type-68 byte span; set MSB0 mask bit control_enable_bit_1based-1"
+                "mode 0 includes fully contained type-67 byte spans and sets MSB0 bit "
+                "control_enable_bit_1based-1; L is the highest selected mask-byte index plus one. "
+                "P5 mode 5 uses the first row with start_byte <= data_byte_offset < start_byte+width, "
+                "data_byte_offset+data_byte_length <= start_byte+width and exact +0x0C/+0x0E bit bounds. "
+                "A matched zero enable key returns C0040102; no matching mode-5 row yields L=0."
             ),
         },
         "encoding": (
-            "mode 0/3 zero-fill N bytes and write the raw value big-endian into the selected whole-byte span; "
-            "mode 0 additionally appends the type-67-derived control-enable mask while mode 3 appends none"
+            "mode 0/3 zero-fill N bytes and write raw32 big-endian across "
+            "u16(trunc_toward_zero((bit_end-bit_start)/8)+1) bytes, restricted to widths 1..4; "
+            "mode 0 appends its type-67 mask to START and STOP, while mode 3 appends no mask"
             if encoding_mode in {0, 3}
-            else "mode 1 writes the raw value into the selected bit ending position and uses the selected-bit-range mask on return-control"
+            else "mode 1 alternate=0 writes low8(raw)<<[7-(bit_end&7)] at bit_end>>3 and appends an "
+                 "N-byte inclusive range mask to START and STOP; u8(bit_end-bit_start)>7 returns C0040102. "
+                 "Nonzero alternate requires a one-byte span and uses unshifted raw8 and low8(alternate)"
             if encoding_mode == 1
-            else "mode 4 writes the shifted raw value across the selected byte span and uses the selected-bit-range mask on return-control"
+            else "mode 4 writes u32(raw32<<[7-(bit_end&7)]) big-endian over the 1..4-byte span and "
+                 "appends an N-byte inclusive range mask to START and STOP"
             if encoding_mode == 4
-            else "mode 6 writes the low raw byte at bit_end>>3 with the same MSB shift as mode 1 and carries no control-enable mask"
+            else "P5 mode 5 uses the same shifted raw32 placement, appends its first exact type-67 "
+                 "row's L-byte enable mask to START and one FF byte to STOP; P6 rejects mode 5"
+            if encoding_mode == 5
+            else "P6 mode 6 writes low8(raw)<<[7-(bit_end&7)] at bit_end>>3; START carries N data bytes "
+                 "and STOP has no payload; P5 rejects mode 6"
             if encoding_mode == 6
-            else f"encoding mode {encoding_mode} is selected by type-67 +0x0A; exact packing remains mode-specific"
+            else f"encoding mode {encoding_mode} returns native status C0040102"
         ),
         "transport": (
-            "DataMonitorPhase5 strips the existing SID for its interface call; DataListIF CCommEventPhase5AT "
-            "re-prepends 0x2F, GetSndFrame copies the queued bytes unchanged, and the P5 J2534 thread sends them via SendIntExt"
+            "DataMonitor strips the existing SID; the matching P5/P6 DataListIF active event re-prepends "
+            "0x2F. START always appends a new active node. Only the STOP chain deduplicates by SID+DID, "
+            "retaining its existing bytes. GetSndFrame copies queued bytes unchanged to SendIntExt."
         ),
     }
     if encoding_mode == 1 and bit_start == bit_end:
@@ -407,15 +445,39 @@ def _direct_active_test_executor_plan(
         on[byte_index] = 1 << shift
         mask[byte_index] = 1 << shift
         plan["minimum_length_examples"] = {
-            "raw_0": (start_prefix + off).hex(),
-            "raw_1": (start_prefix + on).hex(),
-            "return_control": (stop_prefix + mask).hex(),
+            "start": [{
+                "raw_0": (bytes.fromhex(row["request"]) + off + mask).hex(),
+                "raw_1": (bytes.fromhex(row["request"]) + on + mask).hex(),
+            } for row in starts],
+            "stop": [{
+                "return_control": (bytes.fromhex(row["request"]) + mask).hex(),
+            } for row in stops],
             "qualification": (
                 f"uses N={minimum_length}, the static minimum required by bit {bit_end}; "
                 "not proof that the runtime DataIdLengthList entry has that length"
             ),
         }
     return plan
+
+
+def _initial_read_program(
+    frames: list[dict[str, Any]], category_id: int, did: int
+) -> list[dict[str, Any]]:
+    materialized = []
+    for frame in frames:
+        request = bytearray.fromhex(frame["send"]["bytes"])
+        if len(request) < 3 or request[0] != 0x22:
+            raise ValueError(
+                f"category {category_id}: selector 0xCA base request is not 22xxxx: {request.hex()}"
+            )
+        request[1] = (did >> 8) & 0xFF
+        request[2] = did & 0xFF
+        materialized.append({
+            "base_frame": frame,
+            "materialized_send": request.hex(),
+            "receive_check": frame["receive_check"]["bytes"],
+        })
+    return materialized
 
 
 def _active_test_init_selected_plan(
@@ -434,26 +496,12 @@ def _active_test_init_selected_plan(
     transaction: dict[str, Any] = {"mode": mode, "performed": False}
     if mode == 0:
         frames = _master_frame_rows(parser, master, int(category["category_id"]), 0xCA)
-        if len(frames) != 1:
-            raise ValueError(
-                f"category {category['category_id']}: role-0x08 selector 0xCA resolved {len(frames)} frames"
-            )
-        frame = frames[0]
-        base = bytearray.fromhex(frame["send"]["bytes"])
-        if len(base) < 3 or base[0] != 0x22:
-            raise ValueError(
-                f"category {category['category_id']}: selector 0xCA base request is not 22xxxx: {base.hex()}"
-            )
-        did = selected["initial_read_did"]
-        base[1] = (did >> 8) & 0xFF
-        base[2] = did & 0xFF
+        program = _initial_read_program(frames, int(category["category_id"]), selected["initial_read_did"])
         transaction = {
             "mode": mode,
             "performed": True,
             "selector": "0xCA",
-            "base_frame": frame,
-            "materialized_send": base.hex(),
-            "receive_check": frame["receive_check"]["bytes"],
+            "frames": program,
             "bit_start": selected["bit_start"],
             "bit_end": selected["bit_end"],
         }
@@ -625,11 +673,12 @@ def _active_test_signal_info_selected_plan(
 def _multi_active_test_category_plan(
     parser: DDBParser, category: dict[str, Any], db_root: Path
 ) -> dict[str, Any]:
-    db_path = db_root / str(category["database"])
+    db_path = Path(category.get("catalog_database_path") or db_root / str(category["database"]))
     db = parser.parse_ecu_db(db_path)
     section = db.sections.get(33)
     if section is None:
         return {
+            "catalog_context": {**_raw_catalog_source(db_path), "category": category},
             "group_table": 33,
             "group_table_class": ECU_TABLE_CLASS_NAMES.get(33, "unknown"),
             "group_count": 0,
@@ -662,6 +711,7 @@ def _multi_active_test_category_plan(
         for group_id, members in sorted(groups.items())
     ]
     return {
+        "catalog_context": {**_raw_catalog_source(db_path), "category": category},
         "group_table": 33,
         "group_table_class": ECU_TABLE_CLASS_NAMES.get(33, "unknown"),
         "record_size": 12,
@@ -693,11 +743,6 @@ def _multi_active_test_group_plan(
     group = matches[0]
     _, _, parent = _direct_active_test_selected_row(parser, category, db_root, group_id, strings)
     frames = _master_frame_rows(parser, master, int(category["category_id"]), 0xCA)
-    if len(frames) != 1:
-        raise ValueError(
-            f"category {category['category_id']}: role-0x63 selector 0xCA resolved {len(frames)} frames"
-        )
-    frame = frames[0]
     members = []
     for membership in group["members"]:
         _, _, selected = _direct_active_test_selected_row(
@@ -706,20 +751,12 @@ def _multi_active_test_group_plan(
         mode = selected["initial_read_mode"]
         transaction: dict[str, Any] = {"mode": mode, "performed": False}
         if mode == 0:
-            send = bytearray.fromhex(frame["send"]["bytes"] )
-            if len(send) < 3 or send[0] != 0x22:
-                raise ValueError(
-                    f"category {category['category_id']}: selector 0xCA base request is not 22xxxx: {send.hex()}"
-                )
-            did = selected["initial_read_did"]
-            send[1] = (did >> 8) & 0xFF
-            send[2] = did & 0xFF
+            program = _initial_read_program(frames, int(category["category_id"]), selected["initial_read_did"])
             transaction = {
                 "mode": 0,
                 "performed": True,
                 "selector": "0xCA",
-                "materialized_send": send.hex(),
-                "receive_check": frame["receive_check"]["bytes"],
+                "frames": program,
                 "bit_start": selected["bit_start"],
                 "bit_end": selected["bit_end"],
             }
@@ -740,7 +777,7 @@ def _multi_active_test_group_plan(
             "selected_test": parent,
             "member_count": len(members),
         },
-        "base_frame": frame,
+        "base_frames": frames,
         "members": members,
         "runtime_boundary": (
             "group expansion, ordering, type-68 member fields, and initial request materialization are static; "
@@ -754,7 +791,7 @@ def _active_test_monitor_category_plan(
 ) -> dict[str, Any]:
     mode = int(category["generation"]) & 0xE0
     table = 157 if mode == 0x60 else 62
-    db_path = db_root / str(category["database"])
+    db_path = Path(category.get("catalog_database_path") or db_root / str(category["database"]))
     db = parser.parse_ecu_db(db_path)
     section = db.sections.get(table)
     if section is None:
@@ -784,6 +821,7 @@ def _active_test_monitor_category_plan(
     active_count = counts["active_direct_include"] + counts["active_runtime_check_support_pid"]
     nonmember_count = counts["nonmember_direct_exclude"] + counts["nonmember_runtime_probe_then_filter"]
     return {
+        "catalog_context": {**_raw_catalog_source(db_path), "category": category},
         "generation": int(category["generation"]),
         "generation_mode": f"0x{mode:X}",
         "candidate_table": table,
@@ -811,7 +849,7 @@ def _active_test_monitor_category_plan(
 def _monitor_list_category_plan(parser: DDBParser, category: dict[str, Any], db_root: Path) -> dict[str, Any]:
     mode = int(category["generation"]) & 0xE0
     table = 157 if mode == 0x60 else 62
-    db_path = db_root / str(category["database"])
+    db_path = Path(category.get("catalog_database_path") or db_root / str(category["database"]))
     db = parser.parse_ecu_db(db_path)
     section = db.sections.get(table)
     if section is None:
@@ -828,6 +866,7 @@ def _monitor_list_category_plan(parser: DDBParser, category: dict[str, Any], db_
         else:
             counts["runtime_check_support_pid"] += 1
     return {
+        "catalog_context": {**_raw_catalog_source(db_path), "category": category},
         "generation": int(category["generation"]),
         "generation_mode": f"0x{mode:X}",
         "candidate_table": table,
@@ -856,7 +895,9 @@ def resolve_active_test(
     kind: str | None,
 ) -> tuple[str, dict[str, Any]]:
     """Resolve one direct or routine P5 Active Test into its static wire plan."""
-    db = parser.parse_ecu_db(db_root / str(category["database"]))
+    master = native_context(master)
+    category = native_ecu_catalog_category(master, category, db_root, parser)
+    db = parser.parse_ecu_db(Path(category["catalog_database_path"]))
     kinds = []
     if 68 in db.sections and db.sections[68].decoded_record_size == 64:
         size = db.sections[68].decoded_record_size
@@ -878,7 +919,6 @@ def resolve_active_test(
             raise SystemExit(
                 f"{category['database']}: Active Test 0x{active_test_id:X} is not a {kind} candidate"
             )
-        kind = kind
     elif len(kinds) == 1:
         kind = kinds[0]
     elif not kinds:
@@ -898,6 +938,7 @@ def resolve_active_test(
             parser, master, category, db_root, active_test_id, strings
         )
         payload = {
+            "native_context": native_context(master).as_dict(),
             "category": category,
             "kind": kind,
             "selected_test": selected,
@@ -911,6 +952,7 @@ def resolve_active_test(
             parser, category, db_root, active_test_id, strings
         )
         payload = {
+            "native_context": native_context(master).as_dict(),
             "category": category,
             "kind": kind,
             "selected_test": selected,

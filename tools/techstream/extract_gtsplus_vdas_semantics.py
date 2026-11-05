@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import tempfile
 from pathlib import Path
 from typing import Any
 from tools.techstream.extract_gtsplus_tse_managed_semantics import (
@@ -22,11 +21,14 @@ from tools.techstream.extract_gtsplus_tse_managed_semantics import (
     _strings,
     sha256_file,
 )
-from tools.techstream.recover_gtsplus_bodies import recover
+from tools.techstream.recover_all_gtsplus_bodies import DEFAULT_OUTPUT, qualify_recovered_source
+from tools.techstream.inspect_dotnet_il import validate_managed_bodies
+from tools.techstream.techstream_paths import resolve_gts_root
 from tools import REPO_ROOT
 
 
 DEFAULT_OUT = REPO_ROOT / "data/generated/gtsplus_2026/vdas_semantics.json"
+DEFAULT_RECOVERED = DEFAULT_OUTPUT / "GTSPlus"
 DIAG = "GTSPlusDiagAdaptationManager.DiagAdaptationManager"
 ARCHIVER = "GTSPlusArchiver.ZipFile"
 
@@ -279,7 +281,7 @@ def _archiver_contract(path: Path) -> dict[str, Any]:
     }
 
 
-def _build_from_recovered(root: Path, manifest: dict[str, Any] | None = None) -> dict[str, Any]:
+def _build_from_recovered(root: Path, *, gtsplus_root: Path | None = None) -> dict[str, Any]:
     diag = root / "bin/GTSPlusDiagAdaptMng.dll"
     archiver = root / "bin/GTSPlusArchiver.dll"
     if not diag.is_file() or not archiver.is_file():
@@ -289,18 +291,21 @@ def _build_from_recovered(root: Path, manifest: dict[str, Any] | None = None) ->
         "GTSPlusDiagAdaptMng.dll": _source(diag),
         "GTSPlusArchiver.dll": _source(archiver),
     }
-    if manifest is not None:
-        sources["installer_recovery"] = {
-            "gtsplus_version": manifest["gtsplus_version"],
-            "method": manifest["method"],
-            "source_archive_sha256": manifest["source_archive_sha256"],
-        }
-        by_path = {row["path"]: row for row in manifest["binaries"]}
-        for filename in ("bin/GTSPlusDiagAdaptMng.dll", "bin/GTSPlusArchiver.dll"):
-            if filename not in by_path:
-                raise ValueError(f"installer recovery manifest lacks {filename}")
-            if by_path[filename]["plaintext"]["sha256"] != sources[Path(filename).name]["sha256"]:
-                raise ValueError(f"installer manifest/source identity drift for {filename}")
+    manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
+    sources["installer_recovery"] = {
+        "gtsplus_version": manifest["gtsplus_version"],
+        "method": manifest["method"],
+        "source_archive_sha256": manifest["source_archive_sha256"],
+    }
+    gts = resolve_gts_root(gtsplus_root)
+    identities = {}
+    for relative in ("bin/GTSPlusDiagAdaptMng.dll", "bin/GTSPlusArchiver.dll"):
+        path = root / relative
+        sources[path.name]["qualification"] = qualify_recovered_source(
+            path, gts / relative, component_root=root
+        )
+        sources[path.name]["recovery_proof"] = validate_managed_bodies(path)
+        identities[relative] = _open(path)._gts_method_identities
 
     diag_contract = _diag_contract(diag)
     archiver_contract = _archiver_contract(archiver)
@@ -311,6 +316,7 @@ def _build_from_recovered(root: Path, manifest: dict[str, Any] | None = None) ->
         "schema": "gtsplus-vdas-semantics-v1",
         "title": "Current GTS+ PCS Vehicle Data Analysis (.vdas) persistence/export contract",
         "sources": sources,
+        "managed_identities": identities,
         "create_and_export": diag_contract,
         "archive": archiver_contract,
         "tss3_pcs_witnesses": {
@@ -330,21 +336,18 @@ def _build_from_recovered(root: Path, manifest: dict[str, Any] | None = None) ->
     }
 
 
-def build(recovered_root: Path | None = None) -> dict[str, Any]:
-    if recovered_root is not None:
-        return _build_from_recovered(recovered_root.resolve())
-    with tempfile.TemporaryDirectory(prefix="gtsplus-vdas-recovery-") as tmp:
-        root = Path(tmp) / "plain"
-        manifest = recover(output=root)
-        return _build_from_recovered(root, manifest)
+def build(recovered_root: Path | None = None, *, gtsplus_root: Path | None = None) -> dict[str, Any]:
+    root = (recovered_root if recovered_root is not None else DEFAULT_RECOVERED).expanduser().resolve()
+    return _build_from_recovered(root, gtsplus_root=gtsplus_root)
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--recovered-root", type=Path, help="optional exact plaintext GTSPlus root; default recovers installer twins")
+    parser.add_argument("--recovered-root", type=Path, default=DEFAULT_RECOVERED, help="Qualified aggregate GTSPlus component root")
+    parser.add_argument("--gtsplus-root", type=Path)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUT)
     args = parser.parse_args()
-    payload = build(args.recovered_root)
+    payload = build(args.recovered_root, gtsplus_root=args.gtsplus_root)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(args.output)

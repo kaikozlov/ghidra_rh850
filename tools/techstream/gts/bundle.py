@@ -1,8 +1,10 @@
-"""toyota-current universal regional diagnostic bundle: regional resolver index, catalog shards, deterministic ZIP assembly (ProcessPool over regions)."""
+"""Toyota-current regional diagnostic catalogs in canonical gzip-member storage."""
 
 from __future__ import annotations
 
+import io
 import json
+import shutil
 import struct
 import tempfile
 import zipfile
@@ -11,9 +13,15 @@ from pathlib import Path
 from typing import Any
 
 from tools import REPO_ROOT
+from tools.techstream.diag_bundle import DiagnosticBundleWriter
 from tools.techstream.gts.ddb import _english_strings, _generic_ffd_rows, _monitor_rows, _rob_rows
-from tools.techstream.ddb_semantics import records as ddb_records
-from tools.techstream.gts.execution_model import EXECUTION_MODEL, VEHICLE_RESOLVER, _execution_model, _file_sha256
+from tools.techstream.ddb_semantics import (
+    NativeSelectionError,
+    UnresolvedNativeContext,
+    records as ddb_records,
+    select_for_consumer,
+)
+from tools.techstream.gts.execution_model import EXECUTION_MODEL, VEHICLE_RESOLVER, _execution_model, _file_sha256, _resolve_plugin_path
 from tools.techstream.gts.registry import (
     REGISTRY_FUNCTION_NAME_BOUNDARY,
     _registry_active_test_groups,
@@ -24,21 +32,23 @@ from tools.techstream.gts.registry import (
     _registry_dtc_catalog,
     _registry_function_hierarchy,
     _registry_role_bindings,
+    _registry_request_row,
     _registry_selector_rows,
+    _registry_selected_role_bindings,
     _registry_utilities,
 )
 from tools.techstream.gts.master import (
     _master_category_rows,
-    _master_comm_set_rows,
-    _master_frame_rows,
+    _resolve_master_category,
     _master_variable,
 )
 from tools.techstream.parse_ddb import DDBParser, StringDataBase
 from tools.techstream.gts import support
+from tools.techstream.gts.query import native_ecu_catalog_category, native_selection_context
 from tools.techstream.techstream_paths import gts_db_root
 
 
-TOYOTA_DIAG_BUNDLE_SCHEMA = "toyota-diagnostics-bundle-v2"
+TOYOTA_DIAG_BUNDLE_SCHEMA = "toyota-diagnostics-bundle-v4"
 TOYOTA_DIAG_BUNDLE_PROFILE = "toyota-current"
 TOYOTA_DIAG_BUNDLE_REGIONS = ("NA", "EU", "JP")
 
@@ -49,22 +59,22 @@ _PHASE4_SELECTORS = ((0x28, 1), (0x29, 1), (0x2A, 1), (0x2B, 1), (0x2C, 1), (0x2
                      (0x34, 2), (0x36, 3), (0x37, 4), (0x38, 5), (0x35, 6), (0x39, 10))
 
 
-def _bundle_transport_semantics(phase_type: int, request_address: int, functional_address: int) -> dict[str, Any]:
+def _bundle_transport_semantics(route_selector: int, request_address: int, functional_address: int) -> dict[str, Any]:
     """Recover the transport controller selected by CCommFrameCtrl::ChangeCommIF.
 
-    ChangeCommIF switches on the low nibble of phase type. Current P5 phases ending
-    in 2 use the ISO15765 family; 0x18/0x38 select CCommCtrlISO15765_29BitCan;
+    ChangeCommIF switches on the low nibble of the encoded route selector.
+    Values ending in 2 use the ISO15765 family; 0x18/0x38 select CCommCtrlISO15765_29BitCan;
     0x78/0x88 select the CAN-FD ISO15765 PS controller; low-nibble 4 selects
     CCommCtrlISO13400_NDIS. Keep unrecovered cases explicit rather than projecting
     the transport implemented by our consumer onto Toyota's route.
     """
-    low = phase_type & 0x0F
+    low = route_selector & 0x0F
     out: dict[str, Any] = {
         "change_comm_if_case": low,
         "request_address_field": request_address,
         "functional_address_field": functional_address,
     }
-    if phase_type in {0x18, 0x38}:
+    if route_selector in {0x18, 0x38}:
         tx = 0x18DA0000 | ((request_address & 0xFF) << 8) | 0xF1
         out.update({
             "transport_kind": "iso15765-29bit-normal-fixed",
@@ -75,7 +85,7 @@ def _bundle_transport_semantics(phase_type: int, request_address: int, functiona
             if functional_address else None,
             "request_address_field_semantics": "target-address byte (TA); physical normal-fixed request is 0x18DA<ta>F1",
         })
-    elif phase_type in {0x78, 0x88}:
+    elif route_selector in {0x78, 0x88}:
         out.update({
             "transport_kind": "canfd-iso15765-ps",
             "controller": "CCommCtrl_FD_ISO15765_PS",
@@ -123,15 +133,15 @@ def _bundle_transport_semantics(phase_type: int, request_address: int, functiona
     return out
 
 
-def _bundle_protocol_route(master: Any, category_id: int, phase_type: int) -> dict[str, Any]:
+def _bundle_protocol_route(master: Any, category_id: int, route_selector: int) -> dict[str, Any]:
     """Materialize Toyota's class-0x10D route and recovered transport interpretation."""
     matches = [
         raw for raw in ddb_records(master.sections[13])
-        if struct.unpack_from("<H", raw, 0x00)[0] == category_id and raw[0x18] == phase_type
+        if struct.unpack_from("<H", raw, 0x00)[0] == category_id and raw[0x18] == route_selector
     ]
     if len(matches) != 1:
         raise ValueError(
-            f"CDbProtInfo category {category_id} phase 0x{phase_type:02X} resolved {len(matches)} rows"
+            f"CDbProtInfo category {category_id} route selector 0x{route_selector:02X} resolved {len(matches)} rows"
         )
     raw = matches[0]
     if len(raw) != 28:
@@ -146,22 +156,45 @@ def _bundle_protocol_route(master: Any, category_id: int, phase_type: int) -> di
         "request_mask": struct.unpack_from("<H", raw, 0x0E)[0],
         "response_mask": struct.unpack_from("<H", raw, 0x10)[0],
         "legislated_request_address": struct.unpack_from("<H", raw, 0x14)[0],
-        "phase_type": raw[0x18],
+        "route_selector": raw[0x18],
         **_bundle_transport_semantics(raw[0x18], request_address, functional_address),
     }
 
 
 def _bundle_connection_frame(master: Any, frame_id: int) -> dict[str, Any]:
-    matches = [raw for raw in ddb_records(master.sections[17]) if struct.unpack_from("<H", raw, 0)[0] == frame_id]
-    if len(matches) != 1:
-        raise ValueError(f"CDbCommFrame {frame_id} resolved {len(matches)} rows")
-    raw = matches[0]
-    send_var, mask_var, check_var = struct.unpack_from("<HHH", raw, 2)
+    result = master.query(17, frame_id)
+    try:
+        selected = select_for_consumer(result, "frame")
+    except (NativeSelectionError, UnresolvedNativeContext) as exc:
+        return {"frame_id": frame_id, "resolved": False, "native": result.as_dict(), "status": getattr(exc, "status", None)}
+    send_var, mask_var, check_var = struct.unpack_from("<HHH", selected.raw, 2)
+    source = master.database_for(selected)
     return {
         "frame_id": frame_id,
-        "send": _master_variable(master, send_var)["bytes"],
-        "mask": _master_variable(master, mask_var)["bytes"],
-        "check": _master_variable(master, check_var)["bytes"],
+        "resolved": True,
+        "send": _master_variable(source, send_var)["bytes"],
+        "mask": _master_variable(source, mask_var)["bytes"],
+        "check": _master_variable(source, check_var)["bytes"],
+        "native": result.as_dict(),
+        "source": selected.as_dict(),
+    }
+
+
+def _bundle_comm_set(master: Any, comm_set_id: int) -> dict[str, Any]:
+    result = master.query(29, comm_set_id)
+    try:
+        selected = select_for_consumer(result, "commset")
+    except (NativeSelectionError, UnresolvedNativeContext) as exc:
+        return {"resolved": False, "native": result.as_dict(), "status": getattr(exc, "status", None)}
+    raw = selected.raw
+    return {
+        "resolved": True,
+        "comm_set_id": comm_set_id,
+        "send_parameter": struct.unpack_from("<I", raw, 0)[0],
+        "receive_timeout": struct.unpack_from("<I", raw, 4)[0],
+        "retry_count": raw[14],
+        "native": result.as_dict(),
+        "source": selected.as_dict(),
     }
 
 
@@ -253,7 +286,7 @@ def _bundle_vehicle_decision_rows(master: Any) -> list[dict[str, Any]]:
         flags = struct.unpack_from("<I", raw, 0x24)[0]
         out.append({
             "category_id": struct.unpack_from("<H", raw, 0x00)[0],
-            "phase_type": raw[0x02],
+            "route_selector": raw[0x02],
             "flags": flags,
             "text_criteria": [
                 {"value_hex": raw[0x03:0x0A].hex(), "length": raw[0x0A], "operator": raw[0x0B]},
@@ -277,51 +310,24 @@ def _bundle_vehicle_decision_rows(master: Any) -> list[dict[str, Any]]:
     return out
 
 
-def _bundle_special_vehicle_program(gts_root: Path, region: str, parser: DDBParser, gen_master: Any) -> dict[str, Any]:
-    """Resolve P3/P4 SelectCarTypeVin10 probes from Spe FuncCommFrame + Gen CommSet."""
-    spe_root = gts_db_root(gts_root, region, "Spe")
-    spe_path = spe_root / "Toyota.ddb"
-    spe = parser.parse_master_db(spe_path)
-    func = spe.sections[18]
-    frame = spe.sections[17]
-    frame_rows = {
-        struct.unpack_from("<H", raw, 0)[0]: raw
-        for raw in ddb_records(frame)
+def _bundle_special_vehicle_program(gts_root: Path, region: str, parser: DDBParser, master: Any) -> dict[str, Any]:
+    """Export native Gen+Spe selector programs for the P3/P4 vehicle probes."""
+    raw_keys = {
+        struct.unpack_from("<HH", row.raw, 0)
+        for row in master.raw_records(18)
     }
-    by_key: dict[tuple[int, int], list[bytes]] = {}
-    for raw in ddb_records(func):
-        k1, selector = struct.unpack_from("<HH", raw, 0)
-        by_key.setdefault((k1, selector), []).append(raw)
 
     def programs(selector_map: tuple[tuple[int, int], ...]) -> dict[str, Any]:
         selectors = {selector for selector, _ in selector_map}
-        k1s = sorted({k1 for k1, selector in by_key if selector in selectors})
-        out: dict[str, Any] = {}
+        k1s = sorted({k1 for k1, selector in raw_keys if selector in selectors})
+        out = {}
         for k1 in k1s:
             steps = []
             for selector, parser_kind in selector_map:
-                matches = by_key.get((k1, selector), [])
-                if not matches:
+                if (k1, selector) not in raw_keys:
                     continue
-                frames = []
-                for raw in matches:
-                    comm_set_id, frame_id = struct.unpack_from("<HH", raw, 4)
-                    comm_frame = frame_rows.get(frame_id)
-                    if comm_frame is None:
-                        raise ValueError(f"{region} Spe CommFrame {frame_id} is missing")
-                    send_id, mask_id, check_id = struct.unpack_from("<HHH", comm_frame, 2)
-                    frames.append({
-                        "comm_set_id": comm_set_id,
-                        "comm_frame_id": frame_id,
-                        "send": _master_variable(spe, send_id)["bytes"],
-                        "mask": _master_variable(spe, mask_id)["bytes"],
-                        "check": _master_variable(spe, check_id)["bytes"],
-                    })
-                steps.append({
-                    "selector": selector,
-                    "parser_kind": parser_kind,
-                    "frames": frames,
-                })
+                program = _registry_request_row(parser, master, k1, selector, f"vehicle_probe_{selector:02x}")
+                steps.append({**program, "selector": selector, "parser_kind": parser_kind})
             if steps:
                 out[str(k1)] = {"k1": k1, "steps": steps}
         return out
@@ -329,16 +335,14 @@ def _bundle_special_vehicle_program(gts_root: Path, region: str, parser: DDBPars
     phase3 = programs(_PHASE3_SELECTORS)
     phase4 = programs(_PHASE4_SELECTORS)
     commset_ids = sorted({
-        frame["comm_set_id"]
-        for programs_by_k1 in (phase3, phase4)
-        for program in programs_by_k1.values()
+        frame["comm_set"]
+        for by_k1 in (phase3, phase4)
+        for program in by_k1.values()
         for step in program["steps"]
         for frame in step["frames"]
     })
-    gen_commsets = {row["comm_set_id"]: row for row in _master_comm_set_rows(parser, gen_master)}
-    missing = [comm_set_id for comm_set_id in commset_ids if comm_set_id not in gen_commsets]
-    if missing:
-        raise ValueError(f"{region} Spe vehicle program references missing Gen CommSets {missing}")
+    commsets = {key: _bundle_comm_set(master, key) for key in commset_ids}
+    spe_path = gts_db_root(gts_root, region, "Spe") / "Toyota.ddb"
     return {
         "phase3": {
             "type41_mode": "DecisionKey/DecisionKeyEU according to Toyota region selector",
@@ -348,85 +352,80 @@ def _bundle_special_vehicle_program(gts_root: Path, region: str, parser: DDBPars
             "type41_mode": "DecisionKey/DecisionKeyEU according to Toyota region selector",
             "programs_by_k1": phase4,
         },
-        "commsets": {str(key): gen_commsets[key] for key in commset_ids},
+        "commsets": {str(key): commsets[key] for key in commset_ids},
+        "native_context": master.as_dict(),
         "source_identity": {
             "special_master": {
-                "path": f"{region}/DB/Spe/Toyota.ddb",
+                "path": str(spe_path.relative_to(gts_root)),
                 "bytes": spe_path.stat().st_size,
                 "sha256": _file_sha256(spe_path),
             },
         },
         "boundary": (
-            "SelectCarTypeVin10 P3/P4 resolves FuncCommFrame/CommFrame/variable records from the Spe master while "
-            "the referenced CommSet is resolved from the Gen master. K1 is Toyota shared-data slot 14; no category heuristic is substituted."
+            "Selector/frame/CommSet selection uses the shared native Gen+Spe context and first-selector CommSet. "
+            "K1 is Toyota shared-data slot 14; type-41 metadata remains raw/unproved live selection."
         ),
     }
 
 
 def _bundle_session_control(parser: DDBParser, master: Any, categories: list[dict[str, Any]]) -> dict[str, Any]:
-    """Per-category lifecycle derived from each category's actual D1/D2/DD selector frames."""
+    """Export complete native D1/D2/DD programs, not single-frame projections."""
     lifecycle = _execution_model()["gtsplus_continuity"]["dll_role_schema"]["execution_lifecycle"]
     transport = lifecycle["transport_and_session"]
     auto = transport["p5_automatic_session_judgment"]
     cadence_s = round(transport["test_present"]["cadence_ms"] / 1000, 3)
 
-    def frame(category_id: int, selector: int) -> dict[str, Any] | None:
-        rows = _master_frame_rows(parser, master, category_id, selector)
-        if not rows:
-            return None
-        if len(rows) != 1:
-            raise ValueError(f"category {category_id} selector 0x{selector:X} resolved {len(rows)} rows")
-        row = rows[0]
-        return {
-            "selector": row["selector"],
-            "frame": row["comm_frame_id"],
-            "send": row["send"]["bytes"],
-            "mask": row["receive_mask"]["bytes"],
-            "check": row["receive_check"]["bytes"],
-            "comm_set": row["comm_set"],
-        }
+    def program(category_id: int, selector: int, name: str) -> dict[str, Any]:
+        return _registry_request_row(parser, master, category_id, selector, name)
+
+    def session_values(value: dict[str, Any]) -> list[int]:
+        if not value["resolved"] or not value["frames"]:
+            return []
+        values = []
+        for frame in value["frames"]:
+            send = bytes.fromhex(frame["send"])
+            if len(send) != 2 or send[0] != 0x10:
+                return []
+            values.append(send[1])
+        return values
 
     per_category = {}
     for category in categories:
         category_id = int(category["category_id"])
-        d1 = frame(category_id, 0xD1)
-        d2 = frame(category_id, 0xD2)
-        dd = frame(category_id, 0xDD)
-        def dsc_session(value: dict[str, Any] | None) -> int | None:
-            if value is None:
-                return None
-            send = bytes.fromhex(value["send"])
-            return send[1] if len(send) == 2 and send[0] == 0x10 else None
-
-        default_session = dsc_session(d1)
-        extended_session = dsc_session(d2)
-        session_executor_supported = default_session is not None and extended_session is not None
-        keepalive = None
-        if dd is not None:
-            send = bytes.fromhex(dd["send"])
+        category_query = master.query(16, category_id)
+        selected_category = category_query.records[0] if category_query.status == 0 and category_query.records else None
+        d1 = program(category_id, 0xD1, "default_session")
+        d2 = program(category_id, 0xD2, "extended_session")
+        dd = program(category_id, 0xDD, "keepalive")
+        default_values = session_values(d1)
+        extended_values = session_values(d2)
+        default_session = default_values[-1] if default_values else None
+        extended_session = extended_values[-1] if extended_values else None
+        session_executor_supported = bool(default_values and extended_values)
+        keepalive_steps = []
+        for frame in dd["frames"] if dd["resolved"] else []:
+            send = bytes.fromhex(frame["send"])
+            step = {"request": frame["send"], "frame": frame}
             if len(send) == 3 and send[0] == 0x22:
                 did = int.from_bytes(send[1:3], "big")
-                keepalive = {
+                step.update({
                     "kind": "session_did_poll" if did == 0xF186 else "did_poll",
                     "did": f"0x{did:04X}",
-                    "request": dd["send"],
                     "positive_prefix": (bytes([0x62]) + send[1:3]).hex(),
-                    "interval_s": cadence_s,
-                }
+                })
             elif send == b"\x10\x03":
-                keepalive = {
-                    "kind": "extended_session_refresh",
-                    "request": dd["send"],
-                    "interval_s": cadence_s,
-                }
+                step["kind"] = "extended_session_refresh"
             else:
-                keepalive = {
-                    "kind": "unsupported_raw",
-                    "request": dd["send"],
-                    "interval_s": cadence_s,
-                }
+                step["kind"] = "unsupported_raw"
+            keepalive_steps.append(step)
+        keepalive = {
+            "program": dd,
+            "steps": keepalive_steps,
+            "interval_s": cadence_s,
+        }
         per_category[str(category_id)] = {
-            "generation_low5": int(category["generation"]) & 0x1F,
+            "generation_low5": (selected_category.generation & 0x1F) if selected_category is not None else None,
+            "category_native_query": category_query.as_dict(),
             "session_executor_supported": session_executor_supported,
             "session_executor_boundary": (
                 None if session_executor_supported else
@@ -434,20 +433,23 @@ def _bundle_session_control(parser: DDBParser, master: Any, categories: list[dic
             ),
             "default_session": d1,
             "default_session_value": default_session,
+            "default_session_values": default_values,
             "extended_session": d2,
             "extended_session_value": extended_session,
-            "keepalive_frame": dd,
+            "extended_session_values": extended_values,
             "keepalive": keepalive,
         }
 
     return {
         "kind": "toyota-per-category-selector-lifecycle",
+        "native_context": master.as_dict(),
+        "execution_order": "Execute all frames in each selected program in emitted order; the scalar session value is the final DSC step, not a substitute request.",
         "category_gate": auto["category_gate"],
         "per_category": per_category,
         "boundary": (
-            "D1/D2/DD are resolved independently for every Toyota category. The runtime follows the selected category's actual "
-            "DiagnosticSessionControl bytes when D1/D2 have that wire shape; generation-low5 and category membership are evidence "
-            "metadata, never an allowlist."
+            "D1/D2/DD are context-qualified ordered native programs for every initial Toyota category. Execute every frame, "
+            "with the first selector row's CommSet applied to the whole program. Session values record every DSC step; "
+            "generation-low5 and category membership are metadata, never an allowlist."
         ),
     }
 
@@ -460,6 +462,7 @@ def _simple_utility_rows(
     strings: Any,
     *,
     support_mode: str | None,
+    raw_master: Any,
 ) -> list[dict[str, Any]]:
     section = db.sections.get(77)
     if section is None:
@@ -470,17 +473,20 @@ def _simple_utility_rows(
         )
     category_id = int(category["category_id"])
 
-    phases: dict[int, dict[str, Any] | None] = {}
-    for selector, subfunction in ((0xD8, 1), (0xD9, 2), (0xDA, 3)):
-        rows = _master_frame_rows(parser, master, category_id, selector)
-        if len(rows) != 1:
-            phases[selector] = None
-            continue
-        frame = rows[0]
-        expected = bytes((0x31, subfunction, 0xFF, 0xFF))
-        send = bytes.fromhex(frame["send"]["bytes"])
-        expected_reply = bytes((0x71, subfunction)).hex()
-        phases[selector] = frame if send == expected and frame["receive_check"]["bytes"] == expected_reply else None
+    phases = {
+        selector: _registry_request_row(parser, master, category_id, selector, name)
+        for selector, name in ((0xD8, "start"), (0xD9, "stop"), (0xDA, "result"))
+    }
+    geometry_valid = all(
+        phases[selector]["resolved"]
+        and bool(phases[selector]["frames"])
+        and all(
+            frame["send"] == bytes((0x31, subfunction, 0xFF, 0xFF)).hex()
+            and frame["check"] == bytes((0x71, subfunction)).hex()
+            for frame in phases[selector]["frames"]
+        )
+        for selector, subfunction in ((0xD8, 1), (0xD9, 2), (0xDA, 3))
+    )
 
     result = []
     for index, raw in enumerate(ddb_records(section)):
@@ -489,9 +495,17 @@ def _simple_utility_rows(
         utility_id = struct.unpack_from("<H", raw, 0x16)[0]
         command_variable = struct.unpack_from("<H", raw, 0x1A)[0]
         stop_variable = struct.unpack_from("<H", raw, 0x1C)[0]
-        command = _master_variable(master, command_variable)
-        stop_command = _master_variable(master, stop_variable)
-        geometry_ok = all(phases.values()) and rid not in {0, 0xFFFF}
+        command = _master_variable(raw_master, command_variable)
+        stop_command = _master_variable(raw_master, stop_variable)
+        geometry_ok = geometry_valid and rid not in {0, 0xFFFF}
+        def materialize(selector: int, subfunction: int, suffix: str = "") -> list[dict[str, Any]]:
+            if not geometry_ok:
+                return []
+            request = (bytes((0x31, subfunction)) + rid.to_bytes(2, "big")).hex() + suffix
+            return [
+                {"base_frame": frame, "materialized_static_request": request}
+                for frame in phases[selector]["frames"]
+            ]
         row = {
             "id": utility_id,
             "kind": "simple_operation",
@@ -519,11 +533,10 @@ def _simple_utility_rows(
                 "raw_u16_30": struct.unpack_from("<H", raw, 0x30)[0],
                 "raw_u16_32": struct.unpack_from("<H", raw, 0x32)[0],
             },
-            "start_static": (
-                bytes((0x31, 0x01)) + rid.to_bytes(2, "big") + bytes.fromhex(command["bytes"])
-            ).hex() if geometry_ok else None,
-            "stop_static": (bytes((0x31, 0x02)) + rid.to_bytes(2, "big")).hex() if geometry_ok else None,
-            "result_static": (bytes((0x31, 0x03)) + rid.to_bytes(2, "big")).hex() if geometry_ok else None,
+            "selector_programs": {f"0x{key:X}": value for key, value in phases.items()},
+            "start_frames": materialize(0xD8, 1, command["bytes"]),
+            "stop_frames": materialize(0xD9, 2),
+            "result_frames": materialize(0xDA, 3),
             "positive_response": 0x71,
             "session_requirement": "extended",
             "support_gate": {
@@ -552,30 +565,39 @@ def _bundle_category_catalog(
     db_root: Path,
     bin_root: Path,
     category: dict[str, Any],
+    *,
+    raw_master: Any,
+    gts_root: Path,
+    context_identity: dict[str, Any],
 ) -> dict[str, Any]:
-    db_path = db_root / str(category["database"])
+    db_path = Path(category["catalog_database_path"])
     db = parser.parse_ecu_db(db_path)
     monitor_rows = _monitor_rows(db, strings, db_path.name)
     bindings = _registry_role_bindings(parser, master, category, bin_root)
-    dll_rows = list(parser.extract_master_dlls(master.sections[19]))
+    selected_bindings = _registry_selected_role_bindings(parser, master, category, bin_root)
     category_id = int(category["category_id"])
     support_family = support.support_family(
-        support.support_plugin(dll_rows, category_id, 0x67),
-        support.support_plugin(dll_rows, category_id, 0xD5),
+        support.support_plugin(master, category_id, 0x67),
+        support.support_plugin(master, category_id, 0xD5),
     )
     support_mode = support.support_mode(category_id, int(category["generation"]), support_family)
     common = {
         "category": category,
-        "active_tests": _registry_active_tests(parser, master, category, db_root, strings, monitor_rows, bindings),
-        "functions": _registry_function_hierarchy(parser, master, strings, category_id),
+        "active_tests": _registry_active_tests(parser, master, category, db_root, strings, monitor_rows, selected_bindings),
+        "functions": _registry_function_hierarchy(parser, raw_master, strings, category_id),
         "plugins": bindings,
-        "commands": _registry_command_rows(parser, master, category, bin_root, bindings),
+        "selected_plugins": selected_bindings,
+        "native_context": context_identity,
+        "selection_boundary": "Initial category/DLL/frame selection is native-qualified; ECU catalog tables remain raw and unproved for live selection.",
+        "commands": _registry_command_rows(parser, master, category, bin_root, selected_bindings),
         "selectors": _registry_selector_rows(parser, master, category_id),
         "active_test_groups": _registry_active_test_groups(parser, category, db_root, strings),
-        "utilities": _simple_utility_rows(parser, master, category, db, strings, support_mode=support_mode),
+        "utilities": _simple_utility_rows(
+            parser, master, category, db, strings, support_mode=support_mode, raw_master=raw_master,
+        ),
         "source_identity": {
             "database": {
-                "path": f"{db_root.parent.parent.name}/DB/{db_root.name}/{db_path.name}",
+                "path": str(db_path.relative_to(gts_root)),
                 "bytes": db_path.stat().st_size,
                 "sha256": _file_sha256(db_path),
             },
@@ -589,7 +611,7 @@ def _bundle_category_catalog(
             "data_list": _registry_data_list(db, strings),
             "generic_ffd": _generic_ffd_rows(
             db, strings, db_path.name,
-            resolve_variable=lambda variable_id: bytes.fromhex(_master_variable(master, variable_id)["bytes"]),
+            resolve_variable=lambda variable_id: bytes.fromhex(_master_variable(raw_master, variable_id)["bytes"]),
         ),
             "rob": _rob_rows(db, strings, db_path.name),
         }
@@ -629,6 +651,7 @@ def _bundle_customize_catalog(
     master: Any,
     strings: Any,
     category_by_id: dict[int, dict[str, Any]],
+    context: Any,
 ) -> dict[str, Any]:
     """Recover current regional Toyota Customize catalog from master tables 20/21/22/34.
 
@@ -643,9 +666,11 @@ def _bundle_customize_catalog(
         return struct.unpack_from("<I", raw, off)[0]
 
     choice_rows: dict[int, list[dict[str, Any]]] = {}
-    for raw in ddb_records(master.sections[22]):
+    for source_ordinal, raw in enumerate(ddb_records(master.sections[22])):
         key = u16(raw, 0x04)
         choice_rows.setdefault(key, []).append({
+            "source_ordinal": source_ordinal,
+            "raw": raw.hex(),
             "value": u16(raw, 0x06),
             "name": strings.get_string(u32(raw, 0x00)) or "",
             "name_string_index": u32(raw, 0x00),
@@ -656,8 +681,10 @@ def _bundle_customize_catalog(
         rows.sort(key=lambda row: int(row["value"]))
 
     groups = []
-    for raw in ddb_records(master.sections[20]):
+    for source_ordinal, raw in enumerate(ddb_records(master.sections[20])):
         groups.append({
+            "source_ordinal": source_ordinal,
+            "raw": raw.hex(),
             "body_type": raw[0x08],
             "group_id": u16(raw, 0x04),
             "name": strings.get_string(u32(raw, 0x00)) or "",
@@ -667,15 +694,18 @@ def _bundle_customize_catalog(
         })
     groups.sort(key=lambda row: (int(row["body_type"]), int(row["group_id"])))
 
-    items = []
-    for raw in ddb_records(master.sections[21]):
+    items: list[dict[str, Any]] = []
+    for source_ordinal, raw in enumerate(ddb_records(master.sections[21])):
         group_id = u16(raw, 0x08)
         item_id = u16(raw, 0x0A)
         target_category_id = u16(raw, 0x0C)
         choice_key = u16(raw, 0x20)
         all_default_gate = u16(raw, 0x22)
-        target = category_by_id.get(target_category_id)
+        target_query = context.query(16, target_category_id)
+        target = category_by_id.get(target_category_id) if target_query.status == 0 and target_query.records else None
         items.append({
+            "source_ordinal": source_ordinal,
+            "raw": raw.hex(),
             "group_id": group_id,
             "item_id": item_id,
             "name": strings.get_string(u32(raw, 0x00)) or "",
@@ -684,6 +714,12 @@ def _bundle_customize_catalog(
             "target_category_id": target_category_id,
             "target_category_name": str(target.get("name") or "") if target else "",
             "target_generation": int(target["generation"]) if target and target.get("generation") is not None else None,
+            "target_native_query": target_query.as_dict(),
+            "target_resolution": (
+                context.as_dict()["resolution"] if target else
+                "unknown" if target_query.status is None else
+                "native-failure" if target_query.status != 0 else "missing"
+            ),
             "item_aux_u16_0e": u16(raw, 0x0E),
             "support_bit_start": u16(raw, 0x10),
             "support_bit_end": u16(raw, 0x12),
@@ -699,7 +735,7 @@ def _bundle_customize_catalog(
             "raw_u32_24": u32(raw, 0x24),
             "raw_u16_28": u16(raw, 0x28),
             "write_did": u16(raw, 0x2A),
-            "target_phase_type": raw[0x2C],
+            "target_route_selector": raw[0x2C],
             "merge_mode": raw[0x2D],
             "support_selector": raw[0x2E],
             "read_current": raw[0x2F],
@@ -724,8 +760,10 @@ def _bundle_customize_catalog(
     items.sort(key=lambda row: (int(row["group_id"]), int(row["item_id"]), int(row["target_category_id"])))
 
     probes = []
-    for raw in ddb_records(master.sections[34]):
+    for source_ordinal, raw in enumerate(ddb_records(master.sections[34])):
         probes.append({
+            "source_ordinal": source_ordinal,
+            "raw": raw.hex(),
             "target_category_id": u16(raw, 0x00),
             "second_connect_argument": u16(raw, 0x02),
             "connect_frame_id": u16(raw, 0x04),
@@ -738,7 +776,9 @@ def _bundle_customize_catalog(
         })
 
     return {
-        "schema": "toyota-customize-catalog-v1",
+        "schema": "toyota-customize-catalog-v3",
+        "native_context": context.as_dict(),
+        "selection_boundary": "Groups/items/choices/probes are raw catalog occurrences, not proved live selection. Target category metadata is qualified by the supplied initial/event/unknown native context.",
         "groups": groups,
         "items": items,
         "body_type_probes": probes,
@@ -774,6 +814,8 @@ def _build_toyota_diag_region(
     family: str,
     region: str,
     part_path: Path,
+    native_history: Path | None,
+    history_known: bool,
 ) -> dict[str, Any]:
     """Build one Toyota-native regional resolver index plus decoded catalog shards."""
     db_root = gts_db_root(gts_root, region, family)
@@ -782,29 +824,50 @@ def _build_toyota_diag_region(
     strings_path = db_root / "M_English.ddb"
     master = parser.parse_master_db(master_path)
     strings = _english_strings(parser, db_root)
+    context = native_selection_context(gts_root, region, history=native_history, history_known=history_known)
+    initial_context = (
+        context if native_history is None and history_known else
+        native_selection_context(gts_root, region) if history_known else None
+    )
     category_rows = _master_category_rows(parser, master, strings)
-    dll_rows = list(parser.extract_master_dlls(master.sections[19]))
+    initial_categories = [] if initial_context is None else [
+        _resolve_master_category(parser, initial_context, strings, str(category_id))
+        for category_id in dict.fromkeys(row.category_id for row in initial_context.active_records(16))
+    ]
+    initial_context_identity = initial_context.as_dict() if initial_context is not None else None
+    category_ids = dict.fromkeys(row.category_id for row in context.raw_records(16, family="Gen"))
+    category_resolution = {str(key): context.query(16, key) for key in category_ids}
+    selected_categories = [
+        _resolve_master_category(parser, context, strings, key)
+        for key, result in category_resolution.items()
+        if result.status == 0 and result.records
+    ]
 
     # Preserve the exact P5 catalog set that shipped before P6 catalog support, then
     # add current p6-standard categories. Do not broaden or shrink legacy partner P5 shards here.
     p5_catalog_ids = {
-        int(entry.category_id)
-        for entry in dll_rows
-        if entry.dll_name == "GetSupportP5_DT.dll"
+        int(row["category_id"])
+        for row in selected_categories
+        if (binding := support.support_plugin(context, int(row["category_id"]), 0x67))
+        and binding["dll"] == "GetSupportP5_DT.dll"
     }
     catalog_categories = []
-    for row in category_rows:
+    for row in selected_categories:
         category_id = int(row["category_id"])
-        if not row.get("database") or not (db_root / str(row["database"])).is_file():
+        cached = context.file(ecu_id=category_id, family=family)
+        source_path = Path(cached.source.path) if cached is not None else db_root / str(row["database"])
+        if not row.get("database") or not source_path.is_file():
             continue
-        family = support.support_family(
-            support.support_plugin(dll_rows, category_id, 0x67),
-            support.support_plugin(dll_rows, category_id, 0xD5),
+        category_support_family = support.support_family(
+            support.support_plugin(context, category_id, 0x67),
+            support.support_plugin(context, category_id, 0xD5),
         )
-        mode = support.support_mode(category_id, int(row["generation"]), family)
+        mode = support.support_mode(category_id, int(row["generation"]), category_support_family)
         if category_id in p5_catalog_ids or mode == "p6-standard":
-            catalog_categories.append(row)
+            catalog_categories.append(native_ecu_catalog_category(context, row, db_root, parser))
     catalog_ids = {int(row["category_id"]) for row in catalog_categories}
+    catalog_by_id = {int(row["category_id"]): row for row in catalog_categories}
+    context_identity = context.as_dict()
 
     vehicles: dict[str, dict[str, Any]] = {}
     vehicle_names = {
@@ -823,13 +886,16 @@ def _build_toyota_diag_region(
         }
 
     category_index: dict[str, dict[str, Any]] = {}
-    category_by_id = {int(row["category_id"]): row for row in category_rows}
-    for row in category_rows:
+    category_by_id = {
+        int(row["category_id"]): catalog_by_id.get(int(row["category_id"]), row)
+        for row in selected_categories
+    }
+    for row in selected_categories:
         category_id = int(row["category_id"])
-        item = dict(row)
+        item = dict(category_by_id[category_id])
         item["generation_low5"] = int(row["generation"]) & 0x1F
-        single = support.support_plugin(dll_rows, category_id, 0x67)
-        multi = support.support_plugin(dll_rows, category_id, 0xD5)
+        single = support.support_plugin(context, category_id, 0x67)
+        multi = support.support_plugin(context, category_id, 0xD5)
         item["support_plugin_single"] = single
         item["support_plugin_multi"] = multi
         item["support_family"] = support.support_family(single, multi)
@@ -846,18 +912,18 @@ def _build_toyota_diag_region(
     install_row_count = 0
     for raw in ddb_records(master.sections[44]):
         install_set_id, category_id, frame_id, comm_set_id = struct.unpack_from("<HHHH", raw, 4)
-        phase_type = raw[0x13]
-        route_key = f"{category_id}:{phase_type}"
+        route_selector = raw[0x13]
+        route_key = f"{category_id}:{route_selector}"
         if route_key not in routes:
             try:
-                routes[route_key] = _bundle_protocol_route(master, category_id, phase_type)
+                routes[route_key] = _bundle_protocol_route(master, category_id, route_selector)
             except ValueError:
                 route_key = None
         install_sets.setdefault(str(install_set_id), []).append({
             "category_id": category_id,
             "connection_frame_id": frame_id,
             "connection_comm_set_id": comm_set_id,
-            "connection_phase_type": phase_type,
+            "connection_route_selector": route_selector,
             "route_key": route_key,
         })
         install_row_count += 1
@@ -875,31 +941,35 @@ def _build_toyota_diag_region(
         "flags": struct.unpack_from("<I", raw, 0x00)[0],
         "vehicle_type": struct.unpack_from("<H", raw, 0x0E)[0],
         "category_id": struct.unpack_from("<H", raw, 0x10)[0],
-        "phase_type": raw[0x12],
+        "route_selector": raw[0x12],
         "vin_prefix_hex": raw[0x13:0x1E].hex(),
     } for raw in ddb_records(master.sections[59])]
     type41_rows = _bundle_vehicle_decision_rows(master)
-    vehicle_program = _bundle_special_vehicle_program(gts_root, region, parser, master)
+    vehicle_program = _bundle_special_vehicle_program(gts_root, region, parser, context)
     bin_root = gts_root / "bin"
     vehicle_roles = {}
     for role, semantic in ((0x45, "legacy_select_vehicle"), (0x4A, "legacy_select_vehicle_vin"), (0x7D, "vin10_select_vehicle")):
-        selected = support.support_plugin(dll_rows, 0, role)
+        query = context.query(19, role, 0)
+        if query.status is None or query.status != 0:
+            vehicle_roles[f"0x{role:02X}"] = {"semantic": semantic, "native": query.as_dict()}
+            continue
+        selected = support.support_plugin(context, 0, role)
         if selected is None:
             continue
         dll = str(selected["dll"])
         vehicle_roles[f"0x{role:02X}"] = {
             **selected,
             "semantic": semantic,
-            "binary_present_in_current_gtsplus": (bin_root / dll).is_file(),
+            "binary_present_in_current_gtsplus": _resolve_plugin_path(bin_root, dll).is_file(),
         }
 
-    session_categories = [category_by_id[key] for key in sorted(category_by_id)]
+    session_categories = [{"category_id": category_id} for category_id in category_ids]
     region_index = {
         "region": region,
         "vehicles": vehicles,
         "vin_decision": {
             "path": "P5/P6 final resolver; P3/P4 candidate/source stage before type-41",
-            "key": "category_id + phase_type + VIN[0:11], with flags bits 0..10 as per-position wildcards",
+            "key": "category_id + route_selector + VIN[0:11], with flags bits 0..10 as per-position wildcards",
             "rows": vin_rows,
         },
         "vehicle_decision": {
@@ -923,22 +993,37 @@ def _build_toyota_diag_region(
                 "their semantics are unresolved here rather than declaring those Toyota generations unsupported."
             ),
         },
-        "categories": category_index,
+        "category_rows": category_rows,
+        "raw_category_occurrences": [row.as_dict() for row in context.raw_records(16)],
+        "initial_categories": (
+            {str(row["category_id"]): row for row in initial_categories} if initial_context is not None else None
+        ),
+        "initial_native_context": initial_context_identity,
+        "selected_categories": category_index,
+        "category_resolution": {key: value.as_dict() for key, value in category_resolution.items()},
+        "raw_role_bindings": [row.as_dict() for row in context.raw_records(19)],
+        "native_context": context_identity,
+        "raw_catalog_boundary": "Install sets, routes, vehicle decisions, Customize tables and ECU catalogs are raw/unproved live selection; native proof covers only category/DLL/selector/frame/CommSet/timer tables.",
         "install_sets": install_sets,
         "routes": routes,
         "connection_frames": {
-            str(frame_id): _bundle_connection_frame(master, frame_id)
+            str(frame_id): _bundle_connection_frame(context, frame_id)
             for frame_id in sorted(connection_frame_ids)
         },
-        "commsets": {str(row["comm_set_id"]): row for row in _master_comm_set_rows(parser, master)},
-        "session_control": _bundle_session_control(parser, master, session_categories),
-        "utilities": _registry_utilities(parser, master),
+        "commsets": {
+            str(key): _bundle_comm_set(context, key)
+            for key in dict.fromkeys(struct.unpack_from("<H", row.raw, 10)[0] for row in context.raw_records(29))
+        },
+        "session_control": _bundle_session_control(parser, context, session_categories),
+        "utilities": _registry_utilities(parser, context),
         "customize_member": f"customize/{region}/0.json",
         "can_topology": _bundle_can_topologies(parser, master, strings, vehicle_types_with_routes),
         "counts": {
             "vehicle_count": len(vehicles),
             "install_set_count": len(install_sets),
-            "category_count": len(category_index),
+            "raw_category_row_count": len(category_rows),
+            "initial_category_count": len(initial_categories) if initial_context is not None else None,
+            "selected_category_count": len(category_index),
             "catalog_count": len(catalog_ids),
             "install_row_count": install_row_count,
             "vin_decision_row_count": len(vin_rows),
@@ -955,12 +1040,12 @@ def _build_toyota_diag_region(
         },
         "source_identity": {
             "master": {
-                "path": f"{region}/DB/{family}/Toyota.ddb",
+                "path": str(master_path.relative_to(gts_root)),
                 "bytes": master_path.stat().st_size,
                 "sha256": _file_sha256(master_path),
             },
             "strings": {
-                "path": f"{region}/DB/{family}/M_English.ddb",
+                "path": str(strings_path.relative_to(gts_root)),
                 "bytes": strings_path.stat().st_size,
                 "sha256": _file_sha256(strings_path),
             },
@@ -969,23 +1054,18 @@ def _build_toyota_diag_region(
     }
 
     with zipfile.ZipFile(part_path, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as archive:
-        _bundle_write_json(
-            archive,
-            f"customize/{region}/0.json",
-            _bundle_customize_catalog(master, strings, category_by_id),
-        )
+        customize = _bundle_customize_catalog(master, strings, category_by_id, context)
+        customize["source_identity"] = region_index["source_identity"]
+        _bundle_write_json(archive, f"customize/{region}/0.json", customize)
         for category in sorted(catalog_categories, key=lambda row: int(row["category_id"])):
             category_id = int(category["category_id"])
-            payload = _bundle_category_catalog(parser, master, strings, db_root, bin_root, category)
+            payload = _bundle_category_catalog(
+                parser, context, strings, db_root, bin_root, category,
+                raw_master=master, gts_root=gts_root, context_identity=context_identity,
+            )
             _bundle_write_json(archive, f"catalogs/{region}/{category_id}.json", payload)
     return region_index
 
-
-def _bundle_write_bytes(archive: zipfile.ZipFile, member: str, data: bytes) -> None:
-    info = zipfile.ZipInfo(member, date_time=(1980, 1, 1, 0, 0, 0))
-    info.compress_type = zipfile.ZIP_DEFLATED
-    info.external_attr = 0o644 << 16
-    archive.writestr(info, data)
 
 
 def write_toyota_diag_bundle(
@@ -994,13 +1074,14 @@ def write_toyota_diag_bundle(
     *,
     family: str = "Gen",
     regions: tuple[str, ...] = TOYOTA_DIAG_BUNDLE_REGIONS,
+    native_history: Path | None = None,
+    history_known: bool = True,
 ) -> dict[str, Any]:
-    """Write the universal clean Toyota diagnostic bundle used by `tools/toyota`.
+    """Write canonical diagnostic members consumed directly by offline tooling.
 
-    Regional extraction is CPU-heavy, so each regional master is derived in an
-    independent worker. The final archive is then merged in fixed region/category
-    order with fixed ZIP timestamps, keeping the artifact deterministic regardless
-    of worker completion order.
+    Each regional master is derived in an independent worker. Temporary regional
+    ZIPs stay in the build workspace; only deterministic gzip members and their
+    ordered integrity manifest are retained in the output directory.
     """
     resolver_artifact = json.loads(VEHICLE_RESOLVER.read_text())
     if resolver_artifact.get("release") != "2026.03.002.02":
@@ -1009,7 +1090,8 @@ def write_toyota_diag_bundle(
         "schema": TOYOTA_DIAG_BUNDLE_SCHEMA,
         "profile": TOYOTA_DIAG_BUNDLE_PROFILE,
         "release": resolver_artifact["release"],
-        "default_region": "NA",
+        "default_region": regions[0],
+        "native_context_request": {"history_known": history_known, "history_supplied": native_history is not None},
         "fault_status_mask": 0xAF,
         "mode04_request": "0104000000000000",
         "support_contracts": {
@@ -1124,38 +1206,48 @@ def write_toyota_diag_bundle(
             },
         },
         "boundary": (
-            "Clean derived metadata only. Vehicle/install/category/route/session/support-family selection comes from Toyota Gen/Spe "
-            "masters and role fallback. Catalog availability is an independent tooling capability and is never an ECU-support gate. "
-            "Live family-specific support filtering remains the per-ECU capability criterion. No Toyota binary or opaque DDB payload is embedded."
+            "Raw category and role occurrences remain separate from initial and supplied-context native snapshots. "
+            "Native proof covers tables 16/17/18/19/25/29 only; other catalogs and vehicle/install/route tables are raw/unproved live selection. "
+            "Catalog availability is not an ECU-support gate. Exact raw row bytes and source hashes are retained; executable Toyota binaries are not embedded."
         ),
     }
+    if native_history is not None:
+        index["source_identity"]["native_history"] = {
+            "path": str(native_history.resolve()),
+            "bytes": native_history.stat().st_size,
+            "sha256": _file_sha256(native_history),
+        }
 
     out.parent.mkdir(parents=True, exist_ok=True)
-    temporary = out.with_name(f".{out.name}.tmp")
-    temporary.unlink(missing_ok=True)
-    try:
-        with tempfile.TemporaryDirectory(prefix="toyota-diag-bundle-", dir=out.parent) as workspace_text:
-            workspace = Path(workspace_text)
-            part_paths = {region: workspace / f"{region}.zip" for region in regions}
-            workers = min(len(regions), 3)
-            with ProcessPoolExecutor(max_workers=workers) as executor:
-                futures = {
-                    executor.submit(_build_toyota_diag_region, gts_root, family, region, part_paths[region]): region
-                    for region in regions
-                }
-                for future in as_completed(futures):
-                    region = futures[future]
-                    index["regions"][region] = future.result()
+    if out.exists() and not (out / "manifest.json").is_file():
+        raise ValueError(f"refusing to replace a non-bundle directory: {out}")
+    with tempfile.TemporaryDirectory(prefix="toyota-diag-bundle-", dir=out.parent) as workspace_text:
+        workspace = Path(workspace_text)
+        part_paths = {region: workspace / f"{region}.zip" for region in regions}
+        workers = min(len(regions), 3)
+        with ProcessPoolExecutor(max_workers=workers) as executor:
+            futures = {
+                executor.submit(
+                    _build_toyota_diag_region, gts_root, family, region, part_paths[region],
+                    native_history, history_known,
+                ): region
+                for region in regions
+            }
+            for future in as_completed(futures):
+                region = futures[future]
+                index["regions"][region] = future.result()
 
-            with zipfile.ZipFile(temporary, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as archive:
-                for region in regions:
-                    with zipfile.ZipFile(part_paths[region]) as part:
-                        names = sorted(part.namelist(), key=lambda name: int(Path(name).stem))
-                        for name in names:
-                            _bundle_write_bytes(archive, name, part.read(name))
-                _bundle_write_json(archive, "index.json", index)
-        temporary.replace(out)
-    except BaseException:
-        temporary.unlink(missing_ok=True)
-        raise
+        canonical = workspace / "bundle"
+        writer = DiagnosticBundleWriter(canonical)
+        for region in regions:
+            with zipfile.ZipFile(part_paths[region]) as part:
+                names = sorted(part.namelist(), key=lambda name: int(Path(name).stem))
+                for name in names:
+                    with part.open(name) as source:
+                        writer.add(name, source)
+        writer.add("index.json", io.BytesIO(_bundle_json_bytes(index)))
+        writer.finish()
+        if out.exists():
+            shutil.rmtree(out)
+        canonical.replace(out)
     return index

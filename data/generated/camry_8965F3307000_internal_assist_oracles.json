@@ -261,7 +261,7 @@
         "6": "Eco Mode",
         "9": "Range Mode"
       },
-      "source": "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json"
+      "source": "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json.gz"
     },
     "secondary_effect": "C29B2 also emits local curve slope; C2C32 speed-blends that slope into FEBEBF40, which C8678 consumes in the separate FEBEC4C0 torque-rate and assist-slope/speed compensation. The mode bank therefore affects more than the direct BF3C magnitude.",
     "selector_reader_census": {

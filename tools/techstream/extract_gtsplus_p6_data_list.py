@@ -17,13 +17,19 @@ from typing import Any
 import pefile  # type: ignore
 
 from tools import REPO_ROOT
-from tools.techstream.ddb_semantics import extract_monitor_records, extract_msb0, format_p5_decimal, records
+from tools.techstream.ddb_semantics import (
+    NativeSelectionError, UnresolvedNativeContext, extract_monitor_records, extract_msb0,
+    format_p5_decimal, native_context, records, resolve_frame_program, select_for_consumer,
+)
 from tools.techstream.ddb_strings import load_string_db
-from tools.techstream.gts.master import _master_frame_rows, _master_variable
+from tools.techstream.gts.master import _master_variable
+from tools.techstream.gts.support import support_plugin
 from tools.techstream.parse_ddb import DDBParser
 from tools.techstream.techstream_paths import gts_db_root, resolve_gts_root
+from tools.techstream.recover_all_gtsplus_bodies import DEFAULT_OUTPUT, qualify_recovered_source
 
 DEFAULT_OUT = REPO_ROOT / "data/generated/gtsplus_2026/p6_data_list_semantics.json"
+DEFAULT_RECOVERED = DEFAULT_OUTPUT / "GTSPlus"
 REGIONS = ("NA", "EU", "JP")
 WITNESSES = ("ADCU_P6.ddb", "Engine_CM_P6.ddb")
 
@@ -142,6 +148,10 @@ def native_sources(gts: Path, recovered: Path) -> dict[str, Any]:
     for filename, functions in FUNCTIONS.items():
         source_root = recovered if filename == "CommandCommon.dll" else gts
         path = source_root / "bin" / filename
+        qualification = (
+            qualify_recovered_source(path, gts / "bin" / filename, component_root=recovered)
+            if filename == "CommandCommon.dll" else None
+        )
         data = path.read_bytes()
         if digest(data) != SOURCE_SHA256[filename]:
             raise ValueError(f"current-release PE identity mismatch: {filename}")
@@ -177,6 +187,8 @@ def native_sources(gts: Path, recovered: Path) -> dict[str, Any]:
                              "bytes": actual.hex(), "derivation": derivation}
         out[filename] = {**identity(path, source_root), "materialization": "installer plaintext twin" if filename == "CommandCommon.dll" else "installed PE",
                          "functions": bodies, "anchors": anchors}
+        if qualification is not None:
+            out[filename]["qualification"] = qualification
     common = gts / "bin/CommandCommon.dll"
     sidecar = gts / "bin/CommandCommon.dll._"
     if digest(common.read_bytes()) != "89fe3c1f17d7ec58e659a099fc4fc96b55d30534d813c2a4c26211c4d30284c2":
@@ -187,7 +199,7 @@ def native_sources(gts: Path, recovered: Path) -> dict[str, Any]:
     out["CommandCommon.dll"]["provenance"] = {
         "installer": "Setup_PF.exe", "version": "2026.03.002.02",
         "source_archive_sha256": "fb65ac31b1c0a0c1b28d53af8cf540d12eb46d77ba1e6645a014473352ce00c4",
-        "method": "tools/gts recover-bodies; installer CP stub and sidecar equal installed bytes",
+        "method": "qualified aggregate GTSPlus component; exact source-relative output and installed protected-pair manifest match",
     }
     return out
 
@@ -355,49 +367,152 @@ CONTRACTS = {
 }
 
 
+def native_failure(error: NativeSelectionError | UnresolvedNativeContext) -> dict[str, Any]:
+    result = getattr(error, "result", None)
+    return {"status": getattr(error, "status", None), "error": str(error),
+            "query": None if result is None else result.as_dict()}
+
+
+def native_frame_witness(context: Any, category_id: int, selector: int) -> dict[str, Any]:
+    """Retain a complete initial/event selector program, including native failures."""
+    query = context.query(18, category_id, selector)
+    witness: dict[str, Any] = {"selector_query": query.as_dict(), "frames": []}
+    try:
+        witness["frames"] = resolve_frame_program(context, category_id, selector, variable_namespace_base=0x2710)
+        witness["status"] = query.status
+    except (NativeSelectionError, UnresolvedNativeContext) as error:
+        witness.update(native_failure(error))
+    return witness
+
+
+def _master_record_ref(row: Any) -> list[Any]:
+    return [row.source.family, row.table_type, row.ordinal]
+
+
+def _master_query_reference(query: Any, record_refs: dict[str, list[Any]]) -> dict[str, Any]:
+    """Reference the regional raw catalog and its single context snapshot."""
+    provenance = []
+    for origin in query.provenance:
+        item = {key: value for key, value in origin.items()
+                if key not in ("context", "source", "selected_ids")}
+        if "selected_ids" in origin:
+            item["selected_record_refs"] = [record_refs[key] for key in origin["selected_ids"]]
+        provenance.append(item)
+    return {
+        "status": query.status, "mode": query.mode,
+        "record_refs": [_master_record_ref(row) for row in query.records],
+        "raw_variant_refs": [_master_record_ref(row) for row in query.raw_variants],
+        "provenance": provenance,
+    }
+
+
+def native_source_census(parser: DDBParser, root: Path, region: str, role: int,
+                         plugin: str) -> tuple[Any, list[tuple[Any, Any, Any, Any]], dict[str, Any]]:
+    """Separate physical source occurrences from an explicitly initial resolution.
+
+    ECU table joins below remain raw source evidence: their comparators are outside
+    the proved native master-index API. No raw category or DLL row is a live claim.
+    """
+    masters = {family: parser.parse_master_db(gts_db_root(root, region, family) / "Toyota.ddb")
+               for family in ("Gen", "Spe")}
+    context = native_context(masters["Gen"], masters["Spe"])
+    raw_categories = context.raw_records(16)
+    raw_bindings = [row for row in context.raw_records(19) if row.dll_role_id == role]
+    record_refs = {row.identity: _master_record_ref(row) for row in (*raw_categories, *raw_bindings)}
+    candidate_ids = {row.category_id for row in raw_bindings if row.dll_name == plugin}
+    initial = {}
+    for category_id in sorted({u16(row.raw, 0x44) for row in raw_categories}):
+        category_query = context.query(16, category_id)
+        binding_query = context.query(19, role, category_id)
+        item: dict[str, Any] = {
+            "category_query": _master_query_reference(category_query, record_refs),
+            "binding_query": _master_query_reference(binding_query, record_refs),
+            "category": None, "plugin": None,
+        }
+        try:
+            selected = select_for_consumer(category_query, "category")
+            item["category"] = _master_record_ref(selected)
+        except (NativeSelectionError, UnresolvedNativeContext) as error:
+            item["category_failure"] = {
+                "status": getattr(error, "status", None), "error": str(error), "query_ref": "category_query",
+            }
+        try:
+            item["plugin"] = support_plugin(context, category_id, role)
+            if item["plugin"] is not None:
+                item["plugin"].pop("selection")
+                item["plugin"]["query_ref"] = "binding_query"
+        except (NativeSelectionError, UnresolvedNativeContext) as error:
+            item["plugin_failure"] = {
+                "status": getattr(error, "status", None), "error": str(error), "query_ref": "binding_query",
+            }
+        if category_id in candidate_ids or (item["plugin"] is not None and item["plugin"]["dll"] == plugin):
+            initial[str(category_id)] = item
+    sources = []
+    for family, master in masters.items():
+        strings_path = gts_db_root(root, region, family) / "M_English.ddb"
+        strings = load_string_db(parser, strings_path) if strings_path.is_file() else None
+        decoded = parser.extract_master_ecu_categories(master.sections[16])
+        for occurrence, category in zip(context.raw_records(16, family=family), decoded, strict=True):
+            if str(category.category_id) in initial:
+                sources.append((occurrence, category, master, strings))
+    return context, sources, {
+        "context": context.as_dict(), "context_label": "explicit_initial",
+        "record_reference_format": "Triples are [source family, table type, physical ordinal] within this regional context. They resolve in raw_categories or raw_role_bindings; context stores the complete source, load and history metadata once.",
+        "raw_categories": [row.as_dict() for row in raw_categories],
+        "raw_role_bindings": [row.as_dict() for row in raw_bindings],
+        "raw_role_binding_count": len(raw_bindings),
+        "raw_plugin_binding_count": sum(row.dll_name == plugin for row in raw_bindings),
+        "initial_plugin_category_count": sum(
+            item["plugin"] is not None and item["plugin"]["dll"] == plugin for item in initial.values()),
+        "native_initial": initial,
+        "raw_string_sources": {
+            family: {"source": identity(gts_db_root(root, region, family) / "M_English.ddb", root)
+                     if (gts_db_root(root, region, family) / "M_English.ddb").is_file() else None,
+                     "boundary": "Exact family-local raw annotation source only; absent source leaves names/annotated witnesses unresolved, with no cross-family fallback."}
+            for family in masters
+        },
+        "source_census_boundary": "Physical Gen/Spe category occurrences and raw ECU-table joins; not selected ECU metadata or live eligibility.",
+    }
+
+
 def build(gts_root: Path, recovered_root: Path) -> dict[str, Any]:
     gts = resolve_gts_root(gts_root)
     binaries = native_sources(gts, recovered_root)
     parser = DDBParser()
     regions = {}
     for region in REGIONS:
-        db_root = gts_db_root(gts, region, "Gen")
-        master_path = db_root / "Toyota.ddb"
-        master = parser.parse_master_db(master_path)
-        strings_path = db_root / "M_English.ddb"
-        strings = load_string_db(parser, strings_path)
-        categories = {x.category_id: x for x in parser.extract_master_ecu_categories(master.sections[16])}
-        bindings = sorted((x for x in parser.extract_master_dlls(master.sections[19])
-                           if x.dll_role_id == 5 and x.dll_name == "GetDatMonListP6_DT.dll"), key=lambda x: x.category_id)
-        category_raw = {u16(x, 0x44): x for x in records(master.sections[16])}
+        context, sources, selection = native_source_census(parser, gts, region, 5, "GetDatMonListP6_DT.dll")
         catalogs = []
         witnesses = {}
-        for binding in bindings:
-            cat = categories[binding.category_id]
+        for occurrence, cat, master, strings in sources:
+            db_root = Path(occurrence.source.path).parent
             path = db_root / cat.database_name
             entry: dict[str, Any] = {"category_id": cat.category_id, "generation": cat.generation,
-                                     "database": cat.database_name, "category_raw": category_raw[cat.category_id].hex(),
-                                     "binding_raw": binding.raw.hex(), "available": path.is_file()}
-            if path.is_file():
+                                     "database": cat.database_name, "category_occurrence": occurrence.as_dict(),
+                                     "available": bool(cat.database_name) and path.is_file()}
+            if entry["available"]:
                 db = parser.parse_ecu_db(path)
                 entry.update({"source": identity(path, gts), **db_census(db)})
                 if cat.database_name in WITNESSES:
-                    witnesses[cat.database_name] = {
+                    witness_key = f"{occurrence.source.family}:{occurrence.ordinal}:{cat.database_name}"
+                    witnesses[witness_key] = {
                         "source": identity(path, gts), "category_id": cat.category_id,
-                        "frames": {f"0x{s:X}": _master_frame_rows(parser, master, cat.category_id, s) for s in (0xC8, 0xC9, 0xCA, 0xD3, 0xD4)},
-                        "records": select_witnesses(db, master, strings),
+                        "category_occurrence": occurrence.as_dict(),
+                        "frames": {f"0x{s:X}": native_frame_witness(context, cat.category_id, s) for s in (0xC8, 0xC9, 0xCA, 0xD3, 0xD4)},
+                        "records": select_witnesses(db, master, strings) if strings is not None else [],
+                        "annotation_status": "source_available" if strings is not None else "unresolved_family_string_source",
                     }
             catalogs.append(entry)
         available = [x for x in catalogs if x["available"]]
         regions[region] = {
-            "master_source": identity(master_path, gts), "strings_source": identity(strings_path, gts),
-            "binding_count": len(bindings), "available_database_count": len(available),
+            **selection,
+            "available_source_occurrence_count": len(available),
             "totals": {key: sum(x[key] for x in available) for key in ("rows62", "visible_candidates", "composite_rows", "live_conditioned_rows", "dynamic_lsb_rows")},
             "catalogs": catalogs, "witnesses": witnesses,
         }
     bitmap = bytes.fromhex("000080")
     return {
-        "schema": "gtsplus-p6-data-list-semantics-v1", "version": "2026.03.002.02",
+        "schema": "gtsplus-p6-data-list-semantics-v3", "version": "2026.03.002.02",
         "binaries": binaries, "contracts": CONTRACTS, "regions": regions,
         "analytical_wire_example": {
             "provenance": "constructed branch input using the current Engine_CM_P6 DID1002, not an observed response",
@@ -421,7 +536,7 @@ def build(gts_root: Path, recovered_root: Path) -> dict[str, Any]:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--gts-root", type=Path)
-    ap.add_argument("--recovered-root", type=Path, required=True, help="tools/gts recover-bodies output root (contains bin/CommandCommon.dll)")
+    ap.add_argument("--recovered-root", type=Path, default=DEFAULT_RECOVERED, help="Qualified aggregate GTSPlus component root")
     ap.add_argument("--out", type=Path, default=DEFAULT_OUT)
     args = ap.parse_args()
     payload = build(resolve_gts_root(args.gts_root), args.recovered_root)

@@ -23,6 +23,7 @@ import runpy
 import zipfile
 from pathlib import Path
 from typing import Any
+from tools.techstream.gts.registry import load_toyota_diag_registry
 
 REPO = REPO_ROOT
 DEFAULT_OUT = REPO / "data/generated/corolla_tss3_opendbc_readiness.json"
@@ -47,7 +48,7 @@ AUTH_WIRE = REPO / "data/generated/corolla_hf_cooperative_authority_wire_visibil
 FAULT_STATE = REPO / "data/generated/corolla_hf_fault_state_contract.json"
 REMAINING_STATUS = REPO / "data/generated/corolla_hf_remaining_status_contract.json"
 ALBINO_ARCH = H_CAPTURE / "albinoelephant_discord_PORT_ARCHITECTURE.md"
-GTS_REGISTRY = REPO / "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json"
+GTS_REGISTRY = REPO / "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json.gz"
 
 
 def sha256_bytes(data: bytes) -> str:
@@ -183,7 +184,7 @@ def main() -> int:
     power_gate = json.loads(POWER_GATE.read_text())
     auth_wire = json.loads(AUTH_WIRE.read_text())
     albino_arch = ALBINO_ARCH.read_text()
-    gts_registry = json.loads(GTS_REGISTRY.read_text())
+    gts_registry = load_toyota_diag_registry(GTS_REGISTRY)
     gts_hv_gear = find_gts_shift_position(gts_registry, "HV_P5.ddb", "Shift Position")
     expected_gts_gear = {"0": "P", "2": "R", "4": "N", "6": "D", "8": "B"}
     if gts_hv_gear["signal_info"]["pattern_display"] != expected_gts_gear:

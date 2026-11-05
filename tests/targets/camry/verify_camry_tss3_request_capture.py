@@ -17,6 +17,7 @@ from collections import Counter
 from pathlib import Path
 
 from tools import REPO_ROOT
+from tools.techstream.gts.registry import write_toyota_diag_registry
 REPO = REPO_ROOT
 import tools.targets.camry.analysis.analyze_camry_tss3_request_capture as analyze_mod
 import tools.targets.camry.live.camry_frc_lta_capture as lta
@@ -47,23 +48,23 @@ check("DIDs are exactly the OQ-052 sets",
 check("every request is the fixed read-only single-frame 03 22 DID in the default session",
       all(t.request == bytes((0x03, 0x22, t.did >> 8, t.did & 0xFF)) + bytes(4) for t in targets))
 with tempfile.TemporaryDirectory() as td:
-    wrong = Path(td) / "wrong_registry.json"
-    wrong.write_text(json.dumps({
-        "schema": "toyota-diagnostics-registry-v6",
+    wrong = Path(td) / "wrong_registry.json.gz"
+    write_toyota_diag_registry({
+        "schema": "toyota-diagnostics-registry-v8",
         "profile": {"profile": "camry-2026-f33", "panda_bus": 0,
                     "ecus": [{"key": "brake", "address": 0x7B0}, {"key": "frc", "address": 0x7FF}]},
         "catalogs": {},
-    }))
+    }, wrong)
     try:
         cap.load_registry(wrong)
         check("registry address drift fails closed", False, "load_registry accepted a wrong ECU address")
     except SystemExit as exc:
         check("registry address drift fails closed", True, str(exc))
-    wrong.write_text(json.dumps({
-        "schema": "toyota-diagnostics-registry-v6",
+    write_toyota_diag_registry({
+        "schema": "toyota-diagnostics-registry-v8",
         "profile": {"profile": "some-other-car", "panda_bus": 0, "ecus": []},
         "catalogs": {},
-    }))
+    }, wrong)
     try:
         cap.load_registry(wrong)
         check("foreign registry profile fails closed", False, "load_registry accepted a foreign profile")

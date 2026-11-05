@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Extract the pinned GTS+ 2026.03.002.02 bootstrap/teardown lifecycle offline."""
+"""Extract the pinned GTS+ 2026.03.002.02 bootstrap/teardown lifecycle offline.
+
+Defaults to the qualified aggregate's GTSPlus component. Exact manifest-relative
+provenance and installed CP pins admit recovered images; full managed-body
+validation classifies native/bodyless rows separately from valid IL. Semantic
+body/branch pins remain exact. Explicit component roots do not use fallbacks.
+"""
 from __future__ import annotations
 
 import argparse
@@ -22,64 +28,43 @@ from tools.techstream.extract_gtsplus_tse_managed_semantics import (
     _instructions,
     _method_pin,
     _open,
-    _recovery_proof,
 )
 from tools.techstream.gtsplus_local_crypto import decrypt_file
-from tools.techstream.inspect_dotnet_il import format_operand, resolve_token
+from tools.techstream.inspect_dotnet_il import format_operand, inspect_managed_bodies, resolve_token, validate_managed_bodies
+from tools.techstream.recover_all_gtsplus_bodies import DEFAULT_OUTPUT as DEFAULT_RECOVERED, qualify_recovered_source
 
 DEFAULT_INSTALLED = REPO_ROOT / "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus"
-DEFAULT_RECOVERED = REPO_ROOT / "build/out/gtsplus-unprotected"
+DEFAULT_MAIN = DEFAULT_RECOVERED / "GTSPlus"
 DEFAULT_OUT = REPO_ROOT / "data/generated/gtsplus_2026/lifecycle_bootstrap.json"
 
-SOURCE_PINS: dict[str, dict[str, Any]] = {'arb': {'file': 'GTSPlusArbitration.exe',
-         'plaintext': {'sha256': 'f324c24f21eaa0deed85f71720eaa17222912b85ef920bec19347d043dad126e',
-                       'size': 76304},
-         'protected': {'stub_sha256': '9f48c65cca6a91ec1e8f6dae15f04fe3f2f016f6bef7661ad2b3d3a852a5276b',
-                       'stub_size': 98320,
-                       'sidecar_sha256': '059648a21aca063c1135122c7e14124af7944930d1e21685c29f030be55a7dcc',
-                       'sidecar_size': 178160}},
- 'pf': {'file': 'GTSPlus.exe',
-        'plaintext': {'sha256': '31f2d0d7f77517d5336433e211d33f44e54cb65b1522fcdd22730d3f3214220d',
-                      'size': 200208},
-        'protected': {'stub_sha256': 'c2dc6d5ceefadf41165ff6be3bfc049f7bffb96f9f8bb63f26da0d851432cc24',
-                      'stub_size': 221200,
-                      'sidecar_sha256': 'd5399208fc0aa9a625b82c24c83b294f0c345ae79c0820d9a7afc8b352d90cab',
-                      'sidecar_size': 202960}},
- 'common': {'file': 'GTSPlusCommon.dll',
-            'plaintext': {'sha256': '5cae3724989fc6be25f16eb421d635fb4a2e5ff193f3aa493446456054a5454c',
-                          'size': 29200},
-            'protected': {'stub_sha256': '3c1aef55d0875309217099877e7b5c3043327ff75897fdadcdc24fddcc2a883a',
-                          'stub_size': 53264,
-                          'sidecar_sha256': 'cbd0c6ae327f8be22e2fa7933c48fc3d884460216451d7d7bc309224dbd5d386',
-                          'sidecar_size': 118960}},
- 'msg': {'file': 'MsgDatComm.dll',
-         'plaintext': {'sha256': 'ef073fde46c751d9b7afa0a3a669ccc017f55c83fa73eff5c808cb1c56b389ad',
-                       'size': 48144},
-         'protected': {'stub_sha256': '4c513b522e58f98350d9e94c0db0b6ed3cbd30ed0d69f317e4b5921714321ccf',
-                       'stub_size': 69648,
-                       'sidecar_sha256': '6ef555bcfa2990c6ce1e9c122bcd44138f6009f94bd8668cc07317a5dd4440db',
-                       'sidecar_size': 125168}},
- 'adapt': {'file': 'GTSPlusAdaptIF.dll',
-           'plaintext': {'sha256': 'd354d507208dd7a6f2d99ed8516112da27a1b1a8e8b5ea51d8e4fbd9e4d6da41',
-                         'size': 22544},
-           'protected': {'stub_sha256': 'fd1868ee2cb490b0648cfe981074f03ae9c5b0f2a7adfd0646e8f866e4a4f4c4',
-                         'stub_size': 40976,
-                         'sidecar_sha256': '6671e80d4cdaa98e591375a997295b52057479cab992419db52c16eec0a876a4',
-                         'sidecar_size': 117648}},
- 'err': {'file': 'GTSPlusErrorReport.dll',
-         'plaintext': {'sha256': '13cf4d66b321d308cb191a40cd173d3a4097d4d20a12b0a80f9e423d292c40c4',
-                       'size': 83472},
-         'protected': {'stub_sha256': 'd4ba836a35c8397b5fde725f06c0effe21772819746942963c111528c06242d5',
-                       'stub_size': 102416,
-                       'sidecar_sha256': '9eef9b62fb6e83ac9c69f66440afb5353f1be6a50b955bbb93a00f1deeae2073',
-                       'sidecar_size': 131888}},
- 'cm': {'file': 'GtsPlus-CM.dll',
-        'plaintext': {'sha256': '9d66e36d939181543bca6e42bf0f3288d81327f2bf6dace2a5b106229dddeac8',
-                      'size': 1886736},
-        'protected': {'stub_sha256': '22735bf1cad71320164a92ed14071b16d1547f63a76d85b88d612d888c459f95',
-                      'stub_size': 540688,
-                      'sidecar_sha256': 'db69e562601efdea05a06e924a9c06baf9ecee207ac3447cd0b7399e88ebce8f',
-                      'sidecar_size': 1350800}}}
+SOURCE_PINS: dict[str, dict[str, Any]] = {'arb': {'file': 'GTSPlusArbitration.exe', 'protected': {'stub_sha256': '9f48c65cca6a91ec1e8f6dae15f04fe3f2f016f6bef7661ad2b3d3a852a5276b',
+              'stub_size': 98320,
+              'sidecar_sha256': '059648a21aca063c1135122c7e14124af7944930d1e21685c29f030be55a7dcc',
+              'sidecar_size': 178160}},
+ 'pf': {'file': 'GTSPlus.exe', 'protected': {'stub_sha256': 'c2dc6d5ceefadf41165ff6be3bfc049f7bffb96f9f8bb63f26da0d851432cc24',
+               'stub_size': 221200,
+               'sidecar_sha256': 'd5399208fc0aa9a625b82c24c83b294f0c345ae79c0820d9a7afc8b352d90cab',
+               'sidecar_size': 202960}},
+ 'common': {'file': 'GTSPlusCommon.dll', 'protected': {'stub_sha256': '3c1aef55d0875309217099877e7b5c3043327ff75897fdadcdc24fddcc2a883a',
+               'stub_size': 53264,
+               'sidecar_sha256': 'cbd0c6ae327f8be22e2fa7933c48fc3d884460216451d7d7bc309224dbd5d386',
+               'sidecar_size': 118960}},
+ 'msg': {'file': 'MsgDatComm.dll', 'protected': {'stub_sha256': '4c513b522e58f98350d9e94c0db0b6ed3cbd30ed0d69f317e4b5921714321ccf',
+               'stub_size': 69648,
+               'sidecar_sha256': '6ef555bcfa2990c6ce1e9c122bcd44138f6009f94bd8668cc07317a5dd4440db',
+               'sidecar_size': 125168}},
+ 'adapt': {'file': 'GTSPlusAdaptIF.dll', 'protected': {'stub_sha256': 'fd1868ee2cb490b0648cfe981074f03ae9c5b0f2a7adfd0646e8f866e4a4f4c4',
+               'stub_size': 40976,
+               'sidecar_sha256': '6671e80d4cdaa98e591375a997295b52057479cab992419db52c16eec0a876a4',
+               'sidecar_size': 117648}},
+ 'err': {'file': 'GTSPlusErrorReport.dll', 'protected': {'stub_sha256': 'd4ba836a35c8397b5fde725f06c0effe21772819746942963c111528c06242d5',
+               'stub_size': 102416,
+               'sidecar_sha256': '9eef9b62fb6e83ac9c69f66440afb5353f1be6a50b955bbb93a00f1deeae2073',
+               'sidecar_size': 131888}},
+ 'cm': {'file': 'GtsPlus-CM.dll', 'protected': {'stub_sha256': '22735bf1cad71320164a92ed14071b16d1547f63a76d85b88d612d888c459f95',
+               'stub_size': 540688,
+               'sidecar_sha256': 'db69e562601efdea05a06e924a9c06baf9ecee207ac3447cd0b7399e88ebce8f',
+               'sidecar_size': 1350800}}}
 
 CONFIG_PINS: dict[str, dict[str, Any]] = {'Env/ABSystem.yml': {'sha256': 'efdb6658fe0d9388177d74099170b92a243db47968688e7ca3ef1c045ac2996b',
                       'size': 1632},
@@ -132,7 +117,7 @@ CONFIGURATION: dict[str, Any] = {'applications': [{'name': 'GTS+ InfoCenter',
  'report_include_one': {'extension': '.txt',
                         'folder': '%PUBLIC%\\Documents\\GTSPlus\\ReproLog',
                         'order_by': 1}}
-SOURCE_PINS["pfc"] = {'file': 'GTSPlusPFCommon.dll', 'plaintext': {'sha256': 'd1972962a04b711eeb78c940b5d1c02b43d72959f7db61823a11df3c1d30227a', 'size': 152592}, 'protected': {'stub_sha256': '47a9e9a5b5623a37cdb7bd5d8e7616bfeb6c2fa9b2d0f5d37509e75562807079', 'stub_size': 172048, 'sidecar_sha256': 'ffd6f98fdeee317635ab52e7f6ec02f08596d62d0a63e7f36e293605a964ab2e', 'sidecar_size': 123360}}
+SOURCE_PINS["pfc"] = {'file': 'GTSPlusPFCommon.dll', 'protected': {'stub_sha256': '47a9e9a5b5623a37cdb7bd5d8e7616bfeb6c2fa9b2d0f5d37509e75562807079', 'stub_size': 172048, 'sidecar_sha256': 'ffd6f98fdeee317635ab52e7f6ec02f08596d62d0a63e7f36e293605a964ab2e', 'sidecar_size': 123360}}
 CONFIG_PINS["Env/GTSPlusSetting.ini"] = {'sha256': '3b49eb5facfc3c0a4bbdeeda99ae0928dc62357a3d120cc9540bfda8e5e7a117', 'size': 656}
 RETENTION_PLAINTEXT_SHA256 = 'e27a124952d6ff4dfaa69f7b63e844c8e2062f30ca88034428d6b9722583ad14'
 
@@ -627,7 +612,9 @@ def _source(source_id: str, path: Path, expected_sha: str, expected_size: int, r
     data = path.read_bytes()
     if len(data) != expected_size or _sha(data) != expected_sha:
         raise ValueError(f"source identity drift: {path.name}")
-    return {"id": source_id, "path": path.resolve().relative_to(REPO_ROOT.resolve()).as_posix(),
+    resolved = path.resolve()
+    return {"id": source_id,
+            "path": resolved.relative_to(REPO_ROOT.resolve()).as_posix() if resolved.is_relative_to(REPO_ROOT.resolve()) else str(resolved),
             "sha256": expected_sha, "size": expected_size, "representation": representation}
 
 
@@ -645,7 +632,7 @@ def _decode_info(pe: Any, path: Path) -> bytes:
 
 
 def _api_routing(pe: Any, adaptation_pe: Any, evidence: list[dict[str, Any]],
-                 adaptations: list[dict[str, Any]]) -> dict[str, Any]:
+                 adaptations: list[dict[str, Any]], census: dict[str, Any]) -> dict[str, Any]:
     """Recover selector cases and first target blocks, not API implementation claims."""
     workers = ("Cancel", "WebService", "Message", "NonVehicleConnection", "VehicleConnection")
     specs = [
@@ -766,24 +753,23 @@ def _api_routing(pe: Any, adaptation_pe: Any, evidence: list[dict[str, Any]],
 
     enqueue_sites = []
     method_count = 0
-    for td in pe.net.mdtables.TypeDef:
-        for method in td.MethodList:
-            row = method.row
-            if not row.Rva:
+    for row, identity in zip(pe.net.mdtables.MethodDef, census["methods"], strict=True):
+        if identity["implementation"] != "il":
+            continue
+        method_count += 1
+        body = _body(pe, row)
+        for index, instruction in enumerate(body.instructions):
+            if str(instruction.opcode) not in ("call", "callvirt"):
                 continue
-            method_count += 1
-            body = _body(pe, row)
-            for index, instruction in enumerate(body.instructions):
-                if str(instruction.opcode) not in ("call", "callvirt"):
-                    continue
-                if str(getattr(target_row(instruction), "Name", "")) != "EnqueueMessage":
-                    continue
-                enqueue_sites.append({"caller": f"{td.TypeNamespace}.{td.TypeName}::{row.Name}".lstrip("."),
-                                      **_method_pin(row, body), "queue_id": integer(body.instructions[index - 2]),
-                                      "call": instruction_record(instruction, body.instructions[0].offset)})
+            if str(getattr(target_row(instruction), "Name", "")) != "EnqueueMessage":
+                continue
+            enqueue_sites.append({"caller": identity["full_nested_name"] + "::" + identity["name"],
+                                  "method_identity": identity,
+                                  **_method_pin(row, body), "queue_id": integer(body.instructions[index - 2]),
+                                  "call": instruction_record(instruction, body.instructions[0].offset)})
     evidence.append({"id": "bootstrap.api.enqueue-census", "source": "bootstrap.pf.recovered",
-                     "kind": "managed-callsite-census", "locator": "all nonzero MethodDef bodies",
-                     "methods_scanned": method_count, "callsites": enqueue_sites,
+                     "kind": "managed-callsite-census", "locator": "all validated IL MethodDef bodies; native and bodyless rows classified separately",
+                     "methods_scanned": method_count, "method_census": census, "callsites": enqueue_sites,
                      "finding": "All direct call/callvirt EnqueueMessage sites, including internal insertions that bypass main classification."})
     row, _, body = _instructions(adaptation_pe, "GTSPlusAdaptationIF.AdaptationInterface", "ExecuteAdaptation")
     evidence.append({"id": "bootstrap.api.adapter-routing", "source": "bootstrap.adapt.recovered",
@@ -797,32 +783,37 @@ def _api_routing(pe: Any, adaptation_pe: Any, evidence: list[dict[str, Any]],
             "input_boundary": "Main classification falls back to Substring(0,2); null/short inputs throw in this method. Its exception regions are finally-only. Network admission is an earlier, separate boundary."}
 
 
-def build(installed_root: Path = DEFAULT_INSTALLED, recovered_root: Path = DEFAULT_RECOVERED) -> dict[str, Any]:
+def build(installed_root: Path = DEFAULT_INSTALLED, recovered_root: Path = DEFAULT_MAIN) -> dict[str, Any]:
     installed_root, recovered_root = Path(installed_root), Path(recovered_root)
     sources: list[dict[str, Any]] = []
     evidence: list[dict[str, Any]] = []
     assemblies: dict[str, Any] = {}
     for key, pin in SOURCE_PINS.items():
-        name, plain, cp = pin["file"], pin["plaintext"], pin["protected"]
+        name, cp = pin["file"], pin["protected"]
         recovered = recovered_root / "bin" / name
         original = installed_root / "bin" / name
         source_id = f"bootstrap.{key}.recovered"
-        sources.append(_source(source_id, recovered, plain["sha256"], plain["size"],
-                               "same-release installer-original plaintext; tools/gts recover-bodies"))
+        qualification = qualify_recovered_source(recovered, original, component_root=recovered_root)
+        recovered_source = _source(source_id, recovered, qualification["recovered_sha256"],
+                                   recovered.stat().st_size, "manifest-qualified recovered PE")
+        recovered_source["recovery"] = qualification
+        sources.append(recovered_source)
         sources.append(_source(f"bootstrap.{key}.installed", original, cp["stub_sha256"], cp["stub_size"], "installed CP stub"))
         sources.append(_source(f"bootstrap.{key}.sidecar", Path(str(original) + "._"), cp["sidecar_sha256"], cp["sidecar_size"], "installed CP sidecar"))
         if key != "cm":
             assemblies[key] = _open(recovered)
-            proof = _recovery_proof(recovered)
+            proof = validate_managed_bodies(recovered)
             evidence.append({"id": f"bootstrap.{key}.materialized", "source": source_id, "kind": "recovery-provenance",
-                             "locator": "CLI MethodDef bodies", **proof,
+                             "locator": "all MethodDef classifications; complete valid IL bodies", **proof,
+                             "qualification": qualification,
                              "original_sources": [f"bootstrap.{key}.installed", f"bootstrap.{key}.sidecar"],
-                             "finding": "Every nonzero managed MethodDef RVA is materialized; exact installer twin identity pinned."})
+                             "finding": "Every required IL body passes full decoding, framing, operand and branch validation. Native and legitimately bodyless methods remain separately classified; exact manifest links recovered bytes to pinned installed CP sources."})
         else:
             evidence.append({"id": "bootstrap.cm.provenance", "source": source_id, "kind": "recovery-provenance",
-                             "locator": "same-release native CM plaintext",
+                             "locator": "manifest-qualified native CM recovered PE",
+                             "qualification": qualification,
                              "original_sources": ["bootstrap.cm.installed", "bootstrap.cm.sidecar"],
-                             "finding": "Native packaging decoder is the pinned installer-original twin; reused local decoder checks native byte anchor."})
+                             "finding": "Native packaging decoder is qualified against the exact manifest and pinned installed CP pair; reused local decoder checks native byte anchor."})
     for eid, key, rva, size, digest, locator, finding, anchor_pins in METHODS:
         pe = assemblies[key]
         rows = [row for row in pe.net.mdtables.MethodDef
@@ -908,7 +899,8 @@ def build(installed_root: Path = DEFAULT_INSTALLED, recovered_root: Path = DEFAU
                      "locator": "GTSPlusAdaptationInterface.AdaptationTable.xml", "resource_sha256": ADAPTATION_XML_SHA256,
                      "initialization_and_finalization_order": adaptations,
                      "finding": "UserInfo, TGD, DiagAdaptationManager, WebServiceAdaptationManager, FileAdaptation in table order."})
-    api_routing = _api_routing(assemblies["pf"], assemblies["adapt"], evidence, adaptations)
+    api_routing = _api_routing(assemblies["pf"], assemblies["adapt"], evidence, adaptations,
+                               inspect_managed_bodies(recovered_root / "bin/GTSPlus.exe"))
     for key, pe in assemblies.items():
         imports = [{"dll": str(r.ImportScope.row.Name), "export": str(r.ImportName), "method": str(r.MemberForwarded.row.Name)}
                    for r in (pe.net.mdtables.ImplMap or [])]
@@ -929,7 +921,7 @@ def build(installed_root: Path = DEFAULT_INSTALLED, recovered_root: Path = DEFAU
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--installed-root", type=Path, default=DEFAULT_INSTALLED)
-    parser.add_argument("--recovered-root", type=Path, default=DEFAULT_RECOVERED)
+    parser.add_argument("--recovered-root", type=Path, default=DEFAULT_MAIN)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     args = parser.parse_args()
     result = build(args.installed_root, args.recovered_root)

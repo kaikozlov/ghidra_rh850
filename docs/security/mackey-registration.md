@@ -423,6 +423,47 @@ AES routines transfer identically under the same mapping. This is stronger
 evidence for a common **Denso/P1M-E EPS software component** than merely finding
 one repeated secret.
 
+#### Exact F33 128-bit CodeFlash-literal census
+
+A whole-image pass on Camry `8965F3307000` separates key-looking 16-byte data
+from actual AES keys. The canonical 7,336-function Ghidra data-reference graph
+contains 19 directly referenced 16-byte starts whose 16 bytes are all distinct.
+Only three are passed as static key material into a software AES key schedule:
+
+| CodeFlash | 128-bit value | Recovered use |
+|---:|---|---|
+| `0xBFD8` | `ba052435f8843f985fd1329d2b6117b0` | boot image/payload key-derivation root |
+| `0xBFE8` | `f05f36b7d78c03e24ab4faef2a57d044` | boot SecurityAccess client-decryption root |
+| `0x20840` | `893e08418c741ffa2a9c044bffa55813` | application SecurityAccess client-decryption root |
+
+The other crypto-adjacent 128-bit-looking constants resolve as non-secret test
+or algorithm data. `0x27D6C` begins the NIST AES known-answer key
+`2b7e151628aed2a6abf7158809cf4f3c`; `0x215F4` is the compiled-out slot-4
+expected CMAC `b290fa2ea7b6b52eb124134522a6e540`; `0x17DF0` is the stored
+region-0 CodeFlash authentication tag; `0x8FE1/0x234ED+` are AES round
+constants; and the `0x8FF1/0x90F1/0x23500..0x255FF` families are AES
+S-box/T-tables. The high-entropy table at `0x2B118` is an indexed substitution
+check used by the acquisition protocol. Exact standard SHE derivation constants
+`KEY_UPDATE_ENC_C`, `KEY_UPDATE_MAC_C`, `DEBUG_KEY_C`, and the PRNG constants
+are absent from F33 CodeFlash.
+
+The complete software-AES caller closure agrees with the literal scan:
+`boot_aes128_initialize_context @ 0x7680` receives static CodeFlash key material
+only from the `0xBFD8` and `0xBFE8` roots, while
+`expand_aes128_key_and_mark_context_initialized_876C4` receives a static
+CodeFlash key only from `0x20840`; its other callers supply runtime-derived
+buffers. ICU-S command 8 consumes a runtime `M1 || M2 || M3` package rather
+than a CodeFlash key literal. No fourth unexplained 128-bit CodeFlash literal is
+recovered as key material on exact F33.
+
+The same entropy pass over the exact 32-KiB F33 DataFlash finds 101 candidate
+16-byte windows even when the start address is allowed at every byte. Every one
+falls wholly inside the ordinary checkpoint-record bank, across checkpoint
+owners `0/5/6/8/9/10/13/18/19`; none falls in the triplicate object namespace.
+The three known object-15 key-field positions at `0xFF206E14/0xFF206D14/
+0xFF206C14` are all zero in this dump. The recovered persistent image therefore
+adds no unexplained 128-bit key candidate to the CodeFlash census.
+
 It still does **not** prove that `f05f36b7...` is a Renesas silicon-family
 secret. In every tracked P1M-E EPS, the boot SecurityAccess root is ordinary
 CPU-readable CodeFlash at `0xBFE8`; the main CPU directly loads it into a

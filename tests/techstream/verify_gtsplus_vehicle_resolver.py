@@ -27,6 +27,7 @@ def check(name: str, condition: bool, detail: str = "") -> None:
 
 
 artifact = json.loads(ARTIFACT.read_text())
+check("native witness schema", artifact["schema"] == "gtsplus-current-vehicle-resolver-v3")
 na = artifact["regions"]["NA"]
 check("NA table geometry", na["tables"]["vehicle_decision"]["record_count"] == 1869 and na["tables"]["vin_vehicle_decision"]["record_count"] == 2402)
 camry = na["camry_hv_witness"]
@@ -44,10 +45,10 @@ check("Toyota protocol +0x14 holds the legislated request address",
       routes[372]["legislated_request_address"] == 0x7E0 and
       all(route["legislated_request_address"] == 0 or 0x7E0 <= route["legislated_request_address"] <= 0x7E7 for route in routes.values()))
 check("direct current-P5 Toyota route witnesses",
-      (routes[372]["request_address"], routes[372]["address_extension"], routes[372]["phase_type"]) == (0x700, 0, 0x12) and
-      (routes[445]["request_address"], routes[445]["address_extension"], routes[445]["phase_type"]) == (0x7B3, 0, 0x12) and
-      (routes[498]["request_address"], routes[498]["address_extension"], routes[498]["phase_type"]) == (0x792, 0, 0x12) and
-      (routes[5005]["request_address"], routes[5005]["address_extension"], routes[5005]["phase_type"]) == (0x7A2, 0, 0x12))
+      (routes[372]["request_address"], routes[372]["address_extension"], routes[372]["route_selector"]) == (0x700, 0, 0x12) and
+      (routes[445]["request_address"], routes[445]["address_extension"], routes[445]["route_selector"]) == (0x7B3, 0, 0x12) and
+      (routes[498]["request_address"], routes[498]["address_extension"], routes[498]["route_selector"]) == (0x792, 0, 0x12) and
+      (routes[5005]["request_address"], routes[5005]["address_extension"], routes[5005]["route_selector"]) == (0x7A2, 0, 0x12))
 check("Toyota route exposes endpoints absent from the old local sweep",
       routes[409]["request_address"] == 0x7C0 and routes[444]["request_address"] == 0x780)
 check("Toyota 0x750 logical-address-extension witnesses",
@@ -56,18 +57,39 @@ check("Toyota 0x750 logical-address-extension witnesses",
       (routes[470]["request_address"], routes[470]["address_extension"]) == (0x750, 0x7B) and
       (routes[492]["request_address"], routes[492]["address_extension"]) == (0x750, 0x96))
 check("Camry mount connection profiles", camry["connection_profiles"] == [
-    {"frame_id": 0, "comm_set_id": 9, "phase_type": 0x12},
-    {"frame_id": 0, "comm_set_id": 9, "phase_type": 0x22},
+    {"frame_id": 0, "comm_set_id": 9, "route_selector": 0x12},
+    {"frame_id": 0, "comm_set_id": 9, "route_selector": 0x22},
 ])
-check("Camry mount frame 0 is empty", camry["connection_frame_witness"] == {
+frame = camry["connection_frame_witness"]
+check("Camry mount frame 0 selects first native result",
+      frame["status"] == 0 and frame["query"]["status"] == 0 and
+      frame["selected"]["occurrence"] == frame["query"]["records"][0])
+check("Camry mount frame 0 is empty", {
+    key: value for key, value in frame["selected"].items() if key != "occurrence"
+} == {
     "frame_id": 0, "send_variable_id": 0, "receive_mask_variable_id": 0,
     "receive_check_variable_id": 0, "empty": True,
 })
-check("Camry mount CommSet 9", camry["connection_comm_set_witness"] == {
-    "comm_set_id": 9, "send_parameter": 1000, "receive_timeout": 1020,
-    "retry_count": 0, "exception_handler_id": 0, "exception_handler_flag": 0,
-})
-check("mount phase types preserved", sorted({row["connection_phase_type"] for row in camry["mount_candidates"]}) == [0x12, 0x22])
+commset = camry["connection_comm_set_witness"]
+check("Camry mount CommSet query preserves native outcome", commset["query"]["status"] == 0)
+if len(commset["query"]["records"]) == 1:
+    check("Camry mount CommSet 9", commset["status"] == 0 and {
+        key: value for key, value in commset["selected"].items() if key != "occurrence"
+    } == {
+        "comm_set_id": 9, "send_parameter": 1000, "receive_timeout": 1020,
+        "retry_count": 0, "exception_handler_id": 0, "exception_handler_flag": 0,
+    } and commset["selected"]["occurrence"] == commset["query"]["records"][0])
+else:
+    check("Camry mount CommSet rejects merged zero/multiple rows",
+          commset["status"] == 0xC0040102 and commset["selected"] is None)
+check("initial context qualifies both master families",
+      na["context_label"] == "explicit_initial" and
+      {file["source"]["family"] for file in na["native_context"]["files"]} == {"Gen", "Spe"})
+check("raw frame/CommSet rows remain distinct from native queries",
+      bool(frame["raw_occurrences"]) and bool(commset["raw_occurrences"]) and
+      all("source" in row and "ordinal" in row and "raw" in row
+          for row in frame["raw_occurrences"] + commset["raw_occurrences"]))
+check("mount route selectors preserved", sorted({row["connection_route_selector"] for row in camry["mount_candidates"]}) == [0x12, 0x22])
 
 # The current Camry rows wildcard every VIN[0:11] position except indexes
 # 4/7/9.  They accept A or B at index4, K at index7, and S at index9.
@@ -75,11 +97,11 @@ row_a, row_b = [bytes.fromhex(value) for value in camry["vin_rows"]]
 vin_a = b"XXXXAXXKXSX"
 vin_b = b"XXXXBXXKXSX"
 vin_bad = b"XXXXCXXKXSX"
-check("VIN decision key is category/phase/VIN[0:11]", vin_decision_matches(row_a, 372, 0x12, vin_a))
+check("VIN decision key is category/route-selector/VIN[0:11]", vin_decision_matches(row_a, 372, 0x12, vin_a))
 check("second current Camry VIN branch", vin_decision_matches(row_b, 372, 0x12, vin_b))
 check("VIN non-wildcard mismatch rejected", not vin_decision_matches(row_a, 372, 0x12, vin_bad))
 check("category mismatch rejected", not vin_decision_matches(row_a, 373, 0x12, vin_a))
-check("phase mismatch rejected", not vin_decision_matches(row_a, 372, 0x13, vin_a))
+check("route selector mismatch rejected", not vin_decision_matches(row_a, 372, 0x13, vin_a))
 check("VIN decision returns Camry vehicle type at +0x0E", int.from_bytes(row_a[0x0E:0x10], "little") == 12704)
 
 # MSB-first root bitmap: bit0 -> 0000, bit1 -> 0100, byte1 bit0 -> 0800.

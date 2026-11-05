@@ -13,17 +13,17 @@ import argparse
 import hashlib
 import json
 import struct
-import tempfile
 from pathlib import Path
 from typing import Any
 
 import pefile  # type: ignore
-from tools.techstream.recover_gtsplus_bodies import recover
+from tools.techstream.recover_all_gtsplus_bodies import DEFAULT_OUTPUT, qualify_recovered_source
 from tools.techstream.techstream_paths import resolve_gts_root
 from tools import REPO_ROOT
 
 
 DEFAULT_OUT = REPO_ROOT / "data/generated/gtsplus_2026/tss3_native_recorder_protocol.json"
+DEFAULT_RECOVERED = DEFAULT_OUTPUT / "GTSPlus"
 
 IMAGE_EXPORTS = {
     "calculate_key_level49": "?CalculateKeyDataSecLv49@CCmdImgOpeDdr@@AAEXPBEQAE@Z",
@@ -202,197 +202,202 @@ def level49(seed: bytes) -> bytes:
     return bytes(out)
 
 
-def build() -> dict[str, Any]:
-    gts = resolve_gts_root()
+def build(*, gtsplus_root: Path | None = None, recovered_root: Path = DEFAULT_RECOVERED) -> dict[str, Any]:
+    gts = resolve_gts_root(gtsplus_root)
+    recovered_root = recovered_root.expanduser().resolve()
     operation_path = gts / "bin/GetTSS3OperationFFDP5_DT.dll"
     if not operation_path.is_file():
         raise FileNotFoundError(operation_path)
 
-    with tempfile.TemporaryDirectory(prefix="tss3-native-recorder-") as td:
-        recovered_root = Path(td) / "recovered"
-        manifest = recover(output=recovered_root)
-        by_path = {row["path"]: row for row in manifest["binaries"]}
-        command_path = recovered_root / "bin/CommandCommon.dll"
-        image_path = recovered_root / "bin/GetTSS3ImageFFDP5_DT.dll"
-
-        command_pe, command_data, command_base = pe_info(command_path)
-        image_pe, image_data, image_base = pe_info(image_path)
-        operation_pe, operation_data, operation_base = pe_info(operation_path)
-        command_exports = exports(command_pe, command_base)
-        image_exports = exports(image_pe, image_base)
-
-        missing = [name for name in IMAGE_EXPORTS.values() if name not in command_exports]
-        if missing:
-            raise ValueError(f"current CommandCommon export drift: {missing}")
-
-        functions = {
-            key: export_body(command_pe, command_data, command_base, command_exports, name)
-            for key, name in IMAGE_EXPORTS.items()
+    manifest = json.loads((recovered_root / "manifest.json").read_text(encoding="utf-8"))
+    by_path = {row["path"]: row for row in manifest["binaries"]}
+    command_path = recovered_root / "bin/CommandCommon.dll"
+    image_path = recovered_root / "bin/GetTSS3ImageFFDP5_DT.dll"
+    qualifications = {
+        relative: qualify_recovered_source(recovered_root / relative, gts / relative, component_root=recovered_root)
+        for relative in ("bin/CommandCommon.dll", "bin/GetTSS3ImageFFDP5_DT.dll")
+    }
+    
+    command_pe, command_data, command_base = pe_info(command_path)
+    image_pe, image_data, image_base = pe_info(image_path)
+    operation_pe, operation_data, operation_base = pe_info(operation_path)
+    command_exports = exports(command_pe, command_base)
+    image_exports = exports(image_pe, image_base)
+    
+    missing = [name for name in IMAGE_EXPORTS.values() if name not in command_exports]
+    if missing:
+        raise ValueError(f"current CommandCommon export drift: {missing}")
+    
+    functions = {
+        key: export_body(command_pe, command_data, command_base, command_exports, name)
+        for key, name in IMAGE_EXPORTS.items()
+    }
+    info_start = command_exports[IMAGE_EXPORTS["image_info"]]
+    info_end = int(functions["image_info"]["end_va"], 16)
+    info_calls = direct_export_calls(command_pe, command_data, command_base, command_exports, info_start, info_end)
+    semantic_targets = [row["target"] for row in info_calls]
+    expected_order = [
+        IMAGE_EXPORTS["image_spec"],
+        IMAGE_EXPORTS["image_availability"],
+        IMAGE_EXPORTS["image_availability"],
+        IMAGE_EXPORTS["security_unlock"],
+        IMAGE_EXPORTS["image_encryption"],
+    ]
+    filtered = [x for x in semantic_targets if x in set(expected_order)]
+    if filtered != expected_order:
+        raise ValueError(f"TSS3 Image FFD call-order drift: {filtered}")
+    
+    constants = {
+        "availability": {"request": "221101", "mask": "ffffff", "positive": "621101", "va": "0x100D7E5C"},
+        "spec_information": {"request": "221103", "mask": "ffffff", "positive": "621103", "va": "0x100D7F08"},
+        "encryption_method": {"request": "222081", "mask": "ffffff", "positive": "622081", "va": "0x100D7FBC"},
+        "security_seed": {"request": "2703", "mask": "ffff", "positive": "6703", "request_va": "0x100D7E98", "positive_va": "0x100D7EA4"},
+        "security_key": {"request_prefix": "2704", "mask_prefix": "ffff", "positive": "6704", "request_va": "0x100D7ED8", "positive_va": "0x100D7EE0"},
+    }
+    for block in constants.values():
+        if "va" in block:
+            start_va = int(block["va"], 16)
+            for cell_index, field in enumerate(("request", "mask", "positive")):
+                expected = bytes.fromhex(block[field])
+                actual = read_va(command_pe, command_data, command_base, start_va + cell_index * 4, len(expected))
+                if actual != expected:
+                    raise ValueError(
+                        f"current CommandCommon {field} constant drift at {start_va + cell_index * 4:#x}"
+                    )
+    for key in ("security_seed", "security_key"):
+        block = constants[key]
+        req = bytes.fromhex(block.get("request", block.get("request_prefix", "")))
+        pos = bytes.fromhex(block["positive"])
+        if read_va(command_pe, command_data, command_base, int(block["request_va"], 16), len(req)) != req:
+            raise ValueError(f"{key} request drift")
+        if read_va(command_pe, command_data, command_base, int(block["positive_va"], 16), len(pos)) != pos:
+            raise ValueError(f"{key} positive drift")
+    
+    op_functions: dict[str, Any] = {}
+    for key, (start, end) in OPERATION_FUNCTIONS.items():
+        body = read_va(operation_pe, operation_data, operation_base, start, end - start)
+        op_functions[key] = {"va": f"0x{start:08X}", "end_va": f"0x{end:08X}", "size": len(body), "sha256": sha256_bytes(body)}
+    op_anchors = {key: operation_anchor(operation_pe, operation_data, operation_base, spec) for key, spec in OPERATION_CODE_ANCHORS.items()}
+    
+    special_va = 0x10005548
+    special_raw = read_va(operation_pe, operation_data, operation_base, special_va, 30)
+    special_values = list(struct.unpack("<15H", special_raw))
+    if special_values != SPECIAL_BEHAVIOR_IDS:
+        raise ValueError(f"special behavior table drift: {special_values}")
+    
+    # The Image plugin also owns the split-record transport that follows the
+    # CommandCommon setup/security path. Pin exact current function bodies
+    # and direct machine-code anchors so this grammar fails closed on drift.
+    image_execute = image_exports.get("Execute")
+    if image_execute != 0x1000EEB0:
+        raise ValueError(f"GetTSS3Image Execute drift: {image_execute}")
+    image_plugin_functions: dict[str, Any] = {}
+    for key, (start, end) in IMAGE_PLUGIN_FUNCTIONS.items():
+        body = read_va(image_pe, image_data, image_base, start, end - start)
+        image_plugin_functions[key] = {
+            "va": f"0x{start:08X}",
+            "end_va": f"0x{end:08X}",
+            "size": len(body),
+            "sha256": sha256_bytes(body),
         }
-        info_start = command_exports[IMAGE_EXPORTS["image_info"]]
-        info_end = int(functions["image_info"]["end_va"], 16)
-        info_calls = direct_export_calls(command_pe, command_data, command_base, command_exports, info_start, info_end)
-        semantic_targets = [row["target"] for row in info_calls]
-        expected_order = [
-            IMAGE_EXPORTS["image_spec"],
-            IMAGE_EXPORTS["image_availability"],
-            IMAGE_EXPORTS["image_availability"],
-            IMAGE_EXPORTS["security_unlock"],
-            IMAGE_EXPORTS["image_encryption"],
-        ]
-        filtered = [x for x in semantic_targets if x in set(expected_order)]
-        if filtered != expected_order:
-            raise ValueError(f"TSS3 Image FFD call-order drift: {filtered}")
-
-        constants = {
-            "availability": {"request": "221101", "mask": "ffffff", "positive": "621101", "va": "0x100D7E5C"},
-            "spec_information": {"request": "221103", "mask": "ffffff", "positive": "621103", "va": "0x100D7F08"},
-            "encryption_method": {"request": "222081", "mask": "ffffff", "positive": "622081", "va": "0x100D7FBC"},
-            "security_seed": {"request": "2703", "mask": "ffff", "positive": "6703", "request_va": "0x100D7E98", "positive_va": "0x100D7EA4"},
-            "security_key": {"request_prefix": "2704", "mask_prefix": "ffff", "positive": "6704", "request_va": "0x100D7ED8", "positive_va": "0x100D7EE0"},
-        }
-        for block in constants.values():
-            if "va" in block:
-                start_va = int(block["va"], 16)
-                for cell_index, field in enumerate(("request", "mask", "positive")):
-                    expected = bytes.fromhex(block[field])
-                    actual = read_va(command_pe, command_data, command_base, start_va + cell_index * 4, len(expected))
-                    if actual != expected:
-                        raise ValueError(
-                            f"current CommandCommon {field} constant drift at {start_va + cell_index * 4:#x}"
-                        )
-        for key in ("security_seed", "security_key"):
-            block = constants[key]
-            req = bytes.fromhex(block.get("request", block.get("request_prefix", "")))
-            pos = bytes.fromhex(block["positive"])
-            if read_va(command_pe, command_data, command_base, int(block["request_va"], 16), len(req)) != req:
-                raise ValueError(f"{key} request drift")
-            if read_va(command_pe, command_data, command_base, int(block["positive_va"], 16), len(pos)) != pos:
-                raise ValueError(f"{key} positive drift")
-
-        op_functions: dict[str, Any] = {}
-        for key, (start, end) in OPERATION_FUNCTIONS.items():
-            body = read_va(operation_pe, operation_data, operation_base, start, end - start)
-            op_functions[key] = {"va": f"0x{start:08X}", "end_va": f"0x{end:08X}", "size": len(body), "sha256": sha256_bytes(body)}
-        op_anchors = {key: operation_anchor(operation_pe, operation_data, operation_base, spec) for key, spec in OPERATION_CODE_ANCHORS.items()}
-
-        special_va = 0x10005548
-        special_raw = read_va(operation_pe, operation_data, operation_base, special_va, 30)
-        special_values = list(struct.unpack("<15H", special_raw))
-        if special_values != SPECIAL_BEHAVIOR_IDS:
-            raise ValueError(f"special behavior table drift: {special_values}")
-
-        # The Image plugin also owns the split-record transport that follows the
-        # CommandCommon setup/security path. Pin exact current function bodies
-        # and direct machine-code anchors so this grammar fails closed on drift.
-        image_execute = image_exports.get("Execute")
-        if image_execute != 0x1000EEB0:
-            raise ValueError(f"GetTSS3Image Execute drift: {image_execute}")
-        image_plugin_functions: dict[str, Any] = {}
-        for key, (start, end) in IMAGE_PLUGIN_FUNCTIONS.items():
-            body = read_va(image_pe, image_data, image_base, start, end - start)
-            image_plugin_functions[key] = {
-                "va": f"0x{start:08X}",
-                "end_va": f"0x{end:08X}",
-                "size": len(body),
-                "sha256": sha256_bytes(body),
-            }
-        image_plugin_anchors = {
-            key: operation_anchor(image_pe, image_data, image_base, spec)
-            for key, spec in IMAGE_PLUGIN_CODE_ANCHORS.items()
-        }
-
-        frame_vectors = {
-            "occurrence_split1_set1_trigger1": f"0x{image_frame_selector_occurrence(1, 1, 1):08X}",
-            "occurrence_split22_set3_trigger7": f"0x{image_frame_selector_occurrence(22, 3, 7):08X}",
-            "time_series_split1_set1_parts1_0": f"0x{image_frame_selector_time_series(1, 1, 1, 0):08X}",
-            "time_series_split22_set3_parts4_3": f"0x{image_frame_selector_time_series(22, 3, 4, 3):08X}",
-        }
-
-        vectors = {
-            "000000000000": level49(bytes.fromhex("000000000000")).hex(),
-            "010203040506": level49(bytes.fromhex("010203040506")).hex(),
-            "123456789abc": level49(bytes.fromhex("123456789abc")).hex(),
-            "deadbeefcafe": level49(bytes.fromhex("deadbeefcafe")).hex(),
-        }
-
-        return {
-            "schema": "gtsplus-tss3-native-recorder-protocol-v1",
-            "gtsplus_version": manifest["gtsplus_version"],
-            "sources": {
-                "command_common": {"path": "bin/CommandCommon.dll", "size": command_path.stat().st_size, "sha256": sha256_file(command_path), "provenance": by_path["bin/CommandCommon.dll"]["installer"]},
-                "image_plugin": {"path": "bin/GetTSS3ImageFFDP5_DT.dll", "size": image_path.stat().st_size, "sha256": sha256_file(image_path), "provenance": by_path["bin/GetTSS3ImageFFDP5_DT.dll"]["installer"]},
-                "operation_plugin": {"path": "bin/GetTSS3OperationFFDP5_DT.dll", "size": operation_path.stat().st_size, "sha256": sha256_file(operation_path), "provenance": "current installed image is already materialized"},
+    image_plugin_anchors = {
+        key: operation_anchor(image_pe, image_data, image_base, spec)
+        for key, spec in IMAGE_PLUGIN_CODE_ANCHORS.items()
+    }
+    
+    frame_vectors = {
+        "occurrence_split1_set1_trigger1": f"0x{image_frame_selector_occurrence(1, 1, 1):08X}",
+        "occurrence_split22_set3_trigger7": f"0x{image_frame_selector_occurrence(22, 3, 7):08X}",
+        "time_series_split1_set1_parts1_0": f"0x{image_frame_selector_time_series(1, 1, 1, 0):08X}",
+        "time_series_split22_set3_parts4_3": f"0x{image_frame_selector_time_series(22, 3, 4, 3):08X}",
+    }
+    
+    vectors = {
+        "000000000000": level49(bytes.fromhex("000000000000")).hex(),
+        "010203040506": level49(bytes.fromhex("010203040506")).hex(),
+        "123456789abc": level49(bytes.fromhex("123456789abc")).hex(),
+        "deadbeefcafe": level49(bytes.fromhex("deadbeefcafe")).hex(),
+    }
+    
+    return {
+        "schema": "gtsplus-tss3-native-recorder-protocol-v1",
+        "gtsplus_version": manifest["gtsplus_version"],
+        "sources": {
+            "command_common": {"path": "bin/CommandCommon.dll", "size": command_path.stat().st_size, "sha256": sha256_file(command_path), "provenance": by_path["bin/CommandCommon.dll"]["installer"], "qualification": qualifications["bin/CommandCommon.dll"]},
+            "image_plugin": {"path": "bin/GetTSS3ImageFFDP5_DT.dll", "size": image_path.stat().st_size, "sha256": sha256_file(image_path), "provenance": by_path["bin/GetTSS3ImageFFDP5_DT.dll"]["installer"], "qualification": qualifications["bin/GetTSS3ImageFFDP5_DT.dll"]},
+            "operation_plugin": {"path": "bin/GetTSS3OperationFFDP5_DT.dll", "size": operation_path.stat().st_size, "sha256": sha256_file(operation_path), "provenance": "current installed image is already materialized"},
+        },
+        "operation_ffd": {
+            "selector": "0x66",
+            "requests": {
+                "enumerate_behavior_codes": {"request": "AB11", "positive": "EB11", "response_items": "BE16 behavior/RoB codes from response offset 2"},
+                "enumerate_behavior_records": {"request": "AB12 || behavior_id_be16", "positive": "EB12", "response_items": "BE16 record/frame IDs from response offset 4; sorted and deduplicated"},
+                "fetch_record": {"request": "AB13 || behavior_id_be16 || record_id_be16", "positive": "EB13"},
             },
-            "operation_ffd": {
-                "selector": "0x66",
+            "record_parser": {"data_offset": 6, "block": "data_id_be16 || length_u8 || data[length]", "duplicate_policy": "deduplicate Data IDs within each parsed group", "special_data_id": "0x0501 is additionally surfaced as BE16 metadata when length >= 2"},
+            "special_behavior_ids": [f"0x{x:04X}" for x in special_values],
+            "special_behavior_table_va": f"0x{special_va:08X}",
+            "functions": op_functions,
+            "code_anchors": op_anchors,
+        },
+        "image_ffd": {
+            "plugin_execute_va": f"0x{image_execute:08X}",
+            "functions": functions,
+            "get_info_direct_calls": info_calls,
+            "semantic_call_order": ["get spec information", "get flag/availability", "get flag/availability (spec-dependent branch)", "security unlock", "get encryption method"],
+            "frames": constants,
+            "spec_contract": {"accepted_spec_values": [5, 7], "spec_5_availability_slots": list(range(1, 11)), "spec_7_availability_slots": list(range(1, 12)), "available_value": 2},
+            "security": {"seed_length": 6, "seed_request": "2703", "key_request_prefix": "2704", "algorithm": "CCmdImgOpeDdr::CalculateKeyDataSecLv49", "algorithm_vectors": vectors, "boundary": "SecurityUnlock16Byte is a separate current body using CalculateKeyDataSecLv2; GetTSS3ImageFFDInfo calls the six-byte SecurityUnlock path."},
+            "split_record_protocol": {
                 "requests": {
-                    "enumerate_behavior_codes": {"request": "AB11", "positive": "EB11", "response_items": "BE16 behavior/RoB codes from response offset 2"},
-                    "enumerate_behavior_records": {"request": "AB12 || behavior_id_be16", "positive": "EB12", "response_items": "BE16 record/frame IDs from response offset 4; sorted and deduplicated"},
-                    "fetch_record": {"request": "AB13 || behavior_id_be16 || record_id_be16", "positive": "EB13"},
+                    "enumerate_rob_codes": {
+                        "request": "AB31",
+                        "positive": "EB31",
+                        "response_items": "BE16 RoB codes from response offset 2",
+                    },
+                    "fetch_record": {
+                        "request": "AB33 || rob_code_be16 || frame_number_be32",
+                        "positive": "EB33",
+                    },
                 },
-                "record_parser": {"data_offset": 6, "block": "data_id_be16 || length_u8 || data[length]", "duplicate_policy": "deduplicate Data IDs within each parsed group", "special_data_id": "0x0501 is additionally surfaced as BE16 metadata when length >= 2"},
-                "special_behavior_ids": [f"0x{x:04X}" for x in special_values],
-                "special_behavior_table_va": f"0x{special_va:08X}",
-                "functions": op_functions,
-                "code_anchors": op_anchors,
-            },
-            "image_ffd": {
-                "plugin_execute_va": f"0x{image_execute:08X}",
-                "functions": functions,
-                "get_info_direct_calls": info_calls,
-                "semantic_call_order": ["get spec information", "get flag/availability", "get flag/availability (spec-dependent branch)", "security unlock", "get encryption method"],
-                "frames": constants,
-                "spec_contract": {"accepted_spec_values": [5, 7], "spec_5_availability_slots": list(range(1, 11)), "spec_7_availability_slots": list(range(1, 12)), "available_value": 2},
-                "security": {"seed_length": 6, "seed_request": "2703", "key_request_prefix": "2704", "algorithm": "CCmdImgOpeDdr::CalculateKeyDataSecLv49", "algorithm_vectors": vectors, "boundary": "SecurityUnlock16Byte is a separate current body using CalculateKeyDataSecLv2; GetTSS3ImageFFDInfo calls the six-byte SecurityUnlock path."},
-                "split_record_protocol": {
-                    "requests": {
-                        "enumerate_rob_codes": {
-                            "request": "AB31",
-                            "positive": "EB31",
-                            "response_items": "BE16 RoB codes from response offset 2",
-                        },
-                        "fetch_record": {
-                            "request": "AB33 || rob_code_be16 || frame_number_be32",
-                            "positive": "EB33",
-                        },
-                    },
-                    "eb33_response": {
-                        "header": "EB33 || rob_code_be16 || frame_number_be32 || block_count_u8",
-                        "block_count_offset": 8,
-                        "blocks_offset": 9,
-                        "block": "data_id_be16 || length || data[length]",
-                        "length": "BE32 when data_id is 0x6000..0x6FFF; otherwise u8",
-                        "count_zero_policy": "derive block count by scanning valid blocks from offset 9",
-                        "duplicate_policy": "deduplicate Data IDs within the parsed record",
-                        "special_data_id": "0x0501 is additionally surfaced as BE16 metadata when length >= 2",
-                    },
-                    "frame_number_helpers": {
-                        "occurrence": "u32 = 0x00000000 | (split*0x200 + data_set*10 + trigger - 10)",
-                        "time_series": "u32 = ((split*0x200 + data_set*10 - 9) << 16) | (trigger_part_a + trigger_part_b - 1)",
-                        "split_range_observed_in_current acquisition loops": [1, 22],
-                        "vectors": frame_vectors,
-                    },
-                    "functions": image_plugin_functions,
-                    "code_anchors": image_plugin_anchors,
+                "eb33_response": {
+                    "header": "EB33 || rob_code_be16 || frame_number_be32 || block_count_u8",
+                    "block_count_offset": 8,
+                    "blocks_offset": 9,
+                    "block": "data_id_be16 || length || data[length]",
+                    "length": "BE32 when data_id is 0x6000..0x6FFF; otherwise u8",
+                    "count_zero_policy": "derive block count by scanning valid blocks from offset 9",
+                    "duplicate_policy": "deduplicate Data IDs within the parsed record",
+                    "special_data_id": "0x0501 is additionally surfaced as BE16 metadata when length >= 2",
                 },
+                "frame_number_helpers": {
+                    "occurrence": "u32 = 0x00000000 | (split*0x200 + data_set*10 + trigger - 10)",
+                    "time_series": "u32 = ((split*0x200 + data_set*10 - 9) << 16) | (trigger_part_a + trigger_part_b - 1)",
+                    "split_range_observed_in_current acquisition loops": [1, 22],
+                    "vectors": frame_vectors,
+                },
+                "functions": image_plugin_functions,
+                "code_anchors": image_plugin_anchors,
             },
-            "conclusions": [
-                "The complete current-release native TSS3 recorder acquisition stack is now available without V18 behavioral transfer: current Operation plugin plus recovered-original current Image plugin and CommandCommon.",
-                "Operation FFD uses proprietary AB11/12/13 requests with EB11/12/13 responses and selector 0x66; record payloads carry BE16 recorder Data IDs and u8 lengths.",
-                "Current TSS3 Image FFD reads DID 0x1103 spec information and DID 0x1101 availability, then performs SecurityAccess 0x27 subfunctions 0x03/0x04 with a six-byte level-49 key before reading DID 0x2081 encryption method.",
-                "Image spec values 5 and 7 are explicitly supported; availability value 2 marks memorized image slots, 1..10 for spec5 and 1..11 for spec7.",
-                "Current Image-FFD split transport uses AB31/EB31 for RoB enumeration and AB33/EB33 for record fetch; EB33 carries RoB code, BE32 frame number, block count, and variable-length Data-ID blocks.",
-            ],
-            "boundary": "This is Techstream host acquisition/decoding semantics. It does not identify the ECU-side recorder producer, CAN/CAN-FD arbitration IDs, SecOC ownership, or arbitration execution owner.",
-        }
+        },
+        "conclusions": [
+            "The complete current-release native TSS3 recorder acquisition stack is now available without V18 behavioral transfer: current Operation plugin plus recovered-original current Image plugin and CommandCommon.",
+            "Operation FFD uses proprietary AB11/12/13 requests with EB11/12/13 responses and selector 0x66; record payloads carry BE16 recorder Data IDs and u8 lengths.",
+            "Current TSS3 Image FFD reads DID 0x1103 spec information and DID 0x1101 availability, then performs SecurityAccess 0x27 subfunctions 0x03/0x04 with a six-byte level-49 key before reading DID 0x2081 encryption method.",
+            "Image spec values 5 and 7 are explicitly supported; availability value 2 marks memorized image slots, 1..10 for spec5 and 1..11 for spec7.",
+            "Current Image-FFD split transport uses AB31/EB31 for RoB enumeration and AB33/EB33 for record fetch; EB33 carries RoB code, BE32 frame number, block count, and variable-length Data-ID blocks.",
+        ],
+        "boundary": "This is Techstream host acquisition/decoding semantics. It does not identify the ECU-side recorder producer, CAN/CAN-FD arbitration IDs, SecOC ownership, or arbitration execution owner.",
+    }
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--out", type=Path, default=DEFAULT_OUT)
+    ap.add_argument("--gtsplus-root", type=Path)
+    ap.add_argument("--recovered-root", type=Path, default=DEFAULT_RECOVERED)
     args = ap.parse_args()
-    payload = build()
+    payload = build(gtsplus_root=args.gtsplus_root, recovered_root=args.recovered_root)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(f"wrote {args.out}: {payload['sources']['command_common']['sha256'][:12]} operation={payload['sources']['operation_plugin']['sha256'][:12]}")

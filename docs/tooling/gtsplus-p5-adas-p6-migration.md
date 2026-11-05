@@ -206,7 +206,7 @@ module role and state-machine meaning before touching firmware/CAN.
 
 [Source-checked evidence](../../data/generated/gtsplus_2026/p6_data_list_semantics.json)
 is regenerated with
-`uv run python -m tools.techstream.extract_gtsplus_p6_data_list --recovered-root build/out/gtsplus-unprotected`.
+`uv run python -m tools.techstream.extract_gtsplus_p6_data_list --recovered-root build/out/gts-all-unprotected/GTSPlus`.
 It pins the current list/metadata plugins, installer-plaintext `CommandCommon`,
 `DataMonitorPhase6_DT`, `DataListIF`, and conversion libraries, and retains
 compact `ADCU_P6` / `Engine_CM_P6` raw-row, metadata, and request witnesses.

@@ -16,6 +16,10 @@ import struct
 from pathlib import Path
 
 import pefile
+from tools.techstream.ddb_semantics import (
+    NativeSelectionContext, NativeSelectionError, native_commset, native_context,
+    records, resolve_frame_program as _native_frame_program, select_for_consumer,
+)
 from tools.techstream.diagnostic_role_model import role_operation_catalog
 from tools.techstream.parse_ddb import ECU_TABLE_CLASS_NAMES, MASTER_TABLE_CLASS_NAMES, DDBParser
 from tools.techstream.techstream_paths import resolve_gts_root
@@ -168,10 +172,6 @@ def anchor(path: Path, va: int, expected_hex: str) -> dict:
     return {"va": f"0x{va:X}", "file_offset": f"0x{offset:X}", "bytes": expected_hex}
 
 
-def records(section) -> list[bytes]:
-    size = section.decoded_record_size
-    data = section.decoded_data
-    return [data[i * size : (i + 1) * size] for i in range(section.header.record_count)]
 
 
 def variable_blob(master, index: int, *, namespace_base: int = 0) -> bytes:
@@ -191,6 +191,9 @@ def variable_blob(master, index: int, *, namespace_base: int = 0) -> bytes:
 
 
 def resolve_comm_set(parser: DDBParser, master, comm_set_id: int) -> dict:
+    if isinstance(master, NativeSelectionContext) or master.schema_family in ("gtsplus", "ds4"):
+        result = native_context(master).query(29, comm_set_id)
+        return {**native_commset(select_for_consumer(result, "commset")), "selection": result.as_dict()}
     matches = [
         row for row in parser.extract_master_comm_sets(master.sections[29])
         if row.comm_set_id == comm_set_id
@@ -210,7 +213,16 @@ def resolve_comm_set(parser: DDBParser, master, comm_set_id: int) -> dict:
     }
 
 
-def resolve_timer(parser: DDBParser, master, category_id: int, timer_id: int) -> dict:
+def resolve_timer(parser: DDBParser, master, category_id: int, timer_id: int, *, timer_policy: str = "exactly-one") -> dict:
+    if isinstance(master, NativeSelectionContext) or master.schema_family in ("gtsplus", "ds4"):
+        result = native_context(master).query(25, category_id, timer_id)
+        row = select_for_consumer(result, "timer", timer_policy=timer_policy)
+        return {
+            "category_id": category_id, "timer_id": timer_id,
+            "delay_ms": struct.unpack_from("<I", row.raw, 0)[0],
+            "unknown_dword_08": struct.unpack_from("<I", row.raw, 8)[0],
+            "raw": row.raw.hex(), "selection": result.as_dict(),
+        }
     matches = [
         row for row in parser.extract_master_timers(master.sections[25])
         if row.category_id == category_id and row.timer_id == timer_id
@@ -227,7 +239,17 @@ def resolve_timer(parser: DDBParser, master, category_id: int, timer_id: int) ->
     }
 
 
-def resolve_frame(parser: DDBParser, master, category: int, selector: int, *, variable_namespace_base: int = 0) -> dict:
+def resolve_frame_program(parser: DDBParser, master, category: int, selector: int, *, variable_namespace_base: int = 0) -> list[dict]:
+    """Project every current native frame without changing its source context."""
+    program = _native_frame_program(
+        native_context(master), category, selector, variable_namespace_base=variable_namespace_base,
+    )
+    for frame in program:
+        frame["variables"] = {kind: frame.pop(kind) for kind in ("send", "receive_mask", "receive_check")}
+    return program
+
+
+def _legacy_frame(parser: DDBParser, master, category: int, selector: int, *, variable_namespace_base: int = 0) -> dict:
     frows = [
         raw
         for raw in records(master.sections[18])
@@ -271,6 +293,14 @@ def resolve_frame(parser: DDBParser, master, category: int, selector: int, *, va
 
 
 def dll_binding(parser: DDBParser, master, category: int, role: int) -> dict:
+    if isinstance(master, NativeSelectionContext) or master.schema_family in ("gtsplus", "ds4"):
+        result = native_context(master).query(19, role, category)
+        entry = select_for_consumer(result, "plugin")
+        return {
+            "category_id": category, "binding_category_id": entry.category_id,
+            "dll_role_id": role, "dll_role_hex": f"0x{role:X}", "dll_name": entry.dll_name,
+            "raw": entry.raw.hex(), "selection": result.as_dict(),
+        }
     matches = [
         entry
         for entry in parser.extract_master_dlls(master.sections[19])
@@ -291,19 +321,19 @@ def dll_binding(parser: DDBParser, master, category: int, role: int) -> dict:
 def master_examples(techstream_root: Path) -> dict:
     parser = DDBParser()
     path = techstream_root / "NA/DB/Toyota.ddb"
-    master = parser.parse_master_db(path)
+    legacy_master = parser.parse_master_db(path)
     return {
         "source": file_identity(path, techstream_root),
-        "comm_set_table_record_count": master.sections[29].header.record_count,
-        "comm_set_1": resolve_comm_set(parser, master, 1),
+        "comm_set_table_record_count": legacy_master.sections[29].header.record_count,
+        "comm_set_1": resolve_comm_set(parser, legacy_master, 1),
         "hybrid_clear": {
-            "binding": dll_binding(parser, master, 397, 25),
-            "primary": resolve_frame(parser, master, 397, 0x01),
-            "fallback": resolve_frame(parser, master, 397, 0x102),
+            "binding": dll_binding(parser, legacy_master, 397, 25),
+            "primary": _legacy_frame(parser, legacy_master, 397, 0x01),
+            "fallback": _legacy_frame(parser, legacy_master, 397, 0x102),
         },
         "brake_current_cid": {
-            "binding": dll_binding(parser, master, 435, 82),
-            "frame": resolve_frame(parser, master, 435, 0xDC),
+            "binding": dll_binding(parser, legacy_master, 435, 82),
+            "frame": _legacy_frame(parser, legacy_master, 435, 0xDC),
         },
     }
 
@@ -449,6 +479,11 @@ def gtsplus_data_monitor_decoder(gts_root: Path) -> dict:
 
 def gtsplus_plugin_semantics(parser: DDBParser, master, gts_root: Path) -> dict:
     """Pin current-GTS plugin control-flow/response semantics for representative roles."""
+    context = native_context(master)
+    loaded = context.file(family="Gen")
+    if loaded is None:
+        raise NativeSelectionError(0xA0030106)
+    master = loaded.database
     bin_root = gts_root / "bin"
     cid = bin_root / "GetCID_SID22_DT.dll"
     clear = bin_root / "DelDiagCodeP4.dll"
@@ -463,7 +498,7 @@ def gtsplus_plugin_semantics(parser: DDBParser, master, gts_root: Path) -> dict:
     return {
         "role_0x70_p5_active_test_signal_info": {
             "plugin": file_identity(active_test_signal_info, gts_root),
-            "example_binding": dll_binding(parser, master, 397, 0x70),
+            "example_binding": dll_binding(parser, context, 397, 0x70),
             "metadata_model": {
                 "transport": "none in this plugin; iterates selected Active Test IDs and constructs CCmdActTstSignalInfoItem metadata from DDB records",
                 "selected_test_table": {"table": 68, "class": ECU_TABLE_CLASS_NAMES[68], "record_size": 64},
@@ -508,8 +543,8 @@ def gtsplus_plugin_semantics(parser: DDBParser, master, gts_root: Path) -> dict:
         },
         "role_0x08_p5_active_test_init": {
             "plugin": file_identity(active_test_init, gts_root),
-            "example_binding": dll_binding(parser, master, 397, 0x08),
-            "example_frame": resolve_frame(parser, master, 397, 0xCA, variable_namespace_base=0x2710),
+            "example_binding": dll_binding(parser, context, 397, 0x08),
+            "example_frame": resolve_frame_program(parser, context, 397, 0xCA, variable_namespace_base=0x2710),
             "init_model": {
                 "purpose": "initialize one selected direct P5 Active Test from its type-68 record, optional initial RDBI value, linked Data Monitor, and presentation metadata",
                 "selected_test_table": {"table": 68, "class": ECU_TABLE_CLASS_NAMES[68], "record_size": 64},
@@ -583,7 +618,7 @@ def gtsplus_plugin_semantics(parser: DDBParser, master, gts_root: Path) -> dict:
         },
         "role_0x06_p5_active_test_list": {
             "plugin": file_identity(active_test_list, gts_root),
-            "example_binding": dll_binding(parser, master, 397, 0x06),
+            "example_binding": dll_binding(parser, context, 397, 0x06),
             "list_model": {
                 "purpose": "construct the Active Test catalog from DID-backed direct tests and RID-backed routine tests after runtime support evaluation",
                 "category_mode": "low byte of master category generation field (+0x48 raw) masked with 0xE0",
@@ -620,8 +655,8 @@ def gtsplus_plugin_semantics(parser: DDBParser, master, gts_root: Path) -> dict:
         },
         "role_0x63_p5_multi_active_test_init": {
             "plugin": file_identity(multi_active_test_init, gts_root),
-            "example_binding": dll_binding(parser, master, 372, 0x63),
-            "example_frame": resolve_frame(parser, master, 372, 0xCA, variable_namespace_base=0x2710),
+            "example_binding": dll_binding(parser, context, 372, 0x63),
+            "example_frame": resolve_frame_program(parser, context, 372, 0xCA, variable_namespace_base=0x2710),
             "init_model": {
                 "purpose": "expand a multi-control Active Test group through type-33 membership rows, sort its direct type-68 member controls, initialize each member, and emit CCmdActTstSignalDataInit entries",
                 "group_table": {"table": 33, "class": ECU_TABLE_CLASS_NAMES[33], "record_size": 12},
@@ -659,7 +694,7 @@ def gtsplus_plugin_semantics(parser: DDBParser, master, gts_root: Path) -> dict:
         },
         "role_0xad_p5_monitor_list_for_active_test": {
             "plugin": file_identity(active_test_monitor_list, gts_root),
-            "example_binding": dll_binding(parser, master, 397, 0xAD),
+            "example_binding": dll_binding(parser, context, 397, 0xAD),
             "list_model": {
                 "purpose": "construct the P5 Data Monitor list exposed for Active Test use from DDB membership flag 0x40 plus normal runtime PID support state",
                 "category_mode": "low byte of master category generation field (+0x48 raw) masked with 0xE0",
@@ -694,7 +729,7 @@ def gtsplus_plugin_semantics(parser: DDBParser, master, gts_root: Path) -> dict:
         },
         "role_0x05_p5_monitor_list": {
             "plugin": file_identity(monitor_list, gts_root),
-            "example_binding": dll_binding(parser, master, 405, 0x05),
+            "example_binding": dll_binding(parser, context, 405, 0x05),
             "list_model": {
                 "purpose": "construct the Data Monitor list from current P5 DDB candidates plus runtime support state",
                 "category_mode": "low byte of master category generation field (+0x48 raw) masked with 0xE0",
@@ -726,7 +761,7 @@ def gtsplus_plugin_semantics(parser: DDBParser, master, gts_root: Path) -> dict:
         },
         "role_0x41_p5_signal_info": {
             "plugin": file_identity(signal_info, gts_root),
-            "example_binding": dll_binding(parser, master, 405, 0x41),
+            "example_binding": dll_binding(parser, context, 405, 0x41),
             "metadata_model": {
                 "transport": "none in this plugin; constructs CCmdDatMonSignalInfo metadata from DDB records",
                 "monitor_tables": [62, 157],
@@ -757,8 +792,8 @@ def gtsplus_plugin_semantics(parser: DDBParser, master, gts_root: Path) -> dict:
         },
         "role_0x52_generic_cid": {
             "plugin": file_identity(cid, gts_root),
-            "example_binding": dll_binding(parser, master, 405, 0x52),
-            "example_frame": resolve_frame(parser, master, 405, 0xDC, variable_namespace_base=0x2710),
+            "example_binding": dll_binding(parser, context, 405, 0x52),
+            "example_frame": resolve_frame_program(parser, context, 405, 0xDC, variable_namespace_base=0x2710),
             "response_model": {
                 "positive_prefix": "62f181",
                 "echoed_did_receive_indexes": [1, 2],
@@ -787,9 +822,9 @@ def gtsplus_plugin_semantics(parser: DDBParser, master, gts_root: Path) -> dict:
         },
         "role_0x19_dtc_clear": {
             "plugin": file_identity(clear, gts_root),
-            "example_binding": dll_binding(parser, master, 397, 0x19),
-            "primary": resolve_frame(parser, master, 397, 0x01, variable_namespace_base=0x2710),
-            "fallback": resolve_frame(parser, master, 397, 0x102, variable_namespace_base=0x2710),
+            "example_binding": dll_binding(parser, context, 397, 0x19),
+            "primary": resolve_frame_program(parser, context, 397, 0x01, variable_namespace_base=0x2710),
+            "fallback": resolve_frame_program(parser, context, 397, 0x102, variable_namespace_base=0x2710),
             "timer": {
                 "db_record_class": "0x119",
                 "master_table_type": 25,
@@ -797,7 +832,7 @@ def gtsplus_plugin_semantics(parser: DDBParser, master, gts_root: Path) -> dict:
                 "record_size": master.sections[25].decoded_record_size,
                 "record_count": master.sections[25].header.record_count,
                 "lookup_key": [397, 1],
-                "hybrid_timer_1": resolve_timer(parser, master, 397, 1),
+                "hybrid_timer_1": resolve_timer(parser, context, 397, 1, timer_policy='report-and-continue'),
             },
             "control_flow": {
                 "primary_selector": "0x1",
@@ -837,6 +872,11 @@ def gtsplus_p5_active_test_runtime(parser: DDBParser, master, gts_root: Path) ->
     UDS IO-Control; routine tests materialize UDS RoutineControl. Both converge on
     DataListIF queueing and the same P5 J2534 SendIntExt transport worker.
     """
+    context = native_context(master)
+    loaded = context.file(family="Gen")
+    if loaded is None:
+        raise NativeSelectionError(0xA0030106)
+    master = loaded.database
     bin_root = gts_root / "bin"
     datamon = bin_root / "DataMonitorPhase5_DT.dll"
     datalist = bin_root / "DataListIF.dll"
@@ -885,11 +925,11 @@ def gtsplus_p5_active_test_runtime(parser: DDBParser, master, gts_root: Path) ->
             f"did=0x{did:04X} bits={bit_start}..{bit_end} mode={encoding_mode}"
         )
 
-    start_frame = resolve_frame(parser, master, 397, 0x9D, variable_namespace_base=0x2710)
-    stop_frame = resolve_frame(parser, master, 397, 0x64, variable_namespace_base=0x2710)
-    if start_frame["variables"]["send"]["bytes"] != "2fffff03" or start_frame["variables"]["receive_check"]["bytes"] != "6f":
+    start_frame = resolve_frame_program(parser, context, 397, 0x9D, variable_namespace_base=0x2710)
+    stop_frame = resolve_frame_program(parser, context, 397, 0x64, variable_namespace_base=0x2710)
+    if not start_frame or any(frame["variables"]["send"]["bytes"] != "2fffff03" or frame["variables"]["receive_check"]["bytes"] != "6f" for frame in start_frame):
         raise ValueError("Hybrid selector 0x9D is no longer the expected 2FFFFF03 -> 6F frame")
-    if stop_frame["variables"]["send"]["bytes"] != "2fffff00" or stop_frame["variables"]["receive_check"]["bytes"] != "6f":
+    if not stop_frame or any(frame["variables"]["send"]["bytes"] != "2fffff00" or frame["variables"]["receive_check"]["bytes"] != "6f" for frame in stop_frame):
         raise ValueError("Hybrid selector 0x64 is no longer the expected 2FFFFF00 -> 6F frame")
 
     # Current FRC routine witness. The 72-byte GTS+ type-71 layout differs
@@ -929,7 +969,7 @@ def gtsplus_p5_active_test_runtime(parser: DDBParser, master, gts_root: Path) ->
         )
 
     routine_frames = {
-        selector: resolve_frame(parser, master, 498, selector, variable_namespace_base=0x2710)
+        selector: resolve_frame_program(parser, context, 498, selector, variable_namespace_base=0x2710)
         for selector in (0xD5, 0xD6, 0xD7)
     }
     expected_routine_frames = {
@@ -938,15 +978,12 @@ def gtsplus_p5_active_test_runtime(parser: DDBParser, master, gts_root: Path) ->
         0xD7: ("3103ffff", "7103"),
     }
     for selector, (send, check) in expected_routine_frames.items():
-        frame = routine_frames[selector]
-        if frame["variables"]["send"]["bytes"] != send or frame["variables"]["receive_check"]["bytes"] != check:
-            raise ValueError(
-                f"FRC selector 0x{selector:X} drifted: "
-                f"{frame['variables']['send']['bytes']} -> {frame['variables']['receive_check']['bytes']}"
-            )
+        program = routine_frames[selector]
+        if not program or any(frame["variables"]["send"]["bytes"] != send or frame["variables"]["receive_check"]["bytes"] != check for frame in program):
+            raise ValueError(f"FRC selector 0x{selector:X} program drifted: {program}")
 
     routine_binding_roles = {
-        role: [row for row in parser.extract_master_dlls(master.sections[19]) if row.dll_role_id == role]
+        role: [row for row in context.active_records(19) if row.dll_role_id == role]
         for role in (0xB0, 0xAE, 0xAF, 0xD4)
     }
     expected_generic = {
@@ -998,9 +1035,10 @@ def gtsplus_p5_active_test_runtime(parser: DDBParser, master, gts_root: Path) ->
         },
         "command_value": {
             "object": "CStartActTstSnd",
-            "set_value": "engineering input is normalized through the selected physical Mul/Div/Offset and the low raw byte is stored at +0x24",
-            "raw_value_field": "+0x24",
-            "alternate_value_field": "+0x28; constructor initializes it to zero and the normal SetValue path does not modify it",
+            "set_value": "separate native-caller path: wrap the 32-bit engineering subtraction/product, divide signed by Mul, then store the quotient's low byte at +0x24",
+            "logical_adapter": "DiagAdaptation writes logical raw32 directly to +0x24 and alternate32 to +0x28; it does not subsequently call SetValue",
+            "raw_value_field": "+0x24; whole-byte/shifted modes use raw32 and bit modes use its low byte",
+            "alternate_value_field": "+0x28; constructor initializes it to zero and SetValue leaves it unchanged",
         },
         "materializer": {
             "function": "DataMonitorPhase5_DT.dll CDataMonitorThreadP5 virtual_104 @ 0x1000D5E0",
@@ -1017,8 +1055,9 @@ def gtsplus_p5_active_test_runtime(parser: DDBParser, master, gts_root: Path) ->
             },
             "mode_1": {
                 "normal_value_source": "CStartActTstSnd +0x24 when +0x28 == 0",
-                "placement": "zero-fill N data bytes, then place the raw value into the type-68 bit range using byte=bit_end>>3 and shift=7-(bit_end&7)",
-                "return_control": "append the N-byte control-enable mask built from the same type-68 bit range to selector 0x64",
+                "placement": "zero-fill N data bytes, then place low8(raw) at byte=bit_end>>3 shifted by 7-(bit_end&7)",
+                "start_control": "append N data bytes followed by the N-byte control-enable mask; total length 4+2*N",
+                "return_control": "append that N-byte control-enable mask to selector 0x64; total length 4+N",
             },
             "multi_control": "the caller's type-33 path invokes this materializer per member and OR-composes same-DID start/stop data bytes before the common launch interface",
         },
@@ -1037,11 +1076,11 @@ def gtsplus_p5_active_test_runtime(parser: DDBParser, master, gts_root: Path) ->
             "runtime_data_length": "N",
             "minimum_data_length": min_data_length,
             "raw_values": {"OFF": 0, "ON": 1},
-            "start_formula": "2F 28 01 03 || N-byte value; byte[1] bit0 is the water-pump value",
+            "start_formula": "2F 28 01 03 || N-byte value || N-byte control-enable mask; byte[1] bit0 carries the value and is enabled",
             "stop_formula": "2F 28 01 00 || N-byte control-enable mask; byte[1] bit0 = 1",
             "minimum_length_examples": {
-                "OFF": (bytes.fromhex("2f280103") + start_off).hex(),
-                "ON": (bytes.fromhex("2f280103") + start_on).hex(),
+                "OFF": (bytes.fromhex("2f280103") + start_off + stop_mask).hex(),
+                "ON": (bytes.fromhex("2f280103") + start_on + stop_mask).hex(),
                 "return_control": (bytes.fromhex("2f280100") + stop_mask).hex(),
                 "qualification": "examples use N=2, the static minimum implied by bit 15; they are not a claim that the runtime DataIdLengthList entry equals 2",
             },
@@ -1049,7 +1088,7 @@ def gtsplus_p5_active_test_runtime(parser: DDBParser, master, gts_root: Path) ->
         "handoff": {
             "data_monitor_call": "CDataMonitorThreadP5::virtual_20 strips the already-present SID (buffer+1, length-1) and calls CDataMonitorPhase5Interface vtable +0x2C with ActiveTestType=0",
             "interface_thunk": "DataMonitorPhase5_DT.dll 0x10016E75 -> DataListIF.dll p5dm_tf::DMInterface::active_test_start",
-            "event_queue": "CCommEventPhase5AT::ActiveTestStart prepends 0x2F for ActiveTestType 0, queues start and return-control frames, and replaces/updates an existing direct item with the same DID",
+            "event_queue": "CCommEventPhase5AT::ActiveTestStart prepends 0x2F and always appends a new active node; only the STOP chain deduplicates by SID+DID and retains its existing bytes",
             "send_frame": "CCommEventPhase5AT::GetSndFrame memcpy-copies the queued request and length unchanged",
             "transport": "p5diag_tf::J2534DiagInterface::ThreadMain -> KGP_CommFrameCtrl.dll CCommFrameCtrl::SendIntExt",
             "receive": "CCommEventPhase5AT::CheckRcvFrame requires 0x6F for a sent 0x2F request and at least three response bytes",
@@ -1110,7 +1149,7 @@ def gtsplus_p5_active_test_runtime(parser: DDBParser, master, gts_root: Path) ->
                 "interface": "same CDataMonitorPhase5Interface +0x2C active_test_start used by direct tests",
                 "active_test_type": 1,
                 "sid_handling": "DataMonitor passes buffer+1/length-1; DataListIF CCommEventPhase5AT::ActiveTestStart prepends 0x31 for ActiveTestType=1",
-                "queue_identity": "routine queue replacement is keyed by RID",
+                "queue_identity": "START always appends a new active node; only the STOP chain deduplicates by SID+RID and retains its existing bytes",
                 "receive": "CCommEventPhase5AT::CheckRcvFrame requires response SID 0x71 for queued 0x31 requests",
             },
             "single_routine_corroboration": {
@@ -1188,6 +1227,11 @@ def gtsplus_execution_lifecycle(parser: DDBParser, master, gts_root: Path) -> di
     deliberately distinguishes the framework's periodic TestPresentStart request from
     the separate master selectors whose payload is UDS TesterPresent (3E 00).
     """
+    context = native_context(master)
+    loaded = context.file(family="Gen")
+    if loaded is None:
+        raise NativeSelectionError(0xA0030106)
+    master = loaded.database
     bin_root = gts_root / "bin"
     diag_comm = bin_root / "DiagCommCtrlMain.dll"
     kgp_comm = bin_root / "KGP_CommFrameCtrl.dll"
@@ -1203,9 +1247,8 @@ def gtsplus_execution_lifecycle(parser: DDBParser, master, gts_root: Path) -> di
 
     categories = (397, 435, 498)
     category_rows = {
-        row.category_id: row
-        for row in parser.extract_master_ecu_categories(master.sections[16])
-        if row.category_id in categories
+        category: select_for_consumer(context.query(16, category), "category")
+        for category in categories
     }
     if set(category_rows) != set(categories):
         raise ValueError(f"missing current P5 category rows: {sorted(set(categories) - set(category_rows))}")
@@ -1224,14 +1267,14 @@ def gtsplus_execution_lifecycle(parser: DDBParser, master, gts_root: Path) -> di
             "raw": row.raw.hex(),
         }
 
-    lifecycle_frames: dict[str, dict[str, dict]] = {}
+    lifecycle_frames: dict[str, dict[str, list[dict]]] = {}
     for category in categories:
         lifecycle_frames[str(category)] = {
-            "default_session": resolve_frame(parser, master, category, 0xD1, variable_namespace_base=0x2710),
-            "extended_session": resolve_frame(parser, master, category, 0xD2, variable_namespace_base=0x2710),
-            "uds_tester_present_no_check": resolve_frame(parser, master, category, 0x66, variable_namespace_base=0x2710),
-            "uds_tester_present_checked": resolve_frame(parser, master, category, 0x67, variable_namespace_base=0x2710),
-            "test_present_thread_request": resolve_frame(parser, master, category, 0xDD, variable_namespace_base=0x2710),
+            "default_session": resolve_frame_program(parser, context, category, 0xD1, variable_namespace_base=0x2710),
+            "extended_session": resolve_frame_program(parser, context, category, 0xD2, variable_namespace_base=0x2710),
+            "uds_tester_present_no_check": resolve_frame_program(parser, context, category, 0x66, variable_namespace_base=0x2710),
+            "uds_tester_present_checked": resolve_frame_program(parser, context, category, 0x67, variable_namespace_base=0x2710),
+            "test_present_thread_request": resolve_frame_program(parser, context, category, 0xDD, variable_namespace_base=0x2710),
         }
         frame = lifecycle_frames[str(category)]
         expected = {
@@ -1242,15 +1285,17 @@ def gtsplus_execution_lifecycle(parser: DDBParser, master, gts_root: Path) -> di
             "test_present_thread_request": ("22f186", "62"),
         }
         for key, (send, check) in expected.items():
-            actual = frame[key]
-            if actual["comm_set"] != 1:
-                raise ValueError(f"category {category} lifecycle {key} no longer uses CommSet 1")
-            if actual["variables"]["send"]["bytes"] != send:
-                raise ValueError(f"category {category} lifecycle {key} send drifted")
-            if actual["variables"]["receive_check"]["bytes"] != check:
-                raise ValueError(f"category {category} lifecycle {key} response check drifted")
+            program = frame[key]
+            if not program:
+                raise ValueError(f"category {category} lifecycle {key} has no frame program")
+            for actual in program:
+                if actual["comm_set"] != 1:
+                    raise ValueError(f"category {category} lifecycle {key} no longer uses CommSet 1")
+                if actual["variables"]["send"]["bytes"] != send:
+                    raise ValueError(f"category {category} lifecycle {key} send drifted")
+                if actual["variables"]["receive_check"]["bytes"] != check:
+                    raise ValueError(f"category {category} lifecycle {key} response check drifted")
 
-    dll_rows = parser.extract_master_dlls(master.sections[19])
     generic_roles = {}
     for role, expected_name in {
         0x3A: "StartTestPresent.dll",
@@ -1260,41 +1305,42 @@ def gtsplus_execution_lifecycle(parser: DDBParser, master, gts_root: Path) -> di
         0xBF: "SetDefSession_DT.dll",
         0xCA: "MoveSessionCGWDK_DT.dll",
     }.items():
-        matches = [row for row in dll_rows if row.dll_role_id == role and row.category_id == 0]
-        if len(matches) != 1 or matches[0].dll_name != expected_name:
-            raise ValueError(f"generic lifecycle role 0x{role:X} drifted: {matches}")
+        result = context.query(19, role, 0x10000)
+        selected = select_for_consumer(result, "plugin")
+        if selected.dll_name != expected_name:
+            raise ValueError(f"generic lifecycle role 0x{role:X} drifted: {selected}")
         generic_roles[f"0x{role:X}"] = {
-            "category_id": 0,
-            "plugin": matches[0].dll_name,
+            "category_id": selected.category_id,
+            "plugin": selected.dll_name, "selection": result.as_dict(),
         }
 
     check_mode_bindings: dict[str, dict[str, object]] = {}
     for category in categories:
         check_mode_bindings[str(category)] = {}
         for role in (0x17, 0x18):
-            matches = [row for row in dll_rows if row.dll_role_id == role and row.category_id == category]
+            result = context.query(19, role, category).require_success()
             check_mode_bindings[str(category)][f"0x{role:X}"] = (
-                {"plugin": matches[0].dll_name} if len(matches) == 1 else None
+                {"plugin": result.records[0].dll_name, "binding_category_id": result.records[0].category_id,
+                 "selection": result.as_dict()}
+                if result.records else None
             )
-    if check_mode_bindings["397"] != {
-        "0x17": {"plugin": "ConfCheckModeP5_DT.dll"},
-        "0x18": {"plugin": "ChangeCheckModeP5_DT.dll"},
-    }:
-        raise ValueError(f"Hybrid check-mode role bindings drifted: {check_mode_bindings['397']}")
-    if any(check_mode_bindings[str(category)][role] is not None for category in (435, 498) for role in ("0x17", "0x18")):
-        raise ValueError("Brake/FRC unexpectedly gained P5 check-mode role 0x17/0x18")
+    hybrid_bindings = check_mode_bindings["397"]
+    for role, name in (("0x17", "ConfCheckModeP5_DT.dll"), ("0x18", "ChangeCheckModeP5_DT.dll")):
+        binding = hybrid_bindings[role]
+        if not isinstance(binding, dict) or binding.get("plugin") != name:
+            raise ValueError(f"Hybrid check-mode role bindings drifted: {hybrid_bindings}")
 
     hybrid_check_frames = {
-        "start": resolve_frame(parser, master, 397, 0x03, variable_namespace_base=0x2710),
-        "stop": resolve_frame(parser, master, 397, 0x04, variable_namespace_base=0x2710),
-        "results": resolve_frame(parser, master, 397, 0x05, variable_namespace_base=0x2710),
+        "start": resolve_frame_program(parser, context, 397, 0x03, variable_namespace_base=0x2710),
+        "stop": resolve_frame_program(parser, context, 397, 0x04, variable_namespace_base=0x2710),
+        "results": resolve_frame_program(parser, context, 397, 0x05, variable_namespace_base=0x2710),
     }
     for key, (send, check) in {
         "start": ("31011002", "71011002"),
         "stop": ("31021002", "71021002"),
         "results": ("31031002", "7103100201"),
     }.items():
-        if hybrid_check_frames[key]["variables"]["send"]["bytes"] != send or hybrid_check_frames[key]["variables"]["receive_check"]["bytes"] != check:
+        if not hybrid_check_frames[key] or any(frame["variables"]["send"]["bytes"] != send or frame["variables"]["receive_check"]["bytes"] != check for frame in hybrid_check_frames[key]):
             raise ValueError(f"Hybrid RID 0x1002 check-mode {key} frame drifted")
 
     session_flag_symbols = {
@@ -1556,9 +1602,11 @@ def gtsplus_role_layout(gts_root: Path) -> dict:
     parser = DDBParser()
     master_path = gts_root / "NA/DB/Gen/Toyota.ddb"
     master = parser.parse_master_db(master_path)
+    context = native_context(master, parser.parse_master_db(gts_root / "NA/DB/Spe/Toyota.ddb"))
     kgp = gts_root / "bin/KgpDataCtrl.dll"
     return {
         "source": file_identity(master_path, gts_root),
+        "native_context": context.as_dict(),
         "kgp_identity": file_identity(kgp, gts_root),
         "role_layout": {
             "logical_key": "DLL role",
@@ -1586,16 +1634,16 @@ def gtsplus_role_layout(gts_root: Path) -> dict:
             "class_name": MASTER_TABLE_CLASS_NAMES[29],
             "record_size": master.sections[29].decoded_record_size,
             "record_count": master.sections[29].header.record_count,
-            "comm_set_1": resolve_comm_set(parser, master, 1),
+            "comm_set_1": resolve_comm_set(parser, context, 1),
         },
-        "role_catalog": role_operation_catalog(parser, master, gts_root / "bin"),
-        "plugin_semantics": gtsplus_plugin_semantics(parser, master, gts_root),
+        "role_catalog": role_operation_catalog(parser, context, gts_root / "bin"),
+        "plugin_semantics": gtsplus_plugin_semantics(parser, context, gts_root),
         "data_monitor_decoder": gtsplus_data_monitor_decoder(gts_root),
-        "p5_active_test_runtime": gtsplus_p5_active_test_runtime(parser, master, gts_root),
-        "execution_lifecycle": gtsplus_execution_lifecycle(parser, master, gts_root),
-        "hybrid_clear_binding": dll_binding(parser, master, 397, 25),
-        "hybrid_clear_primary": resolve_frame(parser, master, 397, 0x01, variable_namespace_base=0x2710),
-        "hybrid_clear_fallback": resolve_frame(parser, master, 397, 0x102, variable_namespace_base=0x2710),
+        "p5_active_test_runtime": gtsplus_p5_active_test_runtime(parser, context, gts_root),
+        "execution_lifecycle": gtsplus_execution_lifecycle(parser, context, gts_root),
+        "hybrid_clear_binding": dll_binding(parser, context, 397, 25),
+        "hybrid_clear_primary": resolve_frame_program(parser, context, 397, 0x01, variable_namespace_base=0x2710),
+        "hybrid_clear_fallback": resolve_frame_program(parser, context, 397, 0x102, variable_namespace_base=0x2710),
     }
 
 def build(techstream_root: Path, gts_root: Path | None) -> dict:
@@ -1617,7 +1665,7 @@ def build(techstream_root: Path, gts_root: Path | None) -> dict:
         }
 
     return {
-        "schema": "techstream-diagnostic-execution-model-v1",
+        "schema": "techstream-diagnostic-execution-model-v2",
         "interpretation": (
             "Techstream's ordinary diagnostic command layer is a database-driven execution engine: "
             "the controller resolves an ECU/category plus DLL-role through CDbDllTable, dynamically "

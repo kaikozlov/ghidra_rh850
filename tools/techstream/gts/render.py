@@ -42,8 +42,9 @@ def _format_row(row: dict[str, Any]) -> str:
         return f"file\t{row['source']}"
     if kind == "route":
         return (
-            f"route\t{row.get('contact_type','')}\t{row.get('cid_getter','')}\t"
-            f"{row.get('prepare_writer','')}\t{row.get('flash_writer','')}\t{row.get('parameter_file','')}"
+            f"route\t{row.get('selector','')}\t{row.get('cid_getter','')}\t"
+            f"{row.get('prepare_writer','')}\t{row.get('flash_writer','')}\t{row.get('parameter_file') or '(master only)'}"
+            f"\topen_failure={row.get('engine_selection', {}).get('own_ini_open_failure', '')}"
         )
     if kind == "frame":
         return (
@@ -131,57 +132,51 @@ def ecu(payload, *, as_json):
             print(f"{row['table']:>3}\t{row['class']}\tcount={row['records']}\tsize={row['record_size']}")
 
 
+def _active_phase(phase, label):
+    for index, row in enumerate(phase["frames"]):
+        frame = row["base_frame"]
+        request = row.get("materialized_prefix", row.get("materialized_static_request", row.get("materialized_request")))
+        print(
+            f"{label}\tframe={index}\tselector={phase['selector']}\tsend={request}\t"
+            f"expect={frame['receive_check']['bytes']}\tcommset={frame['comm_set']}"
+        )
+
+
 def active_test(payload, kind, category, *, as_json):
     if as_json:
         print(json.dumps(payload, indent=2, sort_keys=True))
         return
-
     selected = payload["selected_test"]
     executor = payload["executor"]
     print(
         f"active-test\tcategory={category['category_id']}\t{category['name']}\tkind={kind}\t"
-        f"id={selected['active_test_id_hex']}\tname={selected['name'] or '-'}"
+        f"id={selected['active_test_id_hex']}\tname={selected['name'] or '-'}\t"
+        f"native_context={payload['native_context']['resolution']}\tmetadata=raw-catalog"
     )
+    _active_phase(executor["start"], "start")
+    _active_phase(executor["stop"], "stop")
     if kind == "direct":
         length = executor["runtime_data_length"]
         print(
             f"wire\tservice={executor['service']}\tdid={executor['data_id_for_act']['did_hex']}\t"
-            f"start={executor['start']['materialized_prefix']}+N\tstop={executor['stop']['materialized_prefix']}+N\t"
             f"runtime_length=N\tminimum={length['minimum_from_bit_geometry']}"
         )
-        probe = length["probe"]
-        print(
-            f"runtime-length-probe\tselector={probe['selector']}\tsend={probe['materialized_request']}\t"
-            f"expect={probe['positive_check']}\tformula=received_length-{probe['response_prefix_length']}"
-        )
+        _active_phase(length["probe"], "runtime-length-probe")
         examples = executor.get("minimum_length_examples")
         if examples is not None:
-            print(
-                f"minimum-example\traw0={examples['raw_0']}\traw1={examples['raw_1']}\t"
-                f"return={examples['return_control']}"
-            )
+            print(f"minimum-examples\t{json.dumps(examples, sort_keys=True)}")
     else:
-        refs = selected
-        if executor["fixed_request"]:
-            print(
-                f"wire\tservice={executor['service']}\trid={executor['routine_id_hex']}\t"
-                f"start={executor['start']['materialized_static_request']}\t"
-                f"stop={executor['stop']['materialized_static_request']}\t"
-                f"result={executor['result']['materialized_static_request']}\tfixed=1"
-            )
-        else:
-            print(
-                f"wire\tservice={executor['service']}\trid={executor['routine_id_hex']}\t"
-                f"start_static={executor['start']['materialized_static_request']}\t"
-                f"stop_static={executor['stop']['materialized_static_request']}\t"
-                f"result={executor['result']['materialized_static_request']}\tfixed=0\tdynamic=masked"
-            )
+        _active_phase(executor["result"], "result")
         print(
-            f"routine-vars\tstart=0x{refs['routine_command_variable']:X}\t"
-            f"stop=0x{refs['routine_stop_command_variable']:X}\t"
-            f"value_mask=0x{refs['output_mask_value_variable']:X}\t"
-            f"button_mask=0x{refs['output_mask_button_variable']:X}\t"
-            f"status_key=0x{refs['routine_status_key']:X}"
+            f"wire\tservice={executor['service']}\trid={executor['routine_id_hex']}\t"
+            f"fixed={int(executor['fixed_request'])}"
+        )
+        print(
+            f"routine-vars\tstart=0x{selected['routine_command_variable']:X}\t"
+            f"stop=0x{selected['routine_stop_command_variable']:X}\t"
+            f"value_mask=0x{selected['output_mask_value_variable']:X}\t"
+            f"button_mask=0x{selected['output_mask_button_variable']:X}\t"
+            f"status_key=0x{selected['routine_status_key']:X}"
         )
 
 
@@ -193,15 +188,14 @@ def command(payload, category, *, as_json):
         f"command	category={category['category_id']}	{category['name']}	role={payload['role_hex']}	"
         f"plugin={payload['plugin']}	surface={payload['operation_surface']}	semantics={payload['semantic_status']}"
     )
-    for name, frame in payload["frames"].items():
-        if frame is None:
-            print(f"{name}	selector=missing")
-            continue
-        print(
-            f"{name}	selector={frame['selector']}	send={frame['send']['bytes']}	"
-            f"expect={frame['receive_check']['bytes']}	commset={frame['comm_set']}	"
-            f"timeout={frame['comm_set_metadata']['receive_timeout']}	retries={frame['comm_set_metadata']['retry_count']}"
-        )
+    print(f"native-context\t{payload['native_context']['resolution']}")
+    for name, frames in payload["frames"].items():
+        for index, frame in enumerate(frames):
+            print(
+                f"{name}\tframe={index}\tselector={frame['selector']}\tsend={frame['send']['bytes']}\t"
+                f"expect={frame['receive_check']['bytes']}\tcommset={frame['comm_set']}\t"
+                f"timeout={frame['comm_set_metadata']['receive_timeout']}\tretries={frame['comm_set_metadata']['retry_count']}"
+            )
     for timer in payload["timers"]:
         print(f"timer	id={timer['timer_id']}	delay_ms={timer['delay_ms']}")
     multi_active = payload["multi_active_test_init_model"]
@@ -222,12 +216,13 @@ def command(payload, category, *, as_json):
             for member in selected_plan["members"]:
                 selected = member["selected_test"]
                 tx = member["initial_transaction"]
-                send = tx.get("materialized_send", "-")
                 print(
                     f"member\torder={member['sort_order']}\tid={selected['active_test_id_hex']}\t"
                     f"name={selected['name'] or '-'}\tdid=0x{selected['initial_read_did']:04X}\t"
-                    f"bits={selected['bit_start']}..{selected['bit_end']}\tsend={send}"
+                    f"bits={selected['bit_start']}..{selected['bit_end']}"
                 )
+                for index, frame in enumerate(tx.get("frames", [])):
+                    print(f"member-initial-read\tframe={index}\tsend={frame['materialized_send']}\texpect={frame['receive_check']}")
     active_test_monitor = payload["active_test_monitor_model"]
     if active_test_monitor is not None:
         category_plan = active_test_monitor.get("category_plan")
@@ -282,10 +277,11 @@ def command(payload, category, *, as_json):
                 f"init_mode={selected['initial_read_mode']}\tmonitor_link_mode={selected['monitor_link_mode']}"
             )
             if tx["performed"]:
-                print(
-                    f"initial-read\tselector={tx['selector']}\tsend={tx['materialized_send']}\t"
-                    f"expect={tx['receive_check']}\tbits={tx['bit_start']}..{tx['bit_end']}"
-                )
+                for index, frame in enumerate(tx["frames"]):
+                    print(
+                        f"initial-read\tframe={index}\tselector={tx['selector']}\tsend={frame['materialized_send']}\t"
+                        f"expect={frame['receive_check']}\tbits={tx['bit_start']}..{tx['bit_end']}"
+                    )
             monitor = linked.get("monitor")
             print(
                 f"linked-monitor\tkey={linked['monitor_key']}\tresolution={linked['resolution']}\t"
@@ -296,20 +292,14 @@ def command(payload, category, *, as_json):
             print(
                 f"active-test-executor\tservice={executor['service']}\tdid={executor['data_id_for_act']['did_hex']}\t"
                 f"encoding_mode={executor['data_id_for_act']['encoding_mode']}\t"
-                f"start={executor['start']['materialized_prefix']}+N\tstop={executor['stop']['materialized_prefix']}+N\t"
                 f"runtime_length=N\tminimum={length['minimum_from_bit_geometry']}"
             )
-            probe = length["probe"]
-            print(
-                f"runtime-length-probe\tselector={probe['selector']}\tsend={probe['materialized_request']}\t"
-                f"expect={probe['positive_check']}\tformula=received_length-{probe['response_prefix_length']}"
-            )
+            _active_phase(executor["start"], "start")
+            _active_phase(executor["stop"], "stop")
+            _active_phase(length["probe"], "runtime-length-probe")
             examples = executor.get("minimum_length_examples")
             if examples is not None:
-                print(
-                    f"active-test-wire-minimum\traw0={examples['raw_0']}\traw1={examples['raw_1']}\t"
-                    f"return={examples['return_control']}\tqualification={examples['qualification']}"
-                )
+                print(f"active-test-wire-minimum\t{json.dumps(examples, sort_keys=True)}")
     active_test_model = payload["active_test_model"]
     if active_test_model is not None:
         category_plan = active_test_model.get("category_plan")
@@ -357,10 +347,11 @@ def command(payload, category, *, as_json):
         )
 
 
-def timers(category, shown, *, as_json):
+def timers(category, shown, *, native_context, as_json):
     if as_json:
-        print(json.dumps({"category": category, "timers": shown}, indent=2, sort_keys=True))
+        print(json.dumps({"category": category, "timers": shown, "native_context": native_context}, indent=2, sort_keys=True))
         return
+    print(f"native-context\t{native_context['resolution']}")
     for row in shown:
         print(
             f"timer	category={row['category_id']}	id={row['timer_id']}	"
@@ -368,10 +359,11 @@ def timers(category, shown, *, as_json):
         )
 
 
-def commsets(shown, *, as_json):
+def commsets(shown, *, native_context, query, as_json):
     if as_json:
-        print(json.dumps(shown, indent=2, sort_keys=True))
+        print(json.dumps({"rows": shown, "query": query, "native_context": native_context}, indent=2, sort_keys=True))
         return
+    print(f"native-context\t{native_context['resolution']}")
     for row in shown:
         send_value = "FFFFFFFF" if row["send_parameter"] == 0xFFFFFFFF else str(row["send_parameter"])
         receive_value = "FFFFFFFF" if row["receive_timeout"] == 0xFFFFFFFF else str(row["receive_timeout"])
@@ -383,10 +375,14 @@ def commsets(shown, *, as_json):
         )
 
 
-def roles(shown, plugin_limit, *, as_json):
+def roles(shown, plugin_limit, *, native_context, as_json):
     if as_json:
-        print(json.dumps(shown, indent=2, sort_keys=True))
+        print(json.dumps({
+            "selection": "raw-role-census-with-native-defaults",
+            "roles": shown, "native_context": native_context,
+        }, indent=2, sort_keys=True))
         return
+    print(f"native-context\t{native_context['resolution']}\tcensus=raw-catalog")
     for row in shown:
         plugins = "; ".join(
             f"{item['dll']}({item['binding_count']})"
@@ -406,6 +402,7 @@ def category(payload, limit, *, as_json):
     if as_json:
         print(json.dumps(payload, indent=2, sort_keys=True))
         return
+    print(f"native-context\t{payload['native_context']['resolution']}\tfunctions=raw-catalog")
     print(
         f"category\t{category['category_id']}\t{category['name']}\t"
         f"db={category['database']}\tshort={category['short_name']}\tgeneration={category['generation']}"
@@ -422,6 +419,7 @@ def canbus(rows, *, as_json):
     if as_json:
         print(json.dumps(rows, indent=2, sort_keys=True))
         return
+    print("selection\traw-catalog")
     for index, row in enumerate(rows):
         if index:
             print()
@@ -468,12 +466,25 @@ def cuw(payload, outer, vehicle, routes, contact, descriptor, *, verbose, as_jso
         print("new_cids\t" + ", ".join(payload["new_cids"]))
     if payload["target_calibrations"]:
         print("target_calibrations\t" + ", ".join(payload["target_calibrations"]))
+    selection = payload["gtsplus_selection"]
+    if "error" in selection["model"]:
+        print("gtsplus_selection_error\t" + json.dumps(selection["model"]["error"], sort_keys=True))
+    else:
+        engine = selection["engine"]
+        print(f"gtsplus_engine\t{engine['name']}\tselector={engine['selector']}\t{engine['reason']}")
+        for binding in selection["roles"]:
+            parameter = binding["parameter"]
+            print(f"gtsplus_binding\t{binding['role']}\tcpu={binding['cpu_index']}\tnode={binding['node_index']}"
+                  f"\t{parameter['parameter_file']}\t{binding.get('dll', '')}"
+                  f"\t{json.dumps(parameter.get('error'), sort_keys=True)}")
+        for precondition in selection.get("role_preconditions", []):
+            print("gtsplus_binding_precondition\t" + json.dumps(precondition, sort_keys=True))
     if routes:
         print("gtsplus_route")
         for route in routes:
             print(_format_row(route))
     else:
-        print(f"gtsplus_route\t(no current route row for {contact!r})")
+        print(f"gtsplus_route\t(no exact selected factory row; runtime ContactType={contact!r})")
     if verbose:
         for section, fields in descriptor.items():
             print(f"[{section}]")
@@ -549,13 +560,22 @@ def recover_all_bodies(manifest, *, as_json):
 
 
 def registry_bundle(out, payload, *, as_json):
-        print(out)
-        if as_json:
-            print(json.dumps({
-                "schema": payload["schema"],
-                "release": payload["release"],
-                "regions": {key: value["counts"] for key, value in payload["regions"].items()},
-            }, sort_keys=True))
+    if as_json:
+        print(json.dumps({
+            "path": str(out),
+            "schema": payload["schema"],
+            "release": payload["release"],
+            "regions": {key: value["counts"] for key, value in payload["regions"].items()},
+        }, sort_keys=True))
+        return
+    print(out)
+    for region, value in payload["regions"].items():
+        counts = value["counts"]
+        print(
+            f"{region}\traw_categories={counts['raw_category_row_count']}\t"
+            f"initial_categories={counts['initial_category_count']}\t"
+            f"selected_categories={counts['selected_category_count']}"
+        )
 
 
 def registry_json_text(payload, *, compact):

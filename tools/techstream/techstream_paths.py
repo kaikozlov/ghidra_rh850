@@ -44,19 +44,17 @@ def resolve_gts_root(value: str | Path | None = None) -> Path:
 
 
 def resolve_cuwplus_root(gts_root: Path, value: str | Path | None = None) -> Path:
+    """Select explicit CUW input or the selected GTS release's installed sibling."""
     override = value or os.environ.get("GTSPLUS_CUW_ROOT")
     if override:
         return Path(override).expanduser().resolve()
-    for parent in (gts_root, *gts_root.parents):
-        candidate = parent / "cuwplus/CUWPlus"
-        if candidate.is_dir():
-            return candidate.resolve()
-    default_gts = resolve_gts_root(GTSPLUS_EXTERNAL_ROOT)
-    if gts_root.resolve() == default_gts:
-        external = REPO_ROOT / "software/Techstream/gtsplus/cuwplus/CUWPlus"
-        return external.resolve()
-    # Never silently combine writer routes from a different GTS release.
-    return (gts_root / "__missing_cuwplus__").resolve()
+    gts_root = gts_root.expanduser().resolve()
+    installed = gts_root.parent / "CUWPlus"
+    if (gts_root / "NA/DB/Gen").is_dir() and (installed / "Ini").is_dir():
+        return installed.resolve()
+    # Ancestor cuwplus/CUWPlus trees can be partial analysis/oracle copies.
+    # Never silently combine those inputs, or another release, with this GTS.
+    return gts_root / "__missing_cuwplus__"
 
 
 def resolve_cuw_corpus(value: str | Path | None = None) -> Path:

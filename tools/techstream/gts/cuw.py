@@ -32,7 +32,7 @@ def _cuw_descriptor(path: Path) -> tuple[dict[str, Any], dict[str, dict[str, str
         raise ValueError("; ".join(outer["errors"]))
     outer["validation"] = "full-container"
     payload = first_member_payload(raw, outer)
-    descriptor = parse_attach_bytes(payload)
+    descriptor = parse_attach_bytes(payload, native_current=True)
     return outer, descriptor
 
 
@@ -49,7 +49,7 @@ def _cuw_descriptor_fast(path: Path) -> tuple[dict[str, Any], dict[str, dict[str
     the full container integrity gate is desired.
     """
     outer, payload = _cuw_first_member_fast(path)
-    return outer, parse_attach_bytes(payload)
+    return outer, parse_attach_bytes(payload, native_current=True)
 
 
 def _new_cids(descriptor: dict[str, dict[str, str]]) -> list[str]:
@@ -95,7 +95,7 @@ def _search_cuw_corpus(query: str, corpus: Path) -> list[dict[str, Any]]:
         # disproportionately expensive compared with reading their few KiB.
         if needle not in path.name.casefold() and needle not in payload.decode("latin1").casefold():
             continue
-        descriptor = parse_attach_bytes(payload)
+        descriptor = parse_attach_bytes(payload, native_current=True)
         vehicle = descriptor.get("Vehicle", {})
         out.append({
             "kind": "cuw",

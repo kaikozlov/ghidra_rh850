@@ -303,6 +303,9 @@ The wrapper (`CancelSecurity` at `0x10091FB0`) adds:
 - 3 retry attempts with 10-second sleep between
 - 2 key-send attempts per seed
 
+The current DS-4 utility's separate [gateway session workflow](#ds-4-gateway-sessions)
+includes its exact response gates, retry budget, and cleanup behavior.
+
 ### 4.4 CSecurityAccessSUBARU — dual-path (AES or custom)
 
 Two key derivation paths selected by a version field (`this+4`):
@@ -2241,8 +2244,7 @@ The recovered control path is:
    terminates in `KGP_CommFrameCtrl::SendInt*` / `Receive*`, selecting ordinary,
    extended, or no-session variants from the frame/transport state.
 
-The current GTS+ **native command/session spine** is instruction-closed.
-`CCommandCtrl::CommandExecute @ 0x1000F060` passes command `m_dwCmd`
+Current GTS+ `CCommandCtrl::CommandExecute @ 0x1000F060` passes command `m_dwCmd`
 (`+0x08`) and `m_dwEcuId` (`+0x1C`) to its role/category resolver, loads the
 selected plugin, resolves `Execute`, clears the controller-owned cancel flag,
 and invokes the plugin with one six-dword context ordered as command, response,
@@ -2250,6 +2252,17 @@ cancel-flag, `CCommFrameCtrl`, `CDataCtrl`, and `CDataMonitorCtrl` pointers.
 `CCommFrameCtrl::LineCriticalSection(1)` is taken immediately before execution
 and `(2)` releases it afterward. The selected command plugin holds the
 communication critical section throughout its `Execute` call.
+
+The managed adaptation boundary has a separate Boolean ABI mismatch.
+`GTSPlusDiagAdaptMng.dll` declares six Boolean delegate returns—challenge,
+authentication, destroy, execute, cancel, and free-memory—with no return
+marshalling override. The corresponding MAIN native exports return their
+Boolean in `AL`; `CreateChallengeCode`'s failure path at `0x1006EE52` clears
+only `AL`, retaining upper `EAX` bits from logging/string release.
+[Default .NET Boolean marshalling uses a four-byte Windows `BOOL`](https://learn.microsoft.com/en-us/dotnet/standard/native-interop/best-practices#boolean-parameters-and-fields).
+[INFERENCE] A native false can therefore be interpreted as true when those
+upper bits are nonzero. This delegate return is distinct from the command plugin's DWORD
+status and serialized operation result.
 
 Current `KGP_CommFrameCtrl.dll` then closes the transport boundary below those
 plugins. `SendInt`/`SendIntExt` converge on `SendProc @ 0x10037F10`, `Receive @
@@ -2410,9 +2423,27 @@ Current role `0x06` closes the analogous Active Test catalog layer. Current Hybr
 
 Current role `0x08` closes the next layer for a **selected direct Active Test**. Hybrid category397 binds `GetActTstInitP5_DT.dll` (37,392 B; SHA-256 `36baa624…9d55`). The current body looks up the selected type68 row by u16 `+0x20`, then interprets `+0x39` as its initial-read mode. Mode 0 resolves master selector `0xCA` (`22FFFF`, mask `FF`, positive check `62`, CommSet1), copies type68 `+0x34` into request bytes 1/2, sends through `CommCacheSndRcvExt`, and extracts the initial value from the row's `+0x28/+0x2A` bit range; mode 1 skips that transaction, while other values return `C0040102`. Byte `+0x3C` selects the panel-key path (`+0x30` for modes 1/3, `+0x32` for mode 2), and byte `+0x3D` controls linked-monitor recovery: mode 1 copies type68 `+0x36`; otherwise the plugin scans generation-selected type62/type157 monitor rows for flag `+0x30 & 0x40` and exact DID/bit-range equality (`+0x46`, `+0x3C`, `+0x3E`), then copies monitor key `+0x34`. Final initialization joins type12 Active-Test pattern, type13 physical conversion, type14 display pattern, and type15 unit records, with `CheckSupportPanel` governing applicable display entries. Exact current witness: Hybrid direct test `0x0001` **Activate the Inverter Water Pump** has DID `0x2801`, bits 15..15, read mode 0, and therefore materializes selector `0xCA` as **`22 28 01 -> 62`**; the monitor scan uniquely resolves key30 **Inverter Water Pump**, whose typed metadata is OFF/ON. `tools/gts command HV_P5 0x08 --item 0x1` reproduces that plan offline. Boundary: role `0x08` initialization does not prove role `0x06` runtime availability, and panel support may still depend on live/cache state; `tools/gts` does not execute the Active Test.
 
-The shared **P5 direct Active-Test runtime executor** below role `0x08` is now closed as well. It is not another category DLL role. Current `CommandDataLib.dll` `CStartActTstSnd::SetValue @ 0x10089E00` performs the exact inverse physical conversion into the command object's low raw byte: **`raw8 = trunc_toward_zero((engineering_integer - Offset) * Div / Mul) & 0xFF`**. Here `engineering_integer` is the displayed engineering value scaled by `10^decimal_point_count`; the role-`0x70` metadata supplies the same type13 `Mul/Div/Offset`, type15 unit, and type14 display choices. The generated direct-test rows therefore export that physical metadata and named choices explicitly. `DataMonitorPhase5_DT.dll` `CDataMonitorThreadP5::virtual_104 @ 0x1000D5E0` then combines the selected type68 row with type67 `CDbDataIdForActTable`. Type67 u16 `+0x02` is the DID lookup key and **the lookup is intentionally one-to-many**: current GTS keeps the complete result set. Every shared-DID set in the current NA/EU/JP corpus has one uniform encoding mode at u8 `+0x0A` (zero mixed-mode sets). The executor also consumes type67 u16 `+0x04` as a 1-based control-enable bit, `+0x06` as data-byte offset, `+0x08` as data-byte length, and the mode-5-only match fields at `+0x0C/+0x0E`. Rejecting a DID merely because it resolves multiple type67 rows was an exporter bug. The recovered OEM lookup supports those rows unambiguously.
+Current-main direct Active-Test packing is implemented in `DataMonitorPhase5_DT.dll` and `DataMonitorPhase6_DT.dll`, below the category command plugins. The selected type68 row supplies the DID and bit bounds; type67 supplies all matching DID records, with the encoding mode taken from the **first returned record** at `+0x0A`. Its other fields are the 1-based enable bit (`+0x04`), byte offset/length (`+0x06/+0x08`) and mode-5 exact bit bounds (`+0x0C/+0x0E`). `DiagAdaptation` writes the command's logical raw32/alternate32 fields at `+0x24/+0x28`. `CStartActTstSnd::SetValue @ 0x10089E00` is a separate native-caller path: wrapped 32-bit subtraction/product, signed division by `Mul`, then low-byte storage. Applying it again after logical adaptation would double-convert the input.
 
-Selector `0x9D` is **`2F FF FF 03`** / mask `FF` / check `6F`, with the type68 DID substituted, and selector `0x64` is **`2F FF FF 00`** / check `6F`. The current builder's control-enable behavior is encoding-mode-specific. Mode 0/3 zero-fill the runtime DID-data length `N` and write the selected raw value big-endian into the whole-byte span covered by type68 `+0x28/+0x2A`; mode 0 then walks all matching type67 rows whose `data_byte_offset/data_byte_length` lies fully inside that selected span and sets MSB0 mask bit `control_enable_bit_1based-1`, while mode 3 appends no control-enable mask. Mode 1 places the raw value at the selected ending bit and uses the selected type68 bit-range mask for return-control. Mode 4 shifts the raw value into the selected bit range and likewise uses the selected-bit-range mask for return-control. Thus control-enable-mask length is **not generally `N`**: it is the produced mask geometry for the selected mode. The **source of N is instruction-closed rather than merely bounded**. `DiagCommCtrlMain` registers share-data slot `0x27` as its `CCmdList<CCmdDataIdLengthList>` at object `+0xE14`; `CCommCachePlusP5::GetSupportEcuDataIdLengthListCache` reads that slot, and each per-ECU entry stores parallel DID (`+0x0C`) and byte-length (`+0x20`) word lists. In `CCommCachePlusP5::CheckSupportDid`, the ordinary probe path resolves selector `0xCA` (`22 FF FF -> 62`), substitutes the selected type68 DID, sends it through `CommCacheSndRcvExt`, requires the received UDS payload length to exceed 3, then appends **`received_length - 3`** to the length list beside that DID; a cached hit reconstructs the internal received length as `N + 3`. Thus the three bytes removed are exactly positive SID `0x62` plus the echoed DID. This runtime-length probe is distinct from role-`0x08`'s initial-value mode: mode 1 may skip the UI initialization read while the support/runtime cache still has an exact `22 <DID>` length probe. Static DDB bit geometry still gives only a lower bound. The current Hybrid `0x0001` water-pump test joins type67 row `000001280000000000000100000000000000`, encoding mode1, DID `0x2801`, bit15, and raw OFF/ON `0/1`; therefore the exact formulas are `2F 28 01 03 || N-byte value` with byte1 bit0 carrying the value and `2F 28 01 00 || control-enable mask` with byte1 bit0 set; for this bit-15 witness the mask itself is two bytes even if runtime `N` is larger. Bit15 proves only `N >= 2`; for the **minimum** `N=2`, the corresponding examples are OFF `2F2801030000`, ON `2F2801030001`, and return-control `2F2801000001`. The handoff is also instruction-closed: `CDataMonitorThreadP5::virtual_20` passes `buffer+1,length-1` through `CDataMonitorPhase5Interface` vtable `+0x2C`; `DataListIF` `CCommEventPhase5AT::ActiveTestStart` re-prepends `0x2F` for direct `ActiveTestType=0`, queues start/return-control frames, `GetSndFrame` copies the queued bytes unchanged, `CheckRcvFrame` requires `0x6F` and at least three response bytes, and `p5diag_tf::J2534DiagInterface::ThreadMain` sends the frame through `KGP_CommFrameCtrl::CCommFrameCtrl::SendIntExt`. No Active Test was executed to establish this model. Current category485 `EPB_P5` is a fail-closed exception: its DDB contains type68/type67 direct-control geometry and selector `0xCA`, but the category has **no selector `0x9D` or `0x64` master frame**. Same-release `CommandCommon.dll` `CCommCachePlus::GetCommFrmInfo @ 0x1006F8C0` queries type `0x112` by the actual category+selector and returns `C0040101` when no row exists; there is no category/frame fallback. Those 14 EPB rows therefore remain non-executable rather than borrowing another category's `2F .. 03/00` template. `tools/gts command HV_P5 0x08 --item 0x1` and `tools/gts active-test HV_P5 0x1` now expose the exact `runtime-length-probe` alongside the executor formula and qualified static-minimum examples.
+The ordinary monitor controller maps category generation `u8(+0x48) & 0x1F`: `0x14/0x15` to Phase5 and `0x16` to Phase6. Connection state, prior controller mode and multi-ECU flags can select Dual/Fuel engines instead. These modules are selected by `KgpDataMonitorCtrl`, not master table19 roles; a category-only plan therefore carries explicit P5/P6 packing requirements.
+
+Selectors `0x9D` and `0x64` supply four-byte START/STOP prefixes, with the selected DID substituted. The current ordinary templates are `2F <DID> 03` and `2F <DID> 00`. Let `N` be the cached DID data length, `L` the produced type67 enable-mask length, and bit0 mean the most-significant bit:
+
+| Mode | Family | Value placement | START after prefix | STOP after prefix |
+|---|---|---|---|---|
+| 0 | P5/P6 | raw32 big-endian, whole-byte width 1..4 | N data bytes + L enable bytes | same L enable bytes |
+| 1 | P5/P6 | raw8 shifted to the ending bit | N data bytes + N mask bytes | same N mask bytes |
+| 2 | P5/P6 | returns `C0040102` | — | — |
+| 3 | P5/P6 | raw32 big-endian, whole-byte width 1..4 | N data bytes | empty |
+| 4 | P5/P6 | shifted raw32, byte span 1..4 | N data bytes + N range-mask bytes | same N range-mask bytes |
+| 5 | P5 only | shifted raw32, byte span 1..4 | N data bytes + L exact-row enable bytes | one `FF` byte |
+| 6 | P6 only | low raw byte shifted to the ending bit | N data bytes | empty |
+
+Mode1 with nonzero alternate requires a one-byte span and uses unshifted raw8 plus low8(alternate). Mode0 builds its mask from every fully contained type67 byte span. Mode5 takes the first contained row with exact bit bounds; its offset must be strictly below the selected span's upper bound. A matched zero enable key fails with `C0040102`; no match produces `L=0`. P5 rejects mode6; P6 rejects mode5. The native builders have unchecked geometry-dependent writes, so these rules describe the binary rather than an input-validation guarantee.
+
+`N` comes from the per-ECU `CCmdDataIdLengthList` cache, registered in shared slot `0x27`. The ordinary `CheckSupportDid` probe uses selector `0xCA`, substitutes the DID into `22 FF FF`, and stores received length minus three after a successful positive response. The removed bytes are `62` plus the echoed DID. This length acquisition is separate from the UI initialization-read mode. For Hybrid test `0x0001`, DID `0x2801`, bit15, mode1, **assuming `N=2`**, OFF is `2F28010300000001`, ON is `2F28010300010001`, and STOP is `2F2801000001`. START is `4+2N` bytes and STOP is `4+N`; both masks remain N bytes when runtime N exceeds the static minimum.
+
+The DataMonitor interface strips the original SID; the matching DataListIF event re-prepends `2F` for direct tests or `31` for routines. **Every START appends a new active node. Only the STOP chain deduplicates by SID+DID/RID, retaining its existing bytes.** `GetSndFrame` copies the queued bytes unchanged to the J2534 worker and `CCommFrameCtrl::SendIntExt`. In the supplied initial context, EPB category485 has no selector `0x9D/0x64` rows; `GetCommFrmInfo` returns `C0040101`, rather than borrowing another category's frames. The offline `tools/gts active-test HV_P5 0x1` output exercises the corrected packing example and length-probe plan.
 
 The generic **current P5 RoB transport** is now closed through raw record bodies. Role `0xA0` binds `GetRoBP5_DT.dll` directly on ordinary P5 categories (unlike the category-0 fallback used by role `0xB5`). The current plugin uses two parallel subfunction families. Selector `0xF3` enumerates behavior codes with **`AB 01 -> EB 01`** and **`AB 11 -> EB 11`**; `FUN_100010C0` parses response bytes after offset 2 as big-endian 16-bit behavior codes. Selector `0xF4` pairs those families as **`AB 02 <behavior:be16> -> EB 02`** and **`AB 12 <behavior:be16> -> EB 12`**; `FUN_100047A0` parses frame IDs from offset 4 as big-endian 16-bit values, sorts them, and removes duplicates. Selector `0xF5` then fetches one raw record with **`AB 03/13 <behavior:be16> <frame:be16> -> EB 03/13`**. `FUN_100016F0` starts record parsing at byte 6: byte 6 is the DID-block count, and when it is zero `FUN_10002A60` derives the count by scanning blocks from byte 7 to response end. Each block is `DID:be16 | length | data`; DIDs `0x6000..0x6FFF` use a big-endian 32-bit length, while all other DIDs use an 8-bit length. The current host does not validate the echoed behavior/frame fields before parsing. The generated diagnostic bundle emits one `p5_rob` command only when the category has an exact `GetRoBP5_DT.dll` role-`0xA0` binding and the complete F3/F4/F5 pair for both subfunction families; all 89 such current categories satisfy that shape. Raw transport is exact; behavior-record signal conversion/presentation remains separate.
 
@@ -3642,11 +3673,13 @@ for both PCS FFD section families, closing the persistence side of the host pipe
 The same template fully declares stored ring-buffer signal metadata: frame indexes/lengths,
 signal/frame IDs, start/end bits, names/units, signedness, **MUL/DIV/OFFSET**, decimal
 precision, display patterns, raw min/max, plus ring read/write positions and raw bytes.
-The managed bodies are now executable after CP recovery rather than an analysis boundary.
-`RingBufferParser::ParseRingBuffer` uses an 8-byte timestamp and record stride
-**`8 + 2 * sum(frame lengths)`**. `ConvertNumericValue` handles signed 1/2/4/8-byte values
-and unsigned bitmask/shift extraction, then computes
-**`(raw * MUL / DIV + OFFSET) / 10^decimal_places`**. `Converter.BinaryRead` exposes the
+CP recovery supplies the qualified IL bodies used below.
+`RingBufferParser::ParseRingBuffer` reads a **4-byte little-endian UInt32 timestamp**.
+The binary record width is **`4 + sum(frame byte lengths)` bytes**.
+The parser converts bytes to hexadecimal text, where that width becomes
+**`8 + 2 * sum(frame byte lengths)` characters**.
+`ConvertNumericValue` handles signed 1/2/4/8-byte values and unsigned bitmask/shift
+extraction, then computes **`(raw * MUL / DIV + OFFSET) / 10^decimal_places`**. `Converter.BinaryRead` exposes the
 actual saved-file typed-reader branches and signature resynchronization logic.
 
 `TseCompression` closes the outer GTSE container too: it recursively inventories the
@@ -3718,27 +3751,43 @@ Current GTS+ contains a first-class Toyota resolver above individual diagnostic 
 
 `CDAExecSelectVehicle` / the VIN10 selector family dispatches by the category generation low five bits. The constructor jump table is exact: `3 -> CGetCarInfoPhase3`, `4 -> CGetCarInfoPhase4`, `20/21 -> Phase5`, and `22 -> Phase6`; values `5..19` return Toyota error `0xA0040403` from this **VIN10 command only**. The master DLL table separately binds role `0x45` to `SelectCarType.dll`, role `0x4A` to `SelectCarTypeVin.dll`, and role `0x7D` to the regional VIN10 selector. The two legacy-selector binaries are referenced by the current master but are absent from the current GTS+ and extracted V18 payloads. Their resolver implementations remain **unrecovered**.
 
-Phase3/Phase4 are not a VIN-table-only path. Their decision program is stored in `DB/Spe/Toyota.ddb` and cross-joins the ordinary `DB/Gen/Toyota.ddb`: Spe supplies variables, CommFrames, and FuncCommFrames while the corresponding CommSet IDs resolve in Gen. Shared-data slot 14 supplies K1. Phase4 selectors `0x28..0x39` resolve to an 18-step program; all current P4 K1 variants carry the same program. The program issues `21 C1`, uses each DB receive mask to select response bytes, and `CGetCarInfoPhase4` assembles those results into the key consumed by class `0x129` `CDbVehicleDecisionTable`. P3 uses the analogous `0x1B..0x27` program and retains a genuine alternate K1 variant. The type-41 matcher itself uses category/phase plus two text and eight scalar criteria, with record flag bits 0..9 bypassing criteria and scalar operator codes `1=equal`, `2=not equal`, `3=record<=key`, `4=record>=key`; EU variants additionally return specificity and Toyota retains highest-score matches. The runtime bundle exports the semantic criteria and the full Spe probe programs rather than opaque DDB records.
+Phase3/Phase4 are not a VIN-table-only path. Their decision program is stored in `DB/Spe/Toyota.ddb` and cross-joins the ordinary `DB/Gen/Toyota.ddb`: Spe supplies variables, CommFrames, and FuncCommFrames while the corresponding CommSet IDs resolve in Gen. Shared-data slot 14 supplies K1. Phase4 selectors `0x28..0x39` resolve to an 18-step program; all current P4 K1 variants carry the same program. The program issues `21 C1`, uses each DB receive mask to select response bytes, and `CGetCarInfoPhase4` assembles those results into the key consumed by class `0x129` `CDbVehicleDecisionTable`. P3 uses the analogous `0x1B..0x27` program and retains a genuine alternate K1 variant. The type-41 matcher uses category/route selector plus two text and eight scalar criteria, with record flag bits 0..9 bypassing criteria and scalar operator codes `1=equal`, `2=not equal`, `3=record<=key`, `4=record>=key`; EU variants additionally return specificity and Toyota retains highest-score matches. The runtime bundle exports the semantic criteria and the full Spe probe programs rather than opaque DDB records.
 
-Phase5 is deliberately different. `CGetCarInfoPhase5::virtual_4 @ 0x10004D80` exactly returns `0xC0040101` without a class-`0x129` query. Current P5 and P6 vehicle resolution uses type-59/class-`0x13B` `CDbVinVehicleDecisionTable` at this stage. Its key is exact: category ID (`u16`), phase/protocol byte, and `VIN[0:11]`, with record flags providing per-position wildcards; record `+0x0E` is the vehicle type. Current NA Camry-HV rows resolve Toyota vehicle type **12704 = `Camry HV`**. Independent tooling must not promote a P3/P4 type-59 hit to a final vehicle: Toyota still performs the type-41 live stage. The Comma runtime now marks those hits non-final rather than silently substituting a VIN-only resolver.
+Phase5 is deliberately different. `CGetCarInfoPhase5::virtual_4 @ 0x10004D80` exactly returns `0xC0040101` without a class-`0x129` query. Current P5 and P6 vehicle resolution uses type-59/class-`0x13B` `CDbVinVehicleDecisionTable` at this stage. Its key is exact: category ID (`u16`), encoded route-selector byte, and `VIN[0:11]`, with record flags providing per-position wildcards; record `+0x0E` is the vehicle type. Current NA Camry-HV rows resolve Toyota vehicle type **12704 = `Camry HV`**. Independent tooling must not promote a P3/P4 type-59 hit to a final vehicle: Toyota still performs the type-41 live stage. The Comma runtime marks those hits non-final.
 
-After vehicle selection, type-5 maps vehicle to install-set IDs and type-44 maps each set to expected ECU categories. `CDAExecGetMountEcuList` / `GetMountEcuListNoCnfm` then applies `CEcuConnectCheck` to those Toyota candidates. Type-44 supplies category `+0x06`, connection-frame ID `+0x08`, CommSet `+0x0A`, and phase byte `+0x13`; `CommConnectionNoBuffer` resolves class `0x111`, sends the DB frame where applicable, masks the response and compares the check bytes. The lower route is category scoped: `CCommFrameCtrl::GetEcuAddr(category, phase) @ 0x10035420` queries class **`0x10D` `CDbProtInfoTable`**, matching category at `+0x00` and phase at `+0x18`; request address is u16 `+0x08`, and current P5 uses byte `+0x0A` as logical-address extension. For standard legislated physical IDs, `+0x14` values in `0x7E0..0x7E7` map to response request+8; other nonzero `+0x14` values are preserved as route metadata rather than rejected as malformed OBD data. All **34/34** current NA Camry-HV logical candidates have a resolved class-`0x10D` route, including direct `0x7C0`/`0x780` endpoints and distinct `0x750` extended-address routes such as TPM `0x2A`, Brake Booster `0x29`, CMCCM `0x7B`, and DMC `0x96`.
+After vehicle selection, type-5 maps vehicle to install-set IDs and type-44 maps each set to expected ECU categories. Current main `DV000004` constructs `CGetMountEcuListNoCommSnd` with role **121**, ECU **0** and mode **0**. The initial NA/EU/JP master contexts select `GetMntEcuLstNoCf_DT.dll`. It enumerates install rows with connection flag **−1**; its final alias-resolution stage probes only when categories `462` and `165`/`361`, or `463` and `413`/`414`, coexist. `DV000005` separately checks an explicitly requested group/ECU/bus and emits `connect` only for a one-record response.
 
-Diagnostic support is a separate Toyota plugin dispatch. `CDbDllTable::GetQuery` selects by role, then exact category, then first row for the role. The generated bundle therefore records the literal selected support DLL rather than deriving family from generation. Across each regional master all **2,136 categories** survive into the resolver index; selected support families are `p3=1`, `p4=1859`, `p5=172`, `p6=104`. The large P4 count includes Toyota's role fallback and must not be reinterpreted as a vehicle-generation classifier. Decoded signal catalogs are separately available for 135 NA / 161 EU / 143 JP categories; catalog availability is tooling coverage, never an ECU-support gate.
+Type-44 supplies category `+0x06`, connection-frame ID `+0x08`, CommSet `+0x0A`, and encoded route selector `+0x13`. When invoked, `CommConnectionNoBuffer` resolves class `0x111`, sends the DB frame where applicable, masks the response and compares the check bytes. The lower route is category scoped: `CCommFrameCtrl::GetEcuAddr(category, route_selector) @ 0x10035420` queries class **`0x10D` `CDbProtInfoTable`**, matching category at `+0x00` and route selector at `+0x18`; request address is u16 `+0x08`, and current P5 uses byte `+0x0A` as logical-address extension. Category `+0x48` supplies ECU generation separately. For standard legislated physical IDs, `+0x14` values in `0x7E0..0x7E7` map to response request+8; other nonzero `+0x14` values are preserved as route metadata rather than rejected as malformed OBD data. All **34/34** current NA Camry-HV logical candidates have a resolved class-`0x10D` route, including direct `0x7C0`/`0x780` endpoints and distinct `0x750` extended-address routes such as TPM `0x2A`, Brake Booster `0x29`, CMCCM `0x7B`, and DMC `0x96`.
+
+The separate `DV000005` individual-ECU request can use cached connection state. In current `GetEcuEchConnect_DT.dll`, processor `0x1000F410` takes the first Installing row matching ECU and route selector. After a successful cable query, cable output `1` or route selector `0x15` selects `ConnectCheckNoComm`; otherwise it calls `ConnectCheck` with route selector and generation as separate arguments. No matching row returns success with no ECU output. The adapter emits signed `connect` only when the response contains exactly one record. The resolver pins the source SHA, dispatch vtable and branch bytes at `0x1000F581`.
+
+Diagnostic support is a separate Toyota plugin dispatch. `CDbDllTable::GetQuery` selects the active role run, then its exact category or first row. The bundle records the selected support DLL rather than deriving it from generation. Initial native selection and lossless physical category occurrences are separate exports; catalog availability is tooling coverage, not an ECU-support gate.
 
 For P5, `GetSupportP5_DT.dll` exposes `(ecuId, optionId, id) -> support`: option 1/2/3 dispatches PID/DID/RID checks, but the shared plugin is **not one universal algorithm**. Current `CommandCommon.dll` first selects family-local behavior: ordinary Toyota P5, Subaru/FHI (`generation & 0xE0 == 0x20`), Suzuki (`0x60`), generation-21 Mazda/MMC-style handling, and Hino exceptions for categories 5033/5049/5050. The universal resolver therefore exports `support_mode` separately from `support_family`. Ordinary Toyota P5 DID support is exact and live: selector `0xC8` sends `22 01 01`; `AnalyzeFrameData` decodes the `62 01 01` payload MSB-first and **retains advertised `xx00` root IDs in the enabled-ID list**, then `CreateEnableDataIdList` queries ordinary advertised groups and expands their member bitmaps. It deliberately does not issue group queries for `0xF300` or `0xFD00`; those advertised roots remain supported IDs. Routine support remains rooted at selector `0xCC`, `31 01 10 01 -> 71...` for the ordinary P5 path.
 
 P6 is independently selected by `GetSupportMultiP6_DT.dll`. DID enumeration starts with `22 A1 00`; the root MSB-first bitmap advertises selector IDs `A1nn`, which themselves remain supported. Ordinary selectors are queried as `22 A1 nn`, and the returned bitmap expands to `nn00..nnFF`. `A1FD` and `A1FE` remain advertised selector IDs but Toyota deliberately does not query/expand them. Routine enumeration is parallel: `31 01 D1 00` advertises `D1nn`, ordinary selectors are queried as `31 01 D1 nn`, and the returned bitmap expands to `nn00..nnFF`. The **inclusive range `D1F0..D1FE`** remains advertised but unexpanded: current `CommandCommon.dll @0x10067EEA` queries only selectors below `D1F0` or above `D1FE`. The [P6 consumer evidence](gtsplus-p5-adas-p6-migration.md) pins that branch. These Toyota support executors operate independently of generation/category permissions.
 
-Transport selection is separate from support family. `CCommFrameCtrl::ChangeCommIF` selects `CCommCtrlISO15765_Phase5` for phase `0x12`, `CCommCtrlISO15765_29BitCan` for phase `0x18`/`0x38`, `CCommCtrl_FD_ISO15765_PS` for `0x78`/`0x88`, and ISO13400/NDIS on its own switch case. For the P6 29-bit normal-fixed path, class-`0x10D +0x08` supplies the **target-address byte**. Toyota materializes physical request `0x18DA<target>F1`, response `0x18DAF1<target>`, and functional request `0x18DB33F1`. Category 6000 therefore resolves raw target `0x00` to `0x18DA00F1 -> 0x18DAF100`. Comma's upstream `UdsClient` already implements this 29-bit source/target swap. The universal Toyota bundle records the Toyota transport controller/physical endpoint and carries **no Panda-bus default**. The caller supplies Panda logical-bus selection from harness/installation state.
+Transport selection is separate from support family. `CCommFrameCtrl::ChangeCommIF @ 0x100314F0` switches on the route selector's low nibble while retaining the full value. Low-nibble `2` selects the ISO15765 family; Category `+0x48/+0x49` supplies its generation/mode subdispatch. Full selectors `0x18`/`0x38` select `CCommCtrlISO15765_29BitCan`, `0x78`/`0x88` select `CCommCtrl_FD_ISO15765_PS`, and low-nibble `4` selects ISO13400/NDIS. For the P6 29-bit normal-fixed path, class-`0x10D +0x08` supplies the **target-address byte**. Toyota materializes physical request `0x18DA<target>F1`, response `0x18DAF1<target>`, and functional request `0x18DB33F1`. Category 6000 therefore resolves raw target `0x00` to `0x18DA00F1 -> 0x18DAF100`. Comma's upstream `UdsClient` already implements this 29-bit source/target swap. The universal Toyota bundle records the Toyota transport controller/physical endpoint and carries **no Panda-bus default**. The caller supplies Panda logical-bus selection from harness/installation state.
 
-Session lifecycle is independent again. The universal bundle resolves D1/D2/DD for every Toyota category. When D1/D2 are literal two-byte `10 XX` requests, the generic runtime executes those exact bytes; it does **not** apply a supported-generation/category allowlist. DD remains category-local (`22 F1 86`, `22 D1 00`, `10 03` refresh, or another unrecovered shape). Unknown shapes mean only that the generic session executor is unavailable for that row. The historical Camry v6 JSON still contains its old `eligible_generation_low5` evidence field, but the universal runtime does not use it as a permission system.
+Session metadata preserves D1/D2/DD as complete ordered native selector programs, including context, source identities and failures. Multi-frame selections are not reduced to scalar requests. First-role fallback, ordered reflection events, first-selector CommSet semantics and explicit cached ECU source identities use the shared native index. Unknown history stays unresolved.
 
-The clean bundle is now `toyota-diagnostics-bundle-v2`. It contains all regional vehicle/type-41/type-59/install/category/route/session/support-dispatch metadata and keeps decoded catalogs lazy and separate. The current NA counts are 2,864 vehicles, 8,372 install sets, 2,136 categories, 82,761 install rows, 2,402 type-59 rows, 1,869 type-41 rows and 479 routes; EU and JP are verified analogously. `tests/techstream/verify_toyota_diag_bundle.py` regenerates the ZIP byte-for-byte and asserts that no `wire_proven_categories`, supported-generation, or catalog-membership permission layer participates.
+The clean bundle is `toyota-diagnostics-bundle-v4`; the target registry is `toyota-diagnostics-registry-v8`. Route, VIN and type-41 records expose `route_selector`; install rows expose `connection_route_selector`; Customize exposes `target_route_selector`. These encoded selectors remain separate from ECU generation. `category_rows` retains occurrence lists; `raw_category_occurrences` preserves both families, separately from `initial_categories`, `selected_categories` and `category_resolution`. Raw role bindings are separate from native-selected plugins. Gen/Spe database family is independent of P4/P5/P6 support-family classification.
 
-The resulting Toyota-native pipeline is therefore **Toyota resolver command family -> live generation/source context -> VIN/type-41 vehicle decision as Toyota dispatches it -> install sets -> category+phase route -> live mounted connectivity -> literal support-plugin family -> live advertised capability -> operation**. This establishes identity, installation, routing and advertised diagnostic capability. It does not make arbitrary mutation safe or authorized; explicit request geometry and user acknowledgement remain separate execution concerns.
+| Region | Physical Gen category rows | Initial selected categories |
+|---|---:|---:|
+| NA | 2,171 | 2,136 |
+| EU | 2,180 | 2,136 |
+| JP | 2,165 | 2,136 |
 
-Machine-readable evidence remains `data/generated/gtsplus_2026/vehicle_resolver_semantics.json` plus the deterministic runtime export `data/generated/gtsplus_2026/toyota_diag_bundle_current.zip`.
+Offline catalog enumeration does not simulate ECU cache loads. An explicitly supplied cached path/load ID is retained; otherwise metadata is materialized in a detached context, with `cache_action=not-mutated-offline-catalog` and no native load ID. A Spe name remains null when only Gen strings are supplied; its original string index and source boundary survive export. Decoded catalogs remain lazy, separate from admission.
+
+The Toyota-native layers are **resolver command family -> generation/source context -> VIN/type-41 vehicle decision -> install candidates and conditional alias resolution -> explicitly requested connectivity -> support-plugin family -> advertised capability -> operation**. Each operation retains its own request geometry and authorization conditions.
+
+Machine-readable evidence remains `data/generated/gtsplus_2026/vehicle_resolver_semantics.json` and the canonical gzip members in `data/generated/gtsplus_2026/toyota_diag_bundle_current/`. The ordered manifest retains each member's exact byte count and SHA-256. `tools/toyota gts bundle export` produces a portable ZIP under `build/out/`; packaged duplicates are not tracked.
+
+The Camry registry is `data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json.gz`. `load_toyota_diag_registry` restores its original JSON without vendor inputs. Deterministic gzip preserves every record, source identity, selection history, and ordering distinction.
+
+Resolver schema 3 stores each raw master table as source-qualified fixed-width hex records in physical order. The record's array index is its ordinal; its decoded offset is `ordinal * record_size`. Source identity and section offset are stored once per group. P6 regional catalogs likewise reference shared category/plugin records and the regional context instead of copying the same query history into each result.
 
 ### 6.3 Current GTS+ live transport for the selected FRC cruise Data IDs
 
@@ -3904,11 +3953,11 @@ Current GTS+ keeps Toyota Customize metadata in the **regional master**. The cur
 
 The current NA master contains 79 group rows, 3,431 item rows, 2,444 possible-value rows, and four body-type probe rows; EU has 77/3,440/2,444/4 and JP 81/3,121/2,444/10. Concrete NA witness: body-type-0 group 1 is **Wireless Door Lock**; item `(group 1, item 23)` is **Open Door Warn**, targets category 26 `Theft Deterrent`, uses data id 1009 with current bits 7..7, and has OEM choices `OFF=0` / `ON=1`. `SetCustomizeAllDefault` checks item `u16 +0x22` before one default path, but that field is zero in every current NA/EU/JP item row; no default value is therefore inferred from the first choice or any other heuristic.
 
-The universal clean diagnostic bundle exports this metadata as a lazy regional `customize/<region>/0.json` member. This is a static catalog boundary only: `GetCustomSupportList` live body-type selection, current-value acquisition, and `SetCustom` write execution remain separate runtime stages.
+The bundle exports `toyota-customize-catalog-v3` under `customize/<region>/0.json`. Target-category queries retain their supplied native context, selected source, failures and unknown results. Other Customize tables remain raw metadata. Live body-type admission, current-value acquisition and `SetCustom` execution are separate stages.
 
-The **current P5/P6 single-item SetCustom transaction is now byte-closed**. `SetCustom.dll` reads each selected `CDbCustItem` target category at `+0x0C`; `+0x2C` is the target phase type and `+0x2A` is the modern current/write DID. Generation-low5 `0x14/0x15` enters the P5 path and `0x16` the P6 path. Both call `CCommCurrentData::CheckSupportP5/P6` for that DID, then `GetCurrentDataOnlyP5/P6`, which resolves selector `0xCA`, substitutes the DID into `22 00 00`, and returns bytes after `62 <DID>`. The merge path uses item `+0x18/+0x1A` as the MSB0 write bit range and `+0x2D` as merge mode. `SetCustomBase` builds a clear mask for that range and ORs the selected raw value into the preserved current buffer; mode 1 additionally requires the corresponding support bit(s) in the immediately preceding byte. Across all 1,933 current-generation NA Customize rows, merge modes are only 0/1, current bit range `+0x14/+0x16` equals write range `+0x18/+0x1A`, and every mode-1 field is one bit wide.
+The **current P5/P6 single-item SetCustom transaction is byte-closed**. `SetCustom.dll` reads each selected `CDbCustItem` target category at `+0x0C`; `+0x2C` is the encoded target route selector and `+0x2A` is the modern current/write DID. Generation-low5 `0x14/0x15` enters the P5 path and `0x16` the P6 path. Both call `CCommCurrentData::CheckSupportP5/P6` for that DID, then `GetCurrentDataOnlyP5/P6`, which resolves selector `0xCA`, substitutes the DID into `22 00 00`, and returns bytes after `62 <DID>`. The merge path uses item `+0x18/+0x1A` as the MSB0 write bit range and `+0x2D` as merge mode. `SetCustomBase` builds a clear mask for that range and ORs the selected raw value into the preserved current buffer; mode 1 additionally requires the corresponding support bit(s) in the immediately preceding byte. Across all 1,933 current-generation NA Customize rows, merge modes are only 0/1, current bit range `+0x14/+0x16` equals write range `+0x18/+0x1A`, and every mode-1 field is one bit wide.
 
-P5 `FUN_1000CE30` and P6 `FUN_1000EEB0` are structurally identical writers: selector `0x74` resolves to **`2E 00 00` / positive `6E 00 00`**, bytes1/2 are replaced with the item write DID, the merged current-data buffer is appended, and the positive response must echo the DID. The generation flush then re-reads the same DID and verifies the merged value, with bounded retry handling. Representative current rows: P5 category 449 `Main Body`, group1/item200 **Wireless Control Function** writes DID `0x225A` on phase `0x22`; P6 category 6033 `Integrated Body No1`, group1/item210 **Wireless Remote Control Setting** writes the same DID on phase `0x18`. The clean Customize catalog exports these proven fields as `write_did`, `target_phase_type`, `write_bit_start/end`, `merge_mode`, plus a `modern_executor` description. Legacy P3/P4 body-type discovery remains a separate transport stage and is not inferred from these modern writes.
+P5 `FUN_1000CE30` and P6 `FUN_1000EEB0` are structurally identical writers: selector `0x74` resolves to **`2E 00 00` / positive `6E 00 00`**, bytes1/2 are replaced with the item write DID, the merged current-data buffer is appended, and the positive response must echo the DID. The generation flush then re-reads the same DID and verifies the merged value, with bounded retry handling. Representative current rows: P5 category 449 `Main Body`, group1/item200 **Wireless Control Function** writes DID `0x225A` with route selector `0x22`; P6 category 6033 `Integrated Body No1`, group1/item210 **Wireless Remote Control Setting** writes the same DID with selector `0x18`. The clean Customize catalog exports `write_did`, `target_route_selector`, `write_bit_start/end`, `merge_mode`, and `modern_executor`. The selector comes from master table 21/native query `0x115`, row `+0x2C`: `GetCustItemLstV2_DT @ 0x1000165D` loads it and passes it to `CCommCurrentData` at `0x1000177E`; that constructor stores it at `+0x08` for frame/cache send-receive. The same catalog processor loads native generation independently from Category `+0x48` at `0x100016B2`. Legacy P3/P4 body-type discovery remains a separate transport stage.
 
 ### Current Simple Operation Utility executor
 
@@ -3918,7 +3967,7 @@ Current ECU table 77 `CDbSimpleUtilityTable` is the concrete generic **Simple Op
 
 The P5 RID support cache is now also instruction-closed. Ordinary generation-20 P5 uses selector `0xCC = 31 01 10 01 -> 71` and `CCmdSupportDataIdList::CreateEnableRIdList @ 0x10066160`. After optional `ConvertToNoRoutineInfo @ 0x100738F0`, `AnalyzeFrameData @ 0x10063660` interprets the returned MSB-first bitmap with shift 8, yielding `xx00` group RIDs. Group RIDs `0x0200..0xDF00` are queried as `31 01 <group RID>` and expanded with shift 0 to `xx01..xxFF`; root group RIDs themselves remain enabled. Whether the positive response includes the optional one-byte routine-info field is cached from `CheckIncludingRoutineInfo @ 0x10070910`, whose unresolved case is decided by ECU function 3/detail `0x56`. Generation-low5 `0x15` instead seeds the RID cache statically from type-71 Active-Test RIDs plus type-77 Simple-Utility RIDs. P6 retains its independent `D100/D1nn` RID hierarchy.
 
-The universal bundle now exports concrete table-77 rows under each category's existing `utilities` array, with exact D8/D9/DA request bytes, fixed command variables, timer/check interval, result keys, and a RID support-gate descriptor. Representative P5 witness: Engine utility 8001 **Reset Memory**, RID `0x1187`, `31011187/31021187/31031187`, timer 180000 ms, check interval 200 ms. P6 Engine utility 8001 **Switch Specification Information**, RID `0xDA03`, `3101DA03/3102DA03/3103DA03`, timer 8000 ms, check interval 200 ms.
+The category `utilities` array retains raw table77 rows and complete D8/D9/DA `selector_programs`, including native context/query/failure evidence. `start_frames`, `stop_frames` and `result_frames` preserve every ordered frame, its base bytes and `materialized_static_request`. Fixed command variables, timers, result keys and RID support descriptors remain catalog evidence. Representative initial-context requests: Engine utility8001 **Reset Memory**, RID `0x1187`, `31011187/31021187/31031187`, timer180000ms/check200ms; P6 Engine utility8001 **Switch Specification Information**, RID `0xDA03`, `3101DA03/3102DA03/3103DA03`, timer8000ms/check200ms.
 
 ## 10. Current GTS+ application lifecycle
 
@@ -3952,6 +4001,47 @@ flowchart TD
     Sync --> Upload["Upload service"]
 ```
 
+### Vehicle-path coverage
+
+| Path | Canonical source map | Current qualification |
+|---|---|---|
+| Connection, vehicle identification, ECU discovery, and session ownership | `lifecycle_vehicle_session.json`, `lifecycle_vci_transport.json` | Current-distribution selection, transport, session, error, and teardown paths mapped. Runtime driver identity and ECU responses remain explicit inputs. |
+| Capability checks and displayed menus | `lifecycle_vehicle_session.json` | Database, factory, settings, support, language-selection, and dispatch decisions mapped. |
+| Information, live data, DTCs, freeze frames, readiness, and recordings | `lifecycle_operations.json.gz`, `lifecycle_persistence.json` | Acquisition, decoding, presentation, and persistence paths mapped with source-qualified provider selection. |
+| Configuration, Active Tests, and compiled utilities | `lifecycle_operations.json.gz` | Read/write, actuation, browser/native utility, cancellation, and cleanup paths mapped. |
+| Local authorization, programming, cancellation, and recovery | `lifecycle_auth_settings.json`, `lifecycle_cuw_utility.json` | Available current-source algorithms mapped; selected physical providers and unavailable distribution/server inputs retain their own boundaries. |
+
+Source publication and graph admission are separate: a provider must retain its
+actual source, body, receiver, ABI, and caller selection before it closes a path.
+Export-selection/ABI records, including critical-section flags, and
+source-identity tuples cannot satisfy an algorithm dependency. The selected
+semantic body or explicit native-body proxy must exist; nested real bodies
+remain independently addressable.
+
+Reviewed lower-provider source covers MAIN/DS-4 TY and DS2, their selected
+J2534 controllers, both EX1 worksets, and both broker parsers. MAIN DS2's
+16 CALLs and one original-stack tail bind to the selected MAIN controller
+bodies; DS-4 binds its own controller implementation. MAIN TY gateway
+callbacks and compiled-in runtime additions retain their actual callers and
+receiver selection.
+
+The embedded JSON11 implementations in MAIN/DS-4 `DataManagerNK`,
+MAIN/DS-4 `DiagAdaptation`, and MAIN `GetUtilFuncList` now have separately
+qualified source models and native observations. Their calling conventions,
+control-block layouts, and application error handling remain source-specific.
+`GTSPlusSettingFileManager.dll` uses separate YAML and nlohmann JSON
+implementations. Its settings selection, conversion, merge, integrity checks,
+and read/write failure paths are mapped at their application callers.
+
+The packaged and standalone reports have identical expanded content.
+Raw-proof externalization also reproduces the preceding curated file
+byte-for-byte when reversed; algorithms and caller selections are retained.
+
+Runtime-selected driver modules, ECU replies, OEM authorization responses, and
+missing current-distribution components remain inputs to those algorithms.
+The domain boundary records identify each case. AgentLite is outside this
+investigation.
+
 ### 10.1 Executable and frontend sources
 
 The installed tree contains **17 CP-protected CLR application executables**
@@ -3962,6 +4052,25 @@ bodies, not the zero-filled executable sections in older recovery copies.
 The recovery procedures and source identities are owned by
 [GTS+ body recovery](gtsplus-body-recovery.md) and
 [CP body recovery](cuwplus-body-recovery.md).
+
+Current CUW queries select the installed
+`unpacked/gtsplus/Toyota Diagnostics/CUWPlus` product: **505 INIs, 500 factory
+declarations and 16 additional master-only selectors**, with native modules at
+the product root. Descriptor fields derive exact filenames independently for
+entry, CID, prepare and flash selection; `ContactType` alone is not a route.
+The ancestor `cuwplus/CUWPlus` sample and recovered PE directories require
+explicit selection.
+Diagnostic DLL resolution stays within the selected product's binary directory;
+registered filename casing is matched to the actual file, and the result retains
+its source path and whole-file hash.
+
+The [database census](../../data/generated/gtsplus_2026/ddb_corpus_census.json)
+covers all **301 DS-4 databases**: 2,519 master/ECU sections, eight Viewer sections
+and 96 string/resource files. Main-product auxiliary coverage includes six
+Viewer files, 90 string/resource files and all six regional Gen/Spe masters.
+The parser preserves ordered raw occurrences, variable-length records and
+source offsets. Main and DS-4 factory identities and DLL-role layouts remain
+distinct; these structural records feed the native selection and workflow joins.
 
 The browser applications are shipped as three signed, encrypted packages under
 `Toyota Diagnostics/GTSPlusGUI`, each with a sibling `.cpf` envelope:
@@ -3994,6 +4103,8 @@ native trust helpers, shutdown helper, certificate registration, and PCChecker.
 The parent runs components serially. Missing siblings are skipped; a nonzero
 child exit aborts only when the launch wrapper returned zero. Wrapper failure
 can therefore continue to the next component.
+
+The same artifact contains all 4,709 member paths from the 12 current installer cabinets, under `install_update.cabinet_members.<installer>`. Each table references its exact cabinet-header source and carries a digest of the ordered names. `ComTol32.dll`, the three PSA flashing plugins, `TCUWKindOfVehicleJudger.dll`, and `CanIDTableForMazda.ini` are absent from these cabinet tables; external Windows loader and VIM directories are outside this source set.
 
 Parent-level signature gates cover the DataSync and GUI installers; component
 scripts have their own payload checks. Empty first-party `OnAbort` callbacks
@@ -4198,6 +4309,11 @@ synthetic boundaries in those runs.
 joins InfoCenter and its Multi helper, the signed login frontend, managed
 UserInfo/settings owners, and native license validation.
 
+Its `security_contract_matrix` separates host-DLL authentication, account and
+license policy, and ECU security/session operations. EX MAC record 130 and
+UtilityGene record 128 have separate layouts; STR/transponder and EMPS/steering
+have separate algorithms. Caller/server-provisioned keys remain explicit inputs.
+
 | License result | Local decision |
 |---:|---|
 | 0 | Valid |
@@ -4215,9 +4331,87 @@ verified null/empty and one-MiB input limits.
 MSK persistence precedes memory publication and update broadcast. Selected
 service errors trigger one renewal/retry; revocation and file deletion have
 separate failure paths. Logout clears cached session state while retaining
-credential files. Settings use per-path mutexes and recursive object merge;
-arrays/scalars replace. Vehicle-database region and distributor region are
-separate settings. `CheckPCTime` discards the clock-write result.
+credential files. Vehicle-database region and distributor region are separate
+settings.
+
+The local clock guard requires `Now >= L - T` and `L + T >= S`, where `L` is
+the saved local time, `S` the saved server time, and `T` the tolerance in minutes.
+A missing local timestamp uses `Now`. `CheckPCTime` attempts a timestamp write
+only when that helper returns code 0. It discards the save result and normally
+returns success with an empty response even when the helper returned an error.
+
+Native settings reads in `GTSPlusSettingFileManager.dll` (`20fd47aa…8d`)
+select these filenames:
+
+| Type | Filename |
+|---:|---|
+| 1 | `GTSPlusCommon.gstg` |
+| 2 | `DistDep.gstg` |
+| 3 | `PcSettings.gstg` |
+| 4 | `UP.up` |
+| 5 | `VehicleConfigure.gstg` |
+
+The base directory is the installation's `Env` directory unless
+`..\Env\CustomSetting.yml` supplies a nonempty `SettingFileFolderPath`.
+`GetFileDataFromType` returns a newly allocated, NUL-terminated JSON buffer on
+success. The caller releases it through the same module's `FreeMemory` before
+unloading the module. Failure leaves the output slot unchanged. A NULL output
+pointer returns `0xFFFF`; otherwise an out-of-range type returns `1`. Native
+execution exercised both guards and NULL/non-NULL buffer release.
+
+The encrypted reader removes the decrypted text through its first LF; without
+an LF it retains the entire text. Any nonzero `DecryptFile` result becomes `9`
+and triggers a best-effort write to `\\.\pipe\SettingFileTampering_<PID>`.
+Pipe failure leaves that result unchanged. Missing files return `2`; YAML
+parse/conversion failure or a non-mapping root returns `6`. The plaintext
+hash gate parses JSON before checking its footer/hash: caught parse/type/hash
+failures become tamper status `9`. Only the later parse-window catch returns
+`5`.
+
+Settings mutexes use the filename after the last backslash: equal basenames in
+different directories share a lock. Wait/release results are discarded, and the
+native paths retain their mutex handles. Partial saves read an existing file
+first and stop on read failure; missing files pass the incoming JSON directly to
+the writer. Merge preserves insertion order, recursively merges object members,
+and replaces other members—including null. A nonempty object patch over an
+existing non-null scalar/array throws; the partial-save wrapper returns `0xFFFF`.
+At the native partial-save entrypoints, an array-root patch supplies decimal
+string keys and a non-null scalar root supplies the empty key. A null root
+changes no members, but successful partial save still continues to the writer.
+
+Only exact lowercase `gstg` selects YAML conversion and encryption. Other
+nonempty extensions use JSON with an uppercase hash over the insertion-ordered
+compact object after removing its footer; the new footer is appended last.
+Parent directories are created before JSON validation. Plain-file open failure
+returns `3`, but `fwrite`/`fclose` results are discarded: a short write can still
+return `0`. The lifecycle state records **save returned success**.
+
+JSON-to-YAML emits a root mapping and converts every number through double with
+17-digit precision; integers beyond $2^{53}$ can lose precision. Nested empty
+objects become YAML null, while empty arrays remain sequences. YAML-to-JSON
+requires a mapping root. Its scalar decoder preserves `!`-tagged strings, then
+tries numeric conversion, the six spellings `true/True/TRUE/false/False/FALSE`,
+and finally string. Scalar mapping keys retain their text and leading zeroes;
+complex keys collapse to the empty key. An explicit `!!str` tag still follows
+the scalar coercion path.
+
+Native converter execution observed YAML `{}` become JSON `null`. Empty child
+containers can become null or retain the container type established by an
+earlier sibling. Only the first YAML document is read. In the reverse
+conversion, root JSON arrays/scalars become mappings with decimal/empty keys.
+
+The native encrypted writer calls
+`EncryptFile(filenamePointer, plaintextPointer)` through the current managed
+MethodDef `0x06000011`; any nonzero provider status becomes `7`. Full saves try
+to preserve an existing first-line header, but failed header recovery selects
+`Editor-header-info:GTSPlus_Main\n` and continues. The separate partial-save
+reader propagates decryption failure before writing.
+
+Managed install-path selection uses `InstallFolderPathGetRegistry` and registry
+value `RootFolder`. Missing registry keys/values yield an empty path; registry
+exceptions propagate through disposal. The assembly-directory fallback is a
+separate selection branch. The native path export copies the resulting UTF-8
+bytes to its caller without a capacity argument or appended NUL.
 
 Missing offline profile data opens an error dialog whose OK callback closes
 the window. Relay-triggered login failure is caught and resolved, so connection,
@@ -4244,6 +4438,111 @@ actual confirmation, execution, session-ending, and window-closing IL.
 The Multi executable owns a separate local mutex and localized notice window;
 its Closing handler hides the window and lets the close event proceed.
 
+#### DS-4 gateway sessions
+
+These contracts belong to the current `DS-4/bin/UtilityEx2TY_DS4.dll`,
+SHA-256 `f90266bf8a6d97b23f8838dcc5969cb913c9b5876615fc72eae36ed5c4bdedbd`.
+Exports 44–46 schedule session-ending callbacks. Exports 47–49 schedule
+SecurityAccess callbacks. The scheduler returns `0xF` even when `CreateThread`
+fails. Callback completion separately publishes its result at `0x100687B8`.
+
+| Route | Configuration value | Module ECU value | Key array |
+|---|---:|---:|---|
+| CPU_A | `0x27C` | `0x7A4` | `0x10022BBC` |
+| CPU_B | `0x27D` | `0x786` | `0x10022BA8` |
+| CGW | `0x259` | `0x786` | `0x10022BA8` |
+
+The SecurityAccess callbacks perform this sequence:
+
+1. Save the module ECU, parameter, and busy-count settings. Set busy count to
+   100. A set global-cancel flag skips communication with result 0.
+2. Select the temporary Mode3 communicator and initialize the selected route.
+   Send `3E 00` with timeout 200 and timeout count 4. Then set timeout 1000 and
+   timeout count 3. Initialization or tester failure goes directly to cleanup.
+3. Query the session with `10 5F`. Session `01` selects `10 88`. Session `88`
+   skips that transition. Other sessions select `10 89`, then `10 88`.
+4. Set timeout count to zero. Request a seed with `27 01 04`, encrypt it with
+   AES-128-ECB, and send `27 02` followed by the 16-byte result.
+   Restore timeout count to 3 after this exchange.
+5. On seed/key failure, query the session again. Send `10 89` when the session
+   differs from `01`. A successful key exchange leaves session `88` selected.
+6. Disconnect and discard its result. Clear the active communicator, override,
+   and configuration. Restore the saved module ECU, parameter, and busy count.
+   Publish the callback result, then call `ExitThread(0)`.
+
+The exchange has a shared budget of three failures. Each seed failure consumes
+one without sleeping. Each seed permits two key attempts. A failed pair consumes
+one budget entry and sleeps 10 seconds only if another cycle remains.
+Exhaustion returns 10005. Recovery-query failure replaces that result with
+10006. Recovery-session failure replaces it with 10007. Both recovery failures
+sleep five seconds. Earlier setup failures bypass this recovery sequence.
+
+The native response gates differ by command:
+
+| Helper | Additional checks after transport success |
+|---|---|
+| Tester `0x10004F50` | Response byte 1 equals zero and length is at most 2. No minimum-length check. |
+| Session query `0x10003EE0` | Length equals 2. It still writes response byte 1 when this check fails. |
+| Session change `0x10003250` | Length equals 2. No session-byte echo check. |
+| Seed `0x10003DF0` | Length is at least 3 and byte 1 echoes `01`. It then copies 16 bytes from the zero-initialized response buffer. |
+| Key `0x10003D10` | Length is at least 3 and byte 1 echoes `02`. |
+
+The seed helper accepts responses shorter than 18 bytes and copies their
+zero-filled tail. Both key arrays contain identical bytes. A zero seed still
+passes through encryption, and the caller discards the cipher's return value.
+Normal cleanup does not restore previous timeout settings, pending cancellation,
+or the ECU session. Exceptions or forced thread termination can bypass cleanup.
+
+The Mode3 transaction reads the global-cancel flag after receiving, before
+response validation. That branch can return the current success status.
+Its CAN provider uses vtable `0x1002237C`. The DS-4 TY lower-framework
+contracts map its configuration, filters, framing, receive classification, and
+disconnect paths. The selected J2534 driver's identity remains runtime-qualified.
+
+An offline run executed 11 PE-matched cipher, copy, XOR, thunk, and cookie
+functions under Unicorn. All 13 cases passed: FIPS AES-128/192/256 vectors,
+key-length aliases, invalid-context behavior, wrapper error precedence, and
+stock-key encryption of zero and two-block inputs.
+
+#### DS-4 DS2 security helpers
+
+The current `DS-4/bin/DS2ComNK_DS4.dll`, SHA-256
+`feea56cf14019b5738c47bed07b2795fdd64ad973209efe069145068bd61d811`,
+owns three helpers and four fixed, source-specific XOR-derived keys.
+Their complete definitions and native evidence are under
+`security_contract_matrix.DS4DS2Security`.
+
+| Caller | Helper | Key selection |
+|---|---|---|
+| `0x1001B300` | `0x100026E0` | Selector `0x10002360` |
+| `0x100192E0`, seed length other than 2 | `0x10002700` | Selector `0x10002400`; low-byte mode 1 or 2 |
+| `0x1001B420` | `0x10002760` | Selector `0x10002640` |
+
+Each selector XORs two local 16-byte arrays, then passes eight DWORD arguments
+to `0x100022E0`, including an unused trailing zero. Algorithm 2, operation 1,
+and mode 1 select its internal AES-ECB routine. The provider allocates
+`(n + 1) mod 2^32` bytes and copies exactly `n` bytes. The extra byte is
+untouched. Other algorithms return 0 before allocation; unsupported operation
+or mode values free the copy and return 0.
+
+The selected provider ignores the cipher's result, copies exactly `n` bytes
+back, frees the allocation, and returns full EAX 1. Its helper then returns
+full EAX 0; rejected selection returns 99. Consequently, zero or non-block
+lengths can produce helper success with unchanged data. Allocation failure
+enters the native throwing path.
+
+The AES routine takes an explicit key length. Its low byte selects 16-byte
+keys for 16 or 128, 24-byte keys for 24 or 192, and 32-byte keys for 32.
+It rejects a null buffer or zero length with `0xFFFFFFFF`, a non-multiple-of-16
+length with `0xFFFFFFF8`, and an unsupported key length with `0xFFFFFFF7`.
+The two-byte seed path instead dispatches through vtable slot `0x78` to
+`0x10018AF0`, whose full-EAX result is the output pointer.
+
+Thirty-one offline Unicorn scenarios exercised the actual helper, selector,
+cipher, and allocation instructions. They covered the four keys, AES key-size
+aliases, rejected inputs, ignored cipher errors, copy boundaries, allocation
+wrap, and both allocation-exception types. CRT boundaries were inert.
+
 ### Web-service request, response, and download contracts
 
 The auth/settings artifact's `service_contract_matrix` joins frontend calls,
@@ -4262,6 +4561,11 @@ Bearer authorization while retaining the configured GUID, MSK, and Basic
 headers. GWS and file download have distinct retry/cancellation handling.
 Both adapter routes end file-edit ownership only on normal return; unexpected
 helper exceptions skip `EndFileEdit`. GWS's monitor still releases in `finally`.
+
+GeneralWebService and FileDownloadManager append an always-true certificate
+validation callback to `ServicePointManager` on each client construction,
+without removal. Managed clients using that process-global policy share its
+certificate-acceptance behavior.
 
 DTC upload handling is selective: rejection of the original PF request is
 swallowed and records the executed ECU, but response JSON parse failure and
@@ -4293,6 +4597,19 @@ logical IPv4/UDP/TCP/stream channels `0x8203/05/06/08`, and tears them down from
 TCP through the physical channel. Wrappers retain module handles and cached
 function pointers across their reset calls.
 
+The ordered regional bindings in `regional_protocol_routes` join the selected
+route to `native_protocol_contracts` and `native_driver_contracts`. These retain
+concrete virtual dispatch, frame construction and classification, driver calls,
+switch tables, and exception-unwind ownership for the distinct main and DS-4
+implementations. `generic_communication_contracts` adds product-qualified
+controller calls, cache materialization, frame exchange, response-list ownership,
+and ordinary versus exceptional cleanup.
+
+`regional_protocol_routes` uses `route_selector` independently of generation.
+Its version-2 frame contexts retain ordered selector/frame row references.
+Join each frame row with its source to `frame_variables`; send/mask/check
+normalization and pool bounds are stored once per source frame.
+
 In `Connect04`, filter failure attempts disconnect before setting the connected
 flag; the disconnect guard rejects that rollback. A subsequent connect can
 overwrite the stored channel. A missing disconnect export preserves bookkeeping;
@@ -4318,10 +4635,124 @@ Actual x86 execution covered API-04/05 failure/reconnect/close behavior, adopted
 KGP channel cleanup, the DS-4 singleton-admission guard, and main NDIS fragmented
 diagnostic/ACK receives with error and undrained-body prefixes.
 
-All four current `SaveLog` shim exports are `33 C0 C2 04 00`: return zero.
-Native execution with an invalid path pointer confirmed that none reads the
-path. Communication logs instead use the optional `MsgDatComm`
+Sixteen further native scenarios exercised both products' ISO9141 retry methods:
+null guards allocate nothing, signed-negative retry counts send nothing, and
+nonnegative counts permit the initial send plus that many retries. Send errors,
+including `0x90020323`, retain their status. Empty-TX success skips Receive.
+The runs checked temporary-buffer frees, `RET 8`, and SEH-head restoration;
+allocation, free, and frame-controller calls were inert boundaries.
+
+All six current GTSPlus, DS-4, and CUWPlus API04/API05 `PassThruSaveLog`
+shim exports are `33 C0 C2 04 00`: return zero. Native execution with an
+invalid path pointer confirmed that none reads the path. `J2534Ctrl` sends
+communication-log records through the optional `MsgDatComm`
 `ER_PutLogCommunication` IPC path into the arbitration-owned collector.
+
+#### MAIN compiled-utility ExCAN path
+
+`GTSPlus/bin/UtilityExNK.dll` (`a5e579fe…09e1`) uses the concrete ExCAN vtable
+at `0x100436FC`:
+
+1. When its pointer is null, `Initialize` (`0x10023320`) acquires a borrowed core
+   and requests the low byte of the supplied address with flags `0x80`. It
+   ignores the connect result before checking core state 3. An already-connected
+   core can retain its old address and continue into configuration. A nonnull
+   owner pointer skips acquisition and connect.
+2. Configuration (`0x10022FF0`) reads broker item 500 as eight-byte records and
+   submits IOCTL 2. On error, it removes records whose key is `0x2A` and retries
+   if any were removed. The broker-read status is ignored. The filtered
+   allocation can have size zero.
+3. Filter setup (`0x10023130`) constructs type-1 and type-3 filters. The latter
+   uses response ID `((address | 0x700) + 8) & 0x7FF`, request ID
+   `address | 0x700`, and the runtime tag byte. Core wrappers return zero
+   regardless of the driver's filter-create or filter-stop status.
+4. Framing (`0x100233A0`) writes `00 00 07 address`, the tag from `0x100509D4`,
+   then the payload; `DataSize` is payload length plus five. Decoder
+   `0x10023250` requires header byte 2 equal to 7, byte 3 equal to integer
+   `u8(address) + 8`, and a matching tag. An NRC response requires `DataSize` 8;
+   another size returns 3. NRC `0x78` returns 5 and sets timeout 5,000;
+   NRC `0x12` returns 22 after the configured delay; other NRCs return 7 after
+   that delay. Accepted-header paths copy `DataSize - 5` bytes, including
+   negative responses. Values 3 and 4 underflow that copy count. The decoder
+   has no positive-SID echo check.
+5. Disconnect (`0x10022CB0`) stops both filters, then calls the core disconnect.
+   Driver failure maps to 99 and retains the owner pointer. Success clears it
+   and sets core state 1. If `IsBadCodePtr` rejects the driver entry, the owner
+   pointer is cleared while core state 3 remains.
+
+Thirty-six native scenarios exercised this class's connection, configuration,
+filter construction, framing, decoding, and teardown. The actual vtable and
+core wrappers ran; acquisition, broker, CRT, and driver interfaces were inert.
+
+#### EX2 Ethernet and DoIP paths
+
+MAIN `UtilityExNK2.dll` (`d9868c8a…12ec1`) uses its NDIS interface.
+DS-4 `UtilityExNK2_DS4.dll` (`dbee0ce2…672a`) opens separate logical channels.
+In DS-4, `0x10042D50` performs this sequence after physical connection:
+
+1. Open IP (`0x8203`), open UDP (`0x8205`), and clear the UDP queue.
+   Send the broadcast vehicle-identification request with DoIP header
+   `FF 00 00 01 00 00 00 00`.
+2. Use the first six received bytes as the remote IPv4/port endpoint, without
+   validating the returned discovery frame. Open TCP (`0x8206`) and clear its
+   queue. Broker UDP/TCP source-port values are narrowed to 16 bits; zero
+   selects `0xC000`.
+3. Send routing activation `02 FD 00 05 00 00 00 07`, followed by the
+   big-endian tester address and five zero bytes. Read through protocol
+   `0x8208` with an in/out **message count of 17 and one descriptor**.
+   A successful read returns zero without checking the routing-response code.
+
+`QueueTCP` (`0x10043100`) passes a count slot initially containing the message
+pointer, while `QueueUDP` supplies count one. The activation routine maps the
+read helper's normalized timeout 2 to 99. Failed setup retains partial channel
+state for the close path.
+
+Both products test the physical-disconnect pointer before calling a different
+NDIS/logical-disconnect pointer. Lower close attempts both network and physical
+cleanup; it clears its borrowed core pointer only when both succeed. DS-4
+physical-close success writes state 1 even after a logical-close failure.
+The destructors' base calls follow normal close return; their empty unwind maps
+provide no exceptional base-cleanup action.
+
+The broker-key constructors (`0x100442B0` MAIN, `0x1003C580` DS-4) query a
+NUL-inclusive conversion size, then pass one fewer WCHAR to the second
+`MultiByteToWideChar(CP_THREAD_ACP, ..., -1, ...)`. They ignore its return and
+set the logical length and terminator themselves. Converted buffer contents
+remain an explicit Windows input to subsequent broker lookup.
+
+Offline execution completed 112 native method scenarios, including paired
+initialize/close/retry/destructor sequences. Six others stopped at attempted
+NULL callbacks, C++ throw interfaces, or bounded oversized copies. Driver,
+broker-value, allocator, and Windows interfaces were explicit inert ports.
+
+#### MAIN TY lower-layer transitions
+
+MAIN `UtilityEx2TY.dll` (`5bdb9490…eb98e`) has source-specific connection,
+ownership, and error transitions:
+
+- The UDS engine `0x1001D670` passes **three DWORD arguments** to its selected
+  lower connect method. Normal finalization at `0x1001D2F0` calls lower close,
+  ignores its status, deletes the owned communicator, and clears active/owned
+  pointers and session state. It retains the injected override; `0x1001DA00`
+  deletes that override when replacing it.
+- P6 connect failure can retain a core pointer with sentinel slot 4. A later
+  `0x10025200` close returns 99 and preserves those fields. The P6 send path
+  `0x100246C0` also retains its acquired waiter when the receive-queue-clear
+  IOCTL fails.
+- Ordinary and tagged UDS decoders set pending timeouts to **5530** and
+  **5000** respectively. Their unsigned `DataSize-4`/`DataSize-5` copies have
+  no minimum-length guard.
+- Five ISO configuration methods pass a stack-local table to `free` in mode 0.
+  Their mode-1 paths use different ownership.
+- Thread helper `0x10026BF0` calls wait/terminate/close only when its stored
+  handle is NULL; a non-NULL handle skips those operations. Its deadline uses
+  unsigned addition, including duration `0xFFFFFFFF`.
+
+Independent offline execution recorded 176 whole native returns and seven
+deliberate boundaries: two oversized copies and five stack-pointer frees.
+Separate key-schedule/block executions matched the AES-128/192/256 FIPS-197
+vectors; the block helper's success status is AL, with native upper EAX bits
+retained. External Windows, allocator, broker, and driver interfaces were inert.
 
 ### Vehicle workspace, ECU selection, and healthcheck
 
@@ -4329,6 +4760,21 @@ path. Communication logs instead use the optional `MsgDatComm`
 joins the signed frontend to managed `GTSPlusDiagAdaptMng.dll` and native
 `DiagAdaptation.dll`. Its extractor authenticates `gts.gui` directly and reuses
 the existing vehicle-resolver artifact.
+
+`platform_session_lifetime` joins PF admission and queues to native worker,
+context, adapter, and cache ownership. After preflight succeeds, `SC000001`
+deletes and clears the old communication and viewer objects **before** reading
+`appPath`, region, or language. Replacement controllers publish sequentially;
+later failure does not roll back earlier mutations. Five native entry-window
+scenarios observed the preflight branch, deleting-destructor flag, viewer free,
+and cleared slots before the first `appPath` access.
+
+The report retains 36 product-qualified configured module selections without a
+current deployment. Checks against all 12 retained installer-cabinet inventories
+found 34 requested basenames absent throughout; `GetCurTimeInfo_DT.dll` and
+`SelectCarId_DT.dll` occur only under DS-4 while the missing selections request
+GTSPlus. The actual loader path controls resolution; no cross-product substitute
+is admitted.
 
 `VehicleConnectController` checks VIM version and battery voltage (8,000 mV),
 takes PF exclusive control, then compares live/confirmed VIN and `decisionVin`.
@@ -4357,6 +4803,44 @@ workspace and its per-ECU caches.
 function list also counts as loaded. Native cache removal in shared slot 8
 matches only `(ecuId:int32, busId:uint16)` and deletes the first match;
 `ecuId=0` clears the list. Group, VIN, and OEM do not participate in that match.
+
+Function-list rejection caches a truthy empty array. A successful response
+without `ecuFuncList` instead stores `undefined`, allowing discovery on a later
+call. A successful connection response without `connect` also stores
+`undefined`, but connection checks use numeric thresholds: even explicit
+recheck flags then skip acquisition. Missing `apiArgs` throws inside the
+connection chain and is caught as status 0, which permits a later recheck.
+
+`EcuFunctionView` projects native capabilities onto five existing buttons:
+
+| Button | Enabling capability IDs | Click target |
+| --- | --- | --- |
+| DTC | `1`, `16`, or `30` | `Dtc` |
+| Data List | `2` | `Datalist` |
+| Active Test | `3` | `ActiveTest` |
+| Utility | Every non-null list, including `[]` | `Utility` |
+| Dual Data List | `10` | `DualDatalist` |
+
+Explicit `null` disables all five; an omitted argument defaults to `[]`.
+The view changes `disabled` and CSS classes, leaving the buttons visible.
+These capability IDs are distinct from the application `FUNCTION_ID` values
+in the `500xx` range used for relay dispatch. `EcuFunctionView.initView` binds
+the buttons to named events; `EcuFunctionController.init` registers their
+handlers, which request the corresponding controller and discard the transition
+promise. `controllerTransition` consumes only the controller ID; the handlers'
+extra `[]` argument is ignored.
+Normal ECU entry requests DTC independently of the capability list; dummy
+ECUs 851/852 request Utility instead.
+Visibility changes precede old-child disposal. A disposal rejection retains the
+old controller reference and the changed visibility, without initializing the
+new child. An initialization rejection instead runs `finally` and publishes
+the new controller.
+
+The MAIN external-language loader keeps its opened file handle local and
+dispatches close through `CDbLangFileBase`'s no-op at `0x100632A0`; its
+destructors release tables/index storage, leaving that handle unclosed.
+DS-4 instead calls private `CloseDbFile @ 0x1005D630` on normal reader exits.
+That method attempts `CloseHandle`; the reader ignores its Boolean result.
 
 Healthcheck visits candidates sequentially and acquires data from connected
 ECUs. Cancellation ends wired collection, sets `cancelFlag`, and queues
@@ -4392,14 +4876,101 @@ Offline execution of the actual authenticated JavaScript verified cache reuse,
 forced refresh, failed connection, cooperative cancellation, fixed-VIN prompts,
 VIM capability/reconnection branches, workspace close/restart ordering,
 successive OEM/option selections, consumed restart failures, independent
-current-ECU copies, and cross-vehicle latest-file restoration.
+current-ECU copies, cross-vehicle latest-file restoration, omitted response
+fields, and connection/function-cache failure precedence. Six isolated-browser
+cases exercised the actual menu markup and view methods, including empty,
+null, numeric/string-ID, and fully enabled capability lists. Actual click
+handlers and event dispatch reached all five controller targets with inert
+localization, ECU acquisition, and feature-transition boundaries. An empty
+capability list still requested the initial DTC controller; a disabled-button
+click produced no additional transition. Actual transition-source scenarios
+also verified the distinct disposal/initialization rejection states and the
+ignored extra argument.
 
 ### Diagnostic operation scheduling and teardown
 
-[`lifecycle_operations.json`](../../data/generated/gtsplus_2026/lifecycle_operations.json)
+[`lifecycle_operations.json.gz`](../../data/generated/gtsplus_2026/lifecycle_operations.json.gz)
 joins frontend operation workers, managed dispatch, native command plugins,
 monitor threads, frame retries, and teardown. The current adaptation path and
 six-pointer plugin ABI are specified in §6.2.0.
+The retained report uses deterministic gzip. Its `operation_contract_inputs`
+references hash-qualified frontend, native, and family specifications under
+`data/gtsplus_lifecycle_operations/`. `load_operation_report` restores these
+contract fields, preserving the builder's ordered family-definition precedence.
+The report retains the computed provider index, per-call joins, and admission evidence.
+
+`diagnostic_operations.native_proof_shards` points directly to the canonical
+compressed proof files, relative to the report. Each entry retains its SHA-256,
+size, record count, and destination container: `native_evidence`,
+`operational_evidence`, or `bodies`. `proof_location` identifies the shard and
+JSON pointer; `operational_program_ref` resolves to the complete program payload.
+Admission checks proof identities against the selected analysis image and the
+canonical owner's installed/analysis pair. The generated directory contains no
+second copy of these proofs.
+
+Export all contracts and proof payloads into one standalone JSON without vendor
+distributions:
+`uv run --locked python -m tools.techstream.extract_gtsplus_lifecycle_operations --from-report data/generated/gtsplus_2026/lifecycle_operations.json.gz --out build/out/lifecycle_operations.json`.
+The compact report's restored graph and all 39 canonical proof files were compared
+against the previous retained representation; only proof-copy locations changed.
+
+Within the loaded report's `diagnostic_operations`, follow these entries:
+
+| Question | Entry |
+|---|---|
+| Browser caller, PF command, arguments and returned values | `frontend_contracts`, `frontend_calls`, `api_adapters` |
+| Product/category selection and native plugin binding | `selection`, `plugin_bindings` |
+| Native algorithm, packet construction, decoding and cleanup | `native_contracts`, `shared_family_contracts` |
+| Exact called provider and source-qualified method | `typed_provider_links` → `contract_definition_locations` |
+| Composed operation path and mutations | `end_to_end`, `mutation_sinks` |
+| Unfinished analysis or published work awaiting integration | `source_present_open_work` |
+
+Provider definitions and native proofs are stored once. Callsite links retain
+their distinct argument/result and ordering contexts. `provider_packet_provenance`
+records where a join was published; `provider_contract_id` and its definition
+locations identify the callee. Artifact-backed selectors, ABI interfaces, proof
+descriptors, and reference-only joins are excluded from definition lookup.
+Their nested algorithms and resolved body-proof proxies remain traversable.
+Original `contract_id` definitions are indexed directly. An optional
+`provider_selected_callee_location` selects the exact method within a provider.
+The PassThru wrapper provider includes its four exact-source
+export/ABI maps and the selected wrapper, algorithm, evidence, and runtime
+contexts for its 60 SDK callers.
+
+The admitted freeze-frame/readiness composition includes its selected/all
+paths, native header algorithms, value models, output publication and lifetime
+providers. Legacy and modern monitor flows include their normal, ring, value,
+frame-list, and worker-lifetime composition. Recorder flows include the SaveLog
+and Plain engines, both DMC headers, and six same-DLL header-only image cores.
+Their native ABI, exception cleanup, allocation, and file-truncation behavior
+remain explicit.
+
+Platform adapter composition includes the separate MAIN and DS-4 factories,
+serializer validation and conversion, concrete command-provider links, and
+support-object ownership. Queues, cancellation fields, response pools, workers,
+and partial session replacement retain their source-specific state transitions.
+
+The four compiled-utility UI graphs include native argument construction,
+dispatch, continuation selectors, private callbacks, result publication, and
+exception cleanup. Their eight SDK business sets—TY, DS2, EX1, and EX2 for
+MAIN and DS-4—are composed with source-qualified programs and caller ABIs.
+The 31 additional DS-4 TY generic-frontdoor calls resolve to 17 public-control
+exports. UI object offsets, packet offsets, and vtable slots retain separate
+coordinate systems.
+
+MAIN/DS-4 ETH physical, broker scalar-JSON, and `CommonDll.ErrReportf`
+components are now composed with their reviewed native proofs and caller
+contexts. The six monitor error wrappers include the complete 90-byte bodies
+through `RET 4`. The additional canonical composition supplies 31 actual
+provider bodies and migrates 285 existing bindings: transport methods,
+metadata queries, DTC helpers, DRS payloads, value/string lifetimes, and Subaru
+security helpers. Advisory transport and DTC identities were replaced by their
+existing source-qualified canonical IDs.
+
+Both products' TY/DS2 lower frameworks, EX1 PSA/P5 paths, and broker parsers
+have source-qualified implementations, alongside EX2 HS/MS/HSEx and ordinary
+CAN/P5 CAN. Runtime-selected `ComTol32` and standard Win32 interfaces retain
+their separate input boundaries.
 
 Utility execution has three distinct owners:
 
@@ -4449,15 +5020,205 @@ end-diagnosis can retain the native instance on a failed response or destroy.
 Offline native execution covered nine result classifications and both monitor
 stop implementations with normal, timed-out, and failed waits.
 
+Current MAIN and DS-4 `CCommFrameData` copy constructors alias four owned
+byte-list headers. Assignment instead clears and rebuilds those lists without
+a self/alias guard. Cache append publishes a default-constructed node before
+assignment, so an allocation exception can leave a linked partial node.
+
+#### Parsed requests and returned values
+
+The exact MAIN `DataManagerNK.dll` (`0618e332…1a9e`) and DS-4
+`DataManagerNK_DS4.dll` (`7295d338…5494`) distinguish these request states:
+
+| `setPFData` input | Published request root | Return and continuation |
+|---|---|---|
+| NULL | Prior root retained | 1004 |
+| Non-NULL, converted text empty | Empty JSON string | 1099; the native frontend stops at this setter result |
+| Nonempty malformed JSON | JSON null | 0; the frontend proceeds to its next field lookup |
+| Valid nonempty JSON | Parsed value | 0 |
+
+For non-NULL input, the setter installs the empty string before conversion and
+parsing. Argument helpers first look up `apiArgs[name]`: a null value returns
+1006, followed by the required-type gate and then the empty-string comparison
+that can return 1002. Data helpers also use an empty-string comparison for that
+1002 guard. The database-count guard is a separate path.
+
+Public selector `0x01000001` is the string `apiId` path. An empty request root
+returns 1002 with latch `0x84020502`; a parsed-null root reaches string failure
+1001 with latch `0x84020506`, preserving the caller's output.
+
+Public selector `0x01000002` reads numeric `resultInfo.result` into the caller's
+DWORD. Native execution observed missing or wrong-type values return success
+with an existing value of 123 unchanged. An existing sentinel `0xFFFFFFFF` or
+`0xFFFF` instead produces 1001 with latch `0x84020401`; actual numeric values
+-1 and 65535 produce the same error. The value 3.75 converts to 3.
+
+Platform's MAIN `0x10079920` and DS-4 `0x1006CB90` C-string wrappers return
+success in AL and callee-clean three DWORD arguments with `RET 0xC`. Each
+publishes a pointer to its local error string, then destroys that string.
+The SettingFileName, GetDbFullPath, GetRegistryPath, and JoInsert caller
+families consume the expired view on failure. Their diagnostic path can read
+dead stack storage or a freed allocation. The separate catalog wrapper
+`GetUtilFuncList!0x1000E630` has the same error-view lifetime, but its actual
+catalog caller ignores that pointer.
+
+#### Native SDK boundary findings
+
+Actual source execution confirmed these consumer-visible boundaries:
+
+- After successful prerequisites, uncancelled DS-4 DS2 camera transfers with
+  lengths 1–55 reach a division by zero; zero reaches an underflowed checksum
+  count. An initial cancel returns zero through `End` without calling `Begin`.
+- DS-4 EX1 TPW allocation lengths `0xFFFFFFFE` and `0xFFFFFFFF` wrap to
+  zero and two bytes before the native four-byte initialization store.
+- DS-4 TY ABS30 requires bit `0x04` set in routine `0x1100` response byte 5;
+  its helper requires at least 36 response bytes. ABS31 modes 1 and 2 inspect
+  response byte 4, mask `0x02`, expecting zero and two respectively.
+- HVB10 commits record byte `+8` only for values 0–3. HVB11 writes bytes
+  `+9/+0xA` before cleanup and validation of its first value. An invalid first
+  value leaves the old `+8` alongside those newly written bytes.
+- Seven DS-4 TY `@0` exports across five families schedule a NULL callback
+  argument. Their embedded UI state stays in `CFun`; it is not an SDK record.
+
+The native programs ran with explicit inert communication, scheduler, allocator,
+or operating-system boundaries.
+
+#### Broker cached numeric values
+
+`EbGetPara`, ordinal 10, reads cached DWORD values in both current brokers:
+MAIN `0x10003F50` and DS-4 `0x100038C0`. It uses stdcall `RET 4`;
+an ordinary missing key returns `0xFFFFFFFF`. Numeric key 111 and string
+key 111 belong to separate caches.
+
+Four keys instead read blob-cache entry 500 as little-endian
+`{uint32 identifier, uint32 value}` rows:
+
+| Requested key | Row identifier |
+|---|---|
+| `0x71` | `1` |
+| `0x97` | `9` |
+| `0xA1` | `0x10103` |
+| `0x14B` | `0x1010A` |
+
+The first matching row wins. For key `0x97`, an absent identifier 9 or its
+first value `0xFFFFFFFF` triggers a second scan for `0x10106`; zero does not.
+Trailing 1–7 bytes are ignored. The getter allocates and copies the blob before
+scanning, then frees the temporary on normal return. Allocation failure has no
+local check before `memcpy`.
+
+Forty-four complete native export scenarios verified cached values, the
+special-key dispatch, duplicate precedence, fallback, partial rows, and native
+stack cleanup. Two additional allocation-failure scenarios reached the
+external `memcpy(NULL, source, nonzero)` boundary. All executed source
+instructions matched the complete guarded control-flow records.
+
+#### Broker scalar JSON values
+
+Current `GTSPlus/bin/eVbBroker.dll` (`d1c9914b…51bd`) and
+`DS-4/bin/eVbBroker_DS4.dll` (`e7995520…aae41`) export stdcall
+`JsonDGetData` and `JsonSGetData`: a root selector and two by-value CString
+arguments, with `RET 12`. Selectors 1–4 choose borrowed JSON text pointers;
+a selected NULL pointer faults during the initial copy. Other selectors parse
+an empty string.
+
+The native parser and two map lookups evaluate `root[outer][inner]`. Each key
+gets an `N+1` byte allocation for `N` UTF16 units. `wcstombs_s` results are
+ignored; its actual output supplies the lookup key. Both key arrays remain
+allocated on normal return.
+
+The numeric getter returns the native integer value or a double converted by
+`CVTTSD2SI`; other JSON types return zero. The string getter returns an allocated
+UTF16 string, including an allocated NUL for a missing or non-string value.
+Parse failure instead returns NULL. Its conversion chain is UTF8 → UTF16 →
+process ACP → thread-ACP UTF16. The first NUL-terminated conversion truncates
+an embedded JSON NUL.
+
+Fifty-four complete native export scenarios exercised the actual parser, map
+lookup, virtual accessors, cleanup, and return. They included duplicate keys,
+missing values, malformed JSON, conversion-error output used as an empty key,
+and distinct process/thread code-page fixtures. CRT, MFC, and Windows calls
+were finite inert ports; the selected locale was an explicit fixture.
+
+#### DS-4 SBW learning workflow
+
+The current `DS-4/bin/UtilityEx2TY_DS4.dll` (`f90266bf…edbd`) exports
+`Ex2SBW_01_StartActPositionLearning`, `ActPositionLearningResult`, and
+`EndExtendedSession`. Each admits protocol selector 20 or 21 and submits its
+callback, a borrowed record pointer, and timeout 10,000 to scheduler `0x10004EF0`.
+The export returns the scheduler's full DWORD result. Callback completion is
+published separately at `0x100687B8`.
+
+The record contains DWORD mode at `+0`, live control at `+4`, and open flag at
+`+8`. Start callback `0x1001D3B0` has two paths:
+
+- Mode zero initializes communication, sets the native configuration fields,
+  requests sessions 1 then 3, sets the open flag, waits 700 ms, and sends
+  `31 01 11 F9`. A successful length/echo check publishes 1004 without finalizing.
+- Nonzero mode waits 200 ms before each `31 03 11 F9` request. Response byte 4
+  equal to zero repeats; one publishes 1001. Control equal to one publishes
+  1002 without cleanup; control equal to two continues polling.
+
+Result callback `0x1001D210` repeatedly sends `22 14 58`, with no intervening
+`Sleep`. Response byte 3 equal to zero or one repeats; three requests the default
+session, calls `Final`, and publishes zero. Any nonzero control, or transaction
+status 1002, publishes 1002 without cleanup. Ordinary start/poll errors clear
+the open flag after requesting the default session when that flag equals one,
+then call `Final`. Result-callback cleanup leaves that record flag unchanged.
+
+End callback `0x1001D2A0` requests the default session, calls `Final`, and
+publishes 1003 regardless of their returned errors. Native execution exercised
+nine public-dispatch and 21 callback scenarios, including packet construction,
+echo/length failures, live cancellation, state writes, and completion publication.
+The scheduler, lower communication calls, and Windows interfaces were inert.
+
+#### Native error reporting
+
+`CommonDll.ErrReportf` is a variadic cdecl function returning void:
+MAIN `0x10001380` (`4b84c9c1…24d`) and DS-4 `0x10001420`
+(`8d690c36…1cf9`). After formatting and path reduction, it calls the cached
+operation logger with five DWORDs:
+`(0x10000000 | ((code >> 16) & 0xFF), code, 0, L"CMD", payload)`.
+The callback result is ignored. A NUL-inclusive payload of at most 128 WCHARs
+uses inline storage; larger payloads use a temporary heap allocation.
+
+`DllMain` loads bare `MsgDatComm.dll` and resolves its operation and USB
+exports independently. Successful detach frees the module but leaves the
+cached values unchanged. Binding to the inspected managed
+`ER_PutLogOperation` implementation depends on the selected module identity;
+that implementation forwards to `ER_ActionLogOutput`.
+
+Six MonitorReads invalid-context wrappers call the reporter, pop 20 argument
+bytes, set `EAX=0xC0040001`, and execute `RET 4`. Their complete bodies are
+90 bytes. The status-return sequence executes only after normal reporter return.
+
+Seventy-two native scenarios covered formatting/buffer boundaries, loader
+outcomes, ordinary cleanup, separately invoked native EH cleanup contexts, and
+actual caller-to-reporter execution in isolated image views. CRT formatting,
+loader, logger, and exception-runtime interfaces were explicit inert ports.
+
 ### Recording, stored sessions, and error-report retention
 
 [`lifecycle_persistence.json`](../../data/generated/gtsplus_2026/lifecycle_persistence.json)
-joins the current browser buffer/ZIP writer, six viewer/converter executables,
-native temporary-file closing, and arbitration's report collector. Current
-normal saves create JSON/ZIP GTSE format `0.0.1` directly. Legacy binary TSE
+joins browser recording, viewer/converter executables, native temporary-file
+closing, VCIB log archives, and arbitration's report collector. Current normal
+saves create JSON/ZIP GTSE format `0.0.1` directly. Legacy binary TSE
 conversion and the current/legacy manifests are specified in
 [saved-session formats](gtsplus-tse-gtse-saved-session.md); recorder and PCS
 handoffs are owned by [VDAS/PCS data](gtsplus-vdas-pcs-data.md).
+
+The recorder contracts link browser capture/import/export, managed viewer
+decoders, saved history, and native DRS codecs. Native DRS starts with
+little-endian magic `0x80000001` and a `uint16` version; each `uint32` record
+length includes its `uint16` ID. The `0x0104` delete-interface record has an
+empty payload. Its outer framing, command payloads, and sample-ring formats
+have separate contracts.
+
+DS-4 P5 can perform physical session setup while a DRS writer is present.
+PCS viewing deletes its fixed temporary directory before admitting the new
+archive, extracts before rejecting multiple members, and rewrites feature logs
+before validating their ASCII-hex contents. Warning-success commits the
+extraction outputs. The artifact preserves per-family field decoding and
+partial-result behavior through presentation and export.
 
 Save ACK precedes completion. The actual buffer/interface consumers distinguish:
 
@@ -4511,6 +5272,41 @@ Report compression failure can be caught before trace staging is deleted.
 `SendErrorReport` retains a Send copy, then moves the package to
 Public Documents `GTSPlus/DataSync/Logs/GTS-E02`, where DataSync takes ownership.
 The folder selector is `0x2E` (`CommonDocuments`).
+
+#### VCIB log archive COM handoff
+
+`ReplaceFromLegasy.dll` is a shipped managed COM server registered by
+`Setup_PF.exe` through `RegAsm /codebase`. Its `vcib_log_archive` contract
+qualifies all four method bodies from the installed DLL, SHA-256 `a722e50f…`.
+The native MAIN TY ordinal 4700 caller resolves
+`Toyota.GTS.Legasy.Migration.ReplaceFromLegasy` through the COM registry and
+invokes `Alt_VCIB_02_CreateZip`.
+
+The method selects all top-level matching files from
+`CommonDocuments\GTSPlus\InterfaceBoxLogFile`. The year/month/day/hour/minute
+arguments only supply the zero-padded numeric filename prefix.
+
+| Mode | Selected files | Archive suffix |
+|---|---|---|
+| 1 | `*.DAT` | `_eventlog.zip` |
+| Other values | `*.TGZ` | `_tracelog.zip` |
+
+An empty selection returns `2001`. An unchecked sum of source lengths greater
+than available drive space returns `2004`; equality is allowed. An unready
+drive supplies zero available space. Preflight exceptions leave the managed
+method.
+
+Compression uses [`ZipArchiveMode.Update`](https://learn.microsoft.com/en-us/dotnet/api/system.io.compression.ziparchivemode?view=netframework-4.8)
+on the final archive path and adds source basenames in enumeration order.
+Entry, open, and disposal exceptions return `2001`. Each failed attempt deletes
+the destination, including after the third attempt. A deletion exception does
+not stop another attempt; later success can replace that error with `0`.
+Source files remain in place.
+
+The native wrapper ignores `Invoke`'s HRESULT and reads the result VARIANT's
+raw DWORD without checking its type. Nine actual-IL scenarios exercised the
+managed selection, space, retry, disposal, deletion, and exception paths with
+inert framework interfaces.
 
 ### Background synchronization, proxy state, and ActionTool
 
@@ -4580,6 +5376,14 @@ joins the outer file-association launcher, CUW browser, managed backend,
 native programming engine, GTS callers, and ECU Security Key branches.
 Process singleton, backend session lock, PF API exclusion, and GUI logout
 inhibition are separate mechanisms.
+
+`flashing_program` joins current factory/master selectors and deployed INI
+profiles to CID acquisition, preparation, transfer, verification, reset, and
+cleanup algorithms. Header selection and attachment use the same model as
+`tools/gts cuw`; all 26 local CUW packages exercised that CLI path.
+The configured PSA providers, Mazda classifier, and Mazda CAN-ID table are
+absent from the twelve inspected current installer cabinets. Their exact
+load/parameter failure paths remain recorded alongside the unavailable bodies.
 
 The backend owns programming lifetime. Normal `CanExit` requires no programming
 and zero client connections; OS ending waits ten seconds before its fallback.
@@ -4660,9 +5464,6 @@ for domain in bootstrap ui_ipc auth_settings install_update \
 done
 ```
 
-All ten outputs regenerated byte-identically. The combined audit checked
-793 source records, 1,487 evidence anchors, 207 states, 423 transitions, and
-85 handoffs, including source hashes and cross-domain references.
 Managed generic operands render from metadata signatures; opcode anchors match
 decoded opcodes rather than substrings in type or method names.
 

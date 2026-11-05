@@ -1,0 +1,3346 @@
+{
+  "data": {
+    "canonical_report_corrections": [
+      {
+        "actual": "Timeoutbranchsetsflag/jumpscompensationwithoutsettingstatus;successfulcompensationCANreturn0. Onlyresponse-state0checks1000ms;state1unbounded.",
+        "claim": "DelRoBP5_wTO1secondtimeoutreturnsfailure"
+      },
+      {
+        "actual": "TSS3operationlogstart19errorisrememberedbutacquisitioncontinues;finalerroroverridesonlyoperation0;stickyerrorcanSKIPfinalStopCommLog.",
+        "claim": "TSS3StartCommLogerrorpreventscommunication"
+      },
+      {
+        "actual": "Recorder callers invokeSetCommLogFilePointer; currentmainprovider10038D50 performsSetFilePointer(FILE_BEGIN) ANDSetEndOfFile. Successfulrewind thereforeTRUNCATEShostlog. Failure90020706; noECUrecorddeletion.",
+        "artifact": "analysis-origin:gts-car-native-TransportProtocols.json#TransportProtocols.main.CCommFrameCtrl.SetCommLogFilePointer.10038d50",
+        "claim": "Filteredrecordlogpointerrewindisonlyaseek,nottruncation"
+      },
+      {
+        "actual": "MainprobeDelConnectBuffer(category,bus12)beforeforcedbus12ConnectCheck;allordinaryoperationalerrorsincludingcancelbecomefalse/status0.",
+        "claim": "IsPCSSBRavailabilityisread-only/nohostmutation"
+      },
+      {
+        "actual": "OncebothPIDssupported,setflag20=1BEFOREfetch;invalidallonessentinelResetkeeps20=1withallvalid/errorflags0;fetcherrorResetkeeps20=1thenbotherrorflags1.",
+        "claim": "CurrentTimeEachECUinvalidreadsetsunsupportedfalse"
+      },
+      {
+        "actual": "WireEB13payloadretainedcommLog;nativeoutputonlyDID0501BE16metadatafirstvalueforshortnonzeroframes;all-special15behaviors90040501.",
+        "claim": "TSS3operationreturnsallFFDbytesasdecodedvalues"
+      },
+      {
+        "actual": "Headerbuffer512copyu16receivebytesunchecked;casebuffer4096overflowbranchcomputesu16(512-offset),not4096;detailpackedcopyfixed280stackarrayunchecked. Sourceexactunsafealgorithmsnotnormalized.",
+        "claim": "DS4DDRheader/casecopyboundsfullyvalidated"
+      },
+      {
+        "correction": "ADUDDRSetDetail100223E0decompilerCwronglyfoldsallloop. Exactnative100224E2-100227ADrecovered/pinnedinOutputcontract. FUN1001CFE0reallyreturns1001D04DRET4; copieslistvia1001CE60toadjacentstackrecord, so likelystackaggregatealias/constantfoldnotnoreturn. ListedinstructionbodySHAisnotexhaustiveCFG/switch/EHproof.",
+        "source": "MainCommonSHA98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3"
+      },
+      {
+        "actual": "ValidctxrunsSIXoptionalstages/SIXDisconnect1, logsandsuppressesALLoperationalerrors, final0; successfieldsnonatomicallyoverwrittenbylaterfamilies.",
+        "claim": "GetImageSpecInfo_DTreturnsfirstcancel/wireerror"
+      },
+      {
+        "actual": "SIXAB33datasetspersistCommLogonly; nativeFFDresult20ONLYDID0501tripmetadatafromdataset1. RejectedcaptureactualMAIN10038D50 seekFILE_BEGIN THENSetEndOfFile TRUNCATESphysicaltail; returnedper-recordnumericerrorssuppressed0 butownEC78\u2192F7DDthrowingheapfailure NOTconvertedordinaryA0000002.",
+        "claim": "DMCimagecapturereturnspixelbuffersinFFDoutput"
+      },
+      {
+        "actual": "BothactualcustomN6/N16algorithmswire2703/2704,seed+keycrossindexcustommix; AES128CancelonlyexplicitADUreadbranches.",
+        "claim": "MainimageLv49/Lv2wire2701/2702orAES"
+      },
+      {
+        "actual": "Freeze8actualmainNoCache100A4330callsSetJ1979SupportInfo(0,0); Transport1qualified5366aba...native10039510ACCEPTSzeroAPPENDTAILregisteredShareData30list+C,no dedup/protocolguard. Returnignored:providerfailurecanpreventwrite,butvalidregisteredlistgets0/0entryeachcall. Set/ClearOBDvirtual+98separatefromlist.",
+        "claim": "J1979NoCacheisread-onlyorzeroECUcacheappendisrejected"
+      },
+      {
+        "actual": "Qualified Main and DS4 CCMDList<CCmdByteData> GetAt10007A00 aliases FIRST payload for nonempty lists, empty returnsaddress4. P4exactRX7 seedlast=RX0; short nonempty E6TX writesaliasSID. Native raw buffer extraction is a different operation and may still be genuinely OOB.",
+        "artifact": "diagnostic_operations.shared_family_contracts.identity-byte-container-provider-contracts",
+        "claim": "Any GetAt byte index>=count means native OOB memory read"
+      },
+      {
+        "actual": "SHR count1; adddouble0.5; CVTTSD2SI yieldsfloor(n/2). n1returns0withoutIO; n3reads2bytes. Nativeinstructions/constantpinned.",
+        "claim": "MainRAM GetRamDataP3 rounds odd requested bytes upward"
+      },
+      {
+        "actual": "GetRamDataByteindicator1 makesEndTrimfillFFandstatus0, includinglast-sendcancel; staleindicatorcanalsohideasubsequentpre-sendfailure.",
+        "claim": "MainRAM EndTrim returns every transport/cancellation error"
+      }
+    ],
+    "composition_join_updates": [
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.gts-platform-frame-cache-contract",
+        "correction": "EarlierintermediatecontractslabelCommCachePlus/CEcuConnectCheckasTransportProtocols;finalownerPlatformSession3. TransportProtocols1ownslowerKgpCCommFrameCtrl/protocolsendreceive/logI/O.",
+        "owner": "PlatformSession"
+      },
+      {
+        "artifact": "analysis-origin:identity-ds4-rid-contracts.json",
+        "contracts": [
+          "identity.support.p5.enabled-rid",
+          "identity.support.p5.subaru-enabled-rid",
+          "identity.support.rid-admission"
+        ],
+        "correction": "CreateEnableRIdList/checksupportoperationalgorithmsIdentity4notgenericcache3;DS4proofNEVERtransferredtomainwithoutmainexactcontract.",
+        "owner": "IdentityCapabilities"
+      },
+      {
+        "artifact": "analysis-origin:gts-security-native-commandcommon-main.json",
+        "contracts": [
+          "security.commandcommon.aes128.cancel",
+          "security.commandcommon.subaru.cancel",
+          "security.commandcommon.suzuki.cancel"
+        ],
+        "correction": "MainOEMDeleteRoBtypedcancelhelpersareactualreadycontracts;SubaruGenerateKeysubfunctionoriginREQUESTtemplate[1],notRX[1]. DS4separateartifactanalysis-origin:gts-security-native-commandcommon-ds4.json.",
+        "owner": "Security"
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.gts-car-native-MonitorReads-pid-contract",
+        "contracts": [
+          "MonitorReads.CommandCommon.GTSPlus.PidData.v1",
+          "MonitorReads.CommandCommon.DS-4.PidData.v1"
+        ],
+        "correction": "PIDCheckSupport/GetData/SetDataactualsharedalgorithmsready;product-specificmetadata/generationselectorsnotinterchangeable.",
+        "owner": "MonitorReads"
+      },
+      {
+        "contract_prefix": "MetadataMain.main.2.<type>",
+        "correction": "JoinnativeactualrowfieldconsumersADU166/167andP6RoB163/164;rawgeometry/schemaownedMetadataMain17,executionhere.",
+        "owner": "MetadataMain"
+      },
+      {
+        "artifact": "analysis-origin:gts-car-native-MetadataDS4-Common-consumer-fields.json",
+        "contract_prefix": "MetadataDS4.table.KgpDataCtrl.2.<decimal lowbyte>",
+        "correction": "DS4specAmonitor110/trigger111/address112/invalid113/header108/case109;D129/130/131/132/127/128;E138/139/140/141/136/137;F147/148/149/150/145/146.",
+        "owner": "MetadataDS4"
+      },
+      {
+        "artifact": "analysis-origin:gts-car-native-OtherPluginsB-ddr-derived-vtables.json",
+        "correction": "DS4GetDDRInfoP5/SaveLogDIDoverrideB8notB0;B0CheckCommandCancel,B4supportallocator; fullRecorderNative.Common.DS4.DDRP5Base66methodengine,fullImageFFD67andRecorderRAM40contractsready;localderivedwrappersremainOtherB16.",
+        "owner": "OtherPluginsB"
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-capture-auto-power-off-contract",
+        "contract": "RecorderNative.Capture.PowerPolicy.AutoPowerOff",
+        "correction": "DV000100realECUbitread-modify-writeviaOtherArole221, NOTside-effect-freeread/NOThostCommandCancel; nativeECU0fallback454\u21926534\u21926034inputmutationdistinctfromUIexplicitserialcalls454\u21926034\u21926534.",
+        "owner": "OtherPluginsA/PlatformSession/RecorderManaged"
+      },
+      {
+        "decision": "IntegrateALL6primary+13actualcomponents onlyAFTER373authoritativephysical+semanticABIcorrection; rawundefined(void) prototypesnonauthoritative; exactcalltargets/proofsretained.",
+        "source": "diagnostic_operations.shared_family_contracts.recorder-analyzer-native-complete-contracts"
+      },
+      {
+        "decision": "Integrate5ownedlocalimageprimaryentries withactualwire/bulk/descriptor/log/cancel/EH/allocator/native-loopsemantics; retain6totalcanonicalheaderobligationsincludingDMC. InheritedP5headerONLYsubsetState+Securityclosed, NOTsyntheticfullDDRbulkjoin.",
+        "source": "diagnostic_operations.shared_family_contracts.recorder-image-worker5-complete-contracts;diagnostic_operations.shared_family_contracts.recorder-image-worker15-complete-contracts"
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-pcs-readtime-p5-header-contract",
+        "consumer_owner": "existingworker7",
+        "decision": "Closeactualbc0180sixclasslocals+57typedMAIN; derived62not66slots; dynamicbus; noCSV; onlyrcv48spec. Formula04EA0/callerF6E0consumer remains7, notimportedclockorDMCparity.",
+        "producer": "RecorderNative.Main.PCSReadTime.P5HeaderEngine"
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-p5-ads-pvm-rc-header-contracts",
+        "decision": "ResolveONLY3source-specificP5headerlocaloverrides/lifetime/support/cache/acquisition; doNOTclose3source-specificDDR4COREbranchesfromP5source. MainOutput TriggerNames exactnativeIDlists30/58 andStrings44/6C corrected, actualcore47containerproof joined.",
+        "producer": "RecorderNative.Main.ImageP5Headers.ADS_PVM_RC"
+      },
+      {
+        "artifacts": [
+          "diagnostic_operations.shared_family_contracts.recorder-ddr-worker5-complete-contracts",
+          "diagnostic_operations.shared_family_contracts.recorder-rob-worker15-complete-contracts",
+          "diagnostic_operations.shared_family_contracts.recorder-operations-worker7-complete-contracts"
+        ],
+        "decision": "ALL58existingprimaryrowsnowhavelocalentry/nativealgorithmcontracts, +0newpartitionunits. NOToverallcompletion: exact8retainedDDR4/corecompositions(SaveLog,Plain,DMC,image5) still11source-present; MainP5/PCS/headerONLYP5cases closed independently.",
+        "producer": "existing5DDR5/existing15RoB4/existing7operations7"
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-ds4-freeze-container-entry-supplement",
+        "decision": "Addactual8requestedFreezeown-entrycontainer/lifetimecontracts+4calledhelpermethods. Older64packetdidNOTinclude6INVALID_DATAentries, supplementnotfalseprojection; P4listDtorfreesnodesONLY, notpixelpayloads.",
+        "producer": "RecorderNative.Common.DS4.DDRAndP4List.FreezeEntrySupplement"
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-final-owned-provider-composition",
+        "contract": "RecorderNative.Final.ExactSourceEntryEngineComposition",
+        "decision": "FormerMainLegacySaveLog3380/Plain35C0 andsixactualimageDDR4COREportsareALLclosedusingeachactualsource/ABI/CFG/EH/allocator/table/wire/output/lifetimealgorithm. DMCactualP5+DDR4concreteentryclosed separately; nophantomNativeTimeDirector/CDmFileReadernewdependency. Historicalearlieropen-joinmessagesnotcurrentgaps.",
+        "state": "final_authoritative_all8_owned_entry_engine_ports_closed"
+      },
+      {
+        "artifacts": [
+          "diagnostic_operations.shared_family_contracts.recorder-ddr-worker5-native-components",
+          "diagnostic_operations.shared_family_contracts.recorder-image-worker5-native-components",
+          "diagnostic_operations.shared_family_contracts.recorder-image-worker5-header-ports",
+          "diagnostic_operations.shared_family_contracts.recorder-image-worker5-complete-contracts"
+        ],
+        "binding": "5reportedDDRaggregateD9B0/componentsE071 andimageheaderports33DD/imagecompleteB86D nowpointactualMAINSaveLog3380/Plain35C0 andADS6680/PVM52D0/RC5920providers/143ABI. Existingcallerbytesunchanged; noenginealgorithmduplication. Registry refreshedONLYtheseknownchangedowned-consumerrecords.",
+        "state": "existing5_source_consumers_refreshed_after_its_confirmed_port_resolution"
+      },
+      {
+        "artifacts": [
+          "diagnostic_operations.shared_family_contracts.recorder-image-worker15-complete-contracts",
+          "diagnostic_operations.shared_family_contracts.recorder-image-tss3-p5-local-contract",
+          "diagnostic_operations.shared_family_contracts.recorder-image-generic-p5-local-contract"
+        ],
+        "binding": "15explicitlyresolvedbothactualsourceTSS3Run60D0/acq79A0andGenericRun3970/acq5240ports,currentbodySHA/RET4/8/one-slot-vtable/lifetime/header-onlyeffects; remainingmandatoryCOREjoins0. Removedstalependingboundarywording; actualP5header/bulk/RoBalgorithms/callerpartial170/188consumptionunchanged.",
+        "state": "existing15_source_consumers_refreshed_after_its_confirmed_port_resolution"
+      }
+    ],
+    "contracts": [
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-ds4-ddr-security-contract",
+        "contract_refs": [
+          "RecorderNative.Common.DS4.DDRP5.Security"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-ds4-ddr-acquisition-contract",
+        "contract_refs": [
+          "RecorderNative.Common.DS4.DDRP5.Acquisition"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-main-pcs-sbr-availability",
+        "contract_refs": [
+          "RecorderNative.Main.PCSSBRVehicleProbe"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-main-setframe-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.ImageSetFrame"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-main-rob-candidates",
+        "contract_refs": [
+          "RecorderNative.Main.RoBCandidateECUs"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-DCM35-wrapper",
+        "contract_refs": [
+          "RecorderNative.Main.DCM35WorkFactors.Wrapper"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-P4-image-availability-wrapper",
+        "contract_refs": [
+          "RecorderNative.P4.ImageAvailability.Wrapper"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-main-time-each-ecu",
+        "contract_refs": [
+          "RecorderNative.Main.CurrentTimeEachECU"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-main-current-absolute-time",
+        "contract_refs": [
+          "RecorderNative.Main.CurrentAbsoluteGPSTime"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-P5-readtime",
+        "contract_refs": [
+          "RecorderNative.P5.ReadTimeEstimate"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-TSS3-operation",
+        "contract_refs": [
+          "RecorderNative.P5.TSS3Operation"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-P6-image-availability",
+        "contract_refs": [
+          "RecorderNative.P6.ImageAvailability"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-ds4-setframe-contract",
+        "contract_refs": [
+          "RecorderNative.Common.DS4.ImageSetFrame"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-P6-DDR-wrappers",
+        "contract_refs": [
+          "RecorderNative.P6.DDRWrapper",
+          "RecorderNative.P6.ADUDDRWrapper",
+          "RecorderNative.P6.DDRLogWrapper",
+          "RecorderNative.P6.ADUDDRLogWrapper"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-DS4-current-time",
+        "contract_refs": [
+          "RecorderNative.DS4.CurrentTimeInfo"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-P5-delete",
+        "contract_refs": [
+          "RecorderNative.P5.DeleteRoB",
+          "RecorderNative.P5.DeleteRoBWithTimeout"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-rob-init-contract",
+        "contract_refs": [
+          "RecorderNative.Common.RoB.InitializePolicy"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-delete-variants",
+        "contract_refs": [
+          "RecorderNative.P4.DeleteRoB",
+          "RecorderNative.P5.SubaruDeleteRoB",
+          "RecorderNative.P5.SuzukiDeleteRoB"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-P6-DeleteRoB",
+        "contract_refs": [
+          "RecorderNative.P6.DeleteRoB"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-P6-ADUOperation",
+        "contract_refs": [
+          "RecorderNative.P6.ADUOperation"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-ds4-ddr-invalidation-contract",
+        "contract_refs": [
+          "RecorderNative.Common.DS4.DDRP5.Invalidation"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-ds4-ddr-output-contract",
+        "contract_refs": [
+          "RecorderNative.Common.DS4.DDRP5.Output"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-ds4-ddr-engine-contract",
+        "contract_refs": [
+          "RecorderNative.Common.DS4.DDRP5Base",
+          "RecorderNative.Common.DS4.DDRP5.Acquisition",
+          "RecorderNative.Common.DS4.DDRP5.Security",
+          "RecorderNative.Common.DS4.DDRP5.Invalidation",
+          "RecorderNative.Common.DS4.DDRP5.Output"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-ds4-image-wire-contract",
+        "contract_refs": [
+          "RecorderNative.Common.DS4.ImageFFD.WirePrimitives"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-ds4-image-p4-contract",
+        "contract_refs": [
+          "RecorderNative.Common.DS4.ImageFFD.P4"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-ds4-image-security-contract",
+        "contract_refs": [
+          "RecorderNative.Common.DS4.ImageFFD.SecurityLv49"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-ds4-image-engine-contract",
+        "contract_refs": [
+          "RecorderNative.Common.DS4.ImageFFD",
+          "RecorderNative.Common.DS4.ImageSetFrame",
+          "RecorderNative.Common.DS4.ImageFFD.WirePrimitives",
+          "RecorderNative.Common.DS4.ImageFFD.SecurityLv49",
+          "RecorderNative.Common.DS4.ImageFFD.P4"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-ds4-ram-engine-contract",
+        "contract_refs": [
+          "RecorderNative.Common.DS4.RecorderRAM"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-ds4-rob-object-contract",
+        "contract_refs": [
+          "RecorderNative.Common.DS4.RoB.PolicyObject"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-main-dcm35-engine-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.DCM35WorkFactors"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-main-physical-to-raw-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.PhysicalToRaw"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-main-adu-ddr-acquisition-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.ADUDDRP6.Acquisition"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-main-adu-ddr-invalidation-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.ADUDDRP6.Invalidation"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-main-adu-ddr-output-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.ADUDDRP6.Output"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-main-adu-ddr-engine-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.ADUDDRP6Base"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-main-p6-ddr-acquisition-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.DDRP6.Acquisition"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-main-p6-ddr-invalidation-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.DDRP6.Invalidation"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-main-p6-ddr-output-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.DDRP6.Output"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-main-p6-ddr-engine-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.DDRP6Base",
+          "RecorderNative.Common.Main.DDRP6.Acquisition",
+          "RecorderNative.Common.Main.DDRP6.Invalidation",
+          "RecorderNative.Common.Main.DDRP6.Output"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-main-image-wire-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.ImageFFD.WirePrimitives"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-main-image-security-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.ImageFFD.Security"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-main-image-p4-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.ImageFFD.P4",
+          "identity.support.bits",
+          "identity.support.p4.enabled-pids",
+          "identity.admission.GTSPlus.CCmdSupportEcu.CheckSupportBitP4.10060950"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-main-image-dmc-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.ImageFFD.DMC"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-main-image-generic-p5-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.ImageFFD.GenericP5"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-main-dmc-image-bulk-contract",
+        "contract_refs": [
+          "RecorderNative.Main.DMCImage.BulkAcquisition"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-main-dmc-image-entry",
+        "contract_refs": [
+          "RecorderNative.Main.DMCImage.Entry"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-main-image-spec-info",
+        "contract_refs": [
+          "RecorderNative.Main.ImageSpecInfo.Entry"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-main-pcs-function-list",
+        "contract_refs": [
+          "RecorderNative.Main.PCSFunctionList.Entry"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-main-pcs-header-info",
+        "contract_refs": [
+          "RecorderNative.Main.PCSHeaderInfo.Entry"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-ds4-rob-analysis-contract",
+        "contract_refs": [
+          "RecorderNative.Common.DS4.RoB.AnalyzeWorkFactors"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-main-rob-analysis-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.RoB.AnalyzeWorkFactors"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-main-absolute-timestamp-fields",
+        "contract_refs": [
+          "RecorderNative.Main.AbsoluteTimestampFields.Entry"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-main-absolute-timestamp-save-log",
+        "contract_refs": [
+          "RecorderNative.Main.AbsoluteTimestampSaveLog.Entry"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-main-rob-p6",
+        "contract_refs": [
+          "RecorderNative.Main.RoBP6.Entry",
+          "RecorderNative.Main.RoBP6.Entry.Code",
+          "RecorderNative.Main.RoBP6.Entry.Frames",
+          "RecorderNative.Main.RoBP6.Entry.Details"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-ds4-ddr-container-contract",
+        "contract_refs": [
+          "RecorderNative.Common.DS4.DDR.Containers",
+          "100964e0"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-capture-auto-power-off-contract",
+        "contract_refs": [
+          "RecorderNative.Capture.PowerPolicy.AutoPowerOff"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-main-rob-object-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.RoB.PolicyObject"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-main-image-rc-21cy-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.ImageFFD.RCAnd21CYPVM"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-main-image-lifetime-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.ImageFFD.Lifetime"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-main-ram-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.RAM.AcquisitionAndCache",
+          "PlatformSession.CommandDataLib.main.CCmdListByte.GetAt.10007a00",
+          "PlatformSession.CommandCommon.main.GetCommFrmInfo.1006f8c0",
+          "PlatformSession.CommandCommon.main.CommFrameSendReceive.1006e800",
+          "PlatformSession.CommandCommon.main.CommCacheSndRcv.1006e2c0"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-main-image-p4",
+        "contract_refs": [
+          "RecorderNative.Main.ImageP4.Entry"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-main-image-ads-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.ImageFFD.ADS"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-main-image-pvm-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.ImageFFD.PVM"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-main-image-tss3-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.ImageFFD.TSS3"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-main-image-adu-fcm-pvm-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.ImageFFD.ADUFCMPVM"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-main-image-engine-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.ImageFFD"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-main-image-availability-p5",
+        "contract_refs": [
+          "RecorderNative.Main.ImageAvailabilityP5.Entry"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-main-payload-dataid-ext-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.PayloadDataIdExt.CaptureOperations",
+          "PlatformSession.CommandDataLib.main.CCmdListByte.GetAt.10007a00",
+          "PlatformSession.CommandDataLib.main.CCmdListByte.copy_ctor.1008e7b0",
+          "PlatformSession.CommandDataLib.main.CCmdListByte.assignment.100abd90",
+          "PlatformSession.CommandDataLib.main.CCmdListByte.AddTail.copy.100cea50",
+          "RecorderNative.Common.Main.RAM.AcquisitionAndCache"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-main-ads-operation-p5",
+        "contract_refs": [
+          "RecorderNative.Main.ADSOperationP5.Entry"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-main-ddr-security-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.DDRP5.Security"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-main-ddr-state-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.DDRP5.StateMetadataAndLifetime"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-main-ddr-acquisition-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.DDRP5.Acquisition"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-main-ddr-invalidation-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.DDRP5.Invalidation",
+          "u16id0/u16kind2; TimelineList4(head8,tailC,count10); ExtendedList14; timelineshaveu32rawvalue/u32status",
+          "6F",
+          "70",
+          "71",
+          "72",
+          "73",
+          "74"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-main-ddr-output-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.DDRP5.Output",
+          "4",
+          "5",
+          "6",
+          "7",
+          "A",
+          "9",
+          "D",
+          "E",
+          "F",
+          "10",
+          "0x75",
+          "0x6f",
+          "0x70",
+          "0x71",
+          "0x72",
+          "0x73",
+          "0x74"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-main-ddr-engine-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.DDRP5Base",
+          "RecorderNative.Common.Main.DDRP5.StateMetadataAndLifetime",
+          "RecorderNative.Common.Main.DDRP5.Security",
+          "RecorderNative.Common.Main.DDRP5.Acquisition",
+          "RecorderNative.Common.Main.DDRP5.Invalidation",
+          "RecorderNative.Common.Main.DDRP5.Output",
+          "RecorderNative.Common.Main.DDR.ReachedContainers"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-analyzer-native-main-common-powersupplycontrol-contracts",
+        "contract_refs": [
+          "RecorderNative.Analyzer.Main.Common.PowerSupplyControl",
+          "RecorderNative.Analyzer.Main.Common.10030300",
+          "RecorderNative.Analyzer.Main.Common.100303c0",
+          "RecorderNative.Analyzer.Main.Common.10030670",
+          "RecorderNative.Analyzer.Main.Common.100308f0",
+          "RecorderNative.Analyzer.Main.Common.10030cb0",
+          "RecorderNative.Analyzer.Main.Common.100310e0",
+          "RecorderNative.Analyzer.Main.Common.100302e0",
+          "RecorderNative.Analyzer.Main.Common.100af560",
+          "RecorderNative.Analyzer.Main.Common.100b3680",
+          "RecorderNative.Analyzer.Main.Common.100bebd0"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-analyzer-native-main-common-newdcm-contracts",
+        "contract_refs": [
+          "RecorderNative.Analyzer.Main.Common.NewDcm",
+          "RecorderNative.Analyzer.Main.Common.1002c440",
+          "RecorderNative.Analyzer.Main.Common.1002c470",
+          "RecorderNative.Analyzer.Main.Common.1002c770",
+          "RecorderNative.Analyzer.Main.Common.1002c7e0",
+          "RecorderNative.Analyzer.Main.Common.1002c850",
+          "RecorderNative.Analyzer.Main.Common.1002c990",
+          "RecorderNative.Analyzer.Main.Common.1002cc90",
+          "RecorderNative.Analyzer.Main.Common.1002cec0",
+          "RecorderNative.Analyzer.Main.Common.100af4b0",
+          "RecorderNative.Analyzer.Main.Common.100b35f0",
+          "RecorderNative.Analyzer.Main.Common.100beb90"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-analyzer-native-main-common-dcm-contracts",
+        "contract_refs": [
+          "RecorderNative.Analyzer.Main.Common.Dcm",
+          "RecorderNative.Analyzer.Main.Common.10028310",
+          "RecorderNative.Analyzer.Main.Common.10028350",
+          "RecorderNative.Analyzer.Main.Common.100285c0",
+          "RecorderNative.Analyzer.Main.Common.10028610",
+          "RecorderNative.Analyzer.Main.Common.10028660",
+          "RecorderNative.Analyzer.Main.Common.10028730",
+          "RecorderNative.Analyzer.Main.Common.10028830",
+          "RecorderNative.Analyzer.Main.Common.10028930",
+          "RecorderNative.Analyzer.Main.Common.100290b0",
+          "RecorderNative.Analyzer.Main.Common.100293a0",
+          "RecorderNative.Analyzer.Main.Common.10029700",
+          "RecorderNative.Analyzer.Main.Common.100298b0",
+          "RecorderNative.Analyzer.Main.Common.10029a80",
+          "RecorderNative.Analyzer.Main.Common.10029b70",
+          "RecorderNative.Analyzer.Main.Common.10029c20",
+          "RecorderNative.Analyzer.Main.Common.10029d30",
+          "RecorderNative.Analyzer.Main.Common.10029e30",
+          "RecorderNative.Analyzer.Main.Common.10028a30",
+          "RecorderNative.Analyzer.Main.Common.10029f70",
+          "RecorderNative.Analyzer.Main.Common.1002a190",
+          "RecorderNative.Analyzer.Main.Common.1002a540",
+          "RecorderNative.Analyzer.Main.Common.1002a670",
+          "RecorderNative.Analyzer.Main.Common.1002a850",
+          "RecorderNative.Analyzer.Main.Common.1002aa00",
+          "RecorderNative.Analyzer.Main.Common.100af430",
+          "RecorderNative.Analyzer.Main.Common.100b3570",
+          "RecorderNative.Analyzer.Main.Common.100beb50"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-analyzer-native-main-common-p4-contracts",
+        "contract_refs": [
+          "RecorderNative.Analyzer.Main.Common.P4",
+          "RecorderNative.Analyzer.Main.Common.1002d540",
+          "RecorderNative.Analyzer.Main.Common.1002d570",
+          "RecorderNative.Analyzer.Main.Common.1002e930",
+          "RecorderNative.Analyzer.Main.Common.1002e980",
+          "RecorderNative.Analyzer.Main.Common.1002e9d0",
+          "RecorderNative.Analyzer.Main.Common.1002eae0",
+          "RecorderNative.Analyzer.Main.Common.1002eba0",
+          "RecorderNative.Analyzer.Main.Common.1002ece0",
+          "RecorderNative.Analyzer.Main.Common.1002ef30",
+          "RecorderNative.Analyzer.Main.Common.1002f720",
+          "RecorderNative.Analyzer.Main.Common.1002f7b0",
+          "RecorderNative.Analyzer.Main.Common.1002f940",
+          "RecorderNative.Analyzer.Main.Common.1002f9f0",
+          "RecorderNative.Analyzer.Main.Common.1002d7a0",
+          "RecorderNative.Analyzer.Main.Common.1002da50",
+          "RecorderNative.Analyzer.Main.Common.1002dcd0",
+          "RecorderNative.Analyzer.Main.Common.1002e100",
+          "RecorderNative.Analyzer.Main.Common.1002e500",
+          "RecorderNative.Analyzer.Main.Common.1002f000",
+          "RecorderNative.Analyzer.Main.Common.1002f450",
+          "RecorderNative.Analyzer.Main.Common.1002fb50",
+          "RecorderNative.Analyzer.Main.Common.1002ff10",
+          "RecorderNative.Analyzer.Main.Common.100af4f0",
+          "RecorderNative.Analyzer.Main.Common.100b3620",
+          "RecorderNative.Analyzer.Main.Common.100bebb0"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-analyzer-native-main-common-base-contracts",
+        "contract_refs": [
+          "RecorderNative.Analyzer.Main.Common.Base",
+          "RecorderNative.Analyzer.Main.Common.10024570",
+          "RecorderNative.Analyzer.Main.Common.100245d0",
+          "RecorderNative.Analyzer.Main.Common.10024830",
+          "RecorderNative.Analyzer.Main.Common.100252b0",
+          "RecorderNative.Analyzer.Main.Common.10025360",
+          "RecorderNative.Analyzer.Main.Common.10025580",
+          "RecorderNative.Analyzer.Main.Common.100253b0",
+          "RecorderNative.Analyzer.Main.Common.10025480",
+          "RecorderNative.Analyzer.Main.Common.10026360",
+          "RecorderNative.Analyzer.Main.Common.100266c0",
+          "RecorderNative.Analyzer.Main.Common.10026870",
+          "RecorderNative.Analyzer.Main.Common.10026a50",
+          "RecorderNative.Analyzer.Main.Common.10026b40",
+          "RecorderNative.Analyzer.Main.Common.10026bf0",
+          "RecorderNative.Analyzer.Main.Common.10026d00",
+          "RecorderNative.Analyzer.Main.Common.10026e10",
+          "RecorderNative.Analyzer.Main.Common.10026fe0",
+          "RecorderNative.Analyzer.Main.Common.10027660",
+          "RecorderNative.Analyzer.Main.Common.10027790",
+          "RecorderNative.Analyzer.Main.Common.10027b10",
+          "RecorderNative.Analyzer.Main.Common.10024dc0",
+          "RecorderNative.Analyzer.Main.Common.10025050",
+          "RecorderNative.Analyzer.Main.Common.10025730",
+          "RecorderNative.Analyzer.Main.Common.10027120",
+          "RecorderNative.Analyzer.Main.Common.10027930",
+          "RecorderNative.Analyzer.Main.Common.10027b40",
+          "RecorderNative.Analyzer.Main.Common.10027d00",
+          "RecorderNative.Analyzer.Main.Common.10025680",
+          "RecorderNative.Analyzer.Main.Common.100af3d0",
+          "RecorderNative.Analyzer.Main.Common.100b3510",
+          "RecorderNative.Analyzer.Main.Common.100beb30"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-analyzer-native-main-common-utilities-contracts",
+        "contract_refs": [
+          "RecorderNative.Analyzer.Main.Common.Utilities",
+          "RecorderNative.Analyzer.Main.Common.100bff7c",
+          "RecorderNative.Analyzer.Main.Common.100c14e0",
+          "RecorderNative.Analyzer.Main.Common.100246e0",
+          "RecorderNative.Analyzer.Main.Common.10028440",
+          "RecorderNative.Analyzer.Main.Common.1002c5b0",
+          "RecorderNative.Analyzer.Main.Common.1002d630",
+          "RecorderNative.Analyzer.Main.Common.10030310",
+          "RecorderNative.Analyzer.Main.Common.10024520",
+          "RecorderNative.Analyzer.Main.Common.10024640",
+          "RecorderNative.Analyzer.Main.Common.10027ad0",
+          "RecorderNative.Analyzer.Main.Common.1002a810",
+          "RecorderNative.Analyzer.Main.Common.1002ce70",
+          "RecorderNative.Analyzer.Main.Common.1002f760",
+          "RecorderNative.Analyzer.Main.Common.10002980",
+          "RecorderNative.Analyzer.Main.Common.10002950",
+          "RecorderNative.Analyzer.Main.Common.100029a0",
+          "RecorderNative.Analyzer.Main.Common.100029b0",
+          "RecorderNative.Analyzer.Main.Common.10002a80",
+          "RecorderNative.Analyzer.Main.Common.10002a90",
+          "RecorderNative.Analyzer.Main.Common.10002b20",
+          "RecorderNative.Analyzer.Main.Common.10002b30",
+          "RecorderNative.Analyzer.Main.Common.10002c00",
+          "RecorderNative.Analyzer.Main.Common.10002ce0",
+          "RecorderNative.Analyzer.Main.Common.10002d00",
+          "RecorderNative.Analyzer.Main.Common.10002df0",
+          "RecorderNative.Analyzer.Main.Common.1002c590",
+          "RecorderNative.Analyzer.Main.Common.100028a0",
+          "RecorderNative.Analyzer.Main.Common.10002c80",
+          "RecorderNative.Analyzer.Main.Common.10002cb0",
+          "RecorderNative.Analyzer.Main.Common.100ad130"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-analyzer-native-main-commanddatalib-valuemodels-contracts",
+        "contract_refs": [
+          "RecorderNative.Analyzer.Main.CommandDataLib.ValueModels",
+          "RecorderNative.Analyzer.Main.CommandDataLib.1000e4d0",
+          "RecorderNative.Analyzer.Main.CommandDataLib.100422e0",
+          "RecorderNative.Analyzer.Main.CommandDataLib.10042310",
+          "RecorderNative.Analyzer.Main.CommandDataLib.10044bd0",
+          "RecorderNative.Analyzer.Main.CommandDataLib.10044c00",
+          "RecorderNative.Analyzer.Main.CommandDataLib.10044c30",
+          "RecorderNative.Analyzer.Main.CommandDataLib.10034310",
+          "RecorderNative.Analyzer.Main.CommandDataLib.10041050",
+          "RecorderNative.Analyzer.Main.CommandDataLib.10041170",
+          "RecorderNative.Analyzer.Main.CommandDataLib.10041210",
+          "RecorderNative.Analyzer.Main.CommandDataLib.10041300",
+          "RecorderNative.Analyzer.Main.CommandDataLib.10043130",
+          "RecorderNative.Analyzer.Main.CommandDataLib.10043250",
+          "RecorderNative.Analyzer.Main.CommandDataLib.10043350",
+          "RecorderNative.Analyzer.Main.CommandDataLib.100433e0",
+          "RecorderNative.Analyzer.Main.CommandDataLib.10043470",
+          "RecorderNative.Analyzer.Main.CommandDataLib.10043530",
+          "RecorderNative.Analyzer.Main.CommandDataLib.10092e00",
+          "RecorderNative.Analyzer.Main.CommandDataLib.10092ea0",
+          "RecorderNative.Analyzer.Main.CommandDataLib.100930f0",
+          "RecorderNative.Analyzer.Main.CommandDataLib.10094030",
+          "RecorderNative.Analyzer.Main.CommandDataLib.100940c0",
+          "RecorderNative.Analyzer.Main.CommandDataLib.10097600",
+          "RecorderNative.Analyzer.Main.CommandDataLib.10099ee0",
+          "RecorderNative.Analyzer.Main.CommandDataLib.1009a2f0",
+          "RecorderNative.Analyzer.Main.CommandDataLib.1009a3c0",
+          "RecorderNative.Analyzer.Main.CommandDataLib.1009a740",
+          "RecorderNative.Analyzer.Main.CommandDataLib.1009a830",
+          "RecorderNative.Analyzer.Main.CommandDataLib.10015fa0",
+          "RecorderNative.Analyzer.Main.CommandDataLib.1001ccc0",
+          "RecorderNative.Analyzer.Main.CommandDataLib.100350f0",
+          "RecorderNative.Analyzer.Main.CommandDataLib.10042070",
+          "RecorderNative.Analyzer.Main.CommandDataLib.10042190",
+          "RecorderNative.Analyzer.Main.CommandDataLib.10042220",
+          "RecorderNative.Analyzer.Main.CommandDataLib.10044840",
+          "RecorderNative.Analyzer.Main.CommandDataLib.100448d0",
+          "RecorderNative.Analyzer.Main.CommandDataLib.10044960",
+          "RecorderNative.Analyzer.Main.CommandDataLib.10044a40",
+          "RecorderNative.Analyzer.Main.CommandDataLib.10044ad0",
+          "RecorderNative.Analyzer.Main.CommandDataLib.10045760",
+          "RecorderNative.Analyzer.Main.CommandDataLib.10093eb0",
+          "RecorderNative.Analyzer.Main.CommandDataLib.100b57f0",
+          "RecorderNative.Analyzer.Main.CommandDataLib.100b5860",
+          "RecorderNative.Analyzer.Main.CommandDataLib.100b5a30",
+          "RecorderNative.Analyzer.Main.CommandDataLib.100ce810",
+          "RecorderNative.Analyzer.Main.CommandDataLib.100ce870",
+          "RecorderNative.Analyzer.Main.CommandDataLib.100ce930",
+          "RecorderNative.Analyzer.Main.CommandDataLib.100cf150",
+          "RecorderNative.Analyzer.Main.CommandDataLib.100d18e0",
+          "RecorderNative.Analyzer.Main.CommandDataLib.100d1910",
+          "RecorderNative.Analyzer.Main.CommandDataLib.100d19b0",
+          "RecorderNative.Analyzer.Main.CommandDataLib.100d19e0",
+          "RecorderNative.Analyzer.Main.CommandDataLib.10020c60",
+          "RecorderNative.Analyzer.Main.CommandDataLib.10020c90",
+          "RecorderNative.Analyzer.Main.CommandDataLib.100b04d0",
+          "RecorderNative.Analyzer.Main.CommandDataLib.100b06a0",
+          "RecorderNative.Analyzer.Main.CommandDataLib.100b0710",
+          "RecorderNative.Analyzer.Main.CommandDataLib.100b5500",
+          "RecorderNative.Analyzer.Main.CommandDataLib.100df1bd",
+          "RecorderNative.Analyzer.Main.CommandDataLib.1000c740",
+          "RecorderNative.Analyzer.Main.CommandDataLib.1000cc60"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-analyzer-native-main-getanlwkfctbtp4_dt-contracts",
+        "contract_refs": [
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.1000fa30",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.100100b0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.10010b40",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.100125d0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.1000f0b0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.1000f110",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.1000f4d0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.1000f540",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.1000f620",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.1000f7d0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.10011220",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.10011260",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.10012580",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.1000ed90",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.1000edf0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.1000ee20",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.1000ee50",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.1000e650",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.1000e830",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.100110f0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.10011380",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.1000ef30",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.1000ef60",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.1000efa0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.10012600",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.1000e4a0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.10005150",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.10004980",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.10003780",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.10003920",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.10003b60",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.10003cb0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.10003bf0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.10004340",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.100046f0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.100036c0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.10003410",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.100032e0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.100025d0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.100122b0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.100034a0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.10012c17",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.1000ee80",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.1000ef10",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.10012c55",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.1000f200",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.1000f230",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT.1000f250"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-analyzer-native-main-getanlwkfctdcm24_dt-contracts",
+        "contract_refs": [
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.1000fa60",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.100100e0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.10010ba0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.100125d0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.1000f0b0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.1000f110",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.1000f500",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.1000f570",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.1000f650",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.1000f800",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.10011280",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.100112c0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.10012580",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.1000ed90",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.1000edf0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.1000ee20",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.1000ee50",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.1000e650",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.1000e830",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.10011150",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.100113f0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.1000ef30",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.1000ef60",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.1000efa0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.10012600",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.1000e4a0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.10005150",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.10004980",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.10003780",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.10003920",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.10003b60",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.10003cb0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.10003bf0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.10004340",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.100046f0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.100036c0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.10003410",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.100025d0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.100122b0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.100032e0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.100034a0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.10012c17",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.1000ee80",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.1000ef10",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.10012c55",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.1000f200",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.1000f230",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT.1000f250"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-analyzer-native-main-getanlwkfctdcmp4_dt-contracts",
+        "contract_refs": [
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.1000fa20",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.100100a0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.10010b30",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.10012540",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.1000f0a0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.1000f100",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.1000f4c0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.1000f530",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.1000f610",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.1000f7c0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.10011210",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.10011250",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.100124f0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.10002120",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.10002180",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.100021b0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.100021e0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.1000e860",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.1000ea40",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.100110e0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.10011360",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.1000ef20",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.1000ef50",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.1000ef90",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.10012570",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.1000e6b0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.10006090",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.100058c0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.100046b0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.10004850",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.10004a90",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.10004bf0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.10004b20",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.10005280",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.10005630",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.100045f0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.10004340",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.10003510",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.10012220",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.10004210",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.100043d0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.10012b87",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.1000ee70",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.1000ef00",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.10012bc5",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.1000f1f0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.1000f220",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT.1000f240"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-analyzer-native-main-getanlwkfctp4psc_dt-contracts",
+        "contract_refs": [
+          "RecorderNative.Analyzer.Main.GetAnlWkFctP4PSC_DT",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctP4PSC_DT.10001420",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctP4PSC_DT.10001cf0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctP4PSC_DT.100011f0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctP4PSC_DT.10001260",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctP4PSC_DT.10001060",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctP4PSC_DT.10001eb0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctP4PSC_DT.100015e0",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctP4PSC_DT.10001730",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctP4PSC_DT.10001f60",
+          "RecorderNative.Analyzer.Main.GetAnlWkFctP4PSC_DT.10002016"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-analyzer-native-main-getanlzwrkfctp3_dt-contracts",
+        "contract_refs": [
+          "RecorderNative.Analyzer.Main.GetAnlzWrkFctP3_DT",
+          "RecorderNative.Analyzer.Main.GetAnlzWrkFctP3_DT.10001220",
+          "RecorderNative.Analyzer.Main.GetAnlzWrkFctP3_DT.10001290",
+          "RecorderNative.Analyzer.Main.GetAnlzWrkFctP3_DT.10001060",
+          "RecorderNative.Analyzer.Main.GetAnlzWrkFctP3_DT.10001d10",
+          "RecorderNative.Analyzer.Main.GetAnlzWrkFctP3_DT.10001450",
+          "RecorderNative.Analyzer.Main.GetAnlzWrkFctP3_DT.10001b60",
+          "RecorderNative.Analyzer.Main.GetAnlzWrkFctP3_DT.100015a0",
+          "RecorderNative.Analyzer.Main.GetAnlzWrkFctP3_DT.10001dc0",
+          "RecorderNative.Analyzer.Main.GetAnlzWrkFctP3_DT.10001e74"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-analyzer-native-main-getanlzwrkfctp4_dt-contracts",
+        "contract_refs": [
+          "RecorderNative.Analyzer.Main.GetAnlzWrkFctP4_DT",
+          "RecorderNative.Analyzer.Main.GetAnlzWrkFctP4_DT.10002850",
+          "RecorderNative.Analyzer.Main.GetAnlzWrkFctP4_DT.10001820",
+          "RecorderNative.Analyzer.Main.GetAnlzWrkFctP4_DT.10002a10",
+          "RecorderNative.Analyzer.Main.GetAnlzWrkFctP4_DT.10001380",
+          "RecorderNative.Analyzer.Main.GetAnlzWrkFctP4_DT.10001480",
+          "RecorderNative.Analyzer.Main.GetAnlzWrkFctP4_DT.100010b0",
+          "RecorderNative.Analyzer.Main.GetAnlzWrkFctP4_DT.10002c30",
+          "RecorderNative.Analyzer.Main.GetAnlzWrkFctP4_DT.10002c70",
+          "RecorderNative.Analyzer.Main.GetAnlzWrkFctP4_DT.100013f0",
+          "RecorderNative.Analyzer.Main.GetAnlzWrkFctP4_DT.10001640",
+          "RecorderNative.Analyzer.Main.GetAnlzWrkFctP4_DT.10001110",
+          "RecorderNative.Analyzer.Main.GetAnlzWrkFctP4_DT.100019e0",
+          "RecorderNative.Analyzer.Main.GetAnlzWrkFctP4_DT.10001d00",
+          "RecorderNative.Analyzer.Main.GetAnlzWrkFctP4_DT.10002e70",
+          "RecorderNative.Analyzer.Main.GetAnlzWrkFctP4_DT.10002f48"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-worker5-native-components",
+        "contract_refs": [
+          "RecorderNative.Main.ADSImageFFDP5.PrimaryExecuteAndRoot"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-worker5-native-components",
+        "contract_refs": [
+          "RecorderNative.Main.ADSImageFFDP5.LocalImageBehaviorBulkAndRecord"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-worker5-native-components",
+        "contract_refs": [
+          "RecorderNative.Main.ADSImageFFDP5.LocalObjectsFrameTemplatesAndRuntime"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-worker5-native-components",
+        "contract_refs": [
+          "RecorderNative.Main.PVMImageFFDP5.PrimaryExecuteAndRoot"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-worker5-native-components",
+        "contract_refs": [
+          "RecorderNative.Main.PVMImageFFDP5.LocalImageLegacySpec1"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-worker5-native-components",
+        "contract_refs": [
+          "RecorderNative.Main.PVMImageFFDP5.LocalImageSpec2DescriptorBulkAndRecord"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-worker5-native-components",
+        "contract_refs": [
+          "RecorderNative.Main.PVMImageFFDP5.LocalObjectsFrameTemplatesAndRuntime"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-worker5-native-components",
+        "contract_refs": [
+          "RecorderNative.Main.RCImageFFDP5.PrimaryExecuteAndRoot"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-worker5-native-components",
+        "contract_refs": [
+          "RecorderNative.Main.RCImageFFDP5.LocalImageDescriptorBulkAndRecord"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-worker5-native-components",
+        "contract_refs": [
+          "RecorderNative.Main.RCImageFFDP5.LocalObjectsFrameTemplatesAndRuntime"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-tss3-p5-local-contract",
+        "contract_refs": [
+          "RecorderNative.Main.GetTSS3ImageFFDP5.LocalRootAndImageAcquisition"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-generic-p5-local-contract",
+        "contract_refs": [
+          "RecorderNative.Main.GetImageFFDP5.LocalRootAndImageAcquisition"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-main-ddr-container-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.DDR.ReachedContainers"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-pcs-readtime-p5-header-contract",
+        "contract_refs": [
+          "RecorderNative.Main.PCSReadTime.P5HeaderEngine"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-p5-ads-pvm-rc-header-contracts",
+        "contract_refs": [
+          "RecorderNative.Main.ADSImageFFDP5.P5HeaderEngine"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-p5-ads-pvm-rc-header-contracts",
+        "contract_refs": [
+          "RecorderNative.Main.PVMImageFFDP5.P5HeaderEngine"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-p5-ads-pvm-rc-header-contracts",
+        "contract_refs": [
+          "RecorderNative.Main.RCImageFFDP5.P5HeaderEngine"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-ddr-worker5-native-components",
+        "contract_refs": [
+          "RecorderNative.Main.GetADSDDRInfoP5_DT.LocalEngine"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-ddr-worker5-native-components",
+        "contract_refs": [
+          "RecorderNative.Main.GetDDRInfoP5_DT.FullDataDerived"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-ddr-worker5-native-components",
+        "contract_refs": [
+          "RecorderNative.Main.GetDDRInfoImgOpeDdr_DT.FullDataDerived"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-ddr-worker5-native-components",
+        "contract_refs": [
+          "RecorderNative.Main.GetDDRInfoSaveLog_DT.BootstrapToRetainedDDR4"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-ddr-worker5-native-components",
+        "contract_refs": [
+          "RecorderNative.Main.GetDDRInfo_DT.BootstrapToRetainedDDR4"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-rob-main-p4-local-contract",
+        "contract_refs": [
+          "RecorderNative.Main.GetRoBP4_DT.LocalRootAcquisitionAndProjection",
+          "RecorderNative.Main.GetRoBP4_DT.100011f0",
+          "RecorderNative.Main.GetRoBP4_DT.10001280",
+          "RecorderNative.Main.GetRoBP4_DT.10001290",
+          "RecorderNative.Main.GetRoBP4_DT.100012c0",
+          "RecorderNative.Main.GetRoBP4_DT.100017b0",
+          "RecorderNative.Main.GetRoBP4_DT.10001820",
+          "RecorderNative.Main.GetRoBP4_DT.10001920",
+          "RecorderNative.Main.GetRoBP4_DT.10001ae0",
+          "RecorderNative.Main.GetRoBP4_DT.10001bf0",
+          "RecorderNative.Main.GetRoBP4_DT.10001c10",
+          "RecorderNative.Main.GetRoBP4_DT.10001c90",
+          "RecorderNative.Main.GetRoBP4_DT.10001ca0",
+          "RecorderNative.Main.GetRoBP4_DT.10001ce0",
+          "RecorderNative.Main.GetRoBP4_DT.10001d90",
+          "RecorderNative.Main.GetRoBP4_DT.10002070",
+          "RecorderNative.Main.GetRoBP4_DT.10002570",
+          "RecorderNative.Main.GetRoBP4_DT.100026e0",
+          "RecorderNative.Main.GetRoBP4_DT.10002950",
+          "RecorderNative.Main.GetRoBP4_DT.10002aa0",
+          "RecorderNative.Main.GetRoBP4_DT.10002b60",
+          "RecorderNative.Main.GetRoBP4_DT.10002b70",
+          "RecorderNative.Main.GetRoBP4_DT.10002b80",
+          "RecorderNative.Main.GetRoBP4_DT.10002fa0",
+          "RecorderNative.Main.GetRoBP4_DT.10002fb0",
+          "RecorderNative.Main.GetRoBP4_DT.10002ff0",
+          "RecorderNative.Main.GetRoBP4_DT.100030b0",
+          "RecorderNative.Main.GetRoBP4_DT.100030d0",
+          "RecorderNative.Main.GetRoBP4_DT.100030f0",
+          "RecorderNative.Main.GetRoBP4_DT.10003130",
+          "RecorderNative.Main.GetRoBP4_DT.10003170",
+          "RecorderNative.Main.GetRoBP4_DT.10003230",
+          "RecorderNative.Main.GetRoBP4_DT.10003280",
+          "RecorderNative.Main.GetRoBP4_DT.10003a40",
+          "RecorderNative.Main.GetRoBP4_DT.10003a70",
+          "RecorderNative.Main.GetRoBP4_DT.10003b00",
+          "RecorderNative.Main.GetRoBP4_DT.10003b60",
+          "RecorderNative.Main.GetRoBP4_DT.10003ba0",
+          "RecorderNative.Main.GetRoBP4_DT.10003be0",
+          "RecorderNative.Main.GetRoBP4_DT.10003bf0",
+          "RecorderNative.Main.GetRoBP4_DT.10003c20",
+          "RecorderNative.Main.GetRoBP4_DT.10004360",
+          "RecorderNative.Main.GetRoBP4_DT.10004540",
+          "RecorderNative.Main.GetRoBP4_DT.10005460",
+          "RecorderNative.Main.GetRoBP4_DT.10005470"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-rob-main-anlz-local-contract",
+        "contract_refs": [
+          "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.LocalRootAcquisitionAndProjection",
+          "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.10001000",
+          "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.10001080",
+          "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.10001090",
+          "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.100010c0",
+          "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.10001300",
+          "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.10001360",
+          "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.10001430",
+          "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.10001560",
+          "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.100015a0",
+          "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.10001620",
+          "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.10001630",
+          "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.10001660",
+          "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.100019b0",
+          "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.10001ec0",
+          "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.100020c0",
+          "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.10002510",
+          "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.100026d0",
+          "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.10002890",
+          "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.100028f0",
+          "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.10002a10",
+          "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.10002a90",
+          "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.10002af0",
+          "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.10002e70",
+          "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.10002e80",
+          "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.10002ef0",
+          "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.10002f00",
+          "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.10002f30",
+          "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.10003280",
+          "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.100032d0",
+          "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.10003300",
+          "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.10003310",
+          "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.10003340",
+          "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.10003980",
+          "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.10003990"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-rob-main-p5-local-contract",
+        "contract_refs": [
+          "RecorderNative.Main.GetRoBP5_DT.LocalRootAcquisitionAndProjection",
+          "RecorderNative.Main.GetRoBP5_DT.10001000",
+          "RecorderNative.Main.GetRoBP5_DT.10001080",
+          "RecorderNative.Main.GetRoBP5_DT.10001090",
+          "RecorderNative.Main.GetRoBP5_DT.100010c0",
+          "RecorderNative.Main.GetRoBP5_DT.100012f0",
+          "RecorderNative.Main.GetRoBP5_DT.10001350",
+          "RecorderNative.Main.GetRoBP5_DT.10001430",
+          "RecorderNative.Main.GetRoBP5_DT.100015e0",
+          "RecorderNative.Main.GetRoBP5_DT.10001690",
+          "RecorderNative.Main.GetRoBP5_DT.100016b0",
+          "RecorderNative.Main.GetRoBP5_DT.100016f0",
+          "RecorderNative.Main.GetRoBP5_DT.10001d00",
+          "RecorderNative.Main.GetRoBP5_DT.10002120",
+          "RecorderNative.Main.GetRoBP5_DT.100021c0",
+          "RecorderNative.Main.GetRoBP5_DT.10002500",
+          "RecorderNative.Main.GetRoBP5_DT.10002750",
+          "RecorderNative.Main.GetRoBP5_DT.10002920",
+          "RecorderNative.Main.GetRoBP5_DT.10002a60",
+          "RecorderNative.Main.GetRoBP5_DT.10002c10",
+          "RecorderNative.Main.GetRoBP5_DT.10002d50",
+          "RecorderNative.Main.GetRoBP5_DT.10002dc0",
+          "RecorderNative.Main.GetRoBP5_DT.10003a30",
+          "RecorderNative.Main.GetRoBP5_DT.10003ff0",
+          "RecorderNative.Main.GetRoBP5_DT.10004580",
+          "RecorderNative.Main.GetRoBP5_DT.100046d0",
+          "RecorderNative.Main.GetRoBP5_DT.10004740",
+          "RecorderNative.Main.GetRoBP5_DT.10004750",
+          "RecorderNative.Main.GetRoBP5_DT.10004780",
+          "RecorderNative.Main.GetRoBP5_DT.100047a0",
+          "RecorderNative.Main.GetRoBP5_DT.10004ad0",
+          "RecorderNative.Main.GetRoBP5_DT.10004b00",
+          "RecorderNative.Main.GetRoBP5_DT.10004b10",
+          "RecorderNative.Main.GetRoBP5_DT.10004b40",
+          "RecorderNative.Main.GetRoBP5_DT.10005490",
+          "RecorderNative.Main.GetRoBP5_DT.100054a0"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-rob-main-subaru-local-contract",
+        "contract_refs": [
+          "RecorderNative.Main.GetRoBP5_SUBARU_DT.LocalRootAcquisitionAndProjection",
+          "RecorderNative.Main.GetRoBP5_SUBARU_DT.10001000",
+          "RecorderNative.Main.GetRoBP5_SUBARU_DT.10001080",
+          "RecorderNative.Main.GetRoBP5_SUBARU_DT.10001090",
+          "RecorderNative.Main.GetRoBP5_SUBARU_DT.100010c0",
+          "RecorderNative.Main.GetRoBP5_SUBARU_DT.100012a0",
+          "RecorderNative.Main.GetRoBP5_SUBARU_DT.10001300",
+          "RecorderNative.Main.GetRoBP5_SUBARU_DT.10001420",
+          "RecorderNative.Main.GetRoBP5_SUBARU_DT.100015e0",
+          "RecorderNative.Main.GetRoBP5_SUBARU_DT.10001660",
+          "RecorderNative.Main.GetRoBP5_SUBARU_DT.10001670",
+          "RecorderNative.Main.GetRoBP5_SUBARU_DT.100016a0",
+          "RecorderNative.Main.GetRoBP5_SUBARU_DT.10001ce0",
+          "RecorderNative.Main.GetRoBP5_SUBARU_DT.100020c0",
+          "RecorderNative.Main.GetRoBP5_SUBARU_DT.10002450",
+          "RecorderNative.Main.GetRoBP5_SUBARU_DT.10002660",
+          "RecorderNative.Main.GetRoBP5_SUBARU_DT.100027e0",
+          "RecorderNative.Main.GetRoBP5_SUBARU_DT.10002940",
+          "RecorderNative.Main.GetRoBP5_SUBARU_DT.100029b0",
+          "RecorderNative.Main.GetRoBP5_SUBARU_DT.10002a10",
+          "RecorderNative.Main.GetRoBP5_SUBARU_DT.10002c50",
+          "RecorderNative.Main.GetRoBP5_SUBARU_DT.100030f0",
+          "RecorderNative.Main.GetRoBP5_SUBARU_DT.10003240",
+          "RecorderNative.Main.GetRoBP5_SUBARU_DT.100032c0",
+          "RecorderNative.Main.GetRoBP5_SUBARU_DT.100032e0",
+          "RecorderNative.Main.GetRoBP5_SUBARU_DT.10003320",
+          "RecorderNative.Main.GetRoBP5_SUBARU_DT.10003340",
+          "RecorderNative.Main.GetRoBP5_SUBARU_DT.10003660",
+          "RecorderNative.Main.GetRoBP5_SUBARU_DT.10003690",
+          "RecorderNative.Main.GetRoBP5_SUBARU_DT.100036a0",
+          "RecorderNative.Main.GetRoBP5_SUBARU_DT.100036d0",
+          "RecorderNative.Main.GetRoBP5_SUBARU_DT.10003830",
+          "RecorderNative.Main.GetRoBP5_SUBARU_DT.10004720",
+          "RecorderNative.Main.GetRoBP5_SUBARU_DT.10004730"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-rob-main-signal-lsb-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.RoB.SignalLSBProjection"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-operations-worker7-complete-contracts",
+        "contract_refs": [
+          "RecorderNative.Common.Main.P4.OperationAndPCSRead"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-operations-worker7-complete-contracts",
+        "contract_refs": [
+          "RecorderNative.Main.OperationP4.Execute"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-operations-worker7-complete-contracts",
+        "contract_refs": [
+          "RecorderNative.Main.OperationP4ICS02.Execute"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-operations-worker7-complete-contracts",
+        "contract_refs": [
+          "RecorderNative.Main.PCSOperationP4.Execute"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-operations-worker7-complete-contracts",
+        "contract_refs": [
+          "RecorderNative.Main.LCSOperationP5.Execute"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-operations-worker7-complete-contracts",
+        "contract_refs": [
+          "RecorderNative.Main.OperationP5.Execute"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-operations-worker7-complete-contracts",
+        "contract_refs": [
+          "RecorderNative.Main.ADUImageP6.Execute"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-operations-worker7-complete-contracts",
+        "contract_refs": [
+          "RecorderNative.Main.ADUImageP6.Acquisition"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-operations-worker7-complete-contracts",
+        "contract_refs": [
+          "RecorderNative.Main.PCSReadTime.Execute"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-operations-worker7-complete-contracts",
+        "contract_refs": [
+          "RecorderNative.Main.PCSReadTime.Legacy14PID"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-operations-worker7-complete-contracts",
+        "contract_refs": [
+          "RecorderNative.Main.PCSReadTime.HeaderComposition"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-operations-worker7-complete-contracts",
+        "contract_refs": [
+          "RecorderNative.Main.PCSReadTime.ScalarAndCategoryPrograms"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-operations-worker7-complete-contracts",
+        "contract_refs": [
+          "RecorderNative.Main.PCSReadTime.P5HeaderEstimate.10004ea0"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-ds4-freeze-container-entry-supplement",
+        "contract_refs": [
+          "RecorderNative.Common.DS4.DDR.InvalidFIFO.Ctor.100294a0"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-ds4-freeze-container-entry-supplement",
+        "contract_refs": [
+          "RecorderNative.Common.DS4.DDR.InvalidFIFO.Dtor.100297f0"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-ds4-freeze-container-entry-supplement",
+        "contract_refs": [
+          "RecorderNative.Common.DS4.DDR.InvalidFIFO.AddTail.1002a4a0"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-ds4-freeze-container-entry-supplement",
+        "contract_refs": [
+          "RecorderNative.Common.DS4.DDR.InvalidFIFO.GetAt.1002e0c0"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-ds4-freeze-container-entry-supplement",
+        "contract_refs": [
+          "RecorderNative.Common.DS4.DDR.InvalidFIFO.RemoveAll.100309f0"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-ds4-freeze-container-entry-supplement",
+        "contract_refs": [
+          "RecorderNative.Common.DS4.DDR.InvalidFIFO.RemoveAt.10030bf0"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-ds4-freeze-container-entry-supplement",
+        "contract_refs": [
+          "RecorderNative.Common.DS4.ImageFFD.P4InfoList.Ctor.10089380"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-ds4-freeze-container-entry-supplement",
+        "contract_refs": [
+          "RecorderNative.Common.DS4.ImageFFD.P4InfoList.Dtor.1008c240"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-ds4-freeze-container-entry-supplement",
+        "contract_refs": [
+          "RecorderNative.Common.DS4.DDR.InvalidFIFO.IndexListAssign.100299e0"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-ds4-freeze-container-entry-supplement",
+        "contract_refs": [
+          "RecorderNative.Common.DS4.DDR.InvalidFIFO.IndexListRemoveAll.10008ea0"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-ds4-freeze-container-entry-supplement",
+        "contract_refs": [
+          "RecorderNative.Common.DS4.ImageFFD.P4InfoList.RemoveAll.10094b50"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-ds4-freeze-container-entry-supplement",
+        "contract_refs": [
+          "RecorderNative.Common.DS4.Runtime.Free.100997fb"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-dmc-p5-header-contract",
+        "contract_refs": [
+          "RecorderNative.Main.DMCImage.P5HeaderEngine"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-common-main-ddr-legacy-container-contract",
+        "contract_refs": [
+          "RecorderNative.Common.Main.DDR.LegacyReachedContainers"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-main-ddr-savelog-engine-contract",
+        "contract_refs": [
+          "RecorderNative.Main.LegacyDDRSaveLog.BusinessEngine"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-main-ddr-plain-engine-contract",
+        "contract_refs": [
+          "RecorderNative.Main.LegacyDDRPlain.BusinessEngine"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-ddr4-header-core-contracts",
+        "contract_refs": [
+          "RecorderNative.Main.DMCImage.DDR4HeaderEngine"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-ddr4-header-core-contracts",
+        "contract_refs": [
+          "RecorderNative.Main.ADSImageFFDP5.DDR4HeaderEngine"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-ddr4-header-core-contracts",
+        "contract_refs": [
+          "RecorderNative.Main.PVMImageFFDP5.DDR4HeaderEngine"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-ddr4-header-core-contracts",
+        "contract_refs": [
+          "RecorderNative.Main.RCImageFFDP5.DDR4HeaderEngine"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-ddr4-header-core-contracts",
+        "contract_refs": [
+          "RecorderNative.Main.TSS3ImageFFDP5.DDR4HeaderEngine"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-ddr4-header-core-contracts",
+        "contract_refs": [
+          "RecorderNative.Main.GenericImageFFDP5.DDR4HeaderEngine"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-main-legacy-ddr-native-abi",
+        "contract_refs": [
+          "RecorderNative.Main.LegacyDDR.AuthoritativePhysicalABIAndExceptionalLifetime"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-final-owned-provider-composition",
+        "contract_refs": [
+          "RecorderNative.Final.ExactSourceEntryEngineComposition",
+          "RecorderNative.Main.LegacyDDR.AuthoritativePhysicalABIAndExceptionalLifetime",
+          "RecorderNative.Common.Main.DDR.LegacyReachedContainers",
+          "RecorderNative.Common.DS4.DDRAndP4List.FreezeEntrySupplement",
+          "RecorderNative.Common.Main.DDRP5Base"
+        ]
+      }
+    ],
+    "exact_composition_ref": "diagnostic_operations.shared_family_contracts.recorder-final-owned-provider-composition",
+    "exact_scope_coverage": [
+      {
+        "basename": "GetCurTimeInfo_DT.dll",
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-DS4-current-time",
+            "id": "RecorderNative.DS4.CurrentTimeInfo"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "DS-4/bin/GetCurTimeInfo_DT.dll",
+          "unit_id": "plugins:sha256:1c880a2cd21feb7e39432a35a02a137b654c5755250732d15b2f768b9d034a2c"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetCurTimeInfo_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:1c880a2cd21feb7e39432a35a02a137b654c5755250732d15b2f768b9d034a2c"
+      },
+      {
+        "basename": "DelRoBP4_DT.dll",
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-delete-variants",
+            "id": "RecorderNative.P4.DeleteRoB"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/DelRoBP4_DT.dll",
+          "unit_id": "plugins:sha256:48c588726cd3a156424429d79ec929b78297827b9ba091c0505da5ab917b355c"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-DelRoBP4_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:48c588726cd3a156424429d79ec929b78297827b9ba091c0505da5ab917b355c"
+      },
+      {
+        "basename": "DelRoBP5_DT.dll",
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-P5-delete",
+            "id": "RecorderNative.P5.DeleteRoB"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/DelRoBP5_DT.dll",
+          "unit_id": "plugins:sha256:c3df7b18de794df41df0509710c0ddbec0ae55e012a8af513dcd7a78eabd4c79"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-DelRoBP5_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:c3df7b18de794df41df0509710c0ddbec0ae55e012a8af513dcd7a78eabd4c79"
+      },
+      {
+        "basename": "DelRoBP5_SUBARU_DT.dll",
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-delete-variants",
+            "id": "RecorderNative.P5.SubaruDeleteRoB"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/DelRoBP5_SUBARU_DT.dll",
+          "unit_id": "plugins:sha256:426f02f93e55368b1aa009d19fe389a5fec3ca5205f85965ffb915ab61aabf7c"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-DelRoBP5_SUBARU_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:426f02f93e55368b1aa009d19fe389a5fec3ca5205f85965ffb915ab61aabf7c"
+      },
+      {
+        "basename": "DelRoBP5_SUZUKI_DT.dll",
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-delete-variants",
+            "id": "RecorderNative.P5.SuzukiDeleteRoB"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/DelRoBP5_SUZUKI_DT.dll",
+          "unit_id": "plugins:sha256:f333c0d855761f98c39b68eb0741f9b63b7afff1bcd3461fe6eaa7dc88c6b0f1"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-DelRoBP5_SUZUKI_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:f333c0d855761f98c39b68eb0741f9b63b7afff1bcd3461fe6eaa7dc88c6b0f1"
+      },
+      {
+        "basename": "DelRoBP5_wTO_DT.dll",
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-P5-delete",
+            "id": "RecorderNative.P5.DeleteRoBWithTimeout"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/DelRoBP5_wTO_DT.dll",
+          "unit_id": "plugins:sha256:7f4c47d3ceaa6fa4422bd4cc5992198ab82fa927cf94d5a2ccab67bb3bd486e9"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-DelRoBP5_wTO_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:7f4c47d3ceaa6fa4422bd4cc5992198ab82fa927cf94d5a2ccab67bb3bd486e9"
+      },
+      {
+        "basename": "DelRoBP6_DT.dll",
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-P6-DeleteRoB",
+            "id": "RecorderNative.P6.DeleteRoB"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/DelRoBP6_DT.dll",
+          "unit_id": "plugins:sha256:d808c06d0ae8afe9f39ef0c7662f1d3a3869de03e2f267cd716b6dfcfd4812a9"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-DelRoBP6_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:d808c06d0ae8afe9f39ef0c7662f1d3a3869de03e2f267cd716b6dfcfd4812a9"
+      },
+      {
+        "basename": "GetADSDDRInfoP5_DT.dll",
+        "component_proof_sources": [
+          "analysis-origin:recorder-ddr-worker5-native-proofs.json"
+        ],
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-ddr-worker5-native-components",
+            "id": "RecorderNative.Main.GetADSDDRInfoP5_DT.LocalEngine"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetADSDDRInfoP5_DT.dll",
+          "unit_id": "plugins:sha256:80806a4132379862ecc6999a27a782b79f5c3c3fb5c1473fada7bc005476c283"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetADSDDRInfoP5_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:80806a4132379862ecc6999a27a782b79f5c3c3fb5c1473fada7bc005476c283"
+      },
+      {
+        "basename": "GetADSImageFFDP5_DT.dll",
+        "component_proof_sources": [
+          "analysis-origin:recorder-image-worker5-native-proofs.json",
+          "diagnostic_operations.shared_family_contracts.recorder-image-worker5-header-only-inherited-joins",
+          "diagnostic_operations.shared_family_contracts.recorder-image-worker5-header-ports"
+        ],
+        "composition_proof": {
+          "artifact": "diagnostic_operations.shared_family_contracts.recorder-final-owned-provider-composition",
+          "id": "RecorderNative.Final.ExactSourceEntryEngineComposition"
+        },
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-worker5-native-components",
+            "id": "RecorderNative.Main.ADSImageFFDP5.PrimaryExecuteAndRoot"
+          },
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-worker5-native-components",
+            "id": "RecorderNative.Main.ADSImageFFDP5.LocalImageBehaviorBulkAndRecord"
+          },
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-worker5-native-components",
+            "id": "RecorderNative.Main.ADSImageFFDP5.LocalObjectsFrameTemplatesAndRuntime"
+          },
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-ddr4-header-core-contracts",
+            "id": "RecorderNative.Main.ADSImageFFDP5.DDR4HeaderEngine"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "resolved_engine_composition": {
+          "analysis_sha256": "a92a2bc4e78f7abcdb1583fff55db62a420e434b563d00e26b33d6f53938ade1",
+          "basename": "GetADSImageFFDP5_DT.dll",
+          "caller": {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-worker5-native-components",
+            "contract": "RecorderNative.Main.ADSImageFFDP5.PrimaryExecuteAndRoot"
+          },
+          "header_effect_port": {
+            "consumer_semantics": "Readactualcallercontractforskip/ignore/proceed/flag1copy/cleanup/power/logpolicy; doNOTturnignoredheaderstatusintotransactionorhelper-absence.",
+            "inputs": "CommandContext {send,recv,cancel,frame,data,unused}; fixedbus12, temporarysendactualECUselectorperexistingcaller",
+            "lifetime": "Own41A0LessA8PIDs, normalmanualdeleteall; FH3ctorfailuredeleteCURRENTpendingallocation, priorPIDslotsnotRAII; ctx/callerresponseborrowed; ownnewthrows(noordinaryNULLfallback)",
+            "outputs": "Nativeu32status plus in-placeRcv.spec48/CSV60(9F..AB13fields); logicalAASupportInfo170/support178/nestedDwordData17C/raw184; noPrivateRecorded/FFD/RAM/pixels"
+          },
+          "other_P5_header_provider": {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-p5-ads-pvm-rc-header-contracts",
+            "closure": "Actual6localclassbodies/current62slotvtable57MainIATs+ownCRT; callerstatusconsumptionperexisting5root, notparity.",
+            "contract": "RecorderNative.Main.ADSImageFFDP5.P5HeaderEngine"
+          },
+          "provider": {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-ddr4-header-core-contracts",
+            "contract": "RecorderNative.Main.ADSImageFFDP5.DDR4HeaderEngine",
+            "native_abi": "uint32_t __thiscall Engine::Run(CommandContext* ctx), ECXproperlyconstructed20C0receiver; one32-bitstackarg/RET4; EAXstatusNOTpointer",
+            "root_va": "10006680"
+          },
+          "source_qualification": "SameDLLcaller/provideranalysisSHAabove/currentinstalledprotected-to-qualifiedsourceidentity, actualRootC/nativebytes/bodySHA/ownCRT/FH3/metadata/wire/format/lifetimeports, notnameparity.",
+          "state": "complete_exact_source_end_to_end_owned_entry_engine_composition",
+          "unit_id": "plugins:sha256:055ed8ac1cdfaf6ee6dab8bbed41e397d71342e3ccc8c0e33ef946c66c1ff8e0"
+        },
+        "source": {
+          "source_ref": "GTSPlus/bin/GetADSImageFFDP5_DT.dll",
+          "unit_id": "plugins:sha256:055ed8ac1cdfaf6ee6dab8bbed41e397d71342e3ccc8c0e33ef946c66c1ff8e0"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetADSImageFFDP5_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:055ed8ac1cdfaf6ee6dab8bbed41e397d71342e3ccc8c0e33ef946c66c1ff8e0"
+      },
+      {
+        "basename": "GetADSOperationFFDP5_DT.dll",
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-main-ads-operation-p5",
+            "id": "RecorderNative.Main.ADSOperationP5.Entry"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetADSOperationFFDP5_DT.dll",
+          "unit_id": "plugins:sha256:954065afe80ee8d96f672b82d7a33d4467ab20677a7c033a41735243a6e151c0"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetADSOperationFFDP5_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:954065afe80ee8d96f672b82d7a33d4467ab20677a7c033a41735243a6e151c0"
+      },
+      {
+        "basename": "GetADUDDRInfoImgOpeDdrP6_DT.dll",
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-P6-DDR-wrappers",
+            "id": "RecorderNative.P6.ADUDDRLogWrapper"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetADUDDRInfoImgOpeDdrP6_DT.dll",
+          "unit_id": "plugins:sha256:be9cf9dd39a92eec5bf8b5dddc2594854012b3cc70aeb44b1a89186447a93802"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetADUDDRInfoImgOpeDdrP6_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:be9cf9dd39a92eec5bf8b5dddc2594854012b3cc70aeb44b1a89186447a93802"
+      },
+      {
+        "basename": "GetADUDDRInfoP6_DT.dll",
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-P6-DDR-wrappers",
+            "id": "RecorderNative.P6.ADUDDRWrapper"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetADUDDRInfoP6_DT.dll",
+          "unit_id": "plugins:sha256:8154e03b130ab30ca46bcba5a568a26762a6d926ff3500a143b34ba2e9373c92"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetADUDDRInfoP6_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:8154e03b130ab30ca46bcba5a568a26762a6d926ff3500a143b34ba2e9373c92"
+      },
+      {
+        "basename": "GetADUImageFFDP6_DT.dll",
+        "component_proof_sources": [
+          "analysis-origin:recorder-operations-native-programs.json",
+          "analysis-origin:recorder-operations-native-programs.json#/modules/GetADUImageFFDP6_DT.dll"
+        ],
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-operations-worker7-complete-contracts",
+            "id": "RecorderNative.Main.ADUImageP6.Execute"
+          },
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-operations-worker7-complete-contracts",
+            "id": "RecorderNative.Main.ADUImageP6.Acquisition"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetADUImageFFDP6_DT.dll",
+          "unit_id": "plugins:sha256:7c35c7ec2994bc94e2e05874e273b3697b2cb8c3f50cf80888e990ef826ebcdd"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetADUImageFFDP6_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:7c35c7ec2994bc94e2e05874e273b3697b2cb8c3f50cf80888e990ef826ebcdd"
+      },
+      {
+        "basename": "GetADUOperationFFDP6_DT.dll",
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-P6-ADUOperation",
+            "id": "RecorderNative.P6.ADUOperation"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetADUOperationFFDP6_DT.dll",
+          "unit_id": "plugins:sha256:b92e54531151e460f8c12f4153d22639b43d81729de8dcab0f857a77f23b23c4"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetADUOperationFFDP6_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:b92e54531151e460f8c12f4153d22639b43d81729de8dcab0f857a77f23b23c4"
+      },
+      {
+        "basename": "GetAbsTimeStampSaveLog_DT.dll",
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-main-absolute-timestamp-save-log",
+            "id": "RecorderNative.Main.AbsoluteTimestampSaveLog.Entry"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetAbsTimeStampSaveLog_DT.dll",
+          "unit_id": "plugins:sha256:29a4b472980ca59d683cd912a3fabe593bf7443d4c3192dc0d85ca2a556aaf8d"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetAbsTimeStampSaveLog_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:29a4b472980ca59d683cd912a3fabe593bf7443d4c3192dc0d85ca2a556aaf8d"
+      },
+      {
+        "basename": "GetAbsltTime_DT.dll",
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-main-absolute-timestamp-fields",
+            "id": "RecorderNative.Main.AbsoluteTimestampFields.Entry"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetAbsltTime_DT.dll",
+          "unit_id": "plugins:sha256:9e63c99b4aa99bf4bd84f6a7c5c5bed646e696f8a884d0aa5df19b1cb53481b2"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetAbsltTime_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:9e63c99b4aa99bf4bd84f6a7c5c5bed646e696f8a884d0aa5df19b1cb53481b2"
+      },
+      {
+        "basename": "GetAnlWkFctBTP4_DT.dll",
+        "component_proof_sources": [
+          "diagnostic_operations.shared_family_contracts.recorder-analyzer-native-main-proofs",
+          "diagnostic_operations.shared_family_contracts.recorder-analyzer-native-main-provider-joins"
+        ],
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-analyzer-native-main-getanlwkfctbtp4_dt-contracts",
+            "id": "RecorderNative.Analyzer.Main.GetAnlWkFctBTP4_DT"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetAnlWkFctBTP4_DT.dll",
+          "unit_id": "plugins:sha256:daee64f466de9a7e8585e13ed7f6a711f96ae6ad59ceeff9ac4821cfbeb4aef0"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetAnlWkFctBTP4_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:daee64f466de9a7e8585e13ed7f6a711f96ae6ad59ceeff9ac4821cfbeb4aef0"
+      },
+      {
+        "basename": "GetAnlWkFctDcm24_DT.dll",
+        "component_proof_sources": [
+          "diagnostic_operations.shared_family_contracts.recorder-analyzer-native-main-proofs",
+          "diagnostic_operations.shared_family_contracts.recorder-analyzer-native-main-provider-joins"
+        ],
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-analyzer-native-main-getanlwkfctdcm24_dt-contracts",
+            "id": "RecorderNative.Analyzer.Main.GetAnlWkFctDcm24_DT"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetAnlWkFctDcm24_DT.dll",
+          "unit_id": "plugins:sha256:4cdf4b6fc67f91811026e87880110bac5958c9894c2821e1a552e4997b78a65e"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetAnlWkFctDcm24_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:4cdf4b6fc67f91811026e87880110bac5958c9894c2821e1a552e4997b78a65e"
+      },
+      {
+        "basename": "GetAnlWkFctDcm35_DT.dll",
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-DCM35-wrapper",
+            "id": "RecorderNative.Main.DCM35WorkFactors.Wrapper"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetAnlWkFctDcm35_DT.dll",
+          "unit_id": "plugins:sha256:a0ab5c0ce226e61ea124249dfae6772a232b6e1b9eede89b23bf42c6e7799a45"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetAnlWkFctDcm35_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:a0ab5c0ce226e61ea124249dfae6772a232b6e1b9eede89b23bf42c6e7799a45"
+      },
+      {
+        "basename": "GetAnlWkFctDcmP4_DT.dll",
+        "component_proof_sources": [
+          "diagnostic_operations.shared_family_contracts.recorder-analyzer-native-main-proofs",
+          "diagnostic_operations.shared_family_contracts.recorder-analyzer-native-main-provider-joins"
+        ],
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-analyzer-native-main-getanlwkfctdcmp4_dt-contracts",
+            "id": "RecorderNative.Analyzer.Main.GetAnlWkFctDcmP4_DT"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetAnlWkFctDcmP4_DT.dll",
+          "unit_id": "plugins:sha256:c918d7b1a73c73267b163c8320813e8c25139ab9450b67d3b4fa98c32071e352"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetAnlWkFctDcmP4_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:c918d7b1a73c73267b163c8320813e8c25139ab9450b67d3b4fa98c32071e352"
+      },
+      {
+        "basename": "GetAnlWkFctP4PSC_DT.dll",
+        "component_proof_sources": [
+          "diagnostic_operations.shared_family_contracts.recorder-analyzer-native-main-proofs",
+          "diagnostic_operations.shared_family_contracts.recorder-analyzer-native-main-provider-joins"
+        ],
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-analyzer-native-main-getanlwkfctp4psc_dt-contracts",
+            "id": "RecorderNative.Analyzer.Main.GetAnlWkFctP4PSC_DT"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetAnlWkFctP4PSC_DT.dll",
+          "unit_id": "plugins:sha256:094ed201864cdaf45c92a85c08d5823564f23ec1351be80ad6d4e541916699db"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetAnlWkFctP4PSC_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:094ed201864cdaf45c92a85c08d5823564f23ec1351be80ad6d4e541916699db"
+      },
+      {
+        "basename": "GetAnlzWrkFctP3_DT.dll",
+        "component_proof_sources": [
+          "diagnostic_operations.shared_family_contracts.recorder-analyzer-native-main-proofs",
+          "diagnostic_operations.shared_family_contracts.recorder-analyzer-native-main-provider-joins"
+        ],
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-analyzer-native-main-getanlzwrkfctp3_dt-contracts",
+            "id": "RecorderNative.Analyzer.Main.GetAnlzWrkFctP3_DT"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetAnlzWrkFctP3_DT.dll",
+          "unit_id": "plugins:sha256:e3a29c84ec6ad24f4aacbdcef02b277bd2a2d3679085fba7913f789ac97ce659"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetAnlzWrkFctP3_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:e3a29c84ec6ad24f4aacbdcef02b277bd2a2d3679085fba7913f789ac97ce659"
+      },
+      {
+        "basename": "GetAnlzWrkFctP4_DT.dll",
+        "component_proof_sources": [
+          "diagnostic_operations.shared_family_contracts.recorder-analyzer-native-main-proofs",
+          "diagnostic_operations.shared_family_contracts.recorder-analyzer-native-main-provider-joins"
+        ],
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-analyzer-native-main-getanlzwrkfctp4_dt-contracts",
+            "id": "RecorderNative.Analyzer.Main.GetAnlzWrkFctP4_DT"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetAnlzWrkFctP4_DT.dll",
+          "unit_id": "plugins:sha256:1e7c0a3c576613b3627b43dc0a9384e3d0b88e79f9adc40babec16774ef7f6b4"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetAnlzWrkFctP4_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:1e7c0a3c576613b3627b43dc0a9384e3d0b88e79f9adc40babec16774ef7f6b4"
+      },
+      {
+        "basename": "GetCurAbsTimeInfo_DT.dll",
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-main-current-absolute-time",
+            "id": "RecorderNative.Main.CurrentAbsoluteGPSTime"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetCurAbsTimeInfo_DT.dll",
+          "unit_id": "plugins:sha256:f31e0aafe7a61a9295bcc2b966d5b528483e4c25e9777fc848433726d6cdf20f"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetCurAbsTimeInfo_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:f31e0aafe7a61a9295bcc2b966d5b528483e4c25e9777fc848433726d6cdf20f"
+      },
+      {
+        "basename": "GetCurTimeInfoEachEcu_DT.dll",
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-main-time-each-ecu",
+            "id": "RecorderNative.Main.CurrentTimeEachECU"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetCurTimeInfoEachEcu_DT.dll",
+          "unit_id": "plugins:sha256:9ee31df2409711f778710e0d3f50dfb154af87716d93fb176fd6907d10e58dfa"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetCurTimeInfoEachEcu_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:9ee31df2409711f778710e0d3f50dfb154af87716d93fb176fd6907d10e58dfa"
+      },
+      {
+        "basename": "GetDDRInfoImgOpeDdrP6_DT.dll",
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-P6-DDR-wrappers",
+            "id": "RecorderNative.P6.DDRLogWrapper"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetDDRInfoImgOpeDdrP6_DT.dll",
+          "unit_id": "plugins:sha256:b09ad6fbb46318e67e46edae1d42415af5f5e18024262a8060de200499c6f530"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetDDRInfoImgOpeDdrP6_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:b09ad6fbb46318e67e46edae1d42415af5f5e18024262a8060de200499c6f530"
+      },
+      {
+        "basename": "GetDDRInfoImgOpeDdr_DT.dll",
+        "component_proof_sources": [
+          "analysis-origin:recorder-ddr-worker5-native-proofs.json"
+        ],
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-ddr-worker5-native-components",
+            "id": "RecorderNative.Main.GetDDRInfoImgOpeDdr_DT.FullDataDerived"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetDDRInfoImgOpeDdr_DT.dll",
+          "unit_id": "plugins:sha256:4ba872b20164ec0195dc88ced8d4ff2778cd96f649d1b70579fe5e7132225abe"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetDDRInfoImgOpeDdr_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:4ba872b20164ec0195dc88ced8d4ff2778cd96f649d1b70579fe5e7132225abe"
+      },
+      {
+        "basename": "GetDDRInfoP5_DT.dll",
+        "component_proof_sources": [
+          "analysis-origin:recorder-ddr-worker5-native-proofs.json"
+        ],
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-ddr-worker5-native-components",
+            "id": "RecorderNative.Main.GetDDRInfoP5_DT.FullDataDerived"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetDDRInfoP5_DT.dll",
+          "unit_id": "plugins:sha256:c3845eec93bbe9a5be1bb931b6a68dd27d878861e93e3c631e5fda89240f8253"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetDDRInfoP5_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:c3845eec93bbe9a5be1bb931b6a68dd27d878861e93e3c631e5fda89240f8253"
+      },
+      {
+        "basename": "GetDDRInfoP6_DT.dll",
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-P6-DDR-wrappers",
+            "id": "RecorderNative.P6.DDRWrapper"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetDDRInfoP6_DT.dll",
+          "unit_id": "plugins:sha256:93eeee6cd1363b1959190ec79bc83290043b749b17d17f7896147d9733972d7f"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetDDRInfoP6_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:93eeee6cd1363b1959190ec79bc83290043b749b17d17f7896147d9733972d7f"
+      },
+      {
+        "basename": "GetDDRInfoSaveLog_DT.dll",
+        "component_proof_sources": [
+          "analysis-origin:recorder-ddr-worker5-native-proofs.json"
+        ],
+        "composition_proof": {
+          "artifact": "diagnostic_operations.shared_family_contracts.recorder-final-owned-provider-composition",
+          "id": "RecorderNative.Final.ExactSourceEntryEngineComposition"
+        },
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-ddr-worker5-native-components",
+            "id": "RecorderNative.Main.GetDDRInfoSaveLog_DT.BootstrapToRetainedDDR4"
+          },
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-main-ddr-savelog-engine-contract",
+            "id": "RecorderNative.Main.LegacyDDRSaveLog.BusinessEngine"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "resolved_engine_composition": {
+          "analysis_sha256": "315e0953d170ef970a6d8032bb3d8363e0d5a6060dfa06860f37ef859c1c015e",
+          "authoritative_native_abi": {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-main-legacy-ddr-native-abi",
+            "contract": "RecorderNative.Main.LegacyDDR.AuthoritativePhysicalABIAndExceptionalLifetime",
+            "count": "all71Logor72Plainactualmethods;no rawvoid/pointer-statusABI"
+          },
+          "basename": "GetDDRInfoSaveLog_DT.dll",
+          "caller": {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-ddr-worker5-native-components",
+            "contract": "RecorderNative.Main.GetDDRInfoSaveLog_DT.BootstrapToRetainedDDR4"
+          },
+          "provider": {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-main-ddr-savelog-engine-contract",
+            "contract": "RecorderNative.Main.LegacyDDRSaveLog.BusinessEngine",
+            "native_abi": "uint32_t __thiscall Engine::Run(CommandContext* ctx), ECXproperlyconstructed20C0receiver; one32-bitstackarg/RET4; EAXstatusNOTpointer",
+            "root_va": "10003380"
+          },
+          "source_qualification": "SameDLLcaller/provideranalysisSHAabove/currentinstalledprotected-to-qualifiedsourceidentity, actualRootC/nativebytes/bodySHA/ownCRT/FH3/metadata/wire/format/lifetimeports, notnameparity.",
+          "state": "complete_exact_source_end_to_end_owned_entry_engine_composition",
+          "unit_id": "plugins:sha256:74b446c5c7acba296b22fdba665045062792284cdd591a6abb45600f98be7685"
+        },
+        "source": {
+          "source_ref": "GTSPlus/bin/GetDDRInfoSaveLog_DT.dll",
+          "unit_id": "plugins:sha256:74b446c5c7acba296b22fdba665045062792284cdd591a6abb45600f98be7685"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetDDRInfoSaveLog_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:74b446c5c7acba296b22fdba665045062792284cdd591a6abb45600f98be7685"
+      },
+      {
+        "basename": "GetDDRInfo_DT.dll",
+        "component_proof_sources": [
+          "analysis-origin:recorder-ddr-worker5-native-proofs.json"
+        ],
+        "composition_proof": {
+          "artifact": "diagnostic_operations.shared_family_contracts.recorder-final-owned-provider-composition",
+          "id": "RecorderNative.Final.ExactSourceEntryEngineComposition"
+        },
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-ddr-worker5-native-components",
+            "id": "RecorderNative.Main.GetDDRInfo_DT.BootstrapToRetainedDDR4"
+          },
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-main-ddr-plain-engine-contract",
+            "id": "RecorderNative.Main.LegacyDDRPlain.BusinessEngine"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "resolved_engine_composition": {
+          "analysis_sha256": "919b561d6948640ea51d04585a1d2f84603ba11954971331a4583cd6fafdfdb2",
+          "authoritative_native_abi": {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-main-legacy-ddr-native-abi",
+            "contract": "RecorderNative.Main.LegacyDDR.AuthoritativePhysicalABIAndExceptionalLifetime",
+            "count": "all71Logor72Plainactualmethods;no rawvoid/pointer-statusABI"
+          },
+          "basename": "GetDDRInfo_DT.dll",
+          "caller": {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-ddr-worker5-native-components",
+            "contract": "RecorderNative.Main.GetDDRInfo_DT.BootstrapToRetainedDDR4"
+          },
+          "provider": {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-main-ddr-plain-engine-contract",
+            "contract": "RecorderNative.Main.LegacyDDRPlain.BusinessEngine",
+            "native_abi": "uint32_t __thiscall Engine::Run(CommandContext* ctx), ECXproperlyconstructed20C0receiver; one32-bitstackarg/RET4; EAXstatusNOTpointer",
+            "root_va": "100035c0"
+          },
+          "source_qualification": "SameDLLcaller/provideranalysisSHAabove/currentinstalledprotected-to-qualifiedsourceidentity, actualRootC/nativebytes/bodySHA/ownCRT/FH3/metadata/wire/format/lifetimeports, notnameparity.",
+          "state": "complete_exact_source_end_to_end_owned_entry_engine_composition",
+          "unit_id": "plugins:sha256:dc6d1817f147104bd7bc01dd2fdb94a1f202f799a96e1fdca2de7e56f54fe2ca"
+        },
+        "source": {
+          "source_ref": "GTSPlus/bin/GetDDRInfo_DT.dll",
+          "unit_id": "plugins:sha256:dc6d1817f147104bd7bc01dd2fdb94a1f202f799a96e1fdca2de7e56f54fe2ca"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetDDRInfo_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:dc6d1817f147104bd7bc01dd2fdb94a1f202f799a96e1fdca2de7e56f54fe2ca"
+      },
+      {
+        "basename": "GetDMCImageFFDP5_DT.dll",
+        "composition_proof": {
+          "artifact": "diagnostic_operations.shared_family_contracts.recorder-final-owned-provider-composition",
+          "id": "RecorderNative.Final.ExactSourceEntryEngineComposition"
+        },
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-main-dmc-image-entry",
+            "id": "RecorderNative.Main.DMCImage.Entry"
+          },
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-ddr4-header-core-contracts",
+            "id": "RecorderNative.Main.DMCImage.DDR4HeaderEngine"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "resolved_engine_composition": {
+          "analysis_sha256": "69946a725e44625d43e2832b21ae1eea2aa97dac2201913abbc027919637c77d",
+          "basename": "GetDMCImageFFDP5_DT.dll",
+          "caller": {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-main-dmc-image-entry",
+            "contract": "RecorderNative.Main.DMCImage.Entry"
+          },
+          "header_effect_port": {
+            "consumer_semantics": "Readactualcallercontractforskip/ignore/proceed/flag1copy/cleanup/power/logpolicy; doNOTturnignoredheaderstatusintotransactionorhelper-absence.",
+            "inputs": "CommandContext {send,recv,cancel,frame,data,unused}; fixedbus12, temporarysendactualECUselectorperexistingcaller",
+            "lifetime": "Own41A0LessA8PIDs, normalmanualdeleteall; FH3ctorfailuredeleteCURRENTpendingallocation, priorPIDslotsnotRAII; ctx/callerresponseborrowed; ownnewthrows(noordinaryNULLfallback)",
+            "outputs": "Nativeu32status plus in-placeRcv.spec48/CSV60(9F..AB13fields); logicalAASupportInfo170/support178/nestedDwordData17C/raw184; noPrivateRecorded/FFD/RAM/pixels"
+          },
+          "other_P5_header_provider": {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-dmc-p5-header-contract",
+            "branch": "Actualcategorylist1BC/status1\u2192P5,otherwisecategoryBC\u2192thisDDR4; bothRETURNstatusesignored; input5CpreexistingpointerbranchdoesNOTqueryeither; support178==1ONLYcopiesnestedDwordData17C\u2192result44, noflagclearonabsence.",
+            "contract": "RecorderNative.Main.DMCImage.P5HeaderEngine"
+          },
+          "provider": {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-ddr4-header-core-contracts",
+            "contract": "RecorderNative.Main.DMCImage.DDR4HeaderEngine",
+            "native_abi": "uint32_t __thiscall Engine::Run(CommandContext* ctx), ECXproperlyconstructed20C0receiver; one32-bitstackarg/RET4; EAXstatusNOTpointer",
+            "root_va": "10005730"
+          },
+          "source_qualification": "SameDLLcaller/provideranalysisSHAabove/currentinstalledprotected-to-qualifiedsourceidentity, actualRootC/nativebytes/bodySHA/ownCRT/FH3/metadata/wire/format/lifetimeports, notnameparity.",
+          "state": "complete_exact_source_end_to_end_owned_entry_engine_composition",
+          "unit_id": "plugins:sha256:5d6fdd19ddec69958ea9a2b6133a1e9f5e13faa8cc5ba71028a6983377fee485"
+        },
+        "source": {
+          "source_ref": "GTSPlus/bin/GetDMCImageFFDP5_DT.dll",
+          "unit_id": "plugins:sha256:5d6fdd19ddec69958ea9a2b6133a1e9f5e13faa8cc5ba71028a6983377fee485"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetDMCImageFFDP5_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json",
+          "uniform_all_function_export": "analysis-origin:gts-car-native-bodies/RecorderNative/GetDMCImageFFDP5_DT.dll.json"
+        },
+        "unit_id": "plugins:sha256:5d6fdd19ddec69958ea9a2b6133a1e9f5e13faa8cc5ba71028a6983377fee485"
+      },
+      {
+        "basename": "GetImageFFDP5_DT.dll",
+        "component_proof_sources": [
+          "analysis-origin:recorder-image-worker15-qualified-proof.json",
+          "diagnostic_operations.shared_family_contracts.recorder-image-worker15-complete-contracts"
+        ],
+        "composition_proof": {
+          "artifact": "diagnostic_operations.shared_family_contracts.recorder-final-owned-provider-composition",
+          "id": "RecorderNative.Final.ExactSourceEntryEngineComposition"
+        },
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-generic-p5-local-contract",
+            "id": "RecorderNative.Main.GetImageFFDP5.LocalRootAndImageAcquisition"
+          },
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-ddr4-header-core-contracts",
+            "id": "RecorderNative.Main.GenericImageFFDP5.DDR4HeaderEngine"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "resolved_engine_composition": {
+          "analysis_sha256": "76dfd3dc9571ccb626a013c1d27369fa1746016a19603720b87bc12e615ee0bb",
+          "basename": "GetImageFFDP5_DT.dll",
+          "caller": {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-generic-p5-local-contract",
+            "contract": "RecorderNative.Main.GetImageFFDP5.LocalRootAndImageAcquisition"
+          },
+          "header_effect_port": {
+            "consumer_semantics": "Readactualcallercontractforskip/ignore/proceed/flag1copy/cleanup/power/logpolicy; doNOTturnignoredheaderstatusintotransactionorhelper-absence.",
+            "inputs": "CommandContext {send,recv,cancel,frame,data,unused}; fixedbus12, temporarysendactualECUselectorperexistingcaller",
+            "lifetime": "Own41A0LessA8PIDs, normalmanualdeleteall; FH3ctorfailuredeleteCURRENTpendingallocation, priorPIDslotsnotRAII; ctx/callerresponseborrowed; ownnewthrows(noordinaryNULLfallback)",
+            "outputs": "Nativeu32status plus in-placeRcv.spec48/CSV60(9F..AB13fields); logicalAASupportInfo170/support178/nestedDwordData17C/raw184; noPrivateRecorded/FFD/RAM/pixels"
+          },
+          "other_P5_header_provider": {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-generic-p5-local-contract",
+            "closure": "Existing15actualsameDLLP5derivedclassmethods/proof/62slot57MainIATcompositionareINSIDEthiscompleteconsumercontract; noadditionalinventedP5providerID.",
+            "contract": "RecorderNative.Main.GetImageFFDP5.LocalRootAndImageAcquisition"
+          },
+          "provider": {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-ddr4-header-core-contracts",
+            "contract": "RecorderNative.Main.GenericImageFFDP5.DDR4HeaderEngine",
+            "native_abi": "uint32_t __thiscall Engine::Run(CommandContext* ctx), ECXproperlyconstructed20C0receiver; one32-bitstackarg/RET4; EAXstatusNOTpointer",
+            "root_va": "10003970"
+          },
+          "source_qualification": "SameDLLcaller/provideranalysisSHAabove/currentinstalledprotected-to-qualifiedsourceidentity, actualRootC/nativebytes/bodySHA/ownCRT/FH3/metadata/wire/format/lifetimeports, notnameparity.",
+          "state": "complete_exact_source_end_to_end_owned_entry_engine_composition",
+          "unit_id": "plugins:sha256:be036e1be793fcc9d84b18ee8ce189d3a052686b87b48cb3bfbe14f0c4c188be"
+        },
+        "source": {
+          "source_ref": "GTSPlus/bin/GetImageFFDP5_DT.dll",
+          "unit_id": "plugins:sha256:be036e1be793fcc9d84b18ee8ce189d3a052686b87b48cb3bfbe14f0c4c188be"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetImageFFDP5_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:be036e1be793fcc9d84b18ee8ce189d3a052686b87b48cb3bfbe14f0c4c188be"
+      },
+      {
+        "basename": "GetImageFFD_DT.dll",
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-main-image-p4",
+            "id": "RecorderNative.Main.ImageP4.Entry"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetImageFFD_DT.dll",
+          "unit_id": "plugins:sha256:c6b9d1e9a179c24d5c57a3b296b1147c5a1ccc54eff03c9e1f4d7ab4b071c6cb"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetImageFFD_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:c6b9d1e9a179c24d5c57a3b296b1147c5a1ccc54eff03c9e1f4d7ab4b071c6cb"
+      },
+      {
+        "basename": "GetImageSpecInfo_DT.dll",
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-main-image-spec-info",
+            "id": "RecorderNative.Main.ImageSpecInfo.Entry"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetImageSpecInfo_DT.dll",
+          "unit_id": "plugins:sha256:b24472294c67f40588668d6ab113d2fe27749a0b33e5a5db4543fc5c6a83a088"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetImageSpecInfo_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json",
+          "uniform_all_function_export": "analysis-origin:gts-car-native-bodies/RecorderNative/GetImageSpecInfo_DT.dll.json"
+        },
+        "unit_id": "plugins:sha256:b24472294c67f40588668d6ab113d2fe27749a0b33e5a5db4543fc5c6a83a088"
+      },
+      {
+        "basename": "GetLCSOperationFFDP5_DT.dll",
+        "component_proof_sources": [
+          "analysis-origin:recorder-operations-native-programs.json",
+          "analysis-origin:recorder-operations-native-programs.json#/modules/GetLCSOperationFFDP5_DT.dll"
+        ],
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-operations-worker7-complete-contracts",
+            "id": "RecorderNative.Main.LCSOperationP5.Execute"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetLCSOperationFFDP5_DT.dll",
+          "unit_id": "plugins:sha256:d360da4a0bc308474da32a3a2c8cf7ef2c877e861af7194a954ab71e706d35dc"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetLCSOperationFFDP5_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:d360da4a0bc308474da32a3a2c8cf7ef2c877e861af7194a954ab71e706d35dc"
+      },
+      {
+        "basename": "GetOpeFrzFrmDatP4_ICS02_DT.dll",
+        "component_proof_sources": [
+          "analysis-origin:recorder-operations-native-programs.json",
+          "analysis-origin:recorder-operations-native-programs.json#/modules/GetOpeFrzFrmDatP4_ICS02_DT.dll"
+        ],
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-operations-worker7-complete-contracts",
+            "id": "RecorderNative.Main.OperationP4ICS02.Execute"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetOpeFrzFrmDatP4_ICS02_DT.dll",
+          "unit_id": "plugins:sha256:fc9668bc2ed1d3a7bdb044a0f93b7ceaa7838fe30cf863fa39fe62e9a82cf13d"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetOpeFrzFrmDatP4_ICS02_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:fc9668bc2ed1d3a7bdb044a0f93b7ceaa7838fe30cf863fa39fe62e9a82cf13d"
+      },
+      {
+        "basename": "GetOperationFrzFrmDatP4_DT.dll",
+        "component_proof_sources": [
+          "analysis-origin:recorder-operations-native-programs.json",
+          "analysis-origin:recorder-operations-native-programs.json#/modules/GetOperationFrzFrmDatP4_DT.dll"
+        ],
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-operations-worker7-complete-contracts",
+            "id": "RecorderNative.Main.OperationP4.Execute"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetOperationFrzFrmDatP4_DT.dll",
+          "unit_id": "plugins:sha256:58acd65a019abd29f53bcc5efe53bd28a5e61b1ccc3d35074db01340e44773f3"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetOperationFrzFrmDatP4_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:58acd65a019abd29f53bcc5efe53bd28a5e61b1ccc3d35074db01340e44773f3"
+      },
+      {
+        "basename": "GetOperationFrzFrmDatP5_DT.dll",
+        "component_proof_sources": [
+          "analysis-origin:recorder-operations-native-programs.json",
+          "analysis-origin:recorder-operations-native-programs.json#/modules/GetOperationFrzFrmDatP5_DT.dll"
+        ],
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-operations-worker7-complete-contracts",
+            "id": "RecorderNative.Main.OperationP5.Execute"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetOperationFrzFrmDatP5_DT.dll",
+          "unit_id": "plugins:sha256:cd7b964501a9ed94ba17ae15543bf26af9d5921454dba9f3e9a8287274acedf0"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetOperationFrzFrmDatP5_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:cd7b964501a9ed94ba17ae15543bf26af9d5921454dba9f3e9a8287274acedf0"
+      },
+      {
+        "basename": "GetPCSFuncList_DT.dll",
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-main-pcs-function-list",
+            "id": "RecorderNative.Main.PCSFunctionList.Entry"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetPCSFuncList_DT.dll",
+          "unit_id": "plugins:sha256:9d035155f69cce5dcb9bb4ba000995228ea39f4f7822c16c24a2442577ac2dce"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetPCSFuncList_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json",
+          "uniform_all_function_export": "analysis-origin:gts-car-native-bodies/RecorderNative/GetPCSFuncList_DT.dll.json"
+        },
+        "unit_id": "plugins:sha256:9d035155f69cce5dcb9bb4ba000995228ea39f4f7822c16c24a2442577ac2dce"
+      },
+      {
+        "basename": "GetPCSHeaderInfo_DT.dll",
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-main-pcs-header-info",
+            "id": "RecorderNative.Main.PCSHeaderInfo.Entry"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetPCSHeaderInfo_DT.dll",
+          "unit_id": "plugins:sha256:71ac0464602f414792b252a126ca95a1d8647ef57b811ecbfdc371abd808ebc6"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetPCSHeaderInfo_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json",
+          "uniform_all_function_export": "analysis-origin:gts-car-native-bodies/RecorderNative/GetPCSHeaderInfo_DT.dll.json"
+        },
+        "unit_id": "plugins:sha256:71ac0464602f414792b252a126ca95a1d8647ef57b811ecbfdc371abd808ebc6"
+      },
+      {
+        "basename": "GetPCSOperationFFDP4_DT.dll",
+        "component_proof_sources": [
+          "analysis-origin:recorder-operations-native-programs.json",
+          "analysis-origin:recorder-operations-native-programs.json#/modules/GetPCSOperationFFDP4_DT.dll"
+        ],
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-operations-worker7-complete-contracts",
+            "id": "RecorderNative.Main.PCSOperationP4.Execute"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetPCSOperationFFDP4_DT.dll",
+          "unit_id": "plugins:sha256:facf2cd999cb480c576a9eba424b102e493cb05a8d445a96fc4c9f0071277a31"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetPCSOperationFFDP4_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:facf2cd999cb480c576a9eba424b102e493cb05a8d445a96fc4c9f0071277a31"
+      },
+      {
+        "basename": "GetPCSReadTime_DT.dll",
+        "component_proof_sources": [
+          "analysis-origin:recorder-operations-native-programs.json",
+          "analysis-origin:recorder-operations-native-programs.json#/modules/GetPCSReadTime_DT.dll"
+        ],
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-operations-worker7-complete-contracts",
+            "id": "RecorderNative.Main.PCSReadTime.Execute"
+          },
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-operations-worker7-complete-contracts",
+            "id": "RecorderNative.Main.PCSReadTime.Legacy14PID"
+          },
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-operations-worker7-complete-contracts",
+            "id": "RecorderNative.Main.PCSReadTime.HeaderComposition"
+          },
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-operations-worker7-complete-contracts",
+            "id": "RecorderNative.Main.PCSReadTime.ScalarAndCategoryPrograms"
+          },
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-operations-worker7-complete-contracts",
+            "id": "RecorderNative.Main.PCSReadTime.P5HeaderEstimate.10004ea0"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetPCSReadTime_DT.dll",
+          "unit_id": "plugins:sha256:73376378f75f3fcc7a08e11283c1b389bc3c05f737080c0b9ce7d51b3eda3053"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetPCSReadTime_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:73376378f75f3fcc7a08e11283c1b389bc3c05f737080c0b9ce7d51b3eda3053"
+      },
+      {
+        "basename": "GetPVMImageFFDP5_DT.dll",
+        "component_proof_sources": [
+          "analysis-origin:recorder-image-worker5-native-proofs.json",
+          "diagnostic_operations.shared_family_contracts.recorder-image-worker5-header-only-inherited-joins",
+          "diagnostic_operations.shared_family_contracts.recorder-image-worker5-header-ports"
+        ],
+        "composition_proof": {
+          "artifact": "diagnostic_operations.shared_family_contracts.recorder-final-owned-provider-composition",
+          "id": "RecorderNative.Final.ExactSourceEntryEngineComposition"
+        },
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-worker5-native-components",
+            "id": "RecorderNative.Main.PVMImageFFDP5.PrimaryExecuteAndRoot"
+          },
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-worker5-native-components",
+            "id": "RecorderNative.Main.PVMImageFFDP5.LocalImageLegacySpec1"
+          },
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-worker5-native-components",
+            "id": "RecorderNative.Main.PVMImageFFDP5.LocalImageSpec2DescriptorBulkAndRecord"
+          },
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-worker5-native-components",
+            "id": "RecorderNative.Main.PVMImageFFDP5.LocalObjectsFrameTemplatesAndRuntime"
+          },
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-ddr4-header-core-contracts",
+            "id": "RecorderNative.Main.PVMImageFFDP5.DDR4HeaderEngine"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "resolved_engine_composition": {
+          "analysis_sha256": "d09bce2a4b209e9557ad1e8bc7922ad8804c5d0b2ec3b784180fc33f3e394c8f",
+          "basename": "GetPVMImageFFDP5_DT.dll",
+          "caller": {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-worker5-native-components",
+            "contract": "RecorderNative.Main.PVMImageFFDP5.PrimaryExecuteAndRoot"
+          },
+          "header_effect_port": {
+            "consumer_semantics": "Readactualcallercontractforskip/ignore/proceed/flag1copy/cleanup/power/logpolicy; doNOTturnignoredheaderstatusintotransactionorhelper-absence.",
+            "inputs": "CommandContext {send,recv,cancel,frame,data,unused}; fixedbus12, temporarysendactualECUselectorperexistingcaller",
+            "lifetime": "Own41A0LessA8PIDs, normalmanualdeleteall; FH3ctorfailuredeleteCURRENTpendingallocation, priorPIDslotsnotRAII; ctx/callerresponseborrowed; ownnewthrows(noordinaryNULLfallback)",
+            "outputs": "Nativeu32status plus in-placeRcv.spec48/CSV60(9F..AB13fields); logicalAASupportInfo170/support178/nestedDwordData17C/raw184; noPrivateRecorded/FFD/RAM/pixels"
+          },
+          "other_P5_header_provider": {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-p5-ads-pvm-rc-header-contracts",
+            "closure": "Actual6localclassbodies/current62slotvtable57MainIATs+ownCRT; callerstatusconsumptionperexisting5root, notparity.",
+            "contract": "RecorderNative.Main.PVMImageFFDP5.P5HeaderEngine"
+          },
+          "provider": {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-ddr4-header-core-contracts",
+            "contract": "RecorderNative.Main.PVMImageFFDP5.DDR4HeaderEngine",
+            "native_abi": "uint32_t __thiscall Engine::Run(CommandContext* ctx), ECXproperlyconstructed20C0receiver; one32-bitstackarg/RET4; EAXstatusNOTpointer",
+            "root_va": "100052d0"
+          },
+          "source_qualification": "SameDLLcaller/provideranalysisSHAabove/currentinstalledprotected-to-qualifiedsourceidentity, actualRootC/nativebytes/bodySHA/ownCRT/FH3/metadata/wire/format/lifetimeports, notnameparity.",
+          "state": "complete_exact_source_end_to_end_owned_entry_engine_composition",
+          "unit_id": "plugins:sha256:d7a06aaa3bd1b0ead1cc090d50148dcd6772d60deda95cbe95784315543e82ae"
+        },
+        "source": {
+          "source_ref": "GTSPlus/bin/GetPVMImageFFDP5_DT.dll",
+          "unit_id": "plugins:sha256:d7a06aaa3bd1b0ead1cc090d50148dcd6772d60deda95cbe95784315543e82ae"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetPVMImageFFDP5_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:d7a06aaa3bd1b0ead1cc090d50148dcd6772d60deda95cbe95784315543e82ae"
+      },
+      {
+        "basename": "GetRCImageFFDP5_DT.dll",
+        "component_proof_sources": [
+          "analysis-origin:recorder-image-worker5-native-proofs.json",
+          "diagnostic_operations.shared_family_contracts.recorder-image-worker5-header-only-inherited-joins",
+          "diagnostic_operations.shared_family_contracts.recorder-image-worker5-header-ports"
+        ],
+        "composition_proof": {
+          "artifact": "diagnostic_operations.shared_family_contracts.recorder-final-owned-provider-composition",
+          "id": "RecorderNative.Final.ExactSourceEntryEngineComposition"
+        },
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-worker5-native-components",
+            "id": "RecorderNative.Main.RCImageFFDP5.PrimaryExecuteAndRoot"
+          },
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-worker5-native-components",
+            "id": "RecorderNative.Main.RCImageFFDP5.LocalImageDescriptorBulkAndRecord"
+          },
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-worker5-native-components",
+            "id": "RecorderNative.Main.RCImageFFDP5.LocalObjectsFrameTemplatesAndRuntime"
+          },
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-ddr4-header-core-contracts",
+            "id": "RecorderNative.Main.RCImageFFDP5.DDR4HeaderEngine"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "resolved_engine_composition": {
+          "analysis_sha256": "6b4f22b8cffea8afb9cbc469c7f2d0dfbf6ff9cebea604a2d1c4f4e4a61be643",
+          "basename": "GetRCImageFFDP5_DT.dll",
+          "caller": {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-worker5-native-components",
+            "contract": "RecorderNative.Main.RCImageFFDP5.PrimaryExecuteAndRoot"
+          },
+          "header_effect_port": {
+            "consumer_semantics": "Readactualcallercontractforskip/ignore/proceed/flag1copy/cleanup/power/logpolicy; doNOTturnignoredheaderstatusintotransactionorhelper-absence.",
+            "inputs": "CommandContext {send,recv,cancel,frame,data,unused}; fixedbus12, temporarysendactualECUselectorperexistingcaller",
+            "lifetime": "Own41A0LessA8PIDs, normalmanualdeleteall; FH3ctorfailuredeleteCURRENTpendingallocation, priorPIDslotsnotRAII; ctx/callerresponseborrowed; ownnewthrows(noordinaryNULLfallback)",
+            "outputs": "Nativeu32status plus in-placeRcv.spec48/CSV60(9F..AB13fields); logicalAASupportInfo170/support178/nestedDwordData17C/raw184; noPrivateRecorded/FFD/RAM/pixels"
+          },
+          "other_P5_header_provider": {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-p5-ads-pvm-rc-header-contracts",
+            "closure": "Actual6localclassbodies/current62slotvtable57MainIATs+ownCRT; callerstatusconsumptionperexisting5root, notparity.",
+            "contract": "RecorderNative.Main.RCImageFFDP5.P5HeaderEngine"
+          },
+          "provider": {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-ddr4-header-core-contracts",
+            "contract": "RecorderNative.Main.RCImageFFDP5.DDR4HeaderEngine",
+            "native_abi": "uint32_t __thiscall Engine::Run(CommandContext* ctx), ECXproperlyconstructed20C0receiver; one32-bitstackarg/RET4; EAXstatusNOTpointer",
+            "root_va": "10005920"
+          },
+          "source_qualification": "SameDLLcaller/provideranalysisSHAabove/currentinstalledprotected-to-qualifiedsourceidentity, actualRootC/nativebytes/bodySHA/ownCRT/FH3/metadata/wire/format/lifetimeports, notnameparity.",
+          "state": "complete_exact_source_end_to_end_owned_entry_engine_composition",
+          "unit_id": "plugins:sha256:6b4f22b8cffea8afb9cbc469c7f2d0dfbf6ff9cebea604a2d1c4f4e4a61be643"
+        },
+        "source": {
+          "source_ref": "GTSPlus/bin/GetRCImageFFDP5_DT.dll",
+          "unit_id": "plugins:sha256:6b4f22b8cffea8afb9cbc469c7f2d0dfbf6ff9cebea604a2d1c4f4e4a61be643"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetRCImageFFDP5_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:6b4f22b8cffea8afb9cbc469c7f2d0dfbf6ff9cebea604a2d1c4f4e4a61be643"
+      },
+      {
+        "basename": "GetReadTimeP5_DT.dll",
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-P5-readtime",
+            "id": "RecorderNative.P5.ReadTimeEstimate"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetReadTimeP5_DT.dll",
+          "unit_id": "plugins:sha256:693ffc92bf7c9cbbbd736e56860ab560b65919e6ee061de3424cc929be0fe8ea"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetReadTimeP5_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:693ffc92bf7c9cbbbd736e56860ab560b65919e6ee061de3424cc929be0fe8ea"
+      },
+      {
+        "basename": "GetRoBCandEcuLst_DT.dll",
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-main-rob-candidates",
+            "id": "RecorderNative.Main.RoBCandidateECUs"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetRoBCandEcuLst_DT.dll",
+          "unit_id": "plugins:sha256:49f7bec6af02a5d7a7b9a5d623324a4d79a312b5676ba3b96b9f6bcfe3a63744"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetRoBCandEcuLst_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:49f7bec6af02a5d7a7b9a5d623324a4d79a312b5676ba3b96b9f6bcfe3a63744"
+      },
+      {
+        "basename": "GetRoBP4_DT.dll",
+        "component_proof_sources": [
+          "analysis-origin:recorder-rob-worker15-qualified-proof.json",
+          "analysis-origin:recorder-rob-worker15-native-abi.json"
+        ],
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-rob-main-p4-local-contract",
+            "id": "RecorderNative.Main.GetRoBP4_DT.LocalRootAcquisitionAndProjection"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetRoBP4_DT.dll",
+          "unit_id": "plugins:sha256:82a3fde6dc7bb89fd3c6e1c43f74d9e8d823373a55c7d8acddcaf85b30142e41"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetRoBP4_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:82a3fde6dc7bb89fd3c6e1c43f74d9e8d823373a55c7d8acddcaf85b30142e41"
+      },
+      {
+        "basename": "GetRoBP5_AnlzWkFct_DT.dll",
+        "component_proof_sources": [
+          "analysis-origin:recorder-rob-worker15-qualified-proof.json",
+          "analysis-origin:recorder-rob-worker15-native-abi.json"
+        ],
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-rob-main-anlz-local-contract",
+            "id": "RecorderNative.Main.GetRoBP5_AnlzWkFct_DT.LocalRootAcquisitionAndProjection"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetRoBP5_AnlzWkFct_DT.dll",
+          "unit_id": "plugins:sha256:73d3e1b2e8b139da98d3931e33680d0777eeea393e4374614e62e9599c121b66"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetRoBP5_AnlzWkFct_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:73d3e1b2e8b139da98d3931e33680d0777eeea393e4374614e62e9599c121b66"
+      },
+      {
+        "basename": "GetRoBP5_DT.dll",
+        "component_proof_sources": [
+          "analysis-origin:recorder-rob-worker15-qualified-proof.json",
+          "analysis-origin:recorder-rob-worker15-native-abi.json"
+        ],
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-rob-main-p5-local-contract",
+            "id": "RecorderNative.Main.GetRoBP5_DT.LocalRootAcquisitionAndProjection"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetRoBP5_DT.dll",
+          "unit_id": "plugins:sha256:db970b4a4d001917288ab0f7a86d4d9ef68f873a2de2a67265067bc383a73820"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetRoBP5_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:db970b4a4d001917288ab0f7a86d4d9ef68f873a2de2a67265067bc383a73820"
+      },
+      {
+        "basename": "GetRoBP5_SUBARU_DT.dll",
+        "component_proof_sources": [
+          "analysis-origin:recorder-rob-worker15-qualified-proof.json",
+          "analysis-origin:recorder-rob-worker15-native-abi.json"
+        ],
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-rob-main-subaru-local-contract",
+            "id": "RecorderNative.Main.GetRoBP5_SUBARU_DT.LocalRootAcquisitionAndProjection"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetRoBP5_SUBARU_DT.dll",
+          "unit_id": "plugins:sha256:261b11e78932cccc6f8ec7560c694c7098d10924333fd0260f131675d10ba276"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetRoBP5_SUBARU_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:261b11e78932cccc6f8ec7560c694c7098d10924333fd0260f131675d10ba276"
+      },
+      {
+        "basename": "GetRoBP6_DT.dll",
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-main-rob-p6",
+            "id": "RecorderNative.Main.RoBP6.Entry"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetRoBP6_DT.dll",
+          "unit_id": "plugins:sha256:4432db034cdaf3d7d41105da914c22b5fd6eb18ff592c09b5844ceb01212ffca"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetRoBP6_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:4432db034cdaf3d7d41105da914c22b5fd6eb18ff592c09b5844ceb01212ffca"
+      },
+      {
+        "basename": "GetTSS3ImageFFDP5_DT.dll",
+        "component_proof_sources": [
+          "analysis-origin:recorder-image-worker15-qualified-proof.json",
+          "diagnostic_operations.shared_family_contracts.recorder-image-worker15-complete-contracts"
+        ],
+        "composition_proof": {
+          "artifact": "diagnostic_operations.shared_family_contracts.recorder-final-owned-provider-composition",
+          "id": "RecorderNative.Final.ExactSourceEntryEngineComposition"
+        },
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-tss3-p5-local-contract",
+            "id": "RecorderNative.Main.GetTSS3ImageFFDP5.LocalRootAndImageAcquisition"
+          },
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-ddr4-header-core-contracts",
+            "id": "RecorderNative.Main.TSS3ImageFFDP5.DDR4HeaderEngine"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "resolved_engine_composition": {
+          "analysis_sha256": "07cfb84e1d258862f95b68a966cf34dbe8d0967e4008c59b2f16b6733a05ecd8",
+          "basename": "GetTSS3ImageFFDP5_DT.dll",
+          "caller": {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-tss3-p5-local-contract",
+            "contract": "RecorderNative.Main.GetTSS3ImageFFDP5.LocalRootAndImageAcquisition"
+          },
+          "header_effect_port": {
+            "consumer_semantics": "Readactualcallercontractforskip/ignore/proceed/flag1copy/cleanup/power/logpolicy; doNOTturnignoredheaderstatusintotransactionorhelper-absence.",
+            "inputs": "CommandContext {send,recv,cancel,frame,data,unused}; fixedbus12, temporarysendactualECUselectorperexistingcaller",
+            "lifetime": "Own41A0LessA8PIDs, normalmanualdeleteall; FH3ctorfailuredeleteCURRENTpendingallocation, priorPIDslotsnotRAII; ctx/callerresponseborrowed; ownnewthrows(noordinaryNULLfallback)",
+            "outputs": "Nativeu32status plus in-placeRcv.spec48/CSV60(9F..AB13fields); logicalAASupportInfo170/support178/nestedDwordData17C/raw184; noPrivateRecorded/FFD/RAM/pixels"
+          },
+          "other_P5_header_provider": {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-tss3-p5-local-contract",
+            "closure": "Existing15actualsameDLLP5derivedclassmethods/proof/62slot57MainIATcompositionareINSIDEthiscompleteconsumercontract; noadditionalinventedP5providerID.",
+            "contract": "RecorderNative.Main.GetTSS3ImageFFDP5.LocalRootAndImageAcquisition"
+          },
+          "provider": {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-image-ddr4-header-core-contracts",
+            "contract": "RecorderNative.Main.TSS3ImageFFDP5.DDR4HeaderEngine",
+            "native_abi": "uint32_t __thiscall Engine::Run(CommandContext* ctx), ECXproperlyconstructed20C0receiver; one32-bitstackarg/RET4; EAXstatusNOTpointer",
+            "root_va": "100060d0"
+          },
+          "source_qualification": "SameDLLcaller/provideranalysisSHAabove/currentinstalledprotected-to-qualifiedsourceidentity, actualRootC/nativebytes/bodySHA/ownCRT/FH3/metadata/wire/format/lifetimeports, notnameparity.",
+          "state": "complete_exact_source_end_to_end_owned_entry_engine_composition",
+          "unit_id": "plugins:sha256:203b825da7ce9a4bd07dbdacecc92a37e617cc4d8b792d9dd9548d907406cdf8"
+        },
+        "source": {
+          "source_ref": "GTSPlus/bin/GetTSS3ImageFFDP5_DT.dll",
+          "unit_id": "plugins:sha256:203b825da7ce9a4bd07dbdacecc92a37e617cc4d8b792d9dd9548d907406cdf8"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetTSS3ImageFFDP5_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:203b825da7ce9a4bd07dbdacecc92a37e617cc4d8b792d9dd9548d907406cdf8"
+      },
+      {
+        "basename": "GetTSS3OperationFFDP5_DT.dll",
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-TSS3-operation",
+            "id": "RecorderNative.P5.TSS3Operation"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/GetTSS3OperationFFDP5_DT.dll",
+          "unit_id": "plugins:sha256:67257cf5dfdab990adbc1bab1938ad1cb6bf52a1b307cc7fcd9b7bd33a093414"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-GetTSS3OperationFFDP5_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:67257cf5dfdab990adbc1bab1938ad1cb6bf52a1b307cc7fcd9b7bd33a093414"
+      },
+      {
+        "basename": "IsImageFFDP4_DT.dll",
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-P4-image-availability-wrapper",
+            "id": "RecorderNative.P4.ImageAvailability.Wrapper"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/IsImageFFDP4_DT.dll",
+          "unit_id": "plugins:sha256:de222350d20a3e585479d5e1e8f0368717edd47667a649307daee95d24d4fdd5"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-IsImageFFDP4_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:de222350d20a3e585479d5e1e8f0368717edd47667a649307daee95d24d4fdd5"
+      },
+      {
+        "basename": "IsImageFFDP5_DT.dll",
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-main-image-availability-p5",
+            "id": "RecorderNative.Main.ImageAvailabilityP5.Entry"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/IsImageFFDP5_DT.dll",
+          "unit_id": "plugins:sha256:01870fd0d3901d2a698c11a9604484604a4fc954fad9f914eb7d03abcb0bb4e6"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-IsImageFFDP5_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:01870fd0d3901d2a698c11a9604484604a4fc954fad9f914eb7d03abcb0bb4e6"
+      },
+      {
+        "basename": "IsImageFFDP6_DT.dll",
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-P6-image-availability",
+            "id": "RecorderNative.P6.ImageAvailability"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/IsImageFFDP6_DT.dll",
+          "unit_id": "plugins:sha256:20c58db57948019e219a25970a7db5cf2dc7c25fbbed8b87c8c1127a749b5bc0"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-IsImageFFDP6_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:20c58db57948019e219a25970a7db5cf2dc7c25fbbed8b87c8c1127a749b5bc0"
+      },
+      {
+        "basename": "IsPCSSBRVehicleP5_DT.dll",
+        "contracts": [
+          {
+            "artifact": "diagnostic_operations.shared_family_contracts.recorder-contract-main-pcs-sbr-availability",
+            "id": "RecorderNative.Main.PCSSBRVehicleProbe"
+          }
+        ],
+        "coverage_state": "complete_owned_primary_entry_and_reachable_native_algorithms_with_exact_source_typed_provider_composition",
+        "source": {
+          "source_ref": "GTSPlus/bin/IsPCSSBRVehicleP5_DT.dll",
+          "unit_id": "plugins:sha256:ff715d6566817c0dcbe72b19f8c8687270b450f90b4026cdbe5cb7df12cf4b83"
+        },
+        "source_proof": {
+          "instruction_listing": "analysis-origin:recorder-native-asm-IsPCSSBRVehicleP5_DT.dll.txt",
+          "proof_limit": "directCFGonly;doesnotproveindirectswitch/vtableclosure",
+          "raw_instructions_calls": "analysis-origin:recorder-native-raw-control-flow.json"
+        },
+        "unit_id": "plugins:sha256:ff715d6566817c0dcbe72b19f8c8687270b450f90b4026cdbe5cb7df12cf4b83"
+      }
+    ],
+    "execution": {
+      "car_VCI_account_server_or_Windows_native_execution": false,
+      "offline_analysis": "QualifiedPE/currentnativeC+instructionbytes/data/exports/CFG/FH3/Capstonestaticanalysis; existingofflineLLVMdemanglerdecodedactual66MAINP5exportsand12legacylistMSVCsignatures. Noverificationexecution.",
+      "tests_gates_linters_smokes": false,
+      "tracked_edits": false,
+      "worker_owned_projects": "recorder_native_p6_11 exportedandbridgeSTOPPED;noactivebridge/import/child"
+    },
+    "parent_qualified_errata": {
+      "allocator": "Actual1000EC78 loops malloc/new-handler then1000F7DD throws bad_alloc; ordinary exhaustion does not take retained NULL/default-header status arms.",
+      "corrected_contract_ids": [
+        "RecorderNative.P5.TSS3Operation",
+        "RecorderNative.Common.Main.ADUDDRP6.Acquisition",
+        "RecorderNative.Common.Main.DDRP6.Acquisition",
+        "RecorderNative.Main.DMCImage.Entry"
+      ],
+      "log_seek": "SetCommLogFilePointer is qualified seek followed by SetEndOfFile truncation; zero checkpoint guards can skip invocation, not change provider behavior."
+    },
+    "schema": "gts-car-native-contract-v1",
+    "scope": {
+      "canonical_shared_engine_ownership": "RecorderNativeownsDS4CCmdGetDdrInfoP5BaseandreachableDDR/PCS/RoBenginesperMain;OtherB16ownsDS4pluginentrywrappers;PlatformSession3ownsPFserialization/frame/cache/session;Identity4ownsP5supportRIDgeneration",
+      "new_primary_units_from_helper_or_analyzer_methods": 0,
+      "primary_plugin_count": 58,
+      "primary_plugins_with_complete_owned_native_composition": 58,
+      "primary_plugins_with_published_entry_contracts": 58,
+      "published_artifact_containers": 152
+    },
+    "slice": "RecorderNative",
+    "source_present_remaining_analysis": {
+      "completion_proof": {
+        "artifact": "diagnostic_operations.shared_family_contracts.recorder-final-owned-provider-composition",
+        "closed_actual_former_entry_gaps": 8,
+        "contract": "RecorderNative.Final.ExactSourceEntryEngineComposition",
+        "note": "Notcountsasclosure: exact71SaveLog/72Plainnativebodies/businessdifferences, actual6sameDLLDDR4headercores14methods+7runtime/FH3each, physicalABI143, actualcontainers13/fiverecoveredexportentries, DMCactualP5sixmethods+57MainIATs, allconsumerroot/providerportscomposed."
+      },
+      "entry_only_contracts_requiring_owned_engine_composition": [],
+      "primary_entries_without_semantic_contract": [],
+      "shared_engine_boundaries": [],
+      "status": "closed_no_owned_source_present_analysis_or_mandatory_entry_engine_gap_remaining",
+      "unavailable_source_claim": false
+    },
+    "source_program_artifacts": {
+      "DS4_Common_all4781": "analysis-origin:gts-car-native-bodies/ds4-CommandCommon.json",
+      "DS4_RAM_cache": "analysis-origin:recorder-ds4-common-ram-bodies.json",
+      "DS4_concrete_DDR_vtable": "analysis-origin:recorder-ds4-p5-ddr-vtable.json",
+      "DS4_selected_recorder_bodies": "analysis-origin:recorder-ds4-common-exact-recorder-bodies.json",
+      "direct_instruction_proof_all58": "analysis-origin:recorder-native-raw-control-flow.json",
+      "full_P6_ADUOperation": "/tmp/recorder-native-p6-analysis/GetADUOperationFFDP6_DT.dll.json",
+      "main_Common_all5532": "analysis-origin:gts-car-native-bodies/main-CommandCommon.json",
+      "main_DCM35": "analysis-origin:recorder-main-dcm-p5-bodies.json",
+      "main_DS4_P5_candidate_comparison_NOT_equivalence": "analysis-origin:recorder-main-ds4-p5-ddr-comparison.json",
+      "main_P6_ADU_actual_method_comparison": "analysis-origin:recorder-main-p6-adu-exact-method-comparison.json",
+      "main_numeric": "analysis-origin:recorder-main-physical-to-raw-bodies.json",
+      "main_p6_rob_native_corrections": "analysis-origin:recorder-main-p6-rob-native-proof.json",
+      "main_rob_analysis_native_recovery": "analysis-origin:recorder-main-rob-analysis-native-proof.json",
+      "main_selected_recorder_bodies": "analysis-origin:recorder-main-common-exact-recorder-bodies.json",
+      "qualified_58_sources": "analysis-origin:recorder-native-qualified-sources.json",
+      "remaining57_primary_full_body_request": "Superseded: all56neededcurrentmainexportsREADY+priorADUOperation+DS4CurrentTime; sourceavailableall58.",
+      "uniform_primary_full_exports": "analysis-origin:recorder-native-uniform-export-ready.json"
+    },
+    "status": "complete_exact_source_58_primary_native_recorder_algorithms_and_owned_shared_engines_with_typed_native_proofs_and_all_entry_engine_compositions",
+    "unexecuted_actual_source_scenarios": "UNEXECUTED static source-specified cases embedded in componentcontracts and diagnostic_operations.shared_family_contracts.recorder-final-owned-provider-composition; parent may run existing contract/source-join integration QA separately. No executed-test claim.",
+    "worker_id": "GtsCarNativeBehavior-11"
+  },
+  "id": "native.RecorderNative",
+  "kind": "native",
+  "schema": "gtsplus-lifecycle-operations-spec-v1"
+}

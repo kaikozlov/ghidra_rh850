@@ -18,13 +18,14 @@ import struct
 from pathlib import Path
 
 from tools import REPO_ROOT as REPO
+from tools.techstream.gts.registry import load_toyota_diag_registry
 from tools.targets.camry.builders.build_camry_8965F3307000_command_cone_ingress import exact_pairs
 from tools.targets.camry.support.camry_f33_corpus import CORPUS, IMAGE, IMAGE_SHA256
 from tools.targets.camry.decomp.c_text import _c_contains
 
 OUT = REPO / "data/generated/camry_8965F3307000_internal_assist_oracles.json"
 GTS = REPO / "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json"
-GTS_REGISTRY = REPO / "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json"
+GTS_REGISTRY = REPO / "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json.gz"
 COMMAND_CONE = REPO / "data/generated/camry_8965F3307000_command_cone_ingress.json"
 LIVE_SELECTOR = REPO / "data/generated/camry_2026_baseline_selector_live.json"
 RDBI_OFFSET = 0x2927C
@@ -273,7 +274,7 @@ def main() -> int:
     # Drive Mode Select Status.  Its enum shape matches the exact F33 0x51E B0[3:0]
     # selector consumer: Normal=0 and Eco=6 select the default/equivalent banks, while
     # Sport=2 (and Sport S+=4) takes the only distinct healthy C28FC/C2B64 bank.
-    registry = json.loads(GTS_REGISTRY.read_text())
+    registry = load_toyota_diag_registry(GTS_REGISTRY)
     need(397 in registry["profile"]["catalog_category_ids"], "Camry HV category 397 no longer installed")
     drive_mode_did = registry["catalogs"]["397"]["dids"]["0x1004"][0]
     need(drive_mode_did["name"] == "Drive Mode Select Status", "HV_P5 drive-mode name drift")

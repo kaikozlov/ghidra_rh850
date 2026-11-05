@@ -1,0 +1,1448 @@
+{
+  "schema": "gtsplus-lifecycle-operations-spec-v1",
+  "id": "frontend.CustomizationFrontend",
+  "kind": "frontend",
+  "data": {
+    "owner": "CustomizationFrontend",
+    "unit_contracts": [
+      {
+        "unit_id": "customization.ui.customize_controller.init",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "init() after construction(commonInfo,controllerId); shared shell admission is external",
+        "state_fields": [
+          "model",
+          "mainView",
+          "currentView",
+          "activityReport"
+        ],
+        "guarded_ordered_transitions": [
+          "Log title Customize without awaiting logger result; create CustomizeModel and CustomizeMainView; assign mainView=currentView before dialog.",
+          "Create no-button progress dialog; await main view initView; await cancelAutoPowerOff; await model.getCustomizeSupportList(\"Customize\").",
+          "On fulfilled support read populate mainView group list; register main events; log group catalog. catch(onErrorCommon) precedes finally(close progress and output log)."
+        ],
+        "request_construction": {
+          "worker_support": {
+            "functionName": "Customize"
+          },
+          "auto_power_off": "GtsWorkerApi.cancelAutoPowerOff()"
+        },
+        "response_error_mapping": "Read/init rejection goes to inherited onErrorCommon; logging promises not joined. Error-handler outcome determines final settlement.",
+        "user_visible_result": "Function catalog screen with localized title; progress closes on success or failure.",
+        "mutation_and_cleanup": "Creates new model/view; support catalog retained in model; no ECU write in own body.",
+        "cancel_semantics": "No cancellation button; finally closes presentation only."
+      },
+      {
+        "unit_id": "customization.ui.customize_controller.dispose",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "dispose() on current controller",
+        "state_fields": [
+          "currentView",
+          "mainView",
+          "itemsView",
+          "model",
+          "eventDisp"
+        ],
+        "guarded_ordered_transitions": [
+          "Call currentView.disposeView synchronously.",
+          "Null mainView/itemsView/currentView/model; dispose controller dispatcher; return Promise.resolve()."
+        ],
+        "request_construction": null,
+        "response_error_mapping": "Synchronous dispose exception escapes before resolved promise; no await of in-flight work.",
+        "user_visible_result": "Current view removed through view disposal.",
+        "mutation_and_cleanup": "Drops references and event handlers; no native stop/disconnect request.",
+        "cancel_semantics": "Does not cancel outstanding model promises or vehicle actions."
+      },
+      {
+        "unit_id": "customization.ui.customize_controller.onClickCustomizeBtn",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "Main CUSTOMIZE_BTN event; evt.detail.args[1] is numeric selected support ID",
+        "state_fields": [
+          "model.selectedCustomizeId"
+        ],
+        "guarded_ordered_transitions": [
+          "Read event ID; model.setCustomizeSupportId(id); invoke controller.initCustomizeItemView()."
+        ],
+        "request_construction": {
+          "local": "selected support ID passed unchanged"
+        },
+        "response_error_mapping": "Does not return initCustomizeItemView promise; inner path catches its own rejections.",
+        "user_visible_result": "Starts selection-dependent items or OEM/security alternate screen.",
+        "mutation_and_cleanup": "Selected ID persists until replacement/clear.",
+        "cancel_semantics": "No cancel logic in event handler."
+      },
+      {
+        "unit_id": "customization.ui.customize_controller.initCustomizeItemView",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "Called after selectedCustomizeId is set; returns Promise",
+        "state_fields": [
+          "itemsView",
+          "currentView",
+          "mainView",
+          "model.currentCustomizeSetting",
+          "model.exclusiveLogicList"
+        ],
+        "guarded_ordered_transitions": [
+          "Create fresh items view and set currentView before progress/read. Await model.getCustomizeItemList().",
+          "code0: dispose main; await item init; log items; set item list; register item events.",
+          "code1 Mazda: close progress early; dispose main; await item init; set items; register events; show DLG06 (confirmation not awaited).",
+          "code2 Security: close progress early; dispose main; await item init; log items; register events; show DLG03; do not call setCustomizeItemList.",
+          "code3 Subaru: dispose main; set currentView=main; await main init; render exclusiveLogicList; register main events.",
+          "code4: same exclusive menu as3 then DLG03. Default code: leave newly selected currentView without initializing view.",
+          "catch inherited onErrorCommon; finally closes progress including paths that already closed it."
+        ],
+        "request_construction": {
+          "worker": "getCustomizeItemList({customizeSupportId:selectedCustomizeId})"
+        },
+        "response_error_mapping": "Fulfilled route code controls UI; error not locally normalized. Worker code4 generation is structurally unreachable in current security-empty path (common contract security-empty-code4).",
+        "user_visible_result": "Items, Mazda confirmation, security-not-enabled dialog, or exclusive list per exact route.",
+        "mutation_and_cleanup": "Item read resets staged list in model; main dispose resets dispatcher; no native writes.",
+        "cancel_semantics": "No abort request; progress close is not operation cancellation."
+      },
+      {
+        "unit_id": "customization.ui.customize_controller.onClickExclusiveLogicList",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "EXCLUSIVE_LOGIC_LIST event; evt.detail.args[1] selects ID",
+        "state_fields": [
+          "itemsView",
+          "currentView",
+          "model.selectedCustomizeId"
+        ],
+        "guarded_ordered_transitions": [
+          "Create new item view; currentView=item; set support ID.",
+          "Create progress; await model.getCustomizeItemList(); disregard returned route code; dispose main; await item init; log and render items; register events.",
+          "catch(onErrorCommon); finally close progress."
+        ],
+        "request_construction": {
+          "customizeSupportId": "evt.detail.args[1]"
+        },
+        "response_error_mapping": "Unlike initCustomizeItemView, does not switch on returned code, even Mazda/security/Subaru.",
+        "user_visible_result": "Always attempts item view after fulfilled item read.",
+        "mutation_and_cleanup": "Updates ID and model current/staged state via read.",
+        "cancel_semantics": "No abort/cancel request."
+      },
+      {
+        "unit_id": "customization.ui.customize_controller.goBackMainView",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "goBackMainView(controller), called from cancel/DLG06 Cancel",
+        "state_fields": [
+          "currentView",
+          "selectedCustomizeId",
+          "currentCustomizeSetting",
+          "updatedCustomizeSetting"
+        ],
+        "guarded_ordered_transitions": [
+          "Set currentView=mainView; clearCustomizeItemInfo before async work; dispose itemsView.",
+          "Create progress on main; await main.initView; repopulate original support list; register main events; resolve.",
+          "catch(onErrorCommon); finally close progress."
+        ],
+        "request_construction": null,
+        "response_error_mapping": "Clear/dispose before promise chain may throw synchronously; later errors inherited.",
+        "user_visible_result": "Restores general support list, not exclusive list.",
+        "mutation_and_cleanup": "Clears selected ID/current items/staged changes; main menu uses cached catalog.",
+        "cancel_semantics": "Navigation cancellation drops pending local selections; does not cancel native action."
+      },
+      {
+        "unit_id": "customization.ui.customize_controller.onClickApplyBtn",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "APPLY_BTN from confirmed DLG01; controller/model already initialized",
+        "state_fields": [
+          "model.updatedCustomizeSetting",
+          "currentView",
+          "model.currentCustomizeSetting"
+        ],
+        "guarded_ordered_transitions": [
+          "Open DLG02 (no buttons); call model.setCustomize(); on fulfilled result close DLG02.",
+          "If result.isError truthy: showCommonErrorDialog(result), do not immediately reread.",
+          "Else code1 Mazda: showDLG05, no automatic clear/reread until Next.",
+          "Else code3 Subaru: dispose current; switch to main; await init; render exclusive list; register events.",
+          "Else: await model.getCustomizeItemList(); ignore read route code; log current values and render captured original view.",
+          "catch(onErrorCommon); finally close DLG02 again."
+        ],
+        "request_construction": {
+          "setCustomizeList": "model staged item list converted by model",
+          "customizeSupportId": "selected ID"
+        },
+        "response_error_mapping": "Global fulfilled set -> route handling; no inspection of native successList. Resolved isError uses dialog; rejected set/read uses inherited handler.",
+        "user_visible_result": "Write progress, error dialog, Mazda ignition-cycle instructions, exclusive menu, or reread current settings.",
+        "mutation_and_cleanup": "Successful normal reread clears staged model list and disables Apply via render; no clear before write.",
+        "cancel_semantics": "No cancellation during DLG02; closing dialog does not abort write/readback."
+      },
+      {
+        "unit_id": "customization.ui.customize_controller.onClickSettings",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "CUSTOMIZE_ITEM event; evt.detail.args[1]=item ID, [2]=choice index string",
+        "state_fields": [
+          "model.updatedCustomizeSetting"
+        ],
+        "guarded_ordered_transitions": [
+          "Read ID/index; call model.updateSelectedCustomizeInfo(id,index)."
+        ],
+        "request_construction": {
+          "local": "No raw radio value parsed: index selects raw valueList in model"
+        },
+        "response_error_mapping": "Synchronous model errors propagate to dispatcher caller.",
+        "user_visible_result": "No direct rendering; view already updates selection markers.",
+        "mutation_and_cleanup": "Stages/reverts item override via model.",
+        "cancel_semantics": "No native action to cancel."
+      },
+      {
+        "unit_id": "customization.ui.customize_controller.onClickCancelBtn",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "CANCEL_BTN event from item cancel button",
+        "state_fields": [
+          "model",
+          "currentView"
+        ],
+        "guarded_ordered_transitions": [
+          "Invoke goBackMainView(controller); do not return its promise."
+        ],
+        "request_construction": null,
+        "response_error_mapping": "Inner goBack chain owns rejection handler.",
+        "user_visible_result": "Return to general support menu.",
+        "mutation_and_cleanup": "Clears staged/current item data through goBack.",
+        "cancel_semantics": "Navigation cancel only, no write cancellation."
+      },
+      {
+        "unit_id": "customization.ui.customize_controller.createProgressDialog",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "Current view must exist",
+        "state_fields": [
+          "currentView"
+        ],
+        "guarded_ordered_transitions": [
+          "Pass sTitleId=r_item_i0005, sScreenId=\"\", sResourceId=r_msg_l0058, arrButtons=[] to currentView.createCommonDialog; return dialog."
+        ],
+        "request_construction": {
+          "dialog": "Please Wait..."
+        },
+        "response_error_mapping": "Dialog construction errors propagate synchronously.",
+        "user_visible_result": "No-button wait dialog.",
+        "mutation_and_cleanup": "No customization/model mutation; caller owns close.",
+        "cancel_semantics": "No cancel control."
+      },
+      {
+        "unit_id": "customization.ui.customize_controller.showDLG02",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "Called before model.setCustomize",
+        "state_fields": [
+          "currentView"
+        ],
+        "guarded_ordered_transitions": [
+          "Return createCommonDialog with title Customize, screen S601-DL-002, resource r_msg_l0002, arrButtons=[]."
+        ],
+        "request_construction": {
+          "dialog": "Updating Customize Settings. Please Wait…"
+        },
+        "response_error_mapping": "No promise/response conversion.",
+        "user_visible_result": "Non-interactive updating dialog.",
+        "mutation_and_cleanup": "Caller closes before routing and in finally.",
+        "cancel_semantics": "No cancel control."
+      },
+      {
+        "unit_id": "customization.ui.customize_controller.showDLG03",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "Security route2 or4",
+        "state_fields": [
+          "currentView"
+        ],
+        "guarded_ordered_transitions": [
+          "Create S601-DL-003 with r_msg_n0003 and OK r_item_b0022.",
+          "OK callback closes dialog and logs; no data request and no enabling mutation."
+        ],
+        "request_construction": {
+          "dialog": "DOP Security not enabled; use Option Setup to turn ON"
+        },
+        "response_error_mapping": "Callback does not return operation promise.",
+        "user_visible_result": "Information dialog; does not automatically enable security.",
+        "mutation_and_cleanup": "Only dialog closure.",
+        "cancel_semantics": "OK only; no cancel/rollback."
+      },
+      {
+        "unit_id": "customization.ui.customize_controller.showDLG05",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "After fulfilled Mazda write code1",
+        "state_fields": [
+          "currentView",
+          "model.currentCustomizeSetting"
+        ],
+        "guarded_ordered_transitions": [
+          "Create S601-DL-005 using r_msg_n0005; Next closes dialog and creates progress.",
+          "Next awaits model.delDiagCodeForMazdaVehicle(); then awaits getCustomizeItemList(); log and render reread settings.",
+          "catch(onErrorCommon); finally close progress; callback does not return its chain."
+        ],
+        "request_construction": {
+          "Mazda_clear": {},
+          "reread": {
+            "customizeSupportId": "selected ID"
+          }
+        },
+        "response_error_mapping": "Worker intentionally resolves Mazda DTC-clear failure, therefore next item read still runs on native clear rejection. Other rejection inherited.",
+        "user_visible_result": "Instructions to turn engine/power OFF then ON (Engine/Ready OFF), Next to proceed.",
+        "mutation_and_cleanup": "Actual DTC clear request is part of Next path; not a read-only screen. Reread resets staged state.",
+        "cancel_semantics": "No Cancel button; ignition transition is instruction only, not programmatically performed here."
+      },
+      {
+        "unit_id": "customization.ui.customize_controller.showDLG06",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "Mazda item-entry route1 after items rendered",
+        "state_fields": [
+          "currentView",
+          "model.currentCustomizeSetting"
+        ],
+        "guarded_ordered_transitions": [
+          "Create S601-DL-006 r_msg_n0006, OK and Cancel.",
+          "OK closes and logs current item list; no immediate native write/clear.",
+          "Cancel closes and calls goBackMainView (chain not returned)."
+        ],
+        "request_construction": {
+          "dialog": "Changing parameters will clear all DTCs of whole system; continue?"
+        },
+        "response_error_mapping": "Does not await either callback activity.",
+        "user_visible_result": "Mazda DTC-clear warning.",
+        "mutation_and_cleanup": "OK does not change staged values; Cancel clears local state via navigation.",
+        "cancel_semantics": "Cancel means leave item view, not abort communication already completed."
+      },
+      {
+        "unit_id": "customization.ui.customize_controller.initMainViewEvents",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "After main list is populated",
+        "state_fields": [
+          "mainView.eventDisp"
+        ],
+        "guarded_ordered_transitions": [
+          "Register CUSTOMIZE_BTN -> onClickCustomizeBtn bound(controller,controller).",
+          "Register EXCLUSIVE_LOGIC_LIST -> onClickExclusiveLogicList bound similarly."
+        ],
+        "request_construction": null,
+        "response_error_mapping": "No guard against duplicate registration in this method; view.disposeView normally clears dispatcher.",
+        "user_visible_result": "Enables click-to-enter list behavior.",
+        "mutation_and_cleanup": "Mutates event subscriptions.",
+        "cancel_semantics": "No cancel request."
+      },
+      {
+        "unit_id": "customization.ui.customize_controller.initItemViewEvents",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "After item view initialized",
+        "state_fields": [
+          "itemsView.eventDisp"
+        ],
+        "guarded_ordered_transitions": [
+          "Register CUSTOMIZE_ITEM -> onClickSettings; APPLY_BTN -> onClickApplyBtn; CANCEL_BTN -> onClickCancelBtn with bound controller."
+        ],
+        "request_construction": null,
+        "response_error_mapping": "No local exception handling or de-duplication.",
+        "user_visible_result": "Connects choice staging, Apply confirmation action and Cancel navigation.",
+        "mutation_and_cleanup": "Mutates subscriptions; item dispose clears dispatcher.",
+        "cancel_semantics": "Cancel subscription invokes navigation only."
+      },
+      {
+        "unit_id": "customization.ui.customize_controller.activityReportMainFunc",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "result: falsy or iterable group rows {name}",
+        "state_fields": [
+          "activityReport"
+        ],
+        "guarded_ordered_transitions": [
+          "Initialize retainedData=[{body:[]}].",
+          "When result truthy, append in input order {record:[{key:\"Customize\",value:val.name}]}.",
+          "Invoke logForList(resource r_item_i1944, retainedData) without returning/awaiting its promise."
+        ],
+        "request_construction": {
+          "activity": "{subTitle:localized Customize Function List,retainedData:[{body:[...]}]}"
+        },
+        "response_error_mapping": "Malformed truthy non-iterable throws; logger rejection not joined by caller.",
+        "user_visible_result": "No UI changes; records catalog through worker logger.",
+        "mutation_and_cleanup": "Activity logging is an external side effect, not a read-only no-op.",
+        "cancel_semantics": "No cancel handling."
+      },
+      {
+        "unit_id": "customization.ui.customize_controller.activityReportItemsFunc",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "result: falsy or item rows {name,values:[{checked,label}]}",
+        "state_fields": [
+          "activityReport",
+          "mainView"
+        ],
+        "guarded_ordered_transitions": [
+          "Build headers Item/Setting localized through mainView.",
+          "For each item iterate values; each checked===1 replaces str, so last checked label wins; none yields empty string.",
+          "Append record keys Item,Setting; invoke logger with r_item_i1945 without returning/awaiting promise."
+        ],
+        "request_construction": {
+          "activity": "Localized headers plus ordered item names and checked-current labels"
+        },
+        "response_error_mapping": "Missing values throws; logs current checked values not staged choice array.",
+        "user_visible_result": "No UI change; activity report side effect.",
+        "mutation_and_cleanup": "No native vehicle action; asynchronous recording call dispatched.",
+        "cancel_semantics": "No cancel handling."
+      },
+      {
+        "unit_id": "customization.ui.customize_controller.showCommonErrorDialog",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "result {detailCode,code,isError} from resolved worker write error",
+        "state_fields": [
+          "model.currentCustomizeSetting",
+          "currentView"
+        ],
+        "guarded_ordered_transitions": [
+          "Open createCommonErrorDialog({sErrorCode:detailCode,execResultCode:code,arrButtons:[OK]}), label r_item_i0756.",
+          "OK closes; create progress; await getCustomizeItemList; log and render captured view; catch inherited error; finally close progress."
+        ],
+        "request_construction": {
+          "error_dialog": "Pass original detailCode/code without translation into success"
+        },
+        "response_error_mapping": "No reread until user OK; reread route code ignored; error-dialog return not returned.",
+        "user_visible_result": "Shared error dialog then refreshed current values.",
+        "mutation_and_cleanup": "Reread clears staged state via model on fulfillment.",
+        "cancel_semantics": "No cancellation of write; already received error."
+      },
+      {
+        "unit_id": "customization.ui.customize_controller.showServiceInfo",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "Menu/shell event; current item view optionally has selected row name",
+        "state_fields": [
+          "itemsView",
+          "currentView",
+          "commonInfo"
+        ],
+        "guarded_ordered_transitions": [
+          "If currentView===itemsView obtain selected item name or null; else keyword null.",
+          "Await showSelectKeywordDialog(keywords); invoke saveActivityRepportForServiceInfoKeyword(keyword); construct service URL(commonInfo,keyword,KeywordSearch.KEYWORD_TYPE.CUSTOMIZE_ITEM); window.open(url,\"_blank\")."
+        ],
+        "request_construction": {
+          "service_info": "commonInfo + chosen keyword + CUSTOMIZE_ITEM search type"
+        },
+        "response_error_mapping": "Promise chain not returned and no catch in method; cancellation/rejection depends on shared keyword dialog.",
+        "user_visible_result": "Keyword-selection dialog and external browser tab.",
+        "mutation_and_cleanup": "Activity-report persistence and tab-opening side effects; no ECU request.",
+        "cancel_semantics": "No local cancellation handler; shared dialog defines reject/cancel result."
+      },
+      {
+        "unit_id": "customization.ui.customize_controller.showHelp",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "Shell Help event",
+        "state_fields": [
+          "commonInfo"
+        ],
+        "guarded_ordered_transitions": [
+          "Set specificationId=gts.SPECIFICATION_ID.CUSTOMIZE; createHelpInfoUrl(commonInfo,specificationId); open new tab."
+        ],
+        "request_construction": {
+          "help": "commonInfo, CUSTOMIZE specification ID"
+        },
+        "response_error_mapping": "Synchronous URL/open errors propagate; window.open result unused.",
+        "user_visible_result": "External help tab.",
+        "mutation_and_cleanup": "Browser side effect, no vehicle action.",
+        "cancel_semantics": "No cancel logic."
+      },
+      {
+        "unit_id": "customization.ui.customize_items_view.initView",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "View constructed(commonInfo), called on admitted item route",
+        "state_fields": [
+          "$viewPane",
+          "onResize",
+          "eventDisp"
+        ],
+        "guarded_ordered_transitions": [
+          "Set pane overflow-y hidden; await ViewUtil.getView(\"customize/s601_06.html\",\"gts_main_panel\").",
+          "Append template v_pane/v_c_pane children; set description label r_item_i0091; hide status; title r_item_i0088/show title.",
+          "Create table header Item30%/Settings70%, tbody; height=calcTableSize(root)-description.outerHeight(true)-4 and overflow-y auto.",
+          "Register resize handler with {$table:root}; draw resources; bind button handlers; trigger window resize; resolve; catch(view.onErrorCommon)."
+        ],
+        "request_construction": {
+          "template": "view/customize/s601_06.html"
+        },
+        "response_error_mapping": "View loader/init errors use inherited handler; no native response read.",
+        "user_visible_result": "Parameter table, read-only description textarea, Cancel and initially disabled Apply.",
+        "mutation_and_cleanup": "Registers resize and DOM handlers, sets overflow; inherited resize lifecycle delegated.",
+        "cancel_semantics": "No request cancellation; template load may still complete after disposal."
+      },
+      {
+        "unit_id": "customization.ui.customize_items_view.disposeView",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "Current item DOM initialized or partially initialized",
+        "state_fields": [
+          "$viewPane",
+          "eventDisp"
+        ],
+        "guarded_ordered_transitions": [
+          "Empty v_pane; set overflow-y auto; empty v_c_pane and v_s_contents.",
+          "Dispose dispatcher; hide title/function buttons."
+        ],
+        "request_construction": null,
+        "response_error_mapping": "Synchronous cleanup only.",
+        "user_visible_result": "Removes items screen.",
+        "mutation_and_cleanup": "Does not explicitly unregister onResize in this body; shared registResizeHandler owner defines lifetime.",
+        "cancel_semantics": "No native abort; no explicit pending promise guard."
+      },
+      {
+        "unit_id": "customization.ui.customize_items_view.initEventHandler",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "Apply/Cancel elements inserted",
+        "state_fields": [
+          "DOM click handlers"
+        ],
+        "guarded_ordered_transitions": [
+          "Bind Apply click with event.data=view -> onClickApplyButton.",
+          "Bind Cancel click with event.data=view -> onClickCancelButton."
+        ],
+        "request_construction": null,
+        "response_error_mapping": "No handler de-duplication in this body.",
+        "user_visible_result": "Buttons respond through local event path.",
+        "mutation_and_cleanup": "DOM subscriptions removed when containing DOM emptied.",
+        "cancel_semantics": "Cancel is local event, not platform cancellation."
+      },
+      {
+        "unit_id": "customization.ui.customize_items_view.setCustomizeItemList",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "customizeItemsInfo normally array of {id,name,information,caution,ecuId,values:[{label,value,checked}]}",
+        "state_fields": [
+          "tbody",
+          "radio attributes",
+          "selected row class",
+          "Apply.disabled",
+          "description text"
+        ],
+        "guarded_ordered_transitions": [
+          "Empty tbody; iterate (customizeItemsInfo??[]) in order; values=item?.values??[]. For each value key i construct label via .text, radio name=id, id=\"opt\"+id+\"_\"+i, value attribute=value.value, index=i, caution attribute. Bind change handler.",
+          "When value.checked===1 set checked and defaultFlg=1; this marks native current match, not factory default. Append alternating row-odd/even with data-id/name/ecuId/information.",
+          "Bind row click: remove row-selected from rows with different data-id; toggle clicked class; always set description text to clicked information even when deselecting.",
+          "Enhance radio inputs checkboxradio({icon:false}); log customizeItemsInfo.length; disable Apply; clear description."
+        ],
+        "request_construction": {
+          "DOM": "Raw arrays stored in radio value attribute only for rendering; model staging uses index into value arrays, never parses attribute"
+        },
+        "response_error_mapping": "Nullish input permits empty map then throws at customizeItemsInfo.length; item null still fails earlier item.id; mandatory assumptions preserved.",
+        "user_visible_result": "Ordered choice radios/current markers and item details. Labels and names use text insertion rather than HTML.",
+        "mutation_and_cleanup": "DOM replacement resets selection markers and Apply, not model staging directly.",
+        "cancel_semantics": "No actions sent; rendering itself cannot cancel read/write."
+      },
+      {
+        "unit_id": "customization.ui.customize_items_view.onSelectChangeRadio",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "Radio change event currentTarget input with name item ID/index choice index",
+        "state_fields": [
+          "current/default/new CSS markers",
+          "Apply.disabled",
+          "model staged updates via event"
+        ],
+        "guarded_ordered_transitions": [
+          "Read selected label, prior new label, and sibling input defaultFlg=1 ID.",
+          "If selected.id===defaultOptId: remove default-value CSS marker. Else if no default ID: remove previous new marker and mark selected as new. Else mark original default label as default-value CSS.",
+          "Compute item ID=Number(selectedItem.name), choice index=selectedItem.getAttribute(\"index\"); trigger CUSTOMIZE_ITEM synchronously before warning/Apply update.",
+          "If caution attribute truthy show DLG04; after that enable Apply iff any default/new CSS marker exists globally; otherwise disable."
+        ],
+        "request_construction": {
+          "event": "customizeItem, numeric itemId, string settingValIndex"
+        },
+        "response_error_mapping": "No await/rollback for caution; selected current values remain model baseline and checked metadata unchanged. Listener exception prevents later warning/Apply update.",
+        "user_visible_result": "Changed baseline/new selection styling, optional warning, Apply state.",
+        "mutation_and_cleanup": "CSS and radio state only here; event synchronously stages model raw list. Returning to baseline removes staged item via model.",
+        "cancel_semantics": "Warning OK only; no revert on warning; Cancel navigation elsewhere."
+      },
+      {
+        "unit_id": "customization.ui.customize_items_view.getSelectedItem",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "Called for service info; optional row-selected",
+        "state_fields": [
+          "row-selected data-name"
+        ],
+        "guarded_ordered_transitions": [
+          "Read first selected row data-name; truthy -> {name:selectName}; falsy -> undefined."
+        ],
+        "request_construction": null,
+        "response_error_mapping": "No name inference from active radio.",
+        "user_visible_result": "Supplies keyword only; no DOM mutation.",
+        "mutation_and_cleanup": "No mutation.",
+        "cancel_semantics": "Not applicable."
+      },
+      {
+        "unit_id": "customization.ui.customize_items_view.onClickApplyButton",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "Apply click with evt.data=view; DOM initially disabled until markers exist",
+        "state_fields": [
+          "dialog"
+        ],
+        "guarded_ordered_transitions": [
+          "Call view.showDLG01(view)."
+        ],
+        "request_construction": {
+          "dialog": "Confirm before any APPLY_BTN event"
+        },
+        "response_error_mapping": "Does not inspect staged count or return dialog. Programmatic call is not guarded by disabled state.",
+        "user_visible_result": "Next/Cancel confirmation.",
+        "mutation_and_cleanup": "No direct native request or model mutation.",
+        "cancel_semantics": "DLG01 Cancel retains changes."
+      },
+      {
+        "unit_id": "customization.ui.customize_items_view.onClickCancelButton",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "Cancel click with evt.data=view",
+        "state_fields": [
+          "eventDisp"
+        ],
+        "guarded_ordered_transitions": [
+          "Trigger CANCEL_BTN with no payload."
+        ],
+        "request_construction": {
+          "event": "cancel"
+        },
+        "response_error_mapping": "Synchronous event dispatch.",
+        "user_visible_result": "Controller navigates back.",
+        "mutation_and_cleanup": "No own state clear; controller goBack performs clear.",
+        "cancel_semantics": "Cancels local editing only."
+      },
+      {
+        "unit_id": "customization.ui.customize_items_view.showDLG01",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "view argument current CustomizeItemsView",
+        "state_fields": [
+          "dialog"
+        ],
+        "guarded_ordered_transitions": [
+          "Create S601-DL-001, title Customize, message r_msg_n0001.",
+          "Next r_item_b0020: close dialog then trigger APPLY_BTN.",
+          "Cancel r_item_b0021: close dialog only; do not trigger CANCEL_BTN."
+        ],
+        "request_construction": {
+          "event_on_next": "apply (no payload)"
+        },
+        "response_error_mapping": "Does not await listeners or return dialog.",
+        "user_visible_result": "Press Next to make changes confirmation.",
+        "mutation_and_cleanup": "Cancel keeps stage/radios/Apply state intact.",
+        "cancel_semantics": "Confirmation cancel is distinct from screen Cancel navigation."
+      },
+      {
+        "unit_id": "customization.ui.customize_items_view.showDLG04",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "view + msg from item caution attribute",
+        "state_fields": [
+          "dialog"
+        ],
+        "guarded_ordered_transitions": [
+          "CreateWarningMessageDialog S601-DL-004, sMessage=msg, title Customize, OK r_item_b0022.",
+          "OK closes dialog only."
+        ],
+        "request_construction": {
+          "message": "Native localized caution passed as string, no resource-ID reinterpretation"
+        },
+        "response_error_mapping": "Warning API handling delegated to shared view.",
+        "user_visible_result": "Caution dialog following a choice change.",
+        "mutation_and_cleanup": "No selection rollback or stage clear.",
+        "cancel_semantics": "No Cancel button."
+      },
+      {
+        "unit_id": "customization.ui.customize_items_view.onResizeTable",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "Resize event.data={$table:jQuery root}",
+        "state_fields": [
+          "table height"
+        ],
+        "guarded_ordered_transitions": [
+          "Only if $table.children().length truthy recompute calcTableSize(table)-description.outerHeight(true)-4 and set height."
+        ],
+        "request_construction": null,
+        "response_error_mapping": "No children -> no-op; malformed event data throws.",
+        "user_visible_result": "Table resizes to available pane.",
+        "mutation_and_cleanup": "DOM height only; no data/read side effect.",
+        "cancel_semantics": "No cancellation."
+      },
+      {
+        "unit_id": "customization.ui.customize_main_view.initView",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "Constructed CustomizeMainView(commonInfo)",
+        "state_fields": [
+          "DOM title",
+          "eventDisp"
+        ],
+        "guarded_ordered_transitions": [
+          "Await ViewUtil.getView(\"customize/s601_03.html\",\"gts_main_panel\"); set document title r_item_i0087.",
+          "Append v_pane/v_c_pane children; hide status; set/show title; hide function buttons; draw resources; trigger resize; initEventHandler; resolve.",
+          "catch(view.onErrorCommon)."
+        ],
+        "request_construction": {
+          "template": "view/customize/s601_03.html"
+        },
+        "response_error_mapping": "Inherited handler controls rejection outcome; list not populated until controller then.",
+        "user_visible_result": "Select Customize Function screen, no active Next button in template.",
+        "mutation_and_cleanup": "DOM/global title mutations; main event-handler initializer itself empty.",
+        "cancel_semantics": "No communication abort."
+      },
+      {
+        "unit_id": "customization.ui.customize_main_view.disposeView",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "Called before items/alternate-menu reinitialization",
+        "state_fields": [
+          "eventDisp",
+          "selectedCustomizeName",
+          "selectedCustomizeId"
+        ],
+        "guarded_ordered_transitions": [
+          "Empty v_pane/v_c_pane/v_s_contents; dispose dispatcher; hide title/buttons; set selectedCustomizeName=\"\"."
+        ],
+        "request_construction": null,
+        "response_error_mapping": "Synchronous cleanup.",
+        "user_visible_result": "Removes main screen.",
+        "mutation_and_cleanup": "Does not reset selectedCustomizeId; next cell click replaces it.",
+        "cancel_semantics": "No native action cancellation."
+      },
+      {
+        "unit_id": "customization.ui.customize_main_view.initEventHandler",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "Called by initView",
+        "state_fields": [
+          "none"
+        ],
+        "guarded_ordered_transitions": [
+          "Assign local view=this; function ends with no event binding."
+        ],
+        "request_construction": null,
+        "response_error_mapping": "No-op body exactly, not a placeholder implementation.",
+        "user_visible_result": "No standalone Next binding.",
+        "mutation_and_cleanup": "None; cell handlers are installed in set*List methods instead.",
+        "cancel_semantics": "Not applicable."
+      },
+      {
+        "unit_id": "customization.ui.customize_main_view.setCustomizeSupportList",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "customizeItemsInfo required array of {id,name} from native support list",
+        "state_fields": [
+          "selectedCustomizeId",
+          "td selected_cell",
+          "table DOM"
+        ],
+        "guarded_ordered_transitions": [
+          "Empty group table. for r=0; r<data.length; r+=2 create row; for c=0..1 append valid item cell with text name and id.",
+          "Register first click callback: selectedCustomizeId=Number(cell.id), remove selected_cell from all cells, toggle clicked selected_cell.",
+          "Register second click callback on same cell with event.data=view -> onClickNextButton."
+        ],
+        "request_construction": {
+          "event": "Selected ID number; no frontend availability filtering"
+        },
+        "response_error_mapping": "Missing/null array throws. Ordered callback registration ensures ID update before CUSTOMIZE_BTN event.",
+        "user_visible_result": "Two-column source-order catalog; click immediately enters selected function.",
+        "mutation_and_cleanup": "Updates view selection only; no native filtering/eligibility calculation.",
+        "cancel_semantics": "No local Cancel control on main template."
+      },
+      {
+        "unit_id": "customization.ui.customize_main_view.setExclusiveLogicList",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "exclusiveLogicList nullish/falsy -> []; group rows each optional exclusiveLogicIdList",
+        "state_fields": [
+          "selectedCustomizeId",
+          "table DOM"
+        ],
+        "guarded_ordered_transitions": [
+          "Empty table; forEach outer exclusive row; data=exclusiveLogicIdList||[]. Independently create two-column rows in each outer group.",
+          "For each cell text name/id; first click sets Number(id) and selection CSS; second click routes onClickExclusiveLogicList."
+        ],
+        "request_construction": {
+          "event": "exclusiveLogicList, numeric child id"
+        },
+        "response_error_mapping": "Does not filter by outer id/type here; all supplied children rendered including empty groups.",
+        "user_visible_result": "Two-column exclusive-child menu preserving outer/inner order.",
+        "mutation_and_cleanup": "DOM and selected ID only; no exclusion predicate computed here.",
+        "cancel_semantics": "No native cancel action."
+      },
+      {
+        "unit_id": "customization.ui.customize_main_view.onClickNextButton",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "Cell second click; evt.data=view",
+        "state_fields": [
+          "selectedCustomizeId"
+        ],
+        "guarded_ordered_transitions": [
+          "Trigger CUSTOMIZE_BTN with view.selectedCustomizeId."
+        ],
+        "request_construction": {
+          "event": "customizeButton, selectedCustomizeId"
+        },
+        "response_error_mapping": "EventDispatcher packs args[1]; no promise returned.",
+        "user_visible_result": "Starts controller path.",
+        "mutation_and_cleanup": "No own state mutation.",
+        "cancel_semantics": "No cancel."
+      },
+      {
+        "unit_id": "customization.ui.customize_main_view.onClickExclusiveLogicList",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "Exclusive cell second click; evt.data=view",
+        "state_fields": [
+          "selectedCustomizeId"
+        ],
+        "guarded_ordered_transitions": [
+          "Trigger EXCLUSIVE_LOGIC_LIST with selectedCustomizeId."
+        ],
+        "request_construction": {
+          "event": "exclusiveLogicList, selectedCustomizeId"
+        },
+        "response_error_mapping": "No route rechecking in view.",
+        "user_visible_result": "Starts controller exclusive selection path.",
+        "mutation_and_cleanup": "No own mutation.",
+        "cancel_semantics": "No cancel."
+      },
+      {
+        "unit_id": "customization.ui.customize_model.getCustomizeSupportList",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "functionName string from controller \"Customize\"",
+        "state_fields": [
+          "customizeSupportList",
+          "exclusiveLogicList"
+        ],
+        "guarded_ordered_transitions": [
+          "Call api.getCustomizeSupportList({functionName}); fulfilled response assigns both lists directly; resolve undefined."
+        ],
+        "request_construction": {
+          "functionName": "argument unchanged"
+        },
+        "response_error_mapping": "Does not supply list defaults; worker/platform define defaults. Rejection propagates.",
+        "user_visible_result": "Controller renders returned group list.",
+        "mutation_and_cleanup": "Replaces cached lists; does not clear selected/staged state.",
+        "cancel_semantics": "No abort handling."
+      },
+      {
+        "unit_id": "customization.ui.customize_model.setCustomize",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "No argument; selectedCustomizeId and updatedCustomizeSetting are model state",
+        "state_fields": [
+          "selectedCustomizeId",
+          "updatedCustomizeSetting"
+        ],
+        "guarded_ordered_transitions": [
+          "Iterate staged list in current order; append {supportId:selectedCustomizeId,itemId:item.id,valueList:item.valueList,ecuId:item.ecuId}.",
+          "Return api.setCustomize({setCustomizeList:param,customizeSupportId:selectedCustomizeId})."
+        ],
+        "request_construction": {
+          "supportId": "same selected group for every item",
+          "itemId": "item.id",
+          "valueList": "raw chosen array preserved by reference",
+          "ecuId": "forwarded to worker only for phase routing"
+        },
+        "response_error_mapping": "Passes result/rejection unchanged; no validation of empty list or selected ID.",
+        "user_visible_result": "No direct UI; controller branches on result.",
+        "mutation_and_cleanup": "Does not clear stage after set request; only later read/back clears.",
+        "cancel_semantics": "No cancel/rollback."
+      },
+      {
+        "unit_id": "customization.ui.customize_model.delDiagCodeForMazdaVehicle",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "No argument; called only by DLG05 Next",
+        "state_fields": [
+          "api"
+        ],
+        "guarded_ordered_transitions": [
+          "Return api.delDiagCodeForMazdaVehicle({})."
+        ],
+        "request_construction": {
+          "parameter": {}
+        },
+        "response_error_mapping": "Result passed through; worker swallows native clear rejection.",
+        "user_visible_result": "Enables reread after instructions.",
+        "mutation_and_cleanup": "Dispatches DTC-clear workflow; not read-only.",
+        "cancel_semantics": "No cancel."
+      },
+      {
+        "unit_id": "customization.ui.customize_model.getCustomizeItemList",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "No argument; selectedCustomizeId state",
+        "state_fields": [
+          "currentCustomizeSetting",
+          "updatedCustomizeSetting"
+        ],
+        "guarded_ordered_transitions": [
+          "Send api.getCustomizeItemList({customizeSupportId:selectedCustomizeId}).",
+          "On fulfilled response assign currentCustomizeSetting=response.customizeItemList and updatedCustomizeSetting=[]; resolve response.code."
+        ],
+        "request_construction": {
+          "customizeSupportId": "selectedCustomizeId unchanged"
+        },
+        "response_error_mapping": "Rejection propagates and leaves old current/staged arrays untouched; no null fallback.",
+        "user_visible_result": "Current values available for route-specific rendering.",
+        "mutation_and_cleanup": "Always clears stage on fulfilled item response, including empty/security results.",
+        "cancel_semantics": "No abort or generation guard."
+      },
+      {
+        "unit_id": "customization.ui.customize_model.updateSelectedCustomizeInfo",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "customizeItemId strict ID; selectedValueIndex from radio index; expected valid current item/choice",
+        "state_fields": [
+          "currentCustomizeSetting",
+          "updatedCustomizeSetting"
+        ],
+        "guarded_ordered_transitions": [
+          "Find current item by strict id equality using filter()[0]; index item.values[selectedValueIndex].",
+          "If selectedValueInfo.checked===0: filter staged entries with same ID out, append {id,valueList:selectedValueInfo.value,ecuId}; replace staged array.",
+          "Else if checked===1: filter matching ID out and replace staged array. Other checked values leave stage unchanged."
+        ],
+        "request_construction": {
+          "staging": "Raw value array kept intact, not scalarized or bit-packed; changing an item moves its override to end of staged order"
+        },
+        "response_error_mapping": "Missing item/index throws synchronously; checked flags are original current-value match and are never updated by staging.",
+        "user_visible_result": "DOM changes handled by view, model exposes pending override only.",
+        "mutation_and_cleanup": "Never changes currentCustomizeSetting.values checked/value; returning to baseline removes pending override.",
+        "cancel_semantics": "Screen Cancel later drops stage; no write yet."
+      },
+      {
+        "unit_id": "customization.ui.customize_model.clearCustomizeItemInfo",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "No argument",
+        "state_fields": [
+          "selectedCustomizeId",
+          "currentCustomizeSetting",
+          "updatedCustomizeSetting"
+        ],
+        "guarded_ordered_transitions": [
+          "Set selectedCustomizeId=null, currentCustomizeSetting=[], updatedCustomizeSetting=[]."
+        ],
+        "request_construction": null,
+        "response_error_mapping": "Synchronous, no native cache call.",
+        "user_visible_result": "Used when leaving item screen.",
+        "mutation_and_cleanup": "Preserves support and exclusive catalog caches; only local editing state cleared.",
+        "cancel_semantics": "This is local discard, not platform clearCacheForCustomize."
+      },
+      {
+        "unit_id": "customization.ui.customize_model.setCustomizeSupportId",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "selectedCustomizeSupportId any value supplied by event",
+        "state_fields": [
+          "selectedCustomizeId"
+        ],
+        "guarded_ordered_transitions": [
+          "Assign selectedCustomizeId=argument without coercion/validation."
+        ],
+        "request_construction": {
+          "local": "ID unchanged; coercion occurred in main view Number(id)"
+        },
+        "response_error_mapping": "No return value.",
+        "user_visible_result": "No direct UI.",
+        "mutation_and_cleanup": "Does not clear old current/staged state until successful item read.",
+        "cancel_semantics": "No cancel."
+      },
+      {
+        "unit_id": "customization.ui.customize_model.cancelAutoPowerOff",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "No argument; init sequence calls before support read",
+        "state_fields": [
+          "temporary GtsWorkerApi"
+        ],
+        "guarded_ordered_transitions": [
+          "Construct new GtsWorkerApi(); return its cancelAutoPowerOff() promise."
+        ],
+        "request_construction": {
+          "worker": "cancelAutoPowerOff command with default {} parameter"
+        },
+        "response_error_mapping": "Propagates shared worker response/rejection; frontend does not interpret result.",
+        "user_visible_result": "Progress remains until operation and support read settle.",
+        "mutation_and_cleanup": "Native auto-power-off cancellation may mutate vehicle session; exact implementation external.",
+        "cancel_semantics": "Name means cancel auto power off, not cancel customization."
+      },
+      {
+        "unit_id": "customization.ui.customize_worker.init",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "commonInfo, ecuCache, commandThread injected by shared worker",
+        "state_fields": [
+          "commonInfo",
+          "ecuCache",
+          "commandThread",
+          "commandHandler"
+        ],
+        "guarded_ordered_transitions": [
+          "Assign three references then initCommandHandler()."
+        ],
+        "request_construction": null,
+        "response_error_mapping": "Synchronous initialization; no native calls.",
+        "user_visible_result": "No UI until browser messages.",
+        "mutation_and_cleanup": "Constructor initializes support/items/exclusive arrays []; cache=null and functionName=null; init does not clear them.",
+        "cancel_semantics": "No cancellation wiring."
+      },
+      {
+        "unit_id": "customization.ui.customize_worker.initCommandHandler",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "Worker initialization",
+        "state_fields": [
+          "commandHandler"
+        ],
+        "guarded_ordered_transitions": [
+          "Bind model twice: this receiver=model and first explicit model argument. Register customize.getCustomizeSupportList -> getCustomizeSupportList; customize.getCustomizeItemList -> getCustomizeItemList; customize.setCustomize -> setCustomize; customize.delDiagCodeForMazdaVehicle -> delDiagCodeForMazdaVehicle."
+        ],
+        "request_construction": {
+          "dispatch": "Handler receives (model,param), param.parameter is browser payload"
+        },
+        "response_error_mapping": "Only four registered commands; getCustomizeItemListForSecurity constant in WorkerApi has no registered handler here and no send method.",
+        "user_visible_result": "Enables worker RPC.",
+        "mutation_and_cleanup": "Mutates command handler map.",
+        "cancel_semantics": "No cancellation command registered."
+      },
+      {
+        "unit_id": "customization.ui.customize_worker.getCustomizeSupportList",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "(model,param), param.parameter.functionName expected",
+        "state_fields": [
+          "functionName",
+          "customizeSupportList",
+          "exclusiveLogicList",
+          "commonInfo mounted ECU state"
+        ],
+        "guarded_ordered_transitions": [
+          "Construct GtsPFApi; store functionName from browser parameter.",
+          "Await gtsPFApi.getCustomizeSupportList() with no parameter; set worker lists=response.apiArgs list || []; retain rtnValue=response.apiArgs (not normalized copy).",
+          "Then obtain commonInfo.getMountedEcuInfoList(); Promise.all over getEcuStatus({checkDisconnected:true}) for every mounted ECU.",
+          "Only after all status promises fulfill resolve original apiArgs."
+        ],
+        "request_construction": {
+          "native": "DV000038, no payload from functionName",
+          "status_handoff": "Each mounted EcuInfo.getEcuStatus({checkDisconnected:true})"
+        },
+        "response_error_mapping": "Native rejection/status-chain rejection propagates; worker normalized caches may be [] while browser original response fields remain absent. Status return values are ignored.",
+        "user_visible_result": "Catalog delayed until mounted ECU status work completes; no browser-side filtering based on those results.",
+        "mutation_and_cleanup": "Catalog cache replacements plus potentially live status/connect/cache/system-exception/function-list side effects owned by shared EcuInfo.",
+        "cancel_semantics": "No cancellation; Promise.all runs every mounted target concurrently."
+      },
+      {
+        "unit_id": "customization.ui.customize_worker.setCustomize",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "param.parameter={setCustomizeList:[{supportId,itemId,valueList,ecuId}],customizeSupportId}; raw item cache from preceding read",
+        "state_fields": [
+          "customizeItemList",
+          "exclusiveLogicList",
+          "commonInfo phase data",
+          "local code"
+        ],
+        "guarded_ordered_transitions": [
+          "Map source list in order to native setCustomizeList entries with exactly supportId,itemId,valueList; drop ecuId from native payload. code=0.",
+          "For each original staged item obtain ECU info by ecuId. Undefined ECU leaves code. While code!==3: Mazda phase21 sets code1; Subaru phase52 calls checkSubaruEcu(selected group,exclusive list,model.customizeItemList[0]); all other phases leave code.",
+          "If final code===3 resolve {code:3} without gtsPFApi.setCustomize. Else call native once with {setCustomizeList:mappedList}.",
+          "On any fulfilled native response discard it completely and resolve {code}; on rejected native request return resolved {detailCode:response.resultInfo.detailCode,code:response.resultInfo.code,isError:true}."
+        ],
+        "request_construction": {
+          "native": "DV000040 {setCustomizeList:[{supportId,itemId,valueList}]}",
+          "routing": "ecuId only used locally; customizeSupportId used for Subaru exclusion not forwarded separately"
+        },
+        "response_error_mapping": "Native successList, per-item success and response apiArgs ignored. Rejection catch covers returned native chain only; synchronous mapping/ECU-phase errors before it escape; missing response.resultInfo makes catch throw.",
+        "user_visible_result": "Global fulfillment becomes normal/Mazda routing regardless individual write failures. Subaru exclusion switches screen without write.",
+        "mutation_and_cleanup": "No staged/current cache clear. code3 sticky prevents later Mazda override; earlier Mazda may be replaced by a later Subaru check result0 or3.",
+        "cancel_semantics": "No stop/cancel parameter. Native owner owns actual write/readback and global/per-item statuses."
+      },
+      {
+        "unit_id": "customization.ui.customize_worker.getCustomizeItemList",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "param.parameter.customizeSupportId; cached support list from support read",
+        "state_fields": [
+          "customizeSupportList"
+        ],
+        "guarded_ordered_transitions": [
+          "Find securityId by strict equality in fixed [3,26,63,80]. Find optionId by fixed priority [100,103] whose id strictly exists in cached support list.",
+          "Only when both found call getCustomizeItemListForSecurity(model,{customizeSupportId:selected,optionCustomizeSupportId:optionId}). Else call normal with selected group."
+        ],
+        "request_construction": {
+          "routing": "Security group with no option present uses NORMAL read, not empty-security shortcut"
+        },
+        "response_error_mapping": "No catch; all branch rejections propagate.",
+        "user_visible_result": "Determines optional DOP gate versus direct items route.",
+        "mutation_and_cleanup": "No own cache mutation.",
+        "cancel_semantics": "No cancel."
+      },
+      {
+        "unit_id": "customization.ui.customize_worker.getCustomizeItemListForNormal",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "param={customizeSupportId}; native V2 result item rows",
+        "state_fields": [
+          "customizeItemList",
+          "local code"
+        ],
+        "guarded_ordered_transitions": [
+          "Await DV000039 with {customizeSupportId}; customizeItemList=response.apiArgs.customizeListItemList||[]; assign raw array to model.customizeItemList.",
+          "Map each raw item preserving order; for every availableSupportId choice compute checked=(elem.valueList.toString()===item.currentValueList?.toString())?1:0. Copy label=dispName,value=valueList.",
+          "Project each item to {id,name,information,caution,values,ecuId}. Obtain ECU info. If defined and code!==1: phase21 sets code1; otherwise call checkSubaruEcu(group,exclusiveLogicList,first raw item), including non-Subaru phases.",
+          "Resolve {code,customizeItemList:projected}. code starts0; Mazda is sticky in reads, unlike writer."
+        ],
+        "request_construction": {
+          "native": "DV000039 {customizeSupportId}",
+          "frontend_choices": "All availableSupportId variable-length arrays passed intact; no type22-only assumption"
+        },
+        "response_error_mapping": "availableSupportId and elem.valueList are mandatory for loop/.toString; currentValueList optional => undefined comparison; no catch or inferred current/default. String comparison can alias different array representations.",
+        "user_visible_result": "Choice labels/current checkmarks, information and caution; code can redirect view.",
+        "mutation_and_cleanup": "Raw model cache replaced before projection, so later transformation failure leaves new raw cache.",
+        "cancel_semantics": "No cancel; no frontend default reset operation."
+      },
+      {
+        "unit_id": "customization.ui.customize_worker.getCustomizeItemListForSecurity",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "param={customizeSupportId,optionCustomizeSupportId}; only called when both route IDs found",
+        "state_fields": [
+          "customizeItemList",
+          "local code",
+          "native Customize cache"
+        ],
+        "guarded_ordered_transitions": [
+          "First await DV000039 for option group; default missing native list to [].",
+          "Find first option item with id===1 or2, nonempty (currentValueList||[]) and element0===1. Missing/mismatched option -> local items=[] and no selected-group read/cache clear.",
+          "Matching option -> await DV000041 clearCacheForCustomize({ecuId:0,id:selected group}); then await DV000039 selected group; retain returned list||[].",
+          "Assign model.customizeItemList; identical projection/OEM loop to normal except group from param and code initially0.",
+          "If projected length===0: code===3 ->4 else ->2. Resolve {code,customizeItemList}."
+        ],
+        "request_construction": {
+          "gate": "Option[100 before103] item1/2 first current raw value exactly numeric1",
+          "cache_clear": {
+            "ecuId": 0,
+            "id": "customizeSupportId"
+          },
+          "selected_read": "Only after successful gate and awaited cache clear"
+        },
+        "response_error_mapping": "All native failures propagate, including gate-option read/cache clear; not normalized into security-disabled. Missing currentValueList only becomes []. Empty results necessarily skip OEM loop so code starts0 and becomes2: code4 branch exists but cannot be reached from this body with ordinary arrays.",
+        "user_visible_result": "Empty security result prompts DLG03; with gate true items retain normal/Mazda/Subaru behavior.",
+        "mutation_and_cleanup": "Gate is based on current native option values, not choice checked/default; native cache invalidation is a mutation, not read-only. Raw item cache becomes [] even when gate fails.",
+        "cancel_semantics": "No cancel; clear cache not rolled back if next read fails."
+      },
+      {
+        "unit_id": "customization.ui.customize_worker.checkSubaruEcu",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "customizeSupportId, exclusiveLogicList, customizeItem (always first cached raw item from callers)",
+        "state_fields": [
+          "read-only exclusiveLogicList and currentValueList"
+        ],
+        "guarded_ordered_transitions": [
+          "If list===undefined or item===undefined or item.currentValueList===undefined return0.",
+          "Compute hasSameId=list.some(exclusive=>exclusive.id===supportId && exclusive.type===1); compute isEnable=item.currentValueList[0]===1. Return3 iff both else0."
+        ],
+        "request_construction": {
+          "predicate": "Strict ID/type/value comparisons, no independent ECU phase lookup"
+        },
+        "response_error_mapping": "Null list/item/currentValueList not treated as undefined and may throw; empty value list -> first undefined -> false.",
+        "user_visible_result": "Can route to exclusive menu and suppress native set.",
+        "mutation_and_cleanup": "No mutations; ignores subsequent cached items and all other currentValueList indices.",
+        "cancel_semantics": "No cancellation; exclusion is admission gate, not an abort."
+      },
+      {
+        "unit_id": "customization.ui.customize_worker.delDiagCodeForMazdaVehicle",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "(model,param) but parameter unused",
+        "state_fields": [
+          "none local persistent"
+        ],
+        "guarded_ordered_transitions": [
+          "Construct GtsPFApi; call clearDtcForMazda({}); on fulfillment resolve undefined; on rejection ALSO resolve undefined."
+        ],
+        "request_construction": {
+          "native": "DV000011 {}"
+        },
+        "response_error_mapping": "Deliberately swallows native clear rejection; synchronous construction/call error before returned promise not swallowed.",
+        "user_visible_result": "DLG05 callback continues to reread even after clear failure.",
+        "mutation_and_cleanup": "Actual DTC clearing cross-layer side effect; no request of physical ignition-cycle performed in code.",
+        "cancel_semantics": "No cancellation."
+      },
+      {
+        "unit_id": "customization.ui.customize_worker_api.setCustomize",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "param={setCustomizeList,customizeSupportId}",
+        "state_fields": [
+          "api: GtsWorkerApi"
+        ],
+        "guarded_ordered_transitions": [
+          "Log entry; var prom=this.api.send(\"customize.setCustomize\",param); log exit before settlement; return prom."
+        ],
+        "request_construction": {
+          "commandId": "customize.setCustomize",
+          "parameter": "param unchanged"
+        },
+        "response_error_mapping": "No transformation/catch; GtsWorkerApi.requestMap governs settle/reject.",
+        "user_visible_result": "No direct UI; result belongs to model/controller path.",
+        "mutation_and_cleanup": "Creates shared worker request; no model state mutation in API wrapper.",
+        "cancel_semantics": "No cancel request or timeout in wrapper."
+      },
+      {
+        "unit_id": "customization.ui.customize_worker_api.getCustomizeSupportList",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "param={functionName}",
+        "state_fields": [
+          "api: GtsWorkerApi"
+        ],
+        "guarded_ordered_transitions": [
+          "Log entry; var prom=this.api.send(\"customize.getCustomizeSupportList\",param); log exit before settlement; return prom."
+        ],
+        "request_construction": {
+          "commandId": "customize.getCustomizeSupportList",
+          "parameter": "param unchanged"
+        },
+        "response_error_mapping": "No transformation/catch; GtsWorkerApi.requestMap governs settle/reject.",
+        "user_visible_result": "No direct UI; result belongs to model/controller path.",
+        "mutation_and_cleanup": "Creates shared worker request; no model state mutation in API wrapper.",
+        "cancel_semantics": "No cancel request or timeout in wrapper."
+      },
+      {
+        "unit_id": "customization.ui.customize_worker_api.getCustomizeItemList",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "param={customizeSupportId}",
+        "state_fields": [
+          "api: GtsWorkerApi"
+        ],
+        "guarded_ordered_transitions": [
+          "Log entry; var prom=this.api.send(\"customize.getCustomizeItemList\",param); log exit before settlement; return prom."
+        ],
+        "request_construction": {
+          "commandId": "customize.getCustomizeItemList",
+          "parameter": "param unchanged"
+        },
+        "response_error_mapping": "No transformation/catch; GtsWorkerApi.requestMap governs settle/reject.",
+        "user_visible_result": "No direct UI; result belongs to model/controller path.",
+        "mutation_and_cleanup": "Creates shared worker request; no model state mutation in API wrapper.",
+        "cancel_semantics": "No cancel request or timeout in wrapper."
+      },
+      {
+        "unit_id": "customization.ui.customize_worker_api.delDiagCodeForMazdaVehicle",
+        "status": "frontend-source-contract-closed",
+        "entry_admission_and_input_domain": "param={}",
+        "state_fields": [
+          "api: GtsWorkerApi"
+        ],
+        "guarded_ordered_transitions": [
+          "Log entry; var prom=this.api.send(\"customize.delDiagCodeForMazdaVehicle\",param); log exit before settlement; return prom."
+        ],
+        "request_construction": {
+          "commandId": "customize.delDiagCodeForMazdaVehicle",
+          "parameter": "param unchanged"
+        },
+        "response_error_mapping": "No transformation/catch; GtsWorkerApi.requestMap governs settle/reject.",
+        "user_visible_result": "No direct UI; result belongs to model/controller path.",
+        "mutation_and_cleanup": "Creates shared worker request; no model state mutation in API wrapper.",
+        "cancel_semantics": "No cancel request or timeout in wrapper."
+      }
+    ],
+    "common_contracts": [
+      {
+        "id": "choice-array-current-versus-default",
+        "applies_to": [
+          "customization.ui.customize_worker.getCustomizeItemListForNormal",
+          "customization.ui.customize_worker.getCustomizeItemListForSecurity",
+          "customization.ui.customize_items_view.setCustomizeItemList",
+          "customization.ui.customize_model.updateSelectedCustomizeInfo",
+          "customization.ui.customize_controller.activityReportItemsFunc"
+        ],
+        "contract": "Both read paths use identical per-choice projection: label=dispName; raw value=valueList (entire array); checked uses .toString equality to optional currentValueList. View defaultFlg and DEFAULT_VALUE_FLAG_ON are display names for checked current values. No factory default value, bit offset, bit merge or scalar conversion is computed by any of60 methods. Radio index retrieves original raw choice array in staging. Native V2/type81/type22/write fields and bit-level merge are native-owner joins."
+      },
+      {
+        "id": "catalog-MySet-and-regional-boundaries",
+        "applies_to": [
+          "customization.ui.customize_controller.init",
+          "customization.ui.customize_controller.dispose",
+          "customization.ui.customize_controller.onClickCustomizeBtn",
+          "customization.ui.customize_controller.initCustomizeItemView",
+          "customization.ui.customize_controller.onClickExclusiveLogicList",
+          "customization.ui.customize_controller.goBackMainView",
+          "customization.ui.customize_controller.onClickApplyBtn",
+          "customization.ui.customize_controller.onClickSettings",
+          "customization.ui.customize_controller.onClickCancelBtn",
+          "customization.ui.customize_controller.createProgressDialog",
+          "customization.ui.customize_controller.showDLG02",
+          "customization.ui.customize_controller.showDLG03",
+          "customization.ui.customize_controller.showDLG05",
+          "customization.ui.customize_controller.showDLG06",
+          "customization.ui.customize_controller.initMainViewEvents",
+          "customization.ui.customize_controller.initItemViewEvents",
+          "customization.ui.customize_controller.activityReportMainFunc",
+          "customization.ui.customize_controller.activityReportItemsFunc",
+          "customization.ui.customize_controller.showCommonErrorDialog",
+          "customization.ui.customize_controller.showServiceInfo",
+          "customization.ui.customize_controller.showHelp",
+          "customization.ui.customize_items_view.initView",
+          "customization.ui.customize_items_view.disposeView",
+          "customization.ui.customize_items_view.initEventHandler",
+          "customization.ui.customize_items_view.setCustomizeItemList",
+          "customization.ui.customize_items_view.onSelectChangeRadio",
+          "customization.ui.customize_items_view.getSelectedItem",
+          "customization.ui.customize_items_view.onClickApplyButton",
+          "customization.ui.customize_items_view.onClickCancelButton",
+          "customization.ui.customize_items_view.showDLG01",
+          "customization.ui.customize_items_view.showDLG04",
+          "customization.ui.customize_items_view.onResizeTable",
+          "customization.ui.customize_main_view.initView",
+          "customization.ui.customize_main_view.disposeView",
+          "customization.ui.customize_main_view.initEventHandler",
+          "customization.ui.customize_main_view.setCustomizeSupportList",
+          "customization.ui.customize_main_view.setExclusiveLogicList",
+          "customization.ui.customize_main_view.onClickNextButton",
+          "customization.ui.customize_main_view.onClickExclusiveLogicList",
+          "customization.ui.customize_model.getCustomizeSupportList",
+          "customization.ui.customize_model.setCustomize",
+          "customization.ui.customize_model.delDiagCodeForMazdaVehicle",
+          "customization.ui.customize_model.getCustomizeItemList",
+          "customization.ui.customize_model.updateSelectedCustomizeInfo",
+          "customization.ui.customize_model.clearCustomizeItemInfo",
+          "customization.ui.customize_model.setCustomizeSupportId",
+          "customization.ui.customize_model.cancelAutoPowerOff",
+          "customization.ui.customize_worker.init",
+          "customization.ui.customize_worker.initCommandHandler",
+          "customization.ui.customize_worker.getCustomizeSupportList",
+          "customization.ui.customize_worker.setCustomize",
+          "customization.ui.customize_worker.getCustomizeItemList",
+          "customization.ui.customize_worker.getCustomizeItemListForNormal",
+          "customization.ui.customize_worker.getCustomizeItemListForSecurity",
+          "customization.ui.customize_worker.checkSubaruEcu",
+          "customization.ui.customize_worker.delDiagCodeForMazdaVehicle",
+          "customization.ui.customize_worker_api.setCustomize",
+          "customization.ui.customize_worker_api.getCustomizeSupportList",
+          "customization.ui.customize_worker_api.getCustomizeItemList",
+          "customization.ui.customize_worker_api.delDiagCodeForMazdaVehicle"
+        ],
+        "contract": "Current authenticated six Customize members are one supplied frontend; they do not branch on NA/EU/JP, generation low5, DS4 table identity, bit fields, default-value metadata, MySet identity or type81/type22. Support arrays and exclusive child arrays pass through without frontend filtering; native catalog eligibility and labels enter DV000038/039. Native regions/generations and all12 DS4 source variants remain separate referenced joins, never frontend equivalence claims. No dedicated default/all-default action or MySet save/recall request is present in this full reachable frontend. Native all-default route remains independently assigned, not closed or declared unavailable."
+      },
+      {
+        "id": "security-empty-code4",
+        "applies_to": [
+          "customization.ui.customize_worker.getCustomizeItemListForSecurity",
+          "customization.ui.customize_controller.initCustomizeItemView"
+        ],
+        "contract": "Security createReturnValue initializes code=0, only changes OEM code inside customizeItemList.forEach, then tests projected length===0. With ordinary arrays, empty means no loop -> code0 -> code2. Code4 branch and controller case4 are retained as shipped branches but no current path in this producer reaches4. Do not invent an empty Subaru-exclusive route."
+      },
+      {
+        "id": "write-status-is-not-per-item-success",
+        "applies_to": [
+          "customization.ui.customize_worker.setCustomize",
+          "customization.ui.customize_controller.onClickApplyBtn"
+        ],
+        "contract": "Worker ignores every fulfilled native setCustomize response including successList. It returns only {code:OEMroute}; rejected request alone maps resultInfo into resolved {isError:true,detailCode,code}. Controller normal fulfillment rereads regardless per-item statuses; error reread is deferred to error-dialog OK. Native global transport result and per-item success must remain separate in native composition."
+      },
+      {
+        "id": "local-cancel-and-inflight-cleanup",
+        "applies_to": [
+          "customization.ui.customize_items_view.showDLG01",
+          "customization.ui.customize_controller.goBackMainView",
+          "customization.ui.customize_controller.dispose",
+          "customization.ui.customize_items_view.disposeView"
+        ],
+        "contract": "DLG01 Cancel closes confirmation and preserves stage. Item Cancel/DLG06 Cancel clear selected/current/staged state and restore catalog. Progress and update dialogs have no buttons. No Customize wrapper registers a cancellation command, abort signal or generation guard; disposal empties DOM/drops references without joining pending promises. Native cancellation/disconnect behavior cannot be assigned from these bodies."
+      }
+    ],
+    "cross_owner_handoffs": [
+      {
+        "id": "shell-events",
+        "owner": "MenuShell",
+        "target": "diagnostic_operations.frontend_contracts.MenuShell#shell.EventDispatcher",
+        "arguments": {
+          "triggerEvent": "(type,...payload)",
+          "controller_receives": "evt.detail.args[1]=id, [2]=index; args[0]=type"
+        },
+        "results_and_interpretation": "Synchronous listeners; view dispose clears dispatcher map; ProcessLogger behavior retained by shared owner.",
+        "status": "composition-required"
+      },
+      {
+        "id": "shell-view-errors-dialogs",
+        "owner": "MenuShell",
+        "target": "diagnostic_operations.frontend_contracts.MenuShell#shell.GtsBaseView",
+        "arguments": {
+          "dialogs": "Exact params in owned methods: common, warning, error; button callback closures belong to Customize",
+          "templates": "ViewUtil.getView(path, gts_main_panel)",
+          "resize": "registResizeHandler(onResizeTable,{$table})"
+        },
+        "results_and_interpretation": "Inherited onErrorCommon, dialog construction/close, resource draw, view resource lookup, keyword selection and resize-handler lifetime remain shared contracts.",
+        "status": "composition-required"
+      },
+      {
+        "id": "shell-worker-rpc",
+        "owner": "MenuShell",
+        "target": "diagnostic_operations.frontend_contracts.MenuShell#shell.GtsWorkerApi",
+        "arguments": {
+          "browser_commands": [
+            "customize.getCustomizeSupportList",
+            "customize.getCustomizeItemList",
+            "customize.setCustomize",
+            "customize.delDiagCodeForMazdaVehicle"
+          ],
+          "parameter": "Exact objects in4 worker_api contracts",
+          "cancelAutoPowerOff": "No args; shared send defaults {}"
+        },
+        "results_and_interpretation": "RPC requestId/resolve/reject transport and actual auto-power-off side effect owned by shared shell/native session owner.",
+        "status": "composition-required"
+      },
+      {
+        "id": "shell-mounted-status",
+        "owner": "MenuShell",
+        "target": "diagnostic_operations.frontend_contracts.MenuShell#shell.CommonInfoWorker",
+        "arguments": {
+          "each_mounted_ecu": "getEcuStatus({checkDisconnected:true})",
+          "join": "Promise.all, after support catalog native response"
+        },
+        "results_and_interpretation": "Worker ignores returned statuses; shared call can clear connect cache, check connection, replace system exceptions and retrieve function list. Failure from shared status chain rejects catalog RPC.",
+        "status": "composition-required"
+      },
+      {
+        "id": "shell-activity-and-service",
+        "owner": "MenuShell",
+        "target": "diagnostic_operations.frontend_contracts.MenuShell#shell.ActivityLogger",
+        "arguments": {
+          "title": "localized r_item_i0005",
+          "catalog": "{subTitle:r_item_i1944,retainedData:[{body:[{record:[{key:\"Customize\",value:name}]}]}]}",
+          "items": "{subTitle:r_item_i1945,retainedData:[{header:[Item,Setting],body:[{record:[{key:Item,value:name},{key:Setting,value:lastCurrentLabel}]}]}]}"
+        },
+        "results_and_interpretation": "Logger worker dispatch is a mutation/recording side effect. Customize callers do not await logging promise. ServiceInfo additionally logs selected keyword and opens URL; Help opens URL.",
+        "status": "composition-required"
+      },
+      {
+        "id": "shell-platform-translation",
+        "owner": "MenuShell",
+        "target": "diagnostic_operations.frontend_contracts.MenuShell#shell.GtsPFApi",
+        "arguments": {
+          "catalog": "Group/each exclusive child nameId -> name",
+          "items": "nameId->name; informationId_V->information; cautionId_V->caution; each choice dispNameId->dispName",
+          "parameters": "IDs undefined/0 filtered by getPFResource; same PF/user language returns defaults; other language calls getTranslatedString and fallback defaults on rejection"
+        },
+        "results_and_interpretation": "Translation mutates native response fields in ordered promise chain before worker projection. setTranslateStr consumes front translation entry only on matching target property/id; missing or0 skips. response.response acknowledgment branch replaces nested promise with translated promise. Frontend worker expects unwrapped response.apiArgs; shared transport owns acknowledgment contract. sendLog/recvLog bodies currently return immediately.",
+        "status": "composition-required"
+      },
+      {
+        "id": "native-support",
+        "owner": "native customization/adaptation owner; integrate through Main",
+        "target": "getCustomizeSupportList",
+        "arguments": "DV000038 no args",
+        "results_and_interpretation": "apiArgs.{customizeSupportList:[{id,name,nameId}],exclusiveLogicList:[{id,type,exclusiveLogicIdList:[{id,name,nameId}]}]}; missing lists cached as[] but original apiArgs returned",
+        "status": "composition-required"
+      },
+      {
+        "id": "native-items",
+        "owner": "native customization/adaptation owner; integrate through Main",
+        "target": "getCustomizeItemList",
+        "arguments": "DV000039 {customizeSupportId}",
+        "results_and_interpretation": "apiArgs.customizeListItemList rows {id,name,nameId,information,informationId_V,caution,cautionId_V,ecuId,currentValueList?,availableSupportId:[{dispName,dispNameId,valueList}]}; missing list ->[]",
+        "status": "composition-required"
+      },
+      {
+        "id": "native-write",
+        "owner": "native customization/adaptation owner; integrate through Main",
+        "target": "setCustomize",
+        "arguments": "DV000040 {setCustomizeList:[{supportId,itemId,valueList}]}",
+        "results_and_interpretation": "Any fulfillment discarded in worker; native successList per item remains distinct. Native rejection expects resultInfo.{code,detailCode}.",
+        "status": "composition-required"
+      },
+      {
+        "id": "native-custom-cache",
+        "owner": "native customization/adaptation owner; integrate through Main",
+        "target": "clearCacheForCustomize",
+        "arguments": "DV000041 {ecuId:0,id:selectedCustomizeSupportId}",
+        "results_and_interpretation": "Fulfillment permits security selected-group read; rejection propagates; cache changes not rolled back.",
+        "status": "composition-required"
+      },
+      {
+        "id": "native-mazda-clear",
+        "owner": "native DTC/diagnostic-adaptation owner; integrate through Main",
+        "target": "clearDtcForMazda",
+        "arguments": "DV000011 {}",
+        "results_and_interpretation": "Worker resolves undefined on fulfilled or rejected native call; scope of system DTC mutation/transport remains native-owned.",
+        "status": "composition-required"
+      },
+      {
+        "id": "native-default-and-all-variants",
+        "owner": "native customization/catalog owners; integrate through Main",
+        "target": "analysis-origin:gts-car-surface-customization.json",
+        "arguments": {
+          "frontend_default_request": "None in complete6 members or2 templates",
+          "opaque_values": "Variable-length choice/current arrays unchanged",
+          "regions": "NA/EU/JP native catalogs separate",
+          "DS4": "All12 supplied distinct native identities retained below"
+        },
+        "results_and_interpretation": "No frontend factory-default inference. Native GetCustSptLstV2/ItemV2, MySet/type87, variable choices/type81, defaults/selector99, SetCustom bit transforms/readback and native teardown require exact owner contracts. Older GetCustom* presence is not current registration proof.",
+        "status": "composition-required"
+      }
+    ],
+    "runtime_inputs": []
+  }
+}

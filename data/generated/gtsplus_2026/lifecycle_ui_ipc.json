@@ -4,16 +4,16 @@
   "sources": [
     {
       "id": "ui_ipc.main_manifest",
-      "path": "build/out/gtsplus-unprotected/manifest.json",
-      "sha256": "185b0c894684f5640acf2eecc8bb2510b7ed3d80e719f3773777fefdba15232e",
-      "size": 60679,
+      "path": "build/out/gts-all-unprotected/GTSPlus/manifest.json",
+      "sha256": "90f5ff8ec45f0bd7bcb9dda0ec7cb82240720421523a571b056a59cade9b3d35",
+      "size": 75121,
       "representation": "recovery manifest"
     },
     {
       "id": "ui_ipc.aux_manifest",
-      "path": "build/out/gts-lifecycle-aux/manifest.json",
-      "sha256": "f14cad9a94c423e1aa2bbe9176db278190a7e2e7bf1046cf9e1f52663ee2aa8b",
-      "size": 64588,
+      "path": "build/out/gts-all-unprotected/Auxiliary/manifest.json",
+      "sha256": "4206f8d58772e2defc04b382af9516bf16ecc064a98abb8372b5e38a8be653c6",
+      "size": 132515,
       "representation": "recovery manifest"
     },
     {
@@ -32,10 +32,19 @@
     },
     {
       "id": "ui_ipc.controller",
-      "path": "build/out/gtsplus-unprotected/bin/GTSPlus.exe",
+      "path": "build/out/gts-all-unprotected/GTSPlus/bin/GTSPlus.exe",
       "sha256": "31f2d0d7f77517d5336433e211d33f44e54cb65b1522fcdd22730d3f3214220d",
       "size": 200208,
-      "representation": "CP-recovered materialized PE"
+      "representation": "CP-recovered materialized PE",
+      "recovery": {
+        "manifest": "/Volumes/data/altdev/inspect/repos/ghidra_rh850_analysis/build/out/gts-all-unprotected/GTSPlus/manifest.json",
+        "manifest_sha256": "90f5ff8ec45f0bd7bcb9dda0ec7cb82240720421523a571b056a59cade9b3d35",
+        "relative_path": "bin/GTSPlus.exe",
+        "protected_stub_sha256": "c2dc6d5ceefadf41165ff6be3bfc049f7bffb96f9f8bb63f26da0d851432cc24",
+        "protected_sidecar_sha256": "d5399208fc0aa9a625b82c24c83b294f0c345ae79c0820d9a7afc8b352d90cab",
+        "recovered_sha256": "31f2d0d7f77517d5336433e211d33f44e54cb65b1522fcdd22730d3f3214220d",
+        "method": "extract the Toyota installer GTSPlus group paired with GTSPlusCP; no runtime decryption/emulation is required"
+      }
     },
     {
       "id": "ui_ipc.websocket.original",
@@ -53,10 +62,19 @@
     },
     {
       "id": "ui_ipc.websocket",
-      "path": "build/out/gtsplus-unprotected/bin/GtsPlus-WebSocketManager.dll",
+      "path": "build/out/gts-all-unprotected/GTSPlus/bin/GtsPlus-WebSocketManager.dll",
       "sha256": "b895fa04167093afbea4c3af761426e13e920a0a067ffab8fa75d0ec43c007d4",
       "size": 35856,
-      "representation": "CP-recovered materialized PE"
+      "representation": "CP-recovered materialized PE",
+      "recovery": {
+        "manifest": "/Volumes/data/altdev/inspect/repos/ghidra_rh850_analysis/build/out/gts-all-unprotected/GTSPlus/manifest.json",
+        "manifest_sha256": "90f5ff8ec45f0bd7bcb9dda0ec7cb82240720421523a571b056a59cade9b3d35",
+        "relative_path": "bin/GtsPlus-WebSocketManager.dll",
+        "protected_stub_sha256": "d3c9c178b0029ef131d5a46c31f84a5fdf43e3689ceaf13237451d861b838e5e",
+        "protected_sidecar_sha256": "1d31106500d7419065ae0684e7d6d402a47967c462185006c3943f2fc964d580",
+        "recovered_sha256": "b895fa04167093afbea4c3af761426e13e920a0a067ffab8fa75d0ec43c007d4",
+        "method": "extract the Toyota installer GTSPlus group paired with GTSPlusCP; no runtime decryption/emulation is required"
+      }
     },
     {
       "id": "ui_ipc.server.original",
@@ -74,10 +92,19 @@
     },
     {
       "id": "ui_ipc.server",
-      "path": "build/out/gts-lifecycle-aux/ContentServer/LocalWebServer.dll",
+      "path": "build/out/gts-all-unprotected/Auxiliary/ContentServer/LocalWebServer.dll",
       "sha256": "7875f16e748f2b154b3e7ec6dbcd20128ef44c695e613e8ca821fbd0c8ced38b",
       "size": 31232,
-      "representation": "CP-recovered materialized PE"
+      "representation": "CP-recovered materialized PE",
+      "recovery": {
+        "manifest": "/Volumes/data/altdev/inspect/repos/ghidra_rh850_analysis/build/out/gts-all-unprotected/Auxiliary/manifest.json",
+        "manifest_sha256": "4206f8d58772e2defc04b382af9516bf16ecc064a98abb8372b5e38a8be653c6",
+        "relative_path": "ContentServer/LocalWebServer.dll",
+        "protected_stub_sha256": "61a75db8b8d192079b7978977e06a467e417a166f2ba2cd97956a90b712634f5",
+        "protected_sidecar_sha256": "a2eb5984cfb95012bcfb66c1a15d518c7fa1a42018cac0f3d104041500ac64e7",
+        "recovered_sha256": "7875f16e748f2b154b3e7ec6dbcd20128ef44c695e613e8ca821fbd0c8ced38b",
+        "method": "gtsplus-cp-body-recovery-v1"
+      }
     },
     {
       "id": "ui_ipc.service.original",
@@ -95,10 +122,19 @@
     },
     {
       "id": "ui_ipc.service",
-      "path": "build/out/gts-lifecycle-aux/ContentServer/LocalWebServerWindowsService.exe",
+      "path": "build/out/gts-all-unprotected/Auxiliary/ContentServer/LocalWebServerWindowsService.exe",
       "sha256": "16b0c3c8bb40c297450d1e9c49ffd66f909eaa6e57fc7e5ceebd0b0a7017c5c9",
       "size": 9216,
-      "representation": "CP-recovered materialized PE"
+      "representation": "CP-recovered materialized PE",
+      "recovery": {
+        "manifest": "/Volumes/data/altdev/inspect/repos/ghidra_rh850_analysis/build/out/gts-all-unprotected/Auxiliary/manifest.json",
+        "manifest_sha256": "4206f8d58772e2defc04b382af9516bf16ecc064a98abb8372b5e38a8be653c6",
+        "relative_path": "ContentServer/LocalWebServerWindowsService.exe",
+        "protected_stub_sha256": "8bea1e709a2eec8fc3619fcc071d9874a6b69866688bf1e99f5babc56ae29a37",
+        "protected_sidecar_sha256": "1c1e3863df87cc5cd4460a2e5cc5ed98ceb6ed53cd20a079a6ba3ad7b31930c0",
+        "recovered_sha256": "16b0c3c8bb40c297450d1e9c49ffd66f909eaa6e57fc7e5ceebd0b0a7017c5c9",
+        "method": "gtsplus-cp-body-recovery-v1"
+      }
     },
     {
       "id": "ui_ipc.crypt.original",
@@ -116,10 +152,19 @@
     },
     {
       "id": "ui_ipc.crypt",
-      "path": "build/out/gts-lifecycle-aux/ContentServer/CryptgraphCommon.dll",
+      "path": "build/out/gts-all-unprotected/Auxiliary/ContentServer/CryptgraphCommon.dll",
       "sha256": "98fc5afd362f6e28aec9f06f71c15c4d6751751a27a8325cdc143ad9f57366b0",
       "size": 24576,
-      "representation": "CP-recovered materialized PE"
+      "representation": "CP-recovered materialized PE",
+      "recovery": {
+        "manifest": "/Volumes/data/altdev/inspect/repos/ghidra_rh850_analysis/build/out/gts-all-unprotected/Auxiliary/manifest.json",
+        "manifest_sha256": "4206f8d58772e2defc04b382af9516bf16ecc064a98abb8372b5e38a8be653c6",
+        "relative_path": "ContentServer/CryptgraphCommon.dll",
+        "protected_stub_sha256": "a70a55a78b3bea044bffa624a9c2aa668d4621e1a03c213cc0d5eb3ff302b073",
+        "protected_sidecar_sha256": "c43577c8174b5d5c285c14f2582aaf1b84e19850b62283c6772fb711949a6176",
+        "recovered_sha256": "98fc5afd362f6e28aec9f06f71c15c4d6751751a27a8325cdc143ad9f57366b0",
+        "method": "gtsplus-cp-body-recovery-v1"
+      }
     },
     {
       "id": "ui_ipc.resource.original",
@@ -137,10 +182,19 @@
     },
     {
       "id": "ui_ipc.resource",
-      "path": "build/out/gts-lifecycle-aux/ContentServer/CryptgraphResource.dll",
+      "path": "build/out/gts-all-unprotected/Auxiliary/ContentServer/CryptgraphResource.dll",
       "sha256": "7a9a2c08f0055fdfed82258835ba68c4a4d41ffeb537bd27caa19ad19d1f16f6",
       "size": 7168,
-      "representation": "CP-recovered materialized PE"
+      "representation": "CP-recovered materialized PE",
+      "recovery": {
+        "manifest": "/Volumes/data/altdev/inspect/repos/ghidra_rh850_analysis/build/out/gts-all-unprotected/Auxiliary/manifest.json",
+        "manifest_sha256": "4206f8d58772e2defc04b382af9516bf16ecc064a98abb8372b5e38a8be653c6",
+        "relative_path": "ContentServer/CryptgraphResource.dll",
+        "protected_stub_sha256": "c9d3d3c35f7af5f3fa4258cea547005846758f67fae2b3326f97b43be6da21b6",
+        "protected_sidecar_sha256": "9f2d7bba218e97aacac917321711e6abaac26625b509770727e4471440c57b47",
+        "recovered_sha256": "7a9a2c08f0055fdfed82258835ba68c4a4d41ffeb537bd27caa19ad19d1f16f6",
+        "method": "gtsplus-cp-body-recovery-v1"
+      }
     },
     {
       "id": "ui_ipc.cm.original",
@@ -158,10 +212,19 @@
     },
     {
       "id": "ui_ipc.cm",
-      "path": "build/out/gts-lifecycle-aux/ContentServer/GtsPlus-CM.dll",
+      "path": "build/out/gts-all-unprotected/Auxiliary/ContentServer/GtsPlus-CM.dll",
       "sha256": "ebc7c0b359c63d12a80c7fc596e93c226007b915f21032e05efa1046c2b292b2",
       "size": 1885184,
-      "representation": "CP-recovered materialized PE"
+      "representation": "CP-recovered materialized PE",
+      "recovery": {
+        "manifest": "/Volumes/data/altdev/inspect/repos/ghidra_rh850_analysis/build/out/gts-all-unprotected/Auxiliary/manifest.json",
+        "manifest_sha256": "4206f8d58772e2defc04b382af9516bf16ecc064a98abb8372b5e38a8be653c6",
+        "relative_path": "ContentServer/GtsPlus-CM.dll",
+        "protected_stub_sha256": "b0e8a25289d697bef0da31812d895e55f4745efd000700cfeb66c1e3135addd2",
+        "protected_sidecar_sha256": "db69e562601efdea05a06e924a9c06baf9ecee207ac3447cd0b7399e88ebce8f",
+        "recovered_sha256": "ebc7c0b359c63d12a80c7fc596e93c226007b915f21032e05efa1046c2b292b2",
+        "method": "gtsplus-cp-body-recovery-v1"
+      }
     },
     {
       "id": "ui_ipc.host_config",
@@ -232,61 +295,157 @@
       "id": "ui_ipc.controller.materialization",
       "source": "ui_ipc.controller",
       "kind": "managed-materialization",
-      "locator": "all nonzero MethodDef RVAs",
+      "locator": "all MethodDef classifications; complete valid IL bodies",
+      "assembly_name": "GTSPlus",
+      "source_sha256": "31f2d0d7f77517d5336433e211d33f44e54cb65b1522fcdd22730d3f3214220d",
+      "module_mvid": "3ddda654-648e-4e5a-b78f-18138d53a039",
+      "classification_counts": {
+        "il": 667,
+        "pinvoke": 8,
+        "abstract": 3,
+        "runtime": 28
+      },
       "method_def_count": 706,
       "method_body_rva_count": 667,
       "method_body_materialized_count": 667,
-      "finding": "Every declared managed body RVA has materialized bytes."
+      "qualification": {
+        "manifest": "/Volumes/data/altdev/inspect/repos/ghidra_rh850_analysis/build/out/gts-all-unprotected/GTSPlus/manifest.json",
+        "manifest_sha256": "90f5ff8ec45f0bd7bcb9dda0ec7cb82240720421523a571b056a59cade9b3d35",
+        "relative_path": "bin/GTSPlus.exe",
+        "protected_stub_sha256": "c2dc6d5ceefadf41165ff6be3bfc049f7bffb96f9f8bb63f26da0d851432cc24",
+        "protected_sidecar_sha256": "d5399208fc0aa9a625b82c24c83b294f0c345ae79c0820d9a7afc8b352d90cab",
+        "recovered_sha256": "31f2d0d7f77517d5336433e211d33f44e54cb65b1522fcdd22730d3f3214220d",
+        "method": "extract the Toyota installer GTSPlus group paired with GTSPlusCP; no runtime decryption/emulation is required"
+      },
+      "finding": "Every required IL body passes full decoding, framing, operand and branch validation; native and legitimately bodyless methods remain separately classified."
     },
     {
       "id": "ui_ipc.websocket.materialization",
       "source": "ui_ipc.websocket",
       "kind": "managed-materialization",
-      "locator": "all nonzero MethodDef RVAs",
+      "locator": "all MethodDef classifications; complete valid IL bodies",
+      "assembly_name": "GtsPlus-WebSocketManager",
+      "source_sha256": "b895fa04167093afbea4c3af761426e13e920a0a067ffab8fa75d0ec43c007d4",
+      "module_mvid": "76ae2dd6-86f9-4db8-8fd8-e8ec99dfe402",
+      "classification_counts": {
+        "il": 116
+      },
       "method_def_count": 116,
       "method_body_rva_count": 116,
       "method_body_materialized_count": 116,
-      "finding": "Every declared managed body RVA has materialized bytes."
+      "qualification": {
+        "manifest": "/Volumes/data/altdev/inspect/repos/ghidra_rh850_analysis/build/out/gts-all-unprotected/GTSPlus/manifest.json",
+        "manifest_sha256": "90f5ff8ec45f0bd7bcb9dda0ec7cb82240720421523a571b056a59cade9b3d35",
+        "relative_path": "bin/GtsPlus-WebSocketManager.dll",
+        "protected_stub_sha256": "d3c9c178b0029ef131d5a46c31f84a5fdf43e3689ceaf13237451d861b838e5e",
+        "protected_sidecar_sha256": "1d31106500d7419065ae0684e7d6d402a47967c462185006c3943f2fc964d580",
+        "recovered_sha256": "b895fa04167093afbea4c3af761426e13e920a0a067ffab8fa75d0ec43c007d4",
+        "method": "extract the Toyota installer GTSPlus group paired with GTSPlusCP; no runtime decryption/emulation is required"
+      },
+      "finding": "Every required IL body passes full decoding, framing, operand and branch validation; native and legitimately bodyless methods remain separately classified."
     },
     {
       "id": "ui_ipc.server.materialization",
       "source": "ui_ipc.server",
       "kind": "managed-materialization",
-      "locator": "all nonzero MethodDef RVAs",
+      "locator": "all MethodDef classifications; complete valid IL bodies",
+      "assembly_name": "LocalWebServer",
+      "source_sha256": "7875f16e748f2b154b3e7ec6dbcd20128ef44c695e613e8ca821fbd0c8ced38b",
+      "module_mvid": "5353d164-8afb-4ee4-8565-69e14494f999",
+      "classification_counts": {
+        "il": 116,
+        "abstract": 8,
+        "runtime": 4
+      },
       "method_def_count": 128,
       "method_body_rva_count": 116,
       "method_body_materialized_count": 116,
-      "finding": "Every declared managed body RVA has materialized bytes."
+      "qualification": {
+        "manifest": "/Volumes/data/altdev/inspect/repos/ghidra_rh850_analysis/build/out/gts-all-unprotected/Auxiliary/manifest.json",
+        "manifest_sha256": "4206f8d58772e2defc04b382af9516bf16ecc064a98abb8372b5e38a8be653c6",
+        "relative_path": "ContentServer/LocalWebServer.dll",
+        "protected_stub_sha256": "61a75db8b8d192079b7978977e06a467e417a166f2ba2cd97956a90b712634f5",
+        "protected_sidecar_sha256": "a2eb5984cfb95012bcfb66c1a15d518c7fa1a42018cac0f3d104041500ac64e7",
+        "recovered_sha256": "7875f16e748f2b154b3e7ec6dbcd20128ef44c695e613e8ca821fbd0c8ced38b",
+        "method": "gtsplus-cp-body-recovery-v1"
+      },
+      "finding": "Every required IL body passes full decoding, framing, operand and branch validation; native and legitimately bodyless methods remain separately classified."
     },
     {
       "id": "ui_ipc.service.materialization",
       "source": "ui_ipc.service",
       "kind": "managed-materialization",
-      "locator": "all nonzero MethodDef RVAs",
+      "locator": "all MethodDef classifications; complete valid IL bodies",
+      "assembly_name": "LocalWebServerWindowsService",
+      "source_sha256": "16b0c3c8bb40c297450d1e9c49ffd66f909eaa6e57fc7e5ceebd0b0a7017c5c9",
+      "module_mvid": "e92fabe3-5bf4-47ab-91ba-1b76e4a7e6bc",
+      "classification_counts": {
+        "il": 17
+      },
       "method_def_count": 17,
       "method_body_rva_count": 17,
       "method_body_materialized_count": 17,
-      "finding": "Every declared managed body RVA has materialized bytes."
+      "qualification": {
+        "manifest": "/Volumes/data/altdev/inspect/repos/ghidra_rh850_analysis/build/out/gts-all-unprotected/Auxiliary/manifest.json",
+        "manifest_sha256": "4206f8d58772e2defc04b382af9516bf16ecc064a98abb8372b5e38a8be653c6",
+        "relative_path": "ContentServer/LocalWebServerWindowsService.exe",
+        "protected_stub_sha256": "8bea1e709a2eec8fc3619fcc071d9874a6b69866688bf1e99f5babc56ae29a37",
+        "protected_sidecar_sha256": "1c1e3863df87cc5cd4460a2e5cc5ed98ceb6ed53cd20a079a6ba3ad7b31930c0",
+        "recovered_sha256": "16b0c3c8bb40c297450d1e9c49ffd66f909eaa6e57fc7e5ceebd0b0a7017c5c9",
+        "method": "gtsplus-cp-body-recovery-v1"
+      },
+      "finding": "Every required IL body passes full decoding, framing, operand and branch validation; native and legitimately bodyless methods remain separately classified."
     },
     {
       "id": "ui_ipc.crypt.materialization",
       "source": "ui_ipc.crypt",
       "kind": "managed-materialization",
-      "locator": "all nonzero MethodDef RVAs",
+      "locator": "all MethodDef classifications; complete valid IL bodies",
+      "assembly_name": "CryptgraphCommon",
+      "source_sha256": "98fc5afd362f6e28aec9f06f71c15c4d6751751a27a8325cdc143ad9f57366b0",
+      "module_mvid": "3fe65a8c-efaf-4aa0-bfd6-fbc758f9001b",
+      "classification_counts": {
+        "il": 72,
+        "pinvoke": 11
+      },
       "method_def_count": 83,
       "method_body_rva_count": 72,
       "method_body_materialized_count": 72,
-      "finding": "Every declared managed body RVA has materialized bytes."
+      "qualification": {
+        "manifest": "/Volumes/data/altdev/inspect/repos/ghidra_rh850_analysis/build/out/gts-all-unprotected/Auxiliary/manifest.json",
+        "manifest_sha256": "4206f8d58772e2defc04b382af9516bf16ecc064a98abb8372b5e38a8be653c6",
+        "relative_path": "ContentServer/CryptgraphCommon.dll",
+        "protected_stub_sha256": "a70a55a78b3bea044bffa624a9c2aa668d4621e1a03c213cc0d5eb3ff302b073",
+        "protected_sidecar_sha256": "c43577c8174b5d5c285c14f2582aaf1b84e19850b62283c6772fb711949a6176",
+        "recovered_sha256": "98fc5afd362f6e28aec9f06f71c15c4d6751751a27a8325cdc143ad9f57366b0",
+        "method": "gtsplus-cp-body-recovery-v1"
+      },
+      "finding": "Every required IL body passes full decoding, framing, operand and branch validation; native and legitimately bodyless methods remain separately classified."
     },
     {
       "id": "ui_ipc.resource.materialization",
       "source": "ui_ipc.resource",
       "kind": "managed-materialization",
-      "locator": "all nonzero MethodDef RVAs",
+      "locator": "all MethodDef classifications; complete valid IL bodies",
+      "assembly_name": "CryptgraphResource",
+      "source_sha256": "7a9a2c08f0055fdfed82258835ba68c4a4d41ffeb537bd27caa19ad19d1f16f6",
+      "module_mvid": "5cedb0cc-5837-4462-ad26-cebb1882b891",
+      "classification_counts": {
+        "il": 8
+      },
       "method_def_count": 8,
       "method_body_rva_count": 8,
       "method_body_materialized_count": 8,
-      "finding": "Every declared managed body RVA has materialized bytes."
+      "qualification": {
+        "manifest": "/Volumes/data/altdev/inspect/repos/ghidra_rh850_analysis/build/out/gts-all-unprotected/Auxiliary/manifest.json",
+        "manifest_sha256": "4206f8d58772e2defc04b382af9516bf16ecc064a98abb8372b5e38a8be653c6",
+        "relative_path": "ContentServer/CryptgraphResource.dll",
+        "protected_stub_sha256": "c9d3d3c35f7af5f3fa4258cea547005846758f67fae2b3326f97b43be6da21b6",
+        "protected_sidecar_sha256": "9f2d7bba218e97aacac917321711e6abaac26625b509770727e4471440c57b47",
+        "recovered_sha256": "7a9a2c08f0055fdfed82258835ba68c4a4d41ffeb537bd27caa19ad19d1f16f6",
+        "method": "gtsplus-cp-body-recovery-v1"
+      },
+      "finding": "Every required IL body passes full decoding, framing, operand and branch validation; native and legitimately bodyless methods remain separately classified."
     },
     {
       "id": "ui_ipc.service.LocalWebServerService.OnStart",
@@ -3334,41 +3493,137 @@
       "routes": [
         {
           "method": "LocalWebServer.ILocalHttpService::GetResource1",
+          "method_identity": {
+            "identity": "sha256:7875f16e748f2b154b3e7ec6dbcd20128ef44c695e613e8ca821fbd0c8ced38b:module:5353d164-8afb-4ee4-8565-69e14494f999:0x06000011",
+            "methoddef_token": "0x06000011",
+            "owner_identity": "sha256:7875f16e748f2b154b3e7ec6dbcd20128ef44c695e613e8ca821fbd0c8ced38b:module:5353d164-8afb-4ee4-8565-69e14494f999:0x02000005",
+            "typedef_token": "0x02000005",
+            "full_nested_name": "LocalWebServer.ILocalHttpService",
+            "name": "GetResource1",
+            "signature_hex": "200212510e0e",
+            "rva": 0,
+            "impl_flags": 0,
+            "flags": 1478
+          },
           "template": "/GetResource/{guiFileName}/{filename}",
           "attribute_sha256": "844f645ddb1d73c3a1732c574877a719f3c80cf90a1900df6ef32e0758a32672"
         },
         {
           "method": "LocalWebServer.ILocalHttpService::GetResource2",
+          "method_identity": {
+            "identity": "sha256:7875f16e748f2b154b3e7ec6dbcd20128ef44c695e613e8ca821fbd0c8ced38b:module:5353d164-8afb-4ee4-8565-69e14494f999:0x06000012",
+            "methoddef_token": "0x06000012",
+            "owner_identity": "sha256:7875f16e748f2b154b3e7ec6dbcd20128ef44c695e613e8ca821fbd0c8ced38b:module:5353d164-8afb-4ee4-8565-69e14494f999:0x02000005",
+            "typedef_token": "0x02000005",
+            "full_nested_name": "LocalWebServer.ILocalHttpService",
+            "name": "GetResource2",
+            "signature_hex": "200312510e0e0e",
+            "rva": 0,
+            "impl_flags": 0,
+            "flags": 1478
+          },
           "template": "/GetResource/{guiFileName}/{dir1}/{filename}",
           "attribute_sha256": "3223a235005d6e0f7e0ac0ef2b54804d7fc0802f25ae714a9b7d42fde1394c02"
         },
         {
           "method": "LocalWebServer.ILocalHttpService::GetResource3",
+          "method_identity": {
+            "identity": "sha256:7875f16e748f2b154b3e7ec6dbcd20128ef44c695e613e8ca821fbd0c8ced38b:module:5353d164-8afb-4ee4-8565-69e14494f999:0x06000013",
+            "methoddef_token": "0x06000013",
+            "owner_identity": "sha256:7875f16e748f2b154b3e7ec6dbcd20128ef44c695e613e8ca821fbd0c8ced38b:module:5353d164-8afb-4ee4-8565-69e14494f999:0x02000005",
+            "typedef_token": "0x02000005",
+            "full_nested_name": "LocalWebServer.ILocalHttpService",
+            "name": "GetResource3",
+            "signature_hex": "200412510e0e0e0e",
+            "rva": 0,
+            "impl_flags": 0,
+            "flags": 1478
+          },
           "template": "/GetResource/{guiFileName}/{dir1}/{dir2}/{filename}",
           "attribute_sha256": "0c1b93e2a8b2718078284cc738380bcc057435e44ab56017198e006ebf08e127"
         },
         {
           "method": "LocalWebServer.ILocalHttpService::GetResource4",
+          "method_identity": {
+            "identity": "sha256:7875f16e748f2b154b3e7ec6dbcd20128ef44c695e613e8ca821fbd0c8ced38b:module:5353d164-8afb-4ee4-8565-69e14494f999:0x06000014",
+            "methoddef_token": "0x06000014",
+            "owner_identity": "sha256:7875f16e748f2b154b3e7ec6dbcd20128ef44c695e613e8ca821fbd0c8ced38b:module:5353d164-8afb-4ee4-8565-69e14494f999:0x02000005",
+            "typedef_token": "0x02000005",
+            "full_nested_name": "LocalWebServer.ILocalHttpService",
+            "name": "GetResource4",
+            "signature_hex": "200512510e0e0e0e0e",
+            "rva": 0,
+            "impl_flags": 0,
+            "flags": 1478
+          },
           "template": "/GetResource/{guiFileName}/{dir1}/{dir2}/{dir3}/{filename}",
           "attribute_sha256": "3aa8c33331d73135b501bf9f3bd3a4bd7f5ee9ab800c3315e37f10d53e4f27af"
         },
         {
           "method": "LocalWebServer.ILocalHttpService::GetResource5",
+          "method_identity": {
+            "identity": "sha256:7875f16e748f2b154b3e7ec6dbcd20128ef44c695e613e8ca821fbd0c8ced38b:module:5353d164-8afb-4ee4-8565-69e14494f999:0x06000015",
+            "methoddef_token": "0x06000015",
+            "owner_identity": "sha256:7875f16e748f2b154b3e7ec6dbcd20128ef44c695e613e8ca821fbd0c8ced38b:module:5353d164-8afb-4ee4-8565-69e14494f999:0x02000005",
+            "typedef_token": "0x02000005",
+            "full_nested_name": "LocalWebServer.ILocalHttpService",
+            "name": "GetResource5",
+            "signature_hex": "200612510e0e0e0e0e0e",
+            "rva": 0,
+            "impl_flags": 0,
+            "flags": 1478
+          },
           "template": "/GetResource/{guiFileName}/{dir1}/{dir2}/{dir3}/{dir4}/{filename}",
           "attribute_sha256": "30c4b517fe70b229eb24faf3c7f9ce630674e7cd4b72af015b77647788843f9d"
         },
         {
           "method": "LocalWebServer.ILocalHttpService::GetResource6",
+          "method_identity": {
+            "identity": "sha256:7875f16e748f2b154b3e7ec6dbcd20128ef44c695e613e8ca821fbd0c8ced38b:module:5353d164-8afb-4ee4-8565-69e14494f999:0x06000016",
+            "methoddef_token": "0x06000016",
+            "owner_identity": "sha256:7875f16e748f2b154b3e7ec6dbcd20128ef44c695e613e8ca821fbd0c8ced38b:module:5353d164-8afb-4ee4-8565-69e14494f999:0x02000005",
+            "typedef_token": "0x02000005",
+            "full_nested_name": "LocalWebServer.ILocalHttpService",
+            "name": "GetResource6",
+            "signature_hex": "200712510e0e0e0e0e0e0e",
+            "rva": 0,
+            "impl_flags": 0,
+            "flags": 1478
+          },
           "template": "/GetResource/{guiFileName}/{dir1}/{dir2}/{dir3}/{dir4}/{dir5}/{filename}",
           "attribute_sha256": "96ab3cd45b932b6c567e0940e00cd238d33c8f493074dc242ac1a5614a09d8be"
         },
         {
           "method": "LocalWebServer.ILocalHttpService::GetResource7",
+          "method_identity": {
+            "identity": "sha256:7875f16e748f2b154b3e7ec6dbcd20128ef44c695e613e8ca821fbd0c8ced38b:module:5353d164-8afb-4ee4-8565-69e14494f999:0x06000017",
+            "methoddef_token": "0x06000017",
+            "owner_identity": "sha256:7875f16e748f2b154b3e7ec6dbcd20128ef44c695e613e8ca821fbd0c8ced38b:module:5353d164-8afb-4ee4-8565-69e14494f999:0x02000005",
+            "typedef_token": "0x02000005",
+            "full_nested_name": "LocalWebServer.ILocalHttpService",
+            "name": "GetResource7",
+            "signature_hex": "200812510e0e0e0e0e0e0e0e",
+            "rva": 0,
+            "impl_flags": 0,
+            "flags": 1478
+          },
           "template": "/GetResource/{guiFileName}/{dir1}/{dir2}/{dir3}/{dir4}/{dir5}/{dir6}/{filename}",
           "attribute_sha256": "009fb33177143938b36bd5ca791e9dfdb7d5371b8e497cf0abdc86ee2f8f6d50"
         },
         {
           "method": "LocalWebServer.ILocalHttpService::GetResource8",
+          "method_identity": {
+            "identity": "sha256:7875f16e748f2b154b3e7ec6dbcd20128ef44c695e613e8ca821fbd0c8ced38b:module:5353d164-8afb-4ee4-8565-69e14494f999:0x06000018",
+            "methoddef_token": "0x06000018",
+            "owner_identity": "sha256:7875f16e748f2b154b3e7ec6dbcd20128ef44c695e613e8ca821fbd0c8ced38b:module:5353d164-8afb-4ee4-8565-69e14494f999:0x02000005",
+            "typedef_token": "0x02000005",
+            "full_nested_name": "LocalWebServer.ILocalHttpService",
+            "name": "GetResource8",
+            "signature_hex": "200912510e0e0e0e0e0e0e0e0e",
+            "rva": 0,
+            "impl_flags": 0,
+            "flags": 1478
+          },
           "template": "/GetResource/{guiFileName}/{dir1}/{dir2}/{dir3}/{dir4}/{dir5}/{dir6}/{dir7}/{filename}",
           "attribute_sha256": "c993339fcb3521227afde712b320c69d463211b6a312d88232f3577d4757a542"
         }

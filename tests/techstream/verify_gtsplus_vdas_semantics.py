@@ -26,17 +26,14 @@ def main() -> int:
     stored = json.loads(ART.read_text(encoding="utf-8"))
     current = build()
     sources = stored["sources"]
-    check(
-        "exact current managed assembly identities",
-        sources["GTSPlusDiagAdaptMng.dll"] == {
-            "size": 57360,
-            "sha256": "7a56cc6488ad0f982b3b8ed531d5da0677d04f58c92b4b4ea3d0ac6508f27f9e",
-        }
-        and sources["GTSPlusArchiver.dll"] == {
-            "size": 19472,
-            "sha256": "ce3c56ada831ea0b7164435fec8bc47184ea97c16b67469404a163fc1fedd7a2",
-        },
-    )
+    for relative in ("bin/GTSPlusDiagAdaptMng.dll", "bin/GTSPlusArchiver.dll"):
+        filename = Path(relative).name
+        check(
+            "exact current qualified managed assembly identity: " + relative,
+            sources[filename] == current["sources"][filename]
+            and sources[filename]["qualification"]["relative_path"] == relative
+            and sources[filename]["sha256"] == sources[filename]["qualification"]["recovered_sha256"],
+        )
     check("current release pinned", sources["installer_recovery"]["gtsplus_version"] == "2026.03.002.02")
 
     create = stored["create_and_export"]

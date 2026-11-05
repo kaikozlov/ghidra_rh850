@@ -17,8 +17,10 @@ from tools.techstream.gts.active_tests import (
     _multi_active_test_group_plan,
 )
 from tools.techstream.diagnostic_role_model import plugin_operation_signature
-from tools.techstream.gts.execution_model import _file_sha256, _semantic_profile_for_plugin
+from tools.techstream.ddb_semantics import native_context, select_for_consumer
+from tools.techstream.gts.execution_model import _plugin_identity, _resolve_plugin_path, _semantic_profile_for_plugin
 from tools.techstream.gts.master import _master_command_binding, _master_frame_rows, _master_timer_rows
+from tools.techstream.gts.query import native_ecu_catalog_category
 from tools.techstream.parse_ddb import DDBParser, StringDataBase
 
 
@@ -32,24 +34,22 @@ def _master_command_plan(
     selected_item: int | None = None,
     strings: StringDataBase | None = None,
 ) -> dict[str, Any]:
+    master = native_context(master)
     category_id = int(category["category_id"])
     binding = _master_command_binding(parser, master, category_id, role)
-    plugin_path = bin_root / binding.dll_name
+    plugin_path = _resolve_plugin_path(bin_root, binding.dll_name)
     if plugin_path.is_file():
         try:
             operation = plugin_operation_signature(plugin_path)
         except pefile.PEFormatError:
             operation = {"surface": "plugin_pe_unparseable"}
-        identity = {
-            "path": plugin_path.name,
-            "size": plugin_path.stat().st_size,
-            "sha256": _file_sha256(plugin_path),
-        }
     else:
         operation = {"surface": "plugin_file_missing"}
-        identity = {"path": plugin_path.name, "size": None, "sha256": None}
+    identity = _plugin_identity(plugin_path)
 
     profile_name, profile, semantic_status = _semantic_profile_for_plugin(plugin_path, role)
+    if db_root is not None and category.get("database"):
+        category = native_ecu_catalog_category(master, category, db_root, parser)
     result: dict[str, Any] = {
         "category": category,
         "role": role,
@@ -57,6 +57,10 @@ def _master_command_plan(
         "plugin": binding.dll_name,
         "plugin_identity": identity,
         "operation_surface": operation["surface"],
+        "native_context": master.as_dict(),
+        "binding_query": master.query(19, role, category_id).as_dict(),
+        "selected_binding": binding.as_dict(),
+        "metadata_selection": "raw ECU metadata qualified by selected category; live support remains external",
         "semantic_status": semantic_status,
         "semantic_profile": profile_name,
         "frames": {},
@@ -144,23 +148,30 @@ def _master_command_plan(
         result["semantic_status"] = "exact_plugin_identity_metadata_only"
     elif profile_name == "role_0x52_generic_cid":
         rows = _master_frame_rows(parser, master, category_id, 0xDC)
-        result["frames"]["request"] = rows[0] if len(rows) == 1 else None
+        result["frames"]["request"] = rows
         result["response_model"] = profile["response_model"]
         result["semantic_status"] = (
             "exact_plugin_identity_and_category_frame"
-            if len(rows) == 1
+            if rows
             else "exact_plugin_identity_but_category_selector_0xDC_missing"
         )
     elif profile_name == "role_0x19_dtc_clear":
         primary = _master_frame_rows(parser, master, category_id, 0x01)
         fallback = _master_frame_rows(parser, master, category_id, 0x102)
-        result["frames"]["primary"] = primary[0] if len(primary) == 1 else None
-        result["frames"]["fallback"] = fallback[0] if len(fallback) == 1 else None
+        result["frames"]["primary"] = primary
+        result["frames"]["fallback"] = fallback
         result["timers"] = [row for row in _master_timer_rows(parser, master, category_id) if row["timer_id"] == 1]
+        timer_query = master.query(25, category_id, 1)
+        timer = select_for_consumer(timer_query, "timer", timer_policy="report-and-continue")
+        result["timer_selection"] = {
+            "policy": "DelDiagCodeP4 consumes row0; zero rows C0040101; excess rows accepted",
+            "query": timer_query.as_dict(),
+            "selected": timer.as_dict(),
+        }
         result["control_flow"] = profile["control_flow"]
         result["semantic_status"] = (
             "exact_plugin_identity_and_primary_frame"
-            if len(primary) == 1
+            if primary
             else "exact_plugin_identity_but_primary_selector_0x1_missing"
         )
     return result

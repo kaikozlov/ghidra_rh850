@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Extract the installed browser, local content service and managed IPC lifecycle."""
+"""Extract the installed browser, local content service and managed IPC lifecycle.
+
+Recovered inputs default to the aggregate's GTSPlus/Auxiliary components.
+Admission joins exact source-relative manifest identities to installed CP pairs,
+then validates full managed bodies, retaining native/bodyless classifications.
+Explicit component roots are authoritative and never fall back to old corpora.
+"""
 from __future__ import annotations
 
 import argparse
@@ -17,12 +23,15 @@ from dncil.cil.body import CilMethodBody
 
 from tools import REPO_ROOT
 from tools.techstream.gtsplus_local_crypto import decode_gui
-from tools.techstream.inspect_dotnet_il import MethodBodyReader, format_operand, resolve_token, type_name
-from tools.techstream.extract_gtsplus_tse_managed_semantics import _recovery_proof
+from tools.techstream.inspect_dotnet_il import (
+    MethodBodyReader, format_operand, managed_method_identities, resolve_token, type_name,
+    validate_managed_bodies,
+)
+from tools.techstream.recover_all_gtsplus_bodies import DEFAULT_OUTPUT as DEFAULT_RECOVERED, qualify_recovered_source
 
 DEFAULT_ROOT = REPO_ROOT / 'software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics'
-DEFAULT_MAIN = REPO_ROOT / 'build/out/gtsplus-unprotected'
-DEFAULT_AUX = REPO_ROOT / 'build/out/gts-lifecycle-aux'
+DEFAULT_MAIN = DEFAULT_RECOVERED / 'GTSPlus'
+DEFAULT_AUX = DEFAULT_RECOVERED / 'Auxiliary'
 DEFAULT_OUT = REPO_ROOT / 'data/generated/gtsplus_2026/lifecycle_ui_ipc.json'
 D = 'ui_ipc.'
 
@@ -32,7 +41,8 @@ def digest(data: bytes) -> str:
 
 
 def rel(path: Path) -> str:
-    return path.resolve().relative_to(REPO_ROOT).as_posix()
+    resolved = path.resolve()
+    return resolved.relative_to(REPO_ROOT).as_posix() if resolved.is_relative_to(REPO_ROOT) else str(resolved)
 
 
 def js_function(text: str, owner: str, name: str, occurrence: int = 0) -> str:
@@ -344,8 +354,6 @@ def build(root: Path = DEFAULT_ROOT, main_root: Path = DEFAULT_MAIN, aux_root: P
         paths[sid] = path
         return sid
 
-    main_manifest = json.loads((main_root / 'manifest.json').read_text())
-    aux_manifest = json.loads((aux_root / 'manifest.json').read_text())
     source('main_manifest', main_root / 'manifest.json', 'recovery manifest')
     source('aux_manifest', aux_root / 'manifest.json', 'recovery manifest')
     components = {
@@ -358,29 +366,20 @@ def build(root: Path = DEFAULT_ROOT, main_root: Path = DEFAULT_MAIN, aux_root: P
         'cm': ('aux', 'ContentServer/GtsPlus-CM.dll'),
     }
     for key, (corpus, name) in components.items():
-        recovered = (main_root if corpus == 'main' else aux_root) / name
+        component_root = main_root if corpus == 'main' else aux_root
+        recovered = component_root / name
         original = root / ('GTSPlus' if corpus == 'main' else '') / name
-        # Auxiliary names already carry their installed subdirectory.
-        if corpus == 'aux':
-            original = root / name
-        if corpus == 'main':
-            entry = next(x for x in main_manifest['binaries'] if x['path'] == name)
-            expected = entry['plaintext']['sha256']
-            stub = entry['protected']['stub_sha256']
-            sidecar = entry['protected']['sidecar_sha256']
-        else:
-            entry = next(x for x in aux_manifest['entries'] if x['relative_path'] == name)
-            expected, stub, sidecar = entry['output_sha256'], entry['stub_sha256'], entry['sidecar_sha256']
-        for path, wanted in [(recovered, expected), (original, stub), (original.with_name(original.name + '._'), sidecar)]:
-            if digest(path.read_bytes()) != wanted:
-                raise ValueError(f'recovery identity drift: {rel(path)}')
+        qualification = qualify_recovered_source(recovered, original, component_root=component_root)
         source(key + '.original', original, 'installed protected PE stub')
         source(key + '.sidecar', original.with_name(original.name + '._'), 'installed CP sidecar')
         sid = source(key, recovered, 'CP-recovered materialized PE')
+        sources[-1]['recovery'] = qualification
         if key != 'cm':
-            proof = _recovery_proof(recovered)
+            proof = validate_managed_bodies(recovered)
             binaries[key] = dnfile.dnPE(str(recovered))
-            evidence.append(dict(id=D+key+'.materialization', source=sid, kind='managed-materialization', locator='all nonzero MethodDef RVAs', **proof, finding='Every declared managed body RVA has materialized bytes.'))
+            evidence.append(dict(id=D+key+'.materialization', source=sid, kind='managed-materialization',
+                locator='all MethodDef classifications; complete valid IL bodies', **proof, qualification=qualification,
+                finding='Every required IL body passes full decoding, framing, operand and branch validation; native and legitimately bodyless methods remain separately classified.'))
 
     def il(key: str, owner: str, method: str, finding: str, needles: tuple[str, ...], index: int = 0) -> str:
         pe = binaries[key]
@@ -472,14 +471,17 @@ def build(root: Path = DEFAULT_ROOT, main_root: Path = DEFAULT_MAIN, aux_root: P
         raise ValueError('content server base address drift')
     evidence.append(dict(id=D+'https_endpoint', source=D+'host_config', kind='config-and-il', locator='system.serviceModel/services/service', base_address=base, app_settings={x.attrib['key']:x.attrib['value'] for x in xml.findall('./appSettings/add')}, finding='WCF host opens configuration endpoint; Transport security webHttp binding serves GUI resources.'))
     pe = binaries['server']
-    method_owner = {id(m.row):type_name(t)+'::'+str(m.row.Name) for t in pe.net.mdtables.TypeDef for m in t.MethodList}
+    identities = managed_method_identities(pe, digest(paths[D+'server'].read_bytes()))
+    method_owner = {id(row): identity for row, identity in
+                    zip(pe.net.mdtables.MethodDef, identities['methods'], strict=True)}
     routes = []
     for attr in pe.net.mdtables.CustomAttribute:
-        name = method_owner.get(id(attr.Parent.row), '')
+        identity = method_owner.get(id(attr.Parent.row))
+        name = identity['full_nested_name'] + '::' + identity['name'] if identity else ''
         value = bytes(attr.Value.value)
         if name.startswith('LocalWebServer.ILocalHttpService::') and b'UriTemplate' in value:
             template = value.split(b'UriTemplate',1)[1][1:].decode()
-            routes.append(dict(method=name, template=template, attribute_sha256=digest(value)))
+            routes.append(dict(method=name, method_identity=identity, template=template, attribute_sha256=digest(value)))
     if len(routes) != 8:
         raise ValueError('WCF resource route count drift')
     evidence.append(dict(id=D+'routes', source=D+'server', kind='CLR-custom-attributes-and-il', locator='ILocalHttpService.GetResource1..8 WebGet attributes', routes=routes, finding='Eight GET resource routes support archive stem plus one through eight path segments; implementation joins with slash and calls GetResource.'))

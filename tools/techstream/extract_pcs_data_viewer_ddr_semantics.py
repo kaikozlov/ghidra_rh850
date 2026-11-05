@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import contextlib
-import io
 import json
 from decimal import Decimal
 from pathlib import Path
@@ -13,7 +11,7 @@ from typing import Any
 import dnfile
 from tools.techstream.extract_pcs_data_viewer_tss3_dictionary import load_culture
 from tools.techstream.extract_pcs_data_viewer_tss3_managed_semantics import (
-
+    DEFAULT_ASSEMBLY,
     Collection,
     _call_names,
     _interpret_collection,
@@ -21,6 +19,9 @@ from tools.techstream.extract_pcs_data_viewer_tss3_managed_semantics import (
     _normalize,
     sha256_file,
 )
+from tools.techstream.extract_gtsplus_tse_managed_semantics import _open
+from tools.techstream.inspect_dotnet_il import validate_managed_bodies
+from tools.techstream.recover_all_gtsplus_bodies import qualify_recovered_source
 from tools.techstream.techstream_paths import resolve_gts_root
 from tools import REPO_ROOT
 
@@ -76,7 +77,7 @@ def _selected(rows: list[dict[str, Any]], *keys: str) -> list[dict[str, Any]]:
     return [row for row in rows if row["ResourceKey"] in wanted]
 
 
-def extract(assembly: Path, *, gtsplus_root: Path | None = None) -> dict[str, Any]:
+def extract(assembly: Path = DEFAULT_ASSEMBLY, *, gtsplus_root: Path | None = None) -> dict[str, Any]:
     assembly = assembly.expanduser().resolve()
     gts = resolve_gts_root(gtsplus_root)
     diagnostics = gts.parent
@@ -85,17 +86,9 @@ def extract(assembly: Path, *, gtsplus_root: Path | None = None) -> dict[str, An
     sidecar = Path(str(protected) + "._")
     en_us = pcs / "en-US/PCS Data Viewer.resources.dll"
 
-    with contextlib.redirect_stderr(io.StringIO()):
-        pe = dnfile.dnPE(str(assembly))
-    method_rows = list(pe.net.mdtables.MethodDef.rows)
-    raw = assembly.read_bytes()
-    body_rvas = [int(row.Rva or 0) for row in method_rows if int(row.Rva or 0)]
-    materialized = sum(
-        bool((offset := pe.get_offset_from_rva(rva)) is not None and any(raw[offset : offset + 16]))
-        for rva in body_rvas
-    )
-    if materialized != len(body_rvas):
-        raise ValueError(f"incomplete CP recovery: {materialized}/{len(body_rvas)} method bodies")
+    qualification = qualify_recovered_source(assembly, protected, component_root=assembly.parent.parent)
+    proof = validate_managed_bodies(assembly)
+    pe = _open(assembly)
 
     _resource_meta, english = load_culture(en_us)
     table_rva, legacy = _table(pe, english, "DetailInfoList")
@@ -126,12 +119,10 @@ def extract(assembly: Path, *, gtsplus_root: Path | None = None) -> dict[str, An
             "protected_sidecar": {"path": str(sidecar.relative_to(diagnostics)), "size": sidecar.stat().st_size, "sha256": sha256_file(sidecar)},
             "english_resources": {"path": str(en_us.relative_to(diagnostics)), "size": en_us.stat().st_size, "sha256": sha256_file(en_us)},
             "recovered_analysis_pe_sha256": sha256_file(assembly),
+            "qualification": qualification,
         },
-        "recovery_proof": {
-            "method_def_count": len(method_rows),
-            "method_body_rva_count": len(body_rvas),
-            "method_body_materialized_count": materialized,
-        },
+        "recovery_proof": proof,
+        "managed_identities": pe._gts_method_identities,
         "decoder": {
             "table_cctor_rva": table_rva,
             "get_value_str_rva": get_value_rva,
@@ -163,7 +154,7 @@ def extract(assembly: Path, *, gtsplus_root: Path | None = None) -> dict[str, An
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--assembly", type=Path, required=True, help="CP-recovered PCS Data Viewer.exe")
+    parser.add_argument("--assembly", type=Path, default=DEFAULT_ASSEMBLY, help="Qualified recovered PCS Data Viewer.exe")
     parser.add_argument("--gtsplus-root", type=Path)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUT)
     args = parser.parse_args()

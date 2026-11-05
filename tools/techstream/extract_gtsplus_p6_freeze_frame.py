@@ -17,16 +17,17 @@ from typing import Any
 
 from tools import REPO_ROOT
 from tools.techstream.ddb_semantics import extract_monitor_records, records
-from tools.techstream.ddb_strings import load_string_db
 from tools.techstream.extract_gtsplus_tss3_native_recorder import (
     export_body, exports, operation_anchor, pe_info, read_va,
 )
-from tools.techstream.gts.master import _master_frame_rows, _master_variable
+from tools.techstream.gts.master import _master_variable
+from tools.techstream.extract_gtsplus_p6_data_list import native_frame_witness, native_source_census
 from tools.techstream.parse_ddb import DDBParser
-from tools.techstream.techstream_paths import gts_db_root, resolve_gts_root
+from tools.techstream.techstream_paths import resolve_gts_root
+from tools.techstream.recover_all_gtsplus_bodies import DEFAULT_OUTPUT, qualify_recovered_source
 
 DEFAULT_OUT = REPO_ROOT / "data/generated/gtsplus_2026/p6_freeze_frame_semantics.json"
-DEFAULT_RECOVERED = REPO_ROOT / "build/out/gtsplus-unprotected"
+DEFAULT_RECOVERED = DEFAULT_OUTPUT / "GTSPlus"
 PLUGIN = "GetEachFrzFrmDatP6_DT.dll"
 IDENTITIES = {
     PLUGIN: "c2eded32d5569552062c79a7d8d38f2626ec0347d32ffc27fe09559004cec658",
@@ -110,15 +111,13 @@ def intern_evidence(pool: dict[str, Any], value: dict[str, Any]) -> str:
     return key
 
 
-def frame_references(frames: dict[str, list[dict[str, Any]]],
-                     pool: dict[str, Any]) -> dict[str, list[dict[str, str]]]:
+def frame_references(frames: dict[str, dict[str, Any]],
+                     pool: dict[str, Any]) -> dict[str, dict[str, Any]]:
     return {
-        selector: [{"frame_ref": intern_evidence(pool, {
-                        key: value for key, value in frame.items()
-                        if key not in {"category_id", "func_comm_frame_raw"}}),
-                    "func_comm_frame_raw": frame["func_comm_frame_raw"]}
-                   for frame in rows]
-        for selector, rows in frames.items()
+        selector: {**program, "frames": [
+            {"frame_ref": intern_evidence(pool, frame)}
+            for frame in program["frames"]]}
+        for selector, program in frames.items()
     }
 
 
@@ -138,6 +137,10 @@ def native(gts: Path, recovered: Path) -> dict[str, Any]:
         ("CommandCommon.dll", recovered / "bin/CommandCommon.dll", recovered),
         ("GetEachFrzFrmDatP5_DT.dll", gts / "bin/GetEachFrzFrmDatP5_DT.dll", gts),
     ):
+        qualification = (
+            qualify_recovered_source(path, gts / "bin" / name, component_root=recovered)
+            if name == "CommandCommon.dll" else None
+        )
         ident = source(path, root)
         if ident["sha256"] != IDENTITIES[name]:
             raise ValueError(f"{name}: unsupported release SHA-256 {ident['sha256']}")
@@ -182,6 +185,8 @@ def native(gts: Path, recovered: Path) -> dict[str, Any]:
         out[name] = {"source": ident, "image_base": f"0x{base:08X}",
                      "functions": functions,
                      "instruction_anchors": {key: operation_anchor(pe, data, base, spec) for key, spec in anchors.items()}}
+        if qualification is not None:
+            out[name]["qualification"] = qualification
     return out
 
 
@@ -212,7 +217,7 @@ def monitor_witness(db: Any, strings: Any, master: Any, row: Any,
     patterns = [r for r in raw_rows(db, 14) if row.pattern_display_key and u16(r, 12) == row.pattern_display_key]
     return {
         "table": 62, "index": row.index, "raw": row.raw.hex(),
-        "name": strings.get_string(row.name_string_index), "name_string_index": row.name_string_index,
+        "name": None if strings is None else strings.get_string(row.name_string_index), "name_string_index": row.name_string_index,
         "monitor_key": row.monitor_key,
         "flags": row.flags, "ffd_member": bool(row.flags & 2),
         "primary_did": row.primary_did, "snapshot_did": row.alternate_did,
@@ -229,38 +234,32 @@ def monitor_witness(db: Any, strings: Any, master: Any, row: Any,
              "div": struct.unpack_from("<i", physical, 4)[0], "offset": struct.unpack_from("<i", physical, 8)[0],
              "signed": physical[20], "decimal_places": physical[21]},
         "unit": None if unit is None else {"table": 15, "raw": unit.hex(),
-            "string_index": struct.unpack_from("<I", unit)[0], "text": strings.get_string(struct.unpack_from("<I", unit)[0])},
+            "string_index": struct.unpack_from("<I", unit)[0],
+            "text": None if strings is None else strings.get_string(struct.unpack_from("<I", unit)[0])},
         "patterns": [{"table": 14, "raw": r.hex(), "value": struct.unpack_from("<I", r, 4)[0],
                       "string_index": struct.unpack_from("<I", r)[0],
-                      "text": strings.get_string(struct.unpack_from("<I", r)[0])} for r in patterns],
+                      "text": None if strings is None else strings.get_string(struct.unpack_from("<I", r)[0])} for r in patterns],
     }
 
 
 def region_evidence(gts: Path, region: str, evidence: dict[str, dict[str, Any]]) -> dict[str, Any]:
     parser = DDBParser()
-    dbroot = gts_db_root(gts, region, "Gen")
-    master = parser.parse_master_db(dbroot / "Toyota.ddb")
-    strings = load_string_db(parser, dbroot / "M_English.ddb")
+    context, sources_raw, selection = native_source_census(parser, gts, region, 0xB5, PLUGIN)
     monitor_pool = evidence["monitors"]
-    bindings = {r.category_id: r for r in parser.extract_master_dlls(master.sections[19])
-                if r.dll_role_id == 0xB5 and r.dll_name == PLUGIN}
-    categories = sorted((r for r in parser.extract_master_ecu_categories(master.sections[16])
-                         if r.category_id in bindings), key=lambda r: r.category_id)
     census = Counter()
     category_rows = []
     targets = []
     additional_info = []
     unresolved = []
     mode_witnesses: dict[tuple[Any, ...], dict[str, Any]] = {}
-    sources = {"master": source(dbroot / "Toyota.ddb", gts),
-               "strings": source(dbroot / "M_English.ddb", gts)}
-    for category in categories:
-        frames = {f"0x{s:X}": _master_frame_rows(parser, master, category.category_id, s) for s in (0xCF, 0xD0, 0x13E)}
+    sources = selection["context"]["files"]
+    for occurrence, category, master, strings in sources_raw:
+        frames = {f"0x{s:X}": native_frame_witness(context, category.category_id, s) for s in (0xCF, 0xD0, 0x13E)}
         frame_refs = frame_references(frames, evidence["frames"])
-        path = dbroot / category.database_name
+        path = Path(occurrence.source.path).parent / category.database_name
         if not category.database_name or not path.is_file():
             category_rows.append({"category_id": category.category_id, "database": category.database_name,
-                                  "selectors": frame_refs,
+                                  "category_occurrence": occurrence.as_dict(), "selectors": frame_refs,
                                   "status": "no ECU DDB filename" if not category.database_name else "DDB missing"})
             continue
         db = parser.parse_ecu_db(path)
@@ -296,9 +295,10 @@ def region_evidence(gts: Path, region: str, evidence: dict[str, dict[str, Any]])
         census["categories_with_ddb"] += 1
         census["ffd_rows"] += len(ffd)
         category_rows.append({"category_id": category.category_id, "database": category.database_name,
+                              "category_occurrence": occurrence.as_dict(),
                               "source": source(path, gts), "monitor_rows": len(monitors), "ffd_rows": len(ffd),
                               "row_mode_census": dict(sorted(counts.items())), "selectors": frame_refs})
-        if frames["0x13E"]:
+        if frames["0x13E"]["frames"]:
             memberships = raw_rows(db, 171)
             monitor_by_key = {row.monitor_key: row for row in monitors}
             by_group = {}
@@ -339,10 +339,10 @@ def region_evidence(gts: Path, region: str, evidence: dict[str, dict[str, Any]])
                          None if did is None else did[6], row.raw[0x4B], row.raw[0x4A],
                          row.ffd_support_condition_key, row.primary_did != row.alternate_did)
             chosen.setdefault(signature, row)
-        binding = bindings[category.category_id]
         targets.append({"category_id": category.category_id, "database": category.database_name,
+            "category_occurrence": occurrence.as_dict(),
             "generation": category.generation, "source": source(path, gts),
-            "binding": {"role": 0xB5, "dll": binding.dll_name, "raw": binding.raw.hex()},
+            "native_initial_category": str(category.category_id),
             "table_inventory": [{"table": t, "records": db.sections[t].header.record_count,
                                   "record_size": db.sections[t].decoded_record_size} for t in (61, 62, 64, 80, 89, 156, 157, 171) if t in db.sections],
             "row_mode_census": dict(sorted(counts.items())), "ffd_rows": len(ffd),
@@ -350,10 +350,10 @@ def region_evidence(gts: Path, region: str, evidence: dict[str, dict[str, Any]])
             "request_materialization_examples": [
                 {"selector": key, "dtc": "0x123456", "snapshot_record": record,
                  "bytes": (bytes.fromhex(frame["send"]["bytes"])[:2] + bytes.fromhex("123456" + record)).hex()}
-                for key, record in (("0xCF", "01"), ("0xD0", "a1")) for frame in frames[key]],
+                for key, record in (("0xCF", "01"), ("0xD0", "a1")) for frame in frames[key]["frames"]],
             "witness_refs": [intern_evidence(monitor_pool, monitor_witness(db, strings, master, row, did_rows))
                              for row in sorted(chosen.values(), key=lambda r: r.index)]})
-    return {"region": region, "sources": sources, "binding_count": len(bindings),
+    return {"region": region, "sources": sources, **selection,
             "census": dict(sorted(census.items())), "categories": category_rows,
             "mode_witnesses": list(mode_witnesses.values()), "targets": targets,
             "additional_info_categories": additional_info, "unresolved_row_modes": unresolved}
@@ -431,9 +431,9 @@ def build(gts_root: Path | None = None, recovered_root: Path = DEFAULT_RECOVERED
     gts = resolve_gts_root(gts_root)
     evidence: dict[str, dict[str, Any]] = {"frames": {}, "monitors": {}}
     regions = [region_evidence(gts, region, evidence) for region in ("NA", "EU", "JP")]
-    return {"schema": "gtsplus-p6-per-dtc-ffd-evidence-v2", "native": native(gts, recovered_root),
+    return {"schema": "gtsplus-p6-per-dtc-ffd-evidence-v4", "native": native(gts, recovered_root),
             "evidence": evidence,
-            "evidence_reference_format": "sha256 of canonical UTF-8 JSON (sorted keys, compact separators); frame_ref resolves in evidence.frames, row_ref/monitor_ref/witness_refs resolve in evidence.monitors. Regional master/string/ECU source hashes identify each use. Category-specific FuncCommFrame raw bindings remain at each selector reference. Type171 retains full row counts, decoded-row digest, per-group census, and one raw membership per group/condition branch.",
+            "evidence_reference_format": "sha256 of canonical UTF-8 JSON (sorted keys, compact separators); selector envelopes retain native query/status and ordered frame_ref entries into evidence.frames, including complete per-frame source and selection provenance. row_ref/monitor_ref/witness_refs resolve in evidence.monitors. Physical category occurrences, raw role rows and initial native resolution remain distinct. Type171 retains full row counts, decoded-row digest, per-group census, and one raw membership per group/condition branch.",
             "semantics": semantics(), "regions": regions}
 
 

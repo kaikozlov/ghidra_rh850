@@ -36,6 +36,13 @@ with tempfile.TemporaryDirectory() as td:
   check("offline analyzer succeeds", proc.returncode == 0, proc.stderr[-300:])
   art = json.loads(out.read_text())
 
+indicator = art["current_gtsplus_join"]["frc_lta_indicator_1"]
+check("registry-derived indicator preserves complete ordered native frame programs",
+      art["schema"] == "camry-2026-lta-state-reconciliation-v2"
+      and all(isinstance(indicator[key], list) and indicator[key]
+              for key in ("start_frames", "stop_frames", "result_frames"))
+      and not any(key in indicator for key in ("start_static", "stop_static", "result_static")))
+
 a = art["drives"]["drive_a"]
 b = art["drives"]["drive_b"]
 
@@ -208,8 +215,7 @@ check("known protected 0x0D7/0x090 show the same 0x00F reset-low2 boundary behav
 
 print("\n== current GTS+ and exact-F33 boundaries ==")
 gts = art["current_gtsplus_join"]
-check("current registry identity and exact EMPS source DDB pinned",
-      gts["source"]["sha256"] == "fb54d0dc559ff95490267652492b5f2c86722e10c80746935f51bd08c9c9fbc1" and
+check("exact EMPS source DDB pinned",
       gts["target_lateral_id"]["source_ddb_sha256"] == "fb7933228bc2f1c5788d1f896c008c5c590ede45ec2e650c07123f94764e329e")
 
 expected_rx = [

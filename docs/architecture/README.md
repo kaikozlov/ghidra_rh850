@@ -22,6 +22,7 @@ in [the variant index](../variants/README.md).
 | [toyota-request-invalidation-us20230166772.md](toyota-request-invalidation-us20230166772.md) | Close read of US20230166772A1: selective client invalidation/priority, latched handoff, and rejection feedback joined to TSS3/P6 evidence |
 | [toyota-selected-id-direct-request-arbitration.md](toyota-selected-id-direct-request-arbitration.md) | Close read of US20200070873A1: Toyota's selected-application-ID + direct-request latency optimization and its exact-F33 boundary |
 | [toyota-tss3-era-patent-landscape.md](toyota-tss3-era-patent-landscape.md) | 2019-2026 Toyota/Toyota-affiliated patent families for VMM arbitration, fail classes, source rejection, gateway topology, SecOC, steering, and attention tracking |
+| [toyota-tss4-domain-controller-architecture.md](toyota-tss4-domain-controller-architecture.md) | 2026 RAV4 TSS4 ADAS-domain-controller production topology joined to Denso/Toyota domain-architecture patents |
 | [toyota-driver-monitoring-us20220001874.md](toyota-driver-monitoring-us20220001874.md) | Deep review of Toyota US20220001874A1: steering touch, driver-monitor attention, hands-off timers, and exact-F33 transfer boundaries |
 | [system-mode-cluster.md](system-mode-cluster.md) | System-mode cluster: shutdown/reset mode machinery and handoff paths |
 

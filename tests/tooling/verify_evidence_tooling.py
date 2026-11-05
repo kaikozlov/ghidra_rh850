@@ -8,14 +8,19 @@ evidence extraction modes.
 """
 from __future__ import annotations
 
+import gzip
+import hashlib
 import json
 import os
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from unittest.mock import patch
 
 from tools import REPO_ROOT
+from tools.catalog import artifact_catalog
+from tools.techstream import extract_gtsplus_lifecycle_operations as operations_mod
 ROOT = REPO_ROOT
 VARIANT_TOOL = ROOT / "tools/variants/extract_variant_evidence.py"
 EXPORTER = ROOT / "tools/project/export_ghidra_project.sh"
@@ -122,6 +127,336 @@ check(
 )
 proc = subprocess.run([str(ARTIFACT_TOOL), "list", "fault_status"], cwd=ROOT, text=True, capture_output=True)
 check(proc.returncode == 0 and "camry_8965F3307000_fault_status.json" in proc.stdout, "artifact catalog provides substring discovery")
+
+# Directory ownership includes tracked nested proofs, not siblings or untracked files.
+with tempfile.TemporaryDirectory(prefix="artifact-directory-") as td:
+    fixture = Path(td)
+    producer = "tools/extract_package.py"
+    tracked_outputs = [
+        "data/generated/package.json",
+        "data/generated/package.proofs/first.json",
+        "data/generated/package.proofs/nested/second.json",
+    ]
+    sibling = "data/generated/package.proofs-other/unowned.json"
+    untracked = "data/generated/package.proofs/untracked.json"
+    (fixture / "tools").mkdir()
+    (fixture / producer).write_text(
+        'DEFAULT_OUT = REPO_ROOT / "data/generated/package.json"\n'
+        'ARTIFACT_OUTPUT_DIR = REPO_ROOT / "data/generated/package.proofs"\n',
+        encoding="utf-8",
+    )
+    for relative in [*tracked_outputs, sibling, untracked]:
+        path = fixture / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("{}\n", encoding="utf-8")
+    subprocess.run(["git", "init", "--quiet", str(fixture)], check=True, capture_output=True)
+    subprocess.run(
+        ["git", "add", "--force", "--", producer, *tracked_outputs, sibling],
+        cwd=fixture, check=True, capture_output=True,
+    )
+    old_repo = artifact_catalog.REPO
+    cached_queries = (
+        artifact_catalog._tracked_artifacts,
+        artifact_catalog._source_files_cached,
+        artifact_catalog._declared_outputs,
+        artifact_catalog._producer_candidates,
+    )
+    try:
+        artifact_catalog.REPO = fixture
+        for query in cached_queries:
+            query.cache_clear()
+        check(
+            all(artifact_catalog.producer_candidates(path) == [producer]
+                for path in tracked_outputs),
+            "declared output directory resolves its tracked nested proof producers",
+        )
+        check(
+            artifact_catalog.producer_candidates(sibling) == []
+            and artifact_catalog.producer_candidates(untracked) == []
+            and untracked not in artifact_catalog.tracked_artifacts(),
+            "output directory ownership excludes prefix siblings and untracked files",
+        )
+    finally:
+        artifact_catalog.REPO = old_repo
+        for query in cached_queries:
+            query.cache_clear()
+
+# Matching duplicate metadata must not attribute recovered code to its installed stub.
+with tempfile.TemporaryDirectory(prefix="operation-source-", dir=ROOT / "build/tmp") as td:
+    fixture = Path(td)
+    source_ref = "DS-4/bin/Protected.dll"
+    installed_sha = hashlib.sha256(b"installed stub").hexdigest()
+    analysis_sha = hashlib.sha256(b"recovered analysis image").hexdigest()
+    record_id, shard_id = "native-proof", "native-proof-shard"
+    payload = {"source_ref": source_ref, "source_sha256": installed_sha}
+    compressed = gzip.compress(json.dumps({
+        "schema": operations_mod.OPERATION_PROOF_SCHEMA,
+        "id": shard_id,
+        "records": {record_id: payload},
+    }).encode(), mtime=0)
+    (fixture / "proof.json.gz").write_bytes(compressed)
+    family = {
+        "native_evidence": {record_id: {
+            **payload,
+            "proof_location": {
+                "shard_id": shard_id, "record_id": record_id,
+                "json_pointer": "/records/" + record_id,
+            },
+        }},
+        "bodies": {},
+        "native_evidence_shards": [{
+            "id": shard_id, "path": "proof.json.gz",
+            "sha256": hashlib.sha256(compressed).hexdigest(),
+            "size": len(compressed), "record_count": 1,
+        }],
+    }
+    for recovered_admission in (False, True):
+        binding = {"installed_sha256": installed_sha}
+        if recovered_admission:
+            binding["recovered"] = {"sha256": analysis_sha}
+        specs = {
+            "families.CompiledUtilities": {operations_mod.OPERATION_PROOF_FAMILY: family},
+            "admission": {"native": {source_ref: binding}},
+            "families.PlatformAdapters": {
+                "gts-platform-canonical-source-identities": {"sources": {
+                    "protected-source": {
+                        "installed": {"path": source_ref, "sha256": installed_sha},
+                        "analysis": {"sha256": analysis_sha},
+                    },
+                }},
+            },
+        }
+        with patch.object(operations_mod, "OPERATION_SPEC_ROOT", fixture):
+            try:
+                operations_mod._operation_proof_specs(specs, [])
+            except ValueError:
+                pass
+            else:
+                raise AssertionError("installed-stub identity admitted for recovered code")
+        print(
+            "[PASS] native proof source follows "
+            + ("recovered admission" if recovered_admission else "canonical owner analysis")
+        )
+
+# Canonical family inputs use the same ordered last-definition precedence as the builder.
+with tempfile.TemporaryDirectory(prefix="operation-report-", dir=ROOT / "build/tmp") as td:
+    fixture = Path(td)
+    inputs = []
+    for ident, data in (
+        ("families.First", {
+            operations_mod.OPERATION_PROOF_FAMILY: {"native_evidence_shards": []},
+            "provider": {"algorithm": "return 3"},
+        }),
+        ("families.Second", {"provider": {"algorithm": "return 7"}}),
+    ):
+        raw = json.dumps({
+            "schema": "gtsplus-lifecycle-operations-spec-v1",
+            "id": ident, "kind": "families", "data": data,
+        }).encode()
+        source = fixture / (ident + ".json.gz")
+        compressed = gzip.compress(raw, mtime=0)
+        source.write_bytes(compressed)
+        inputs.append({
+            "id": ident, "kind": "families", "path": source.name,
+            "size": len(compressed), "sha256": hashlib.sha256(compressed).hexdigest(),
+        })
+    report = fixture / "report.json.gz"
+    report.write_bytes(gzip.compress(json.dumps({
+        "diagnostic_operations": {"native_proof_shards": []},
+        "operation_contract_inputs": inputs,
+    }).encode(), mtime=0))
+    restored = operations_mod.load_operation_report(report)
+    check(
+        restored["diagnostic_operations"]["shared_family_contracts"]["provider"]
+        == {"algorithm": "return 7"},
+        "retained operation contracts preserve ordered provider-definition precedence",
+    )
+    source.write_bytes(gzip.compress(raw.replace(b"return 7", b"return 9"), mtime=0))
+    try:
+        operations_mod.load_operation_report(report)
+    except ValueError as exc:
+        check("input drift" in str(exc), "changed canonical evidence is rejected before use")
+    else:
+        raise AssertionError("operation report accepted a changed canonical provider")
+
+provider_family = {
+    "caller": {
+        "dependencies": [{
+            "id": "provider.method",
+            "artifact": "provider",
+            "kind": "native-provider-reference",
+        }, {
+            "contract_id": "provider.method",
+            "artifact": "provider",
+            "kind": "native-provider-reference",
+        }, {
+            "id": "provider.method",
+            "artifact": "provider",
+            "types": ["CDrsMonSettingInfo", "CDrsMonStopInfo"],
+            "scope": "Payload provider",
+        }, {
+            "id": "provider.method",
+            "artifact": "provider",
+            "selector": ["contracts", {"id": "provider.method"}],
+            "body_sha256": "source-body-digest",
+        }, {
+            "id": "provider.method",
+            "artifact": "provider",
+            "name": "Method",
+            "proof_artifact": "provider-proof",
+            "source_sha256": "source-digest",
+            "status": "source-qualified",
+            "va": "0x10001000",
+        }, {
+            "id": "provider.method",
+            "artifact": "provider",
+            "binding": "First row for the selected ECU.",
+        }, {
+            "id": "provider.method",
+            "artifact": "provider",
+            "join": "Use the canonical serializer.",
+            "source_sha256": "source-digest",
+        }, {
+            "id": "provider.method",
+            "artifact": "provider",
+            "kind": "value-lifecycle",
+            "obligation": "Initialize the caller's stack value.",
+            "product": "DS-4",
+        }, {
+            "contract": "provider.method",
+            "artifact": "provider",
+            "abi": "int Method(unsigned key)",
+            "owner": "Provider",
+            "source_sha256": "source-digest",
+            "va": "0x10001000",
+        }],
+        "source_identity": {"id": "provider.method", "sha256": "source-digest"},
+        "facet_reference": {
+            "id": "provider.method", "artifact": "provider", "facet": "/methods/0x10001000",
+        },
+        "source_method_tuple": {
+            "contract_id": "provider.method",
+            "native_entry": "0x10001000",
+            "source_sha256": "source-digest",
+        },
+        "public_entry_join": {
+            "contract_id": "provider.method",
+            "actual_public_contract_id": "provider.method",
+            "ordinal": 1,
+            "symbol": "Method",
+            "VA": "0x10001000",
+        },
+        "exports": [{
+            "id": "provider.interface",
+            "name": "Method",
+            "ordinal": 1,
+            "va": "0x10001000",
+            "rva": "0x1000",
+            "source_sha256": "source-digest",
+            "abi": {"convention": "stdcall", "stack_bytes": 4},
+            "contract": "provider.method",
+            "evidence": {"instructions": "provider-proof#/functions/10001000"},
+            "virtual_dispatch": {"slot": "0x4c", "target_va": "0x10002000"},
+            "critical_section_10028838": False,
+        }],
+        "typed_joins": [{
+            "id": "provider.method",
+            "artifact": "provider",
+            "ABI": {"writer": "WriteTable(slot14)"},
+        }],
+        "typed_engine_callee_join": {
+            "contract_id": "provider.method",
+            "artifact": "provider",
+            "complete_local_methods": {"Dispatch": "0x1000e850"},
+            "native_proof": "provider-proof",
+        },
+        "canonical_joins": [{
+            "id": "provider.method",
+            "artifact": "provider",
+            "VAs": ["0x10001000"],
+            "purpose": "Call the existing provider.",
+            "qualified_children": [{
+                "id": "provider.child",
+                "kind": "native-body",
+                "native_evidence_ref": "proof.child",
+            }],
+            "qualified_value": {
+                "contract": "provider.value",
+                "artifact": "provider",
+                "ABI": "thiscall ctor()",
+                "json_pointer": "/variants/DS-4/constructor",
+            },
+        }],
+        "typed_provider_joins": {"private": {"0x10001000": {
+            "id": "provider.method",
+            "canonical_artifact": "provider",
+            "native_target": "0x10001000",
+            "actual_business_callers": ["caller.method"],
+            "semantic_status": "composed",
+        }}},
+        "actual_shared_private_provider_joins": [{
+            "id": "provider.method",
+            "interface_artifact": "provider",
+            "interface_snapshot": {"id": "provider.snapshot", "algorithm": "return 8"},
+        }],
+    },
+    "provider": {
+        "contracts": [{
+            "contract_id": "provider.method",
+            "native_entry": "0x10001000",
+            "source_sha256": "source-digest",
+            "algorithm": "return 7",
+        }],
+        "exports": [{
+            "id": "provider.export_body",
+            "name": "NativeMethod",
+            "ordinal": 2,
+            "contract": "provider.method",
+            "abi": {"convention": "stdcall", "stack_bytes": 4},
+            "native_body_ref": "provider-proof#/functions/10003000",
+            "critical_section_10028838": True,
+        }],
+    },
+}
+provider_call = {"id": "caller.method", "provider_contract_id": "provider.method"}
+provider_definitions, provider_links = operations_mod._operation_contract_links(
+    {}, provider_family, [provider_call],
+)
+check(
+    provider_links[0]["provider_definition_locations"]
+    == ["/shared_family_contracts/provider/contracts/0"],
+    "provider lookup selects the algorithm rather than reference-only joins",
+)
+check(
+    provider_definitions["provider.child"]
+    == ["/shared_family_contracts/caller/canonical_joins/0/qualified_children/0"]
+    and provider_definitions["provider.snapshot"]
+    == ["/shared_family_contracts/caller/actual_shared_private_provider_joins/0/interface_snapshot"]
+    and provider_definitions["provider.value"]
+    == ["/shared_family_contracts/caller/canonical_joins/0/qualified_value"]
+    and provider_definitions["provider.export_body"]
+    == ["/shared_family_contracts/provider/exports/0"],
+    "reference traversal retains nested body proxies and algorithm definitions",
+)
+try:
+    operations_mod._operation_contract_links(
+        {}, {"caller": provider_family["caller"]}, [provider_call],
+    )
+except ValueError:
+    pass
+else:
+    raise AssertionError("a provider reference concealed a missing algorithm definition")
+print("[PASS] reference-only providers remain unresolved without a definition")
+try:
+    operations_mod._operation_contract_links(
+        {}, provider_family,
+        [{"id": "caller.export", "provider_contract_id": "provider.interface"}],
+    )
+except ValueError:
+    pass
+else:
+    raise AssertionError("an export interface substituted for its selected algorithm")
+print("[PASS] export metadata cannot satisfy a semantic provider dependency")
 
 # BUILD_ROOT may be supplied through a symlink. The inventory guard must compare
 # canonical paths, and a failed headless preflight must not delete a pre-existing

@@ -58,9 +58,10 @@ from tools.targets.camry.live.camry_frc_lta_capture import (
     write_canbin_record,
 )
 from ddb_semantics import decode_p5_signal
+from tools.techstream.gts.registry import load_toyota_diag_registry
 
-REGISTRY_PATH = REPO / "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json"
-EXPECTED_SCHEMA = "toyota-diagnostics-registry-v6"
+REGISTRY_PATH = REPO / "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json.gz"
+EXPECTED_SCHEMA = "toyota-diagnostics-registry-v8"
 EXPECTED_PROFILE = "camry-2026-f33"
 DIAG_BUS = 0
 DEFAULT_POLL_HZ = 2.0
@@ -124,7 +125,7 @@ def rdbi_request_frame(did: int) -> bytes:
 
 
 def load_registry(path: Path = REGISTRY_PATH) -> dict[str, Any]:
-    registry = json.loads(path.read_text())
+    registry = load_toyota_diag_registry(path)
     profile = registry.get("profile", {})
     if registry.get("schema") != EXPECTED_SCHEMA or profile.get("profile") != EXPECTED_PROFILE:
         raise SystemExit(
@@ -264,7 +265,7 @@ def plan(targets: tuple[DidTarget, ...]) -> dict[str, Any]:
             for target in targets
         ],
         "decoder": {
-            "source": "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json",
+            "source": "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json.gz",
             "contract": P5_DECODER,
             "payload_origin": "UDS DID value bytes (positive SID/DID echo excluded)",
             "implementation": "tools/techstream/ddb_semantics.py::decode_p5_signal",

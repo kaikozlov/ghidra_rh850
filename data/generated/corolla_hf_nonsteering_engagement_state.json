@@ -740,8 +740,8 @@
       "sha256": "247ac13d7fd412418cf052e87c98ef15ef50ca6fc91a2741c5c0e2ed4f955fc6"
     },
     "gts_registry": {
-      "path": "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json",
-      "sha256": "c43ddf749a1b5bb158780bcb161f5c521aed566621051476077ed5ed1289e3fb"
+      "path": "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json.gz",
+      "sha256": "01c66eaaed00619b2813dc9b3436d0e9a67bd3112a4b027329469ba5728a2708"
     },
     "h_decompiler": {
       "path": "data/generated/corolla_8965H1202000_nonsteering_engagement_decompiler_evidence.json",

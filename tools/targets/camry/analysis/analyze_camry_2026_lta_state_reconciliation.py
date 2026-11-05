@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from tools.targets.camry.support import camry_f33_corpus as f33
 from tools import REPO_ROOT
+from tools.techstream.gts.registry import load_toyota_diag_registry
 import argparse
 import bisect
 import gzip
@@ -21,7 +22,7 @@ SOURCES = {
   "drive_a": RAW / "camry_relay_route_can_20260827.ndjson.gz",
   "drive_b": RAW / "camry_relay_lta_confirm_route_can_20260827.ndjson.gz",
 }
-REGISTRY = REPO / "data/generated/gtsplus_2026" / "toyota_diag_registry_camry_2026.json"
+REGISTRY = REPO / "data/generated/gtsplus_2026" / "toyota_diag_registry_camry_2026.json.gz"
 F33_INGRESS = REPO / "data/generated/camry_8965F3307000_external_lateral_ingress.json"
 F33_STATIC = REPO / "data/generated/camry_8965F3307000_codeflash.json"
 
@@ -485,7 +486,10 @@ def analyze_drive(path: Path) -> dict:
 
 def build() -> dict:
   drives = {name: analyze_drive(path) for name, path in SOURCES.items()}
-  registry = json.loads(REGISTRY.read_text())
+  registry = load_toyota_diag_registry(REGISTRY)
+  with gzip.open(REGISTRY, "rb") as stream:
+    registry_uncompressed_sha256 = hashlib.file_digest(stream, "sha256").hexdigest()
+    registry_uncompressed_size = stream.tell()
   emps = registry["catalogs"]["405"]
   target_lateral = next(row for row in emps["dids"]["0x1CEE"] if row["name"] == "Target Lateral ID")
   frc = registry["catalogs"]["498"]
@@ -501,7 +505,7 @@ def build() -> dict:
     for interval in drive["0x08A_b21"]["b21_11_intervals"]
   ]
   return {
-    "schema": "camry-2026-lta-state-reconciliation-v1",
+    "schema": "camry-2026-lta-state-reconciliation-v2",
     "drives": drives,
     "combined": {
       "b21_value_set_both_drives": sorted(set.intersection(*(
@@ -525,7 +529,11 @@ def build() -> dict:
       },
     },
     "current_gtsplus_join": {
-      "source": {"path": rel(REGISTRY), "size": REGISTRY.stat().st_size, "sha256": sha256(REGISTRY)},
+      "source": {
+        "path": rel(REGISTRY), "size": REGISTRY.stat().st_size, "sha256": sha256(REGISTRY),
+        "uncompressed_sha256": registry_uncompressed_sha256,
+        "uncompressed_size": registry_uncompressed_size,
+      },
       "emps_category": emps["category"],
       "target_lateral_id": {
         "did": "0x1CEE",
@@ -549,9 +557,9 @@ def build() -> dict:
         "category": frc["category"],
         "service": indicator["service"],
         "routine_id": indicator["routine_id"],
-        "start_static": indicator["start_static"],
-        "stop_static": indicator["stop_static"],
-        "result_static": indicator["result_static"],
+        "start_frames": indicator["start_frames"],
+        "stop_frames": indicator["stop_frames"],
+        "result_frames": indicator["result_frames"],
         "execution": indicator["execution"],
         "boundary": "FRC fixed RoutineControl/display active-test concept only; it is not a synchronized live-state oracle and is not used to name a captured byte.",
       },

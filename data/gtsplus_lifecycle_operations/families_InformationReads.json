@@ -1,0 +1,3156 @@
+{
+  "data": {
+    "information-fixed-string": {
+      "contracts": [
+        {
+          "body_bytes": "558bec8b450c56578bf903c00fb7f08b470885c0741250e88ae10b0083c404c747080000000033c06685f67426837d08007420566689770ce860e10b0056ff750889470850e8aff80b0083c4105f5e5dc2080033c966894f0c85c0740950e843e10b0083c404c74708000000005f5e5dc20800",
+          "body_length": 115,
+          "body_sha256": "cf0cfade9fbb6c176e8a1a7aff14b4e6b646c5c8188d14853d842221502d40e9",
+          "id": "InformationReads.CommandDataLib.GTSPlus.CCmdString.SetAt.wide.v1",
+          "mangled_abi": "?SetAt@CCmdString@@QAEXPB_WG@Z",
+          "product": "GTSPlus",
+          "rva": "0x21050",
+          "semantics": "wide",
+          "source_ref": "GTSPlus/bin/CommandDataLib.dll",
+          "source_sha256": "ffce12af45554a552dbf616545c4c4e02780702e4cb9e2c6f8235ff4f05c79ab",
+          "va": "0x10021050"
+        },
+        {
+          "body_bytes": "558bec578bf98b470885c0741250e813e20b0083c404c747080000000033c0668b4d0c6685c9742a837d08007424560fb7f15666894f0ce8e1e10b0056ff750889470850e830f90b0083c4105e5f5dc2080033c966894f0c85c0740950e8c4e10b0083c404c74708000000005f5dc20800",
+          "body_length": 113,
+          "body_sha256": "040a604c1e04491286363f1e6c820b566e8a8b24ec4c133b1b0d0c809abca210",
+          "id": "InformationReads.CommandDataLib.GTSPlus.CCmdString.SetAt.narrow.v1",
+          "mangled_abi": "?SetAt@CCmdString@@QAEXPBDG@Z",
+          "product": "GTSPlus",
+          "rva": "0x20fd0",
+          "semantics": "narrow",
+          "source_ref": "GTSPlus/bin/CommandDataLib.dll",
+          "source_sha256": "ffce12af45554a552dbf616545c4c4e02780702e4cb9e2c6f8235ff4f05c79ab",
+          "va": "0x10020fd0"
+        },
+        {
+          "body_bytes": "558bec8b450c56578bf903c00fb7f08b470885c0741250e8da8a0b0083c404c747080000000033c06685f67426837d08007420566689770ce8b08a0b0056ff750889470850e802a20b0083c4105f5e5dc2080033c966894f0c85c0740950e8938a0b0083c404c74708000000005f5e5dc20800",
+          "body_length": 115,
+          "body_sha256": "3df8d74b7d44bd95c1cfefb4e807d3b9a3cdbd3a6c668839fc9fa6e45d612876",
+          "id": "InformationReads.CommandDataLib.DS4.CCmdString.SetAt.wide.v1",
+          "mangled_abi": "?SetAt@CCmdString@@QAEXPB_WG@Z",
+          "product": "DS4",
+          "rva": "0x20ef0",
+          "semantics": "wide",
+          "source_ref": "DS-4/bin/CommandDataLib.dll",
+          "source_sha256": "b74766a99fbb4e929ab82b696a593fcd2f85b2d16fe726946208cd2772ecbeb3",
+          "va": "0x10020ef0"
+        },
+        {
+          "body_bytes": "558bec578bf98b470885c0741250e8638b0b0083c404c747080000000033c0668b4d0c6685c9742a837d08007424560fb7f15666894f0ce8318b0b0056ff750889470850e883a20b0083c4105e5f5dc2080033c966894f0c85c0740950e8148b0b0083c404c74708000000005f5dc20800",
+          "body_length": 113,
+          "body_sha256": "dc774717950d021d008fd6851896ac855c133188e0e35cc1611c6eb70cf623be",
+          "id": "InformationReads.CommandDataLib.DS4.CCmdString.SetAt.narrow.v1",
+          "mangled_abi": "?SetAt@CCmdString@@QAEXPBDG@Z",
+          "product": "DS4",
+          "rva": "0x20e70",
+          "semantics": "narrow",
+          "source_ref": "DS-4/bin/CommandDataLib.dll",
+          "source_sha256": "b74766a99fbb4e929ab82b696a593fcd2f85b2d16fe726946208cd2772ecbeb3",
+          "va": "0x10020e70"
+        }
+      ],
+      "schema": "gts-car-native-contract-v1",
+      "semantics": {
+        "narrow": {
+          "abi": "void __thiscall CCmdString::SetAt(char const* input,u16 count)",
+          "byte_length": "L=count",
+          "steps": [
+            "Free existing data first.",
+            "If count==0 or input==null set length0/data=null.",
+            "Else store count:u16,new byte[count],memcpy exactcount bytes."
+          ],
+          "terminator": "No appended terminator or encoding conversion."
+        },
+        "wide": {
+          "abi": "void __thiscall CCmdString::SetAt(wchar_t const* input,u16 count)",
+          "aliasing": "Self/source-alias input is not protected; input pointing to old owned buffer becomes freed before memcpy.",
+          "byte_length": "L=(2*count)&0xFFFF",
+          "exceptions": [
+            "Allocation failure invokes new-handler/retry then throws bad_alloc/bad_array_new_length; no status return. Existing old buffer already destroyed; length stored before allocating."
+          ],
+          "steps": [
+            "Free existing this.data+8 via delete[] and set data null before checking input.",
+            "If L==0 or input==null: this.length+0xC:u16=0 and data=null; returnvoid.",
+            "Otherwise set this.length=L; new byte[L] using throwing new[]; set this.data; memcpy(data,input,L); returnvoid."
+          ],
+          "terminator": "No NUL search, terminator insertion, widening, padding or zero-fill. Count is UTF16 units but stored length is BYTE count. Caller must include any desired terminator. Raw trailing source bytes are preserved even after embedded NUL."
+        }
+      },
+      "slice": "InformationReads.CommandDataLib.String"
+    },
+    "information-ordinary-cid": {
+      "analysis_kind": "offline static native; no ECU behavior observed",
+      "contracts": [
+        {
+          "body_length": 312,
+          "body_sha256": "4497b29f24486dd82766405814e253344228cc9860aa3d29fc48dcdcda2db7bb",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData.CCmdCommCidData.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??0CCmdCommCidData@@QAE@XZ",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xb0f0",
+          "semantics": "runtime.construct",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000b0f0"
+        },
+        {
+          "body_length": 312,
+          "body_sha256": "1ef81451654c7d249e53211d609cacfb59e53c3bcbb31fde7cc8733189eae31b",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData.CCmdCommCidData.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??0CCmdCommCidData@@QAE@XZ",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x8fe0",
+          "semantics": "runtime.construct",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x10008fe0"
+        },
+        {
+          "body_length": 60,
+          "body_sha256": "f604a4384bd5db46542717f08a65476fff1dc3fbbb52389ee6fb1e1bebadaf9c",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData.~CCmdCommCidData.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??1CCmdCommCidData@@UAE@XZ",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xb250",
+          "semantics": "runtime.destroy",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000b250"
+        },
+        {
+          "body_length": 60,
+          "body_sha256": "5a51c5d54311ed50c2e960d602da4bae92d12f4be8e6e4088adfcbb0b9c1707d",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData.~CCmdCommCidData.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??1CCmdCommCidData@@UAE@XZ",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x9140",
+          "semantics": "runtime.destroy",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x10009140"
+        },
+        {
+          "body_length": 52,
+          "body_sha256": "4932f262e83001571d510f7fb34a472a995df1ce3d69c087f7e4c6104704b114",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData.DeleteCidDataByteEnd.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?DeleteCidDataByteEnd@CCmdCommCidData@@QAEKJ@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xb3b0",
+          "semantics": "base.delete_tail",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000b3b0"
+        },
+        {
+          "body_length": 52,
+          "body_sha256": "3a8d75b86e080c3a52cce1c66932b054ddb8805790458116399bbc8c4a195779",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData.DeleteCidDataByteEnd.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?DeleteCidDataByteEnd@CCmdCommCidData@@QAEKJ@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x92a0",
+          "semantics": "base.delete_tail",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x100092a0"
+        },
+        {
+          "body_length": 479,
+          "body_sha256": "d511e8f915a963ba62130008450c29cc62a25d37e25342c1dd7fcd28fda59daa",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData.GetCidData.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?GetCidData@CCmdCommCidData@@QAEKEAAVCCommCachePlus@@@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xb3f0",
+          "semantics": "base.read",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000b3f0"
+        },
+        {
+          "body_length": 479,
+          "body_sha256": "0161f093cb59f1e54df7df74b3bb5604a2c35d41f84b55654d60cad87ebb0f77",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData.GetCidData.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?GetCidData@CCmdCommCidData@@QAEKEAAVCCommCachePlus@@@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x92e0",
+          "semantics": "base.read",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x100092e0"
+        },
+        {
+          "body_length": 625,
+          "body_sha256": "45541e2d1ef19496321db85e1b15de506192d251beeacc6672ed5a8cec924ace",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData.GetInstallingEcuList.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?GetInstallingEcuList@CCmdCommCidData@@QAEKPAUtagCOMMAND_DATA@@PAV?$CCmdList@VCCmdEcuSpecificInfo@@@@@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xb5d0",
+          "semantics": "base.installing",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000b5d0"
+        },
+        {
+          "body_length": 625,
+          "body_sha256": "cd1dc9d85fb0292a968ca194e732445452b79f3ed5ddd127d11305c44b6e6631",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData.GetInstallingEcuList.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?GetInstallingEcuList@CCmdCommCidData@@QAEKPAUtagCOMMAND_DATA@@PAV?$CCmdList@VCCmdEcuSpecificInfo@@@@@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x94c0",
+          "semantics": "base.installing",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x100094c0"
+        },
+        {
+          "body_length": 29,
+          "body_sha256": "a6b4cb67af55272d93346eaa3f6586fead9c9c3357782b9ee7808ab7b4a93696",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData.GetSupportId.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?GetSupportId@CCmdCommCidData@@QAEEJ@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xb850",
+          "semantics": "base.support_id",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000b850"
+        },
+        {
+          "body_length": 29,
+          "body_sha256": "507710c04850687ce1107099d63f06fe8c55e5b98f6e5b1d99199a08970e4978",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData.GetSupportId.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?GetSupportId@CCmdCommCidData@@QAEEJ@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x9740",
+          "semantics": "base.support_id",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x10009740"
+        },
+        {
+          "body_length": 10,
+          "body_sha256": "dace84fc27a7dfa3ba11465d115ffcf6bb97f0c50da46a11c4f6f86d45e4e10f",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData.GetSupportIdCount.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?GetSupportIdCount@CCmdCommCidData@@QAEJXZ",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xb870",
+          "semantics": "base.support_count",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000b870"
+        },
+        {
+          "body_length": 10,
+          "body_sha256": "dace84fc27a7dfa3ba11465d115ffcf6bb97f0c50da46a11c4f6f86d45e4e10f",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData.GetSupportIdCount.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?GetSupportIdCount@CCmdCommCidData@@QAEJXZ",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x9760",
+          "semantics": "base.support_count",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x10009760"
+        },
+        {
+          "body_length": 360,
+          "body_sha256": "83d6f17a15ae40781a5dad44ac337ddd567ac104f6516ae6da965e39679ff9a7",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData.GetSupportIdList.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?GetSupportIdList@CCmdCommCidData@@QAEKAAVCCommCachePlus@@@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xb880",
+          "semantics": "base.support",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000b880"
+        },
+        {
+          "body_length": 360,
+          "body_sha256": "1e91f9e963fbf80a146df880df823d3bc673056f9fdb5e01fa2c4b6d22856c5e",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData.GetSupportIdList.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?GetSupportIdList@CCmdCommCidData@@QAEKAAVCCommCachePlus@@@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x9770",
+          "semantics": "base.support",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x10009770"
+        },
+        {
+          "body_length": 44,
+          "body_sha256": "f4f17340a7db4f45b3cb296790ead8d7a0c07d70c86753220325893718d8423f",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData.InitCmdCommCidData.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?InitCmdCommCidData@CCmdCommCidData@@QAEKPAUtagCOMMAND_DATA@@GG@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xbb50",
+          "semantics": "base.init",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000bb50"
+        },
+        {
+          "body_length": 44,
+          "body_sha256": "f4f17340a7db4f45b3cb296790ead8d7a0c07d70c86753220325893718d8423f",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData.InitCmdCommCidData.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?InitCmdCommCidData@CCmdCommCidData@@QAEKPAUtagCOMMAND_DATA@@GG@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x9a40",
+          "semantics": "base.init",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x10009a40"
+        },
+        {
+          "body_length": 92,
+          "body_sha256": "40f3400f8397bf7dfcaa19fe709b8501851524b564f883aa9218f14c88b72e3e",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData.JudgeCidDataAscii.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?JudgeCidDataAscii@CCmdCommCidData@@QAEKAAVCCmdStringName@@PAH@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xbb80",
+          "semantics": "base.ascii",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000bb80"
+        },
+        {
+          "body_length": 92,
+          "body_sha256": "40f3400f8397bf7dfcaa19fe709b8501851524b564f883aa9218f14c88b72e3e",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData.JudgeCidDataAscii.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?JudgeCidDataAscii@CCmdCommCidData@@QAEKAAVCCmdStringName@@PAH@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x9a70",
+          "semantics": "base.ascii",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x10009a70"
+        },
+        {
+          "body_length": 236,
+          "body_sha256": "250f6614abed5c85cc8185b0a2fb685d9c30c6a6ab54c9cff6e9785db42eb49a",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData.RcvFrmMaskCheck.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?RcvFrmMaskCheck@CCmdCommCidData@@QAEKABVCCommFrameData@@@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xbbe0",
+          "semantics": "base.mask",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000bbe0"
+        },
+        {
+          "body_length": 236,
+          "body_sha256": "16be847bbdadcad2faa1500ae69f6d578f6e51695f49f8b5894ab082cf145568",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData.RcvFrmMaskCheck.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?RcvFrmMaskCheck@CCmdCommCidData@@QAEKABVCCommFrameData@@@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x9ad0",
+          "semantics": "base.mask",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x10009ad0"
+        },
+        {
+          "body_length": 360,
+          "body_sha256": "4faafa3b2f2bfa3bbc7d2abf5cd865028007c777c84c03186dd3e2968fcfbaf5",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData.StoreCidData.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?StoreCidData@CCmdCommCidData@@QAEKAAVCCmdStringName@@J@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xbcd0",
+          "semantics": "base.store",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000bcd0"
+        },
+        {
+          "body_length": 360,
+          "body_sha256": "7ee8b2aaadcaf845d22a6454aa3726ea73ec9df0d66479069f2aa14a4521563a",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData.StoreCidData.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?StoreCidData@CCmdCommCidData@@QAEKAAVCCmdStringName@@J@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x9bc0",
+          "semantics": "base.store",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x10009bc0"
+        },
+        {
+          "body_length": 9,
+          "body_sha256": "917770f596b64ea23dd67ed07d6bdf9c4f03789d38c3cf44415ecbac4a658ac5",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_1AB0.CCmdCommCidData_1AB0.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??0CCmdCommCidData_1AB0@@QAE@XZ",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xbe50",
+          "semantics": "runtime.construct",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000be50"
+        },
+        {
+          "body_length": 9,
+          "body_sha256": "c90552e32812e704d0aeb5c2eab37f96e7a40df8e7a7cc987a1ed5ba9a041e7f",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_1AB0.CCmdCommCidData_1AB0.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??0CCmdCommCidData_1AB0@@QAE@XZ",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x9d40",
+          "semantics": "runtime.construct",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x10009d40"
+        },
+        {
+          "body_length": 7,
+          "body_sha256": "c7b5959b8010ae93431242c54a54e7c21183e70cfc3dc93856a3165fe7c6cd92",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_1AB0.~CCmdCommCidData_1AB0.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??1CCmdCommCidData_1AB0@@UAE@XZ",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xbe60",
+          "semantics": "runtime.destroy",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000be60"
+        },
+        {
+          "body_length": 7,
+          "body_sha256": "c642c66c0b51cc4682701a1765e68321b9d322c48ecd36befe42c9a1286e45a1",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_1AB0.~CCmdCommCidData_1AB0.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??1CCmdCommCidData_1AB0@@UAE@XZ",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x9d50",
+          "semantics": "runtime.destroy",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x10009d50"
+        },
+        {
+          "body_length": 731,
+          "body_sha256": "374fe9e25372353198c7487d4c437b78f31eb592b0b326c01722bf09b387ef04",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_1AB0.GetCidData.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?GetCidData@CCmdCommCidData_1AB0@@QAEKPAUtagCOMMAND_DATA@@AAVCCommCachePlus@@AAVCCmdStringName@@@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xbf20",
+          "semantics": "B0.read_store",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000bf20"
+        },
+        {
+          "body_length": 731,
+          "body_sha256": "d22086312991e2dd6c0760f2ec74f4200c1bbd446d1fa62ce072f2de911d587c",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_1AB0.GetCidData.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?GetCidData@CCmdCommCidData_1AB0@@QAEKPAUtagCOMMAND_DATA@@AAVCCommCachePlus@@AAVCCmdStringName@@@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x9e10",
+          "semantics": "B0.read_store",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x10009e10"
+        },
+        {
+          "body_length": 28,
+          "body_sha256": "4f1a172e3a3657423e9a3fe6152fd8776eaf984c31dc0dfc2dc0d573d1e41113",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_1A_A4.CCmdCommCidData_1A_A4.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??0CCmdCommCidData_1A_A4@@QAE@XZ",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xc200",
+          "semantics": "runtime.construct",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000c200"
+        },
+        {
+          "body_length": 28,
+          "body_sha256": "053c8ad37235a6eb02f3ca2b09c295812ba88455853dc969d90811fb11dc63e5",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_1A_A4.CCmdCommCidData_1A_A4.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??0CCmdCommCidData_1A_A4@@QAE@XZ",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0xa0f0",
+          "semantics": "runtime.construct",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000a0f0"
+        },
+        {
+          "body_length": 11,
+          "body_sha256": "96cedc7f104fe71a6eab2e6b5c1a3eb9de8b3d1d9d66449ba4d1f471536f614d",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_1A_A4.~CCmdCommCidData_1A_A4.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??1CCmdCommCidData_1A_A4@@UAE@XZ",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xc220",
+          "semantics": "runtime.destroy",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000c220"
+        },
+        {
+          "body_length": 11,
+          "body_sha256": "aa821e1d59350c1abf27529d464f4656d71adc6a0f17d48b41ee15299ce28fb5",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_1A_A4.~CCmdCommCidData_1A_A4.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??1CCmdCommCidData_1A_A4@@UAE@XZ",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0xa110",
+          "semantics": "runtime.destroy",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000a110"
+        },
+        {
+          "body_length": 254,
+          "body_sha256": "bded2f8148f8b047653b21fb803c3ea29924df93a75b2d9a22ed6aadb238210c",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_1A_A4.GetCidData_A4.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?GetCidData_A4@CCmdCommCidData_1A_A4@@QAEKAAVCCommCachePlus@@J@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xc2e0",
+          "semantics": "A4.read",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000c2e0"
+        },
+        {
+          "body_length": 254,
+          "body_sha256": "bde9788e896bd8e2f9089173116c53fc88e068bc71cf5284e80a79b23cf29496",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_1A_A4.GetCidData_A4.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?GetCidData_A4@CCmdCommCidData_1A_A4@@QAEKAAVCCommCachePlus@@J@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0xa1d0",
+          "semantics": "A4.read",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000a1d0"
+        },
+        {
+          "body_length": 120,
+          "body_sha256": "2e12f83fc205a63557a4de5c7e14291fc8c06674b1b437a2ac1293f3726585c3",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_1A_A4.GetCidSndCount.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?GetCidSndCount@CCmdCommCidData_1A_A4@@QAEKAAVCCommCachePlus@@PAJ@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xc3e0",
+          "semantics": "A4.count",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000c3e0"
+        },
+        {
+          "body_length": 120,
+          "body_sha256": "ed365e0b1aaa0c5b1c5efccc2a0e857c11e02f5a10fb7887688a77ed8a058c75",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_1A_A4.GetCidSndCount.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?GetCidSndCount@CCmdCommCidData_1A_A4@@QAEKAAVCCommCachePlus@@PAJ@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0xa2d0",
+          "semantics": "A4.count",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000a2d0"
+        },
+        {
+          "body_length": 455,
+          "body_sha256": "141141a1812530d4175a9833c6af6a07ddeba628f95d969857ba08c9eb85638d",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_1A_A4.GetSupportIdList_1A_A4.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?GetSupportIdList_1A_A4@CCmdCommCidData_1A_A4@@QAEKAAVCCommCachePlus@@PAE@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xc460",
+          "semantics": "A4.support",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000c460"
+        },
+        {
+          "body_length": 455,
+          "body_sha256": "d1521bb1c068158355a9c3064080a3da49905a2fc973ff28096a6d7fc4a87d42",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_1A_A4.GetSupportIdList_1A_A4.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?GetSupportIdList_1A_A4@CCmdCommCidData_1A_A4@@QAEKAAVCCommCachePlus@@PAE@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0xa350",
+          "semantics": "A4.support",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000a350"
+        },
+        {
+          "body_length": 42,
+          "body_sha256": "d01934cfb806f4fba68e06e8e5a209dd7c796a14b584f4ba6fc25d5723ec63ba",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_1A_A4.InitCmdCommCidData_A4.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?InitCmdCommCidData_A4@CCmdCommCidData_1A_A4@@QAEKPAUtagCOMMAND_DATA@@G@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xc630",
+          "semantics": "A4.init",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000c630"
+        },
+        {
+          "body_length": 42,
+          "body_sha256": "d01934cfb806f4fba68e06e8e5a209dd7c796a14b584f4ba6fc25d5723ec63ba",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_1A_A4.InitCmdCommCidData_A4.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?InitCmdCommCidData_A4@CCmdCommCidData_1A_A4@@QAEKPAUtagCOMMAND_DATA@@G@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0xa520",
+          "semantics": "A4.init",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000a520"
+        },
+        {
+          "body_length": 181,
+          "body_sha256": "d33fe9e8a9a5ea2531e1ad4fd7b6ac7d0308d2147e175eb59aaf7359b6904abe",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_1A_A4.JudgeCidDataAscii.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?JudgeCidDataAscii@CCmdCommCidData_1A_A4@@QAEKJPAH@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xc660",
+          "semantics": "A4.ascii",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000c660"
+        },
+        {
+          "body_length": 181,
+          "body_sha256": "cc70cab194ca4d6f3c04056b2c2d10a61d8555421eff762a7a63881826d6f585",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_1A_A4.JudgeCidDataAscii.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?JudgeCidDataAscii@CCmdCommCidData_1A_A4@@QAEKJPAH@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0xa550",
+          "semantics": "A4.ascii",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000a550"
+        },
+        {
+          "body_length": 447,
+          "body_sha256": "c7730ff377543fb000972e50900e67fbf3bc69b8070d0c5af9835a7ffd1415ce",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_1A_A4.StoreCidData_A4.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?StoreCidData_A4@CCmdCommCidData_1A_A4@@QAEKAAVCCmdStringName@@J@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xc720",
+          "semantics": "A4.store",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000c720"
+        },
+        {
+          "body_length": 447,
+          "body_sha256": "ab70e25fe881a8d945144bb6a818b49b724e0e6d41567c8ee2f49476920d8263",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_1A_A4.StoreCidData_A4.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?StoreCidData_A4@CCmdCommCidData_1A_A4@@QAEKAAVCCmdStringName@@J@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0xa610",
+          "semantics": "A4.store",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000a610"
+        },
+        {
+          "body_length": 28,
+          "body_sha256": "a1c25df5a8de6f2b6af4f7125e1e0087dd9139c3ba42e8267dfbb0798310ba51",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_1A_AA.CCmdCommCidData_1A_AA.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??0CCmdCommCidData_1A_AA@@QAE@XZ",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xc8e0",
+          "semantics": "runtime.construct",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000c8e0"
+        },
+        {
+          "body_length": 28,
+          "body_sha256": "5dbe28e242d52732e0e528436d7ab03b923a515c90aa4e37809af501c350a023",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_1A_AA.CCmdCommCidData_1A_AA.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??0CCmdCommCidData_1A_AA@@QAE@XZ",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0xa7d0",
+          "semantics": "runtime.construct",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000a7d0"
+        },
+        {
+          "body_length": 11,
+          "body_sha256": "ec4cdbe389c9ad8cb71983d0a76194dcb815bb830270b1a6f3d417f82ad990d1",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_1A_AA.~CCmdCommCidData_1A_AA.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??1CCmdCommCidData_1A_AA@@UAE@XZ",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xc900",
+          "semantics": "runtime.destroy",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000c900"
+        },
+        {
+          "body_length": 11,
+          "body_sha256": "8623dbfa51ce2f0ec19d125795a034a032aa462f5cba52f726b7cc840d525031",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_1A_AA.~CCmdCommCidData_1A_AA.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??1CCmdCommCidData_1A_AA@@UAE@XZ",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0xa7f0",
+          "semantics": "runtime.destroy",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000a7f0"
+        },
+        {
+          "body_length": 227,
+          "body_sha256": "3493f1da7244bbe828fe58c7cfa85650108c810a0840d87876eec9a66201707f",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_1A_AA.GetCidData_AA.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?GetCidData_AA@CCmdCommCidData_1A_AA@@QAEKAAVCCommCachePlus@@@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xc9c0",
+          "semantics": "AA.read",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000c9c0"
+        },
+        {
+          "body_length": 227,
+          "body_sha256": "41ac84e056913ea242afad91d658b7e7fec80363d63478d096d60e4c48af4cd1",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_1A_AA.GetCidData_AA.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?GetCidData_AA@CCmdCommCidData_1A_AA@@QAEKAAVCCommCachePlus@@@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0xa8b0",
+          "semantics": "AA.read",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000a8b0"
+        },
+        {
+          "body_length": 455,
+          "body_sha256": "c2c6a095901ce2044f51c763e733dc2a1e4fabbc11d70f5e9da8a738e98a478b",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_1A_AA.GetSupportIdList_1A_AA.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?GetSupportIdList_1A_AA@CCmdCommCidData_1A_AA@@QAEKAAVCCommCachePlus@@PAE@Z",
+          "parameters": {
+            "fallback": "0xAA"
+          },
+          "product": "GTSPlus",
+          "rva": "0xcab0",
+          "semantics": "A4.support",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000cab0"
+        },
+        {
+          "body_length": 455,
+          "body_sha256": "e29b151f9b16af0bf1faff02a9ee7414579f26ad31f70aa7da992c7755acb1b8",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_1A_AA.GetSupportIdList_1A_AA.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?GetSupportIdList_1A_AA@CCmdCommCidData_1A_AA@@QAEKAAVCCommCachePlus@@PAE@Z",
+          "parameters": {
+            "fallback": "0xAA"
+          },
+          "product": "DS4",
+          "rva": "0xa9a0",
+          "semantics": "A4.support",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000a9a0"
+        },
+        {
+          "body_length": 42,
+          "body_sha256": "d01934cfb806f4fba68e06e8e5a209dd7c796a14b584f4ba6fc25d5723ec63ba",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_1A_AA.InitCmdCommCidData_AA.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?InitCmdCommCidData_AA@CCmdCommCidData_1A_AA@@QAEKPAUtagCOMMAND_DATA@@G@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xcc80",
+          "semantics": "A4.init",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000cc80"
+        },
+        {
+          "body_length": 42,
+          "body_sha256": "d01934cfb806f4fba68e06e8e5a209dd7c796a14b584f4ba6fc25d5723ec63ba",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_1A_AA.InitCmdCommCidData_AA.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?InitCmdCommCidData_AA@CCmdCommCidData_1A_AA@@QAEKPAUtagCOMMAND_DATA@@G@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0xab70",
+          "semantics": "A4.init",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000ab70"
+        },
+        {
+          "body_length": 397,
+          "body_sha256": "bce90513c69068f48dba43ca131a11db6bcfce98249fc776b546e1a69cd283a6",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_1A_AA.StoreCidData_AA.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?StoreCidData_AA@CCmdCommCidData_1A_AA@@QAEKAAVCCmdStringName@@@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xccb0",
+          "semantics": "AA.store",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000ccb0"
+        },
+        {
+          "body_length": 397,
+          "body_sha256": "4cddfaaa23fd97451bf7f7713ced94280f2ff6c352a6557ea05c9c635a50af9a",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_1A_AA.StoreCidData_AA.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?StoreCidData_AA@CCmdCommCidData_1A_AA@@QAEKAAVCCmdStringName@@@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0xaba0",
+          "semantics": "AA.store",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000aba0"
+        },
+        {
+          "body_length": 69,
+          "body_sha256": "9f8af38a1e3d1124c2ad784f5de3d10bcbc6dd8eb77ae5bbc2cc8d7d4c28dfff",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_FrontRadarSensor.CCmdCommCidData_FrontRadarSensor.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??0CCmdCommCidData_FrontRadarSensor@@QAE@XZ",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xce40",
+          "semantics": "runtime.construct",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000ce40"
+        },
+        {
+          "body_length": 69,
+          "body_sha256": "952d5a7fd2e928b1cb6a8dd49f0c4a3f9963e63682f7296bff4c0d0dd1429a56",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_FrontRadarSensor.CCmdCommCidData_FrontRadarSensor.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??0CCmdCommCidData_FrontRadarSensor@@QAE@XZ",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0xb400",
+          "semantics": "runtime.construct",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000b400"
+        },
+        {
+          "body_length": 11,
+          "body_sha256": "f8947a78b7d4d7c59baa145e7ca4e4a151ec100a40092cda1901ea1b8763dbb8",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_FrontRadarSensor.~CCmdCommCidData_FrontRadarSensor.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??1CCmdCommCidData_FrontRadarSensor@@UAE@XZ",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xce90",
+          "semantics": "runtime.destroy",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000ce90"
+        },
+        {
+          "body_length": 11,
+          "body_sha256": "ae8c2be6ccd7d6205207546c237e523655aab0b87a2c88e35ced0aacaa645526",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_FrontRadarSensor.~CCmdCommCidData_FrontRadarSensor.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??1CCmdCommCidData_FrontRadarSensor@@UAE@XZ",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0xb450",
+          "semantics": "runtime.destroy",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000b450"
+        },
+        {
+          "body_length": 490,
+          "body_sha256": "a605a944c55f2c6d10c0e22c37f4ac72e4a40bde2b272b8eb604259e33d0747e",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_FrontRadarSensor.GetCidData.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?GetCidData@CCmdCommCidData_FrontRadarSensor@@QAEKEAAVCCommCachePlus@@@Z",
+          "parameters": {
+            "bus": "this+38:u16",
+            "noInit": true,
+            "targetOverride": "this+34:u32"
+          },
+          "product": "GTSPlus",
+          "rva": "0xcf50",
+          "semantics": "base.read",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000cf50"
+        },
+        {
+          "body_length": 490,
+          "body_sha256": "8a5269c638f580d26adeeb2dfa56334615a8309aae8a1d79fbd14fcbc6aba174",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_FrontRadarSensor.GetCidData.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?GetCidData@CCmdCommCidData_FrontRadarSensor@@QAEKEAAVCCommCachePlus@@@Z",
+          "parameters": {
+            "bus": "this+38:u16",
+            "noInit": true,
+            "targetOverride": "this+34:u32"
+          },
+          "product": "DS4",
+          "rva": "0xb510",
+          "semantics": "base.read",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000b510"
+        },
+        {
+          "body_length": 205,
+          "body_sha256": "3a85fdde2817e65b643ec646e4313646c87e2565e4fd74aaa86d4e759ca4b97e",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_FrontRadarSensor.GetCommInfoFrontRadarSensor.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?GetCommInfoFrontRadarSensor@CCmdCommCidData_FrontRadarSensor@@QAEKK@Z",
+          "parameters": {
+            "detail": "0x4F"
+          },
+          "product": "GTSPlus",
+          "rva": "0xd140",
+          "semantics": "special.info",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000d140"
+        },
+        {
+          "body_length": 205,
+          "body_sha256": "2cd7f9dd8a21e671b2bd8e09dd3d709e1626af502e159b8885efce444e4a6371",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_FrontRadarSensor.GetCommInfoFrontRadarSensor.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?GetCommInfoFrontRadarSensor@CCmdCommCidData_FrontRadarSensor@@QAEKK@Z",
+          "parameters": {
+            "detail": "0x4F"
+          },
+          "product": "DS4",
+          "rva": "0xb700",
+          "semantics": "special.info",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000b700"
+        },
+        {
+          "body_length": 362,
+          "body_sha256": "d716171e765b65eebe5c4e654c6e6a89abab9c94c12fd95a07d323c422689343",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_FrontRadarSensor.GetSupportIdList.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?GetSupportIdList@CCmdCommCidData_FrontRadarSensor@@QAEKAAVCCommCachePlus@@@Z",
+          "parameters": {
+            "bus": "this+38:u16",
+            "noInit": true,
+            "targetOverride": "this+34:u32"
+          },
+          "product": "GTSPlus",
+          "rva": "0xd210",
+          "semantics": "base.support",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000d210"
+        },
+        {
+          "body_length": 362,
+          "body_sha256": "8e47bad3e8a0ab3a082b0db8067fa07e697db8349a7b4275b5ef1e24fc5c412e",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_FrontRadarSensor.GetSupportIdList.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?GetSupportIdList@CCmdCommCidData_FrontRadarSensor@@QAEKAAVCCommCachePlus@@@Z",
+          "parameters": {
+            "bus": "this+38:u16",
+            "noInit": true,
+            "targetOverride": "this+34:u32"
+          },
+          "product": "DS4",
+          "rva": "0xb7d0",
+          "semantics": "base.support",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000b7d0"
+        },
+        {
+          "body_length": 360,
+          "body_sha256": "0b85d158ec5dfa88ce2da6ffe6900f3649cf0c3f56641d15c04904385d56eded",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_FrontRadarSensor.StoreCidData.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?StoreCidData@CCmdCommCidData_FrontRadarSensor@@QAEKAAVCCmdStringName@@J@Z",
+          "parameters": {
+            "prefix": "FrontRadarSensor_CID"
+          },
+          "product": "GTSPlus",
+          "rva": "0xd380",
+          "semantics": "base.store",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000d380"
+        },
+        {
+          "body_length": 360,
+          "body_sha256": "bcfecfb6f73fe8dedf173d4047a5999eb4bdfda67c2cf9d972fa65bb422c3e82",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_FrontRadarSensor.StoreCidData.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?StoreCidData@CCmdCommCidData_FrontRadarSensor@@QAEKAAVCCmdStringName@@J@Z",
+          "parameters": {
+            "prefix": "FrontRadarSensor_CID"
+          },
+          "product": "DS4",
+          "rva": "0xb940",
+          "semantics": "base.store",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000b940"
+        },
+        {
+          "body_length": 69,
+          "body_sha256": "545e1174c9235b64ed018bb5553aa1ce0bbf8ad5f6504ef1d2311a6269b23bd0",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_HICM.CCmdCommCidData_HICM.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??0CCmdCommCidData_HICM@@QAE@XZ",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xd510",
+          "semantics": "runtime.construct",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000d510"
+        },
+        {
+          "body_length": 69,
+          "body_sha256": "7631bdf31c1ff6d387f489471d2009fb4ba4bc9b50d7fc860514ad5f8f1eab27",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_HICM.CCmdCommCidData_HICM.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??0CCmdCommCidData_HICM@@QAE@XZ",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0xbab0",
+          "semantics": "runtime.construct",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000bab0"
+        },
+        {
+          "body_length": 11,
+          "body_sha256": "355a05182b692509a0f4575f9c3e540dbbc7c2ee43df31f4f9b9bd8c9d724361",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_HICM.~CCmdCommCidData_HICM.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??1CCmdCommCidData_HICM@@UAE@XZ",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xd560",
+          "semantics": "runtime.destroy",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000d560"
+        },
+        {
+          "body_length": 11,
+          "body_sha256": "258d429fa5034f4e659765dadb34cc257008fe41463f094a36d2332e26b043d8",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_HICM.~CCmdCommCidData_HICM.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??1CCmdCommCidData_HICM@@UAE@XZ",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0xbb00",
+          "semantics": "runtime.destroy",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000bb00"
+        },
+        {
+          "body_length": 490,
+          "body_sha256": "a79f99d0c56d9d24234d478807b3d4aefd49d3ab05c15854fcf33fa9c4a75de6",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_HICM.GetCidData.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?GetCidData@CCmdCommCidData_HICM@@QAEKEAAVCCommCachePlus@@@Z",
+          "parameters": {
+            "bus": "this+38:u16",
+            "noInit": true,
+            "targetOverride": "this+34:u32"
+          },
+          "product": "GTSPlus",
+          "rva": "0xd620",
+          "semantics": "base.read",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000d620"
+        },
+        {
+          "body_length": 490,
+          "body_sha256": "4ed621f6672a35a226be25bb4cae064df9a4b1a228d6afe40f1bce300b7f3721",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_HICM.GetCidData.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?GetCidData@CCmdCommCidData_HICM@@QAEKEAAVCCommCachePlus@@@Z",
+          "parameters": {
+            "bus": "this+38:u16",
+            "noInit": true,
+            "targetOverride": "this+34:u32"
+          },
+          "product": "DS4",
+          "rva": "0xbbc0",
+          "semantics": "base.read",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000bbc0"
+        },
+        {
+          "body_length": 205,
+          "body_sha256": "24df29219ca1af427dc443ad63df633e5227c33b224254dd44f1edaefd22b6ef",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_HICM.GetCommInfoHICM.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?GetCommInfoHICM@CCmdCommCidData_HICM@@QAEKK@Z",
+          "parameters": {
+            "detail": "0x4A"
+          },
+          "product": "GTSPlus",
+          "rva": "0xd810",
+          "semantics": "special.info",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000d810"
+        },
+        {
+          "body_length": 205,
+          "body_sha256": "2540c3c801874fb1a4de8dec3891b334d3d77d8c89cf443c82b6e92f81432cf0",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_HICM.GetCommInfoHICM.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?GetCommInfoHICM@CCmdCommCidData_HICM@@QAEKK@Z",
+          "parameters": {
+            "detail": "0x4A"
+          },
+          "product": "DS4",
+          "rva": "0xbdb0",
+          "semantics": "special.info",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000bdb0"
+        },
+        {
+          "body_length": 362,
+          "body_sha256": "1d9aab9314ff50d6f2059f9fab7f08fab775a3c2ae42f9aea5460f1e6c729f41",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_HICM.GetSupportIdList.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?GetSupportIdList@CCmdCommCidData_HICM@@QAEKAAVCCommCachePlus@@@Z",
+          "parameters": {
+            "bus": "this+38:u16",
+            "noInit": true,
+            "targetOverride": "this+34:u32"
+          },
+          "product": "GTSPlus",
+          "rva": "0xd8e0",
+          "semantics": "base.support",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000d8e0"
+        },
+        {
+          "body_length": 362,
+          "body_sha256": "66d560e307765f922e37909f7a5583cedb3750d059e09cb00ec84d37da23c5c5",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_HICM.GetSupportIdList.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?GetSupportIdList@CCmdCommCidData_HICM@@QAEKAAVCCommCachePlus@@@Z",
+          "parameters": {
+            "bus": "this+38:u16",
+            "noInit": true,
+            "targetOverride": "this+34:u32"
+          },
+          "product": "DS4",
+          "rva": "0xbe80",
+          "semantics": "base.support",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000be80"
+        },
+        {
+          "body_length": 360,
+          "body_sha256": "bef08143c0216ca1518239601d07673ca1847c3efcc603dfc36a1f6fca800c3b",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_HICM.StoreCidData.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?StoreCidData@CCmdCommCidData_HICM@@QAEKAAVCCmdStringName@@J@Z",
+          "parameters": {
+            "prefix": "HICM_CID"
+          },
+          "product": "GTSPlus",
+          "rva": "0xda50",
+          "semantics": "base.store",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000da50"
+        },
+        {
+          "body_length": 360,
+          "body_sha256": "32708ebbd28d33bbfa120fe1d41f4eec5b05610144766092b1ed4d37b690763f",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_HICM.StoreCidData.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?StoreCidData@CCmdCommCidData_HICM@@QAEKAAVCCmdStringName@@J@Z",
+          "parameters": {
+            "prefix": "HICM_CID"
+          },
+          "product": "DS4",
+          "rva": "0xbff0",
+          "semantics": "base.store",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000bff0"
+        },
+        {
+          "body_length": 133,
+          "body_sha256": "208ee7a50acbaeb994f47232ac5ecd3f1bb38b78395d4793ec522db03b99808e",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_PSA.CCmdCommCidData_PSA.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??0CCmdCommCidData_PSA@@QAE@XZ",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xdbf0",
+          "semantics": "runtime.construct",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000dbf0"
+        },
+        {
+          "body_length": 133,
+          "body_sha256": "e0e1b577a936bfe79614f3cc5353677ba08fee2d12b9af6544d4ecf340ee3b51",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_PSA.CCmdCommCidData_PSA.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??0CCmdCommCidData_PSA@@QAE@XZ",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0xc190",
+          "semantics": "runtime.construct",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000c190"
+        },
+        {
+          "body_length": 26,
+          "body_sha256": "f98fab7eaffa9be2791f6f7db891d220c0110c5fb6a5bc1992dbf235ca3691b9",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_PSA.~CCmdCommCidData_PSA.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??1CCmdCommCidData_PSA@@UAE@XZ",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xdc80",
+          "semantics": "runtime.destroy",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000dc80"
+        },
+        {
+          "body_length": 26,
+          "body_sha256": "4f99da6110bc537f4eb111287618d4f6d9974438e57bf9d76b2cdbffb4338bf5",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_PSA.~CCmdCommCidData_PSA.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??1CCmdCommCidData_PSA@@UAE@XZ",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0xc220",
+          "semantics": "runtime.destroy",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000c220"
+        },
+        {
+          "body_length": 214,
+          "body_sha256": "34c4036fdcb7ad0e0c39804cd66a81a07e94ed7734c51621b36db38be03e7928",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_PSA.ByteToHexStr.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?ByteToHexStr@CCmdCommCidData_PSA@@IAEKPAEJPAVCCmdString@@@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xdd50",
+          "semantics": "PSA.hex",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000dd50"
+        },
+        {
+          "body_length": 214,
+          "body_sha256": "d18631de01814037d07acc2034f27a09c3db1b8c4ba1219088f353c64a98b2e1",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_PSA.ByteToHexStr.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?ByteToHexStr@CCmdCommCidData_PSA@@IAEKPAEJPAVCCmdString@@@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0xc2f0",
+          "semantics": "PSA.hex",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000c2f0"
+        },
+        {
+          "body_length": 71,
+          "body_sha256": "2deb6238739fee80700f35c57428b9a0d89101d08b691e36328700aa722e65fb",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_PSA.CheckCidDataBCD.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?CheckCidDataBCD@CCmdCommCidData_PSA@@IAEKE@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xde30",
+          "semantics": "PSA.bcd",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000de30"
+        },
+        {
+          "body_length": 71,
+          "body_sha256": "6752a59972d33d61ad8f33b32afd73346d306c895b8d8287b78d38cab0bb739d",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_PSA.CheckCidDataBCD.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?CheckCidDataBCD@CCmdCommCidData_PSA@@IAEKE@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0xc3d0",
+          "semantics": "PSA.bcd",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000c3d0"
+        },
+        {
+          "body_length": 188,
+          "body_sha256": "048231d93dc1a96fcfaf2ae7ca7568b1bd3b08aeaabf44fd5ce2808b6edc7a01",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_PSA.GetAddToCidData.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?GetAddToCidData@CCmdCommCidData_PSA@@IAEKGPAE@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xde80",
+          "semantics": "PSA.additional",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000de80"
+        },
+        {
+          "body_length": 188,
+          "body_sha256": "f150f83124018525b86e02071401307a424b5f955aac4faa7771868511c5075e",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_PSA.GetAddToCidData.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?GetAddToCidData@CCmdCommCidData_PSA@@IAEKGPAE@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0xc420",
+          "semantics": "PSA.additional",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000c420"
+        },
+        {
+          "body_length": 474,
+          "body_sha256": "51f68c696beab0b93a163189c0c1b3bb2eec7172f035895f5f5a3fc535f863a5",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_PSA.GetCidData.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?GetCidData@CCmdCommCidData_PSA@@QAEKJAAVCCommCachePlus@@@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xdf50",
+          "semantics": "PSA.read",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000df50"
+        },
+        {
+          "body_length": 474,
+          "body_sha256": "3899dcba0f3acc7b118e489efcf5c003a9b3547aa216e33c1b021f2bbd18c23e",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_PSA.GetCidData.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?GetCidData@CCmdCommCidData_PSA@@QAEKJAAVCCommCachePlus@@@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0xc4e0",
+          "semantics": "PSA.read",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000c4e0"
+        },
+        {
+          "body_length": 269,
+          "body_sha256": "45e070cfc47a8e744852e29b3f55347094fb181fa48ab4cb083a052259dfe3a5",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_PSA.GetProaceId.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?GetProaceId@CCmdCommCidData_PSA@@IAEKJ@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xe130",
+          "semantics": "PSA.identity",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000e130"
+        },
+        {
+          "body_length": 269,
+          "body_sha256": "a3475925c1388fd24a1d0343ffa96263507f42f84529438c4e0d435094c2f7a8",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_PSA.GetProaceId.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?GetProaceId@CCmdCommCidData_PSA@@IAEKJ@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0xc6c0",
+          "semantics": "PSA.identity",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000c6c0"
+        },
+        {
+          "body_length": 483,
+          "body_sha256": "a052a50285cbfb377e78ace135d79929236b35904e2bbd4b9cffe4c9594f5667",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_PSA.StoreCidData.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?StoreCidData@CCmdCommCidData_PSA@@QAEKAAVCCmdStringName@@J@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xe240",
+          "semantics": "PSA.store",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000e240"
+        },
+        {
+          "body_length": 483,
+          "body_sha256": "88f55d5794d9692791d9a5d6db799242333103ea253fce1aa8948566d831c3e1",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_PSA.StoreCidData.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?StoreCidData@CCmdCommCidData_PSA@@QAEKAAVCCmdStringName@@J@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0xc7d0",
+          "semantics": "PSA.store",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000c7d0"
+        },
+        {
+          "body_length": 69,
+          "body_sha256": "d60556ae4071a8ed2dbe3d2987ba64ebfd12b4c9d50a7ff68e813e9f9b107825",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_SASensor.CCmdCommCidData_SASensor.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??0CCmdCommCidData_SASensor@@QAE@XZ",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xe430",
+          "semantics": "runtime.construct",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000e430"
+        },
+        {
+          "body_length": 69,
+          "body_sha256": "a1cc36882d47889eeee52d3442522e8a8e6adbf0901c5b8a5fd84062445242cb",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_SASensor.CCmdCommCidData_SASensor.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??0CCmdCommCidData_SASensor@@QAE@XZ",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0xc9c0",
+          "semantics": "runtime.construct",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000c9c0"
+        },
+        {
+          "body_length": 11,
+          "body_sha256": "668476cd9d38cd7c3adf5db82963cdac1fd107996327d250f53cdb18a68ca81b",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_SASensor.~CCmdCommCidData_SASensor.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??1CCmdCommCidData_SASensor@@UAE@XZ",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xe480",
+          "semantics": "runtime.destroy",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000e480"
+        },
+        {
+          "body_length": 11,
+          "body_sha256": "323b13e4b43b5b232b87e5464450ef814e51e5498926f758eb3b343b81444c60",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_SASensor.~CCmdCommCidData_SASensor.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??1CCmdCommCidData_SASensor@@UAE@XZ",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0xca10",
+          "semantics": "runtime.destroy",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000ca10"
+        },
+        {
+          "body_length": 490,
+          "body_sha256": "f42e8f6d37deacdbd8690aeabcc05c6fbf813d5d3c0d3c8643ef75f6f0699833",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_SASensor.GetCidData.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?GetCidData@CCmdCommCidData_SASensor@@QAEKEAAVCCommCachePlus@@@Z",
+          "parameters": {
+            "bus": "this+38:u16",
+            "noInit": true,
+            "targetOverride": "this+34:u32"
+          },
+          "product": "GTSPlus",
+          "rva": "0xe540",
+          "semantics": "base.read",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000e540"
+        },
+        {
+          "body_length": 490,
+          "body_sha256": "32f00ec68c8b91ecb90f30c1a0298d4b167457d7bc16d03f2156cc712b5e5ee8",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_SASensor.GetCidData.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?GetCidData@CCmdCommCidData_SASensor@@QAEKEAAVCCommCachePlus@@@Z",
+          "parameters": {
+            "bus": "this+38:u16",
+            "noInit": true,
+            "targetOverride": "this+34:u32"
+          },
+          "product": "DS4",
+          "rva": "0xcad0",
+          "semantics": "base.read",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000cad0"
+        },
+        {
+          "body_length": 205,
+          "body_sha256": "da165fdc243b42fe8fc8889ade2c5fb2d6121433e6fbff15f8976a705abe4035",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_SASensor.GetCommInfoSASensor.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?GetCommInfoSASensor@CCmdCommCidData_SASensor@@QAEKK@Z",
+          "parameters": {
+            "detail": "0x4E"
+          },
+          "product": "GTSPlus",
+          "rva": "0xe730",
+          "semantics": "special.info",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000e730"
+        },
+        {
+          "body_length": 205,
+          "body_sha256": "a6849f0674b6a8d6d5b01b9a079880e859cbe336336723543d2906ce64d8a74b",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_SASensor.GetCommInfoSASensor.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?GetCommInfoSASensor@CCmdCommCidData_SASensor@@QAEKK@Z",
+          "parameters": {
+            "detail": "0x4E"
+          },
+          "product": "DS4",
+          "rva": "0xccc0",
+          "semantics": "special.info",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000ccc0"
+        },
+        {
+          "body_length": 362,
+          "body_sha256": "d6887cb08e0a7389255dd9848eeee865f0259e9bf957b778d483fd37ca29ccc0",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_SASensor.GetSupportIdList.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?GetSupportIdList@CCmdCommCidData_SASensor@@QAEKAAVCCommCachePlus@@@Z",
+          "parameters": {
+            "bus": "this+38:u16",
+            "noInit": true,
+            "targetOverride": "this+34:u32"
+          },
+          "product": "GTSPlus",
+          "rva": "0xe800",
+          "semantics": "base.support",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000e800"
+        },
+        {
+          "body_length": 362,
+          "body_sha256": "eb4fbb837e02fa1b06efb74cab80424fce4c890fa5381eb8f49891ed6a59803f",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_SASensor.GetSupportIdList.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?GetSupportIdList@CCmdCommCidData_SASensor@@QAEKAAVCCommCachePlus@@@Z",
+          "parameters": {
+            "bus": "this+38:u16",
+            "noInit": true,
+            "targetOverride": "this+34:u32"
+          },
+          "product": "DS4",
+          "rva": "0xcd90",
+          "semantics": "base.support",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000cd90"
+        },
+        {
+          "body_length": 173,
+          "body_sha256": "60e93b9bb5d56aecc7bd3fe24176d42e4d80184b25522ceada6bab5b82a08ddb",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_SASensor.IsSASensor.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?IsSASensor@CCmdCommCidData_SASensor@@QAEHPAV?$CCmdList@VCCmdEcuSpecificInfo@@@@@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xe970",
+          "semantics": "SASensor.detect",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000e970"
+        },
+        {
+          "body_length": 173,
+          "body_sha256": "92f1e025f25527cac74f8f736123ad3ea1ce70887fb4ec7eccf7ce710b4b35e8",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_SASensor.IsSASensor.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?IsSASensor@CCmdCommCidData_SASensor@@QAEHPAV?$CCmdList@VCCmdEcuSpecificInfo@@@@@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0xcf00",
+          "semantics": "SASensor.detect",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000cf00"
+        },
+        {
+          "body_length": 360,
+          "body_sha256": "e2550d5343aa03c0ce5baa2cf3152dc1182ebb8a108c0bd77068ad8edc74b090",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_SASensor.StoreCidData.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?StoreCidData@CCmdCommCidData_SASensor@@QAEKAAVCCmdStringName@@J@Z",
+          "parameters": {
+            "prefix": "SteeringAngleSensor_CID"
+          },
+          "product": "GTSPlus",
+          "rva": "0xea20",
+          "semantics": "base.store",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000ea20"
+        },
+        {
+          "body_length": 360,
+          "body_sha256": "8821ed1f212aa70b9d4d63188a45a26907a51cc33c38da88eaef16ff4c6a90cf",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_SASensor.StoreCidData.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?StoreCidData@CCmdCommCidData_SASensor@@QAEKAAVCCmdStringName@@J@Z",
+          "parameters": {
+            "prefix": "SteeringAngleSensor_CID"
+          },
+          "product": "DS4",
+          "rva": "0xcfb0",
+          "semantics": "base.store",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000cfb0"
+        },
+        {
+          "body_length": 69,
+          "body_sha256": "93f954fa46caa69a5727d83e35a022fb5f53b809ec277f74565d6fd37ed797ea",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_Telematics.CCmdCommCidData_Telematics.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??0CCmdCommCidData_Telematics@@QAE@XZ",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xeb90",
+          "semantics": "runtime.construct",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000eb90"
+        },
+        {
+          "body_length": 69,
+          "body_sha256": "c624254cca2281890383953e6a03c346d17201319ab15acaba8f9f4db3bae488",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_Telematics.CCmdCommCidData_Telematics.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??0CCmdCommCidData_Telematics@@QAE@XZ",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0xd120",
+          "semantics": "runtime.construct",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000d120"
+        },
+        {
+          "body_length": 11,
+          "body_sha256": "ce66e29b2084efe746f53a653b0fccf58737ced68586918e3ed7638c60ece4d7",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_Telematics.~CCmdCommCidData_Telematics.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??1CCmdCommCidData_Telematics@@UAE@XZ",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xebe0",
+          "semantics": "runtime.destroy",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000ebe0"
+        },
+        {
+          "body_length": 11,
+          "body_sha256": "b4e00f5017a91a87d1172f009d3507967055e6ef5513c507a94f2b6ffa4113b6",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_Telematics.~CCmdCommCidData_Telematics.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??1CCmdCommCidData_Telematics@@UAE@XZ",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0xd170",
+          "semantics": "runtime.destroy",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000d170"
+        },
+        {
+          "body_length": 490,
+          "body_sha256": "df084400c9849586f9e1379534415af74cac2fa69b169dfbae8dbccffacba59b",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_Telematics.GetCidData.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?GetCidData@CCmdCommCidData_Telematics@@QAEKEAAVCCommCachePlus@@@Z",
+          "parameters": {
+            "bus": "this+38:u16",
+            "noInit": true,
+            "targetOverride": "this+34:u32"
+          },
+          "product": "GTSPlus",
+          "rva": "0xeca0",
+          "semantics": "base.read",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000eca0"
+        },
+        {
+          "body_length": 490,
+          "body_sha256": "38d8a1c865ce60aa8eff4304b1147d736d216c2a0bf0ad7c991cbdaa623c6f8a",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_Telematics.GetCidData.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?GetCidData@CCmdCommCidData_Telematics@@QAEKEAAVCCommCachePlus@@@Z",
+          "parameters": {
+            "bus": "this+38:u16",
+            "noInit": true,
+            "targetOverride": "this+34:u32"
+          },
+          "product": "DS4",
+          "rva": "0xd230",
+          "semantics": "base.read",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000d230"
+        },
+        {
+          "body_length": 205,
+          "body_sha256": "59bce19920aaded67916c986fb03afdd24e3557e40dd417ad492534f0908bb95",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_Telematics.GetCommInfoTelematics.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?GetCommInfoTelematics@CCmdCommCidData_Telematics@@QAEKK@Z",
+          "parameters": {
+            "detail": "0x51"
+          },
+          "product": "GTSPlus",
+          "rva": "0xee90",
+          "semantics": "special.info",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000ee90"
+        },
+        {
+          "body_length": 205,
+          "body_sha256": "298ba192be81e18a28d823219bca3923a5929ad32d655cfbed914d67b85502c1",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_Telematics.GetCommInfoTelematics.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?GetCommInfoTelematics@CCmdCommCidData_Telematics@@QAEKK@Z",
+          "parameters": {
+            "detail": "0x51"
+          },
+          "product": "DS4",
+          "rva": "0xd420",
+          "semantics": "special.info",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000d420"
+        },
+        {
+          "body_length": 362,
+          "body_sha256": "7754101d24817996ce91b42e3f291049b6b8bb14488018d23f748befa8a72c75",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_Telematics.GetSupportIdList.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?GetSupportIdList@CCmdCommCidData_Telematics@@QAEKAAVCCommCachePlus@@@Z",
+          "parameters": {
+            "bus": "this+38:u16",
+            "noInit": true,
+            "targetOverride": "this+34:u32"
+          },
+          "product": "GTSPlus",
+          "rva": "0xef60",
+          "semantics": "base.support",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000ef60"
+        },
+        {
+          "body_length": 362,
+          "body_sha256": "ebf27b2ba9361e7faae66cd01617bb7dbd1d8dde65ea57e522770aaf30ed5f78",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_Telematics.GetSupportIdList.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?GetSupportIdList@CCmdCommCidData_Telematics@@QAEKAAVCCommCachePlus@@@Z",
+          "parameters": {
+            "bus": "this+38:u16",
+            "noInit": true,
+            "targetOverride": "this+34:u32"
+          },
+          "product": "DS4",
+          "rva": "0xd4f0",
+          "semantics": "base.support",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000d4f0"
+        },
+        {
+          "body_length": 360,
+          "body_sha256": "214c579c7f769a27a32b6f9e11058d7cc92ac54c8a0cfdad9eb94b25c3b9575f",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_Telematics.StoreCidData.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?StoreCidData@CCmdCommCidData_Telematics@@QAEKAAVCCmdStringName@@J@Z",
+          "parameters": {
+            "prefix": "Telematics_CID"
+          },
+          "product": "GTSPlus",
+          "rva": "0xf0d0",
+          "semantics": "base.store",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1000f0d0"
+        },
+        {
+          "body_length": 360,
+          "body_sha256": "c58e067173949b8db265a4337836597d5fbd5d2cbcb398fbd2c2037ab66fd96f",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_Telematics.StoreCidData.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?StoreCidData@CCmdCommCidData_Telematics@@QAEKAAVCCmdStringName@@J@Z",
+          "parameters": {
+            "prefix": "Telematics_CID"
+          },
+          "product": "DS4",
+          "rva": "0xd660",
+          "semantics": "base.store",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000d660"
+        },
+        {
+          "body_length": 132,
+          "body_sha256": "5f1e4097bacb72496a8eafbd0e62c92c47f0983eea04a593c86bd14987eba57f",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData.??0CCmdCommCidData@@QAE@ABV0@@Z.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??0CCmdCommCidData@@QAE@ABV0@@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xae600",
+          "semantics": "runtime.copy_construct",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x100ae600"
+        },
+        {
+          "body_length": 132,
+          "body_sha256": "e2887e66e384f2f0de34d7f2b355609898c112884992159ab1be3370a4417d67",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData.??0CCmdCommCidData@@QAE@ABV0@@Z.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??0CCmdCommCidData@@QAE@ABV0@@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x89860",
+          "semantics": "runtime.copy_construct",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x10089860"
+        },
+        {
+          "body_length": 11,
+          "body_sha256": "18c111b857b7b634955045cf9fb7d57622ef0267f7d1766c2783a64b50c977fd",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_1AB0.??0CCmdCommCidData_1AB0@@QAE@ABV0@@Z.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??0CCmdCommCidData_1AB0@@QAE@ABV0@@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xae690",
+          "semantics": "runtime.copy_construct",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x100ae690"
+        },
+        {
+          "body_length": 11,
+          "body_sha256": "602b36ec9f88e80e598efecf8ac901452447adcd1aac6f445c8aa7c7de1f6e18",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_1AB0.??0CCmdCommCidData_1AB0@@QAE@ABV0@@Z.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??0CCmdCommCidData_1AB0@@QAE@ABV0@@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x898f0",
+          "semantics": "runtime.copy_construct",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x100898f0"
+        },
+        {
+          "body_length": 27,
+          "body_sha256": "c733b46e6f9de2fc9829bdcd29a08aa3ebfad6addc28e0dbc694f5c2739d3712",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_1A_A4.??0CCmdCommCidData_1A_A4@@QAE@ABV0@@Z.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??0CCmdCommCidData_1A_A4@@QAE@ABV0@@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xae6a0",
+          "semantics": "runtime.copy_construct",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x100ae6a0"
+        },
+        {
+          "body_length": 27,
+          "body_sha256": "cb0993059cd0d43dfa00a76e1907c63d207f48d3a5bc313770700022b3702ceb",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_1A_A4.??0CCmdCommCidData_1A_A4@@QAE@ABV0@@Z.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??0CCmdCommCidData_1A_A4@@QAE@ABV0@@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x89900",
+          "semantics": "runtime.copy_construct",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x10089900"
+        },
+        {
+          "body_length": 27,
+          "body_sha256": "e40a75c0a5a2c3d2004d6388ff14282b071986ae1f366d8bd45b35f660982375",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_1A_AA.??0CCmdCommCidData_1A_AA@@QAE@ABV0@@Z.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??0CCmdCommCidData_1A_AA@@QAE@ABV0@@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xae6c0",
+          "semantics": "runtime.copy_construct",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x100ae6c0"
+        },
+        {
+          "body_length": 27,
+          "body_sha256": "90f05286d6c31d3a55c2babb12e18298bd782b1cf8433295ffe0572692cabe58",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_1A_AA.??0CCmdCommCidData_1A_AA@@QAE@ABV0@@Z.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??0CCmdCommCidData_1A_AA@@QAE@ABV0@@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x89920",
+          "semantics": "runtime.copy_construct",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x10089920"
+        },
+        {
+          "body_length": 44,
+          "body_sha256": "8aaffe7ce76e8add540364e4206f967beca83251c08722601f973a68ddf85f5e",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_FrontRadarSensor.??0CCmdCommCidData_FrontRadarSensor@@QAE@ABV0@@Z.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??0CCmdCommCidData_FrontRadarSensor@@QAE@ABV0@@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xae6e0",
+          "semantics": "runtime.copy_construct",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x100ae6e0"
+        },
+        {
+          "body_length": 44,
+          "body_sha256": "c14811c7f2abee8788bc3937df6f93bcf211c7c63e2d633dcb924acbfbf15a11",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_FrontRadarSensor.??0CCmdCommCidData_FrontRadarSensor@@QAE@ABV0@@Z.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??0CCmdCommCidData_FrontRadarSensor@@QAE@ABV0@@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x89970",
+          "semantics": "runtime.copy_construct",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x10089970"
+        },
+        {
+          "body_length": 44,
+          "body_sha256": "b7b9c58319250e80976856cdf1cc69ea6bcb7aa3d98952e715e9b45985d7c679",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_HICM.??0CCmdCommCidData_HICM@@QAE@ABV0@@Z.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??0CCmdCommCidData_HICM@@QAE@ABV0@@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xae710",
+          "semantics": "runtime.copy_construct",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x100ae710"
+        },
+        {
+          "body_length": 44,
+          "body_sha256": "5a7af904a4ffdcbd87bd38e255d10f8f33c668ad39f478f0b20ab5dae3d9e6d3",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_HICM.??0CCmdCommCidData_HICM@@QAE@ABV0@@Z.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??0CCmdCommCidData_HICM@@QAE@ABV0@@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x899a0",
+          "semantics": "runtime.copy_construct",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x100899a0"
+        },
+        {
+          "body_length": 55,
+          "body_sha256": "d7486f2aa6cfd8e496d89b8b18f1676ad1c3c5fc66abdfcdfa77e4b420d84920",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_PSA.??0CCmdCommCidData_PSA@@QAE@ABV0@@Z.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??0CCmdCommCidData_PSA@@QAE@ABV0@@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xae740",
+          "semantics": "runtime.copy_construct",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x100ae740"
+        },
+        {
+          "body_length": 55,
+          "body_sha256": "5b8810839d24dca5a3f6fd039875c43a084c60f658840b1dc0307b5c5bd57383",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_PSA.??0CCmdCommCidData_PSA@@QAE@ABV0@@Z.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??0CCmdCommCidData_PSA@@QAE@ABV0@@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x899d0",
+          "semantics": "runtime.copy_construct",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x100899d0"
+        },
+        {
+          "body_length": 44,
+          "body_sha256": "77e99c4685c0cd86e43e9e6583802fcda128e557dce7a7698b1577072296e983",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_SASensor.??0CCmdCommCidData_SASensor@@QAE@ABV0@@Z.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??0CCmdCommCidData_SASensor@@QAE@ABV0@@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xae780",
+          "semantics": "runtime.copy_construct",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x100ae780"
+        },
+        {
+          "body_length": 44,
+          "body_sha256": "dbb6039cb447e1b4637a02c064fcc8aa2ad4d181cd329aea161dacf3af0f7687",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_SASensor.??0CCmdCommCidData_SASensor@@QAE@ABV0@@Z.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??0CCmdCommCidData_SASensor@@QAE@ABV0@@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x89a10",
+          "semantics": "runtime.copy_construct",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x10089a10"
+        },
+        {
+          "body_length": 44,
+          "body_sha256": "f302c3e3923993abf40efe040124b87b456ec90efbd89938c7a36909514ec217",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_Telematics.??0CCmdCommCidData_Telematics@@QAE@ABV0@@Z.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??0CCmdCommCidData_Telematics@@QAE@ABV0@@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xae7b0",
+          "semantics": "runtime.copy_construct",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x100ae7b0"
+        },
+        {
+          "body_length": 44,
+          "body_sha256": "fb153fbddf5188fd88a59d854703ef53ff309937adf61bb86078e2c337fbb7ec",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_Telematics.??0CCmdCommCidData_Telematics@@QAE@ABV0@@Z.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??0CCmdCommCidData_Telematics@@QAE@ABV0@@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x89a40",
+          "semantics": "runtime.copy_construct",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x10089a40"
+        },
+        {
+          "body_length": 64,
+          "body_sha256": "1ecfd335829763f161ea1925aa0d7dcff23208ebcc33377d81682443d8205fe0",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData.??4CCmdCommCidData@@QAEAAV0@AAV0@@Z.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??4CCmdCommCidData@@QAEAAV0@AAV0@@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xb2b20",
+          "semantics": "runtime.assign",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x100b2b20"
+        },
+        {
+          "body_length": 64,
+          "body_sha256": "80b843e912061163ca4580df59f394bb12a985f67e7079de75da7f6c209d15fb",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData.??4CCmdCommCidData@@QAEAAV0@AAV0@@Z.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??4CCmdCommCidData@@QAEAAV0@AAV0@@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x8d460",
+          "semantics": "runtime.assign",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1008d460"
+        },
+        {
+          "body_length": 5,
+          "body_sha256": "e58773679e693e79ccf3a079b2d7c66b6103cf65bb691bf2e5991ab2eaa2769d",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_1AB0.??4CCmdCommCidData_1AB0@@QAEAAV0@ABV0@@Z.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??4CCmdCommCidData_1AB0@@QAEAAV0@ABV0@@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xb2b60",
+          "semantics": "runtime.assign",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x100b2b60"
+        },
+        {
+          "body_length": 5,
+          "body_sha256": "e58773679e693e79ccf3a079b2d7c66b6103cf65bb691bf2e5991ab2eaa2769d",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_1AB0.??4CCmdCommCidData_1AB0@@QAEAAV0@ABV0@@Z.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??4CCmdCommCidData_1AB0@@QAEAAV0@ABV0@@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x8d4a0",
+          "semantics": "runtime.assign",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1008d4a0"
+        },
+        {
+          "body_length": 64,
+          "body_sha256": "74f436766bca62d01a998d9600def5375156f7f31566cba5c740e8920ede0bde",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_1A_A4.??4CCmdCommCidData_1A_A4@@QAEAAV0@AAV0@@Z.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??4CCmdCommCidData_1A_A4@@QAEAAV0@AAV0@@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xb2b70",
+          "semantics": "runtime.assign",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x100b2b70"
+        },
+        {
+          "body_length": 64,
+          "body_sha256": "e8f32a524b0fe06fc5d98187a16a09f2e93225deeeaf4af403e78f9ddef330e6",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_1A_A4.??4CCmdCommCidData_1A_A4@@QAEAAV0@AAV0@@Z.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??4CCmdCommCidData_1A_A4@@QAEAAV0@AAV0@@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x8d4b0",
+          "semantics": "runtime.assign",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1008d4b0"
+        },
+        {
+          "body_length": 64,
+          "body_sha256": "f6acdb44889001015694a74093bff8ad20440c5adffae239f0c57956b5026fa1",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_1A_AA.??4CCmdCommCidData_1A_AA@@QAEAAV0@AAV0@@Z.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??4CCmdCommCidData_1A_AA@@QAEAAV0@AAV0@@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xb2bb0",
+          "semantics": "runtime.assign",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x100b2bb0"
+        },
+        {
+          "body_length": 64,
+          "body_sha256": "4fbd08fb4082f1f9a224c720941ef5780b65dc0ca79b97b955ee06ca4b1bd9ea",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_1A_AA.??4CCmdCommCidData_1A_AA@@QAEAAV0@AAV0@@Z.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??4CCmdCommCidData_1A_AA@@QAEAAV0@AAV0@@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x8d4f0",
+          "semantics": "runtime.assign",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1008d4f0"
+        },
+        {
+          "body_length": 78,
+          "body_sha256": "1dd484ea7d08870643686017dc9517f9fd2cd2e94d41516390aade4ab1c26660",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_FrontRadarSensor.??4CCmdCommCidData_FrontRadarSensor@@QAEAAV0@AAV0@@Z.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??4CCmdCommCidData_FrontRadarSensor@@QAEAAV0@AAV0@@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xb2bf0",
+          "semantics": "runtime.assign",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x100b2bf0"
+        },
+        {
+          "body_length": 78,
+          "body_sha256": "43d491f2c8429be04cb1d78c3bb895e9ef956e91a9c9296b93758158b807e316",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_FrontRadarSensor.??4CCmdCommCidData_FrontRadarSensor@@QAEAAV0@AAV0@@Z.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??4CCmdCommCidData_FrontRadarSensor@@QAEAAV0@AAV0@@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x8d580",
+          "semantics": "runtime.assign",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1008d580"
+        },
+        {
+          "body_length": 78,
+          "body_sha256": "d9aca2f260c9ea4780d33c30c55576473d8a5d9f550cc919a18ad904b85c62a9",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_HICM.??4CCmdCommCidData_HICM@@QAEAAV0@AAV0@@Z.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??4CCmdCommCidData_HICM@@QAEAAV0@AAV0@@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xb2c40",
+          "semantics": "runtime.assign",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x100b2c40"
+        },
+        {
+          "body_length": 78,
+          "body_sha256": "93aece42241f880b4b6bb9c6f48680fc7e83bb3f40c5121f7c38b7e8df3be761",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_HICM.??4CCmdCommCidData_HICM@@QAEAAV0@AAV0@@Z.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??4CCmdCommCidData_HICM@@QAEAAV0@AAV0@@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x8d5d0",
+          "semantics": "runtime.assign",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1008d5d0"
+        },
+        {
+          "body_length": 112,
+          "body_sha256": "5551ed9eed148e59258eccda2ffaac3136c7d62dfe9cc4572b680fe3d3d35335",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_PSA.??4CCmdCommCidData_PSA@@QAEAAV0@AAV0@@Z.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??4CCmdCommCidData_PSA@@QAEAAV0@AAV0@@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xb2c90",
+          "semantics": "runtime.assign",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x100b2c90"
+        },
+        {
+          "body_length": 112,
+          "body_sha256": "bcdc9cc620c2e0289b91c83e9543ef0622338c54b8afa7475197a394c3edca6e",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_PSA.??4CCmdCommCidData_PSA@@QAEAAV0@AAV0@@Z.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??4CCmdCommCidData_PSA@@QAEAAV0@AAV0@@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x8d620",
+          "semantics": "runtime.assign",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1008d620"
+        },
+        {
+          "body_length": 78,
+          "body_sha256": "d8ea3b4561173af17a742d1ef4b539b621b24b95d3ce03160bb92d40de59f33a",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_SASensor.??4CCmdCommCidData_SASensor@@QAEAAV0@AAV0@@Z.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??4CCmdCommCidData_SASensor@@QAEAAV0@AAV0@@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xb2d00",
+          "semantics": "runtime.assign",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x100b2d00"
+        },
+        {
+          "body_length": 78,
+          "body_sha256": "ae17a3fdb55fe5cce18e0488052644a067d7bce14d36abc50e96fd6c40d3c47a",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_SASensor.??4CCmdCommCidData_SASensor@@QAEAAV0@AAV0@@Z.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??4CCmdCommCidData_SASensor@@QAEAAV0@AAV0@@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x8d690",
+          "semantics": "runtime.assign",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1008d690"
+        },
+        {
+          "body_length": 78,
+          "body_sha256": "aca04971b8f9239fd0708b4cb3baa5652212fa316aa70819855e11a1decfab3d",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_Telematics.??4CCmdCommCidData_Telematics@@QAEAAV0@AAV0@@Z.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "??4CCmdCommCidData_Telematics@@QAEAAV0@AAV0@@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xb2d50",
+          "semantics": "runtime.assign",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x100b2d50"
+        },
+        {
+          "body_length": 78,
+          "body_sha256": "e4847b4a9ddbf801f8f820bd9ba0df81a0b04c08e324758619e904242f0507d3",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_Telematics.??4CCmdCommCidData_Telematics@@QAEAAV0@AAV0@@Z.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "??4CCmdCommCidData_Telematics@@QAEAAV0@AAV0@@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x8d6e0",
+          "semantics": "runtime.assign",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1008d6e0"
+        },
+        {
+          "body_length": 21,
+          "body_sha256": "8f6a649a0ec9b87776bf302c612ac8c3429539fdb2cc951b81f61bc2adc3b5a8",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData.?__autoclassinit2@CCmdCommCidData@@QAEXI@Z.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?__autoclassinit2@CCmdCommCidData@@QAEXI@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xbe8f0",
+          "semantics": "runtime.zero",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x100be8f0"
+        },
+        {
+          "body_length": 21,
+          "body_sha256": "8180225eeabe7e1d0062b3eb8873bd96cdffd573c0a1b8eab1f8b0ab32097ed6",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData.?__autoclassinit2@CCmdCommCidData@@QAEXI@Z.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?__autoclassinit2@CCmdCommCidData@@QAEXI@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x97760",
+          "semantics": "runtime.zero",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x10097760"
+        },
+        {
+          "body_length": 21,
+          "body_sha256": "1260f34da3de1d09ca2872f12cfc34b3df965135e471d07a2b5cf86ad0550625",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_1A_A4.?__autoclassinit2@CCmdCommCidData_1A_A4@@QAEXI@Z.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?__autoclassinit2@CCmdCommCidData_1A_A4@@QAEXI@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xbe910",
+          "semantics": "runtime.zero",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x100be910"
+        },
+        {
+          "body_length": 21,
+          "body_sha256": "65b07d0dcf13e9e0955ca19e764296e502d488d625a6151a3f663e8f7b3c2ee6",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_1A_A4.?__autoclassinit2@CCmdCommCidData_1A_A4@@QAEXI@Z.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?__autoclassinit2@CCmdCommCidData_1A_A4@@QAEXI@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x97780",
+          "semantics": "runtime.zero",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x10097780"
+        },
+        {
+          "body_length": 21,
+          "body_sha256": "030c7092c0c4ea93ed16298595ea4ec55eda860a99abc86f1e7d32e3287e64b5",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_1A_AA.?__autoclassinit2@CCmdCommCidData_1A_AA@@QAEXI@Z.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?__autoclassinit2@CCmdCommCidData_1A_AA@@QAEXI@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xbe930",
+          "semantics": "runtime.zero",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x100be930"
+        },
+        {
+          "body_length": 21,
+          "body_sha256": "cd1d241aa1b8d1bc3507ce3740f0c65a32d2fcfe56f679b76f095ca7e6d66717",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_1A_AA.?__autoclassinit2@CCmdCommCidData_1A_AA@@QAEXI@Z.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?__autoclassinit2@CCmdCommCidData_1A_AA@@QAEXI@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x977a0",
+          "semantics": "runtime.zero",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x100977a0"
+        },
+        {
+          "body_length": 21,
+          "body_sha256": "099121f111e1c868f65e863e9dadd336e0cb831c0405a8675a2a98b46b32c82b",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_FrontRadarSensor.?__autoclassinit2@CCmdCommCidData_FrontRadarSensor@@QAEXI@Z.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?__autoclassinit2@CCmdCommCidData_FrontRadarSensor@@QAEXI@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xbe950",
+          "semantics": "runtime.zero",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x100be950"
+        },
+        {
+          "body_length": 21,
+          "body_sha256": "b92b09a37d61c2fa68a9d7b1a623f7b725862611054bd268c5812661d5d38cb5",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_FrontRadarSensor.?__autoclassinit2@CCmdCommCidData_FrontRadarSensor@@QAEXI@Z.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?__autoclassinit2@CCmdCommCidData_FrontRadarSensor@@QAEXI@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x977e0",
+          "semantics": "runtime.zero",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x100977e0"
+        },
+        {
+          "body_length": 21,
+          "body_sha256": "1bc67a28c2504433a729a356d35f7a98f614a6ca0c809a39b88521847f6a5542",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_HICM.?__autoclassinit2@CCmdCommCidData_HICM@@QAEXI@Z.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?__autoclassinit2@CCmdCommCidData_HICM@@QAEXI@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xbe970",
+          "semantics": "runtime.zero",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x100be970"
+        },
+        {
+          "body_length": 21,
+          "body_sha256": "1ff38cbb1aeee4e2c7a76419a4f8939750497941c4cdd7a3fe97dbbc482139f4",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_HICM.?__autoclassinit2@CCmdCommCidData_HICM@@QAEXI@Z.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?__autoclassinit2@CCmdCommCidData_HICM@@QAEXI@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x97800",
+          "semantics": "runtime.zero",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x10097800"
+        },
+        {
+          "body_length": 21,
+          "body_sha256": "c8469975a0f6f9941f7e3c8ca6083cef84c580276a0158aa4e3c6b8e801dcdc9",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_PSA.?__autoclassinit2@CCmdCommCidData_PSA@@QAEXI@Z.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?__autoclassinit2@CCmdCommCidData_PSA@@QAEXI@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xbe990",
+          "semantics": "runtime.zero",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x100be990"
+        },
+        {
+          "body_length": 21,
+          "body_sha256": "982f45dce46ec3082e473db98142345e16cce1331a0ca2fee7674fde2ccf8d31",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_PSA.?__autoclassinit2@CCmdCommCidData_PSA@@QAEXI@Z.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?__autoclassinit2@CCmdCommCidData_PSA@@QAEXI@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x97820",
+          "semantics": "runtime.zero",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x10097820"
+        },
+        {
+          "body_length": 21,
+          "body_sha256": "4c064fbea0d86ebda3348eb13c6203723ecd179c2cd1e99b35e16f8c02126482",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_SASensor.?__autoclassinit2@CCmdCommCidData_SASensor@@QAEXI@Z.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?__autoclassinit2@CCmdCommCidData_SASensor@@QAEXI@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xbe9b0",
+          "semantics": "runtime.zero",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x100be9b0"
+        },
+        {
+          "body_length": 21,
+          "body_sha256": "0caf7906e8dc7781e95bfbf025d8c2bde80fa89283e161aa0237a99ada4f19b4",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_SASensor.?__autoclassinit2@CCmdCommCidData_SASensor@@QAEXI@Z.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?__autoclassinit2@CCmdCommCidData_SASensor@@QAEXI@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x97840",
+          "semantics": "runtime.zero",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x10097840"
+        },
+        {
+          "body_length": 21,
+          "body_sha256": "16d947b5c64a8b4221af912e118ef864e5fb3b8cfbac355a8d4c87186ddcd07f",
+          "id": "InformationReads.CommandCommon.GTSPlus.CCmdCommCidData_Telematics.?__autoclassinit2@CCmdCommCidData_Telematics@@QAEXI@Z.v1",
+          "independent_instruction_equivalence": false,
+          "mangled_abi": "?__autoclassinit2@CCmdCommCidData_Telematics@@QAEXI@Z",
+          "parameters": {},
+          "product": "GTSPlus",
+          "rva": "0xbe9d0",
+          "semantics": "runtime.zero",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x100be9d0"
+        },
+        {
+          "body_length": 21,
+          "body_sha256": "f4896ec29e6dfa336e7fdec41fd98649837d6f511471e7124a33b9c6e33db86c",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_Telematics.?__autoclassinit2@CCmdCommCidData_Telematics@@QAEXI@Z.v1",
+          "independent_instruction_equivalence": true,
+          "mangled_abi": "?__autoclassinit2@CCmdCommCidData_Telematics@@QAEXI@Z",
+          "parameters": {},
+          "product": "DS4",
+          "rva": "0x97860",
+          "semantics": "runtime.zero",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x10097860"
+        },
+        {
+          "body_length": 69,
+          "body_sha256": "b82cea98b6c90511be118d33da936f5a8c704a6a5216cca2f08c805dc1e06e0c",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_DisplayAudio.ctor.v1",
+          "mangled_abi": "??0CCmdCommCidData_DisplayAudio@@QAE@XZ",
+          "parameters": {},
+          "product": "DS4",
+          "semantics": "runtime.construct",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000ad30"
+        },
+        {
+          "body_length": 11,
+          "body_sha256": "605e7283e1a25cf1ee8c2d94fb8c91b231132ecc0f3ce61cdb02e76422a2a061",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_DisplayAudio.dtor.v1",
+          "mangled_abi": "??1CCmdCommCidData_DisplayAudio@@UAE@XZ",
+          "parameters": {},
+          "product": "DS4",
+          "semantics": "runtime.destroy",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000ad80"
+        },
+        {
+          "body_length": 490,
+          "body_sha256": "4ecd86b08025923ac860a800ee32e8d88d1dcbd23109e413622a5ac9e7fc5264",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_DisplayAudio.GetCidData.v1",
+          "mangled_abi": "?GetCidData@CCmdCommCidData_DisplayAudio@@QAEKEAAVCCommCachePlus@@@Z",
+          "parameters": {
+            "bus": "this+38:u16",
+            "noInit": true,
+            "targetOverride": "this+34:u32"
+          },
+          "product": "DS4",
+          "semantics": "base.read",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000ae40"
+        },
+        {
+          "body_length": 205,
+          "body_sha256": "21a5ef77474413a0c3bd103b29f621cca7940b8f0c4a0ace29c2ecd56229378c",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_DisplayAudio.GetCommInfo.v1",
+          "mangled_abi": "?GetCommInfoDisplayAudio@CCmdCommCidData_DisplayAudio@@QAEKK@Z",
+          "parameters": {
+            "detail": "0x6C"
+          },
+          "product": "DS4",
+          "semantics": "special.info",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000b030"
+        },
+        {
+          "body_length": 362,
+          "body_sha256": "1c11cd27eb09b095134d6739b10829697a68b997a94b4812ef43cfea7ebb9e98",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_DisplayAudio.GetSupportIdList.v1",
+          "mangled_abi": "?GetSupportIdList@CCmdCommCidData_DisplayAudio@@QAEKAAVCCommCachePlus@@@Z",
+          "parameters": {
+            "bus": "this+38:u16",
+            "noInit": true,
+            "targetOverride": "this+34:u32"
+          },
+          "product": "DS4",
+          "semantics": "base.support",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000b100"
+        },
+        {
+          "body_length": 360,
+          "body_sha256": "88793f104f783674ab25ed3743a77df1a36a7bad7c23e00c718e5323074fa468",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_DisplayAudio.StoreCidData.v1",
+          "mangled_abi": "?StoreCidData@CCmdCommCidData_DisplayAudio@@QAEKAAVCCmdStringName@@J@Z",
+          "parameters": {
+            "prefix": "DisplayAudio_CID"
+          },
+          "product": "DS4",
+          "semantics": "base.store",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1000b270"
+        },
+        {
+          "body_length": 44,
+          "body_sha256": "f60e86d7d9e2b33734bc097a296ab8a92ffa73033d7878dccff9e2ad57d4ba00",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_DisplayAudio.??0CCmdCommCidData_FrontRadarSensor@@QAE@ABV0@@Z.v1",
+          "mangled_abi": "??0CCmdCommCidData_DisplayAudio@@QAE@ABV0@@Z",
+          "parameters": {},
+          "product": "DS4",
+          "semantics": "runtime.copy_construct",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x10089940"
+        },
+        {
+          "body_length": 78,
+          "body_sha256": "32402cab93f46377c99295f8a34cabf87c6725dcce9d275cbc976430afc52a97",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_DisplayAudio.??4CCmdCommCidData_FrontRadarSensor@@QAEAAV0@AAV0@@Z.v1",
+          "mangled_abi": "??4CCmdCommCidData_DisplayAudio@@QAEAAV0@AAV0@@Z",
+          "parameters": {},
+          "product": "DS4",
+          "semantics": "runtime.assign",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x1008d530"
+        },
+        {
+          "body_length": 21,
+          "body_sha256": "5dacf4e07b1f1b19ad615750f50a627411c5b474bb477d4010971df885a34aab",
+          "id": "InformationReads.CommandCommon.DS4.CCmdCommCidData_DisplayAudio.?__autoclassinit2@CCmdCommCidData_FrontRadarSensor@@QAEXI@Z.v1",
+          "mangled_abi": "?__autoclassinit2@CCmdCommCidData_DisplayAudio@@QAEXI@Z",
+          "parameters": {},
+          "product": "DS4",
+          "semantics": "runtime.zero",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x100977c0"
+        },
+        {
+          "body_bytes": "558bec578b791833c085ff7e5d538b5d08568b71108bce85c974113bc7730d85c074098bd08b0983ea0175f939590c7411403bc77cdf5e5bb8020604c05f5dc2080085f674113bc7730d85c0740966908b3683e80175f98b450c668b4e105e5b66890833c05f5dc20800b8020604c05f5dc2",
+          "body_length": 114,
+          "body_sha256": "7e58bb6f770984fa525b14a0b7e1d94e7345e0f2ae93fc329020d71bb18d8f48",
+          "id": "InformationReads.CommandCommon.GTSPlus.StandardValueId.v1",
+          "mangled_abi": "?GetStandardValueId@CCmdStandardValueIdList@@QAEKKPAG@Z",
+          "product": "GTSPlus",
+          "semantics": "standard.lookup",
+          "source_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+          "va": "0x1005f9d0"
+        },
+        {
+          "body_bytes": "558bec578b791833c085ff7e5d538b5d08568b71108bce85c974113bc7730d85c074098bd08b0983ea0175f939590c7411403bc77cdf5e5bb8020604c05f5dc2080085f674113bc7730d85c0740966908b3683e80175f98b450c668b4e105e5b66890833c05f5dc20800b8020604c05f5dc2",
+          "body_length": 114,
+          "body_sha256": "7e58bb6f770984fa525b14a0b7e1d94e7345e0f2ae93fc329020d71bb18d8f48",
+          "id": "InformationReads.CommandCommon.DS4.StandardValueId.v1",
+          "mangled_abi": "?GetStandardValueId@CCmdStandardValueIdList@@QAEKKPAG@Z",
+          "product": "DS4",
+          "semantics": "standard.lookup",
+          "source_sha256": "987ab6a26eef65d72267b1a42cf0409904baa09bbc6adbf3340b9d80388da041",
+          "va": "0x10047b90"
+        }
+      ],
+      "errors": {
+        "A0040201": "mask/expected or echoed ID mismatch",
+        "A0040202": "response length predicate fails",
+        "A0040208": "invalid BCD identity byte",
+        "C0040001": "invalid required pointer/argument in specified local branches",
+        "C0040101": "required database result empty",
+        "C0040102": "materialized frame shape/count invalid",
+        "C0040601": "shared slot missing",
+        "C0040602": "function metadata missing or standard item not found",
+        "propagation": "All other helper/transport/DB status values preserved except explicitly described fallback branches."
+      },
+      "layouts": {
+        "CID_base": {
+          "cid_frames": {
+            "count": "+0x30",
+            "head": "+0x28",
+            "offset": "0x20",
+            "width": 20
+          },
+          "cid_selector": {
+            "offset": "0xA",
+            "width": 2
+          },
+          "command_borrowed": {
+            "offset": "0x4",
+            "width": 4
+          },
+          "support_frames": {
+            "count": "+0x1C",
+            "head": "+0x14",
+            "offset": "0xC",
+            "width": 20
+          },
+          "support_selector": {
+            "offset": "0x8",
+            "width": 2
+          },
+          "vptr": {
+            "offset": "0x0",
+            "width": 4
+          }
+        },
+        "frame": {
+          "byte_data": "CCmdByteData+8:u8",
+          "expected_count": "frame+0x7C:s32",
+          "expected_list": "frame+0x6C",
+          "mask_count": "frame+0x54:s32",
+          "mask_list": "frame+0x44",
+          "node_payload_offset": 4,
+          "receive_count": "frame+0x68:s32",
+          "receive_list": "frame+0x58",
+          "send_count": "frame+0x40:s32",
+          "send_list": "frame+0x30"
+        },
+        "output": {
+          "name": "CCmdStringName+0x18:CCmdString",
+          "string_data": "+0x10:pointer",
+          "string_length": "+0x14:u16",
+          "value": "CCmdStringName+8:CCmdString"
+        }
+      },
+      "schema": "gts-car-native-contract-v1",
+      "slice": "InformationReads.CommandCommon",
+      "state_and_cleanup": {
+        "cache": "Borrowed caller cache is never destroyed by CID helper except PSA creates an independent temporary cache. Variant noInit calls cache.SetSndNoInit before each support/read, no local restoration. Exact effect delegated to cache owner.",
+        "cancellation": "No own cancel flag poll or loop interruption; external cache/transport may return cancellation status; helper propagates it unless explicit A4/AA fallback above.",
+        "selection": "Selectors supplied by owning plugin; exact main/DS4 factory active-index selection governed by diagnostic_operations.selection; no invented category0 fallback.",
+        "strings": "CP_ACP is external Windows locale input. Fixed SetAt copy lengths require CommandDataLib string contract; no invented zero padding beyond actual local initialization."
+      },
+      "templates": {
+        "A4.ascii": {
+          "inputs": [
+            "this:A4*",
+            "index:s32",
+            "isASCII:s32*"
+          ],
+          "quirks": [
+            "If receive_count<=7, isASCII is not initialized."
+          ],
+          "result": "status:u32",
+          "steps": [
+            "Null output or index>=CID frame_count=>C0040001; no explicit nonnegative validation.",
+            "For receive bytes starting7, set*isASCII=1 for each examined byte; accept0 OR20..7E; first other byte sets0 and stops. Return0."
+          ]
+        },
+        "A4.count": {
+          "inputs": [
+            "this:A4*",
+            "cache:CCommCachePlus&",
+            "count:s32*"
+          ],
+          "result": "status:u32",
+          "steps": [
+            "Null count=>C0040001. Set*count=0; clear CID frame list; materialize CID selector target0. On0 set*count=cid_frames.count (not response count); propagate status."
+          ]
+        },
+        "A4.init": {
+          "inputs": [
+            "this:A4*",
+            "command:COMMAND_DATA*",
+            "cid_selector:u16"
+          ],
+          "result": "status:u32",
+          "steps": [
+            "Null command=>C0040001. Store command+4, support_selector+8=0, cid_selector+A=argument. Return0."
+          ]
+        },
+        "A4.read": {
+          "inputs": [
+            "this:A4*",
+            "cache:CCommCachePlus&",
+            "index:s32"
+          ],
+          "result": "status:u32",
+          "steps": [
+            "Require index<cid_frames.count signed else C0040001; no explicit index>=0 test. Select indexed frame.",
+            "Require send_count>=7 else C0040102. CommCacheSndRcv(frame,0); propagate nonzero.",
+            "Require receive_count==mask_count else A0040202. Return base.mask result."
+          ]
+        },
+        "A4.store": {
+          "inputs": [
+            "this:A4*",
+            "output:CCmdStringName&",
+            "index:s32"
+          ],
+          "result": "status:u32",
+          "steps": [
+            "Require index<frame_count else C0040001, without explicit >=0 test.",
+            "Copy receive[7:] without local buffer cap; ACP NUL-terminated conversion; output.value.SetAt(converted,receive_count-7+1).",
+            "output.name=format(\"CID%d\",index+1); return0."
+          ]
+        },
+        "A4.support": {
+          "inputs": [
+            "this:A4*",
+            "cache:CCommCachePlus&",
+            "method:u8*"
+          ],
+          "parameters": {
+            "fallback": "0xA4"
+          },
+          "result": "status:u32; chooses method byte",
+          "steps": [
+            "Null method=>C0040001; clear support frame list; materialize support_selector with target0; require exactly1 frame and send_count>=3 else C0040102.",
+            "CommCacheSndRcv(frame,0). On0 require receive_count>=mask_count else A0040202; base.mask failure propagates, success sets*method=0x1A returns0.",
+            "On status91010009 set*method=fallback and return0.",
+            "On90020321 only when receive_count>=3 and receive[2] in{0x12,0x22}, set*method=fallback and return0; otherwise return90020321.",
+            "All other status propagate unchanged."
+          ]
+        },
+        "AA.read": {
+          "inputs": [
+            "this:AA*",
+            "cache:CCommCachePlus&"
+          ],
+          "result": "status:u32",
+          "steps": [
+            "Clear CID frame list; materialize selector target0, propagate failure.",
+            "Require exactly1 frame and send_count>=2 else C0040102.",
+            "CommCacheSndRcv(frame,0); propagate nonzero. Return base.mask result; unlike base/A4 no explicit receive length equality/minimum here."
+          ]
+        },
+        "AA.store": {
+          "inputs": [
+            "this:AA*",
+            "output:CCmdStringName&"
+          ],
+          "quirks": [
+            "Negative count not explicitly clamped; SetAt gets u16-narrowed count+1."
+          ],
+          "result": "status0",
+          "steps": [
+            "count=min(receive_count-2,8) signed. Copy positive count bytes from receive[2:] to local zeroed narrow buffer.",
+            "ACP conversion; value.SetAt(converted,count+1); name=\"CID1\"; return0."
+          ]
+        },
+        "B0.read_store": {
+          "inputs": [
+            "this:1AB0*",
+            "command:COMMAND_DATA*",
+            "cache:CCommCachePlus&",
+            "output:CCmdStringName&"
+          ],
+          "result": "status:u32",
+          "steps": [
+            "Null command=>C0040001. Materialize selectorAD target0 to local RAII list; require exactly1 frame else C0040102.",
+            "CommCacheSndRcv(frame,0), propagate nonzero. Require receive_count>=mask_count and receive_count>=6 else A0040202.",
+            "No additional local base.mask call. Format UTF16 decimal receive[3].receive[4].receive[5], write output.value; output.name=\"CID1\". Return0.",
+            "Destroy local frame list/frame nodes/core on every normal/error return and unwind."
+          ]
+        },
+        "PSA.additional": {
+          "inputs": [
+            "this:PSA*",
+            "addition:u16",
+            "out:u8*"
+          ],
+          "result": "status:u32",
+          "steps": [
+            "Require command, command.DataCtrl, command.snd, addition!=0, out!=null else C0040001.",
+            "CheckEcuFunc(DataCtrl,command.snd.ecu+1C,function1D,detail54,addition,&local32); if !=1 returnC0040602; write low8(local32), return0."
+          ]
+        },
+        "PSA.bcd": {
+          "inputs": [
+            "byte:u8"
+          ],
+          "result": "0 iff (byte&15)<10 and (byte&F0)<A0; else A0040208"
+        },
+        "PSA.hex": {
+          "inputs": [
+            "bytes:u8*",
+            "length:s32",
+            "output:CCmdString*"
+          ],
+          "result": "status:u32",
+          "steps": [
+            "Reject null input/output or unsigned(length)>255 => C0040001.",
+            "Append each byte as uppercase2-digit hex without delimiters in UTF16 temporary512 units (wcscat_s capacity511); assign output string; return0."
+          ]
+        },
+        "PSA.identity": {
+          "bounds": "No independent local bounds check for receive23..25 or2..6; only previous mask_count bound.",
+          "inputs": [
+            "this:PSA*",
+            "kind:s32"
+          ],
+          "result": "status:u32",
+          "steps": [
+            "Unsigned kind>1=>C0040001.",
+            "kind0 calls PSA.additional(addition12,&bytes[0]); on0 copies receive[23],receive[24],receive[25] to bytes1..3 then PSA.additional(addition13,&bytes4).",
+            "kind1 copies receive[2..6] into five identity bytes+34..38; return0."
+          ]
+        },
+        "PSA.read": {
+          "inputs": [
+            "this:PSA*",
+            "kind:s32",
+            "cache:CCommCachePlus&"
+          ],
+          "result": "status:u32",
+          "steps": [
+            "Construct temporary CCommCachePlus (not the supplied cache); clear CID frames, five identity bytes+34..38, selector+A and prefix string+3C.",
+            "kind0 chooses selectorE8,prefixPROACE_SW; kind1 selectorE9,prefixPROACE_HW; other values leave selector0 then materialize (not immediately rejected).",
+            "Materialize selector target0 via temporary cache; require exactly1 frame and send_count>=2 else C0040102.",
+            "CommCacheSndRcv(frame,0); propagate nonzero; require receive_count>=mask_count else A0040202; base.mask then PSA.identity.",
+            "Destroy temporary cache on all exits. Supplied cache reference unused in native body."
+          ]
+        },
+        "PSA.store": {
+          "inputs": [
+            "this:PSA*",
+            "output:CCmdStringName&",
+            "field:s32"
+          ],
+          "quirks": [
+            "Local copies happen before255-byte length guard in PSA.hex; no local cap at copy loop."
+          ],
+          "result": "status:u32",
+          "steps": [
+            "field0 validates all5 identity bytes as packed BCD (both nibbles<=9); any invalid=>A0040208. Copy5; suffixID.",
+            "field1 copies all send bytes to local256-byte buffer; suffixFRAMEID.",
+            "field2 copies all receive bytes; suffixFRAMEVALUE. Other fields leave length0/suffix empty.",
+            "PSA.hex(buffer,length,&output.value); propagate error. output.name=format(\"%s_%s\",storedPrefix,suffix); return0."
+          ]
+        },
+        "SASensor.detect": {
+          "formula": "Scan ordered ECU list, return1 when copied ECU ID+8 is0x1A1 or0x1BD; else0. No local null-list validation.",
+          "inputs": [
+            "this:SASensor*",
+            "ecus:CCmdList<CCmdEcuSpecificInfo>*"
+          ],
+          "result": "bool32"
+        },
+        "base.ascii": {
+          "inputs": [
+            "this:CID*",
+            "output:CCmdStringName&",
+            "isASCII:s32*"
+          ],
+          "quirks": [
+            "NUL is accepted; empty string yields true. This is byte scan, not Unicode validation."
+          ],
+          "result": "status:u32",
+          "steps": [
+            "Null isASCII =>C0040001.",
+            "Initialize *isASCII=1. Scan exactly output.value.length:u16 bytes from output.value.data; each byte must be0 OR 0x20..0x7E. First other byte sets0 and stops. Return0."
+          ]
+        },
+        "base.delete_tail": {
+          "formula": "for i=start; i<receive_count; ++i: receive[i]=0; return0",
+          "inputs": [
+            "this:CID*",
+            "start:s32"
+          ],
+          "quirks": [
+            "Does not remove bytes or decrease count; negative start is not rejected locally."
+          ],
+          "result": "status0"
+        },
+        "base.init": {
+          "inputs": [
+            "this:CID*",
+            "command:COMMAND_DATA*",
+            "support_selector:u16",
+            "cid_selector:u16"
+          ],
+          "result": "status:u32",
+          "steps": [
+            "If command==null return C0040001 without updates.",
+            "Store borrowed command+4, support selector+8, CID selector+A. Return0."
+          ]
+        },
+        "base.installing": {
+          "inputs": [
+            "this:CID*",
+            "command:COMMAND_DATA*",
+            "out:CCmdList<CCmdEcuSpecificInfo>*"
+          ],
+          "product_difference": "Embedded CDiagToolDb is command.DataCtrl+0xCC main and +0xC0 DS4, proven differing literal displacements.",
+          "result": "status:u32; appends ordered ECU IDs",
+          "steps": [
+            "Null command or out => C0040001.",
+            "command.DataCtrl.CShareData.GetData(slot9,&vehicle); propagate failure. Null vehicle=>C0040601.",
+            "Query GetDbRecord(0x105,EcuGroup,vehicle.u16[0],1); propagate failure; zero rows=>C0040101.",
+            "For each group in native ordered rows, key=row+6:u16; GetDbRecord(0x12C,InstallingEcuList,key); propagate failure; zero rows=>C0040101.",
+            "For each installing row, candidate=row+6:u16. Query GetDbRecord(0x142,DummyEcuList,candidate). A0030107 is ignored; other nonzero propagates. If a dummy row exists use first row+2:u16 instead.",
+            "Append CCmdEcuSpecificInfo with resulting ECU ID, preserving order/duplicates; no output clear. Return0."
+          ]
+        },
+        "base.mask": {
+          "bounds": "No local independent receive/expected bounds check; callers provide length predicates. Exact disassembly distinguishes receive+58/mask+44/expected+6C.",
+          "formula": "for i=0; i<mask_count; ++i: if (receive[i] & mask[i]) != expected[i] return A0040201; return0",
+          "inputs": [
+            "this:CID*",
+            "frame:CCommFrameData const&"
+          ],
+          "result": "status:u32"
+        },
+        "base.read": {
+          "inputs": [
+            "this:CID*",
+            "id:u8",
+            "cache:CCommCachePlus&"
+          ],
+          "parameters": {
+            "bus": 0,
+            "noInit": false,
+            "targetOverride": 0
+          },
+          "result": "status:u32; response retained in owned CID frame",
+          "steps": [
+            "RemoveAll cid_frames; GetCommFrmInfo(cid_selector,command,&cid_frames,targetOverride), propagate nonzero.",
+            "Require frame_count==1 and send_count>=3 else C0040102.",
+            "Set send[2]=id; cache.CommCacheSndRcv(frame,bus), propagate nonzero.",
+            "Require receive_count==mask_count else A0040202.",
+            "Run base.mask, propagate failure.",
+            "Require receive[2]==send[2] else A0040201. Return0."
+          ]
+        },
+        "base.store": {
+          "inputs": [
+            "this:CID*",
+            "output:CCmdStringName&",
+            "index:s32"
+          ],
+          "parameters": {
+            "prefix": "CID"
+          },
+          "quirks": [
+            "Copy count may exceed local buffer; embedded NUL terminates text conversion; exact SetAt count17 is not receive-derived. No local output-null validation."
+          ],
+          "result": "status0; overwrites two strings",
+          "steps": [
+            "Zero255 bytes of256-byte local narrow buffer and510 bytes of512-byte UTF16 name buffer.",
+            "Copy receive[3..receive_count) to narrow buffer, without explicit cap or minimum in this method.",
+            "Convert NUL-terminated narrow buffer with Windows MultiByteToWideChar(codepage0=ACP,flags0,length=strlen+1), not UTF8; temporary allocation freed after SetAt.",
+            "output.value.SetAt(converted,17).",
+            "output.name = formatUTF16(\"%s%d\",prefix,index+1). Return0."
+          ]
+        },
+        "base.support": {
+          "inputs": [
+            "this:CID*",
+            "cache:CCommCachePlus&"
+          ],
+          "parameters": {
+            "bus": 0,
+            "noInit": false,
+            "targetOverride": 0
+          },
+          "result": "status:u32; response remains in owned support frame",
+          "steps": [
+            "RemoveAll support_frames.",
+            "cache.GetCommFrmInfo(support_selector,command,&support_frames,targetOverride); propagate nonzero.",
+            "Require frame_count==1 and send_count>=3 else C0040102.",
+            "cache.CommCacheSndRcv(frame,bus); propagate nonzero.",
+            "Require receive_count>=mask_count else A0040202.",
+            "Run base.mask."
+          ]
+        },
+        "base.support_count": {
+          "bounds": "No null/empty/frame-present check or nonnegative clamp.",
+          "formula": "support_frame.receive_count - 3",
+          "result": "s32"
+        },
+        "base.support_id": {
+          "bounds": "No local range validation.",
+          "formula": "support_frame.receive[index+3]",
+          "inputs": [
+            "index:s32"
+          ],
+          "result": "u8"
+        },
+        "runtime.assign": {
+          "inputs": [
+            "this:CID*",
+            "source:CID&"
+          ],
+          "result": "this",
+          "steps": [
+            "Copy command/selectors then invoke CCmdList<CCommFrameData>::operator= for both frame lists; derived variants additionally copy their fields; PSA copies five bytes and prefix CCmdString. 1AB0 returns this without data copy."
+          ]
+        },
+        "runtime.construct": {
+          "inputs": [
+            "this:CID*"
+          ],
+          "result": "this",
+          "steps": [
+            "Set class vptr; initialize both CCmdCore/CCmdList frame subobjects, clear their linked nodes, set command/selectors0.",
+            "Special variants additionally clear targetOverride:u32+34 and bus:u16+38; PSA instead clears five bytes34..38 and initializes string3C. 1AB0 only sets vptr (no base fields)."
+          ]
+        },
+        "runtime.copy_construct": {
+          "inputs": [
+            "this:CID*",
+            "source:CID const&"
+          ],
+          "quirks": [
+            "Exported copy constructor uses shallow list-pointer copying, not operation-level ownership transfer; normal plugin paths generally stack-construct helpers rather than use these copies."
+          ],
+          "result": "this",
+          "steps": [
+            "Copy borrowed command and selector fields; CCmdCore copy for list subobjects then shallow-copy linked-list head/tail/count pointers.",
+            "Derived special classes additionally copy u32+34/u16+38; PSA copies five identity bytes and CCmdString prefix; 1AB0 only sets vptr."
+          ]
+        },
+        "runtime.destroy": {
+          "inputs": [
+            "this:CID*"
+          ],
+          "result": "void",
+          "steps": [
+            "Derived destructor resets derived vptr then base destructor; PSA first destroys prefix string3C.",
+            "Base resets vptr; destroys/clears CID frames+20 then support frames+C and their CCmdCore bases.",
+            "1AB0 only resets its vptr. No shared borrowed COMMAND_DATA/cache destruction."
+          ]
+        },
+        "runtime.zero": {
+          "formula": "memset(this,0,size)",
+          "inputs": [
+            "this:void*",
+            "size:u32"
+          ],
+          "result": "void"
+        },
+        "special.info": {
+          "inputs": [
+            "this:specialCID*",
+            "ecu:u32"
+          ],
+          "parameters": {
+            "detail": "variant-specific"
+          },
+          "result": "status:u32",
+          "steps": [
+            "Require this.command and command.DataCtrl else C0040001.",
+            "Local CFuncInfoCache.CheckEcuFunc(DataCtrl,ecu,function1D,detail,additionD,&this.targetOverride+34).",
+            "CheckEcuFunc(DataCtrl,ecu,function1D,detail,additionE,&local32). Both must equal1 else C0040602.",
+            "Store low16(local32) to this.bus+38; return0. Destroy local func cache on all exits."
+          ]
+        },
+        "standard.lookup": {
+          "inputs": [
+            "this:CCmdStandardValueIdList*",
+            "item:u32",
+            "out:u16*"
+          ],
+          "quirks": [
+            "No out-null validation on match; no DB/wire action; no sort/dedup."
+          ],
+          "result": "status:u32",
+          "steps": [
+            "Scan native ordered list at this+C, head this+10,count this+18; first node+0C:u32==item writes node+10:u16 to*out and returns0.",
+            "Empty/no match=>C0040602; out untouched."
+          ]
+        }
+      }
+    },
+    "information-string-assignment-reset": {
+      "contracts": [
+        {
+          "abi": "thiscall virtual void RemoveAll(),slot+0C",
+          "algorithm": "Ifthis+8data!=NULL free;this+8NULL,this+Cu16byteLength0;noargument/allocation/status.",
+          "id": "InformationReads.CommandDataLib.GTSPlus.CCmdString.RemoveAll.v1",
+          "product": "GTSPlus",
+          "source_ref": "GTSPlus/bin/CommandDataLib.dll"
+        },
+        {
+          "abi": "thiscall void operator=(wchar_t const*)",
+          "algorithm": [
+            "IfsrcNULL,L0;elseunboundedwcslen16scan,computeL=(2*((wcslen(src)+1)&FFFF))&FFFF. INCLUDEterminatorinordinarylength;emptystringhasL2,distinctfromRemoveAlllen0.",
+            "FreeolddataBEFOREallocation/copyandzerooldptr. IfsrcnonnullandL!=0 storeu16L,allocatebyte[L],memcpyexactL,storepointer;noextraNUL/padding/validation. WrappedL0orNULLsrc=>NULLdata/zeroLength. Notalias-safe;allocation/copyexceptionsnotstatus;storedLengthmayalreadybechanged."
+          ],
+          "id": "InformationReads.CommandDataLib.GTSPlus.CCmdString.Assign.wide.v1",
+          "product": "GTSPlus",
+          "source_ref": "GTSPlus/bin/CommandDataLib.dll"
+        },
+        {
+          "abi": "thiscall virtual void RemoveAll(),slot+0C",
+          "algorithm": "Ifthis+8data!=NULL free;this+8NULL,this+Cu16byteLength0;noargument/allocation/status.",
+          "id": "InformationReads.CommandDataLib.DS4.CCmdString.RemoveAll.v1",
+          "product": "DS4",
+          "source_ref": "DS-4/bin/CommandDataLib.dll"
+        },
+        {
+          "abi": "thiscall void operator=(wchar_t const*)",
+          "algorithm": [
+            "IfsrcNULL,L0;elseunboundedwcslen16scan,computeL=(2*((wcslen(src)+1)&FFFF))&FFFF. INCLUDEterminatorinordinarylength;emptystringhasL2,distinctfromRemoveAlllen0.",
+            "FreeolddataBEFOREallocation/copyandzerooldptr. IfsrcnonnullandL!=0 storeu16L,allocatebyte[L],memcpyexactL,storepointer;noextraNUL/padding/validation. WrappedL0orNULLsrc=>NULLdata/zeroLength. Notalias-safe;allocation/copyexceptionsnotstatus;storedLengthmayalreadybechanged."
+          ],
+          "id": "InformationReads.CommandDataLib.DS4.CCmdString.Assign.wide.v1",
+          "product": "DS4",
+          "source_ref": "DS-4/bin/CommandDataLib.dll"
+        }
+      ],
+      "relation": "EachproductindependentlydecodedfromqualifiedPE;notcrossproductbasenameassumption."
+    }
+  },
+  "id": "families.InformationReads",
+  "kind": "families",
+  "schema": "gtsplus-lifecycle-operations-spec-v1"
+}

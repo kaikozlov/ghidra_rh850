@@ -1,0 +1,1377 @@
+{
+  "schema": "gtsplus-lifecycle-operations-spec-v1",
+  "id": "frontend.ReadDtcFrontend",
+  "kind": "frontend",
+  "data": {
+    "owner": "ReadDtcFrontend",
+    "common_contracts": [
+      {
+        "id": "ReadDtcFrontend.data-list-acquire",
+        "applies_to_members": [
+          "js/gts/datalist/datalist_worker.js"
+        ],
+        "entry_inputs": [
+          "param.parameter.ecuId",
+          "snapshotType",
+          "interval"
+        ],
+        "states": [
+          "cache.data",
+          "snapshotMode",
+          "snapshotType",
+          "commandThread",
+          "buffer"
+        ],
+        "ordered_behavior": [
+          "initDatalist builds a fresh cache and default trigger; settings folder/paths and checkbox load precede fuel-support check, built-in custom lists, user .cl files, supported monitor list, trigger list, monitor metadata, buffer construction and default/current selection.",
+          "Built-in lists sort by dispOrder and remove IDs7000..7499/8000..10099; first defaultDispFlag1 becomes DEFAULT_LIST. User .cl loads are serial; JSON filename must case-insensitively match customListName+.CL. Folder/file/parse failures in these optional list paths resolve rather than abort.",
+          "Signal support is the returned getDatMonSignalList signalDataList, not a UI assumption. ECU546 retains337, removes335/336 from displayed list, and marks synthesized337. Every custom list intersects the admitted signal IDs; empty lists disappear. Metadata is converted using each signal converter and current unitSetting.",
+          "getNewDatalist uses temporary cache only when isTemporary; selection ordering is OEM all-signal order for built-in/other IDs and preserves user order otherwise; missing metadata suppresses a displayed parameter. Optional DTC-count trigger adds a raw numeric counter, updates dtcCountPidId and creates graph metadata. Non-temporary replacement resets parameter trigger and updates sharedData.customListMap.",
+          "startDatalist shifts CHECK mode to NORMAL then confirms; snapshot1=MONITOR, snapshot2=WAITING. Buffer clearing precedes startDatMon; still non-normal check mode suppresses start. signal337 is replaced with335+336 in the native request. enable must be exactly1 before resetting frame/trigger/flag state and scheduling poll.",
+          "getDatMonValue rejects any nonempty messageList. Empty signalList records zero sampling frames and returns samplingRate only. Otherwise first timestamp becomes shared time origin; every sample time is mutated relative to it, lists sort newest-first, full data goes to buffer before conversion/trigger evaluation.",
+          "Live337 uses truthiness of both incoming335/336 data, Number conversion, divisor-zero=>0 and upper clamp100; absent/falsy operands yield {value:null,valueStr:\"\"}. Selected DTC counter bypasses unit conversion. Waiting trigger transitions to RECORDING; recording expiry stops timer then awaits stopDatMon before STOP/isSaveData. Flag capture applies only during recording.",
+          "stopDatalist removes periodic scheduling before stopDatMon; success clears lastDtcCount and enters STOP. exitDatalist suppresses stop/check-mode errors, attempts normal-mode restoration+confirmation, and closes buffer only when cache exists and is no longer CHECK. No cancellation of an already-running PF request is implied by timer stop."
+        ]
+      },
+      {
+        "id": "ReadDtcFrontend.dual-data-list",
+        "applies_to_members": [
+          "js/gts/dual_datalist/dual_datalist_worker.js"
+        ],
+        "ordered_behavior": [
+          "The dual implementation is not treated as equivalent to the single implementation. startDatMon sends one ordered startDataMonitorList containing base ecuId+signals then dualEcuId+signals, each independently substituting337 with335/336. It resets stoppingDatalist=false and requires enable===1.",
+          "A polling iteration awaits base getDatMonValue and buffer/conversion, then dual getDatMonValue and buffer/conversion; it returns both converted value lists. stoppingDatalist causes either subsequent acquisition to resolve false. Empty lists give that ECU no values; nonempty messageList rejects.",
+          "Both ECUs use the first nonempty sample timestamp as origin; getDatMonValue normalizes all samples in place. Frame count and sampling frameNum come from dual result, while triggering/recording state and lastDtcCount use base values. isFirstData is ORed across acquisitions. recordTime prefers base data and falls back to dual data.",
+          "Expiry sets stoppingDatalist=true, stops timer and awaits stopDatMon for the base ecuId. Returned STOP/isSaveData occurs after native stop success. Separate exact stop/exit/error paths remain in function contracts."
+        ]
+      },
+      {
+        "id": "ReadDtcFrontend.dtc-request-and-ffd",
+        "applies_to_members": [
+          "js/gts/dtc/dtc_worker.js"
+        ],
+        "ordered_behavior": [
+          "checkDtcSupport requires at least one ECU function1/16/30; monitor button additionally requires distributor displayMonitorStatus and MONITOR support. getDtc rejects absent/empty ecuFuncList; sends ecuId,busId,phaseType and function/detail request lists, never a presumed universal DTC service.",
+          "Permanent display setting defaults0; function32 is admitted only for setting===1 and CHECK_REGULATORY support. Detail set is1,2,3,4,6,42,57 plus43 when permanent display is truthy; ffdOption is included only when not undefined.",
+          "First scan order: getDtc(option0), optional custom-list folders/files+signal list, MIL, monitor status, enhanced/generic tab setting, saveSystemDtc and createReturnValue(true). Repeat uses cached custom lists and createReturnValue(false). First scan resolves revoke reasons; other failure maps to {result:resultInfo.code,errorCode:resultInfo.detailCode}. Repeat maps failures without revoke special handling.",
+          "getFfd branches on property existence of ffdInfo, not its truthiness. It serially reads each ffdId, fills missing multiData ffdType with bit0x10=>2 otherwise current type; first indexed successful response initializes merge, later responses merge by signal id and tuple(data,index,ffdType); per-read rejects resolve. No claim that a failed first indexed read produces a valid later merge.",
+          "Without ffdInfo, request includes optional ffdId when property exists; otherwise optional ssrNoList/sdrNoList. getFfd rejection resolves undefined. getFfdOfOneTime snapshots cache through JSON roundtrip before FFD, DTC item filters, optional detail-id list and detail reads, then returns selected enhanced/generic row plus parameter group lists."
+        ]
+      },
+      {
+        "id": "ReadDtcFrontend.dtc-clear-mutations",
+        "applies_to_members": [
+          "js/gts/dtc/dtc_worker.js",
+          "js/gts/monitor/monitor_worker.js"
+        ],
+        "ordered_behavior": [
+          "Clear is mutating. Both DTC and Monitor clear first optionally writeAfterSalesZone when function1/detail67 is supported: date day/month+1/year from local Date plus raw commonInfo mileage. After-sales rejection is deliberately swallowed, then clear proceeds.",
+          "MAZDA_OEM uses clearDtcForMazda without per-ECU clear-support gate. Other OEM/generation paths require some function1/16/30 with detail7 or21 and send clearDtc({ecuId}); unsupported is a successful no-op at frontend.",
+          "DTC clear maps clear rejection to {result:code,errorCode:detailCode}; Monitor clear propagates rejection. UI confirmation/retry/rescan and disable/reenable transitions are separate controller graphs and are not implied by worker completion."
+        ]
+      },
+      {
+        "id": "ReadDtcFrontend.monitor-obd",
+        "applies_to_members": [
+          "js/gts/monitor/monitor_worker.js",
+          "js/gts/monitor/monitor_util.js"
+        ],
+        "ordered_behavior": [
+          "Initialization order is setting-file help/distributor country excerpt, optional MIL, PID01 normal monitor status, PID41 support probe, PID41 normal only if probe succeeds, serial PID01 results, serial PID41 results, then formatted result. MIL failure resolves; PID41 support failure sets false; PID01 per-linked result failure resolves; PID41 per-result failure propagates.",
+          "Linked test requests carry {ecuId,linkIdList,funcId:0}. Misfire system names additionally invoke getMisfireInfo. Return includes separate pid01View.tableData,pid41View.tableData,ecuInfo and settings. Repeat builds fresh modelCache and commits it only when !loopCancelFlag; exact order includes writing ecuCache from previous model.cache.data before replacement.",
+          "Test pass compares raw data against optional raw minLimitData/maxLimitData: below min or above max fails; equality passes, undefined limits do not fail. Unit conversion is performed independently for data/min/max for displayed strings. All detail-pass=>summary PASS, no details=>EMPTY, otherwise FAIL.",
+          "PID01 and current/PID41 condition/status remapping differ; full switch matrices and summary A..F icon guards are retained in convertViewData statement graph. Misfire rows override detail.result=MISFIRE, clear min/max, set testSummary=EMPTY after summaryIcon computation.",
+          "getMisfireInfo starts general communication with ecuId/busId, checks generic22 F8 10, then sequential22 F5 02/03/04/05 reads. ErrorCode presence skips that read; response strips first3 bytes. Payload byte0 advertises8 signals; each admitted signal is a BE16 at offsets1,3,..15 and scaled1 offset0 with nominal0..65535. try/catch returns accumulated results; finally always awaits endGeneralComm (rejection swallowed)."
+        ]
+      },
+      {
+        "id": "ReadDtcFrontend.qdc-and-qdc-cid",
+        "applies_to_members": [
+          "js/gts/quick_dtc_check/quick_dtc_check_worker.js",
+          "js/gts/quick_dtc_check_cid/quick_dtc_check_cid_worker.js"
+        ],
+        "ordered_behavior": [
+          "Each variant independently loads PC/distributor country permanent-display setting, sorts mounted ECUs by dbIndex, obtains softwareId and produces initial ECU rows. Initialization failure becomes {result:false,...already-cached rows}, not rejected promise.",
+          "start begins 100ms message-queue polling, optionally initializes wired vehicle collection and turns log collection ON when carryOut and VIN/engine target. ECUs process serially; isCancel skips later ECUs but does not abort current PF request. Connected status plus function1/16/30[/32 when setting truthy] selects current detail1 across eligible functions, falling back to past detail2 only if no current requests. option0 requests no FFD.",
+          "DTC error resolves undefined and yields UNKNOWN; [] yields NORMAL, nonempty yields ABNORMAL, disconnected yields WITHOUT. QDC-CID separately admits CID function and obtains cidList; no ordinary-QDC equivalence is assumed for that branch.",
+          "Collection chooses WVDC_VIN_{NA,JP,EU,OT}.vds and WVDC_VehicleType_{NA,JP,EU,OT}.vds with exact region match; uses VIN or vehicleType||IT3_division||IT3_modelCode and engineType||IT3_engineType. Collection/API failures are swallowed. Ending turns logging OFF and flashWiredVehicleData constructs VIC_<softwareId>_<UTC timestamp>.json plus GTS-C02 metadata; this is data collection/output, not ECU reflashing.",
+          "Final END message includes local timestamp selected by dateFormat and cancellation flag; then isCancel resets. cancelDtcCheck only sets flag. endDtcCheck resets flag and stops message polling.",
+          "clear serially rechecks connections/functions, writes after-sales zone when1/67 supported; ordinary clear requires1/16/30 with7/21. MAZDA phase21 global clear executes at most once (yetCleared gate). First non-normal resultInfo is retained across resolves/rejects while processing continues; final result:true is accompanied by accumulated resultInfo."
+        ]
+      },
+      {
+        "id": "ReadDtcFrontend.fuel-generation-calculation",
+        "applies_to_members": [
+          "js/gts/fuelconsumption/fuelconsumption_worker.js"
+        ],
+        "ordered_behavior": [
+          "Calculation selection is PHASE_3 first, else any supportInfoByCylList function/detail gate chooses AfterPhase4Another, else only PHASE_4/PHASE_5 chooses AfterPhase4. There is no inferred Phase6/default return. All PID maps and support table entries are retained as program bindings.",
+          "First cycle initializes preData and dtime0; later dtime is raw latestDataTime delta. distance accumulates speed*dtime/1000/3600. P3 fuel accumulation uses data.dspd (as shipped), while instantaneous ratio denominator uses data.despd; later variants use engine speed data.despd for fuel accumulation. All formulas and finite-number/zero guards remain exact in function graphs.",
+          "P3 cylinder count parses commonInfo; ordinary later variant ECU372 maps PID9806/9802/9803 to3/4/6, ECU456 PID9802=>4, otherwise uses data value. Another variant assigns cylinder3 then4 by support conditions, allowing later assignment to override. NHW correction is0.95 only phase4/5.",
+          "Average economy distance0=>0.1 and consumed-fuel0=>100. Instantaneous speed0=>0.1 and zero engine-speed/dtime/injection/cylinder=>100. Stopped time, gear percentages and A/C use source-specific accumulators; graphs preserve differences including P3 reinitialization behavior.",
+          "Unit rounding paths exist only phase3 versus phase4/5. Display rows additionally include selected/trigger PID conversions. ECU546 signal337 falsy data yields empty strings. resetFuelconsumption resets preData,time/frame/trigger/flags/isRecordingTimeOver locally; it is not sent as an ECU reset.",
+          "Recording, polling start/stop, buffer save/cancel and state transitions are separate source contracts; recording has buffer/file/native-stop effects and is not classified read-only."
+        ]
+      },
+      {
+        "id": "ReadDtcFrontend.conversion",
+        "applies_to_members": [
+          "js/gts/common/gts_worker_util.js"
+        ],
+        "ordered_behavior": [
+          "createConverter shallow-copies metadata; missing converter object returns null. Pattern types1/20/22 use Number(value) lookup in dispInfoList; unknown values have undefined valueStr. Numeric types2/21/23/25/26/28/29/30 use genre-selected user unit tables. Hex3/31 uses uppercase Number(value).toString(16) padded ceil(bitLength/4). ASCII4/32 and DIAG_CODE5 keep input text and return NaN numeric value.",
+          "Min/max13/24/27/33 first sets pattern endpoints from source dataMin/dataMax according to first-two-pattern ordering, then unit-converts endpoints; converter replaces value/valueStr at >=max and <=min using endpoint metadata. Empty/malformed endpoints are not invented; catch only covers setup.",
+          "TIME_HH_MM19 formats Number(value) minutes as zero-padded hours:minutes. LUX6,S_10BIT7,S_12BIT8,U_10BIT9,S_8BIT10,U_16BIT11,REV_LSB12,REV_LSB_NCB34 and default use convertNone; native extraction/decoding is upstream, not reverse-decoded again by frontend.",
+          "Numeric converters replace one comma with period for parsing, round Math.round(n*10^decPnt)/10^decPnt, toFixed(decPnt), then restore decimal comma when input contained it. Unit setting LSBnull uses100/Number(value); others Number(value)*LSB+OFFSET. convertNone preserves nonnumeric text as valueStr. No frontend guards are fabricated for invalid precision/unit table indices.",
+          "All13 unit tables, genre mappings, conversion factors, pressure absolute/gauge offsets and locale/date/time helpers are retained in source-root function graphs; distinct constants are not collapsed to exemplar units."
+        ]
+      },
+      {
+        "id": "ReadDtcFrontend.stored-and-graph",
+        "applies_to_members": [
+          "js/gts/canbus_check/canbus_check_stored_central_view.js",
+          "js/gts/canbus_check/canbus_check_stored_communication_malfunction_view.js",
+          "js/gts/canbus_check/canbus_check_stored_controller.js",
+          "js/gts/canbus_check/canbus_check_stored_detail_view.js",
+          "js/gts/canbus_check/canbus_check_stored_main_view.js",
+          "js/gts/canbus_check/canbus_check_stored_model.js",
+          "js/gts/canbus_check/canbus_check_stored_old_view.js",
+          "js/gts/datalist/datalist_stored_controller.js",
+          "js/gts/datalist/datalist_stored_manager_view.js",
+          "js/gts/datalist/datalist_stored_model.js",
+          "js/gts/datalist/datalist_stored_view.js",
+          "js/gts/dtc/dtc_health_stored_controller.js",
+          "js/gts/dtc/dtc_health_stored_ffd_view.js",
+          "js/gts/dtc/dtc_health_stored_main_view.js",
+          "js/gts/dtc/dtc_health_stored_model.js",
+          "js/gts/dtc/dtc_stored_controller.js",
+          "js/gts/dtc/dtc_stored_ffd_view.js",
+          "js/gts/dtc/dtc_stored_graph_view.js",
+          "js/gts/dtc/dtc_stored_main_view.js",
+          "js/gts/dtc/dtc_stored_manager_view.js",
+          "js/gts/dtc/dtc_stored_model.js",
+          "js/gts/dual_datalist/dual_datalist_stored_controller.js",
+          "js/gts/dual_datalist/dual_datalist_stored_model.js",
+          "js/gts/dual_datalist/dual_datalist_stored_view.js",
+          "js/gts/fuelconsumption/fuelconsumption_stored_controller.js",
+          "js/gts/fuelconsumption/fuelconsumption_stored_main_view.js",
+          "js/gts/fuelconsumption/fuelconsumption_stored_model.js",
+          "js/gts/graph/bar_chart/bar_chart_object.js",
+          "js/gts/graph/bar_chart/bar_chart_series.js",
+          "js/gts/graph/bar_chart/bar_chart_view.js",
+          "js/gts/graph/dynamic_graph.js",
+          "js/gts/graph/graph_edit_flag_memo_dlg_view.js",
+          "js/gts/graph/graph_info.js",
+          "js/gts/graph/graph_panel.js",
+          "js/gts/graph/graph_setting_dialog.js",
+          "js/gts/graph/graph_stored_controller.js",
+          "js/gts/graph/graph_stored_model.js",
+          "js/gts/graph/graph_worker.js",
+          "js/gts/graph/graph_worker_api.js",
+          "js/gts/graph/led_chart/led_chart_object.js",
+          "js/gts/graph/led_chart/led_chart_series.js",
+          "js/gts/graph/led_chart/led_chart_view.js",
+          "js/gts/graph/line_chart/line_chart_object.js",
+          "js/gts/graph/line_chart/line_chart_plot_line.js",
+          "js/gts/graph/line_chart/line_chart_series.js",
+          "js/gts/graph/line_chart/line_chart_view.js",
+          "js/gts/graph/line_chart/line_chart_x_axis.js",
+          "js/gts/graph/line_chart/line_chart_y_axis.js",
+          "js/gts/graph/meter_chart/meter_chart_object.js",
+          "js/gts/graph/meter_chart/meter_chart_series.js",
+          "js/gts/graph/meter_chart/meter_chart_view.js",
+          "js/gts/graph/plot_line_object.js",
+          "js/gts/graph/series_data.js",
+          "js/gts/graph/static_graph.js",
+          "js/gts/graph/x_axis_info.js",
+          "js/gts/graph/y_axis_info.js",
+          "js/gts/health_check/health_check_stored_controller.js",
+          "js/gts/health_check/health_check_stored_load_view.js",
+          "js/gts/health_check/health_check_stored_main_view.js",
+          "js/gts/health_check/health_check_stored_model.js",
+          "js/gts/monitor/monitor_health_stored_controller.js",
+          "js/gts/monitor/monitor_health_stored_detail_view.js",
+          "js/gts/monitor/monitor_health_stored_main_view.js",
+          "js/gts/monitor/monitor_health_stored_model.js",
+          "js/gts/monitor/monitor_stored_controller.js",
+          "js/gts/monitor/monitor_stored_detail_view.js",
+          "js/gts/monitor/monitor_stored_main_view.js",
+          "js/gts/monitor/monitor_stored_model.js",
+          "js/gts/vehicle_information/vehicle_information_stored_controller.js",
+          "js/gts/vehicle_information/vehicle_information_stored_model.js",
+          "js/gts/vehicle_information/vehicle_information_stored_view.js"
+        ],
+        "ordered_behavior": [
+          "Stored read wrappers retrieve StoredDataManager.getStoredData(storedId,true), relocalize when stored language differs, and build converters from persisted signal metadata/current unitSetting. MenuShell owns StoredDataManager/BufferInterface/GtsBaseBuffer/container runtime; DataCaptureReports owns stored_data UI/worker/CSV projections. Graph/read projections remain here.",
+          "Single datalist selects persisted customList[0].pidIdList; dtc counter synthesizes numeric metadata. Stored ECU546+337 derives335/336 aligned by array index, divisor-zero=>0 and clamp100; this differs from live falsy-operand empty behavior. Stored samplingRate computes Math.round(lastTime/frameNum) when both truthy.",
+          "Graph stored saveFlagList forwards {storedId,flagList}; graph edit memo/settings/axis/line/bar/LED/meter transforms, event bindings, static/dynamic sorting/zoom/range behavior and disposal are retained method-by-method with the complete graph program/function effects. No graph module import is substituted for those effects."
+        ]
+      },
+      {
+        "id": "ReadDtcFrontend.canbus-oem-routing",
+        "applies_to_members": [
+          "js/gts/canbus_check/canbus_check_worker.js"
+        ],
+        "ordered_behavior": [
+          "openCanBusScreen separates MAZDA, CENTRAL_GW and old branches. Central-GW fetch uses selected canBusDisplayId only when confirmBusConfig, passes category/ECU/histPidSupport entries plus canBusOptionId; it reads current time serially for each connected communication ECU, including ecuId0 as connected. Missing time entries become null in saved list.",
+          "Old branch reads categoryIdLstList then current/history connection rows. Initial current connections are WHITE; history-only RED. Subsequent disappearance becomes RED; RED reappearance or newly current entry becomes YELLOW; previously present colors are preserved; new history-only remains RED. Central-GW uses systemId+categoryId matching for prior row lookup, with distinct update code.",
+          "MAZDA loops only MAZDA_OEM mounted ECUs and excludes ecuId862, asks checkCanBusEcuConnectForMazda. Initial connected WHITE/disconnected RED; RED reconnection YELLOW; disconnect RED. Ordered requests and returned field defaults remain exact in worker graphs.",
+          "Clear, malfunction-check, periodic startup/stop, save/stored-data paths remain separate method/effect contracts; CAN-bus status display is not assumed read-only when a clear action is selected."
+        ]
+      },
+      {
+        "id": "ReadDtcFrontend.healthcheck-orchestration",
+        "applies_to_members": [
+          "js/gts/health_check/health_check_worker.js"
+        ],
+        "ordered_behavior": [
+          "_startHealthCheck computes execute pattern and CAN support, awaits CGW and wired collection setup, then serial mounted-ECU loop. Each loop skips undefined/cancelled/missing ECU, constructs independent cache sections, emits start UI message, checks ECU status with optional cache invalidation, clones function/status state and only connected ECUs run DTC/monitor/RoB/CID acquisition.",
+          "For each processed ECU it awaits DTC/MIL error check, special-operation-history, ABS history, operation history, predictiveFFD, individual stores and save before view conversion and end-ECU message. Business algorithms of those history/utility owners are joined, not transferred to native closure here.",
+          "After ECU scan, cancellation runs summary-end and returns early. Otherwise activity report, timestamp, CAN-bus and tire-pressure acquisition and messages run in order; if still not cancelled, SOH and calibration/health/priority/result/production-date/SAAP web calls follow. SU-result, PSIRT, wired-collection end, RoB web save and summary finish follow in source order.",
+          "Outer catch is not a general finally cleanup: it returns revoke UI message when e.revoke, otherwise undefined. No cleanup beyond explicit source paths is claimed. cancelHealthCheck only acts if isRunning && !cancelFlag, first awaits wired-data end, stores optional cancelAfterFunc/Args, sets cancelFlag and queues cancellation-start message.",
+          "saveHealthCheckData creates HealthCheck buffer, shallow-copies cache.data, filters truthy ECU entries, saves, outputs activity link, saves Ipk and cache. finally sets isRunning=false. Customer-friendly report derives API input milInput from captured ECU CID/MIL/DTC sections and may return url/revoke/empty url; external endpoint behavior belongs outside offline source.",
+          "Every OEM/generation-specific status/CID/clear/RoB/cache branch is retained in the full function contracts, including explicit phase6 configuration display helpers and Suzuki CID combination; native decoders/writers remain cross-layer joins."
+        ]
+      },
+      {
+        "id": "ReadDtcFrontend.pf-read-facade",
+        "applies_to_members": [
+          "js/gts/common/gts_platform_api.js",
+          "js/gts/common/gts_platform_raw_interface.js"
+        ],
+        "ordered_behavior": [
+          "Raw wrappers call this.send(exact PFCMD constant,param,receiveAck) and return the same promise. All233 current simple wrappers and236 command constants are preserved in pf_catalog/raw_command_constants; non-simple raw runtime methods remain shared MenuShell-owned.",
+          "Read facade methods preserve receiveAck semantics: when response.response exists, conversion/translation is attached to that final-response promise and the acknowledgement wrapper resolves immediately; otherwise conversion/translation is applied directly to response. Acknowledgement is not equated to final ECU result.",
+          "getDtc partition uses kindFlag0 enhanced and1 generic. Enhanced Phase5/6 bypasses mergeCore; other enhanced and all generic separate comment===\"1\" from other rows. mergeCore deduplicates by dtcCode, ORs ffdType, unions kind values, merges timeStampList by(keyCycle,elapsedTime,ffdType), merges FFD by id and multiData by(data,index,ffdType), and deduplicates(ffdId,ffdType). mergeDtc2Row starts from non-comment1 codes and only appends matching comment1 rows, so unmatched comment1-only rows are not emitted by that merge.",
+          "DTC ffdType16 maps nested multiData ffdType to2 before merge; other types propagate. Translation batches name/unit/timestamp-unit/FFD/display-pattern names using exact resource IDs and existing default strings, then writes translated fields through setTranslateStr. All remaining read API payload/result transforms and their exception/return branches are in exact function contracts, not treated as identity wrappers.",
+          "The raw websocket request map, send/cancel/connection owner and common runtime exception classification remain typed MenuShell seams. Native PID/DTC/FFD/identity decoding roles must be composed by native owners from the exact API ID and actual ecuId/busId/phaseType fields."
+        ]
+      }
+    ],
+    "owned_member_bindings": [
+      {
+        "id": "live_reads.frontend.js_gts_canbus_check_canbus_check_worker_js",
+        "member": "js/gts/canbus_check/canbus_check_worker.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.canbus-oem-routing"
+        ]
+      },
+      {
+        "id": "live_reads.frontend.js_gts_datalist_datalist_buffer_js",
+        "member": "js/gts/datalist/datalist_buffer.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_datalist_datalist_common_dlg_view_js",
+        "member": "js/gts/datalist/datalist_common_dlg_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_datalist_datalist_controller_js",
+        "member": "js/gts/datalist/datalist_controller.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_datalist_datalist_main2_view_js",
+        "member": "js/gts/datalist/datalist_main2_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_datalist_datalist_main_view_js",
+        "member": "js/gts/datalist/datalist_main_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_datalist_datalist_manager_view_js",
+        "member": "js/gts/datalist/datalist_manager_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_datalist_datalist_model_js",
+        "member": "js/gts/datalist/datalist_model.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_datalist_datalist_save_type1_view_js",
+        "member": "js/gts/datalist/datalist_save_type1_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_datalist_datalist_save_type2_view_js",
+        "member": "js/gts/datalist/datalist_save_type2_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_datalist_datalist_snapshot_config_view_js",
+        "member": "js/gts/datalist/datalist_snapshot_config_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_datalist_datalist_stored_controller_js",
+        "member": "js/gts/datalist/datalist_stored_controller.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.stored-and-graph"
+        ]
+      },
+      {
+        "id": "live_reads.frontend.js_gts_datalist_datalist_stored_manager_view_js",
+        "member": "js/gts/datalist/datalist_stored_manager_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.stored-and-graph"
+        ]
+      },
+      {
+        "id": "live_reads.frontend.js_gts_datalist_datalist_stored_model_js",
+        "member": "js/gts/datalist/datalist_stored_model.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.stored-and-graph"
+        ]
+      },
+      {
+        "id": "live_reads.frontend.js_gts_datalist_datalist_stored_view_js",
+        "member": "js/gts/datalist/datalist_stored_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.stored-and-graph"
+        ]
+      },
+      {
+        "id": "live_reads.frontend.js_gts_datalist_datalist_worker_js",
+        "member": "js/gts/datalist/datalist_worker.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.data-list-acquire"
+        ]
+      },
+      {
+        "id": "live_reads.frontend.js_gts_datalist_datalist_worker_api_js",
+        "member": "js/gts/datalist/datalist_worker_api.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_dtc_dtc_worker_js",
+        "member": "js/gts/dtc/dtc_worker.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.dtc-request-and-ffd",
+          "ReadDtcFrontend.dtc-clear-mutations"
+        ]
+      },
+      {
+        "id": "live_reads.frontend.js_gts_dual_datalist_dual_datalist_buffer_js",
+        "member": "js/gts/dual_datalist/dual_datalist_buffer.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_dual_datalist_dual_datalist_common_dlg_view_js",
+        "member": "js/gts/dual_datalist/dual_datalist_common_dlg_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_dual_datalist_dual_datalist_controller_js",
+        "member": "js/gts/dual_datalist/dual_datalist_controller.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_dual_datalist_dual_datalist_main2_view_js",
+        "member": "js/gts/dual_datalist/dual_datalist_main2_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_dual_datalist_dual_datalist_main_view_js",
+        "member": "js/gts/dual_datalist/dual_datalist_main_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_dual_datalist_dual_datalist_model_js",
+        "member": "js/gts/dual_datalist/dual_datalist_model.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_dual_datalist_dual_datalist_stored_controller_js",
+        "member": "js/gts/dual_datalist/dual_datalist_stored_controller.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.stored-and-graph"
+        ]
+      },
+      {
+        "id": "live_reads.frontend.js_gts_dual_datalist_dual_datalist_stored_model_js",
+        "member": "js/gts/dual_datalist/dual_datalist_stored_model.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.stored-and-graph"
+        ]
+      },
+      {
+        "id": "live_reads.frontend.js_gts_dual_datalist_dual_datalist_stored_view_js",
+        "member": "js/gts/dual_datalist/dual_datalist_stored_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.stored-and-graph"
+        ]
+      },
+      {
+        "id": "live_reads.frontend.js_gts_dual_datalist_dual_datalist_worker_js",
+        "member": "js/gts/dual_datalist/dual_datalist_worker.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.dual-data-list"
+        ]
+      },
+      {
+        "id": "live_reads.frontend.js_gts_dual_datalist_dual_datalist_worker_api_js",
+        "member": "js/gts/dual_datalist/dual_datalist_worker_api.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_fuelconsumption_fuelconsumption_buffer_js",
+        "member": "js/gts/fuelconsumption/fuelconsumption_buffer.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_fuelconsumption_fuelconsumption_common_dlg_view_js",
+        "member": "js/gts/fuelconsumption/fuelconsumption_common_dlg_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_fuelconsumption_fuelconsumption_controller_js",
+        "member": "js/gts/fuelconsumption/fuelconsumption_controller.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_fuelconsumption_fuelconsumption_main2_view_js",
+        "member": "js/gts/fuelconsumption/fuelconsumption_main2_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_fuelconsumption_fuelconsumption_main_view_js",
+        "member": "js/gts/fuelconsumption/fuelconsumption_main_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_fuelconsumption_fuelconsumption_model_js",
+        "member": "js/gts/fuelconsumption/fuelconsumption_model.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_fuelconsumption_fuelconsumption_stored_controller_js",
+        "member": "js/gts/fuelconsumption/fuelconsumption_stored_controller.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.stored-and-graph"
+        ]
+      },
+      {
+        "id": "live_reads.frontend.js_gts_fuelconsumption_fuelconsumption_stored_main_view_js",
+        "member": "js/gts/fuelconsumption/fuelconsumption_stored_main_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.stored-and-graph"
+        ]
+      },
+      {
+        "id": "live_reads.frontend.js_gts_fuelconsumption_fuelconsumption_stored_model_js",
+        "member": "js/gts/fuelconsumption/fuelconsumption_stored_model.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.stored-and-graph"
+        ]
+      },
+      {
+        "id": "live_reads.frontend.js_gts_fuelconsumption_fuelconsumption_worker_js",
+        "member": "js/gts/fuelconsumption/fuelconsumption_worker.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.fuel-generation-calculation"
+        ]
+      },
+      {
+        "id": "live_reads.frontend.js_gts_fuelconsumption_fuelconsumption_worker_api_js",
+        "member": "js/gts/fuelconsumption/fuelconsumption_worker_api.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_health_check_health_check_worker_js",
+        "member": "js/gts/health_check/health_check_worker.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.healthcheck-orchestration"
+        ]
+      },
+      {
+        "id": "live_reads.frontend.js_gts_monitor_monitor_buffer_js",
+        "member": "js/gts/monitor/monitor_buffer.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_monitor_monitor_common_dlg_view_js",
+        "member": "js/gts/monitor/monitor_common_dlg_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_monitor_monitor_controller_js",
+        "member": "js/gts/monitor/monitor_controller.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_monitor_monitor_detail_view_js",
+        "member": "js/gts/monitor/monitor_detail_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_monitor_monitor_health_controller_js",
+        "member": "js/gts/monitor/monitor_health_controller.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_monitor_monitor_health_detail_view_js",
+        "member": "js/gts/monitor/monitor_health_detail_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_monitor_monitor_health_main_view_js",
+        "member": "js/gts/monitor/monitor_health_main_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_monitor_monitor_health_model_js",
+        "member": "js/gts/monitor/monitor_health_model.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_monitor_monitor_health_stored_controller_js",
+        "member": "js/gts/monitor/monitor_health_stored_controller.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.stored-and-graph"
+        ]
+      },
+      {
+        "id": "live_reads.frontend.js_gts_monitor_monitor_health_stored_detail_view_js",
+        "member": "js/gts/monitor/monitor_health_stored_detail_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.stored-and-graph"
+        ]
+      },
+      {
+        "id": "live_reads.frontend.js_gts_monitor_monitor_health_stored_main_view_js",
+        "member": "js/gts/monitor/monitor_health_stored_main_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.stored-and-graph"
+        ]
+      },
+      {
+        "id": "live_reads.frontend.js_gts_monitor_monitor_health_stored_model_js",
+        "member": "js/gts/monitor/monitor_health_stored_model.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.stored-and-graph"
+        ]
+      },
+      {
+        "id": "live_reads.frontend.js_gts_monitor_monitor_main_view_js",
+        "member": "js/gts/monitor/monitor_main_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_monitor_monitor_model_js",
+        "member": "js/gts/monitor/monitor_model.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_monitor_monitor_stored_controller_js",
+        "member": "js/gts/monitor/monitor_stored_controller.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.stored-and-graph"
+        ]
+      },
+      {
+        "id": "live_reads.frontend.js_gts_monitor_monitor_stored_detail_view_js",
+        "member": "js/gts/monitor/monitor_stored_detail_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.stored-and-graph"
+        ]
+      },
+      {
+        "id": "live_reads.frontend.js_gts_monitor_monitor_stored_main_view_js",
+        "member": "js/gts/monitor/monitor_stored_main_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.stored-and-graph"
+        ]
+      },
+      {
+        "id": "live_reads.frontend.js_gts_monitor_monitor_stored_model_js",
+        "member": "js/gts/monitor/monitor_stored_model.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.stored-and-graph"
+        ]
+      },
+      {
+        "id": "live_reads.frontend.js_gts_monitor_monitor_util_js",
+        "member": "js/gts/monitor/monitor_util.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.monitor-obd"
+        ]
+      },
+      {
+        "id": "live_reads.frontend.js_gts_monitor_monitor_worker_js",
+        "member": "js/gts/monitor/monitor_worker.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.dtc-clear-mutations",
+          "ReadDtcFrontend.monitor-obd"
+        ]
+      },
+      {
+        "id": "live_reads.frontend.js_gts_monitor_monitor_worker_api_js",
+        "member": "js/gts/monitor/monitor_worker_api.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_quick_dtc_check_cid_quick_dtc_check_cid_controller_js",
+        "member": "js/gts/quick_dtc_check_cid/quick_dtc_check_cid_controller.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_quick_dtc_check_cid_quick_dtc_check_cid_dialog_js",
+        "member": "js/gts/quick_dtc_check_cid/quick_dtc_check_cid_dialog.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_quick_dtc_check_cid_quick_dtc_check_cid_dialog_004_view_js",
+        "member": "js/gts/quick_dtc_check_cid/quick_dtc_check_cid_dialog_004_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_quick_dtc_check_cid_quick_dtc_check_cid_model_js",
+        "member": "js/gts/quick_dtc_check_cid/quick_dtc_check_cid_model.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_quick_dtc_check_cid_quick_dtc_check_cid_screen_01_view_js",
+        "member": "js/gts/quick_dtc_check_cid/quick_dtc_check_cid_screen_01_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_quick_dtc_check_cid_quick_dtc_check_cid_worker_js",
+        "member": "js/gts/quick_dtc_check_cid/quick_dtc_check_cid_worker.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.qdc-and-qdc-cid"
+        ]
+      },
+      {
+        "id": "live_reads.frontend.js_gts_quick_dtc_check_cid_quick_dtc_check_cid_worker_api_js",
+        "member": "js/gts/quick_dtc_check_cid/quick_dtc_check_cid_worker_api.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_vehicle_information_vehicle_information_common_dlg_view_js",
+        "member": "js/gts/vehicle_information/vehicle_information_common_dlg_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_vehicle_information_vehicle_information_stored_controller_js",
+        "member": "js/gts/vehicle_information/vehicle_information_stored_controller.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.stored-and-graph"
+        ]
+      },
+      {
+        "id": "live_reads.frontend.js_gts_vehicle_information_vehicle_information_stored_model_js",
+        "member": "js/gts/vehicle_information/vehicle_information_stored_model.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.stored-and-graph"
+        ]
+      },
+      {
+        "id": "live_reads.frontend.js_gts_vehicle_information_vehicle_information_stored_view_js",
+        "member": "js/gts/vehicle_information/vehicle_information_stored_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.stored-and-graph"
+        ]
+      },
+      {
+        "id": "live_reads.frontend.js_gts_vehicle_information_vehicle_information_worker_js",
+        "member": "js/gts/vehicle_information/vehicle_information_worker.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "live_reads.frontend.js_gts_vehicle_information_vehicle_information_worker_api_js",
+        "member": "js/gts/vehicle_information/vehicle_information_worker_api.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_dtc_dtc_buffer_js",
+        "member": "js/gts/dtc/dtc_buffer.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_dtc_dtc_common_dlg_view_js",
+        "member": "js/gts/dtc/dtc_common_dlg_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_dtc_dtc_controller_js",
+        "member": "js/gts/dtc/dtc_controller.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_dtc_dtc_ffd_view_js",
+        "member": "js/gts/dtc/dtc_ffd_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_dtc_dtc_graph_view_js",
+        "member": "js/gts/dtc/dtc_graph_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_dtc_dtc_health_controller_js",
+        "member": "js/gts/dtc/dtc_health_controller.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_dtc_dtc_health_ffd_view_js",
+        "member": "js/gts/dtc/dtc_health_ffd_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_dtc_dtc_health_main_view_js",
+        "member": "js/gts/dtc/dtc_health_main_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_dtc_dtc_health_model_js",
+        "member": "js/gts/dtc/dtc_health_model.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_dtc_dtc_health_stored_controller_js",
+        "member": "js/gts/dtc/dtc_health_stored_controller.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.stored-and-graph"
+        ]
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_dtc_dtc_health_stored_ffd_view_js",
+        "member": "js/gts/dtc/dtc_health_stored_ffd_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.stored-and-graph"
+        ]
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_dtc_dtc_health_stored_main_view_js",
+        "member": "js/gts/dtc/dtc_health_stored_main_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.stored-and-graph"
+        ]
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_dtc_dtc_health_stored_model_js",
+        "member": "js/gts/dtc/dtc_health_stored_model.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.stored-and-graph"
+        ]
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_dtc_dtc_load_view_js",
+        "member": "js/gts/dtc/dtc_load_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_dtc_dtc_main_view_js",
+        "member": "js/gts/dtc/dtc_main_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_dtc_dtc_manager_view_js",
+        "member": "js/gts/dtc/dtc_manager_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_dtc_dtc_model_js",
+        "member": "js/gts/dtc/dtc_model.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_dtc_dtc_stored_controller_js",
+        "member": "js/gts/dtc/dtc_stored_controller.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.stored-and-graph"
+        ]
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_dtc_dtc_stored_ffd_view_js",
+        "member": "js/gts/dtc/dtc_stored_ffd_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.stored-and-graph"
+        ]
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_dtc_dtc_stored_graph_view_js",
+        "member": "js/gts/dtc/dtc_stored_graph_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.stored-and-graph"
+        ]
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_dtc_dtc_stored_main_view_js",
+        "member": "js/gts/dtc/dtc_stored_main_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.stored-and-graph"
+        ]
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_dtc_dtc_stored_manager_view_js",
+        "member": "js/gts/dtc/dtc_stored_manager_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.stored-and-graph"
+        ]
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_dtc_dtc_stored_model_js",
+        "member": "js/gts/dtc/dtc_stored_model.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.stored-and-graph"
+        ]
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_dtc_dtc_util_js",
+        "member": "js/gts/dtc/dtc_util.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_dtc_dtc_worker_js",
+        "member": "js/gts/dtc/dtc_worker.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.dtc-request-and-ffd",
+          "ReadDtcFrontend.dtc-clear-mutations"
+        ]
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_dtc_dtc_worker_api_js",
+        "member": "js/gts/dtc/dtc_worker_api.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_health_check_health_check_worker_js",
+        "member": "js/gts/health_check/health_check_worker.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.healthcheck-orchestration"
+        ]
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_health_check_health_check_worker_api_js",
+        "member": "js/gts/health_check/health_check_worker_api.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_quick_dtc_check_quick_dtc_check_controller_js",
+        "member": "js/gts/quick_dtc_check/quick_dtc_check_controller.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_quick_dtc_check_quick_dtc_check_dialog_js",
+        "member": "js/gts/quick_dtc_check/quick_dtc_check_dialog.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_quick_dtc_check_quick_dtc_check_model_js",
+        "member": "js/gts/quick_dtc_check/quick_dtc_check_model.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_quick_dtc_check_quick_dtc_check_screen_01_view_js",
+        "member": "js/gts/quick_dtc_check/quick_dtc_check_screen_01_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_quick_dtc_check_quick_dtc_check_worker_js",
+        "member": "js/gts/quick_dtc_check/quick_dtc_check_worker.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.qdc-and-qdc-cid"
+        ]
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_quick_dtc_check_quick_dtc_check_worker_api_js",
+        "member": "js/gts/quick_dtc_check/quick_dtc_check_worker_api.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_quick_dtc_check_cid_quick_dtc_check_cid_controller_js",
+        "member": "js/gts/quick_dtc_check_cid/quick_dtc_check_cid_controller.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_quick_dtc_check_cid_quick_dtc_check_cid_dialog_js",
+        "member": "js/gts/quick_dtc_check_cid/quick_dtc_check_cid_dialog.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_quick_dtc_check_cid_quick_dtc_check_cid_dialog_004_view_js",
+        "member": "js/gts/quick_dtc_check_cid/quick_dtc_check_cid_dialog_004_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_quick_dtc_check_cid_quick_dtc_check_cid_model_js",
+        "member": "js/gts/quick_dtc_check_cid/quick_dtc_check_cid_model.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_quick_dtc_check_cid_quick_dtc_check_cid_screen_01_view_js",
+        "member": "js/gts/quick_dtc_check_cid/quick_dtc_check_cid_screen_01_view.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_quick_dtc_check_cid_quick_dtc_check_cid_worker_js",
+        "member": "js/gts/quick_dtc_check_cid/quick_dtc_check_cid_worker.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": [
+          "ReadDtcFrontend.qdc-and-qdc-cid"
+        ]
+      },
+      {
+        "id": "dtc_freeze.gui.js_gts_quick_dtc_check_cid_quick_dtc_check_cid_worker_api_js",
+        "member": "js/gts/quick_dtc_check_cid/quick_dtc_check_cid_worker_api.js",
+        "business_owner": "ReadDtcFrontend",
+        "common_contract_refs": []
+      }
+    ],
+    "crossing_interpretation": "Only actual owned-member gtsPFApi receiver calls appear in pf_call_refs. Global per-call table is shared once across frontend owners; source common contracts define business ordering, not PF facade declarations.",
+    "pf_call_refs": [
+      "operations.frontend_call.3d8dccf0a5ded1acea67b56c",
+      "operations.frontend_call.f201a9338ea420ecab054a1e",
+      "operations.frontend_call.045854fe8fb39b830cc11cb1",
+      "operations.frontend_call.fd27514f343d7b98c7d76567",
+      "operations.frontend_call.37f58a0b7599b7e6658917a7",
+      "operations.frontend_call.b7585506a10d5d4ac23db41d",
+      "operations.frontend_call.603cbe7fc84a25c3d7d73141",
+      "operations.frontend_call.7a9eaee7653760e79d56ae1d",
+      "operations.frontend_call.d4cc81a231a99551a786ea81",
+      "operations.frontend_call.d4dacd9c37314c859905a147",
+      "operations.frontend_call.b2b0be67a471535c777617d6",
+      "operations.frontend_call.574304474c1d22f3e2f5b971",
+      "operations.frontend_call.0c056cf6841ddffb4c012ee6",
+      "operations.frontend_call.05eba8f2716ce9bbfcec0feb",
+      "operations.frontend_call.c95701012d04b3436f974d7b",
+      "operations.frontend_call.07017f9a6e2efaeee118d708",
+      "operations.frontend_call.c9700e5cc37982e03c4e10d4",
+      "operations.frontend_call.e7e5791bb37f2e3b10c4bb87",
+      "operations.frontend_call.26afda316185fa5fd15f1489",
+      "operations.frontend_call.e5741e394e897ed9c5c981f5",
+      "operations.frontend_call.b0ddf6da35808c419821ac18",
+      "operations.frontend_call.2fd3b35e7b8b010ba719e356",
+      "operations.frontend_call.3f0caf732fb62aafbaeb66ba",
+      "operations.frontend_call.644c43d7c1ea7fc7353d0355",
+      "operations.frontend_call.f581b0928bea3ca47cb67149",
+      "operations.frontend_call.6378b8f2d41c22bfcf29fda0",
+      "operations.frontend_call.f9db9bbf4f446fd3ca3111ef",
+      "operations.frontend_call.8e4c15c04f5ef8f461ba22c6",
+      "operations.frontend_call.ad4c3aef720b4fc55f4eb757",
+      "operations.frontend_call.d6e919387c62d46657bd39ca",
+      "operations.frontend_call.20e57e0fa3b3978380094fdb",
+      "operations.frontend_call.26c55342219071ad30fc015c",
+      "operations.frontend_call.d46b34cc72f53eb797bf4ea5",
+      "operations.frontend_call.6c4281ef000f9e5082164aa2",
+      "operations.frontend_call.b083e0450b0be33939f2bf34",
+      "operations.frontend_call.f3d286fd068bdd0c2b6e8856",
+      "operations.frontend_call.8631f9b32021065b09b431fd",
+      "operations.frontend_call.80d9a3eba06237a06a520a84",
+      "operations.frontend_call.4304b07c4c2a3e1cf002e4a8",
+      "operations.frontend_call.33141dd244b03c9ba1a50f07",
+      "operations.frontend_call.b96cb11436fc8f5337ac05bf",
+      "operations.frontend_call.17ee57be7622d53b1bf2a6c4",
+      "operations.frontend_call.fff8f3f9ef3ae303870050ec",
+      "operations.frontend_call.79362a960f1ee2e9ec13ff79",
+      "operations.frontend_call.032672bd7256ddc7f2d679d2",
+      "operations.frontend_call.fa7a361db51a5cb0035e9352",
+      "operations.frontend_call.5c5d088b5cd530179858789b",
+      "operations.frontend_call.5d307d8857814bd8e9b3ef32",
+      "operations.frontend_call.6fa06b2abd84bc2a50889ecf",
+      "operations.frontend_call.8f9b052a8e2c855b0df5eeb0",
+      "operations.frontend_call.550bf53fefa31dd0b41c4b1c",
+      "operations.frontend_call.cdcff56e605f4175af058e17",
+      "operations.frontend_call.eefdc88bf464b6b17da1658d",
+      "operations.frontend_call.a1bf730820ee9edadf82ace4",
+      "operations.frontend_call.d221d5a00cd5581f887a0e75",
+      "operations.frontend_call.ddac69148112eed4d32fd21b",
+      "operations.frontend_call.28f738b50b19e7886afd5dfa",
+      "operations.frontend_call.d773a28650ae2091d0a09505",
+      "operations.frontend_call.8b806f4ef33e150b5340dde7",
+      "operations.frontend_call.3f8109db2c410ee9f8b89777",
+      "operations.frontend_call.8e477a5978e80c84445cf702",
+      "operations.frontend_call.5f6ac48ccfd26a0d31e4d64f",
+      "operations.frontend_call.ccbdf9da49da9e64f6709648",
+      "operations.frontend_call.389dc74bd53f7af156a3108c",
+      "operations.frontend_call.c01413e31351094292fa1c1e",
+      "operations.frontend_call.4aef1e2f9e97da589485f85a",
+      "operations.frontend_call.19bd0c525a1eeb98d02161d3",
+      "operations.frontend_call.ee54adfdd6c907dbd109c0de",
+      "operations.frontend_call.ac73011fbc1a5fdd03cc1361",
+      "operations.frontend_call.45a5c6c3d74f05b8ea02867a",
+      "operations.frontend_call.1716c5dd1e385260722fa610",
+      "operations.frontend_call.d5e0eebf61f8dbea7c192f88",
+      "operations.frontend_call.8e9411072a32ecdef59ea8df",
+      "operations.frontend_call.a64e087489c5e36a2151db88",
+      "operations.frontend_call.6d2f600c6c1f0ecbced2e8c6",
+      "operations.frontend_call.7ee1c7eafd5f6705795a23ca",
+      "operations.frontend_call.4868deafa7c428b04df635df",
+      "operations.frontend_call.9e12c3291de1447997e9ef11",
+      "operations.frontend_call.9ee6fdfc90edaf04f0d25f73",
+      "operations.frontend_call.6ad8a10b3fd1d66fffde81f2",
+      "operations.frontend_call.9bf5071f42f66307c945d27b",
+      "operations.frontend_call.e010df36c7db0e71c1a83cc8",
+      "operations.frontend_call.f23f958a0b4de06b235a8eba",
+      "operations.frontend_call.d64b209fdf3aa426f562f5df",
+      "operations.frontend_call.cf6e20c1570fbbfddab3ab05",
+      "operations.frontend_call.288bda07f825dd7246071823",
+      "operations.frontend_call.52953c915dd447296778d026",
+      "operations.frontend_call.1aca98d54c053cae7ad09530",
+      "operations.frontend_call.d2e611698e1369af2db63972",
+      "operations.frontend_call.6fbaf915e874566e7dcf3a3e",
+      "operations.frontend_call.0549da317ba0bf812ea089df",
+      "operations.frontend_call.317aeee6ff893d13f705e5bb",
+      "operations.frontend_call.17eb3eec169ce15c302a7df8",
+      "operations.frontend_call.40a9707411fc759a4bc98485",
+      "operations.frontend_call.8c589a1d4bc4e2e95a6298ff",
+      "operations.frontend_call.01ecd34f08de2341d4b20cad",
+      "operations.frontend_call.14c338662d3d059827c80b0c",
+      "operations.frontend_call.67130495550246a3376ab67e",
+      "operations.frontend_call.c4fc2e618d5ec4a133138955",
+      "operations.frontend_call.15d980c12689118a0e9f952c",
+      "operations.frontend_call.ccef624cd3db57646c5d9b0a",
+      "operations.frontend_call.3f5b1304a9f718f797008ea5",
+      "operations.frontend_call.b69c01c98226a653ba588e29",
+      "operations.frontend_call.63c8c41e65e89d8ccec86f0f",
+      "operations.frontend_call.3157497ba223d09ccfee3839",
+      "operations.frontend_call.c333d901073a622e45df3aae",
+      "operations.frontend_call.18bc50f0430be255474546e1",
+      "operations.frontend_call.e1887bd86ec17a3f258c98f9",
+      "operations.frontend_call.aad9e7c1be89348b74ec2e24",
+      "operations.frontend_call.5a1c5be3d03703debaa34423",
+      "operations.frontend_call.a750d346a0d041db1833a92e",
+      "operations.frontend_call.ac9622ad1db1077eaa33596c",
+      "operations.frontend_call.cbf5ca8b27ecc2607df535df",
+      "operations.frontend_call.758e82028e7480d571a6ded9",
+      "operations.frontend_call.987c0d724f1d1eb00fec38a0",
+      "operations.frontend_call.482d8d0e7172c6b4e39967be",
+      "operations.frontend_call.c034d1b5254f8ac58e01077f",
+      "operations.frontend_call.2e73e0ec330c50521b7ec0f8",
+      "operations.frontend_call.fbb169fd2caeee006ea3c13f",
+      "operations.frontend_call.016fb9aae325fedbe9a0abac",
+      "operations.frontend_call.107c1ab180095095219aeaaf",
+      "operations.frontend_call.39c2aa67594e8af4ad8a7d71",
+      "operations.frontend_call.5e357c7c4699a03c54dafc8a",
+      "operations.frontend_call.189c0f2e6ab5ed4ca533eadd",
+      "operations.frontend_call.e982f1ff88bffff7b80192e6",
+      "operations.frontend_call.9aff1f978c09de2649036217",
+      "operations.frontend_call.99652a43baf310c69ec9e802",
+      "operations.frontend_call.20851b972d0dbad45c972be2",
+      "operations.frontend_call.4840fc2f109b6026696e02ce",
+      "operations.frontend_call.79e96bb7fb6442f8f558a0e0",
+      "operations.frontend_call.3e314c8e8acf5d6859a7a421",
+      "operations.frontend_call.e70e5b733cd5bdedb7635105",
+      "operations.frontend_call.0bc49a88d64ff188cc418fca",
+      "operations.frontend_call.7c325c385bf2b5aef5a964cc",
+      "operations.frontend_call.d8ca24e115661318f0f71eef",
+      "operations.frontend_call.2d81abc20e060df0f8b6521e",
+      "operations.frontend_call.7a08985006929f8adc751eba",
+      "operations.frontend_call.2afade063a389b00adb06cb9",
+      "operations.frontend_call.7ae183509824a46b9ac944d5",
+      "operations.frontend_call.48dac065fb2b911cd6c723bd",
+      "operations.frontend_call.a63d1ffa91b18b8b527b6dc3",
+      "operations.frontend_call.23112cd8a5453611a6594a77",
+      "operations.frontend_call.5b43c2b96658e94dd0462cee",
+      "operations.frontend_call.141e23670c671c695674e735",
+      "operations.frontend_call.2cf0bf868efa153212e69d37",
+      "operations.frontend_call.d5be755dd2a62e639d1c52d3",
+      "operations.frontend_call.340f268b34c2a5307439c56e",
+      "operations.frontend_call.60c1e64c7677af2272aa3a72",
+      "operations.frontend_call.bd8ea461e76be244130de5e1",
+      "operations.frontend_call.f40082249552988066fc949f",
+      "operations.frontend_call.ea24c4d99a209a4c7006f75b",
+      "operations.frontend_call.e543096d4e116738fa7703fb",
+      "operations.frontend_call.b7794eb2ed69c22205c18709",
+      "operations.frontend_call.347c578c67176adab343abc5",
+      "operations.frontend_call.f301d7c78220277be67dccb5",
+      "operations.frontend_call.060a88ed74f9eb61bee47a20",
+      "operations.frontend_call.9345e3b82043ce85a1d7e61b",
+      "operations.frontend_call.5c36306e01a981eba3a1d2e2",
+      "operations.frontend_call.c4c11d0b5c45cee3f81f855b",
+      "operations.frontend_call.0d045ef4c5cc9985f33c9cd0",
+      "operations.frontend_call.46a61e82de2dada18a8ac755",
+      "operations.frontend_call.b5212aca9fab4c8a70ee918a",
+      "operations.frontend_call.4e2c1411b4e6e025b193dca1",
+      "operations.frontend_call.8981ad69555e08d227ca753f",
+      "operations.frontend_call.266cb63619d10d672b131f76",
+      "operations.frontend_call.dec7c7cd4195a1638a170f4b",
+      "operations.frontend_call.d47eaef66f8179d5cc0448dd",
+      "operations.frontend_call.0f55a888bb779ba9a836765f",
+      "operations.frontend_call.aa1958d14795573bb806ba18",
+      "operations.frontend_call.28cd31a05bec331b235a231d",
+      "operations.frontend_call.f081e0a2092d9a3315d5802c",
+      "operations.frontend_call.6eaa2ea9bd8a4dd2ac4644d8",
+      "operations.frontend_call.4dcfc1387094776743163e8b",
+      "operations.frontend_call.0abb8c53c8c76ddcd5b8d4c2",
+      "operations.frontend_call.dfe6752d2d15d7a69a316d6b",
+      "operations.frontend_call.9535e85f5606366b2aee0018",
+      "operations.frontend_call.d3be16e575a897caa9ba3e22",
+      "operations.frontend_call.47b44babc4ecae2f552e3796",
+      "operations.frontend_call.216b5568c555e7d17b0e778b",
+      "operations.frontend_call.920163df4380f1a305fa3f92",
+      "operations.frontend_call.c713c1a753fcfd13dd964ce8",
+      "operations.frontend_call.5babfa09e30f4c0c3c73a799",
+      "operations.frontend_call.1600adc0f97bde9ce0e9298c",
+      "operations.frontend_call.00cdab93eea0650940d7bac1",
+      "operations.frontend_call.25785c91f639be11bf6f7983",
+      "operations.frontend_call.b15089b897227d254ebe6a71",
+      "operations.frontend_call.2492e5ce031af5fec7539788",
+      "operations.frontend_call.9ff7cf6c7c1964517702fd29",
+      "operations.frontend_call.1d254979a7722a09857e8a07",
+      "operations.frontend_call.21c6739d2c7bb9713c4326e0",
+      "operations.frontend_call.9190d0c1b5130ef706caacb2",
+      "operations.frontend_call.751cf052d9854556b0a6cd78",
+      "operations.frontend_call.f765d37888ec20c276b56413",
+      "operations.frontend_call.08c67d623ba3e49d07081263",
+      "operations.frontend_call.5ef2a4f0afbf99115d7bdb42",
+      "operations.frontend_call.d4060b8483fa8b0bd2bfb4dc",
+      "operations.frontend_call.29e1c3d4457316c013eec053",
+      "operations.frontend_call.05dab6fa86fc6b01f95445b2",
+      "operations.frontend_call.a652b4aaf233422140c61081",
+      "operations.frontend_call.c6899829b700247290ff99c6",
+      "operations.frontend_call.0e617130fb911e74ae2a0149",
+      "operations.frontend_call.86ec816037b759dbf76c0b73",
+      "operations.frontend_call.509de7d5055f53a2974445de",
+      "operations.frontend_call.2ffeef550a44530e202abef0",
+      "operations.frontend_call.7c9ad6e96d65d433729da692",
+      "operations.frontend_call.e3751ada0d07b87b49404c36",
+      "operations.frontend_call.f84b0107756bc28446a8ca75",
+      "operations.frontend_call.50a1e68b27a1c64333a4039f",
+      "operations.frontend_call.6137315bc6a8dc6910917224",
+      "operations.frontend_call.3767b05886bce546ae272ef1",
+      "operations.frontend_call.683968c0c10eb2d4c940f6e1",
+      "operations.frontend_call.8af6f08bab2102132e33af31",
+      "operations.frontend_call.894d84aa04767046a78c62a3",
+      "operations.frontend_call.c87074cca226b0c554718ecd",
+      "operations.frontend_call.8597bb7c0fc33326a6980d5c",
+      "operations.frontend_call.17d8c26da66e8bcff9fd4afe",
+      "operations.frontend_call.a839d07f4b52152eab9d8d67",
+      "operations.frontend_call.549d609f8559c66716b41788",
+      "operations.frontend_call.5bd23670de91c5467184a692",
+      "operations.frontend_call.daa333b85e0392a96b08f483",
+      "operations.frontend_call.57efba161c8bf5a49f9a842b",
+      "operations.frontend_call.5e03572d115a0294f8e92d55",
+      "operations.frontend_call.e8c8dd041e0ad8eb90d53a10",
+      "operations.frontend_call.7d9f2d1d1f056bc28b397d3a",
+      "operations.frontend_call.69ee632a5de52f015d72d0ab",
+      "operations.frontend_call.92693ad5f2d0922af0020d19",
+      "operations.frontend_call.2ef009bc3ac2b5b83f79cea9",
+      "operations.frontend_call.ef160bc92bf1e502cf3cc905",
+      "operations.frontend_call.c0e6077424a7d6dfd3db9f8a",
+      "operations.frontend_call.d3002477277edbddb86a7bae",
+      "operations.frontend_call.32417090401c3da6394ef168",
+      "operations.frontend_call.16d369f84814d51eb23984c7",
+      "operations.frontend_call.dad9ae24677beda337df2b47",
+      "operations.frontend_call.b587552c2b037caf737d3677",
+      "operations.frontend_call.d8ba90d581c82ab1b52a5578",
+      "operations.frontend_call.9f1ab7adadda2259a79e0daf",
+      "operations.frontend_call.58cc83338fd5bece811b124f",
+      "operations.frontend_call.18a779c43656eee6d2abde3c",
+      "operations.frontend_call.0885b87949f92d14564ab5ff",
+      "operations.frontend_call.56c723aaa0686da2dadb0062",
+      "operations.frontend_call.46051a750a8088693271c3db",
+      "operations.frontend_call.c1ca976a55268ca4060b772a",
+      "operations.frontend_call.95b54af94c2e486f6657182c",
+      "operations.frontend_call.150b274c61a0afc34a5ba0b5",
+      "operations.frontend_call.85946c3e50a5a755fe3866a4",
+      "operations.frontend_call.54b54f446fc9944c649c4868",
+      "operations.frontend_call.7ea82c86da3b960d2d591a92",
+      "operations.frontend_call.c9f7db1c3b1b11cd1a4d9ac8",
+      "operations.frontend_call.5f28cae999bcfdd2c80f8cc3",
+      "operations.frontend_call.8efddb0f9231b6ccf4f33520",
+      "operations.frontend_call.1e78e7b4e1ff1c4baf784058",
+      "operations.frontend_call.46797f2d4fad9f92fd630a44",
+      "operations.frontend_call.15bcbe2618bbd174c23899d1",
+      "operations.frontend_call.0834a9e1bfc3742a211e3ae6",
+      "operations.frontend_call.3eabe7a5bdead8bbe8343532",
+      "operations.frontend_call.9a4a0488a703c4167fe453b4",
+      "operations.frontend_call.32c51a852dc5693c498da036",
+      "operations.frontend_call.f8fe4f3cea26320758d40690",
+      "operations.frontend_call.78c04f03276138f5d6f74eed",
+      "operations.frontend_call.54cca50792a0bc11ab5a2deb",
+      "operations.frontend_call.d1caaa1e5235f0e3d67f2cb5",
+      "operations.frontend_call.4a2350c7c443257c5ec68b40",
+      "operations.frontend_call.5cc6e49d28368ff1601b41a2",
+      "operations.frontend_call.80f169d60f5241f9e08ff1e5",
+      "operations.frontend_call.b790334c0a5bef305202bf24",
+      "operations.frontend_call.315bda8506d6f05d19ec4ab7",
+      "operations.frontend_call.d6404270e821bf5d590cd6e5",
+      "operations.frontend_call.cd8c5d1a539ecb804effa0c8",
+      "operations.frontend_call.b7568e0bd4b43841b3e90fa6",
+      "operations.frontend_call.69bc0c41e3fe4f2a5b09f15a",
+      "operations.frontend_call.01282d0e0057cf86061485c9",
+      "operations.frontend_call.97f7abfea40df95a17e2b6a3",
+      "operations.frontend_call.283d59841d04292088fb0a32",
+      "operations.frontend_call.fabee0777e9c3b0fd8a2f5e7",
+      "operations.frontend_call.62e7b2a95effe8a3b62b5d4c",
+      "operations.frontend_call.efa851bd41e05dab55dea1a4",
+      "operations.frontend_call.0dfb1fc0a22693a75c19e482",
+      "operations.frontend_call.6da8de704f23f9205674e372",
+      "operations.frontend_call.5159a97f24512e9f33d9a6b8",
+      "operations.frontend_call.433eefd0ad0c63b38136ce4f",
+      "operations.frontend_call.544749a5c2044add0f242013",
+      "operations.frontend_call.c1f0b704eff964c77441cf1b",
+      "operations.frontend_call.43d29f1096301f9c810a2207",
+      "operations.frontend_call.fc0de65965f87b99e4d3be5e",
+      "operations.frontend_call.1ad1479f33310dae84d83cf8",
+      "operations.frontend_call.128dc346c89237efe9a4f948",
+      "operations.frontend_call.c1c9769109db6a2caa06726a",
+      "operations.frontend_call.2bd016650da811aa91f3e8e3",
+      "operations.frontend_call.1ceccb32c2e5fcdd7f2cb5b1",
+      "operations.frontend_call.3eec6a60571bc74f0b87a7ad",
+      "operations.frontend_call.af9898fd30cecdc75f7a6838",
+      "operations.frontend_call.cf4c499af82b22dc8aeab5fa",
+      "operations.frontend_call.522e82e85dd3e71e601594d1",
+      "operations.frontend_call.bc8ad9c23bfb3a5fce6d024c",
+      "operations.frontend_call.bdf626f76519761d796d3328",
+      "operations.frontend_call.c833b9024bc9d148c966c31f",
+      "operations.frontend_call.cc7728267d7e2bfff4666cf8",
+      "operations.frontend_call.a596c70146469449486a0f3f",
+      "operations.frontend_call.780f1ae64b2fb278d64ef3bd",
+      "operations.frontend_call.fe5700265fffd3f18ef4fac7",
+      "operations.frontend_call.9aaca3801596c33fcfd6ee6d",
+      "operations.frontend_call.20bbcca08abac1b1448bfbfa",
+      "operations.frontend_call.0f44084a2c4fa8fe19e3f0df",
+      "operations.frontend_call.d758366bdf9173ded5ef8e7f",
+      "operations.frontend_call.e9aeb24bfcfcff26b26866e3",
+      "operations.frontend_call.65d3e957eace2663c7f00f98",
+      "operations.frontend_call.68b9e65cee1393956d8eb6b1",
+      "operations.frontend_call.adc695d19de06946c178a3c8",
+      "operations.frontend_call.4b79e5394ba5e790da7d74b8",
+      "operations.frontend_call.a005672561215397009c65a8",
+      "operations.frontend_call.a6609829f9353fc0f6805557",
+      "operations.frontend_call.967b31b3abb9e80684b3d018",
+      "operations.frontend_call.74627af8756db96a025146a0",
+      "operations.frontend_call.56923e546417809c474ba1b3",
+      "operations.frontend_call.36b028d901637021d22a34da",
+      "operations.frontend_call.8daa82e38a560ea04610d51e",
+      "operations.frontend_call.d69d69922d95df5f98b0087f",
+      "operations.frontend_call.17b50217b080523759d08790",
+      "operations.frontend_call.b87176e498ee7e9b699ec307",
+      "operations.frontend_call.30713e4aa934a033ad440f04",
+      "operations.frontend_call.29a8a6c5f6bbd64e3bf1b7ef",
+      "operations.frontend_call.d5a29f6990fd8ee3ae896da5",
+      "operations.frontend_call.0cbd149e125c1068c27c9170",
+      "operations.frontend_call.fa919912700957c40aa61226",
+      "operations.frontend_call.6d4bc06377723eb79ad67e95",
+      "operations.frontend_call.3e69aef947cb8f079cc27b1c",
+      "operations.frontend_call.e29b924f1b3f4f89d7c3d100",
+      "operations.frontend_call.9280fd8f79334d729a5746f0",
+      "operations.frontend_call.5e67d6515f69303dce7efa08",
+      "operations.frontend_call.e6100bf8e6f48ecc39902d96",
+      "operations.frontend_call.e1e9d78dc6481c8d00c9db11",
+      "operations.frontend_call.31a16b2668c8310a668bf370",
+      "operations.frontend_call.3aa65ae38c79b32e4b24a353"
+    ]
+  }
+}

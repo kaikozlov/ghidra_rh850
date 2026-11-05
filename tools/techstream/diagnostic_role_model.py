@@ -11,6 +11,8 @@ from typing import Any
 
 import pefile
 from tools.techstream.pe_utils import imports as pe_imports
+from tools.techstream.ddb_semantics import NativeSelectionContext, native_context
+from tools.techstream.gts.execution_model import _resolve_plugin_path
 
 
 # CommandCommon primitives that directly materialize or execute communication
@@ -24,11 +26,9 @@ DIRECT_TRANSPORT_MARKERS = (
     "DeleteCommCacheSndRcv",
 )
 
-# Current plugins still import these stable API names.  Their executable V18
-# bodies are independently proven to reach GetCommFrmInfo + a send/receive
-# primitive (sometimes through CheckSupportBit).  Current GTS+ CommandCommon's
-# on-disk .text is sparse/virtual-only beyond the initial page, so this is an
-# API-continuity transfer.
+# These labels describe V18 executable proof for stable imported API names.
+# Current recovered CommandCommon bytes are available, but import-name matching
+# alone does not establish their current implementation's transport behavior.
 V18_PROVEN_DELEGATED_TRANSPORT_MARKERS = (
     "?CheckSupportPid@CCommCachePlusP5@@",
     "?CheckSupportDid@CCommCachePlusP5@@",
@@ -107,8 +107,14 @@ def plugin_operation_signature(path: Path) -> dict[str, Any]:
 
 
 def role_operation_catalog(parser: Any, master: Any, bin_root: Path) -> dict[str, Any]:
+    context = (
+        native_context(master)
+        if isinstance(master, NativeSelectionContext) or master.schema_family in ("gtsplus", "ds4")
+        else None
+    )
     by_role: dict[int, list[Any]] = {}
-    for entry in parser.extract_master_dlls(master.sections[19]):
+    entries = context.raw_records(19) if context is not None else parser.extract_master_dlls(master.sections[19])
+    for entry in entries:
         by_role.setdefault(entry.dll_role_id, []).append(entry)
 
     signature_cache: dict[str, dict[str, Any]] = {}
@@ -125,7 +131,7 @@ def role_operation_catalog(parser: Any, master: Any, bin_root: Path) -> dict[str
         role_binding_surfaces: dict[str, int] = {}
         for dll, binding_count in sorted(counts.items(), key=lambda item: (-item[1], item[0].casefold())):
             if dll not in signature_cache:
-                path = bin_root / dll
+                path = _resolve_plugin_path(bin_root, dll)
                 if not path.is_file():
                     signature_cache[dll] = {
                         "surface": "plugin_file_missing",
@@ -163,10 +169,14 @@ def role_operation_catalog(parser: Any, master: Any, bin_root: Path) -> dict[str
             "binding_surface_counts": dict(sorted(role_binding_surfaces.items())),
             "plugins": plugins,
         })
+        if context is not None:
+            roles[-1]["native_default"] = context.query(19, role, 0x10000).as_dict()
 
     roles.sort(key=lambda row: (-row["binding_count"], row["role"]))
     return {
         "scope": "shared-runtime edges recovered from plugin imports",
+        "catalog": "raw-occurrences",
+        "native_context": context.as_dict() if context is not None else None,
         "binding_count": sum(row["binding_count"] for row in roles),
         "role_count": len(roles),
         "unique_plugin_count": len(signature_cache),

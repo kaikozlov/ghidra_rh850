@@ -11,9 +11,7 @@ general CLR interpreter.
 from __future__ import annotations
 
 import argparse
-import contextlib
 import hashlib
-import io
 import json
 import re
 from dataclasses import dataclass
@@ -27,12 +25,15 @@ from dnfile.codedindex import TypeDefOrRef
 from dnfile.utils import read_compressed_int
 from dncil.cil.body import CilMethodBody  # type: ignore
 from tools.techstream.extract_pcs_data_viewer_tss3_dictionary import load_culture
-from tools.techstream.inspect_dotnet_il import MethodBodyReader, resolve_token, type_name
+from tools.techstream.inspect_dotnet_il import MethodBodyReader, resolve_token, type_name, validate_managed_bodies
+from tools.techstream.extract_gtsplus_tse_managed_semantics import _open, _method_rows
+from tools.techstream.recover_all_gtsplus_bodies import DEFAULT_OUTPUT, qualify_recovered_source
 from tools.techstream.techstream_paths import resolve_gts_root
 from tools import REPO_ROOT
 
 
 DEFAULT_OUT = REPO_ROOT / "data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json"
+DEFAULT_ASSEMBLY = DEFAULT_OUTPUT / "Auxiliary/PCS Data Viewer/PCS Data Viewer.exe"
 DID_DEFINE = "PCSDataViewer.Extractor.OperationFFD.TSS3.Define.DIDDataDefine"
 DETAIL_INFO = "PCSDataViewer.Extractor.OperationFFD.TSS3.Define.DetailBitAssignInfo"
 ROB_DEFINE = "PCSDataViewer.Extractor.OperationFFD.TSS3.Define.RoBCodeDefine"
@@ -104,13 +105,11 @@ def _int_constant(ins: Any) -> int | None:
 
 
 def _method_owner_map(pe: dnfile.dnPE) -> dict[int, str]:
-    out: dict[int, str] = {}
-    for td in pe.net.mdtables.TypeDef.rows:
-        owner = type_name(td)
-        for item in td.MethodList:
-            if getattr(item, "row", None) is not None:
-                out[id(item.row)] = owner
-    return out
+    return {
+        id(pe.net.mdtables.MethodDef.rows[(int(method["methoddef_token"], 16) & 0xFFFFFF) - 1]):
+            method["full_nested_name"]
+        for method in pe._gts_method_identities["methods"]
+    }
 
 
 def _owner_and_name(row: Any, method_owners: dict[int, str]) -> tuple[str, str]:
@@ -130,14 +129,10 @@ def _field_owner_and_name(row: Any) -> tuple[str, str]:
 
 
 def _find_method(pe: dnfile.dnPE, full_type: str, name: str) -> dnfile.mdtable.MethodDefRow:
-    for td in pe.net.mdtables.TypeDef.rows:
-        if type_name(td) != full_type:
-            continue
-        matches = [item.row for item in td.MethodList if str(item.row.Name) == name]
-        if len(matches) != 1:
-            raise ValueError(f"{full_type}: expected one {name}, got {len(matches)}")
-        return matches[0]
-    raise ValueError(f"type not found: {full_type}")
+    matches = _method_rows(pe, full_type, name)
+    if len(matches) != 1:
+        raise ValueError(f"{full_type}: expected one {name}, got {len(matches)}")
+    return matches[0]
 
 
 def _method_instructions(pe: dnfile.dnPE, full_type: str, name: str) -> tuple[int, list[Any]]:
@@ -724,7 +719,7 @@ def _lateral_arbitration_schema(details: list[dict[str, Any]]) -> dict[str, Any]
         },
     }
 
-def extract(assembly: Path, *, gtsplus_root: Path | None = None) -> dict[str, Any]:
+def extract(assembly: Path = DEFAULT_ASSEMBLY, *, gtsplus_root: Path | None = None) -> dict[str, Any]:
     assembly = assembly.expanduser().resolve()
     gts = resolve_gts_root(gtsplus_root)
     diagnostics = gts.parent
@@ -733,17 +728,9 @@ def extract(assembly: Path, *, gtsplus_root: Path | None = None) -> dict[str, An
     sidecar = Path(str(protected) + "._")
     en_us = pcs / "en-US/PCS Data Viewer.resources.dll"
 
-    with contextlib.redirect_stderr(io.StringIO()):
-        pe = dnfile.dnPE(str(assembly))
-    method_rows = list(pe.net.mdtables.MethodDef.rows)
-    raw = assembly.read_bytes()
-    body_rvas = [int(row.Rva or 0) for row in method_rows if int(row.Rva or 0)]
-    materialized = sum(
-        bool((off := pe.get_offset_from_rva(rva)) is not None and any(raw[off : off + 16]))
-        for rva in body_rvas
-    )
-    if materialized != len(body_rvas):
-        raise ValueError(f"assembly is not a complete CP recovery: {materialized}/{len(body_rvas)} method bodies materialized")
+    qualification = qualify_recovered_source(assembly, protected, component_root=assembly.parent.parent)
+    proof = validate_managed_bodies(assembly)
+    pe = _open(assembly)
 
     _resource_meta, english = load_culture(en_us)
     did_rva, did_records = _interpret_collection(
@@ -797,12 +784,10 @@ def extract(assembly: Path, *, gtsplus_root: Path | None = None) -> dict[str, An
             "protected_sidecar": {"path": str(sidecar.relative_to(diagnostics)), "size": sidecar.stat().st_size, "sha256": sha256_file(sidecar)},
             "english_resources": {"path": str(en_us.relative_to(diagnostics)), "size": en_us.stat().st_size, "sha256": sha256_file(en_us)},
             "recovered_analysis_pe_sha256": sha256_file(assembly),
+            "qualification": qualification,
         },
-        "recovery_proof": {
-            "method_def_count": len(method_rows),
-            "method_body_rva_count": len(body_rvas),
-            "method_body_materialized_count": materialized,
-        },
+        "recovery_proof": proof,
+        "managed_identities": pe._gts_method_identities,
         "operation_ffd": {
             "detail_table_cctor_rva": did_rva,
             "detail_row_count": len(details),
@@ -839,7 +824,7 @@ def extract(assembly: Path, *, gtsplus_root: Path | None = None) -> dict[str, An
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--assembly", type=Path, required=True, help="CP-recovered PCS Data Viewer.exe")
+    parser.add_argument("--assembly", type=Path, default=DEFAULT_ASSEMBLY, help="Qualified recovered PCS Data Viewer.exe")
     parser.add_argument("--gtsplus-root", type=Path)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUT)
     args = parser.parse_args()

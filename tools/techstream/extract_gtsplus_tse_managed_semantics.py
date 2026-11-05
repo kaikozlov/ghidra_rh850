@@ -13,12 +13,17 @@ from typing import Any
 
 import dnfile  # type: ignore
 from dncil.cil.body import CilMethodBody  # type: ignore
-from tools.techstream.inspect_dotnet_il import MethodBodyReader, format_operand, resolve_token, type_name
+from tools.techstream.inspect_dotnet_il import (
+    MethodBodyReader, format_operand, managed_method_identities, resolve_token,
+    validate_managed_bodies,
+)
+from tools.techstream.recover_all_gtsplus_bodies import DEFAULT_OUTPUT, qualify_recovered_source
 from tools.techstream.techstream_paths import resolve_gts_root
 from tools import REPO_ROOT
 
 
 DEFAULT_OUT = REPO_ROOT / "data/generated/gtsplus_2026/tse_managed_semantics.json"
+DEFAULT_RECOVERED = DEFAULT_OUTPUT / "Auxiliary"
 COMPONENTS = (
     "GTSPlusTSEConverter/Converter.dll",
     "GTSPlusTSEConverter/RingBufferParser.dll",
@@ -44,14 +49,21 @@ def _open(path: Path) -> dnfile.dnPE:
         pe = dnfile.dnPE(str(path))
     if not (pe.net and pe.net.metadata and pe.net.mdtables):
         raise ValueError(f"not a parseable recovered CLR assembly: {path}")
+    pe._gts_method_identities = managed_method_identities(pe, hashlib.sha256(pe.__data__).hexdigest())
     return pe
 
 
 def _method_rows(pe: dnfile.dnPE, full_type: str, name: str) -> list[Any]:
-    for td in pe.net.mdtables.TypeDef.rows:
-        if type_name(td) == full_type:
-            return [item.row for item in td.MethodList if str(item.row.Name) == name]
-    raise ValueError(f"type not found: {full_type}")
+    identities = pe._gts_method_identities
+    types = [td for td in identities["type_definitions"] if td["full_nested_name"] == full_type]
+    if len(types) != 1:
+        raise ValueError(f"expected one full nested type identity: {full_type}, got {len(types)}")
+    owner = types[0]["identity"]
+    return [
+        pe.net.mdtables.MethodDef.rows[(int(method["methoddef_token"], 16) & 0xFFFFFF) - 1]
+        for method in identities["methods"]
+        if method["owner_identity"] == owner and method["name"] == name
+    ]
 
 
 def _body(pe: dnfile.dnPE, row: Any) -> CilMethodBody:
@@ -93,25 +105,6 @@ def _method_pin(row: Any, body: CilMethodBody) -> dict[str, Any]:
         "rva": int(row.Rva),
         "body_size": int(body.size),
         "body_sha256": hashlib.sha256(body.raw_bytes).hexdigest(),
-    }
-
-
-def _recovery_proof(path: Path) -> dict[str, Any]:
-    pe = _open(path)
-    rows = list(pe.net.mdtables.MethodDef.rows)
-    raw = path.read_bytes()
-    body_rvas = [int(row.Rva or 0) for row in rows if int(row.Rva or 0)]
-    materialized = 0
-    for rva in body_rvas:
-        off = pe.get_offset_from_rva(rva)
-        if off is not None and any(raw[off : off + 16]):
-            materialized += 1
-    if materialized != len(body_rvas):
-        raise ValueError(f"incomplete recovered body set for {path}: {materialized}/{len(body_rvas)}")
-    return {
-        "method_def_count": len(rows),
-        "method_body_rva_count": len(body_rvas),
-        "method_body_materialized_count": materialized,
     }
 
 
@@ -367,7 +360,10 @@ def _ring_contract(path: Path) -> dict[str, Any]:
             "parse_ring_buffer": _method_pin(parse_row, parse_body),
             "convert_numeric_value": _method_pin(numeric_row, numeric_body),
         },
-        "record_width": "8-byte timestamp + 2 * sum(frame lengths)",
+        "record_width": (
+            "Binary records contain a 4-byte little-endian UInt32 timestamp and sum(frame byte lengths) data bytes. "
+            "The parser processes 8 + 2 * sum(frame byte lengths) hexadecimal characters."
+        ),
         "signed_decode": ["SByte", "Int16", "Int32", "Int64"],
         "unsigned_decode": "UInt64 parse, bit-mask, then right shift",
         "engineering_value": "((raw * MUL) / DIV + OFFSET) / 10^decimal_places",
@@ -411,7 +407,7 @@ def _compression_contract(path: Path) -> dict[str, Any]:
     }
 
 
-def extract(recovered_root: Path, *, gtsplus_root: Path | None = None) -> dict[str, Any]:
+def extract(recovered_root: Path = DEFAULT_RECOVERED, *, gtsplus_root: Path | None = None) -> dict[str, Any]:
     recovered_root = recovered_root.expanduser().resolve()
     gts = resolve_gts_root(gtsplus_root)
     diagnostics = gts.parent
@@ -419,6 +415,7 @@ def extract(recovered_root: Path, *, gtsplus_root: Path | None = None) -> dict[s
     sources: dict[str, Any] = {}
     proofs: dict[str, Any] = {}
     paths: dict[str, Path] = {}
+    identities: dict[str, Any] = {}
     for rel in COMPONENTS:
         protected = diagnostics / rel
         sidecar = Path(str(protected) + "._")
@@ -426,12 +423,15 @@ def extract(recovered_root: Path, *, gtsplus_root: Path | None = None) -> dict[s
         if not recovered.is_file():
             raise FileNotFoundError(f"missing recovered component: {recovered}")
         paths[rel] = recovered
-        proof = _recovery_proof(recovered)
+        qualification = qualify_recovered_source(recovered, protected, component_root=recovered_root)
+        proof = validate_managed_bodies(recovered)
+        identities[rel] = _open(recovered)._gts_method_identities
         proofs[rel] = proof
         sources[rel] = {
             "protected_stub": {"size": protected.stat().st_size, "sha256": sha256_file(protected)},
             "protected_sidecar": {"size": sidecar.stat().st_size, "sha256": sha256_file(sidecar)},
             "recovered_analysis_pe": {"size": recovered.stat().st_size, "sha256": sha256_file(recovered)},
+            "qualification": qualification,
         }
 
     return {
@@ -439,6 +439,7 @@ def extract(recovered_root: Path, *, gtsplus_root: Path | None = None) -> dict[s
         "title": "GTS+ recovered TSE/GTSE managed procedural semantics",
         "sources": sources,
         "recovery_proof": proofs,
+        "managed_identities": identities,
         "binary_read": _binary_read_contract(paths["GTSPlusTSEConverter/Converter.dll"]),
         "legacy_upgrade": _legacy_upgrade_contract(paths["GTSPlusTSEConverter/TSEConverter.exe"]),
         "ring_buffer_parser": _ring_contract(paths["GTSPlusTSEConverter/RingBufferParser.dll"]),
@@ -449,7 +450,7 @@ def extract(recovered_root: Path, *, gtsplus_root: Path | None = None) -> dict[s
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--recovered-root", type=Path, required=True)
+    ap.add_argument("--recovered-root", type=Path, default=DEFAULT_RECOVERED)
     ap.add_argument("--gtsplus-root", type=Path)
     ap.add_argument("--output", type=Path, default=DEFAULT_OUT)
     args = ap.parse_args()

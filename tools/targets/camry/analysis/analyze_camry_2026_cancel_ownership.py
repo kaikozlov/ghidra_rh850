@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from tools.targets.camry.support import camry_f33_corpus as f33
 from tools import REPO_ROOT
+from tools.techstream.gts.registry import load_toyota_diag_registry
 import argparse
 import binascii
 import gzip
@@ -66,8 +67,8 @@ def edges(samples, bit):
 def stationary() -> dict:
     with gzip.open(STATIONARY, 'rt') as stream:
         recording = json.load(stream)
-    registry_path = ROOT / 'data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json'
-    registry = json.loads(registry_path.read_text())
+    registry_path = ROOT / 'data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json.gz'
+    registry = load_toyota_diag_registry(registry_path)
     names = {r['bit_start']: r['name'] for r in registry['catalogs']['498']['data_list']['rows']
              if r['did'] == '0x1906' and r['bit_start'] == r['bit_end']}
     streams = defaultdict(list)

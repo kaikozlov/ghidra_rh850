@@ -162,29 +162,32 @@ tools/gts recover-aux-bodies --workers 8 \
   --output build/out/gts-collision-concurrent
 ```
 
-Regenerate the complete aggregate into a new selected root only after these gates,
-then migrate consumers and generated source references together. Join each selected
-output through its component manifest to the exact installed relative stub/sidecar
-pair and output SHA-256; resolve files beneath that selected root rather than old
-absolute manifest paths. Keep installer originals, protected installed pairs and
-normalized analysis outputs as separate representations.
+The canonical aggregate is `build/out/gts-all-unprotected`: **249 qualified
+outputs**, comprising `GTSPlus` (54), `CUWPlus` (143), and `Auxiliary` (52).
+Semantic consumers resolve files beneath the selected component root and call
+`qualify_recovered_source` before admitting them. Qualification joins the exact
+source-relative manifest entry to the installed stub/sidecar pair and output
+SHA-256/size; stale absolute manifest paths and same-name legacy outputs are not
+fallback sources. Installer originals, protected installed pairs and normalized
+analysis outputs retain separate identities.
 
-The retained legacy aggregate has 248 entries and omits PCS Data Viewer; its
-console representation also predates the corrected 11-body recovery. Preserve
-the separately corrected console/auxiliary representations until the replacement
-aggregate passes qualification. Do not reinterpret their hashes as interchangeable
-with legacy same-name outputs. Regenerate the outer CUWLauncher separately.
+Managed consumers additionally validate complete IL bodies and carry SHA/MVID/
+TypeDef/MethodDef identities, including nested ownership. Nonzero MethodDef RVAs
+and valid IL counts remain distinct because native implementations also have RVAs.
+The CUW console comes from `CUWPlus/CuwBackendServiceConsoleApp.exe`; the outer
+launcher is separately qualified under `build/out/gts-lifecycle-launcher`.
+Consumer source references and generated artifacts are migrated together.
 
-Explicit current-source regeneration commands (these select new output roots):
+To reproduce the canonical roots:
 
 ```sh
 tools/gts recover-all-bodies --workers 8 --keep-workspace \
   --gtsplus-root "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus" \
-  --output build/out/gts-car-qualified
+  --output build/out/gts-all-unprotected
 tools/gts recover-cuw-bodies --workers 1 --only CUWLauncher.exe \
   --gtsplus-root "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus" \
   --source software/Techstream/gtsplus/unpacked/gtsplus/CUWLauncher \
-  --output build/out/gts-car-qualified-launcher
+  --output build/out/gts-lifecycle-launcher
 ```
 
 ## What is recovered versus regenerated
@@ -368,11 +371,11 @@ and `.text/.rsrc/.reloc` virtual geometry matches. The clean rebuilt files may
 still differ at the disk-container level because the analysis rebuilder emits a
 small normalized `.idata`; application semantics are the oracle here.
 
-The same corrected path recovers `PCS Data Viewer.exe` with **22,447/22,447**
-nonzero-RVA method bodies materialized (entry `0x66FB8E`) and
-`GTSPlusTSEConverter/TSEConverter.exe` with **27/27** (entry `0x6BAE`).
+`PCS Data Viewer.exe` has **22,447 nonzero MethodDef RVAs** (entry `0x66FB8E`);
+admission distinguishes its managed IL from native implementations.
+`GTSPlusTSEConverter/TSEConverter.exe` has **27 managed bodies** (entry `0x6BAE`).
 `tests/techstream/verify_gtsplus_managed_exe_recovery.py` pins the five exact Toyota
-oracles; the auxiliary recovery test pins PCS/TSEConverter.
+oracles; the auxiliary recovery test validates PCS/TSEConverter.
 
 ## Independent native oracle
 

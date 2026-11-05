@@ -1,22 +1,36 @@
 """Verify the clean derived Toyota diagnostics registry for the maintainer Camry."""
 from __future__ import annotations
 
-import json
+import gzip
 import os
 
+import struct
+import tempfile
+from pathlib import Path
 from tools import REPO_ROOT
 REPO = REPO_ROOT
 
 from tools.techstream import techstream_paths
 from tools.techstream.ddb_semantics import (
+    NativeSelectionContext,
+    native_context,
     convert_p5_physical,
     decode_p5_signal,
     extract_msb0,
     format_p5_decimal,
 )
-from tools.techstream.gts.registry import build_toyota_diag_registry
+from tools.techstream.gts.registry import (
+    _registry_request_row,
+    _registry_role_bindings,
+    _registry_selected_role_bindings,
+    _registry_session_control,
+    build_toyota_diag_registry,
+    load_toyota_diag_registry,
+    write_toyota_diag_registry,
+)
+from tools.techstream.parse_ddb import DDBParser, ECUDataBase, Section, TableDataHead
 
-ART = REPO / "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json"
+ART = REPO / "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json.gz"
 
 passed = failed = 0
 
@@ -29,11 +43,151 @@ def check(name: str, condition: object) -> None:
     print(f"[{'PASS' if ok else 'FAIL'}] {name}")
 
 
+def verify_synthetic_native_programs(parser: DDBParser) -> None:
+    """Exercise consumer projection with deliberately different selector CommSets."""
+    def selector(frame: int, commset: int, order: int) -> bytes:
+        return struct.pack("<HHHHHHHBB", 397, 0xD2, commset, frame, 0, order, 0, 0, 0)
+
+    def commset(identifier: int) -> bytes:
+        return struct.pack("<IIHHHBB", 1000, 1020, 0, identifier, 0, 1, 0)
+
+    def database(root: Path, family: str, tables: dict[int, list[bytes]]) -> ECUDataBase:
+        path = root / "NA" / "DB" / family / "Toyota.ddb"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"synthetic native consumer fixture\0" + b"".join(
+            raw for rows in tables.values() for raw in rows
+        ))
+        sections = {}
+        for table, rows in tables.items():
+            payload = b"".join(rows)
+            if table == 0:
+                offsets = []
+                offset = 0
+                for raw in rows:
+                    offsets.append(struct.pack("<IH", offset, len(raw)))
+                    offset += len(raw)
+                payload = b"".join(offsets) + payload
+            sections[table] = Section(
+                TableDataHead(table, 0, len(rows), len(payload)), 0, payload,
+                schema_family="gtsplus", variable_layout=table == 0, source_path=path,
+            )
+        return ECUDataBase(path, 1, sections, schema_family="gtsplus")
+
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        dll = "MissingFixture.dll".encode("utf-16le").ljust(80, b"\0") + struct.pack("<HHHBB", 77, 0, 0x52, 0, 0)
+        gen = database(root, "Gen", {
+            0: [bytes.fromhex("1001"), bytes.fromhex("1003")],
+            17: [struct.pack("<HHHH", 100, 1, 0, 0), struct.pack("<HHHH", 101, 2, 0, 0)],
+            18: [selector(100, 1, 0), selector(101, 2, 1)],
+            19: [dll],
+            29: [commset(1), commset(2)],
+        })
+        spe = database(root, "Spe", {
+            0: [bytes.fromhex("1002")],
+            17: [struct.pack("<HHHH", 102, 1, 0, 0)],
+            18: [selector(102, 2, 0)],
+        })
+        context = native_context(gen, spe)
+        session = _registry_session_control(parser, context, [{"category_id": 397, "generation": 20}])
+        program = session["per_category"]["397"]["extended_session"]
+        check("multiframe session retains Gen then Spe order and first-row CommSet across every step",
+              program["resolved"]
+              and [frame["send"] for frame in program["frames"]] == ["1001", "1003", "1002"]
+              and [frame["comm_set"] for frame in program["frames"]] == [1, 1, 1]
+              and [frame["native"]["frame_occurrence"]["source"]["family"] for frame in program["frames"]]
+                  == ["Gen", "Gen", "Spe"])
+        bindings = _registry_selected_role_bindings(parser, context, {"category_id": 999}, root / "bin")
+        check("first-role fallback may originate from a nonzero source category",
+              bindings[0]["binding_category_id"] == 77
+              and bindings[0]["exact_category_binding"] is False
+              and bindings[0]["semantic_status"] == "plugin_file_missing"
+              and _registry_role_bindings(parser, context, {"category_id": 999}, root / "bin") == [])
+        context.load(database(root, "Spe", {29: [commset(1)]}), family="Spe")
+        duplicate = _registry_request_row(parser, context, 397, 0xD2, "ambiguous_commset")
+        check("merged duplicate CommSet is a native consumer failure, not dict last-wins",
+              not duplicate["resolved"] and duplicate["native"]["status"] == 0xC0040102
+              and len(duplicate["native"]["failure_query"]["records"]) == 2)
+
+
 def main() -> int:
-    actual = json.loads(ART.read_text())
+    actual = load_toyota_diag_registry(ART)
     gts = techstream_paths.resolve_gts_root(os.environ.get("GTSPLUS_ROOT"))
     regenerated = build_toyota_diag_registry(gts)
     check("registry regenerates exactly from current GTS+ and pinned live evidence", actual == regenerated)
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        # Exercise order, duplicate occurrences, Unicode, and provenance without
+        # rebuilding the large fixture for each serialization variant.
+        sample = {
+            "schema": actual["schema"],
+            "history": [{"source": "Spe", "raw": "00ff"}, {"source": "Gen", "raw": "00ff"}],
+            "name": "診断",
+        }
+        for compact in (False, True):
+            first = root / "first.json.gz"
+            second = root / "second.json.gz"
+            plain = root / "export.json"
+            write_toyota_diag_registry(sample, first, compact=compact)
+            write_toyota_diag_registry(sample, second, compact=compact)
+            write_toyota_diag_registry(sample, plain, compact=compact)
+            check(f"gzip registry roundtrip preserves content (compact={compact})",
+                  load_toyota_diag_registry(first) == sample)
+            check(f"gzip registry bytes ignore output filename and time (compact={compact})",
+                  first.read_bytes() == second.read_bytes()
+                  and first.read_bytes()[4:8] == b"\0" * 4)
+            check(f"gzip registry expands to the plain export (compact={compact})",
+                  gzip.decompress(first.read_bytes()) == plain.read_bytes())
+    check("registry separates raw occurrences from the initial native snapshot",
+          actual["schema"] == "toyota-diagnostics-registry-v8"
+          and actual["native_context"]["resolution"] == "initial"
+          and len(actual["category_rows"]) >= len(actual["initial_categories"]))
+
+    parser = DDBParser()
+    verify_synthetic_native_programs(parser)
+    gen_path = techstream_paths.gts_db_root(gts, "NA", "Gen") / "Toyota.ddb"
+    spe_path = techstream_paths.gts_db_root(gts, "NA", "Spe") / "Toyota.ddb"
+    master = parser.parse_master_db(gen_path)
+    spe = parser.parse_master_db(spe_path) if spe_path.is_file() else None
+    context = native_context(master, spe)
+    multi = _registry_request_row(parser, context, 1, 0xA, "multistep")
+    selector_query = context.query(18, 1, 0xA)
+    first_commset = struct.unpack_from("<H", selector_query.records[0].raw, 4)[0]
+    check("selector duplicate steps remain ordered and all consume the first selector CommSet",
+          multi["resolved"] and len(multi["frames"]) == len(selector_query.records) >= 2
+          and all(frame["comm_set"] == first_commset for frame in multi["frames"])
+          and [frame["native"]["selector_occurrence"] for frame in multi["frames"]]
+              == [row.as_dict() for row in selector_query.records])
+    absent = _registry_request_row(parser, context, 0xFFFF, 0xFFFF, "missing")
+    check("missing native selector retains consumer failure instead of an empty success",
+          absent["resolved"] is False and absent["frames"] == []
+          and absent["native"]["status"] == 0xC0040101)
+    unknown = NativeSelectionContext(history_known=False)
+    unknown.load(master, family="Gen")
+    unknown_program = _registry_request_row(parser, unknown, 1, 0x66, "unknown")
+    check("unknown live history retains unresolved context and raw variants",
+          unknown_program["resolved"] is False
+          and unknown_program["native"]["status"] is None
+          and unknown_program["native"]["context"]["resolution"] == "unknown"
+          and unknown_program["native"]["query"]["raw_variants"])
+    initial = _registry_request_row(parser, context, 1, 0x66, "initial")
+    context.correspondence_reflection(0, 136)
+    reflected = _registry_request_row(parser, context, 1, 0x66, "reflected")
+    check("explicit handling136 changes selector66 without rewriting the initial snapshot",
+          [frame["send"] for frame in initial["frames"]] == ["0100"]
+          and [frame["send"] for frame in reflected["frames"]] == ["2100"]
+          and initial["native"]["context"]["resolution"] == "initial"
+          and reflected["native"]["context"]["resolution"] == "event-history")
+    context = native_context(master, spe)
+    raw_bindings = _registry_role_bindings(parser, context, {"category_id": 405}, gts / "bin")
+    selected_bindings = _registry_selected_role_bindings(parser, context, {"category_id": 405}, gts / "bin")
+    fallback = next(row for row in selected_bindings if row["role"] == 0xDA)
+    check("raw bindings and native first-role fallback are distinct source-qualified surfaces",
+          all(row["role"] != 0xDA for row in raw_bindings)
+          and fallback["dll"] == "GetCurAbsTimeInfo_DT.Dll"
+          and fallback["binding_category_id"] == 0
+          and fallback["exact_category_binding"] is False
+          and fallback["native"]["query"]["records"][0] == fallback["occurrence"])
 
     profile = actual["profile"]
     check("exact F33 EPS identity guard is pinned",
@@ -58,14 +212,14 @@ def main() -> int:
 
     resolver = profile["vehicle_resolution"]
     check("Toyota vehicle resolver selects current Camry-HV vehicle type",
-          resolver["generation"] == "current-gtsplus-vehicle-resolver-v2"
+          resolver["generation"] == "current-gtsplus-vehicle-resolver-v3"
           and resolver["vehicle_type"] == 12704
           and resolver["vehicle_name"] == "Camry HV"
           and resolver["install_set_ids"] == [8119, 8120, 8121, 27706])
     check("Toyota VIN decision matcher is vendored as structured data",
           resolver["vin_decision"]["source_category_id"] == 372
           and len(resolver["vin_decision"]["rows"]) == 2
-          and {row["phase_type"] for row in resolver["vin_decision"]["rows"]} == {0x12}
+          and {row["route_selector"] for row in resolver["vin_decision"]["rows"]} == {0x12}
           and {row["vehicle_type"] for row in resolver["vin_decision"]["rows"]} == {12704})
     mount = resolver["mount"]
     check("Toyota mount resolver carries all 34 logical Camry categories",
@@ -74,14 +228,17 @@ def main() -> int:
           and len({row["category_id"] for row in mount["candidates"]}) == 34
           and {row["connection_frame_id"] for row in mount["candidates"]} == {0}
           and {row["connection_comm_set_id"] for row in mount["candidates"]} == {9}
-          and {row["connection_phase_type"] for row in mount["candidates"]} == {0x12, 0x22})
-    check("Toyota current Camry mount connection frame is transport-only",
-          mount["frame_0"] == {
+          and {row["connection_route_selector"] for row in mount["candidates"]} == {0x12, 0x22})
+    check("Toyota current Camry connection frame has empty send/mask/check geometry",
+          {key: mount["frame_0"]["selected"][key] for key in (
+              "frame_id", "send_variable_id", "receive_mask_variable_id", "receive_check_variable_id", "empty"
+          )} == {
               "frame_id": 0, "send_variable_id": 0, "receive_mask_variable_id": 0,
               "receive_check_variable_id": 0, "empty": True,
           }
-          and mount["comm_set_9"]["send_parameter"] == 1000
-          and mount["comm_set_9"]["receive_timeout"] == 1020)
+          and mount["frame_0"]["status"] == 0
+          and mount["comm_set_9"]["selected"]["send_parameter"] == 1000
+          and mount["comm_set_9"]["selected"]["receive_timeout"] == 1020)
     routes = {row["category_id"]: row["transport_route"] for row in mount["candidates"]}
     check("Toyota route contains direct endpoints absent from the old 17-address sweep",
           routes[409]["request_address"] == 0x7C0 and routes[444]["request_address"] == 0x780)
@@ -196,11 +353,11 @@ def main() -> int:
           hv_test["name"] == "Activate the Inverter Water Pump"
           and hv_test["service"] == 0x2F
           and hv_test["did"] == 0x2801
-          and hv_test["start_prefix"] == "2f280103"
-          and hv_test["stop_prefix"] == "2f280100"
+          and [frame["materialized_prefix"] for frame in hv_test["start_frames"]] == ["2f280103"]
+          and [frame["materialized_prefix"] for frame in hv_test["stop_frames"]] == ["2f280100"]
           and hv_test["runtime_length_probe"]["kind"] == "read_data_by_identifier_value_length"
-          and hv_test["runtime_length_probe"]["request"] == "222801"
-          and hv_test["runtime_length_probe"]["check"] == "62"
+          and [frame["materialized_request"] for frame in hv_test["runtime_length_probe"]["frames"]] == ["222801"]
+          and [frame["positive_check"] for frame in hv_test["runtime_length_probe"]["frames"]] == ["62"]
           and hv_test["runtime_length_probe"]["response_prefix_length"] == 3
           and hv_test["execution"] == "plan_only")
 
@@ -235,8 +392,8 @@ def main() -> int:
     engine_static_routine = next(row for row in actual["catalogs"]["372"]["active_tests"] if row["id"] == 40402)
     check("static routine-command variable bytes do not falsely make a routine runtime-parameterized",
           engine_static_routine["name"] == "AIR PUMP: OFF / ASV B1: CLOSE / ASV B2: CLOSE"
-          and engine_static_routine["start_static"] == "3101113600"
-          and engine_static_routine["routine_command"]["bytes"] == "00"
+          and [frame["materialized_static_request"] for frame in engine_static_routine["start_frames"]] == ["3101113600"]
+          and [row["bytes"] for row in engine_static_routine["routine_commands"]] == ["00"]
           and engine_static_routine["output_mask_value"]["bytes"] == ""
           and engine_static_routine["output_mask_button"]["bytes"] == ""
           and engine_static_routine["fixed_request"] is True
@@ -252,9 +409,9 @@ def main() -> int:
           frc_test["name"] == "LTA Steering Vibration"
           and frc_test["routine_id"] == 0x1588
           and frc_test["fixed_request"] is True
-          and frc_test["start_static"] == "31011588"
-          and frc_test["stop_static"] == "31021588"
-          and frc_test["result_static"] == "31031588"
+          and [frame["materialized_static_request"] for frame in frc_test["start_frames"]] == ["31011588"]
+          and [frame["materialized_static_request"] for frame in frc_test["stop_frames"]] == ["31021588"]
+          and [frame["materialized_static_request"] for frame in frc_test["result_frames"]] == ["31031588"]
           and frc_test["session_requirement"] == "extended"
           and frc_test["execution"] == "executable")
 
@@ -265,14 +422,16 @@ def main() -> int:
           and sum(row["execution"] == "unresolved_static_plan" for row in active) == 10
           and all(row["execution"] != "executable" for row in active if row["kind"] == "direct"))
 
-    # ---- schema v6: Toyota resolver/routes + execution model, function hierarchy, utilities ----
+    # Source-qualified native programs alongside raw metadata.
     hv = actual["catalogs"]["397"]
-    check("legacy catalog surface is preserved behind the v6 resolver additions",
+    check("catalog metadata remains available alongside native programs",
           all(key in hv for key in ("category", "dids", "dtcs", "active_tests"))
           and hv_test["execution"] == "plan_only"
-          and hv_test["start_prefix"] == "2f280103")
+          and [frame["materialized_prefix"] for frame in hv_test["start_frames"]] == ["2f280103"])
     check("initial-read request is materialized per direct Active Test",
-          hv_test["initial_read"] == {"mode": 0, "selector": "0xCA", "request": "222801", "check": "62"}
+          hv_test["initial_read"]["mode"] == 0
+          and hv_test["initial_read"]["resolved"]
+          and [(frame["send"], frame["check"]) for frame in hv_test["initial_read"]["frames"]] == [("222801", "62")]
           and hv_test["session_requirement"] == "extended")
     eps_ffd_meta = actual["catalogs"]["405"]["generic_ffd"]
     eps_ffd_steering = next(row for row in eps_ffd_meta["signals"] if row["name"] == "Steering Angle")
@@ -298,8 +457,8 @@ def main() -> int:
           hv_ffd["role"] == 0xB5
           and hv_ffd["plugin_binding"]["binding_category_id"] == 0
           and hv_ffd["plugin_binding"]["dll"] == "GetEachFrzFrmDatP5_DT.dll"
-          and hv_ffd["requests"][0]["send"] == "1904000000ff"
-          and hv_ffd["requests"][0]["check"] == "5904"
+          and [frame["send"] for frame in hv_ffd["requests"][0]["frames"]] == ["1904000000ff"]
+          and [frame["check"] for frame in hv_ffd["requests"][0]["frames"]] == ["5904"]
           and hv_ffd["execution"] == "read_only")
 
     hv_rob_meta = hv["rob"]
@@ -330,15 +489,16 @@ def main() -> int:
           eps_pos["value"] == "1.5" and eps_neg["value"] == "-1.5")
 
     hv_rob = next(row for row in hv["commands"] if row["kind"] == "p5_rob")
-    check("ordinary P5 RoB transport is exported only from exact role-0xA0 binding",
+    check("ordinary P5 RoB transport preserves native order and exact role-0xA0 binding",
           hv_rob["role"] == 0xA0
           and hv_rob["plugin_binding"]["binding_category_id"] == 397
           and hv_rob["plugin_binding"]["exact_category_binding"] is True
           and hv_rob["plugin_binding"]["dll"] == "GetRoBP5_DT.dll"
-          and [[(phase["send"], phase["check"]) for phase in (protocol["inventory"], protocol["frames"], protocol["record"])]
-               for protocol in hv_rob["protocols"]] == [
-                  [("ab01", "eb01"), ("ab020000", "eb02"), ("ab0300000000", "eb03")],
-                  [("ab11", "eb11"), ("ab120000", "eb12"), ("ab1300000000", "eb13")],
+          and [[(frame["send"], frame["check"]) for frame in hv_rob["requests"][phase]["frames"]]
+               for phase in ("inventory", "frames", "record")] == [
+                  [("ab11", "eb11"), ("ab01", "eb01")],
+                  [("ab120000", "eb12"), ("ab020000", "eb02")],
+                  [("ab1300000000", "eb13"), ("ab0300000000", "eb03")],
                ]
           and hv_rob["execution"] == "read_only")
 
@@ -356,14 +516,16 @@ def main() -> int:
     check("every catalog category resolves identical D1/D2/0xDD session frames",
           set(session["per_category"]) == {str(cid) for cid in profile["catalog_category_ids"]}
           and all(row["generation_low5"] == "0x14"
-                  and row["default_session"]["send"] == "1001"
-                  and row["extended_session"]["send"] == "1003"
-                  and row["keepalive"]["send"] == "22f186"
-                  and row["keepalive"]["check"] == "62"
+                  and [frame["send"] for frame in row["default_session"]["frames"]] == ["1001"]
+                  and [frame["send"] for frame in row["extended_session"]["frames"]] == ["1003"]
+                  and [frame["send"] for frame in row["keepalive"]["frames"]] == ["22f186"]
+                  and [frame["check"] for frame in row["keepalive"]["frames"]] == ["62"]
                   for row in session["per_category"].values()))
 
     check("referenced CommSet timeout/retry rows are carried exactly",
-          actual["commsets"]["rows"] == {
+          {key: {field: row[field] for field in (
+              "send_parameter", "receive_timeout", "retry_count", "exception_handler_id", "exception_handler_flag"
+          )} for key, row in actual["commsets"]["rows"].items()} == {
               "1": {
                   "send_parameter": 1000, "receive_timeout": 1020, "retry_count": 1,
                   "exception_handler_id": 0, "exception_handler_flag": 0,
@@ -376,21 +538,22 @@ def main() -> int:
 
     hv_selectors = {row["selector"]: row for row in hv["selectors"]}
     check("resolved selector frames include the recovered executor templates",
-          len(hv["selectors"]) == 42
-          and hv_selectors["0xDD"] == {"selector": "0xDD", "frame": "0x2B55", "comm_set": 1,
-                                       "send": "22f186", "mask": "ff", "check": "62"}
-          and hv_selectors["0x9D"]["send"] == "2fffff03" and hv_selectors["0x9D"]["check"] == "6f"
-          and hv_selectors["0x64"]["send"] == "2fffff00"
-          and hv_selectors["0xD5"]["send"] == "3101ffff" and hv_selectors["0xD7"]["check"] == "7103")
+          [(frame["frame"], frame["comm_set"], frame["send"], frame["mask"], frame["check"])
+           for frame in hv_selectors["0xDD"]["frames"]] == [("0x2B55", 1, "22f186", "ff", "62")]
+          and hv_selectors["0x9D"]["frames"][0]["send"] == "2fffff03"
+          and hv_selectors["0x9D"]["frames"][0]["check"] == "6f"
+          and hv_selectors["0x64"]["frames"][0]["send"] == "2fffff00"
+          and hv_selectors["0xD5"]["frames"][0]["send"] == "3101ffff"
+          and hv_selectors["0xD7"]["frames"][0]["check"] == "7103")
 
-    hv_plugins = {row["role"]: row for row in hv["plugins"]}
+    hv_plugins = {row["role"]: row for row in hv["selected_plugins"]}
     check("role bindings carry recovered kinds and fail closed elsewhere",
           hv_plugins[0x19]["dll"] == "DelDiagCodeP4.dll"
           and hv_plugins[0x19]["semantic_kind"] == "dtc_clear"
           and hv_plugins[0x41]["semantic_kind"] == "p5_signal_info"
           and hv_plugins[0x29]["semantic_kind"] is None
           and hv_plugins[0x29]["semantic_status"] == "plugin_semantics_unrecovered_for_identity")
-    emps_plugins = {row["role"]: row for row in actual["catalogs"]["405"]["plugins"]}
+    emps_plugins = {row["role"]: row for row in actual["catalogs"]["405"]["selected_plugins"]}
     check("EMPS binds the exactly-recovered 0x52 CID plugin",
           emps_plugins[0x52]["dll"] == "GetCID_SID22_DT.dll"
           and emps_plugins[0x52]["semantic_kind"] == "generic_cid")
@@ -398,19 +561,24 @@ def main() -> int:
     hv_commands = {row["role"]: row for row in hv["commands"]}
     check("DTC-clear command carries both selector paths with per-request session class",
           hv_commands[0x19]["kind"] == "dtc_clear"
-          and hv_commands[0x19]["requests"][0] == {
+          and [{key: frame[key] for key in (
+              "name", "selector", "send", "mask", "check", "comm_set",
+              "receive_timeout", "retry_count", "session_requirement",
+          )} for frame in hv_commands[0x19]["requests"][0]["frames"]] == [{
               "name": "primary", "selector": "0x1", "send": "04", "mask": "", "check": "44",
               "comm_set": 1, "receive_timeout": 1020, "retry_count": 1,
-              "session_requirement": "default", "resolved": True,
-          }
-          and hv_commands[0x19]["requests"][1]["send"] == "14ffffff"
-          and hv_commands[0x19]["requests"][1]["session_requirement"] == "extended"
-          and hv_commands[0x19]["timer"] == {"timer_id": 1, "delay_ms": 0}
+              "session_requirement": "default",
+          }]
+          and hv_commands[0x19]["requests"][1]["frames"][0]["send"] == "14ffffff"
+          and hv_commands[0x19]["requests"][1]["frames"][0]["session_requirement"] == "extended"
+          and hv_commands[0x19]["timer"]["resolved"]
+          and hv_commands[0x19]["timer"]["delay_ms"] == 0
+          and hv_commands[0x19]["timer"]["consumer_policy"] == "first-record-if-nonempty"
           and len(hv_commands[0x19]["flow"]["fallback_error_codes_when_function_gate_set"]) == 10)
     emps_cid = {row["role"]: row for row in actual["catalogs"]["405"]["commands"]}[0x52]
     check("CID response model is carried where the exact plugin identity is recovered",
           emps_cid["requests"][0]["selector"] == "0xDC"
-          and emps_cid["requests"][0]["check"] == "62f181"
+          and emps_cid["requests"][0]["frames"][0]["check"] == "62f181"
           and emps_cid["response_model"]["payload_offset"] == 4
           and emps_cid["response_model"]["record_size"] == 16)
 

@@ -104,7 +104,7 @@ The generation-22 powertrain set contains 6000 `Engine_CM_P6`,
 Vehicle 12704 also lists empty install set 27706 (`0x6C3A`).
 
 Source: NA vehicle/install-set/category records in
-`data/generated/gtsplus_2026/toyota_diag_bundle_current.zip`;
+`data/generated/gtsplus_2026/toyota_diag_bundle_current/index.json.gz`;
 the 498-carrying rows are also in
 `data/generated/gtsplus_2026/tss3_crossvehicle_fleet_install_sets.csv`.
 

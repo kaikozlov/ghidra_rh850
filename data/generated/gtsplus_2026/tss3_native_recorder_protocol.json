@@ -449,12 +449,30 @@
     "command_common": {
       "path": "bin/CommandCommon.dll",
       "provenance": "Setup_PF.exe",
+      "qualification": {
+        "manifest": "/Volumes/data/altdev/inspect/repos/ghidra_rh850_analysis/build/out/gts-all-unprotected/GTSPlus/manifest.json",
+        "manifest_sha256": "90f5ff8ec45f0bd7bcb9dda0ec7cb82240720421523a571b056a59cade9b3d35",
+        "method": "extract the Toyota installer GTSPlus group paired with GTSPlusCP; no runtime decryption/emulation is required",
+        "protected_sidecar_sha256": "2fd7211088bee794d56239d3f2960d03f5747dbe7c20097fca6c34559f80d6da",
+        "protected_stub_sha256": "89fe3c1f17d7ec58e659a099fc4fc96b55d30534d813c2a4c26211c4d30284c2",
+        "recovered_sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
+        "relative_path": "bin/CommandCommon.dll"
+      },
       "sha256": "98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3",
       "size": 1280016
     },
     "image_plugin": {
       "path": "bin/GetTSS3ImageFFDP5_DT.dll",
       "provenance": "Setup_PF.exe",
+      "qualification": {
+        "manifest": "/Volumes/data/altdev/inspect/repos/ghidra_rh850_analysis/build/out/gts-all-unprotected/GTSPlus/manifest.json",
+        "manifest_sha256": "90f5ff8ec45f0bd7bcb9dda0ec7cb82240720421523a571b056a59cade9b3d35",
+        "method": "extract the Toyota installer GTSPlus group paired with GTSPlusCP; no runtime decryption/emulation is required",
+        "protected_sidecar_sha256": "d86e7ba6c770909288cace4837dde2caf4d86a258efb22b75c275407fdabdd90",
+        "protected_stub_sha256": "203b825da7ce9a4bd07dbdacecc92a37e617cc4d8b792d9dd9548d907406cdf8",
+        "recovered_sha256": "07cfb84e1d258862f95b68a966cf34dbe8d0967e4008c59b2f16b6733a05ecd8",
+        "relative_path": "bin/GetTSS3ImageFFDP5_DT.dll"
+      },
       "sha256": "07cfb84e1d258862f95b68a966cf34dbe8d0967e4008c59b2f16b6733a05ecd8",
       "size": 117776
     },

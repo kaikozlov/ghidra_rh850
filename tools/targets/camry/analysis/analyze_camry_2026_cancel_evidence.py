@@ -8,6 +8,7 @@ are intentionally not interpreted as CAN-field positions or write commands.
 from __future__ import annotations
 
 from tools import REPO_ROOT
+from tools.techstream.gts.registry import load_toyota_diag_registry
 import argparse
 import binascii
 import gzip
@@ -203,7 +204,7 @@ def build() -> dict:
         address, size, byte, bit, assertion = key
         return {'address': f'0x{address:03X}', 'length': size, 'byte': byte, 'bit': bit,
                 'assertion_value': int(assertion), 'events_with_edge': coverage[key], 'events_observed': eligible[key]}
-    registry = json.loads((ROOT / 'data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json').read_text())
+    registry = load_toyota_diag_registry(ROOT / 'data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json.gz')
     tests = registry['catalogs']['498']['active_tests']
     return {
         'schema': 'camry-2026-cancel-evidence-v2',

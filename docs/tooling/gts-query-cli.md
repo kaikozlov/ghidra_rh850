@@ -211,102 +211,39 @@ For the exact 2026 Camry join, see the [Camry baseline §19](../variants/camry-2
 
 ### Master DB execution model
 
-`active-test`, `command`, `role`, `commset`, `timer`, `category`, and `frame` expose the means-based diagnostic execution model recovered
-from Techstream/GTS+ rather than another endpoint-specific lookup. The current
-master contains **6,194 category/plugin bindings but only 191 logical DLL roles**.
-`command` is the normal joined view: it resolves one category+role to the exact
-current plugin identity, operation surface, category-local frames/CommSets,
-timers, and any recovered executable parser/control-flow semantics. Semantic
-profiles are keyed by SHA-256; if a selected plugin changes bytes, the command
-fails closed to `plugin_semantics_unrecovered_for_identity` and does not inherit
-selectors or parser behavior by filename/role alone. `role` aggregates the
-vocabulary globally so one command family can be studied
-across every ECU generation that uses it. For example, role `0x19` has 536
-bindings and is dominated by `DelDiagCodeP4.dll` (424) plus the P6 equivalent
-(106). `category`
-resolves a master ECU category by numeric ID or an unambiguous database/name key
-and shows its `CDbDllTable` plugin-role bindings plus function IDs. `frame`
-resolves `CDbFuncCommFrameTable` selector operands through `CDbCommFrameTable`
-and `CDbVariableTable` to the exact current GTS+ send / receive-mask /
-receive-check bytes. `timer` decodes master type-25 `CDbTimerTable` by Toyota ECU category and timer ID; the recovered first dword is the command delay passed directly to `Sleep`. `commset` decodes master type-29 `CDbComSetTable`, including
-the proven receive-timeout and retry fields used by the shared runtime:
+`active-test`, `command`, `role`, `commset`, `timer`, `category`, and `frame` expose the native diagnostic execution model. **Raw catalog rows and the active native index are different views.** `--raw` preserves source, table, ordinal, bytes and duplicate occurrences. Selected queries report their native context; an initial offline context is not an observed vehicle session.
 
-```text
-$ tools/gts command HV_P5 0x19
-command  category=397  Hybrid Control  role=0x19  plugin=DelDiagCodeP4.dll  surface=direct_transport  semantics=exact_plugin_identity_and_primary_frame
-primary  selector=0x1  send=04  expect=44  commset=1  timeout=1020  retries=1
-fallback selector=0x102  send=14ffffff  expect=54  commset=1  timeout=1020  retries=1
-timer    id=1  delay_ms=0
-flow     primary=0x1  fallback=0x102  fallback_errors=10
+The native default index includes only the leading handling-ID-zero prefix. Ordered handling events delete the first comparator-equal row or replace/insert a row. Master category queries skip Spe; other admitted master queries concatenate Gen then Spe. Category names resolve from their own source's string table. Catalog inspection uses detached ECU contexts and does not mutate the supplied session history.
 
-$ tools/gts command EMPS_P5 0x52
-command  category=405  EMPS  role=0x52  plugin=GetCID_SID22_DT.dll  surface=direct_transport  semantics=exact_plugin_identity_and_category_frame
-request  selector=0xDC  send=22f181  expect=62f181  commset=1  timeout=1020  retries=1
-response payload_offset=4  record_size=16  names=CID1...  conversion=CP_ACP
+Use `--native-context initial` for the initial index. Use `--native-context unknown` when the session history is unavailable. A selected command then emits unresolved JSON and exits with status2.
 
-$ tools/gts command HV_P5 0x06
-command  category=397  Hybrid Control  role=0x6  plugin=GetActTstListP5_DT.dll  surface=delegated_transport_v18_proven  semantics=exact_plugin_identity_and_category_active_test_partition
-active-tests  direct=29  routine=10  multi_did=0  did_helper=CheckSupportDid  rid_helper=CheckSupportRid
+`--native-history FILE` replays an ordered JSON event array. For example, `[{"kind":"reflection","ecu_id":0,"handling_id":136}]` changes `tools/gts frame 1 0x66 --json` from `0100` to `2100`. The output retains the event and its source-qualified status.
 
-$ tools/gts command HV_P5 0x08 --item 0x1
-command  category=397  Hybrid Control  role=0x8  plugin=GetActTstInitP5_DT.dll  surface=direct_transport  semantics=exact_plugin_identity_and_selected_active_test_plan
-active-test-init  id=0x1  name=Activate the Inverter Water Pump  did=0x2801  bits=15..15  init_mode=0  monitor_link_mode=0
-initial-read      selector=0xCA  send=222801  expect=62  bits=15..15
-linked-monitor    key=30  resolution=unique DID/bit-range match from plugin scan  name=Inverter Water Pump
-active-test-executor  service=0x2F  did=0x2801  encoding_mode=1  start=2f280103+N  stop=2f280100+N  runtime_length=N  minimum=2
-active-test-wire-minimum  raw0=2f2801030000  raw1=2f2801030001  return=2f2801000001  qualification=uses N=2, the static minimum required by bit 15; not proof that the runtime DataIdLengthList entry has that length
+`command` joins category+role to the selected plugin, every selected frame, CommSet, timers and recovered control flow. A category miss falls back to the **first active row for that role**, not a category-zero lookup. Plugin semantics are SHA-256-bound; an unknown identity reports `plugin_semantics_unrecovered_for_identity`. Deployed filenames resolve within the selected directory, preserving its actual spelling.
 
-$ tools/gts active-test HV_P5 0x1
-active-test  category=397  Hybrid Control  kind=direct  id=0x1  name=Activate the Inverter Water Pump
-wire  service=0x2F  did=0x2801  start=2f280103+N  stop=2f280100+N  runtime_length=N  minimum=2
-minimum-example  raw0=2f2801030000  raw1=2f2801030001  return=2f2801000001
+`frame` evaluates every selected type18 row. Each supplies its own frame key, but current `GetCommFrmInfo` uses the **first selector row's CommSet key for all emitted frames**. The frame consumer uses its first returned type17 record; the CommSet consumer requires exactly one type29 record. Handler136 changes the initial selector-`0x66` program from `0100` to `2100`, making event history material to the result.
 
-$ tools/gts active-test FRC_P5 0xA429
-active-test  category=498  Front Recognition Camera 2  kind=routine  id=0xA429  name=LTA Steering Vibration
-wire  service=0x31  rid=0x1588  start=31011588  stop=31021588  result=31031588  fixed=1
-routine-vars  start=0x0  stop=0x0  value_mask=0x0  button_mask=0x0  status_key=0x2
+`timer` uses type25's key at `+0x04`, category at `+0x06`, handling ID at `+0x08`, flag at `+0x0A`, and delay at `+0x00`. `commset` exposes the native timeout, retry and exception-handler fields. Unknown history remains unresolved rather than silently becoming the initial index.
 
-$ tools/gts command HV_P5 0x70 --item 0x1
-command  category=397  Hybrid Control  role=0x70  plugin=GetATSignalInfoP5_DT.dll  surface=no_recovered_shared_transport_edge  semantics=exact_plugin_identity_and_selected_active_test_signal_info
-active-test-signal-info  id=0x1  name=Activate the Inverter Water Pump  pattern_key=10  physical_key=6  conv=1/1 offset=0  dec=0  signed=0  unit=-
-active-test-display      pattern=1  button_size=0  key_op=101  key_invalid=0  values=1=ON
+```sh
+# Selected plugin/control flow and raw metadata
+tools/gts command HV_P5 0x19
+tools/gts command EMPS_P5 0x52
+tools/gts category HV_P5
+tools/gts frame 397 0x1
+tools/gts commset 1
+tools/gts timer HV_P5 1
 
-$ tools/gts command HV_P5 0xAD
-command  category=397  Hybrid Control  role=0xAD  plugin=GetDatMonListP5ForActTest_DT.dll  surface=delegated_transport_v18_proven  semantics=exact_plugin_identity_and_category_active_test_monitor_partition
-active-test-monitors  table=62  total=1464  active=1411  nonmember=53  direct=0  runtime_active=1411  runtime_nonmember=53  builder=CreateEnableDataIdList
-
-$ tools/gts command Engine_P5 0x63 --item 0x4C
-command  category=372  Engine  role=0x63  plugin=GetMultiActInitP5_DT.dll  surface=direct_transport  semantics=exact_plugin_identity_and_selected_multi_active_test_plan
-multi-active-test-census  groups=5  memberships=10  table=33
-multi-active-test  group=0x4C  name=Pilot Injection Volume  members=2
-member  order=1  id=0x4D  name=Pilot Injection Volume Select Cylinder  did=0x284A  bits=0..7  send=22284a
-member  order=2  id=0x4E  name=Pilot Injection Volume Value  did=0x284A  bits=8..15  send=22284a
-
-$ tools/gts command EMPS_P5 0x05
-command  category=405  EMPS  role=0x5  plugin=GetDatMonListP5_DT.dll  surface=delegated_transport_v18_proven  semantics=exact_plugin_identity_and_category_candidate_partition
-list     table=62  candidates=230  direct_include=0  direct_exclude=0  runtime_probe=230  builder=CreateEnableDataIdList
-
-$ tools/gts command EMPS_P5 0x41
-command  category=405  EMPS  role=0x41  plugin=GetDatMonSignalInfoP5_DT.dll  surface=no_recovered_shared_transport_edge  semantics=exact_plugin_identity_metadata_only
-metadata physical=table13  unit=table15  patterns=table14  fields=10
-
-$ tools/gts did EMPS_P5 0x1037
-did      EMPS_P5.ddb  0x1037 alt=0x3037  Steering Angle  conv=15/1 offset=0 dec=1 signed=1 bits=16 unit=deg
-
-$ tools/gts category HV_P5
-category  397  Hybrid Control  db=HV_P5.ddb  generation=20
-...
-0x19      DelDiagCodeP4.dll
-
-$ tools/gts commset 1
-commset  1  send_parameter=1000  receive_timeout=1020  retries=1  exception_id=0  exception_flag=0  unknown_0c=0
-
-$ tools/gts timer HV_P5 1
-timer  category=397  id=1  delay_ms=0  unknown_08=0
-
-$ tools/gts frame 397 0x1
-frame  category=397  selector=0x1  comm_set=1  frame=0x279E  rcv_timeout=1020  retries=1  send=04  mask=  check=44
+# Selected Active Test, initialization, presentation and monitor membership
+tools/gts active-test HV_P5 0x1
+tools/gts active-test FRC_P5 0xA429
+tools/gts command HV_P5 0x08 --item 0x1
+tools/gts command HV_P5 0x70 --item 0x1
+tools/gts command HV_P5 0xAD
+tools/gts command Engine_P5 0x63 --item 0x4C
 ```
+
+These commands are offline planners. The Hybrid example obtains four-byte prefixes `2F280103` and `2F280100`, plus the independent `222801 -> 62` length probe. For its mode1 encoding, START includes N value bytes **and N mask bytes**; STOP includes N mask bytes. With the explicit example assumption `N=2`, ON is `2F28010300010001` and return-control is `2F2801000001`.
 
 `active-test` is the preferred selected-test planner when you do not already know Toyota's internal command role. It auto-detects a unique current type-68 direct versus 72-byte type-71 routine row (or accepts `--kind` for an ambiguous key), resolves the current master templates, and never opens a transport. For current routine rows, type71 `+0x28/+0x2A/+0x2C/+0x2E` are respectively routine-command, routine-stop, output-value-mask, and output-button-mask variable references; `+0x30` is the type72 routine-status key. A `fixed=1` result means all four payload sources are zero, as for FRC `0xA429`, so the displayed `31 01/02/03 + RID` requests have no hidden setpoint bytes. Current GTS+ uses standard UDS `31/71` here; the older pinned V18 `21 E2/61 E2` routine executor remains version-specific.
 
@@ -316,7 +253,7 @@ Role `0xAD` is category-wide rather than selected-test-specific. The current `Ge
 
 For role `0x70`, the same `--item` selects the direct type-68 Active Test but no wire transaction is attached. The exact current `GetATSignalInfoP5_DT.dll` consumes that selected ID and joins type-12 Active-Test pattern, type-13 physical conversion, type-14 display values, and type-15 unit metadata into `CCmdActTstSignalInfoItem`. This makes `0x70` the read-only presentation/conversion companion to role `0x08`.
 
-For role `0x08`, `--item` is the direct Active Test ID from the selected category's type-68 `CDbActTestP5Table`. The planner joins that exact row to the current plugin's initialization state machine: when `initial_read_mode == 0`, selector `0xCA` supplies a base `22FFFF` request and the plugin substitutes the row's `+0x34` DID into request bytes 1/2 before send. It also reproduces the plugin's linked-Data-Monitor lookup by DID and bit range. The planner continues into the shared P5 runtime executor: type67 `CDbDataIdForActTable` supplies the DID encoding mode; selector `0x9D` supplies `2FFFFF03 -> 6F` for start/short-term adjustment and selector `0x64` supplies `2FFFFF00 -> 6F` for return-control. The displayed `+N` remains intentionally symbolic in the offline plan because bit geometry proves only a minimum, but the **live source of N is now closed**: `CCommCachePlusP5::CheckSupportDid` resolves selector `0xCA`, sends `22 <DID>`, requires a response longer than the three-byte `62 <DID>` echo, and appends `received_length - 3` to the per-ECU `CCmdDataIdLengthList`. The exporter therefore emits a separate `runtime_length_probe` even when role-`0x08` initial-read mode is 1. This probe supplies support/runtime state independently of the selected-test initial-value display transaction. `active-test-wire-minimum` stays a static illustration, while `runtime-length-probe` describes the exact read-only transaction that can materialize N on a live ECU. The planner itself still sends nothing and does not assert that role `0x06` would expose the test on a particular vehicle. Unknown direct-test IDs fail closed.
+For role `0x08`, `--item` selects the category's type68 Active Test. Initial-read mode0 substitutes DID `+0x34` into selector `0xCA`; mode1 skips that initialization read. The planner also follows the linked-monitor DID/bit-range lookup. Direct execution takes its encoding mode from the first matching type67 row and uses selectors `0x9D/0x64` for START/STOP. N comes separately from `CheckSupportDid`: a successful `22 <DID>` response longer than the three-byte `62 <DID>` echo contributes `received_length - 3` to the per-ECU length cache. The `runtime_length_probe` is therefore retained even when initialization-read mode1 skips its transaction. Minimum-length examples assume N from static bit geometry; actual support, runtime N and menu exposure remain caller-supplied state. Unknown test IDs fail closed.
 
 Current GTS+ namespaces base-variable references above `0x2710`; the CLI follows
 `CDbVariableTable::GetVariable` and subtracts `0x2710` before the unchanged
@@ -338,25 +275,32 @@ a query instead of silently choosing one. Use category `397` or database key
 `tools/gts cuw FILE.cuw` reads only the small outer header + first `attach.att`
 member by default, so even 250+ MiB packages resolve immediately without
 streaming the flash payload. It summarizes vehicle/contact type, diagnostic
-IDs, logical-block calibration IDs, and target calibration IDs, then decodes the
-current GTS+ CUWPlus route INIs and joins `Vehicle/ContactType` to the current:
+IDs, logical-block calibration IDs, and target calibration IDs. Current native
+selection uses `KindOfECU`, `ContactType`, CPU and node fields to derive exact
+INI filenames and select:
 
 ```text
 CID getter -> prepare writer -> flash writer
 ```
 
-This makes a CUW immediately actionable without first remembering which of the
-older corpus inspectors or writer generators owns the relevant mechanics.
-Those proof tools remain separate. Add `--validate` when full outer-container
-CRC/size validation is actually required; that deliberately reads the entire
-package and is not part of the normal discovery path.
+Ordinary entry selectors first probe their own INI; if it is unreadable, the
+first exact master row selects the legacy or current engine. Exact
+`P5-Unified`, `Phase6` and `Ethernet` contacts take the current-engine branch
+directly. CID, prepare and flash selectors are separate: classic prepare uses
+CPU0's DLL while address and flash selection use the current CPU; node-based
+routes use their required-specification/protocol fields. Missing CPU or node
+state remains an explicit native precondition, not a synthetic CPU0 or node.
+
+The result retains selector inputs, selected files, role bindings and native
+failure branches. Add `--validate` for full outer-container CRC/size validation;
+that reads the entire package and is separate from descriptor/route discovery.
 
 ### DLL / EXE inspection
 
-`tools/gts pe` resolves binaries from the current GTS+ `bin` directory and the
-tracked CUWPlus reconstruction tree, then exposes native PE imports, exports,
-and ASCII/UTF-16 strings. An optional query filters all three surfaces in one
-command.
+`tools/gts pe` resolves binaries from the selected GTS+ `bin` directory and its
+installed `CUWPlus` sibling, or an explicit `--cuwplus-root`. It exposes native
+PE imports, exports, and ASCII/UTF-16 strings. An optional query filters all
+three surfaces in one command.
 
 Use this for fast implementation lookup (class names, exported methods, DLL
 edges, protocol strings), then use Ghidra/decompilation and the deterministic
@@ -374,9 +318,26 @@ For the maintainer Camry:
 
 ```bash
 tools/gts registry camry-2026-f33 \
-  --out data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json
+  --out data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json.gz
 
 tools/gts registry camry-2026-f33 --compact > /tmp/toyota_diag_registry.json
+```
+
+The tracked Camry fixture uses deterministic gzip (level 6, zero modification
+time, no embedded filename). It retains the complete schema-v8 JSON, including
+all repeated native query/context evidence, raw source identities, record order,
+and selection histories; compression is not a reduced catalog or a new schema.
+The original 174,740,779 JSON bytes occupy 5,378,395 tracked gzip bytes.
+`--compact` only removes JSON whitespace and is independent of gzip output.
+An output name ending in `.gz` selects gzip; other output paths and stdout
+remain ordinary JSON for exports.
+
+Offline readers use
+`tools.techstream.gts.registry.load_toyota_diag_registry(Path(...))`; no
+proprietary corpus or external build cache is needed. For a plain JSON copy:
+
+```bash
+uv run python -c 'import gzip; from pathlib import Path; p = Path("data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json.gz"); Path("/tmp/toyota_diag_registry.json").write_bytes(gzip.decompress(p.read_bytes()))'
 ```
 
 The `camry-2026-f33` profile pins the relay-correct Panda bus-0 diagnostic topology,
@@ -400,9 +361,44 @@ use a separate special-format overload. Each exported DID signal explicitly name
 its decoder kind so future non-P5 formats can fail closed instead of inheriting this
 contract implicitly.
 
-`tools/gts registry toyota-current --out FILE.zip` is the default Comma-side export rather than a vehicle-specific registry. Bundle schema **`toyota-diagnostics-bundle-v2`** keeps Toyota's resolver layers independent: all regional vehicle/type-41/type-59 tables, install sets, all 2,136 category identities, class-`0x10D` category+phase routes, per-category D1/D2/DD frames, literal support-plugin dispatch, family-local `support_mode`, Toyota transport-controller selection, and lazy decoded catalogs. Catalog availability no longer decides whether a category exists or is routable. Current support-family selection comes directly from Toyota's DLL table (`p3/p4/p5/p6`). The ordinary Toyota P5 mode reproduces `22 01 01` plus MSB-first group/member expansion while retaining advertised `xx00` IDs and skipping Toyota's `F300`/`FD00` group queries; Subaru/Suzuki/Mazda/Hino modes remain distinct rather than inheriting that implementation. Standard P6 support discovery is fully exported: DID `22 A1 00 -> A1nn -> nn00..nnFF` with `A1FD/A1FE` retained but unexpanded, and RID `31 01 D1 00 -> D1nn -> nn00..nnFF` with the inclusive range `D1F0..D1FE` retained but unexpanded. Phase `0x18`/`0x38` routes are materialized through Toyota's `CCommCtrlISO15765_29BitCan` normal-fixed address construction (`0x18DA<target>F1` request / `0x18DAF1<target>` response), rather than treating the raw class-`0x10D +0x08` target byte as an 11-bit CAN ID. Other Toyota controllers remain explicitly typed so local transport-executor coverage cannot become a category-support decision. P3/P4 also carry their `Spe/Toyota.ddb` live probe programs and semantic type-41 criteria; a VIN hit requiring that second stage is explicitly non-final. VIN10 low5 `5..19` rejection is recorded together with Toyota's separate legacy `SelectCarType.dll` / `SelectCarTypeVin.dll` role bindings, whose binaries are absent from the current corpus and are therefore an unresolved implementation path rather than an unsupported-generation declaration. The bundle deliberately contains no Panda logical-bus default: the caller supplies that harness state. `tests/techstream/verify_toyota_diag_bundle.py` regenerates the ZIP byte-for-byte and verifies these boundaries plus Camry and 4Runner install/route resolution. The older Camry JSON remains only a compatibility/evidence fixture.
+`tools/gts registry toyota-current` regenerates the canonical universal bundle at
+`data/generated/gtsplus_2026/toyota_diag_bundle_current/`; `--out DIRECTORY`
+selects another destination. This is a directory of deterministic gzip-compressed
+members, not a tracked distribution ZIP. Its ordered `manifest.json` records every
+original member name, uncompressed size, and SHA-256. All 686 original members are
+retained byte-for-byte, including the existing compact native metadata and P6
+representations; source identities, query ordering, and JSON schemas are unchanged.
+The canonical directory occupies 106,938,056 bytes; its largest file is
+`index.json.gz` at 13,413,545 bytes. The replaced ZIP occupied 118,655,949 bytes
+and contained 4,972,122,569 uncompressed bytes.
 
-Registry schema v3 also carries the current Camry-HV GTS CAN Bus Check topology and
+Offline access needs only the tracked canonical directory, Python dependencies,
+and this repository—no Toyota distributions, DLLs, or extraction cache:
+
+```bash
+tools/toyota gts bundle list
+tools/toyota gts bundle read catalogs/NA/372.json --path category
+tools/toyota gts bundle verify
+tools/toyota gts bundle export
+# Default portable output: build/out/toyota_diag_bundle_current.zip (not tracked).
+# Byte-for-byte migration proof against a preserved original archive:
+tools/toyota gts bundle verify --compare-zip /path/to/original.zip
+```
+
+Use `bundle --bundle DIRECTORY` to select a different canonical directory,
+`bundle read MEMBER` to stream the exact member bytes, and `bundle export --out
+FILE.zip` to select a portable export path. Python consumers use
+`tools.techstream.diag_bundle.DiagnosticBundle` (`open`, `read`, `json`, `namelist`).
+Reads inflate only the selected member; verification and ZIP export stream all
+members rather than allocating the 844 MiB uncompressed index.
+
+Bundle schema **`toyota-diagnostics-bundle-v4`** keeps Toyota's resolver layers independent: all regional vehicle/type-41/type-59 tables, install sets, physical category occurrences and native-selected categories, class-`0x10D` category/route-selector keys, per-category D1/D2/DD frames, selected support plugins, family-local `support_mode`, Toyota transport-controller selection, and lazy decoded catalogs. Route/VIN/type-41 rows expose `route_selector`, install rows `connection_route_selector`, and Customize rows `target_route_selector`. ECU generation remains a separate input. Catalog availability does not decide whether a category exists or is routable.
+
+Current support-family selection comes directly from Toyota's DLL table (`p3/p4/p5/p6`). The ordinary Toyota P5 mode reproduces `22 01 01` plus MSB-first group/member expansion while retaining advertised `xx00` IDs and skipping Toyota's `F300`/`FD00` group queries; Subaru/Suzuki/Mazda/Hino modes remain distinct. Standard P6 support discovery exports DID `22 A1 00 -> A1nn -> nn00..nnFF` with `A1FD/A1FE` retained but unexpanded, and RID `31 01 D1 00 -> D1nn -> nn00..nnFF` with the inclusive range `D1F0..D1FE` retained but unexpanded. Route selectors `0x18`/`0x38` use Toyota's `CCommCtrlISO15765_29BitCan` normal-fixed construction (`0x18DA<target>F1` request / `0x18DAF1<target>` response). Other controllers remain explicitly typed. P3/P4 carry their `Spe/Toyota.ddb` live probe programs and semantic type-41 criteria; a VIN hit requiring that second stage is non-final. VIN10 low5 `5..19` rejection is recorded together with Toyota's separate legacy `SelectCarType.dll` / `SelectCarTypeVin.dll` role bindings, whose binaries are absent from the current corpus.
+
+The bundle contains no Panda logical-bus default: the caller supplies harness state. `tests/techstream/verify_toyota_diag_bundle.py` regenerates the canonical gzip members byte-for-byte, checks exact portable ZIP member restoration and deterministic export, and checks these boundaries plus Camry and 4Runner install/route resolution. The Camry gzip-compressed JSON is a target-specific evidence fixture.
+
+Registry schema v8 also carries the current Camry-HV GTS CAN Bus Check topology and
 tracked module identities needed by the legacy Camry fixture. Toyota master vehicle type
 `12704` (**Camry HV**) resolves `CANBusCarID=0x00A7D910`; all 18 option rows collapse to
 one placement variant. The exact placements put **Front Camera Module** on GTS **Bus 1**
@@ -431,15 +427,17 @@ witnesses are Hybrid Active Test `0x0001` (`0x2F`, DID `0x2801`, start prefix
 The legacy Camry registry schema **v6** predates the universal bundle and remains an evidence/compatibility fixture. It added Toyota vehicle/mounted-ECU/capability metadata and category routes to the older execution-model surface. Its historical generation/session fields are retained as evidence but are not permission inputs in the universal runtime. Earlier catalog sections remain preserved in shape:
 
 - `profile.vehicle_resolution` — clean structured Toyota resolver metadata from
-  `CSelectCarTypeVin10` / `GetMountEcuListNoCnfm` / `GetSupportP5_DT`. The current
+  `CSelectCarTypeVin10` / `GetMntEcuLstNoCf_DT.dll` / `GetSupportP5_DT`. The current
   Camry witness resolves vehicle type `12704` = **Camry HV**, four install sets
   (`8119`, `8120`, `8121`, `27706`), and **34 Toyota logical ECU categories**. Each
-  candidate preserves its install-set/category identity plus the exact mount-connect
-  inputs: connection frame `0`, CommSet `9`, and phase type `0x12` or `0x22`.
-  Connection frame 0 has no send/mask/check payload, so Toyota's mount stage
-  checks transport/category connectivity without probing F181 identity. Each candidate
-  also carries `transport_route` resolved **only** through Toyota class `0x10D`
-  `CDbProtInfoTable`, using the same `(category, phase)` key consumed by
+  candidate preserves its install-set/category identity and connection metadata:
+  frame `0`, CommSet `9`, and encoded route selector `0x12` or `0x22`.
+  Current `DV000004` uses role121 mode0: it publishes candidates with connection
+  state `-1`, then selectively probes coexisting combined/individual aliases.
+  The separate `DV000005` can select a cache-only branch. Connection frame0 has
+  empty send/mask/check payloads. Each candidate's `transport_route` resolves
+  through Toyota class `0x10D` `CDbProtInfoTable`, with the same
+  `(category, route_selector)` key consumed by
   `CCommFrameCtrl::GetEcuAddr`: u16 `+0x08` is the request address and byte `+0x0A`
   is the current P5 logical address extension. Thus all 34 Camry candidates have a
   Toyota-derived route; no maintained-profile endpoint allowlist participates. This
@@ -512,13 +510,20 @@ scripts:
 
 `GTSPLUS_ROOT` may point either at the repository's external-artifact root or
 directly at `.../Toyota Diagnostics/GTSPlus`; the CLI normalizes both shapes.
-When an alternate GTS+ tree is selected, writer-route lookup uses only an
-adjacent CUWPlus tree (or an explicit `GTSPLUS_CUW_ROOT`/`--cuwplus-root`) and
-never silently borrows the repository pin's route tables.
-When an alternate GTS+ tree is selected, route lookup prefers a `cuwplus/CUWPlus`
-tree adjacent to that artifact before falling back to the repository default, so
-DDBs and writer tables are not silently mixed across releases. Use
-`--cuwplus-root` when an intentional cross-release comparison is desired.
+Writer-route lookup selects the installed `CUWPlus` sibling of that normalized
+GTS+ directory, including its `Ini/` directory and product-level DLLs. The current
+installed corpus contains 505 INIs, 500 factory declarations and 16 additional
+master-only selectors: a 516-selector union. A missing sibling remains missing;
+the CLI does not substitute an ancestor sample or another release.
+Explicit `GTSPLUS_CUW_ROOT`/`--cuwplus-root` values remain authoritative and may
+select either a product directory with `Ini/` or a flat INI corpus. Use an
+explicit root for intentional cross-release comparisons or recovered PE bodies.
+
+Command and registry DLL lookup compares filenames case-insensitively within
+the selected product's immediate binary directory. Results retain the registered
+spelling separately from the actual filename, source path and whole-file hash.
+Case-equivalent duplicate files are ambiguous; a missing main-product DLL does
+not resolve to a same-named DS-4 or older-release DLL.
 
 ## Evidence boundary
 

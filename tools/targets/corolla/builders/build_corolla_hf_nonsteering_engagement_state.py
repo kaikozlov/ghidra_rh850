@@ -12,6 +12,7 @@ import struct
 import zipfile
 from pathlib import Path
 from tools.targets.corolla.support.corolla_h_constants import CODEFLASH as H_CODEFLASH
+from tools.techstream.gts.registry import load_toyota_diag_registry
 
 REPO = REPO_ROOT
 IMAGE = H_CODEFLASH
@@ -27,7 +28,7 @@ EQ = REPO / "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equiv
 ALBINO_ARCH = H_CAPTURE / "albinoelephant_discord_PORT_ARCHITECTURE.md"
 ALBINO_PORT = H_CAPTURE / "Corolla_Fingerprint_v1.zip"
 ALBINO_DBC_MEMBER = r"Corolla_Fingerprint\port\files\opendbc_repo\opendbc\dbc\toyota_corolla_tss3_pt.dbc"
-GTS_REGISTRY = REPO / "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json"
+GTS_REGISTRY = REPO / "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json.gz"
 OUT = REPO / "data/generated/corolla_hf_nonsteering_engagement_state.json"
 
 
@@ -85,7 +86,7 @@ def main() -> int:
     albino_arch = ALBINO_ARCH.read_text()
     with zipfile.ZipFile(ALBINO_PORT) as zf:
         albino_dbc = zf.read(ALBINO_DBC_MEMBER).decode("utf-8", "replace")
-    gts_registry = load(GTS_REGISTRY)
+    gts_registry = load_toyota_diag_registry(GTS_REGISTRY)
     gts_hv_gear = find_gts_signal(gts_registry, "HV_P5.ddb", "Shift Position")
     if gts_hv_gear["signal_info"]["pattern_display"] != {"0": "P", "2": "R", "4": "N", "6": "D", "8": "B"}:
         raise ValueError("GTS+ P5 hybrid shift-position semantics drift")

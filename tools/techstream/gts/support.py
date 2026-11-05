@@ -4,19 +4,22 @@ from __future__ import annotations
 
 from typing import Any
 
+from tools.techstream.ddb_semantics import NativeSelectionContext, select_for_consumer
 
-def support_plugin(rows: list[Any], category_id: int, role: int) -> dict[str, Any] | None:
-    """Apply current CDbDllTable::GetQuery role/category fallback exactly."""
-    role_rows = [row for row in rows if int(row.dll_role_id) == role]
-    if not role_rows:
+
+def support_plugin(context: NativeSelectionContext, category_id: int, role: int) -> dict[str, Any] | None:
+    """Resolve the active native index, including its actual first-role fallback."""
+    result = context.query(19, role, category_id).require_success()
+    if not result.records:
         return None
-    selected = next((row for row in role_rows if int(row.category_id) == category_id), role_rows[0])
+    selected = select_for_consumer(result, "plugin")
     return {
         "role": role,
         "requested_category_id": category_id,
-        "binding_category_id": int(selected.category_id),
-        "exact_category_binding": int(selected.category_id) == category_id,
+        "binding_category_id": selected.category_id,
+        "exact_category_binding": selected.category_id == category_id,
         "dll": selected.dll_name,
+        "selection": result.as_dict(),
     }
 
 

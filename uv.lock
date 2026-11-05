@@ -52,6 +52,7 @@ source = { editable = "." }
 dependencies = [
     { name = "dncil" },
     { name = "dnfile" },
+    { name = "ida-domain" },
     { name = "numpy" },
     { name = "pefile" },
     { name = "pycryptodome" },
@@ -63,11 +64,35 @@ dependencies = [
 requires-dist = [
     { name = "dncil", specifier = "==1.0.2" },
     { name = "dnfile", specifier = "==0.18.0" },
+    { name = "ida-domain", specifier = ">=0.5.1" },
     { name = "numpy", specifier = "==2.4.6" },
     { name = "pefile", specifier = "==2024.8.26" },
     { name = "pycryptodome", specifier = "==3.23.0" },
     { name = "systemrdl-compiler", specifier = ">=1.33.0" },
     { name = "unicorn", specifier = "==2.1.4" },
+]
+
+[[package]]
+name = "ida-domain"
+version = "0.5.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "idapro" },
+    { name = "packaging" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/80/34/be087d3ea1c3a6573e0660cb5b40f0c4ade9ae5772cf1c5d98d52472d28b/ida_domain-0.5.1.tar.gz", hash = "sha256:c49f2c417047d882e954f651b50a709a3f27903b33ba533b794aa54d6536d16f", size = 396413, upload-time = "2026-08-10T13:32:48.45Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/27/78/9c698d818b0fddc6648f703a0821edeeb65b18404b43f556d249c5446c96/ida_domain-0.5.1-py3-none-any.whl", hash = "sha256:bfbb17c7d0cb2ed7d3f21342e1c8787f9018d5c2a94cdfd29e06537dd026a06d", size = 201275, upload-time = "2026-08-10T13:32:46.955Z" },
+]
+
+[[package]]
+name = "idapro"
+version = "0.0.12"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/3b/1d/f559b88acdc3fd60ed823d4433ee1314a22d621c34af33a427f2c2d568f5/idapro-0.0.12.tar.gz", hash = "sha256:d6f11d5126a6b9ab7f016573c674a3b5aa45cf38589f8b3d1b284c1c8fccd69f", size = 1076446, upload-time = "2026-10-22T17:02:38.1Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/25/fd/c25a5415f13deb202a27eb979ae88bc99453c39393a38bd13789f0044297/idapro-0.0.12-py3-none-any.whl", hash = "sha256:feb4fd5aae8619c646d85545f4abc7acfebc152c45360722d00edeb63d6b83aa", size = 2189493, upload-time = "2026-10-22T17:02:36.216Z" },
 ]
 
 [[package]]
@@ -156,6 +181,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/1a/9c/c531f2293b91265d8b48e9b329f54fdd7ffae73cb4134ea10cca4237e9cc/numpy-2.4.6-pp311-pypy311_pp73-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:5dbbdb29840ca3d91ee0fece42fc29278886d908280bfec0a5846c6f901a3eb0", size = 15798374, upload-time = "2026-05-18T23:37:02.674Z" },
     { url = "https://files.pythonhosted.org/packages/1a/b0/413077f6b1153ed3cba361401c6783bbad6114804a000cc22eb71c13e190/numpy-2.4.6-pp311-pypy311_pp73-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:8ad03c0965fb3c692200e74d458ca28c1dbb4ce96f9a479a8aa041ad5fabca02", size = 16747286, upload-time = "2026-05-18T23:37:06.327Z" },
     { url = "https://files.pythonhosted.org/packages/15/ce/e5ec180bc41812edcd8daeb8639d205622c0e8c02259d8ab25a0201b3c2a/numpy-2.4.6-pp311-pypy311_pp73-win_amd64.whl", hash = "sha256:2803abfebfc990042cd494d8ce2d5f82e9d847af6d35ec486923aa19dbad5e73", size = 12504263, upload-time = "2026-05-18T23:37:09.715Z" },
+]
+
+[[package]]
+name = "packaging"
+version = "26.3"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/7d/fa/3944b40b07da9ce895c0e6303a5ab7d53da063554f534556b134a54d6093/packaging-26.3.tar.gz", hash = "sha256:94edc256424af38762eb31306eed28beb9f0efc50a8837492c9d6fd6004aed79", size = 313412, upload-time = "2026-08-04T18:15:28.737Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/63/34/ba1c580383c9eada3711951fef0795c80b829a078d72188184bcab9dd527/packaging-26.3-py3-none-any.whl", hash = "sha256:d7193f7c8e4e93f444fde0262bf90af30e16fa0ad0ad44cb553c87339b23cd1c", size = 129956, upload-time = "2026-08-04T18:15:27.159Z" },
 ]
 
 [[package]]

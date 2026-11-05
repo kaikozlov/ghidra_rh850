@@ -309,7 +309,7 @@ The actual retained GTS registry keeps the following nodes distinct:
 | `0x792` | 498 / `FRC_P5.ddb` | Front Recognition Camera |
 | `0x7B0` | 435 / `ABS_P5.ddb` | Brake/EPB |
 
-The source is `data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json`,
+The source is `data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json.gz`,
 `profile.ecus` and the corresponding category bindings. The retained
 `T-0051-26.cuw` is **node0724 Motor Generator**. Hybrid Control is node07D2.
 The earlier convenient "Engine/MG" shorthand must not be interpreted as

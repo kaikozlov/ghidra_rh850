@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import gzip
+import io
 import json
 import struct
 from pathlib import Path
@@ -17,28 +19,67 @@ from tools.techstream.gts.active_tests import (
     _routine_active_test_selected_row,
 )
 from tools.techstream.gts.ddb import _dtc_rows, _english_strings, _generic_ffd_rows, _monitor_rows, _rob_rows
-from tools.techstream.ddb_semantics import extract_monitor_records
+from tools.techstream.ddb_semantics import (
+    NativeSelectionError,
+    UnresolvedNativeContext,
+    extract_monitor_records,
+    native_context,
+    native_commset,
+    select_for_consumer,
+)
 from tools.techstream.gts.execution_model import (
     EXECUTION_MODEL,
     GENERIC_UTILITY_ROLE_KINDS,
     P6_ACTIVE_TEST_PLUGIN_KINDS,
     VEHICLE_RESOLVER,
     _execution_model,
+    _execution_plugin_profiles,
     _file_sha256,
+    _plugin_identity,
+    _resolve_plugin_path,
     _semantic_kind_for_profile,
     _semantic_profile_for_plugin,
 )
 from tools.techstream.gts.master import (
     _master_canbus_topology_rows,
-    _master_comm_set_rows,
     _master_frame_rows,
-    _master_timer_rows,
     _master_variable,
     _resolve_master_category,
 )
 from tools.techstream.parse_ddb import DDBParser, StringDataBase
 from tools.techstream.gts import support
+from tools.techstream.gts.query import native_ecu_catalog_category, native_selection_context
 from tools.techstream.techstream_paths import gts_db_root, resolve_gts_root
+
+
+def load_toyota_diag_registry(path: Path) -> dict[str, Any]:
+    """Read the tracked gzip registry without requiring an installed GTS corpus."""
+    with gzip.open(path, "rt", encoding="utf-8") as stream:
+        return json.load(stream)
+
+
+def write_toyota_diag_registry(
+    payload: dict[str, Any], path: Path, *, compact: bool = False,
+) -> None:
+    """Export JSON, using deterministic gzip for a .gz destination."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    options = {
+        "indent": None if compact else 2,
+        "sort_keys": True,
+        "separators": (",", ":") if compact else None,
+    }
+    if path.suffix == ".gz":
+        with (
+            path.open("wb") as raw,
+            gzip.GzipFile(filename="", mode="wb", fileobj=raw, compresslevel=6, mtime=0) as compressed,
+            io.TextIOWrapper(compressed, encoding="utf-8", newline="\n") as stream,
+        ):
+            json.dump(payload, stream, **options)
+            stream.write("\n")
+    else:
+        with path.open("w", encoding="utf-8", newline="\n") as stream:
+            json.dump(payload, stream, **options)
+            stream.write("\n")
 
 
 CAMRY_2026_DIAG_PROFILE = {
@@ -183,16 +224,16 @@ def _compact_direct_active_test(
         "encoding_mode": executor["data_id_for_act"]["encoding_mode"],
         "data_id_for_act_records": executor["data_id_for_act"]["records"],
         "control_enable_mask": executor["control_enable_mask"],
+        "encoding_requirements": executor["encoding_requirements"],
         "bit_start": executor["bit_range"]["start"],
         "bit_end": executor["bit_range"]["end"],
-        "start_prefix": executor["start"]["materialized_prefix"],
-        "stop_prefix": executor["stop"]["materialized_prefix"],
+        "start_frames": executor["start"]["frames"],
+        "stop_frames": executor["stop"]["frames"],
         "runtime_length_minimum": executor["runtime_data_length"]["minimum_from_bit_geometry"],
         "runtime_length_probe": {
             "kind": executor["runtime_data_length"]["probe"]["kind"],
             "selector": executor["runtime_data_length"]["probe"]["selector"],
-            "request": executor["runtime_data_length"]["probe"]["materialized_request"],
-            "check": executor["runtime_data_length"]["probe"]["positive_check"],
+            "frames": executor["runtime_data_length"]["probe"]["frames"],
             "response_prefix_length": executor["runtime_data_length"]["probe"]["response_prefix_length"],
             "received_length_formula": executor["runtime_data_length"]["probe"]["received_length_formula"],
             "decoded_value_formula": executor["runtime_data_length"]["probe"]["decoded_value_formula"],
@@ -202,27 +243,28 @@ def _compact_direct_active_test(
         "monitor_key": monitor.get("monitor_key"),
         "monitor_name": monitor.get("name") or "",
         "signal_info": signal_info,
-        "session_requirement": _session_requirement(executor["start"]["materialized_prefix"]),
+        "session_requirement": "extended" if any(
+            _session_requirement(frame["materialized_prefix"]) == "extended" for frame in executor["start"]["frames"]
+        ) else "default",
         "execution": "plan_only",
     }
 
 
 def _direct_initial_read_plan(selected: dict[str, Any], init_frame: dict[str, Any] | None) -> dict[str, Any]:
-    """Compact role-0x08 selector-0xCA initial-read request for one direct test."""
+    """Materialize every native role-0x08 selector-0xCA frame for one direct test."""
     plan: dict[str, Any] = {"mode": selected["initial_read_mode"]}
     if selected["initial_read_mode"] != 0 or init_frame is None:
         return plan
     did = int(selected["initial_read_did"])
-    request = bytearray.fromhex(init_frame["send"]["bytes"])
-    if len(request) < 3 or request[0] != 0x22:
-        raise ValueError("selector 0xCA base request is no longer 22xxxx")
-    request[1] = (did >> 8) & 0xFF
-    request[2] = did & 0xFF
-    plan.update({
-        "selector": "0xCA",
-        "request": request.hex(),
-        "check": init_frame["receive_check"]["bytes"],
-    })
+    frames = []
+    for frame in init_frame["frames"]:
+        request = bytearray.fromhex(frame["send"])
+        if len(request) < 3 or request[0] != 0x22:
+            raise ValueError("selector 0xCA base request is no longer 22xxxx")
+        request[1] = (did >> 8) & 0xFF
+        request[2] = did & 0xFF
+        frames.append({**frame, "send": request.hex()})
+    plan.update({**init_frame, "frames": frames})
     return plan
 
 
@@ -234,20 +276,22 @@ def _compact_routine_active_test(selected: dict[str, Any], executor: dict[str, A
         "service": 0x31,
         "positive_response": 0x71,
         "routine_id": selected["routine_id"],
-        "start_static": executor["start"]["materialized_static_request"],
-        "stop_static": executor["stop"]["materialized_static_request"],
-        "result_static": executor["result"]["materialized_static_request"],
+        "start_frames": executor["start"]["frames"],
+        "stop_frames": executor["stop"]["frames"],
+        "result_frames": executor["result"]["frames"],
         "fixed_request": executor["fixed_request"],
         "routine_command_variable": selected["routine_command_variable"],
         "routine_stop_command_variable": selected["routine_stop_command_variable"],
         "output_mask_value_variable": selected["output_mask_value_variable"],
         "output_mask_button_variable": selected["output_mask_button_variable"],
-        "routine_command": executor["start"]["static_command_variable"],
-        "routine_stop_command": executor["stop"]["static_command_variable"],
+        "routine_commands": [frame["static_command_variable"] for frame in executor["start"]["frames"]],
+        "routine_stop_commands": [frame["static_command_variable"] for frame in executor["stop"]["frames"]],
         "output_mask_value": executor["output_mask_value"],
         "output_mask_button": executor["output_mask_button"],
         "routine_status_key": selected["routine_status_key"],
-        "session_requirement": _session_requirement(executor["start"]["materialized_static_request"]),
+        "session_requirement": "extended" if any(
+            _session_requirement(frame["materialized_static_request"]) == "extended" for frame in executor["start"]["frames"]
+        ) else "default",
         "execution": "executable" if executor["fixed_request"] else "plan_only",
     }
 
@@ -261,15 +305,13 @@ def _registry_active_tests(
     monitor_rows: list[dict[str, Any]],
     bindings: list[dict[str, Any]],
 ) -> list[dict[str, Any]]:
-    db_path = db_root / str(category["database"])
+    db_path = Path(category["catalog_database_path"]) if "catalog_database_path" in category else db_root / str(category["database"])
     db = parser.parse_ecu_db(db_path)
-    init_frames = _master_frame_rows(parser, master, int(category["category_id"]), 0xCA)
-    init_frame = init_frames[0] if len(init_frames) == 1 else None
-    dll_rows = list(parser.extract_master_dlls(master.sections[19]))
+    init_frame = _registry_request_row(parser, master, int(category["category_id"]), 0xCA, "initial_read")
     category_id = int(category["category_id"])
     support_family = support.support_family(
-        support.support_plugin(dll_rows, category_id, 0x67),
-        support.support_plugin(dll_rows, category_id, 0xD5),
+        next((binding for binding in bindings if binding["role"] == 0x67), None),
+        next((binding for binding in bindings if binding["role"] == 0xD5), None),
     )
     support_mode = support.support_mode(category_id, int(category["generation"]), support_family)
     signal_info_enabled = any(
@@ -433,49 +475,86 @@ REGISTRY_FUNCTION_NAME_BOUNDARY = (
 )
 
 
+def _registry_plugin_binding(entry: Any, bin_root: Path) -> dict[str, Any]:
+    """Classify one source occurrence without losing its registered filename."""
+    plugin_path = _resolve_plugin_path(bin_root, entry.dll_name)
+    profile_name, _, status = _semantic_profile_for_plugin(plugin_path, entry.dll_role_id)
+    semantic_kind = _semantic_kind_for_profile(profile_name)
+    if semantic_kind is None and plugin_path.is_file():
+        p6_kind = P6_ACTIVE_TEST_PLUGIN_KINDS.get((entry.dll_role_id, _file_sha256(plugin_path)))
+        if p6_kind is not None:
+            semantic_kind = p6_kind
+            status = "exact_plugin_identity"
+    return {
+        "role": entry.dll_role_id,
+        "dll": entry.dll_name,
+        "plugin_identity": _plugin_identity(plugin_path),
+        "semantic_profile": profile_name,
+        "semantic_kind": semantic_kind,
+        "semantic_status": status,
+        "occurrence": entry.as_dict(),
+    }
+
+
 def _registry_role_bindings(
     parser: DDBParser,
     master: Any,
     category: dict[str, Any],
     bin_root: Path,
 ) -> list[dict[str, Any]]:
-    """Category plugin bindings; semantic kind only where the exact plugin identity is recovered."""
+    """Every raw category binding, in physical Gen/Spe order, not native selection."""
+    return [
+        _registry_plugin_binding(entry, bin_root)
+        for entry in native_context(master).raw_records(19)
+        if entry.category_id == int(category["category_id"])
+    ]
+
+
+def _registry_selected_role_bindings(
+    parser: DDBParser,
+    master: Any,
+    category: dict[str, Any],
+    bin_root: Path,
+) -> list[dict[str, Any]]:
+    """Native plugin record0 per role, including non-category-zero role-head defaults."""
+    context = native_context(master)
     category_id = int(category["category_id"])
     bindings = []
-    for entry in sorted(
-        (row for row in parser.extract_master_dlls(master.sections[19]) if row.category_id == category_id),
-        key=lambda row: (row.dll_role_id, row.dll_name.casefold()),
-    ):
-        plugin_path = bin_root / entry.dll_name
-        profile_name, _, status = _semantic_profile_for_plugin(plugin_path, entry.dll_role_id)
-        semantic_kind = _semantic_kind_for_profile(profile_name)
-        if semantic_kind is None and plugin_path.is_file():
-            p6_kind = P6_ACTIVE_TEST_PLUGIN_KINDS.get((entry.dll_role_id, _file_sha256(plugin_path)))
-            if p6_kind is not None:
-                semantic_kind = p6_kind
-                status = "exact_plugin_identity"
+    for role in sorted({entry.dll_role_id for entry in context.raw_records(19)}):
+        query = context.query(19, role, category_id)
+        try:
+            entry = select_for_consumer(query, "plugin")
+        except (NativeSelectionError, UnresolvedNativeContext) as exc:
+            bindings.append({
+                "role": role,
+                "dll": None,
+                "semantic_profile": None,
+                "semantic_kind": None,
+                "semantic_status": "native_selection_unresolved" if query.status is None else "native_selection_failed",
+                "native": {"context": context.as_dict(), "query": query.as_dict(), "status": getattr(exc, "status", None)},
+            })
+            continue
         bindings.append({
-            "role": entry.dll_role_id,
-            "dll": entry.dll_name,
-            "semantic_kind": semantic_kind,
-            "semantic_status": status,
+            **_registry_plugin_binding(entry, bin_root),
+            "requested_category_id": category_id,
+            "binding_category_id": entry.category_id,
+            "exact_category_binding": entry.category_id == category_id,
+            "native": {"context": context.as_dict(), "query": query.as_dict(), "status": 0},
         })
     return bindings
 
 
 def _registry_selector_rows(parser: DDBParser, master: Any, category_id: int) -> list[dict[str, Any]]:
-    """Every resolved (selector -> CommSet/CommFrame/send/mask/check) row for one category."""
-    rows = _master_frame_rows(parser, master, category_id)
+    """Context-qualified selector programs, without sorting their constituent frames."""
+    context = native_context(master)
+    selectors = dict.fromkeys(
+        struct.unpack_from("<H", entry.raw, 2)[0]
+        for entry in context.raw_records(18)
+        if struct.unpack_from("<H", entry.raw)[0] == category_id
+    )
     return [
-        {
-            "selector": row["selector"],
-            "frame": row["comm_frame_id"],
-            "comm_set": row["comm_set"],
-            "send": row["send"]["bytes"],
-            "mask": row["receive_mask"]["bytes"],
-            "check": row["receive_check"]["bytes"],
-        }
-        for row in sorted(rows, key=lambda row: (int(row["selector"], 16), row["comm_frame_id"]))
+        _registry_request_row(parser, context, category_id, selector, "selector")
+        for selector in selectors
     ]
 
 
@@ -622,6 +701,7 @@ def _registry_request_from_frame(row: dict[str, Any], name: str) -> dict[str, An
     return {
         "name": name,
         "selector": row["selector"],
+        "frame": row["comm_frame_id"],
         "send": row["send"]["bytes"],
         "mask": row["receive_mask"]["bytes"],
         "check": row["receive_check"]["bytes"],
@@ -629,7 +709,7 @@ def _registry_request_from_frame(row: dict[str, Any], name: str) -> dict[str, An
         "receive_timeout": comm_set["receive_timeout"],
         "retry_count": comm_set["retry_count"],
         "session_requirement": _session_requirement(row["send"]["bytes"]),
-        "resolved": True,
+        "native": row["selection"],
     }
 
 
@@ -640,10 +720,23 @@ def _registry_request_row(
     selector: int,
     name: str,
 ) -> dict[str, Any]:
-    matches = _master_frame_rows(parser, master, category_id, selector)
-    if len(matches) != 1:
-        return {"name": name, "selector": f"0x{selector:X}", "resolved": False}
-    return _registry_request_from_frame(matches[0], name)
+    context = native_context(master)
+    query = context.query(18, category_id, selector)
+    native = {"context": context.as_dict(), "query": query.as_dict(), "status": query.status}
+    try:
+        matches = _master_frame_rows(parser, context, category_id, selector)
+    except (NativeSelectionError, UnresolvedNativeContext) as exc:
+        native["status"] = getattr(exc, "status", None)
+        if exc.result is not None:
+            native["failure_query"] = exc.result.as_dict()
+        return {"name": name, "selector": f"0x{selector:X}", "resolved": False, "frames": [], "native": native}
+    return {
+        "name": name,
+        "selector": f"0x{selector:X}",
+        "resolved": True,
+        "frames": [_registry_request_from_frame(row, name) for row in matches],
+        "native": native,
+    }
 
 
 def _registry_command_rows(
@@ -660,18 +753,39 @@ def _registry_command_rows(
         kind = binding["semantic_kind"]
         if kind is None:
             continue
-        _, profile, _ = _semantic_profile_for_plugin(bin_root / binding["dll"], binding["role"])
+        profile_name = binding["semantic_profile"]
+        if profile_name is None:
+            continue
+        profile = _execution_plugin_profiles()[profile_name]
         if kind == "dtc_clear":
             control_flow = profile["control_flow"]
-            timers = [row for row in _master_timer_rows(parser, master, category_id) if row["timer_id"] == 1]
+            timer_query = native_context(master).query(25, category_id, 1)
+            try:
+                timer = select_for_consumer(timer_query, "timer", timer_policy="report-and-continue")
+                timer_plan = {
+                    "timer_id": 1,
+                    "delay_ms": struct.unpack_from("<I", timer.raw)[0],
+                    "resolved": True,
+                    "native": timer_query.as_dict(),
+                    "consumer_policy": "first-record-if-nonempty",
+                }
+            except (NativeSelectionError, UnresolvedNativeContext) as exc:
+                timer_plan = {
+                    "timer_id": 1,
+                    "resolved": False,
+                    "native": timer_query.as_dict(),
+                    "status": getattr(exc, "status", None),
+                    "consumer_policy": "first-record-if-nonempty",
+                }
             rows.append({
                 "role": binding["role"],
                 "kind": kind,
+                "plugin_binding": binding,
                 "requests": [
                     _registry_request_row(parser, master, category_id, 0x1, "primary"),
                     _registry_request_row(parser, master, category_id, 0x102, "fallback"),
                 ],
-                "timer": {"timer_id": 1, "delay_ms": timers[0]["delay_ms"]} if len(timers) == 1 else None,
+                "timer": timer_plan,
                 "flow": {
                     "primary_selector": control_flow["primary_selector"],
                     "fallback_selector": control_flow["fallback_selector"],
@@ -684,6 +798,7 @@ def _registry_command_rows(
             rows.append({
                 "role": binding["role"],
                 "kind": kind,
+                "plugin_binding": binding,
                 "requests": [_registry_request_row(parser, master, category_id, 0xDC, "request")],
                 "response_model": profile["response_model"],
                 "execution": "plan_only",
@@ -693,6 +808,7 @@ def _registry_command_rows(
             rows.append({
                 "role": binding["role"],
                 "kind": kind,
+                "plugin_binding": binding,
                 "initial_read": {
                     "selector": initial_read["selector"],
                     "base_request": initial_read["base_request"],
@@ -705,89 +821,62 @@ def _registry_command_rows(
                 "execution": "plan_only",
             })
 
-    # Role 0xB5 is a generic/default P5 binding in the current master. CommandExecute's
-    # CDbDllTable fallback selects the first role row (category 0) when a current P5
-    # category has no exact 0xB5 row. Export only ordinary Toyota P5 here: partner/Hino
-    # branches inside the same DLL have distinct orchestration and remain separate work.
-    dll_rows = list(parser.extract_master_dlls(master.sections[19]))
-    single = support.support_plugin(dll_rows, category_id, 0x67)
-    multi = support.support_plugin(dll_rows, category_id, 0xD5)
+    # The native role-run head is the fallback, regardless of its source category.
+    single = next((binding for binding in bindings if binding["role"] == 0x67), None)
+    multi = next((binding for binding in bindings if binding["role"] == 0xD5), None)
     family = support.support_family(single, multi)
     mode = support.support_mode(category_id, int(category["generation"]), family)
-    ffd_binding = support.support_plugin(dll_rows, category_id, 0xB5)
+    ffd_binding = next((binding for binding in bindings if binding["role"] == 0xB5 and binding["dll"]), None)
     if mode == "p5-standard" and ffd_binding is not None and ffd_binding["dll"] == "GetEachFrzFrmDatP5_DT.dll":
         request = _registry_request_row(parser, master, category_id, 0xCF, "all_snapshot_records")
-        if request.get("resolved"):
-            if request.get("send") != "1904000000ff" or request.get("check") != "5904":
-                raise ValueError(
-                    f"category {category_id}: selector 0xCF DTC snapshot frame drifted: "
-                    f"{request.get('send')} -> {request.get('check')}"
-                )
-            rows.append({
-                "role": 0xB5,
-                "kind": "p5_dtc_snapshot",
-                "plugin_binding": ffd_binding,
-                "requests": [request],
-                "request_model": {
-                    "service": "0x19",
-                    "subfunction": "0x04 reportDTCSnapshotRecordByDTCNumber",
-                    "dtc_substitution": "request bytes 2/3/4 take the selected 24-bit DTC",
-                    "snapshot_record_number": "0xFF (all snapshot records)",
-                },
-                "response_model": {
-                    "positive_prefix": "5904",
-                    "layout_after_prefix": "DTC[3] | status | repeated(snapshot_record:u8 | identifier_count:u8 | repeated(DID:be16 | length:u8 | data[length]))",
-                    "dtc_echo_offset": 2,
-                    "status_offset": 5,
-                    "snapshot_records_offset": 6,
-                    "identifier_length_source": "explicit u8 immediately after each DID",
-                    "boundary": "raw snapshot DID blocks are exact; signal-level freeze-frame decoding is not projected from Data Monitor metadata",
-                },
-                "execution": "read_only",
-            })
+        if request["resolved"] and any(
+            frame["send"] != "1904000000ff" or frame["check"] != "5904" for frame in request["frames"]
+        ):
+            raise ValueError(f"category {category_id}: selector 0xCF DTC snapshot program drifted")
+        rows.append({
+            "role": 0xB5,
+            "kind": "p5_dtc_snapshot",
+            "plugin_binding": ffd_binding,
+            "requests": [request],
+            "request_model": {
+                "service": "0x19",
+                "subfunction": "0x04 reportDTCSnapshotRecordByDTCNumber",
+                "dtc_substitution": "request bytes 2/3/4 take the selected 24-bit DTC",
+                "snapshot_record_number": "0xFF (all snapshot records)",
+            },
+            "response_model": {
+                "positive_prefix": "5904",
+                "layout_after_prefix": "DTC[3] | status | repeated(snapshot_record:u8 | identifier_count:u8 | repeated(DID:be16 | length:u8 | data[length]))",
+                "dtc_echo_offset": 2,
+                "status_offset": 5,
+                "snapshot_records_offset": 6,
+                "identifier_length_source": "explicit u8 immediately after each DID",
+                "boundary": "raw snapshot DID blocks are exact; signal-level freeze-frame decoding is not projected from Data Monitor metadata",
+            },
+            "execution": "read_only",
+        })
 
-    rob_binding = support.support_plugin(dll_rows, category_id, 0xA0)
+    rob_binding = next((binding for binding in bindings if binding["role"] == 0xA0 and binding["dll"]), None)
     if (mode == "p5-standard" and rob_binding is not None
             and rob_binding["exact_category_binding"] is True
             and rob_binding["dll"] == "GetRoBP5_DT.dll"):
-        by_selector = {
-            selector: _master_frame_rows(parser, master, category_id, selector)
-            for selector in (0xF3, 0xF4, 0xF5)
+        requests = {
+            "inventory": _registry_request_row(parser, master, category_id, 0xF3, "behavior_codes"),
+            "frames": {
+                **_registry_request_row(parser, master, category_id, 0xF4, "behavior_frames"),
+                "behavior_substitution": "request bytes 2/3 take behavior_code as big-endian u16",
+            },
+            "record": {
+                **_registry_request_row(parser, master, category_id, 0xF5, "behavior_record"),
+                "behavior_substitution": "request bytes 2/3 take behavior_code as big-endian u16",
+                "frame_substitution": "request bytes 4/5 take frame_id as big-endian u16",
+            },
         }
-
-        def exact_frame(selector: int, send: str, check: str) -> dict[str, Any] | None:
-            matches = [
-                row for row in by_selector[selector]
-                if row["send"]["bytes"] == send and row["receive_check"]["bytes"] == check
-            ]
-            return matches[0] if len(matches) == 1 else None
-
-        protocols = []
-        for base in (0x01, 0x11):
-            inventory = exact_frame(0xF3, f"ab{base:02x}", f"eb{base:02x}")
-            frames = exact_frame(0xF4, f"ab{base + 1:02x}0000", f"eb{base + 1:02x}")
-            record = exact_frame(0xF5, f"ab{base + 2:02x}00000000", f"eb{base + 2:02x}")
-            if inventory is None or frames is None or record is None:
-                protocols = []
-                break
-            protocols.append({
-                "inventory": _registry_request_from_frame(inventory, "behavior_codes"),
-                "frames": {
-                    **_registry_request_from_frame(frames, "behavior_frames"),
-                    "behavior_substitution": "request bytes 2/3 take behavior_code as big-endian u16",
-                },
-                "record": {
-                    **_registry_request_from_frame(record, "behavior_record"),
-                    "behavior_substitution": "request bytes 2/3 take behavior_code as big-endian u16",
-                    "frame_substitution": "request bytes 4/5 take frame_id as big-endian u16",
-                },
-            })
-        if len(protocols) == 2:
-            rows.append({
+        rows.append({
                 "role": 0xA0,
                 "kind": "p5_rob",
                 "plugin_binding": rob_binding,
-                "protocols": protocols,
+                "requests": requests,
                 "response_model": {
                     "inventory": {
                         "layout": "EB | inventory_subfunction | repeated(behavior_code:be16)",
@@ -838,33 +927,14 @@ def _registry_session_control(
     auto = transport["p5_automatic_session_judgment"]
     uds2 = auto["uds_class_2"]
 
-    def frame_row(category_id: int, selector: int) -> dict[str, Any] | None:
-        matches = _master_frame_rows(parser, master, category_id, selector)
-        if len(matches) != 1:
-            return None
-        row = matches[0]
-        return {
-            "selector": row["selector"],
-            "frame": row["comm_frame_id"],
-            "send": row["send"]["bytes"],
-            "mask": row["receive_mask"]["bytes"],
-            "check": row["receive_check"]["bytes"],
-            "comm_set": row["comm_set"],
-        }
-
     per_category = {}
     for category in categories:
         category_id = int(category["category_id"])
-        default = frame_row(category_id, 0xD1)
-        extended = frame_row(category_id, 0xD2)
-        keepalive = frame_row(category_id, 0xDD)
-        for row, expected in ((default, "1001"), (extended, "1003"), (keepalive, "22f186")):
-            if row is not None and row["send"] != expected:
-                raise ValueError(
-                    f"category {category_id} session frame {row['selector']} drift: {row['send']} != {expected}"
-                )
+        default = _registry_request_row(parser, master, category_id, 0xD1, "default_session")
+        extended = _registry_request_row(parser, master, category_id, 0xD2, "extended_session")
+        keepalive = _registry_request_row(parser, master, category_id, 0xDD, "keepalive")
         per_category[str(category_id)] = {
-            "generation_low5": f"0x{int(category['generation']) & 0x1F:02X}",
+            "generation_low5": None if category["generation"] is None else f"0x{int(category['generation']) & 0x1F:02X}",
             "default_session": default,
             "extended_session": extended,
             "keepalive": keepalive,
@@ -921,7 +991,7 @@ def _registry_session_control(
 def _registry_vehicle_resolver(region: str) -> dict[str, Any]:
     """Portable clean subset of Toyota's independently verified current resolver artifact."""
     resolver = json.loads(VEHICLE_RESOLVER.read_text())
-    if resolver.get("schema") != "gtsplus-current-vehicle-resolver-v1" or resolver.get("release") != "2026.03.002.02":
+    if resolver.get("schema") != "gtsplus-current-vehicle-resolver-v3" or resolver.get("release") != "2026.03.002.02":
         raise ValueError("current vehicle resolver artifact identity drift")
     witness = resolver["regions"][region]["camry_hv_witness"]
     if witness.get("vehicle_type") != 12704 or witness.get("vehicle_name") != "Camry HV":
@@ -934,7 +1004,7 @@ def _registry_vehicle_resolver(region: str) -> dict[str, Any]:
             "flags": struct.unpack_from("<I", raw, 0x00)[0],
             "vehicle_type": struct.unpack_from("<H", raw, 0x0E)[0],
             "category_id": struct.unpack_from("<H", raw, 0x10)[0],
-            "phase_type": raw[0x12],
+            "route_selector": raw[0x12],
             "vin_prefix_hex": raw[0x13:0x1E].hex(),
         })
 
@@ -943,26 +1013,31 @@ def _registry_vehicle_resolver(region: str) -> dict[str, Any]:
         raise ValueError(f"{region}: Toyota transport route missing from Camry mount candidate")
 
     return {
-        "generation": "current-gtsplus-vehicle-resolver-v2",
+        "generation": "current-gtsplus-vehicle-resolver-v3",
+        "native_context": resolver["regions"][region]["native_context"],
+        "context_label": resolver["regions"][region]["context_label"],
         "vehicle_type": witness["vehicle_type"],
         "vehicle_name": witness["vehicle_name"],
         "vin_decision": {
             "source_category_id": 372,
-            "key": "category_id + phase_type + VIN[0:11], with flags bits 0..10 as per-position wildcards",
+            "key": "category_id + route_selector + VIN[0:11], with flags bits 0..10 as per-position wildcards",
             "rows": vin_rows,
         },
         "install_set_ids": witness["install_set_ids"],
         "mount": {
-            "algorithm": "GetMountEcuListNoCnfm/CEcuConnectCheck::CommConnectionNoBuffer",
+            "algorithm": "DV000004: role 121/mode 0 enumeration with conditional ECU-alias resolution",
             "candidate_count": witness["mount_candidate_count"],
             "candidates": candidates,
             "connection_profiles": witness["connection_profiles"],
             "frame_0": witness["connection_frame_witness"],
             "comm_set_9": witness["connection_comm_set_witness"],
             "transport_route": resolver["mounted_ecu"]["transport_route"],
+            "discovery": resolver["mounted_ecu"]["current_main_dv4"],
+            "individual_connection": resolver["mounted_ecu"]["individual_connection"],
+            "discovery_plugin": resolver["regions"][region]["mount_plugin"],
             "route_boundary": (
                 "transport_route is resolved exclusively from Toyota CDbProtInfoTable class 0x10D using the same "
-                "category+phase key as CCommFrameCtrl::GetEcuAddr. Maintained-profile request addresses are not "
+                "category+route-selector key as CCommFrameCtrl::GetEcuAddr. Maintained-profile request addresses are not "
                 "consulted. Shared request ID 0x750 remains category-specific through Toyota's address-extension field"
             ),
         },
@@ -977,24 +1052,37 @@ def _registry_utilities(parser: DDBParser, master: Any) -> dict[str, Any]:
         "transport_and_session"
     ]["generic_roles"]
     bindings = []
-    by_role: dict[int, list[str]] = {}
-    for entry in parser.extract_master_dlls(master.sections[19]):
-        if entry.category_id == 0:
-            by_role.setdefault(entry.dll_role_id, []).append(entry.dll_name)
+    context = native_context(master)
     for role in sorted(GENERIC_UTILITY_ROLE_KINDS):
-        dlls = sorted(set(by_role.get(role, [])))
-        if len(dlls) != 1:
-            raise ValueError(f"generic utility role 0x{role:X} resolved {len(dlls)} master bindings: {dlls}")
+        query = context.query(19, role, 0xFFFF)
+        try:
+            entry = select_for_consumer(query, "plugin")
+        except (NativeSelectionError, UnresolvedNativeContext) as exc:
+            bindings.append({
+                "role": role,
+                "semantic_kind": GENERIC_UTILITY_ROLE_KINDS[role],
+                "native": query.as_dict(),
+                "status": getattr(exc, "status", None),
+                "resolved": False,
+            })
+            continue
         pinned = generic_roles.get(f"0x{role:X}")
-        if pinned is not None and pinned["plugin"] != dlls[0]:
+        if pinned is not None and pinned["plugin"] != entry.dll_name:
             raise ValueError(
-                f"generic utility role 0x{role:X} drift: master {dlls[0]} vs execution model {pinned['plugin']}"
+                f"generic utility role 0x{role:X} drift: master {entry.dll_name} vs execution model {pinned['plugin']}"
             )
-        bindings.append({"role": role, "dll": dlls[0], "semantic_kind": GENERIC_UTILITY_ROLE_KINDS[role]})
+        bindings.append({
+            "role": role,
+            "dll": entry.dll_name,
+            "binding_category_id": entry.category_id,
+            "semantic_kind": GENERIC_UTILITY_ROLE_KINDS[role],
+            "native": query.as_dict(),
+            "resolved": True,
+        })
     return {
         "scope": (
-            "recovered generic (category-0) command families only; every other generic role is "
-            "intentionally absent rather than classified"
+            "recovered role-head default command families only; every other role is "
+            "intentionally absent rather than classified; not category-zero selection"
         ),
         "bindings": bindings,
         "routine_control": {
@@ -1032,12 +1120,22 @@ def _registry_utilities(parser: DDBParser, master: Any) -> dict[str, Any]:
     }
 
 
-def build_toyota_diag_registry(gts_root: Path, region: str = "NA", family: str = "Gen") -> dict[str, Any]:
+def build_toyota_diag_registry(
+    gts_root: Path,
+    region: str = "NA",
+    family: str = "Gen",
+    *,
+    native_history: Path | None = None,
+    history_known: bool = True,
+) -> dict[str, Any]:
     gts_root = resolve_gts_root(gts_root)
     db_root = gts_db_root(gts_root, region, family)
     parser = DDBParser()
-    master_path = db_root / "Toyota.ddb"
+    master_path = gts_db_root(gts_root, region, "Gen") / "Toyota.ddb"
     master = parser.parse_master_db(master_path)
+    spe_path = gts_db_root(gts_root, region, "Spe") / "Toyota.ddb"
+    spe_master = parser.parse_master_db(spe_path) if spe_path.is_file() else None
+    context = native_selection_context(gts_root, region, history=native_history, history_known=history_known)
     strings_path = db_root / "M_English.ddb"
     strings = _english_strings(parser, db_root)
     dtc_clear_path = REPO_ROOT / "data/generated/camry_2026_dtc_clear.json"
@@ -1055,25 +1153,53 @@ def build_toyota_diag_registry(gts_root: Path, region: str = "NA", family: str =
     })
     catalogs: dict[str, Any] = {}
     source_files = [master_path, strings_path, dtc_clear_path, nrtd_p5_path, eps_identity_path, EXECUTION_MODEL, VEHICLE_RESOLVER]
+    if spe_master is not None:
+        source_files.append(spe_path)
     bin_root = gts_root / "bin"
     resolved_categories = []
     for category_id in known_categories:
-        category = _resolve_master_category(parser, master, strings, str(category_id))
+        category_query = context.query(16, category_id)
+        file_query = context.ecu_file_category(category_id, family)
+        try:
+            select_for_consumer(category_query, "category")
+            category = _resolve_master_category(parser, context, strings, str(category_id))
+            category = native_ecu_catalog_category(context, category, db_root, parser)
+        except (NativeSelectionError, UnresolvedNativeContext) as exc:
+            category = {"category_id": category_id, "generation": None}
+            resolved_categories.append(category)
+            catalogs[str(category_id)] = {
+                "category": None,
+                "category_resolution": category_query.as_dict(),
+                "ecu_file_resolution": file_query.as_dict(),
+                "status": getattr(exc, "status", None),
+                "plugins": _registry_role_bindings(parser, context, category, bin_root),
+                "selected_plugins": _registry_selected_role_bindings(parser, context, category, bin_root),
+                "selectors": _registry_selector_rows(parser, context, category_id),
+                "metadata_resolution": "unresolved native category; raw category occurrences retained at registry root",
+                "commands": [],
+            }
+            continue
+        category["ecu_file_resolution"] = file_query.as_dict()
         resolved_categories.append(category)
-        db_path = db_root / str(category["database"])
+        db_path = Path(category["catalog_database_path"])
         db = parser.parse_ecu_db(db_path)
         source_files.append(db_path)
         monitor_rows = _monitor_rows(db, strings, db_path.name)
-        bindings = _registry_role_bindings(parser, master, category, bin_root)
+        bindings = _registry_role_bindings(parser, context, category, bin_root)
+        selected_bindings = _registry_selected_role_bindings(parser, context, category, bin_root)
         catalogs[str(category_id)] = {
             "category": category,
+            "category_resolution": category_query.as_dict(),
+            "ecu_file_resolution": file_query.as_dict(),
             "dids": _registry_did_catalog(monitor_rows),
             "dtcs": _registry_dtc_catalog(parser, db, strings, db_path.name),
-            "active_tests": _registry_active_tests(parser, master, category, db_root, strings, monitor_rows, bindings),
+            "active_tests": _registry_active_tests(parser, context, category, db_root, strings, monitor_rows, selected_bindings),
             "functions": _registry_function_hierarchy(parser, master, strings, category_id),
             "plugins": bindings,
-            "commands": _registry_command_rows(parser, master, category, bin_root, bindings),
-            "selectors": _registry_selector_rows(parser, master, category_id),
+            "selected_plugins": selected_bindings,
+            "metadata_resolution": "raw ECU catalogs; native index proof is limited to master tables 16/17/18/19/25/29",
+            "commands": _registry_command_rows(parser, context, category, bin_root, selected_bindings),
+            "selectors": _registry_selector_rows(parser, context, category_id),
             "data_list": _registry_data_list(db, strings),
             "generic_ffd": _generic_ffd_rows(
             db, strings, db_path.name,
@@ -1083,34 +1209,35 @@ def build_toyota_diag_registry(gts_root: Path, region: str = "NA", family: str =
             "active_test_groups": _registry_active_test_groups(parser, category, db_root, strings),
         }
     profile["catalog_category_ids"] = known_categories
-    profile["session_control"] = _registry_session_control(parser, master, resolved_categories)
+    profile["session_control"] = _registry_session_control(parser, context, resolved_categories)
     profile["vehicle_resolution"] = _registry_vehicle_resolver(region)
 
     referenced_comm_sets = {
-        int(row["comm_set"])
+        int(frame["comm_set"])
         for catalog in catalogs.values()
-        for row in catalog["selectors"]
+        for program in catalog["selectors"]
+        for frame in program["frames"]
     }
     for session_row in profile["session_control"]["per_category"].values():
         for frame_key in ("default_session", "extended_session", "keepalive"):
-            frame = session_row[frame_key]
-            if frame is not None:
-                referenced_comm_sets.add(int(frame["comm_set"]))
-    referenced_comm_sets.add(int(profile["vehicle_resolution"]["mount"]["comm_set_9"]["comm_set_id"]))
-    referenced_comm_sets = sorted(referenced_comm_sets)
+            referenced_comm_sets.update(int(frame["comm_set"]) for frame in session_row[frame_key]["frames"])
+    referenced_comm_sets.add(9)
     commsets = {}
-    for row in _master_comm_set_rows(parser, master):
-        if row["comm_set_id"] not in referenced_comm_sets:
-            continue
-        commsets[str(row["comm_set_id"])] = {
-            "send_parameter": row["send_parameter"],
-            "receive_timeout": row["receive_timeout"],
-            "retry_count": row["retry_count"],
-            "exception_handler_id": row["exception_handler_id"],
-            "exception_handler_flag": row["exception_handler_flag"],
-        }
-    if sorted(int(key) for key in commsets) != referenced_comm_sets:
-        raise ValueError("referenced CommSet ids did not all resolve in the master table")
+    for comm_set_id in sorted(referenced_comm_sets):
+        query = context.query(29, comm_set_id)
+        try:
+            entry = select_for_consumer(query, "commset")
+            commsets[str(comm_set_id)] = {
+                **native_commset(entry),
+                "resolved": True,
+                "native": query.as_dict(),
+            }
+        except (NativeSelectionError, UnresolvedNativeContext) as exc:
+            commsets[str(comm_set_id)] = {
+                "resolved": False,
+                "status": getattr(exc, "status", None),
+                "native": query.as_dict(),
+            }
 
     mode04 = dtc_clear["legislated_obd"]
     profile["dtc_clear"] = {
@@ -1146,7 +1273,13 @@ def build_toyota_diag_registry(gts_root: Path, region: str = "NA", family: str =
             ecu["observed_identity"] = identity
 
     return {
-        "schema": "toyota-diagnostics-registry-v6",
+        "schema": "toyota-diagnostics-registry-v8",
+        "native_context": context.as_dict(),
+        "category_rows": [entry.as_dict() for entry in context.raw_records(16)],
+        "initial_categories": (
+            [entry.as_dict() for entry in native_context(master, spe_master).active_records(16)]
+            if history_known else None
+        ),
         "profile": profile,
         "decoders": {
             "p5-linear-msb0-v1": {
@@ -1168,7 +1301,7 @@ def build_toyota_diag_registry(gts_root: Path, region: str = "NA", family: str =
             ),
             "rows": commsets,
         },
-        "utilities": _registry_utilities(parser, master),
+        "utilities": _registry_utilities(parser, context),
         "function_names": REGISTRY_FUNCTION_NAME_BOUNDARY,
         "catalogs": catalogs,
         "source_identity": {

@@ -19,6 +19,34 @@ def _file_sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _resolve_plugin_path(bin_root: Path, dll_name: str) -> Path:
+    """Resolve supplied DLL filename casing within the controller-selected folder."""
+    if not dll_name or dll_name in {".", ".."} or any(char in dll_name for char in "/\\:"):
+        raise ValueError(f"plugin binding must contain a filename, not a path: {dll_name!r}")
+    requested = bin_root / dll_name
+    if not bin_root.is_dir():
+        return requested
+    # Supplied module names are ASCII; casefold reconciles their Windows aliases.
+    matches = [
+        path for path in bin_root.iterdir()
+        if path.name.casefold() == dll_name.casefold() and path.is_file()
+    ]
+    if len(matches) > 1:
+        names = ", ".join(repr(path.name) for path in sorted(matches))
+        raise ValueError(f"ambiguous plugin filename {dll_name!r} in {bin_root}: {names}")
+    return matches[0] if matches else requested
+
+
+def _plugin_identity(plugin_path: Path) -> dict[str, Any]:
+    present = plugin_path.is_file()
+    return {
+        "path": plugin_path.name,
+        "source_path": str(plugin_path),
+        "size": plugin_path.stat().st_size if present else None,
+        "sha256": _file_sha256(plugin_path) if present else None,
+    }
+
+
 @functools.lru_cache(maxsize=1)
 def _execution_model() -> dict[str, Any]:
     return json.loads(EXECUTION_MODEL.read_text())

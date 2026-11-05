@@ -16,13 +16,14 @@ from dncil.clr.token import Token
 
 from tools import REPO_ROOT
 from tools.techstream.extract_gtsplus_tse_managed_semantics import (
-    _body, _method_pin, _open, _recovery_proof, sha256_file,
+    _body, _method_pin, _open, sha256_file,
 )
-from tools.techstream.inspect_dotnet_il import format_operand, resolve_token, type_name
+from tools.techstream.inspect_dotnet_il import format_operand, resolve_token, type_name, validate_managed_bodies, managed_method_identities
+from tools.techstream.recover_all_gtsplus_bodies import DEFAULT_OUTPUT as DEFAULT_RECOVERED, qualify_recovered_source
 from tools.techstream.gtsplus_local_crypto import decrypt_file
 
 DEFAULT_ROOT = REPO_ROOT / 'software/Techstream/gtsplus/unpacked/gtsplus'
-DEFAULT_RECOVERED = REPO_ROOT / 'build/out/gts-lifecycle-aux'
+DEFAULT_AUX = DEFAULT_RECOVERED / 'Auxiliary'
 DEFAULT_OUT = REPO_ROOT / 'data/generated/gtsplus_2026/lifecycle_sync_upload.json'
 DOMAIN = 'sync_upload'
 COMPONENTS = {
@@ -31,8 +32,8 @@ COMPONENTS = {
     'action': ('DiagMessageInput/ActionTool.exe', '3e82c1bb4014c7df4d54a1ec7822da1e45bd98663e54f32d47e379daa8f5ea5d', 'c20d5d2c729306786494e3ef178ae518de2d88f0a6ada777bc79640f24492216', '4fc7fc2a27f6c848fb54ede602715801c6d852b7bfd0c69bf115f0aaaa90b654'),
     'common': ('DiagMessageInput/CommonLibrary.dll', 'fcceab0815336f8242ecea4fb8bbbef8cd2985169537c3b00a001e807e466151', '', ''),
 }
-# Each tuple pins a decoded method by RVA and checks decisive resolved IL operands.
-# The assembly hashes above guard every branch byte, including unprinted instructions.
+# Each tuple selects a decoded method by RVA and checks decisive resolved IL operands.
+# Qualified source identity and the complete token census accompany selected branch evidence.
 METHODS = [
     ('service_main', 'sync', 0x2689, ['ServiceBase::Run'], 'SCM service entry; no console/GUI main loop.'),
     ('service_start', 'sync', 0x231c, ['CoInitializeSecurity', 'StartAliveMonitorRunningEvent', 'StartWaitingForApiEvent', 'Timer::set_AutoReset'], 'OnStart installs inter-process callbacks and a non-repeating initialization timer.'),
@@ -277,13 +278,13 @@ def _queue_contract() -> dict[str, Any]:
     }
 
 
-def build(root: Path = DEFAULT_ROOT, recovered_root: Path = DEFAULT_RECOVERED) -> dict[str, Any]:
+def build(root: Path = DEFAULT_ROOT, recovered_root: Path = DEFAULT_AUX) -> dict[str, Any]:
     root, recovered_root = root.resolve(), recovered_root.resolve()
     diagnostics = root / 'Toyota Diagnostics'
     sources: list[dict[str, Any]] = []
     evidence: list[dict[str, Any]] = []
     assemblies: dict[str, Any] = {}
-    methods: dict[str, dict[int, tuple[str, Any]]] = {}
+    methods: dict[str, dict[int, list[tuple[dict[str, Any], Any]]]] = {}
 
     def source(key: str, path: Path, representation: str, expected: str = '') -> str:
         digest = sha256_file(path)
@@ -294,24 +295,32 @@ def build(root: Path = DEFAULT_ROOT, recovered_root: Path = DEFAULT_RECOVERED) -
         return sid
 
     manifest_path = recovered_root / 'manifest.json'
-    source('recovery_manifest', manifest_path, 'CP recovery manifest linking original stubs/sidecars to recovered representations')
-    recovery = {entry['relative_path']: entry for entry in json.loads(manifest_path.read_text())['entries']}
+    source('recovery_manifest', manifest_path, 'component recovery manifest linking original stubs/sidecars to recovered representations')
     for key, (rel, decoded_hash, stub_hash, sidecar_hash) in COMPONENTS.items():
         path = (diagnostics if key == 'common' else recovered_root) / rel
-        source(key, path, 'installed managed plaintext' if key == 'common' else 'CP recovered managed PE', decoded_hash)
-        if key != 'common':
+        if key == 'common':
+            source(key, path, 'installed managed plaintext', decoded_hash)
+        else:
+            qualification = qualify_recovered_source(path, diagnostics / rel, component_root=recovered_root)
+            source(key, path, 'qualified recovered managed PE', qualification['recovered_sha256'])
+            sources[-1]['qualification'] = qualification
+            evidence.append({'id': _id(key + '_qualification'), 'source': _id(key),
+                             'kind': 'recovered-source-qualification', **qualification})
             source(key + '_stub', diagnostics / rel, 'installed CP protected stub', stub_hash)
             source(key + '_sidecar', Path(str(diagnostics / rel) + '._'), 'installed CP encrypted body', sidecar_hash)
-            entry = recovery[rel]
-            if (entry['output_sha256'], entry['stub_sha256'], entry['sidecar_sha256']) != (decoded_hash, stub_hash, sidecar_hash):
-                raise ValueError(f'recovery provenance drift: {rel}')
-        proof = _recovery_proof(path)
+        proof = validate_managed_bodies(path)
         assemblies[key] = pe = _open(path)
-        methods[key] = {int(m.row.Rva): (type_name(td) + '::' + str(m.row.Name), m.row) for td in pe.net.mdtables.TypeDef for m in td.MethodList if m.row.Rva}
-        evidence.append({'id': _id(key + '_materialized'), 'source': _id(key), 'kind': 'managed-body-materialization', 'locator': 'MethodDef table', **proof})
+        identities = managed_method_identities(pe, proof['source_sha256'])
+        methods[key] = {}
+        for identity, row in zip(identities['methods'], pe.net.mdtables.MethodDef.rows):
+            if identity['rva']:
+                methods[key].setdefault(identity['rva'], []).append((identity, row))
+        evidence.append({'id': _id(key + '_materialized'), 'source': _id(key), 'kind': 'managed-body-admission', 'locator': 'complete MethodDef identity and implementation census', **proof, 'identities': identities})
 
     for eid, key, rva, required, finding in METHODS:
-        name, row = methods[key][rva]
+        aliases = methods[key][rva]
+        identity, row = aliases[0]
+        name = ' / '.join(identity['full_nested_name'] + '::' + identity['name'] for identity, _ in aliases)
         pe = assemblies[key]
         body = _body(pe, row)
         base = body.instructions[0].offset
@@ -343,6 +352,7 @@ def build(root: Path = DEFAULT_ROOT, recovered_root: Path = DEFAULT_RECOVERED) -
         selected.update(i for i, ins in enumerate(body.instructions) if str(ins.opcode) == 'switch')
         branches = [line for line in lines if line['opcode'].startswith(('br', 'beq', 'bne', 'bgt', 'blt', 'bge', 'ble', 'leave')) or line['opcode'] == 'switch']
         evidence.append({'id': _id(eid), 'source': _id(key), 'kind': 'managed-il', 'locator': name, **_method_pin(row, body), 'il_offset_origin': 'first instruction = IL_0000', 'anchors': [lines[i] for i in sorted(selected)], 'branches': branches, 'exception_regions': [{'kind': h.exception_type, 'try': [h.try_start, h.try_end], 'handler': [h.handler_start, h.handler_end]} for h in body.exception_handlers], 'finding': finding})
+        evidence[-1]['method_identities'] = [identity for identity, _ in aliases]
         if signatures:
             evidence[-1]['call_signatures'] = signatures
         if eid == 'http_response':
@@ -359,10 +369,18 @@ def build(root: Path = DEFAULT_ROOT, recovered_root: Path = DEFAULT_RECOVERED) -
     if (version.MajorVersion, version.MinorVersion, version.BuildNumber, version.RevisionNumber) != (2, 2, 4, 0):
         raise ValueError('bundled EF Core version drift')
     assemblies['ef_core'] = ef
-    methods['ef_core'] = {int(m.row.Rva): (type_name(td) + '::' + str(m.row.Name), m.row)
-                          for td in ef.net.mdtables.TypeDef for m in td.MethodList if m.row.Rva}
+    proof = validate_managed_bodies(ef_path)
+    identities = managed_method_identities(ef, proof['source_sha256'])
+    evidence.append({'id': _id('ef_core_materialized'), 'source': ef_source,
+                     'kind': 'managed-body-admission', **proof, 'identities': identities})
+    methods['ef_core'] = {}
+    for identity, row in zip(identities['methods'], ef.net.mdtables.MethodDef.rows):
+        if identity['rva']:
+            methods['ef_core'].setdefault(identity['rva'], []).append((identity, row))
     for eid, rva in EF_RECEIPT_METHODS.items():
-        name, row = methods['ef_core'][rva]
+        aliases = methods['ef_core'][rva]
+        identity, row = aliases[0]
+        name = ' / '.join(identity['full_nested_name'] + '::' + identity['name'] for identity, _ in aliases)
         body = _body(ef, row)
         base = body.instructions[0].offset
         evidence.append({'id': _id(eid), 'source': ef_source, 'kind': 'managed-il-complete',
@@ -375,11 +393,14 @@ def build(root: Path = DEFAULT_ROOT, recovered_root: Path = DEFAULT_RECOVERED) -
                                                 'try': [h.try_start, h.try_end],
                                                 'handler': [h.handler_start, h.handler_end]}
                                                for h in body.exception_handlers]})
+        evidence[-1]['method_identities'] = [identity for identity, _ in aliases]
 
     # Complete streams make file/SQL prefixes auditable, not selected-call summaries.
     pe = assemblies['sync']
     for eid, rva in QUEUE_METHODS.items():
-        name, row = methods['sync'][rva]
+        aliases = methods['sync'][rva]
+        identity, row = aliases[0]
+        name = ' / '.join(identity['full_nested_name'] + '::' + identity['name'] for identity, _ in aliases)
         body = _body(pe, row)
         base = body.instructions[0].offset
         instructions = []
@@ -403,6 +424,7 @@ def build(root: Path = DEFAULT_ROOT, recovered_root: Path = DEFAULT_RECOVERED) -
                                                 'try': [h.try_start, h.try_end],
                                                 'handler': [h.handler_start, h.handler_end]}
                                                for h in body.exception_handlers]})
+        evidence[-1]['method_identities'] = [identity for identity, _ in aliases]
     migration_resources = [r for r in pe.net.resources
                            if str(r.name) == 'GTSPlusDataSync.Resource.MigrationSql.resources']
     migration_sql = [{'name': e.name, 'sql': e.value} for e in migration_resources[0].data.entries]
@@ -579,7 +601,7 @@ def build(root: Path = DEFAULT_ROOT, recovered_root: Path = DEFAULT_RECOVERED) -
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, default=DEFAULT_ROOT)
-    parser.add_argument('--recovered-root', type=Path, default=DEFAULT_RECOVERED)
+    parser.add_argument('--recovered-root', type=Path, default=DEFAULT_AUX)
     parser.add_argument('--output', type=Path, default=DEFAULT_OUT)
     args = parser.parse_args()
     artifact = build(args.root, args.recovered_root)

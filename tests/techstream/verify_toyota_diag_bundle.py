@@ -2,19 +2,24 @@
 from __future__ import annotations
 
 import hashlib
+import io
 import json
 import os
+import struct
 import tempfile
 import zipfile
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import patch
 
 from tools import REPO_ROOT
 REPO = REPO_ROOT
 
 from tools.techstream import techstream_paths
-from tools.techstream.gts.bundle import write_toyota_diag_bundle
+from tools.techstream.diag_bundle import DEFAULT_BUNDLE, DiagnosticBundle, DiagnosticBundleWriter
+from tools.techstream.gts.bundle import _bundle_customize_catalog, _bundle_session_control, write_toyota_diag_bundle
 
-ART = REPO / "data/generated/gtsplus_2026/toyota_diag_bundle_current.zip"
+ART = DEFAULT_BUNDLE
 
 passed = failed = 0
 
@@ -27,10 +32,148 @@ def check(name: str, condition: object) -> None:
     print(f"[{'PASS' if ok else 'FAIL'}] {name}")
 
 
+def verify_session_program_projection() -> None:
+    context = SimpleNamespace(
+        query=lambda *_: SimpleNamespace(status=0, records=(SimpleNamespace(generation=20),), as_dict=lambda: {"status": 0}),
+        as_dict=lambda: {"history_known": True, "resolution": "initial"},
+    )
+    def program(_parser, _context, _category_id, selector, name):
+        sends = {0xD1: ("1001", "1001"), 0xD2: ("1003", "1003"), 0xDD: ("22f186", "1003")}[selector]
+        return {
+            "name": name, "selector": f"0x{selector:X}", "resolved": True,
+            "frames": [{"send": send, "comm_set": 7} for send in sends],
+            "native": {"status": 0},
+        }
+    with patch("tools.techstream.gts.bundle._registry_request_row", side_effect=program):
+        row = _bundle_session_control(None, context, [{"category_id": 372}])["per_category"]["372"]
+    check("bundle sessions preserve multiframe D1/D2/DD programs and all keepalive steps",
+          row["session_executor_supported"] is True
+          and row["default_session_values"] == [1, 1]
+          and row["extended_session_values"] == [3, 3]
+          and len(row["default_session"]["frames"]) == len(row["extended_session"]["frames"]) == 2
+          and [step["kind"] for step in row["keepalive"]["steps"]] == ["session_did_poll", "extended_session_refresh"])
+    unknown = SimpleNamespace(
+        query=lambda *_: SimpleNamespace(status=None, records=(), as_dict=lambda: {"status": None}),
+        as_dict=lambda: {"history_known": False, "resolution": "unknown"},
+    )
+    unresolved = {"resolved": False, "frames": [], "native": {"status": None}}
+    with patch("tools.techstream.gts.bundle._registry_request_row", return_value=unresolved):
+        row = _bundle_session_control(None, unknown, [{"category_id": 372}])["per_category"]["372"]
+    check("bundle sessions preserve unknown native context without manufactured session defaults",
+          row["generation_low5"] is None
+          and row["category_native_query"]["status"] is None
+          and row["default_session_value"] is None
+          and row["extended_session_value"] is None
+          and row["session_executor_supported"] is False
+          and row["default_session"]["native"]["status"] is None)
+
+
+def verify_customize_context_projection() -> None:
+    raw = bytearray(52)
+    struct.pack_into("<HHH", raw, 8, 1, 200, 449)
+    struct.pack_into("<H", raw, 0x2A, 0x225A)
+    master = SimpleNamespace(sections={20: [], 21: [bytes(raw)], 22: [], 34: []})
+    strings = SimpleNamespace(get_string=lambda _: "")
+    targets = {449: {"name": "Context target", "generation": 22}}
+    def context(status, resolution):
+        return SimpleNamespace(
+            query=lambda *_: SimpleNamespace(
+                status=status, records=(object(),) if status == 0 else (),
+                as_dict=lambda: {"status": status},
+            ),
+            as_dict=lambda: {"resolution": resolution, "history_known": status is not None},
+        )
+    with patch("tools.techstream.gts.bundle.ddb_records", side_effect=lambda rows: rows):
+        selected = _bundle_customize_catalog(master, strings, targets, context(0, "event-history"))["items"][0]
+        unknown = _bundle_customize_catalog(master, strings, targets, context(None, "unknown"))["items"][0]
+        failed_target = _bundle_customize_catalog(master, strings, targets, context(0xA0030106, "event-history"))["items"][0]
+    check("Customize metadata follows supplied event context, not last raw category",
+          selected["target_generation"] == 22
+          and selected["target_resolution"] == "event-history"
+          and selected["modern_executor"]["family"] == "p6"
+          and selected["source_ordinal"] == 0)
+    check("Customize preserves unknown context and native target failures without default substitution",
+          unknown["target_generation"] is None
+          and unknown["target_category_name"] == ""
+          and unknown["target_native_query"]["status"] is None
+          and unknown["target_resolution"] == "unknown"
+          and "modern_executor" not in unknown
+          and failed_target["target_generation"] is None
+          and failed_target["target_native_query"]["status"] == 0xA0030106
+          and failed_target["target_resolution"] == "native-failure")
+
+
+def verify_member_storage() -> None:
+    members = [
+        ("catalogs/NA/372.json", b'{"source":"NA","rows":[2,1,2]}\n'),
+        ("catalogs/EU/372.json", b'{"source":"EU","rows":[2,1,2]}\n'),
+        ("index.json", b'{"regions":["NA","EU"]}\n'),
+    ]
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        first = root / "first"
+        second = root / "second"
+        for target in (first, second):
+            writer = DiagnosticBundleWriter(target)
+            for name, payload in members:
+                writer.add(name, io.BytesIO(payload))
+            writer.finish()
+        bundle = DiagnosticBundle(first)
+        bundle.verify()
+        check("canonical members preserve source-qualified names, physical ordering and exact bytes",
+              bundle.namelist() == [name for name, _ in members]
+              and all(bundle.read(name) == payload for name, payload in members))
+        check("canonical JSON inspection retains source-qualified payloads",
+              bundle.json("catalogs/NA/372.json") == {"source": "NA", "rows": [2, 1, 2]}
+              and bundle.json("catalogs/EU/372.json") == {"source": "EU", "rows": [2, 1, 2]})
+        check("canonical gzip member regeneration is deterministic",
+              all(path.read_bytes() == (second / path.relative_to(first)).read_bytes()
+                  for path in first.rglob("*") if path.is_file()))
+        export = root / "portable.zip"
+        bundle.export_zip(export)
+        bundle.compare_zip(export)
+        with zipfile.ZipFile(export) as archive:
+            check("portable export restores all member bytes and names in original order",
+                  archive.namelist() == bundle.namelist()
+                  and all(archive.read(name) == payload for name, payload in members)
+                  and archive.testzip() is None)
+        other_export = root / "other.zip"
+        bundle.export_zip(other_export)
+        check("portable ZIP export is byte-for-byte deterministic",
+              export.read_bytes() == other_export.read_bytes())
+        damaged = first / "catalogs/NA/372.json.gz"
+        damaged.write_bytes((first / "catalogs/EU/372.json.gz").read_bytes())
+        try:
+            bundle.verify()
+        except ValueError:
+            check("canonical integrity detects valid-gzip member substitution", True)
+        else:
+            check("canonical integrity detects valid-gzip member substitution", False)
+
+
 def main() -> int:
-    with zipfile.ZipFile(ART) as archive:
-        check("bundle ZIP has no corrupt members", archive.testzip() is None)
-        index = json.loads(archive.read("index.json"))
+    verify_session_program_projection()
+    verify_customize_context_projection()
+    verify_member_storage()
+    gts = techstream_paths.resolve_gts_root(os.environ.get("GTSPLUS_ROOT"))
+    source_hashes: dict[Path, str] = {}
+    def source_matches(source: dict[str, object]) -> bool:
+        path = Path(str(source["path"]))
+        if not path.is_absolute():
+            path = gts / path
+        path = path.resolve()
+        if not path.is_relative_to(gts.resolve()) or not path.is_file():
+            return False
+        if path not in source_hashes:
+            source_hashes[path] = hashlib.sha256(path.read_bytes()).hexdigest()
+        return source_hashes[path] == source["sha256"]
+    archive = DiagnosticBundle(ART)
+    archive.verify()
+    check("bundle members match their exact-byte integrity manifest", True)
+    with archive.open("index.json") as index_source:
+        index = json.load(index_source)
+        check("bundle declares the route-selector schema",
+              index["schema"] == "toyota-diagnostics-bundle-v4")
 
         check("universal Toyota bundle does not project a Panda wiring default",
               "default_panda_bus" not in index)
@@ -84,18 +227,42 @@ def main() -> int:
         check("NA current P5/P6 Customize rows export exact write DID/phase/merge geometry",
               p5_customize["name"] == "Wireless Control Function"
               and p5_customize["write_did"] == 0x225A
-              and p5_customize["target_phase_type"] == 0x22
+              and p5_customize["target_route_selector"] == 0x22
               and [p5_customize["write_bit_start"], p5_customize["write_bit_end"]] == [0, 7]
               and p5_customize["merge_mode"] == 0
               and p5_customize["modern_executor"]["family"] == "p5"
               and p6_customize["name"] == "Wireless Remote Control Setting"
               and p6_customize["write_did"] == 0x225A
-              and p6_customize["target_phase_type"] == 0x18
+              and p6_customize["target_route_selector"] == 0x18
               and p6_customize["modern_executor"]["family"] == "p6")
 
         for region in ("NA", "EU", "JP"):
             regional = index["regions"][region]
-            categories = regional["categories"]
+            categories = regional["selected_categories"]
+            raw_categories = [
+                row for row in regional["raw_category_occurrences"]
+                if row["source"]["family"] == "Gen"
+            ]
+            expected_raw_count = {"NA": 2171, "EU": 2180, "JP": 2165}[region]
+            check(f"{region} preserves every physical Gen category occurrence",
+                  len(regional["category_rows"]) == expected_raw_count
+                  and len(raw_categories) == expected_raw_count
+                  and [row["ordinal"] for row in raw_categories] == list(range(expected_raw_count))
+                  and all(len(bytes.fromhex(row["raw"])) == 76 for row in raw_categories)
+                  and regional["counts"]["raw_category_row_count"] == expected_raw_count)
+            check(f"{region} labels raw catalogs and initial/selected snapshots separately",
+                  "categories" not in regional
+                  and regional["native_context"]["resolution"] == "initial"
+                  and regional["native_context"]["history_known"] is True
+                  and regional["initial_native_context"]["resolution"] == "initial"
+                  and regional["initial_categories"] is not None
+                  and "unproved" in regional["raw_catalog_boundary"]
+                  and all(row["status"] == 0 for row in regional["category_resolution"].values()))
+            check(f"{region} source paths and hashes name the actual selected Gen/Spe inputs",
+                  regional["source_identity"]["master"]["path"] == f"{region}/DB/Gen/Toyota.ddb"
+                  and regional["source_identity"]["strings"]["path"] == f"{region}/DB/Gen/M_English.ddb"
+                  and all(source_matches(source) for source in regional["source_identity"].values())
+                  and all(source_matches(row["source"]) for row in regional["native_context"]["files"]))
             check(f"{region} P6 Engine classification follows Toyota plugin dispatch",
                   categories["6000"]["database"] == "Engine_CM_P6.ddb"
                   and categories["6000"]["support_family"] == "p6"
@@ -119,7 +286,7 @@ def main() -> int:
                   p5_route["transport_kind"] == "iso15765-phase-family"
                   and p5_route["controller"].startswith("CCommCtrlISO15765")
                   and p5_route["physical_request_address"] == 0x792)
-            check(f"{region} P6 phase 0x18 selects Toyota 29-bit ISO15765 normal-fixed",
+            check(f"{region} P6 route selector 0x18 selects Toyota 29-bit ISO15765 normal-fixed",
                   p6_route["transport_kind"] == "iso15765-29bit-normal-fixed"
                   and p6_route["controller"] == "CCommCtrlISO15765_29BitCan"
                   and p6_route["request_address_field"] == 0x00
@@ -142,6 +309,36 @@ def main() -> int:
                   session["kind"] == "toyota-per-category-selector-lifecycle"
                   and "eligible_generation_low5" not in session
                   and "wire_proven_categories" not in session)
+            programs = [
+                program
+                for row in session["per_category"].values()
+                for program in (row["default_session"], row["extended_session"], row["keepalive"]["program"])
+            ]
+            check(f"{region} session programs retain complete native selector rows and first-row CommSet",
+                  all(
+                      (
+                          len(program["frames"]) == len(program["native"]["query"]["records"])
+                          and all(
+                              frame["comm_set"] == int.from_bytes(
+                                  bytes.fromhex(program["native"]["query"]["records"][0]["raw"])[4:6], "little"
+                              )
+                              for frame in program["frames"]
+                          )
+                      ) if program["resolved"] else (
+                          program["frames"] == [] and program["native"]["status"] is not None
+                      )
+                      for program in programs
+                  ))
+            check(f"{region} session values retain every emitted DSC step",
+                  all(
+                      row["default_session_values"] == [
+                          bytes.fromhex(frame["send"])[1] for frame in row["default_session"]["frames"]
+                      ]
+                      and row["extended_session_values"] == [
+                          bytes.fromhex(frame["send"])[1] for frame in row["extended_session"]["frames"]
+                      ]
+                      for row in session["per_category"].values() if row["session_executor_supported"]
+                  ))
             for cid in (372, 397, 405, 435, 498):
                 row = session["per_category"][str(cid)]
                 if not (row["session_executor_supported"] is True
@@ -182,9 +379,9 @@ def main() -> int:
         check("universal P6 Engine catalog exports fixed Simple Operation Utility geometry",
               p6_simple["name"] == "Switch Specification Information"
               and p6_simple["routine_id"] == 0xDA03
-              and p6_simple["start_static"] == "3101da03"
-              and p6_simple["stop_static"] == "3102da03"
-              and p6_simple["result_static"] == "3103da03"
+              and [frame["materialized_static_request"] for frame in p6_simple["start_frames"]] == ["3101da03"]
+              and [frame["materialized_static_request"] for frame in p6_simple["stop_frames"]] == ["3102da03"]
+              and [frame["materialized_static_request"] for frame in p6_simple["result_frames"]] == ["3103da03"]
               and p6_simple["timer_ms"] == 8000
               and p6_simple["check_interval_ms"] == 200
               and p6_simple["support_gate"]["mode"] == "p6-standard")
@@ -211,17 +408,17 @@ def main() -> int:
         check("universal P5 Engine catalog exports fixed Simple Operation Utility geometry",
               engine_simple["name"] == "Reset Memory"
               and engine_simple["routine_id"] == 0x1187
-              and engine_simple["start_static"] == "31011187"
-              and engine_simple["stop_static"] == "31021187"
-              and engine_simple["result_static"] == "31031187"
+              and [frame["materialized_static_request"] for frame in engine_simple["start_frames"]] == ["31011187"]
+              and [frame["materialized_static_request"] for frame in engine_simple["stop_frames"]] == ["31021187"]
+              and [frame["materialized_static_request"] for frame in engine_simple["result_frames"]] == ["31031187"]
               and engine_simple["timer_ms"] == 180000
               and engine_simple["check_interval_ms"] == 200
               and engine_simple["support_gate"]["mode"] == "p5-standard"
               and engine_simple["execution"] == "plan_only")
         engine_static_routine = next(row for row in engine_catalog["active_tests"] if row["id"] == 40402)
         check("universal Engine catalog grades static routine-command bytes as executable",
-              engine_static_routine["start_static"] == "3101113600"
-              and engine_static_routine["routine_command"]["bytes"] == "00"
+              [frame["materialized_static_request"] for frame in engine_static_routine["start_frames"]] == ["3101113600"]
+              and [row["bytes"] for row in engine_static_routine["routine_commands"]] == ["00"]
               and engine_static_routine["fixed_request"] is True
               and engine_static_routine["execution"] == "executable")
         hybrid_engineering = next(row for row in hybrid_catalog["active_tests"] if row["id"] == 1)
@@ -230,13 +427,21 @@ def main() -> int:
               and hybrid_engineering["signal_info"]["choices"] == [{"value": 1, "text": "ON"}]
               and hybrid_engineering["signal_info"]["engineering_to_raw"]["source"].endswith("CStartActTstSnd::SetValue"))
         hybrid_test = next(row for row in hybrid_catalog["active_tests"] if row["id"] == 1)
+        check("bundle catalog retains raw bindings separately from context-selected role defaults",
+              "plugins" in hybrid_catalog
+              and "selected_plugins" in hybrid_catalog
+              and all("occurrence" in row for row in hybrid_catalog["plugins"])
+              and all("native" in row for row in hybrid_catalog["selected_plugins"])
+              and source_matches(hybrid_catalog["source_identity"]["database"])
+              and hybrid_catalog["category"]["catalog_context"]["source"]["sha256"]
+                  == hybrid_catalog["source_identity"]["database"]["sha256"])
         hybrid_ffd = next(row for row in hybrid_catalog["commands"] if row["kind"] == "p5_dtc_snapshot")
         check("universal Hybrid catalog exports generic P5 DTC snapshot request",
               hybrid_ffd["role"] == 0xB5
               and hybrid_ffd["plugin_binding"]["binding_category_id"] == 0
               and hybrid_ffd["plugin_binding"]["dll"] == "GetEachFrzFrmDatP5_DT.dll"
-              and hybrid_ffd["requests"][0]["send"] == "1904000000ff"
-              and hybrid_ffd["requests"][0]["check"] == "5904")
+              and [frame["send"] for frame in hybrid_ffd["requests"][0]["frames"]] == ["1904000000ff"]
+              and [frame["check"] for frame in hybrid_ffd["requests"][0]["frames"]] == ["5904"])
         eps_catalog = json.loads(archive.read("catalogs/NA/405.json"))
         eps_ffd_meta = eps_catalog["generic_ffd"]
         eps_ffd_steering = next(row for row in eps_ffd_meta["signals"] if row["name"] == "Steering Angle")
@@ -262,23 +467,26 @@ def main() -> int:
               and eps_steering["signal_info"]["mul"] == 15
               and eps_steering["signal_info"]["unit"] == "deg")
         hybrid_rob = next(row for row in hybrid_catalog["commands"] if row["kind"] == "p5_rob")
-        check("universal Hybrid catalog exports exact P5 RoB inventory/frame/record triplets",
+        check("universal Hybrid catalog preserves native P5 RoB triplet order and decode offsets",
               hybrid_rob["role"] == 0xA0
               and hybrid_rob["plugin_binding"]["binding_category_id"] == 397
               and hybrid_rob["plugin_binding"]["exact_category_binding"] is True
-              and [[phase["send"] for phase in (protocol["inventory"], protocol["frames"], protocol["record"])]
-                   for protocol in hybrid_rob["protocols"]] == [
-                      ["ab01", "ab020000", "ab0300000000"],
-                      ["ab11", "ab120000", "ab1300000000"],
-                   ]
+              and [
+                  [frame["send"] for frame in hybrid_rob["requests"][phase]["frames"]]
+                  for phase in ("inventory", "frames", "record")
+              ] == [
+                  ["ab11", "ab01"],
+                  ["ab120000", "ab020000"],
+                  ["ab1300000000", "ab0300000000"],
+              ]
               and hybrid_rob["response_model"]["frames"]["payload_offset"] == 4
               and hybrid_rob["response_model"]["record"]["payload_offset"] == 6)
         check("universal Hybrid direct Active Test exports exact live runtime-length probe",
               hybrid_test["name"] == "Activate the Inverter Water Pump"
               and hybrid_test["runtime_length_probe"]["kind"] == "read_data_by_identifier_value_length"
               and hybrid_test["runtime_length_probe"]["selector"] == "0xCA"
-              and hybrid_test["runtime_length_probe"]["request"] == "222801"
-              and hybrid_test["runtime_length_probe"]["check"] == "62"
+              and [frame["materialized_request"] for frame in hybrid_test["runtime_length_probe"]["frames"]] == ["222801"]
+              and [frame["positive_check"] for frame in hybrid_test["runtime_length_probe"]["frames"]] == ["62"]
               and hybrid_test["runtime_length_probe"]["response_prefix_length"] == 3)
 
         na = index["regions"]["NA"]
@@ -295,7 +503,7 @@ def main() -> int:
             seen: set[tuple[int, int, str | None]] = set()
             for install_set_id in vehicle["install_set_ids"]:
                 for row in na["install_sets"].get(str(install_set_id), []):
-                    identity = (int(row["category_id"]), int(row["connection_phase_type"]), row.get("route_key"))
+                    identity = (int(row["category_id"]), int(row["connection_route_selector"]), row.get("route_key"))
                     if identity not in seen:
                         seen.add(identity)
                         rows.append(row)
@@ -317,13 +525,20 @@ def main() -> int:
               and all(sorted(step["selector"] for step in program["steps"]) == list(range(0x28, 0x3A))
                       for program in p4_programs))
 
-    actual_sha = hashlib.sha256(ART.read_bytes()).hexdigest()
     with tempfile.TemporaryDirectory() as tmp:
-        regenerated_path = Path(tmp) / "toyota_diag_bundle_current.zip"
-        gts = techstream_paths.resolve_gts_root(os.environ.get("GTSPLUS_ROOT"))
+        regenerated_path = Path(tmp) / "toyota_diag_bundle_current"
         write_toyota_diag_bundle(gts, regenerated_path)
-        regenerated_sha = hashlib.sha256(regenerated_path.read_bytes()).hexdigest()
-        check("universal bundle regenerates byte-for-byte deterministically", actual_sha == regenerated_sha)
+        tracked_files = {path.relative_to(ART) for path in ART.rglob("*") if path.is_file()}
+        regenerated_files = {path.relative_to(regenerated_path) for path in regenerated_path.rglob("*") if path.is_file()}
+        check("universal canonical bundle regenerates byte-for-byte deterministically",
+              tracked_files == regenerated_files
+              and all(hashlib.sha256((ART / path).read_bytes()).digest()
+                      == hashlib.sha256((regenerated_path / path).read_bytes()).digest()
+                      for path in tracked_files))
+        portable = Path(tmp) / "toyota_diag_bundle_current.zip"
+        archive.export_zip(portable)
+        archive.compare_zip(portable)
+        check("portable export restores every universal bundle member byte-for-byte", True)
 
     print(f"\n{passed} passed, {failed} failed")
     return 1 if failed else 0

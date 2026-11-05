@@ -18,3 +18,9 @@ build/
 # Local reference corpus/handoffs. Context only; not repository truth.
 # Proprietary software corpora used by canonical verification belong in software/.
 /REFERENCE/
+
+# Canonical GTS evidence is retained once; portable/expanded exports belong in build/.
+/data/generated/gtsplus_2026/toyota_diag_bundle_current.zip
+/data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json
+/data/generated/gtsplus_2026/lifecycle_operations.json
+/data/generated/gtsplus_2026/lifecycle_operations.proofs/

@@ -1,0 +1,1481 @@
+{
+  "data": {
+    "SDK_business_admission": {
+      "additional_business_baskets": [
+        "DS4_TY"
+      ],
+      "canonical_security_ids": [
+        "security.legacy.ds4-ds2.aes-ecb-3e520",
+        "security.legacy.ds4-ds2.crypto-provider-22e0",
+        "security.legacy.ds4-ds2.helper-26e0",
+        "security.legacy.ds4-ds2.helper-2700",
+        "security.legacy.ds4-ds2.helper-2760",
+        "security.legacy.ds4-ds2.xor-key-selectors"
+      ],
+      "complete_business_baskets": [
+        "MAIN_TY",
+        "MAIN_DS2",
+        "MAIN_EX1",
+        "MAIN_EX2",
+        "DS4_DS2",
+        "DS4_EX1",
+        "DS4_EX2"
+      ],
+      "complete_business_component_count": 8,
+      "component_inputs": "diagnostic_operations.shared_family_contracts.gts-sdk-business-final-inputs",
+      "current_embedded_JSON11_admission": {
+        "actual_callers_family": "operations-current-embedded-json11-callers",
+        "all_previous_source_variants": [
+          {
+            "provider_contract_id": "identity.utility.settings.number-extraction",
+            "source_ref": "GTSPlus/bin/GetUtilFuncList.dll",
+            "source_sha256": "cc0d10f47f1500c46352dea9a9dd2ddb1d34ead580b1af3c347087a3b1f42a36",
+            "status": "PARENT_REVIEWED_EXACT_SOURCE_ALGORITHMS_COMPOSED"
+          },
+          {
+            "provider_contract_id": "platform.adapters.main.execute.envelope.1006c9a0",
+            "source_ref": "GTSPlus/bin/DiagAdaptation.dll",
+            "source_sha256": "eb4b5ffd08bfd1e18b7c5aa5b3679893fb6d3efc2c9bcd655c5e40038fe8531a",
+            "status": "PARENT_REVIEWED_EXACT_SOURCE_ALGORITHMS_COMPOSED"
+          },
+          {
+            "provider_contract_id": "platform.adapters.ds4.drs_json.1006b4e0",
+            "source_ref": "DS-4/bin/DiagAdaptation.dll",
+            "source_sha256": "44cc9df6f3107edb5423d76ef68adeb9a528b68b6ece3a9e2485ecf48f668e0c",
+            "status": "PARENT_REVIEWED_EXACT_SOURCE_ALGORITHMS_COMPOSED"
+          },
+          {
+            "provider_contract_id": "CompiledUtilities.DataManager.NativePublicContracts",
+            "source_ref": "GTSPlus/bin/DataManagerNK.dll",
+            "source_sha256": "0618e332e19ea193047ddc41c264a032bff1e1eda8e7d73157fe33a102d01a9e",
+            "status": "PARENT_REVIEWED_EXACT_SOURCE_ALGORITHMS_COMPOSED"
+          },
+          {
+            "provider_contract_id": "CompiledUtilities.DataManager.NativePublicContracts",
+            "source_ref": "DS-4/bin/DataManagerNK_DS4.dll",
+            "source_sha256": "7295d33898a43c665a94a6f523ed184622f5cfcd17bc815102b7bfec611f5494",
+            "status": "PARENT_REVIEWED_EXACT_SOURCE_ALGORITHMS_COMPOSED"
+          }
+        ],
+        "family": "operations-current-embedded-json11-admission",
+        "native_programs_family": "operations-current-embedded-json11-native-programs",
+        "original_Settings_wrapper_provider_IDs": [
+          "InformationReads.Settings.GetFileDataFromType.v1",
+          "InformationReads.Settings.FreeMemory.v1",
+          "InformationReads.Settings.TypeReader.v1",
+          "InformationReads.Settings.ReadType1.v1",
+          "InformationReads.Settings.DecryptReader.v1",
+          "InformationReads.Settings.YamlToJson.v1",
+          "InformationReads.Settings.TamperReport.v1"
+        ],
+        "parent_final_package_QA_pending": true,
+        "remaining_source_frontier": {
+          "actual_reached_native_chains": {
+            "imports": "ExactPE imports onlykernel/advapi/MSVCP/VCRUNTIME/UCRT; the YAML/JSON engines above are own code, not imported parser DLLs. Existing wrapper algorithm descriptions and bounded helper proofs do not qualify all private engine semantics.",
+            "plaintext_JSON_path": "ActualC880non-gstg branch file/hash gate→14C90→17C90/18660; realnlohmann output adapters named in15B40→19500. Decompile bodies before naming any other roles; no inferred_json11_parity.",
+            "type1_path": "1E61 GetFileDataFromType2A80→TypeReader8B40→ReadType1C880 gstg→DecryptReader13C80→YamlToJsonF510→actualYAML2B860→2B7B0; conversionF7B0/FCC0/102F0/10630/FF20; result dumped15B40."
+          },
+          "existing_bounded_scalar_converter_and_native_read_write_evidence_not_whole_engine_closure": true,
+          "existing_seven_public_wrapper_contracts_closed": true,
+          "library_families": [
+            "YAML",
+            "nlohmann JSON"
+          ],
+          "new_engine_algorithm_admission": false,
+          "no_per_function_todo_list": true,
+          "not_JSON11_or_cross_library_parity": true,
+          "not_provider_absence_or_imported_parser_DLL_or_unavailable_runtime_source": true,
+          "source_ref": "GTSPlus/bin/GTSPlusSettingFileManager.dll",
+          "source_sha256": "20fd47aac7d0e427f4012d9421fe039e309e5d1f704a11c40de280bf3e7c8f8d",
+          "source_work_contract": "analysis-origin:gts-settings-embedded-engines-work-contract.json",
+          "status": "SOURCE_PRESENT_OWN_SETTINGS20FD_YAML_AND_NLOHMANN_ENGINE_SOURCE_QUALIFICATION_REMAINS"
+        },
+        "review_and_runtime_qualification": "Main/independent native evidence: Catalog53parse+15additional; one initial wrong-level comparison fixture expectation retained,notsoftwarefailure. Platform146+two initial format-port failures retained. DataManager160cases/1924attempts/1886RET;four bare-BSSPC0 fixture limits,26foreignthrows/eightterminationstops;100manualFuncInfo92RET/eighttermination is not fullFH3;151producerdesigns unexecuted. Settings six finite wrapper cases157PCs and bounded existing76F3 application observations do not close fullYAML/nlohmann engines. Worker16 executes no native/tests/producer/gates.",
+        "source_inputs_family": "operations-current-embedded-json11-inputs"
+      },
+      "physical_core_complete": false,
+      "reviewed_lower_parser_controller_admission": {
+        "boundary": "The seven original reviewed SDK cohorts and separately reviewed eighth DS4TY component remain admitted. Current agreed cutover additionally composes all FIVE exact-source embedded JSON11 variants: Catalogcc0d, PlatformMAINeb4b/DS4recovered44cc, DataManagerMAIN0618/DS47295 under original existing owner IDs, plus original1E61 Settings seven wrapper contracts. Actual source/ABI/CFG/class/lifetime and caller selection remain product-qualified; no source-name aliases or wholesale caller retargeting. The ONLY new library source frontier in this cutover is ownSettings20fd YAML and nlohmann JSON engines on their actual conditional read/write routes, not missing public providers, unavailable code or an assertion that every lifecycle domain is open. Bare DLL/module identity, actual file contents, true foreign CRT/Win32/driver behavior, scheduling and physical replies remain qualified runtime conditions. Existing application/queue/DB/cancel/cleanup behavior and bounded native observations are retained; no whole Windows/vehicle/network execution or all-path/nativeFH3 claim. Parent final package/default/standalone/consumer checks remain required.",
+        "physical_or_whole_graph_complete": false,
+        "qualification_family": "operations-reviewed-parser-ex1-ds4ds2-source-qualification"
+      }
+    },
+    "actual_SDK_port_packets": {
+      "A": "diagnostic_operations.shared_family_contracts.compiled-utilities-native-business-A-sdk-interfaces",
+      "B": "diagnostic_operations.shared_family_contracts.compiled-utilities-native-business-B-provider-inputs",
+      "D": "diagnostic_operations.shared_family_contracts.compiled-utilities-native-business-D-provider-inputs"
+    },
+    "complete": false,
+    "contracts": [
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-binder-contract",
+        "closure": "managed utility loading/binder43writes/native lifecycle/result/earlyfail cleanup",
+        "id": "CompiledUtilities.main.managed-broker"
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-broker-contract",
+        "closure": "currentmain8selection rules plus49eligible-ID consumerloop,notproducerbusiness",
+        "id": "CompiledUtilities.main.broker-dispatch-continuation"
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-ds4-broker-contract",
+        "closure": "currentDS4separate selection/rewrite/synchronousentry/return;no850loop",
+        "id": "CompiledUtilities.DS-4.broker-dispatch"
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-locale-contract",
+        "closure": "bothproducts actualJSONfield->UTF16path601+font600producer",
+        "id": "CompiledUtilities.broker.utility-language-file"
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-json-language-contract",
+        "closure": "bothproducts validarraymissingindex=>empty versusparseerrorNULL uncheckedcompare",
+        "id": "CompiledUtilities.broker.json-array-language-boundary"
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-front-contract",
+        "closure": "currentfrontend guard/call/response/error/state branches only;transitiveGeneenginepending",
+        "id": "CompiledUtilities.native-frontends"
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-datamanager-contract",
+        "closure": "bothproductgetArgs/getArgsDataSize/errorlatch andmainnumericargumentlookup;remainingstorage/conversionpending",
+        "id": "CompiledUtilities.datamanager.args-and-error-latch"
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-filemanager-contract",
+        "closure": "Bothproducts currentexactmatchingwrapperbodybytes:exclusivewholefileload,DM/DRSmagicheaders,tableenvelopeindex/read/write/seek/error/handleownership. Recordpayloads andCDrTempFile remain sourcepresent;MonitorReads6ownsDatMonserialization.",
+        "id": "CompiledUtilities.filemanager.file-table-wrappers"
+      },
+      {
+        "artifact": "analysis-origin:compiled-utilities-supplemental-support.json",
+        "closure": "Exact6additionalsources:CRCGetCRCbitloop/ABI/errors;ReplaceFromLegasyall4ILmethods/COM/localZIP/retry/space/disposal;fourcurrentmain/DS4coreevariants independentlymappedsection-byte-identicaltoCUWactualmanualCFG,ownSHA/IAT/applicationbindingsretained.",
+        "id": "CompiledUtilities.supplemental-support"
+      },
+      {
+        "artifact": "analysis-origin:compiled-utilities-main-gene-engines.json",
+        "closure": "Actual main D1B0 warning resolved through bounded raw switch tables; session selector/UDS request-response retry/suppress/pending/CANpack/providerMUXqueue/aux tester-present channels/worker stop semantics. NonUDS and other operation graphs remain explicit; no all-module claim.",
+        "id": "CompiledUtilities.GTSPlus.UtilityGene.engine-contracts"
+      },
+      {
+        "artifact": "analysis-origin:compiled-utilities-main-gene-platform-binding.json",
+        "closure": "Actual provider path/env expansion/17-symbol readiness/lifetime andDriver2typedjoins;API1outputselfpointer correction. Exactdatabase20-key/partial-state/reset/P6address bindings;independentP6/DoIPtransaction/session kernels andactualpolicy/defaultfields. Lowerframe/helper/broadcastoperation algorithms remain explicit.",
+        "id": "CompiledUtilities.GTSPlus.UtilityGene.PlatformBinding"
+      },
+      {
+        "artifact": "analysis-origin:compiled-utilities-main-gene-a8.json",
+        "closure": "ActualA8first-response retry/continued-frame collection/partial-success error suppression,142Ccachekey/layout/allocation/free,DBcontext lookup,nonzero-byte support indices/full-mask predicates/data-length-count. Concretelegacy wire providers still explicit remaining source.",
+        "id": "CompiledUtilities.GTSPlus.UtilityGene.A8CacheAndSupport"
+      },
+      {
+        "artifact": "analysis-origin:compiled-utilities-main-gene-security-wire.json",
+        "closure": "UG5level/logIdABI,standard27seed/keywire,zero-seedskip,protocol74ID-selected16Bglobalkey,protocol16temporaryunwrapkey,protocol34specialCAN/session/RID/auth phases,three-keyattemptpolicy,normal/errorcleanupandsecurity.ug5.*providerjoin. CurrentPE1858Bswitchspanproofincludesdecompilerrecoveredcaseblocks.",
+        "id": "CompiledUtilities.GTSPlus.UtilityGene.UG5SecurityWireAndLifetime"
+      },
+      {
+        "artifact": "analysis-origin:compiled-utilities-main-gene-connection.json",
+        "closure": "Actualsingle/multi init/final/modeXrouting,borrowedCONNECTINFOmutations,addressstate/Broadcastselection,zero-defaultversusrawconfig,UDS/P6owned-active/overrideallocationanddelete,DoIPstaticlowerretention,andnormal/errorrestorationquirks.",
+        "id": "CompiledUtilities.GTSPlus.UtilityGene.ConnectionAndMultiMode"
+      },
+      {
+        "additional_id": "CompiledUtilities.GTSPlus.UtilityGene.MACKeyLocalCMAC",
+        "artifact": "analysis-origin:compiled-utilities-main-gene-mackey-wrappers.json",
+        "closure": "ActualUG21/22/23wrapperABI/ninestatic0x128records,selectedorder/resultpacking,normal-business-statusmapping,challenge-tokenAES,localAES-CMACandtagverification,sharedstack-pointerlifetime,frontendinput/staticoutputorder-mismatch. Composessecurity.mackey.{native-phase-engines,participant-proof,support-bitmap,routine-status,phase-controls}.",
+        "id": "CompiledUtilities.GTSPlus.UtilityGene.MACKeyWrappersAndContext"
+      },
+      {
+        "artifact": "analysis-origin:compiled-utilities-ds4-gene-variants.json",
+        "closure": "Own-sourceDS4protocol54(not74)/noP6dispatch,sessionrawswitchwarningresolved,DBbindingbusdifferences,zero-lengthKAInitialize,UG5uniqueEalgorithmselector/AESencrypt-onlyenvelope,fiveexactFeisteltablejoins,andEIGHT0x128MACrecordswithshiftedcontextABI. LoweruninspectedDS4phase/provideralgorithmsnotclaimedbymaintransfer.",
+        "id": "CompiledUtilities.DS-4.UtilityGene.ExactVariantContracts"
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-datamanager-native-contract",
+        "closure": "All15publicrootcontracts,currentbothproductsown-sourceABI/helpercomparisons,126/122typedIDregistry+40JSONfieldpaths,request/responsefixedcopiesandstringlifetime,settingsproviderread/freeload,DBconsumerprojectionandtyped17/18joins,error/cancel. IncludesBORROWEDGetVariablepointerDISCARDED(outMaskunchanged),type8getDataNOOUTPUTWRITE,threefixedgetterwholecopies/internaltailownership;notjustexportcensus.",
+        "field_bindings": "analysis-origin:compiled-utilities-datamanager-field-bindings.json",
+        "id": "CompiledUtilities.DataManager.NativePublicContracts"
+      },
+      {
+        "artifact": "analysis-origin:compiled-utilities-ds4-gene-uds-binding.json",
+        "closure": "ActualCRTstaticUDSobjects/rawmissinginitializerscomposeSecurity14proof;concretevtable/per-busHS/MS/HSExmachinebranches;CANpacking/NTA/NRC/pending/retrykernel/worker-inhibitownership. OwnDS4RxTx+8and5530vs5000timeouts—notmain74transfer. Current source-qualified EX2HS/MS/HSEx,LegacyCAN/ISO,P6 andETH lower algorithms are already canonical, per exact50CF source/VA/slot/owner audit; these are not retained unfinished algorithms. Actual receiver/factory/module/driver/runtime predicates remain.",
+        "id": "CompiledUtilities.DS-4.UtilityGene.UDSConcreteBinding"
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-filemanager-monitor-system-temp",
+        "closure": "46actualownedmethods/bothcurrentproducts:allmonitorflag/SystemInfo/Tempfilewirefields,DatMonborrowedruntimeoffsets/serializerjoins,error/partialmutation/counter/counttruncation,copies/selfassignment/opaqueBYTEstrings/filehandleownership. ExplicitotherownerDRScomposition,noclass-namecensusclosure.",
+        "id": "CompiledUtilities.FileManager.MonitorSystemTempRecords"
+      },
+      {
+        "artifact": "analysis-origin:compiled-utilities-commanddata-copy-lifetime.json",
+        "closure": "22actualreachednativeString/Buffer/WordList/Core/Reader/Writercopy/assignment/destructorleafalgorithms,ownbothsource/bodypairs;shallowownedcopyvsrebuildingassign/alias/selfassignfailure,borrowedstreambuffers,exactu16BYTE/NULsemantics.",
+        "id": "CompiledUtilities.CommandDataLib.ReachedCopyLifetime"
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-comtable-consumer-contract",
+        "closure": "Bothactualadvanced-familyCCOM01consumerloading/ECUID115+CarID132bindings/type-tagdispatch/read-resultbranches/callbackdeepcopy/normalunloadandteardown;rawPEwindowpinsswitchcaseenumcallomittedrecognizedbodycalllist. UnderlyingownedDS2ComwireenginesNOTclosedbythiscallercontract.",
+        "id": "CompiledUtilities.DS2UtilityAdv.CCOM01.TableConsumer"
+      },
+      {
+        "artifact": "analysis-origin:compiled-utilities-ds2com-identifier-wrappers.json",
+        "closure": "All23ordinaryidentifierwrapperdispatches/actualmodeandreadtailarguments/CFunfactoryprotocolvariants/Initialize-Finalizeownership;source-derivedthreeNULL-deref-before-guardmethods. SerialNo/threaded/lowerwirealgorithmsremainseparateownedsource-presentwork.",
+        "id": "CompiledUtilities.DS2Com.PublicIdentifierWrappers"
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-comtable-native-contract",
+        "closure": "All4exactJP/OSmain/DS4providers:orderedregistries/1864actuallookuprows/21decoderalgorithms/staticfactories/opaqueTYPEtags(notbytecounts)/9argvirtualABI/callbackfalse-on-fallback/danglingtemporaryCStringreturns. Actualconsumerjoinsretainedsource-presentwithinthisslice.",
+        "id": "CompiledUtilities.COMTableAccess.NativeProviders"
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-front-lifecycle-contract",
+        "closure": "Exactall3stdcall(ctx*)exportlifecycles/source-qualifiedrawwindowsbothproducts;Abortno-op,Disconnectsnapshot/conditionalFinal+Finalizeignoredstatus/deviceUnloadstatus+clear-on-failure/borrowedmutablecontextrestore. Composes46SC/UGcases/currentDataManagerandGenecontracts;notfictionalcancellation/relock/DLLunload.",
+        "id": "CompiledUtilities.native-frontends.lifecycle"
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-managed-contract",
+        "closure": "203primary+106expanded managedtype/state/event/IPC/bodyfamilies andnativewrapperentry;nativeSOAP/browseroperation calleescomposed,notclosedbyIL",
+        "id": "utilities.managed.current-source-complete"
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-ty-contract",
+        "closure": "TY1actualentry/rootconstructor;TY2business/helpersandcontinuationproducerspending",
+        "id": "CompiledUtilities.native-TY-families"
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-other-contract",
+        "closure": "4familyentry/root/message-map plusactual850writersITAdv872D0/NK12C410;businesscallbackspending",
+        "id": "compiled-utilities-other"
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-aux-contract",
+        "closure": "Neo route6/7composedcompleteexistingruntime;UtilityExNK/NK2/DS2ComexportinstructionCFGsnotsemanticclosure",
+        "id": "compiled-utilities-aux-contract"
+      }
+    ],
+    "cross_owner_joins": [
+      {
+        "agent": "GtsCarNativeBehavior-13.CompiledManagedForms",
+        "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-managed-contract",
+        "owner": "CompiledManagedForms",
+        "type": "native delegate wrapper<->managed form IL,argument/result/close;all203 scoped types,2834 MethodDefs,2337 IL effect/branch graphs and79 native WrapNK reachable function graphs are owned by managed composition",
+        "units": [
+          "IT3UtilityRevNK.dll",
+          "IT3UtilityRevWrapNK.dll",
+          "IT3UtilityWrapNK.dll"
+        ]
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-ty-contract",
+        "owner": "CompiledTyFamilies",
+        "type": "TY/TY2 imported helper typed ABI+protocol behavior;peer explicitly incomplete after resource pause,so kept open",
+        "unit": "UtilityEx2TY.dll"
+      },
+      {
+        "artifact": "analysis-origin:gts-security-native-legacy-mackey.json",
+        "owner": "SecurityNativeLegacy",
+        "type": "only five CPub EFI/IMB/KFS SecurityAccess exports and seed/key dependencies;remaining methods owned here and open",
+        "unit": "DS2ComNK.dll"
+      },
+      {
+        "artifact": "diagnostic_operations.shared_family_contracts.gts-car-native-MetadataLocaleJet-main-contracts",
+        "contract_ids": [
+          "MLJ.Main.ResourceKeyText",
+          "MLJ.Main.EmbeddedLanguageCandidate",
+          "MLJ.Main.StringId",
+          "MLJ.Main.StringHelperVietnamese",
+          "MLJ.Main.ExternalStringContext"
+        ],
+        "owner": "MetadataLocaleJet",
+        "type": "main product contextual string/locale/resource selectors;generic file/index methods compose MetadataMain/NativeIndex",
+        "unit": "UtilityDB.dll"
+      },
+      {
+        "artifact": "analysis-origin:gts-car-native-MetadataMain-UtilityDB-analysis.json",
+        "owner": "MetadataMain",
+        "type": "172 current bodies plus exact per-instruction proof;raw typed field interpretation owned there",
+        "unit": "UtilityDB.dll"
+      },
+      {
+        "artifact": "analysis-origin:gts-car-neo-interpreter-contract.json",
+        "owner": "NeoInterpreter",
+        "type": "all18 graph scripts,49 callbacks,typed parser/runtime/transport;no new reimplementation"
+      },
+      {
+        "owner": "PlatformSession",
+        "type": "PassThruWrapNK/J2534 channel/session/serialization from aux.neo.extension.transport_join;no assumption of directUtilityExNeo->KGP import"
+      },
+      {
+        "callee_exports": "Exact GetProcAddress literal names plus nested delegate Invoke typed signatures in workergraphs",
+        "contract": "utilities.managed.soap-and-browser",
+        "direction": "managedrequestfiles/brokerparams->nativeSOAP/browser->typednativepointer/string/status->managedpoll/UI/IPC",
+        "owner": "CompiledUtilities native IT3UtilityNK"
+      },
+      {
+        "binding": "Broker string601 is DDBfilenameinput;no utilityLangDBName/T_utilityLangDBName/UtilityLang/langdb ldstr literal in any inspected assembly. Filechoice external to this managed binder.",
+        "callee": "GetUtilityString_DT.dll CreateDbObject/GetUtilityString_K1/DeleteDbObject",
+        "contract": "utilities.managed.localization",
+        "owner": "MetadataLocale/MetadataDs4Locale"
+      },
+      {
+        "binding": "Native PF/command responses materialized by nativeutility into exact shared section records;this slice owns managed decode/UI/resultwriteback,not PF packetserialization or vehiclewire assertions.",
+        "contract": "utilities.managed.ipc",
+        "owner": "PlatformSession"
+      },
+      {
+        "binding": "Source selector IDs,per-form buttons/results,activationevents andIPC resultcodes stayseparate from browsermenu/shell flow.",
+        "contract": "utilities.managed.selector",
+        "owner": "UtilityPlusFront"
+      },
+      {
+        "boundary": "Unavailable exact assemblyfilename in currentinstalled/recoveredpayload searched. Call failure sourcecode0x01000001 fullyspecified;do notinventitsvehiclebusiness.",
+        "callee": "IT3LargeScrFuncTY / ScreenFunction.ScreenFunctionMain.SelectFunction(uint32)",
+        "contract": "utilities.large-screen.core",
+        "owner": "LargeScr reflected function producer"
+      },
+      {
+        "contract": "currentSC/UGAPIadapters andsharedCommandCommon frame/cache/retry/connectinfo/session",
+        "owner": "PlatformSession-3",
+        "typed_boundary": "Frontend namedDMGRfields/currentUtilityGeneordinalcalls;currentGeneengineownedhere. CurrentDS4CommandCommon4781bodiesavailablecentralexportindex;compose ratherthanreimport."
+      },
+      {
+        "contract": "CompiledUtilities.broker.utility-language-file + CompiledUtilities.broker.json-array-language-boundary",
+        "owner": "MetadataLocaleJet-19",
+        "typed_boundary": "JSON exactfield+FunctionID/product/region/language->601path;RevClsBrokerconstructor601->m_strDDBPath->GetUtilityString CreateDbObject;no stemguess."
+      },
+      {
+        "owner": "MonitorReads-6",
+        "typed_boundary": "Main assigned6nativeDatMonCommon CSerialBuffer/CDatMonSignalTable+Item/CFrameSizeTable/CRingBuffer serialization/runtime ABI,bothvariants;FileManager actualbyte/table callerscompose6,nevermanaged12formattransfer."
+      }
+    ],
+    "frontend_error_latch_composition": "Main4E23alwayscallsDMGRgetErrorDetail (consumeslatch);iflocallresultEBX==0ignoresretrievedlatchedvalueandsucceeds,sooptionalgetArgs1006canleavelatchthatisclearedwithoutfailure. Nonzeroresultuseslatchedvalueorfallback800000FF.",
+    "monitor_serialization_composition": {
+      "artifact": "diagnostic_operations.shared_family_contracts.gts-car-native-MonitorReads-serialization-contract",
+      "contract_ids": [
+        "MonitorReads.DatMonCommon.GTSPlus.Serialization.v1",
+        "MonitorReads.DatMonCommon.DS-4.Serialization.v1"
+      ],
+      "typed_binding": "Only actual DatMonCommon native serializer calls compose6 CSerialBuffer/SignalItem/Table/FrameSize/Ring grammar. Do NOT apply this to bespoke CDrsMonBuff/FileManager DRS rows: OtherPluginsA.FileManagerIT3.<main|ds4>.DRS.* owns those reachedCreateDrs and its CommandDataLib rowcodecs. DatMon FrameSize serialized256index+256length inBOTH despite mainruntime1024;DatMonRingstream38bytepackedheader;mode0fullphysical,mode1linearized+lastpacketduplication/timestampadjust;voidReadcanpartiallymutateonsizefailure. Nevermanagedformattransfer."
+    },
+    "native_UI_SDK_boundary": {
+      "A20_identity_composition": {
+        "MAIN_DS2": {
+          "ABI_override_entries": [
+            "0x10008c30",
+            "0x1000e2c0",
+            "0x1000e440"
+          ],
+          "UI_caller_joins": 453,
+          "authority": "Canonical provider ABI overrides outrank advisory decompiler signatures; complete CFG identity uses the published deterministic serialization recipe.",
+          "family": "compiled-utilities-native-business-A-sdk-ds2-supplement20",
+          "method_operational_CFG_identity_bindings": 1709
+        },
+        "MAIN_EX1": {
+          "UI_caller_joins": 216,
+          "authority": "listed instruction SHA is NOT closure; raw instruction-byte SHA is NOT serialized full-CFG identity",
+          "family": "compiled-utilities-native-business-A-sdk-ex1-supplement20",
+          "native_program_identity_bindings": 533
+        },
+        "aggregate_family": "compiled-utilities-native-business-A-sdk-business-supplements20",
+        "aggregate_source_sha256": "3587b666ef84af3dd3542054df88cc2a0e4cb389b5b853ce613c9ba4f3d59031",
+        "frozen_UI_root_not_reanalyzed_or_replaced": true
+      },
+      "actual_canonical_native_provider_inverse": {
+        "clean_cutover_contexts": 62,
+        "family": "operations-sdk-current-native-provider-inverse",
+        "new_physical_definition_contexts": 74,
+        "new_reference_provider_admission": {
+          "MAIN_DRS": {
+            "family": "operations-current-main-drs-native-provider-caller-joins",
+            "providers": 2,
+            "typed_bindings": 22
+          },
+          "identity_policy": "Three DTC advisory IDs and sixteen transport facade convenience IDs clean-cut to actual source+VA canonical native IDs; original contract_id implementation schemas preserved without duplicate identity fields. No aliases, implementation copying per caller, fabricated ABI or inferred source absence.",
+          "lifecycle_string": {
+            "actual_contexts": 116,
+            "family": "operations-actual-identity-lifecycle-caller-joins",
+            "providers": 2,
+            "typed_bindings": 114
+          },
+          "other_native": {
+            "family": "operations-current-canonical-native-provider-caller-joins",
+            "providers": 11,
+            "typed_bindings": 38
+          },
+          "provider_count": 31,
+          "remaining_scope": "Reviewed/current-staged source composition: DS4TY607contract/677program/691inverse base plus accepted7runtime providers/7inverse and205exact three-field caller bindings, preciseexisting2030A four-fieldABI only; MAIN TY27semanticfamilies/611actualsource programs andMAINDS2specific405method→nativeIR/19components; existingMAINcontroller17orderedalgorithms with16CALL+one original-stacktailJMP exactDS2invocations; canonicalnumericordinal10 MAIN/DS4 source algorithms. Independent9final bounded body/caller/vtable/sourceownership qualification completed for this examined footprint and all731reference-only cards normalized by exact role. Parent owns finalpackage/default/standalone/gate QA and producer release. DS4DS2/EX1both/parserboth remain outside this cutoff, with separate canonical review/source work; actual selected receiver/module/driver/OS/physical predicates remain explicit. No wholeSDK/allDLL/vehiclegraph or realWindows/car closure.",
+          "state": "COMPOSED_ACTUAL_NATIVE_ALGORITHMS_AND_EXACT_CONTEXTS",
+          "transport": {
+            "family": "operations-transport-authoritative-caller-joins",
+            "providers": 16,
+            "typed_bindings": 111
+          },
+          "typed_binding_count": 285
+        },
+        "unique_source_VA_bindings": 1273
+      },
+      "actual_driver_wrapper_provider_admission": {
+        "caller_contracts_contexts_and_provider_ID_unchanged": true,
+        "downstream_J2534Ctrl_retargeting": false,
+        "evidence_family": "gts-driver-wrappers-evidence",
+        "exact_consumer_selection_family": "operations-sdk-driver-wrapper-selection",
+        "export_ABI_entries": 100,
+        "previously_unresolved_existing_caller_links": 60,
+        "provider_contract_id": "TransportDrivers.PassThruWrappers",
+        "provider_family": "gts-driver-wrappers",
+        "qualified_sources": 4,
+        "source_qualification_family": "operations-sdk-driver-wrapper-source-qualification"
+      },
+      "actual_transport_provider_composition": {
+        "actual_native_CALL_contexts": 111,
+        "boundary": "Exact16canonical native definitions and111native transfer contexts composed with full source algorithms/C/CFG/EH/class evidence; no advisory facade aliases, physical I/O or whole-graph claim.",
+        "canonical_providers": 16,
+        "provider_family": "operations-transport-authoritative-caller-joins",
+        "source_qualification_family": "operations-transport-authoritative-publication-qualification",
+        "state": "COMPOSED_EXACT_NATIVE_SOURCE_AND_VA"
+      },
+      "additional_DS4_TY_business_admission": {
+        "additional_parent_native_scenarios": {
+          "ABS_HVB_whole_callbacks": 23,
+          "actual_no_record_at0_exports": 7,
+          "source_publications_unchanged": true,
+          "worker_native_execution": false
+        },
+        "admission_input_family": "gts-ds4-ty-final-admission",
+        "broader_physical_core_complete": false,
+        "business_exports": 56,
+        "families": 19,
+        "family": "compiled-utilities-ds4-ty-business-operations",
+        "native_proof_binding_kinds": {
+          "actual_IAT_indirection_Sleep_with_duration": 14,
+          "local_switch_dispatch": 3,
+          "shared_generic_virtual_method_with_actual_target_provider_bindings": 71
+        },
+        "public_control_effect_composition": {
+          "caller_publication_sha256": "37a3406bb5d0e538f7370284e408a1760e7a6f2602e2616b02f3dfaaa0ec4adc",
+          "final_admission_sha256": "b310a2cac81e0cb63cdb3e7f9b07202c9cf7ded8766f2e3d48ee1d2261699ea4",
+          "joins": 31,
+          "provider_family": "compiled-utilities-ds4-ty-public-controls-contract",
+          "provider_map": "D31_provider_map",
+          "public_export_contracts": 17,
+          "status": "ALL31_EXACT_SOURCE_CALLER_IAT_EXPORT_EFFECTS_AND_ABI_TYPED; ONLY_LOWER_PHYSICAL_CORE_RETAINED13"
+        },
+        "source_sha256": "f90266bf8a6d97b23f8838dcc5969cb913c9b5876615fc72eae36ed5c4bdedbd",
+        "status": "ADMITTED_PARENT_RELEASE_ALL_BUSINESS_AND_EXISTING_D31_PUBLIC_EFFECTS_TYPED"
+      },
+      "additional_current_component_admissions": [
+        "compiled-utilities-main-ex2-psa-component-input",
+        "compiled-utilities-main-ex1-excan-return-width-input",
+        "compiled-utilities-main-ex2-p6-component-input",
+        "compiled-utilities-canonical-ownership-amendment"
+      ],
+      "admitted_business_components": [
+        {
+          "basket": "MAIN_TY",
+          "business_scope_complete": true,
+          "exact_publication_sha256": "b1deb36795cbb1c0a3d5574b51d2125ffab02e03c61c93eb157cfd5c4f80ba3d",
+          "family": "compiled-utilities-main-ty-business-contracts",
+          "physical_car_traffic_claim": false
+        },
+        {
+          "basket": "MAIN_DS2",
+          "business_scope_complete": true,
+          "exact_publication_sha256": "e837664cd4101bbfa897d64b67d2849d9a8279512d7fbcb0ef678c7e682d7904",
+          "family": "compiled-utilities-main-ds2-business-contracts",
+          "physical_car_traffic_claim": false
+        },
+        {
+          "basket": "MAIN_EX1",
+          "business_scope_complete": true,
+          "exact_publication_sha256": "9350ee3dfe8f018234ac0308c68037c2bcfebac1af4ad93d379c0091d6342a1d",
+          "family": "compiled-utilities-main-ex1-business-contracts",
+          "physical_car_traffic_claim": false
+        },
+        {
+          "basket": "MAIN_EX2",
+          "business_scope_complete": true,
+          "exact_publication_sha256": "7d6c6920b4b53872dc6c2c4d3e25b03b79e5b4b9d8a8a427d1f1eaba13ac697b",
+          "family": "compiled-utilities-main-ex2-business-contracts",
+          "physical_car_traffic_claim": false
+        },
+        {
+          "basket": "DS4_DS2",
+          "business_scope_complete": true,
+          "exact_publication_sha256": "88e68b231695b50232e4ad26f888e52389916113287558ba3419cb14edbee864",
+          "family": "compiled-utilities-ds4-ds2-business-contracts",
+          "physical_car_traffic_claim": false
+        },
+        {
+          "basket": "DS4_EX1",
+          "business_scope_complete": true,
+          "exact_publication_sha256": "4f390a604249ac82be1e096552e4225e76f15ac16da7b25261e41afee22d54a7",
+          "family": "compiled-utilities-ds4-ex1-business-contract",
+          "physical_car_traffic_claim": false
+        },
+        {
+          "basket": "DS4_EX2",
+          "business_scope_complete": true,
+          "exact_publication_sha256": "ed312ae666afc7467ad23e654a839bf43103e9fb3e08f2dc1b8fcc0553913e05",
+          "family": "compiled-utilities-ds4-ex2-business",
+          "physical_car_traffic_claim": false
+        }
+      ],
+      "admitted_packet_input_identity_family": "operations-sdk-admitted-packet-inputs",
+      "audited_already_canonical_physical_coverage": {
+        "MAIN_EX1_PSA_a5e_not_retracted": "Differentexactsource; NativeEX2PSA d986/DS4dbee doNOTcloseMAINEX1a5e-selected50900/43CB4/25C60 class. ExistingMAINEX1LegacyISO/LegacyNK/ExCan remainreused,notduplicated.",
+        "artifact": "analysis-origin:gts-car-other-sdk-physical-source-audit9-addendum.json#50CF",
+        "ordinary_CAN_P5_CAN_EXCAN_also_already_published": {
+          "artifact": {
+            "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-ex2-legacy-can-contract",
+            "sha256": "013656c82427324f51e89de158ecdae6317bcfcb699cb12f194b02bf0c67c10a",
+            "size": 828626
+          },
+          "root_id": "CompiledUtilities.NativeEX2.LegacyCAN",
+          "scope": "MAIN and DS-4 EX2 CComCan, CComExCan, CComP5Can and CComP5ExCan. Actual source-specific algorithms, class vtables, CRT lifetime roots and native case evidence. This is the EX2 fifteen-callback J2534 core, not the EX1 twelve-callback LegacyNKDriverCore.",
+          "source_hashes": [
+            "d9868c8a9a69ffbab26ea7d4431e290372cd207e84e7b4aed27446aeb4c12ec1",
+            "dbee0ce2bc014e75cd41a8654fbbb813809bae136a65a90d7b3b64496ce8672a"
+          ]
+        },
+        "rows": [
+          {
+            "actual_existing_canonical_packet": {
+              "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-main-ex2-can-core-contract",
+              "sha256": "a3e92565b7c1afdf161cf5a081d7460244339f691acc4e6347eaf26049d33270",
+              "size": 605943
+            },
+            "actual_selected_lower_slot_bindings": [
+              {
+                "actual_target": "0x10033f60",
+                "class": "CComHsCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-main-ex2-can-core-contract/contracts/0"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.GTSPlus.CANUDSAndSharedCore.LifetimeAndControl",
+                "slot": "0x0",
+                "vptr": "0x10186fb0"
+              },
+              {
+                "actual_target": "0x100421f0",
+                "class": "CComHsCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-main-ex2-can-core-contract/contracts/2"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.GTSPlus.CANUDSAndSharedCore.InitializeAndClose",
+                "slot": "0x4",
+                "vptr": "0x10186fb0"
+              },
+              {
+                "actual_target": "0x10042020",
+                "class": "CComHsCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-main-ex2-can-core-contract/contracts/2"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.GTSPlus.CANUDSAndSharedCore.InitializeAndClose",
+                "slot": "0x8",
+                "vptr": "0x10186fb0"
+              },
+              {
+                "actual_target": "0x10041e20",
+                "class": "CComHsCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-main-ex2-can-core-contract/contracts/3"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.GTSPlus.CANUDSAndSharedCore.FramesAndReceive",
+                "slot": "0x10",
+                "vptr": "0x10186fb0"
+              },
+              {
+                "actual_target": "0x10041d60",
+                "class": "CComHsCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-main-ex2-can-core-contract/contracts/3"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.GTSPlus.CANUDSAndSharedCore.FramesAndReceive",
+                "slot": "0x14",
+                "vptr": "0x10186fb0"
+              },
+              {
+                "actual_target": "0x100323f0",
+                "class": "CComHsCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-main-ex2-can-core-contract/contracts/0"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.GTSPlus.CANUDSAndSharedCore.LifetimeAndControl",
+                "slot": "0x2c",
+                "vptr": "0x10186fb0"
+              },
+              {
+                "actual_target": "0x100324a0",
+                "class": "CComHsCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-main-ex2-can-core-contract/contracts/0"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.GTSPlus.CANUDSAndSharedCore.LifetimeAndControl",
+                "slot": "0x30",
+                "vptr": "0x10186fb0"
+              },
+              {
+                "actual_target": "0x10032440",
+                "class": "CComHsCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-main-ex2-can-core-contract/contracts/0"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.GTSPlus.CANUDSAndSharedCore.LifetimeAndControl",
+                "slot": "0x34",
+                "vptr": "0x10186fb0"
+              },
+              {
+                "actual_target": "0x100422a0",
+                "class": "CComHsCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-main-ex2-can-core-contract/contracts/3"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.GTSPlus.CANUDSAndSharedCore.FramesAndReceive",
+                "slot": "0x38",
+                "vptr": "0x10186fb0"
+              },
+              {
+                "actual_target": "0x10033f90",
+                "class": "CComHsExCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-main-ex2-can-core-contract/contracts/0"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.GTSPlus.CANUDSAndSharedCore.LifetimeAndControl",
+                "slot": "0x0",
+                "vptr": "0x10187008"
+              },
+              {
+                "actual_target": "0x10042490",
+                "class": "CComHsExCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-main-ex2-can-core-contract/contracts/2"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.GTSPlus.CANUDSAndSharedCore.InitializeAndClose",
+                "slot": "0x4",
+                "vptr": "0x10187008"
+              },
+              {
+                "actual_target": "0x10042020",
+                "class": "CComHsExCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-main-ex2-can-core-contract/contracts/2"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.GTSPlus.CANUDSAndSharedCore.InitializeAndClose",
+                "slot": "0x8",
+                "vptr": "0x10187008"
+              },
+              {
+                "actual_target": "0x10041e20",
+                "class": "CComHsExCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-main-ex2-can-core-contract/contracts/3"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.GTSPlus.CANUDSAndSharedCore.FramesAndReceive",
+                "slot": "0x10",
+                "vptr": "0x10187008"
+              },
+              {
+                "actual_target": "0x10041d60",
+                "class": "CComHsExCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-main-ex2-can-core-contract/contracts/3"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.GTSPlus.CANUDSAndSharedCore.FramesAndReceive",
+                "slot": "0x14",
+                "vptr": "0x10187008"
+              },
+              {
+                "actual_target": "0x100323f0",
+                "class": "CComHsExCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-main-ex2-can-core-contract/contracts/0"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.GTSPlus.CANUDSAndSharedCore.LifetimeAndControl",
+                "slot": "0x2c",
+                "vptr": "0x10187008"
+              },
+              {
+                "actual_target": "0x100324a0",
+                "class": "CComHsExCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-main-ex2-can-core-contract/contracts/0"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.GTSPlus.CANUDSAndSharedCore.LifetimeAndControl",
+                "slot": "0x30",
+                "vptr": "0x10187008"
+              },
+              {
+                "actual_target": "0x10032440",
+                "class": "CComHsExCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-main-ex2-can-core-contract/contracts/0"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.GTSPlus.CANUDSAndSharedCore.LifetimeAndControl",
+                "slot": "0x34",
+                "vptr": "0x10187008"
+              },
+              {
+                "actual_target": "0x10042540",
+                "class": "CComHsExCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-main-ex2-can-core-contract/contracts/3"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.GTSPlus.CANUDSAndSharedCore.FramesAndReceive",
+                "slot": "0x38",
+                "vptr": "0x10187008"
+              },
+              {
+                "actual_target": "0x10033fc0",
+                "class": "CComMsCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-main-ex2-can-core-contract/contracts/0"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.GTSPlus.CANUDSAndSharedCore.LifetimeAndControl",
+                "slot": "0x0",
+                "vptr": "0x10187060"
+              },
+              {
+                "actual_target": "0x100428b0",
+                "class": "CComMsCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-main-ex2-can-core-contract/contracts/2"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.GTSPlus.CANUDSAndSharedCore.InitializeAndClose",
+                "slot": "0x4",
+                "vptr": "0x10187060"
+              },
+              {
+                "actual_target": "0x10042020",
+                "class": "CComMsCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-main-ex2-can-core-contract/contracts/2"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.GTSPlus.CANUDSAndSharedCore.InitializeAndClose",
+                "slot": "0x8",
+                "vptr": "0x10187060"
+              },
+              {
+                "actual_target": "0x10041e20",
+                "class": "CComMsCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-main-ex2-can-core-contract/contracts/3"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.GTSPlus.CANUDSAndSharedCore.FramesAndReceive",
+                "slot": "0x10",
+                "vptr": "0x10187060"
+              },
+              {
+                "actual_target": "0x10041d60",
+                "class": "CComMsCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-main-ex2-can-core-contract/contracts/3"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.GTSPlus.CANUDSAndSharedCore.FramesAndReceive",
+                "slot": "0x14",
+                "vptr": "0x10187060"
+              },
+              {
+                "actual_target": "0x100323f0",
+                "class": "CComMsCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-main-ex2-can-core-contract/contracts/0"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.GTSPlus.CANUDSAndSharedCore.LifetimeAndControl",
+                "slot": "0x2c",
+                "vptr": "0x10187060"
+              },
+              {
+                "actual_target": "0x100324a0",
+                "class": "CComMsCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-main-ex2-can-core-contract/contracts/0"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.GTSPlus.CANUDSAndSharedCore.LifetimeAndControl",
+                "slot": "0x30",
+                "vptr": "0x10187060"
+              },
+              {
+                "actual_target": "0x10032440",
+                "class": "CComMsCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-main-ex2-can-core-contract/contracts/0"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.GTSPlus.CANUDSAndSharedCore.LifetimeAndControl",
+                "slot": "0x34",
+                "vptr": "0x10187060"
+              },
+              {
+                "actual_target": "0x100422a0",
+                "class": "CComMsCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-main-ex2-can-core-contract/contracts/3"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.GTSPlus.CANUDSAndSharedCore.FramesAndReceive",
+                "slot": "0x38",
+                "vptr": "0x10187060"
+              }
+            ],
+            "canonical_dependency_joins": [
+              {
+                "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-ex2-ccu-contract",
+                "id": "CompiledUtilities.NativeEX2.GTSPlus.CCU.CommunicatorNRCProjection",
+                "methods": [
+                  "0x10032340",
+                  "0x100323b0"
+                ]
+              },
+              {
+                "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-ex2-ccu-contract",
+                "id": "CompiledUtilities.NativeEX2.GTSPlus.CCU.UDSOwnedLowerReplacement",
+                "methods": [
+                  "0x100414e0"
+                ],
+                "purpose": "actualMAIN48-byteCanUDSconstructor/basefields/derivedvptrreplacement"
+              },
+              {
+                "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-ex2-diagnostic-engines-contract",
+                "id": "CompiledUtilities.NativeEX2.DiagnosticEngines.GTSPlus.UDS",
+                "purpose": "owning1070/1074/1078lowerselectionandlifecycle/callerparameters,notduplicatephysicalalgorithm"
+              },
+              {
+                "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-main-ex2-common-context-contract",
+                "id": "CompiledUtilities.NativeEX2.GTSPlus.CommonContext",
+                "purpose": "actualhigherMode2/P5selection/callerconditionals;rawcachedprotocol111is101CE0E8"
+              }
+            ],
+            "loader_and_driver_composition": {
+              "OEM_factory": "3CD30(argProtocol)guard101D76A4 buildsONEstatic101D7648/profile15hex/atexit10176AD0 with FIRSTinitializercallerprotocol;subsequentdifferentprotocolargsdonotchangeobject. MsCan passes8005. GuardEHabort1014168E. Allgetterreturnsborrowedglobals.",
+              "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-native-sdk-load-domains-contract",
+              "core_constructor": "3BFD0 setsCDllManager vptr101871AC andHMODULEat+4,thenloadscanonicaldomain. SetCorevptr101871B4;protocol(+8)=callerarg;channel(+C)=u32(protocol+0x100);address(+10hex)=0;profile(+18hex)=callerarg;state(+1Chex)=0;callbackfields+20..58hex. Onlyall15facadesnonnull setsstate1. ThisdoesNOTproveinnerwrapperbackendloaded/ready.",
+              "definition_methods": [
+                "0x1003bfd0",
+                "0x1003cdd0",
+                "0x1003cd30"
+              ],
+              "global_initialization": "Ifplainflag101CF1C0==0 set1beforeinitialization;zero4recordarray101CF1C8lengthB0,eachstate1/configOwner0;zero8messages4152Bstarting101CF2CC,101D0308,101D1344,101D2380,101D33BC,101D43F8,101D5434,101D6470;ownertagsatprecedingDWORDall4. Copytemplate10187460twiceintoFIFO101D74A8..101D74C4;zero4thread/protocolwaiters101CF290..101CF2AC;InitializeCriticalSection101CF278/101CF2B0. Notatomic/perobject/refcount.",
+              "ordinary_factory": "3CDD0 eagerlychecksinitializationofALLordinaryprotocol4/6/1staticsBEFOREselector;return4object101D74C8guard101D7524/atexit10176AE0,6object101D7528guard101D7584/atexit10176AC0,1object101D7588guard101D75E4/atexit10176AF0;allprofile0;otherselectorNULLafterallchecks. GuardEHactions1014168E.",
+              "provider": "CompiledUtilities.NativeSDK.LoadDomains.GTSPlus.EX2",
+              "reuse": "ExistingproviderownsSTRING111AppPath/fixedbin/PassThruWrapNK.dll/load/namebindfacet;belowareadditionalcorefield/global/factorysemantics,notsecondloaderadmission."
+            },
+            "product": "GTSPlus",
+            "root_id": "CompiledUtilities.NativeEX2.GTSPlus.CANUDSAndSharedCore",
+            "source_sha256": "d9868c8a9a69ffbab26ea7d4431e290372cd207e84e7b4aed27446aeb4c12ec1",
+            "upper_entry": "100347f0",
+            "verdict": "EARLIER_GENUINE_SOURCE_GAP_RETRACTED; actualsame-source canonicalphysicalalgorithms and coredependencies alreadyexist. Ordinarycomponent semanticcoverage is not wholeSDK/vehiclecompletion."
+          },
+          {
+            "actual_existing_canonical_packet": {
+              "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-ds4-ex2-can-core-contract",
+              "sha256": "b8043fd071cfb3fe8b5fddf87ab51c247af0a88b766ae0b0018479cb59bc5aad",
+              "size": 452476
+            },
+            "actual_selected_lower_slot_bindings": [
+              {
+                "actual_target": "0x10032870",
+                "class": "CComHsCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-ds4-ex2-can-core-contract/contracts/0"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.DS4.CANUDSAndSharedSlots.LifetimeAndProtocols",
+                "slot": "0x0",
+                "vptr": "0x10175fc4"
+              },
+              {
+                "actual_target": "0x100403c0",
+                "class": "CComHsCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-ds4-ex2-can-core-contract/contracts/2"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.DS4.CANUDSAndSharedSlots.InitializeAndClose",
+                "slot": "0x4",
+                "vptr": "0x10175fc4"
+              },
+              {
+                "actual_target": "0x10040200",
+                "class": "CComHsCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-ds4-ex2-can-core-contract/contracts/2"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.DS4.CANUDSAndSharedSlots.InitializeAndClose",
+                "slot": "0x8",
+                "vptr": "0x10175fc4"
+              },
+              {
+                "actual_target": "0x10040010",
+                "class": "CComHsCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-ds4-ex2-can-core-contract/contracts/3"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.DS4.CANUDSAndSharedSlots.FramesAndReceive",
+                "slot": "0x10",
+                "vptr": "0x10175fc4"
+              },
+              {
+                "actual_target": "0x1003ff50",
+                "class": "CComHsCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-ds4-ex2-can-core-contract/contracts/3"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.DS4.CANUDSAndSharedSlots.FramesAndReceive",
+                "slot": "0x14",
+                "vptr": "0x10175fc4"
+              },
+              {
+                "actual_target": "0x10030d10",
+                "class": "CComHsCan",
+                "current_definition_locations": [],
+                "existing_direct_component": null,
+                "slot": "0x2c",
+                "vptr": "0x10175fc4"
+              },
+              {
+                "actual_target": "0x10030dc0",
+                "class": "CComHsCan",
+                "current_definition_locations": [],
+                "existing_direct_component": null,
+                "slot": "0x30",
+                "vptr": "0x10175fc4"
+              },
+              {
+                "actual_target": "0x10030d60",
+                "class": "CComHsCan",
+                "current_definition_locations": [],
+                "existing_direct_component": null,
+                "slot": "0x34",
+                "vptr": "0x10175fc4"
+              },
+              {
+                "actual_target": "0x10040470",
+                "class": "CComHsCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-ds4-ex2-can-core-contract/contracts/3"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.DS4.CANUDSAndSharedSlots.FramesAndReceive",
+                "slot": "0x38",
+                "vptr": "0x10175fc4"
+              },
+              {
+                "actual_target": "0x100328a0",
+                "class": "CComHsExCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-ds4-ex2-can-core-contract/contracts/0"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.DS4.CANUDSAndSharedSlots.LifetimeAndProtocols",
+                "slot": "0x0",
+                "vptr": "0x1017601c"
+              },
+              {
+                "actual_target": "0x10040650",
+                "class": "CComHsExCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-ds4-ex2-can-core-contract/contracts/2"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.DS4.CANUDSAndSharedSlots.InitializeAndClose",
+                "slot": "0x4",
+                "vptr": "0x1017601c"
+              },
+              {
+                "actual_target": "0x10040200",
+                "class": "CComHsExCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-ds4-ex2-can-core-contract/contracts/2"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.DS4.CANUDSAndSharedSlots.InitializeAndClose",
+                "slot": "0x8",
+                "vptr": "0x1017601c"
+              },
+              {
+                "actual_target": "0x10040010",
+                "class": "CComHsExCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-ds4-ex2-can-core-contract/contracts/3"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.DS4.CANUDSAndSharedSlots.FramesAndReceive",
+                "slot": "0x10",
+                "vptr": "0x1017601c"
+              },
+              {
+                "actual_target": "0x1003ff50",
+                "class": "CComHsExCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-ds4-ex2-can-core-contract/contracts/3"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.DS4.CANUDSAndSharedSlots.FramesAndReceive",
+                "slot": "0x14",
+                "vptr": "0x1017601c"
+              },
+              {
+                "actual_target": "0x10030d10",
+                "class": "CComHsExCan",
+                "current_definition_locations": [],
+                "existing_direct_component": null,
+                "slot": "0x2c",
+                "vptr": "0x1017601c"
+              },
+              {
+                "actual_target": "0x10030dc0",
+                "class": "CComHsExCan",
+                "current_definition_locations": [],
+                "existing_direct_component": null,
+                "slot": "0x30",
+                "vptr": "0x1017601c"
+              },
+              {
+                "actual_target": "0x10030d60",
+                "class": "CComHsExCan",
+                "current_definition_locations": [],
+                "existing_direct_component": null,
+                "slot": "0x34",
+                "vptr": "0x1017601c"
+              },
+              {
+                "actual_target": "0x10040700",
+                "class": "CComHsExCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-ds4-ex2-can-core-contract/contracts/3"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.DS4.CANUDSAndSharedSlots.FramesAndReceive",
+                "slot": "0x38",
+                "vptr": "0x1017601c"
+              },
+              {
+                "actual_target": "0x100328d0",
+                "class": "CComMsCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-ds4-ex2-can-core-contract/contracts/0"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.DS4.CANUDSAndSharedSlots.LifetimeAndProtocols",
+                "slot": "0x0",
+                "vptr": "0x10176074"
+              },
+              {
+                "actual_target": "0x10040a70",
+                "class": "CComMsCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-ds4-ex2-can-core-contract/contracts/2"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.DS4.CANUDSAndSharedSlots.InitializeAndClose",
+                "slot": "0x4",
+                "vptr": "0x10176074"
+              },
+              {
+                "actual_target": "0x10040200",
+                "class": "CComMsCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-ds4-ex2-can-core-contract/contracts/2"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.DS4.CANUDSAndSharedSlots.InitializeAndClose",
+                "slot": "0x8",
+                "vptr": "0x10176074"
+              },
+              {
+                "actual_target": "0x10040010",
+                "class": "CComMsCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-ds4-ex2-can-core-contract/contracts/3"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.DS4.CANUDSAndSharedSlots.FramesAndReceive",
+                "slot": "0x10",
+                "vptr": "0x10176074"
+              },
+              {
+                "actual_target": "0x1003ff50",
+                "class": "CComMsCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-ds4-ex2-can-core-contract/contracts/3"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.DS4.CANUDSAndSharedSlots.FramesAndReceive",
+                "slot": "0x14",
+                "vptr": "0x10176074"
+              },
+              {
+                "actual_target": "0x10030d10",
+                "class": "CComMsCan",
+                "current_definition_locations": [],
+                "existing_direct_component": null,
+                "slot": "0x2c",
+                "vptr": "0x10176074"
+              },
+              {
+                "actual_target": "0x10030dc0",
+                "class": "CComMsCan",
+                "current_definition_locations": [],
+                "existing_direct_component": null,
+                "slot": "0x30",
+                "vptr": "0x10176074"
+              },
+              {
+                "actual_target": "0x10030d60",
+                "class": "CComMsCan",
+                "current_definition_locations": [],
+                "existing_direct_component": null,
+                "slot": "0x34",
+                "vptr": "0x10176074"
+              },
+              {
+                "actual_target": "0x10040470",
+                "class": "CComMsCan",
+                "current_definition_locations": [
+                  "/shared_family_contracts/compiled-utilities-ds4-ex2-can-core-contract/contracts/3"
+                ],
+                "existing_direct_component": "CompiledUtilities.NativeEX2.DS4.CANUDSAndSharedSlots.FramesAndReceive",
+                "slot": "0x38",
+                "vptr": "0x10176074"
+              }
+            ],
+            "canonical_dependency_joins": [
+              {
+                "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-ds4-ex2-base-interfaces-contract",
+                "id": "CompiledUtilities.NativeEX2.DS4.BaseInterfaces.CompilerAndCRT",
+                "methods": [
+                  "0x10131472"
+                ],
+                "purpose": "Canonical CRT delete-thunk owner. Caller two-word sized-delete proof and local native body remain definition evidence only; no second algorithm admission.",
+                "source_unit": "binary.DS-4.UtilityExNK2_DS4.dll"
+              },
+              {
+                "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-ds4-ex2-base-interfaces-contract",
+                "id": "CompiledUtilities.NativeEX2.DS4.BaseInterfaces.UDSOwnedLowerAndParameters",
+                "purpose": "Existing32930/33390-ownedlowerallocation/replacementandcallerparameterbinding;newpacketprovidesactualreachedconcreteclasses,notsecond32930definition."
+              },
+              {
+                "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-ex2-diagnostic-engines-contract",
+                "id": "CompiledUtilities.NativeEX2.DiagnosticEngines.DS-4.UDS",
+                "purpose": "Owningcontext/lowerselection/transactioncallerpolicy;notphysicalalgorithmparity."
+              },
+              {
+                "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-ds4-ex2-psa-core-contract",
+                "id": "CompiledUtilities.NativeEX2.DS4.PSAAndOEMCore",
+                "methods": [
+                  "0x10030c70",
+                  "0x10030cd0",
+                  "0x10030d60",
+                  "0x10030dc0"
+                ],
+                "purpose": "Reuse provider's actual base constructor/destructor definition evidence30C70/30CD0 and LifetimeAndRawSelector-owned DWORD30D60/30DC0 ports. The base-definition VAs are not invented typed-port aliases. Standard CAN adds derived fields without changing this base."
+              },
+              {
+                "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-ds4-ex2-psa-core-contract",
+                "id": "CompiledUtilities.NativeEX2.DS4.PSAAndOEMCore.TesterAndDeviceControls",
+                "methods": [
+                  "0x10030d10",
+                  "0x10030d30",
+                  "0x10030d90",
+                  "0x10030dd0"
+                ],
+                "purpose": "Actual shared base Final/Init ALWAYS use ordinary core4; Voltage/Battery coreNULL prebind ordinary4. Not PSA session/tester commands."
+              },
+              {
+                "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-ds4-ex2-psa-core-contract",
+                "id": "CompiledUtilities.NativeEX2.DS4.PSAAndOEMCore.LowerFrameTransport",
+                "methods": [
+                  "0x10030ef0"
+                ],
+                "purpose": "Exact shared base30EF0 tail-dispatches virtualRead at vslot14hex; this join does not import PSA frame builders or decoders."
+              },
+              {
+                "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-ds4-ex2-psa-core-contract",
+                "id": "CompiledUtilities.NativeEX2.DS4.PSAAndOEMCore.CoreInitializeVoltageAndFinalize",
+                "purpose": "ActualreacheddirectcoreInitializeTWOwordsDS4,Finalize,voltage,batterydevicehelpers+15callbackfieldmap/driver2joins."
+              },
+              {
+                "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-ds4-ex2-psa-core-contract",
+                "id": "CompiledUtilities.NativeEX2.DS4.PSAAndOEMCore.CoreLifecycle",
+                "purpose": "Sharedglobalinitializationandunrefcounteddestructorofcorestatics;directDisconnectdoesNOTsweepsharedslots."
+              },
+              {
+                "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-ds4-ex2-psa-core-contract",
+                "id": "CompiledUtilities.NativeEX2.DS4.PSAAndOEMCore.StaticGuardRuntime",
+                "purpose": "ActualDS4guardabort/header/footer/waitnotMAINguardaddressaliases."
+              },
+              {
+                "artifact": "diagnostic_operations.shared_family_contracts.compiled-utilities-native-sdk-load-domains-contract",
+                "id": "CompiledUtilities.NativeSDK.LoadDomains.DS-4.EX2",
+                "purpose": "ExistingSTRING111fixedPassThruWrapNK_DS4.dllload/namebindfacet;3B530OEMfirstprotocol/profile15compositionbelow."
+              }
+            ],
+            "loader_and_driver_composition": {
+              "concurrency": "ManualCS/gate/queueownershiphasnoadditionalfinally/unwindrecovery. Foreignexceptions/forcedterminationcanleaveownership. NoC++EHguardassumedfromlocalCvariables.",
+              "definition_only": [
+                "0x1003b530"
+              ],
+              "factory": "3B530(argProtocol)singleborrowedstatic101C2040/guard101C209C/profile15hex/atexit10166790,constructor3A7D0. FIRSTinitializerprotocolwins;laterdifferentargsdontreconstruct. ActualMsCanpasses8005hex. Exceptionsabortguard1013133E. NoaliasPSA101C1FE0profileD orordinary6global101C1F20/profile0.",
+              "framing": "Driver2wrapperreadformatsfirstmsgafterbackendexcept9/16evenerrors/count0;writeformatsbeforebackend;Ioctl2walkslocalConfigListformattingafterbackend. Nocount/headertranslationorsafemalformedfallback. Nologsinkorlockingadded.",
+              "inner_paths": "DS4innerbrokerSTRING111fixedUNSUFFIXEDbin/J2534Ctrl.dllandbin/MsgDatComm.dll;DONOTsubstituteJ2534Ctrl_DS4.dllfromfilenameguess.",
+              "wrapper": "FifteenexactcurrentDS4innerPassThruWrapNK_DS4.dllSHA9ecfe8...exportsjoinTransportDrivers.PassThruWrappers. Coreallfacadesnonnull/state1doesNOTprovewrapperbackend;innercachedNULLbackendcanfault(exceptOemConnectmissing7). Actualconditionalruntimebindingremainsdriver2authority."
+            },
+            "product": "DS-4",
+            "root_id": "CompiledUtilities.NativeEX2.DS4.CANUDSAndSharedSlots",
+            "source_sha256": "dbee0ce2bc014e75cd41a8654fbbb813809bae136a65a90d7b3b64496ce8672a",
+            "upper_entry": "10033000",
+            "verdict": "EARLIER_GENUINE_SOURCE_GAP_RETRACTED; actualsame-source canonicalphysicalalgorithms and coredependencies alreadyexist. Ordinarycomponent semanticcoverage is not wholeSDK/vehiclecompletion."
+          }
+        ],
+        "sha256": "a04e3dc5984a4729f18a426e85d3523ec90b524915e2dcc3d4d64e69fb249db2"
+      },
+      "bounded_parent_native_execution_observation": {
+        "artifact_origin": "gts-ds4-ds2-camera-transfer-smoke.json",
+        "scenario_count": 34,
+        "scope": "Actual-native37E80/38210 plus state/retry helpers with inert virtual/Begin/End boundaries; parent confirms DIV-by-zero/current-offset remainder, zero-length checksum underflow, cancel0/End,status500..506/900..906,native RET8/12; not physical traffic.",
+        "source_corrections_required": false
+      },
+      "canonical_native_ownership_amendment": {
+        "aliases_admitted": false,
+        "family": "compiled-utilities-canonical-ownership-amendment",
+        "other_six_group_IDs_keep_only_their_other_actual_methods": true,
+        "retired_contract_ids": [
+          "CompiledUtilities.NativeEX2.CANUDSBroadcast.DS-4.BrokerCache",
+          "CompiledUtilities.NativeEX2.LegacyISO.DS-4.DirectIoctl"
+        ],
+        "source_VA_clean_cutovers": 8
+      },
+      "canonical_security": {
+        "actual_consumer_helper_list_joins": 9,
+        "canonical_location": "data/generated/gtsplus_2026/lifecycle_auth_settings.json#/security_contract_matrix/DS4DS2Security",
+        "family": "gts-security-native-ds4-ds2-helpers-contract",
+        "no_second_cipher_algorithm_implementation": true,
+        "provider_contract_ids": [
+          "security.legacy.ds4-ds2.aes-ecb-3e520",
+          "security.legacy.ds4-ds2.crypto-provider-22e0",
+          "security.legacy.ds4-ds2.helper-26e0",
+          "security.legacy.ds4-ds2.helper-2700",
+          "security.legacy.ds4-ds2.helper-2760",
+          "security.legacy.ds4-ds2.xor-key-selectors"
+        ],
+        "status": "COMPOSED_EXISTING_AUTH_SETTINGS_CANONICAL_SIX_DS4DS2_IDS_WITH_ACTUAL_CALLER_WORKFLOWS"
+      },
+      "completed_component_corrections": {
+        "ExCanInitialize": "compiled-utilities-main-ex1-excan-return-width-input",
+        "actual_provider_sha256": "9811d796bfcdf81e7a913b006fe63d1a1f22df6cc320945c6b1c06c3b35cf376",
+        "additional_parent_observation": {
+          "origin": "gts-main-ex1-excan-setup-smoke.json",
+          "scenarios": 18,
+          "scope": "Complete native initializer/configurator/filter/corewrapper/disconnect;778 published instruction rows matchedPE by parent; actual class/core with inert acquisition/broker/CRT/driver pointers/IsBadCodePtr. No algorithm defect beyond corrected staleAL14 wording."
+        },
+        "full_EAX_return": true,
+        "parent_observation": {
+          "origin": "gts-main-ex1-excan-frame-smoke.json",
+          "scenarios": 18,
+          "scope": "Native framing/decoder with inert boundaries, including NRC and DataSize3/4copy underflow; separate from camera34."
+        }
+      },
+      "current_lower_source_admission_boundary": "Reviewed/current-staged source composition: DS4TY607contract/677program/691inverse base plus accepted7runtime providers/7inverse and205exact three-field caller bindings, preciseexisting2030A four-fieldABI only; MAIN TY27semanticfamilies/611actualsource programs andMAINDS2specific405method→nativeIR/19components; existingMAINcontroller17orderedalgorithms with16CALL+one original-stacktailJMP exactDS2invocations; canonicalnumericordinal10 MAIN/DS4 source algorithms. Independent9final bounded body/caller/vtable/sourceownership qualification completed for this examined footprint and all731reference-only cards normalized by exact role. Parent owns finalpackage/default/standalone/gate QA and producer release. DS4DS2/EX1both/parserboth remain outside this cutoff, with separate canonical review/source work; actual selected receiver/module/driver/OS/physical predicates remain explicit. No wholeSDK/allDLL/vehiclegraph or realWindows/car closure.",
+      "frozen_input_family": "gts-sdk-business-final-inputs",
+      "generic_core": {
+        "completed_MAIN_EX2_P6": "compiled-utilities-main-ex2-p6-component-input",
+        "composed_physical_components": {
+          "ErrReportf_providers": 2,
+          "actual_CALL_and_definition_bindings_family": "operations-sdk-physical-provider-typed-joins",
+          "algorithms_admitted": true,
+          "boundary": "Three component native algorithms/proofs admitted; exact driver/core/JSON/language/IPC owners reused. This is not completion of all separately owned generic/physical contexts, runtime module resolution, physical vehicle traffic or parent final package/standalone QA.",
+          "family": "operations-sdk-physical-provider-source-contexts",
+          "input_manifest_family": "compiled-utilities-eth-json-reporting-component-inputs",
+          "reporting_actual_wrapper_CALL_family": "operations-monitor-common-reporting-caller-joins",
+          "source_VA_contexts": 74,
+          "source_qualification_family": "operations-sdk-physical-component-source-qualification",
+          "state": "ADMITTED_EXACT_SOURCE_REVIEWED_COMPONENTS"
+        },
+        "input_family": "compiled-utilities-current-component-inputs",
+        "later_completed_component": "compiled-utilities-main-ex2-psa-component-input",
+        "owner": "13",
+        "remaining_scope": [
+          "Other source-specific physical/core residuals and conditional runtime identities remain explicit; this package does not claim whole-graph or vehicle closure."
+        ],
+        "status": "RETAINED_SOURCE_PRESENT_PHYSICAL_CORE_INCOMPLETE; completed frozen components admitted independently"
+      },
+      "identity_cutovers": {
+        "consumer_owner": "20",
+        "moved_methods_are_not_ExCan_wrappers": true,
+        "per_VA_replacements": {
+          "0x10025210": "CompiledUtilities.NativeEX.LegacyNKDriverCore",
+          "0x10025220": "CompiledUtilities.NativeEX.LegacyNKDriverCore",
+          "0x10025240": "CompiledUtilities.NativeEX.LegacyNKDriverCore",
+          "0x100252a0": "CompiledUtilities.NativeEX.LegacyNKDriverCore",
+          "0x100252f0": "CompiledUtilities.NativeEX.LegacyNKDriverCore",
+          "0x10025570": "CompiledUtilities.NativeEX.LegacyNKDriverCore",
+          "0x10025580": "CompiledUtilities.NativeEX.LegacyNKDriverCore",
+          "0x10025590": "CompiledUtilities.NativeEX.LegacyNKDriverCore",
+          "0x100255d0": "CompiledUtilities.NativeEX.LegacyNKDriverCore",
+          "0x100256a0": "CompiledUtilities.NativeEX.LegacyNKDriverCore",
+          "0x100256f0": "CompiledUtilities.NativeEX.LegacyNKDriverCore",
+          "0x10025710": "CompiledUtilities.NativeEX.LegacyNKDriverCore"
+        },
+        "source_ref": "GTSPlus/bin/UtilityExNK.dll",
+        "source_sha256": "a5e579fec4cc9563c76882c5b457eb245ac04e86d670b39103326831b1cf09e1"
+      },
+      "independent_review_provenance": {
+        "additional_DS4_TY_QA": [
+          "analysis-origin:compiled-utilities-ds4-ty-independent-composition-qa-1.json",
+          "analysis-origin:compiled-utilities-ds4-ty-business-qa9-d8c4082b.json"
+        ],
+        "bounded_native_observations": [
+          "gts-ds4-ds2-camera-transfer-smoke",
+          "gts-main-ex1-excan-frame-smoke",
+          "gts-main-ex1-excan-setup-smoke",
+          "gts-ds4-ty-sbw-workflow-smoke",
+          "gts-ds4-ty-corrections-smoke"
+        ],
+        "physical_traffic_executed_by_this_producer": false,
+        "seven_QA_publications": [
+          "analysis-origin:compiled-utilities-main-ty-independent-qa-10.json",
+          "analysis-origin:compiled-utilities-main-ds2-independent-qa-1.json",
+          "analysis-origin:compiled-utilities-main-ex1-business-qa20.json",
+          "analysis-origin:compiled-utilities-main-ex2-business-qa9.json",
+          "analysis-origin:compiled-utilities-ds4-ds2-business-QA-worker11.json",
+          "analysis-origin:compiled-utilities-ds4-ex1-business-independent-qa-6.json",
+          "analysis-origin:compiled-utilities-ds4-ex2-business-QA-worker11.json"
+        ],
+        "status": "All seven reviewed QA filenames were confirmed present by parent; original exact frozen publication hashes are authoritative. No worker verification was executed."
+      },
+      "numeric_broker_composition": {
+        "exact_EAT_ordinal": 10,
+        "native_execution_observation": "Parent executed46 exact-source offline observations:44 complete exports returned with native RET4 and expected DWORD values;2 nonempty malloc-failure cases stopped at the external memcpy(NULL,source,n) boundary. All588 executed source PCs matched the complete guarded native CFG records. Finite external MFC/CRT ports and fixture cache state; no application/device I/O.",
+        "ordinary_and_four_special_key_semantics": true,
+        "provider_contract_id": "CompiledUtilities.NativeBroker.SharedParameterReadRefresh.NumericGetter",
+        "provider_selected_callee_location": "/shared_family_contracts/compiled-utilities-broker-shared-read-contract/numeric_getters",
+        "source_profiles": {
+          "DS-4": {
+            "blob_find": 268461952,
+            "blob_global": 268520292,
+            "entry": 268449984,
+            "numeric_find": 268461952,
+            "numeric_global": 268520280,
+            "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/DS-4/bin/eVbBroker_DS4.dll",
+            "sha256": "e79955204001396ac5b284e567453760b360a5cbab3677972f9d3f8e6a6aae41"
+          },
+          "GTSPlus": {
+            "blob_find": 268463840,
+            "blob_global": 268553252,
+            "entry": 268451664,
+            "numeric_find": 268493168,
+            "numeric_global": 268553240,
+            "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/bin/eVbBroker.dll",
+            "sha256": "d1c9914b84396dfb3024145ea09362741fd2122cbc8f14da4d338bd2d8ea51bd"
+          }
+        },
+        "status": "Reviewed actual ordinal10 getter/cache algorithm and complete32nativeprograms staged with exact existing/current source IAT/EAT joins. Separate12StringLen/13String/14size/15copy/21JSON ownership retained; not wholebroker/parser closure."
+      },
+      "other_reference_provider_admission": {
+        "MAIN_DRS": {
+          "family": "operations-current-main-drs-native-provider-caller-joins",
+          "providers": 2,
+          "typed_bindings": 22
+        },
+        "identity_policy": "Three DTC advisory IDs and sixteen transport facade convenience IDs clean-cut to actual source+VA canonical native IDs; original contract_id implementation schemas preserved without duplicate identity fields. No aliases, implementation copying per caller, fabricated ABI or inferred source absence.",
+        "lifecycle_string": {
+          "actual_contexts": 116,
+          "family": "operations-actual-identity-lifecycle-caller-joins",
+          "providers": 2,
+          "typed_bindings": 114
+        },
+        "other_native": {
+          "family": "operations-current-canonical-native-provider-caller-joins",
+          "providers": 11,
+          "typed_bindings": 38
+        },
+        "provider_count": 31,
+        "remaining_scope": "Reviewed/current-staged source composition: DS4TY607contract/677program/691inverse base plus accepted7runtime providers/7inverse and205exact three-field caller bindings, preciseexisting2030A four-fieldABI only; MAIN TY27semanticfamilies/611actualsource programs andMAINDS2specific405method→nativeIR/19components; existingMAINcontroller17orderedalgorithms with16CALL+one original-stacktailJMP exactDS2invocations; canonicalnumericordinal10 MAIN/DS4 source algorithms. Independent9final bounded body/caller/vtable/sourceownership qualification completed for this examined footprint and all731reference-only cards normalized by exact role. Parent owns finalpackage/default/standalone/gate QA and producer release. DS4DS2/EX1both/parserboth remain outside this cutoff, with separate canonical review/source work; actual selected receiver/module/driver/OS/physical predicates remain explicit. No wholeSDK/allDLL/vehiclegraph or realWindows/car closure.",
+        "state": "COMPOSED_ACTUAL_NATIVE_ALGORITHMS_AND_EXACT_CONTEXTS",
+        "transport": {
+          "family": "operations-transport-authoritative-caller-joins",
+          "providers": 16,
+          "typed_bindings": 111
+        },
+        "typed_binding_count": 285
+      },
+      "physical_component_admission": {
+        "ErrReportf_providers": 2,
+        "actual_CALL_and_definition_bindings_family": "operations-sdk-physical-provider-typed-joins",
+        "algorithms_admitted": true,
+        "boundary": "Three component native algorithms/proofs admitted; exact driver/core/JSON/language/IPC owners reused. This is not completion of all separately owned generic/physical contexts, runtime module resolution, physical vehicle traffic or parent final package/standalone QA.",
+        "family": "operations-sdk-physical-provider-source-contexts",
+        "input_manifest_family": "compiled-utilities-eth-json-reporting-component-inputs",
+        "reporting_actual_wrapper_CALL_family": "operations-monitor-common-reporting-caller-joins",
+        "source_VA_contexts": 74,
+        "source_qualification_family": "operations-sdk-physical-component-source-qualification",
+        "state": "ADMITTED_EXACT_SOURCE_REVIEWED_COMPONENTS"
+      },
+      "provider_identity_policy": "Semantic owner is provider_contract_id plus exact definition locations. Packet family identifies provenance only. No cross-product, basename, ABI-only or generic-status substitution.",
+      "publication_counts": {
+        "A20_MAIN_DS2_method_operational_CFG_identities": 1709,
+        "A20_MAIN_EX1_native_program_identities": 533,
+        "A20_UI_identity_joins": 669,
+        "D31_public_control_effect_joins": 31,
+        "additional_reviewed_business_components": 1,
+        "all_inputs_explicit": 39,
+        "declared_proof_shards": 35,
+        "exact_source_VA_provider_owners": 1199,
+        "frozen_business_components": 7,
+        "native_evidence_records": 89910,
+        "new_shards": 22,
+        "operational_evidence_records": 37720,
+        "remaining_physical_core_complete": false,
+        "retained_body_records": 5050,
+        "typed_provider_links": 55047
+      },
+      "published_lower_framework_admission_boundary": "Reviewed/current-staged source composition: DS4TY607contract/677program/691inverse base plus accepted7runtime providers/7inverse and205exact three-field caller bindings, preciseexisting2030A four-fieldABI only; MAIN TY27semanticfamilies/611actualsource programs andMAINDS2specific405method→nativeIR/19components; existingMAINcontroller17orderedalgorithms with16CALL+one original-stacktailJMP exactDS2invocations; canonicalnumericordinal10 MAIN/DS4 source algorithms. Independent9final bounded body/caller/vtable/sourceownership qualification completed for this examined footprint and all731reference-only cards normalized by exact role. Parent owns finalpackage/default/standalone/gate QA and producer release. DS4DS2/EX1both/parserboth remain outside this cutoff, with separate canonical review/source work; actual selected receiver/module/driver/OS/physical predicates remain explicit. No wholeSDK/allDLL/vehiclegraph or realWindows/car closure.",
+      "remaining_scope": "Reviewed/current-staged source composition: DS4TY607contract/677program/691inverse base plus accepted7runtime providers/7inverse and205exact three-field caller bindings, preciseexisting2030A four-fieldABI only; MAIN TY27semanticfamilies/611actualsource programs andMAINDS2specific405method→nativeIR/19components; existingMAINcontroller17orderedalgorithms with16CALL+one original-stacktailJMP exactDS2invocations; canonicalnumericordinal10 MAIN/DS4 source algorithms. Independent9final bounded body/caller/vtable/sourceownership qualification completed for this examined footprint and all731reference-only cards normalized by exact role. Parent owns finalpackage/default/standalone/gate QA and producer release. DS4DS2/EX1both/parserboth remain outside this cutoff, with separate canonical review/source work; actual selected receiver/module/driver/OS/physical predicates remain explicit. No wholeSDK/allDLL/vehiclegraph or realWindows/car closure.",
+      "status": "ALL_SEVEN_FROZEN_SDK_BUSINESS_COMPONENTS_PLUS_REVIEWED_EIGHTH_DS4_TY_ADMITTED_WITH_EXACT_NATIVE_PROGRAMS_AND_TYPED_CALLER_COMPOSITION"
+    },
+    "native_UI_business": {
+      "A": {
+        "contract_id": "CompiledUtilities.NativeBusiness.A",
+        "exact_source_root_sha256": "afbf1e7a58fa802ca24a4f21ae845597a8456f7d41e6b6a65d283309040c2afc",
+        "family_ref": "diagnostic_operations.shared_family_contracts.compiled-utilities-native-business-A",
+        "scope": "Complete owned native UI business, selection, native ABI/proofs, continuation and registered/private callbacks. Does not close separate SDK operation providers."
+      },
+      "B": {
+        "contract_id": "CompiledUtilities.NativeBusiness.B",
+        "exact_source_root_sha256": "5b824ce342dbcb3893bd2ab2d89fcc37f0340404cc00eea88063e6859e851d72",
+        "family_ref": "diagnostic_operations.shared_family_contracts.compiled-utilities-native-business-B",
+        "scope": "Complete owned native UI business, selection, native ABI/proofs, continuation and registered/private callbacks. Does not close separate SDK operation providers."
+      },
+      "C": {
+        "contract_id": "CompiledUtilities.NativeBusiness.C",
+        "exact_source_root_sha256": "1e3f269343cacdea230c2eed44dc2eea7c842d03e04e66e56c0e386f133a438c",
+        "family_ref": "diagnostic_operations.shared_family_contracts.compiled-utilities-native-business-C",
+        "scope": "Complete owned native UI business, selection, native ABI/proofs, continuation and registered/private callbacks. Does not close separate SDK operation providers."
+      },
+      "D": {
+        "contract_id": "CompiledUtilities.NativeBusiness.D",
+        "exact_source_root_sha256": "8872d44eea0c786763ae97f38a0386c372094bb4455da904aa285cf1cc459d4e",
+        "family_ref": "diagnostic_operations.shared_family_contracts.compiled-utilities-native-business-D",
+        "scope": "Complete owned native UI business, selection, native ABI/proofs, continuation and registered/private callbacks. Does not close separate SDK operation providers."
+      }
+    },
+    "resource_boundary": {
+      "nativebulkinputs": "analysis-origin:compiled-utilities-native-ready-index.json gives28readyfullC/instructioncorpora. Soleglobaltokenexplicitlyhanded13->4andsharedslotupdated. Noadditionalimportsneededforthese28sources;semanticclosurestillrequiresactualreachedanalysis.",
+      "nativejobs": "Afterexplicit1->13serial-tokenauthorization,finishedsole2G/maxcpu2Ghidra12.2exports;all28exactsourceSHAs/listedPEinstructionbytes/bodySHAspassofflinequalification. NoECU/Windows/tests/gatesexecuted.",
+      "projects": "Savedprojectreusefirst;remainingcurrentimportsinscratchcompiled13_remaining_current_20261104;twomainDS2UtlCOMTblsame-namecollisionsresolvedinseparatecompiled13_main_comtables_20261104. Allownedfinitejobssettled;noownedJVM/bridgeactive."
+    },
+    "secondary_caller_domain_contract": {
+      "contract_id": "CompiledUtilities.SecondaryCassetteCallers20",
+      "family_ref": "diagnostic_operations.shared_family_contracts.compiled-secondary-callers-worker20",
+      "generic_cassette_business_complete": false,
+      "publication_sha256": "ce5e97c0958e1de2c2bee6790992e8462e05df51117c544476e2ba2dbb9396c1",
+      "scope": "Complete BOUNDED negative over all current eleven-UI local loader expressions, broker/CFun selection and callback effect domains, composed with the independently source-qualified eight imported SDK load/argument/dispatch domains. This is not a filename census and not a global unreachable/deployment-dormant assertion.",
+      "target_contract_ids": [
+        "CompiledUtilities.SecondaryCassetteCallers20.Target.2",
+        "CompiledUtilities.SecondaryCassetteCallers20.Target.4",
+        "CompiledUtilities.SecondaryCassetteCallers20.Target.15",
+        "CompiledUtilities.SecondaryCassetteCallers20.Target.24",
+        "CompiledUtilities.SecondaryCassetteCallers20.Target.34",
+        "CompiledUtilities.SecondaryCassetteCallers20.Target.44",
+        "CompiledUtilities.SecondaryCassetteCallers20.Target.47",
+        "CompiledUtilities.SecondaryCassetteCallers20.Target.64",
+        "CompiledUtilities.SecondaryCassetteCallers20.Target.80"
+      ]
+    },
+    "status": "OWNED_NATIVE_UI_AND_REVIEWED_SDK_BUSINESS_LOWER_PARSER_CONTROLLER_COHORTS_COMPOSED_EXACT_SOURCE; UNRELEASED_AND_RUNTIME_PHYSICAL_BOUNDARIES_EXPLICIT",
+    "unadmitted_planned_provider_contexts": [
+      {
+        "caller_context_location": "/shared_family_contracts/compiled-C-external-process-platform-contract/MCIWndCreateW/provider",
+        "caller_contract_id": "CompiledUtilities.NativeBusiness.C.ExternalProcessAndWindowsMedia",
+        "caller_source_ref": "DS-4/bin/IT3UtilityAdvNK_DS4.dll",
+        "requested_provider_contract_id": "WindowsMSVFW32.dll",
+        "status": "EXPLICIT_EXTERNAL_OR_BROKER_SEMANTIC_PORT_RETAINED; no fabricated provider alias"
+      }
+    ]
+  },
+  "id": "native.CompiledUtilities",
+  "kind": "native",
+  "schema": "gtsplus-lifecycle-operations-spec-v1"
+}
