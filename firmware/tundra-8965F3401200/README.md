@@ -114,6 +114,15 @@ CPU-selection dispatch. The exact Tundra selection mechanism among `0x0203`,
 the six-byte RequestDownload address, and CPU-to-CPU forwarding requires the
 Tundra bootloader or a programming trace.
 
+**CPU architecture distinction.** These two *different application images* are
+not the RH850/P1M-E's main/checker G3M pair, which executes in lockstep for
+functional safety ([Renesas P1M-E datasheet](https://www.renesas.com/en/document/dst/rh850p1m-e-datasheet)),
+and neither should be confused with the separate G3K security CPU (ICUP) in
+Renesas ICU-M devices. Tundra's CPU11 and CPU12 both contain EPS application
+and SecOC code; the evidence here establishes their independently programmed
+logical images and CPU11's external diagnostic role, but not the exact physical
+multi-MCU or inter-processor wiring.
+
 ## CPU11 application: entry to programming mode
 
 The Tundra CPU11 application SID `10` service at `0x25B10` uses a
