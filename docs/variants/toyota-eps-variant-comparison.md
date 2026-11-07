@@ -60,6 +60,83 @@ For Corolla H/F, the two exact application images are byte-identical at `0x17E00
 After canonical inventory regeneration, `tools/test spanconstant_corolla_codeflash`
 passes all five verification paths, including the Span-vs-Sienna transfer check.
 
+## XCP and communication-stack split
+
+XCP presence lines up with one CanTp integration, and XCP absence does not
+line up with a single alternative. The XCP-present images use a
+32-bit-length CanTp behind 16-bit adapters, a fixed configuration pointer,
+and shared transmit scratch. Crown and Tundra CPU11 use native 16-bit
+descriptors, a voted runtime configuration pointer, and stack-local
+transmit frames. Tundra CPU12's CanTp init slot is `jmp lp`. These are firmware
+implementation fingerprints, not OEM release names.
+
+| Exact image | XCP | CanTp receive adapter / PCI dispatcher | Single-frame transmit builder |
+|---|---|---|---|
+| Sienna `8965B4512000` | present, gated | `794EA / 79454`: widen to 32 bits | `7A506`: shared `FEBE4EF0` |
+| Corolla H/F | present, gated | `7388A / 737F4`: widen to 32 bits | `748A6`: shared `FEBE4DE8` |
+| Camry `8965F3307000` | present, gated | `7A57A / 7A4E4`: widen to 32 bits | `7B596`: shared `FEBE4EFC` |
+| Crown `8965F3012000` | absent | `81D7A / 81CE4`: native 16 bits | `82D26`: stack-local eight-byte frame |
+| Tundra `8965F3401200` (CPU11) | absent | `7CB1A / 7CA84`: native 16 bits | `7DAC6`: stack-local eight-byte frame |
+| Tundra `8965F3402200` (CPU12) | absent | `77C88` calls `78CC8` (`jmp lp`) | — |
+
+Target-native decompilation verifies each row. Instruction-shape matching
+locates the homologs; it does not establish their semantics. Camry
+`7A4EE: 27 0F 05 00` is `ld.w 4[r7],r1`; Crown
+`81CEE: E7 0F 05 00` is `ld.hu 4[r7],r1`. Exact-image GNU execution with
+descriptor word `00010000` observes Camry read `65536` and Crown read `0`,
+taking different length-test branches.
+
+Configuration binding independently follows the split. Getters Sienna
+`7929E`, Corolla `7363E`, and Camry `7A32E` return constant CodeFlash
+configuration addresses `22D50`, `22B94`, and `22C70`. Crown initializer
+`82A8A` publishes pointer/inverse/duplicate at `FEBE4AEC/4AF0/4AF4`;
+getter `81AF2` votes and repairs that triplet under interrupt guards.
+GNU execution of its voting interval `81AFA..81B32` repairs a corrupted
+first pointer using the other two. The full getter encounters an unsupported
+privileged instruction in the GNU simulator's interrupt guard.
+Tundra CPU11 getter `7C892` votes the same pointer, inverse, and duplicate
+at `gp-6338`, `gp-6334`, and `gp-6330`. CPU11 init `7AE90` calls `7BFF2`,
+which writes `FFFF` into the channel-state halfwords. CPU12 init `77C88`
+calls `78CC8`, whose only instruction is `jmp lp`. CPU11's PCI dispatcher
+`7CA84` reads the length with `ld.hu 4[r7], r1` (`E7 0F 05 00`).
+
+The shared higher layers make this a matched comparison: all 17
+service-level SID policies have the same session/security/count shape across
+Sienna, Corolla, Camry and Crown; Camry and Crown also have identical
+242-record DID metadata. Crown retains SID23's zero-count range-security
+allowlist and the RAM-copy backend `4F184 -> 4F0DE -> 4F122`. Exact-image
+execution reads `FEBF7C00` through that backend. The identical startup shadow
+copy and MPU window also remain. In the code section holding Camry's XCP,
+Crown has 98,640 bytes of contiguous padding to `AEB00`; Camry has 87,552.
+
+XCP is present and gated on Sienna, Corolla H/F, and Camry, and absent on
+Crown and the four Tundra application images. Descriptor width does not
+decide inclusion: CPU11 keeps the 16-bit CanTp integration without XCP, and
+CPU12 ships no CanTp at all. The bytes show compile-time bundle selection.
+Flash capacity, the shared diagnostic tables, and the `FEBF7C00` window are
+present on the XCP-absent Crown image.
+
+### Wire identities and rejected tooling explanation
+
+Sienna uses standard `7F7/7F8`. Corolla H/F and Camry use extended
+`1FDC0002/1FE00002`: `9FDC0002/9FE00002` include hardware IDE bit 31.
+The exact Sienna `836B4` and Corolla `7DAB4` filter loaders write the
+respective request words directly to GAFLID; both were executed in GNU
+simulation. The [scanner](../tooling/rh850-codeflash-structure-scanner.md)
+now reports these identities separately.
+
+The Sep-10 Camry C7 steering-request consumer was our injected helper.
+Its use of the stock receive mailbox establishes reachability.
+
+The Unified-writer post-reset tail is a different identifier from Sienna's
+`7F7` route. V18 and the unprotected GTS+ builds of
+`TCUWCanUnifiedFlashWriter.dll` and
+`TCUWCanUnifiedFlashWriterEachArea.dll` emit `777` data `10 81` and `77F`
+data `FE 10 81` (second frame length 7, TxFlags `80`). None of those four
+binaries contains a `7F7` immediate. `T-0035-22` (`8965F3401200/2200`) and
+`T-0036-22` (`8965F3403200/4200`) select `P5-Unified`, which resolves to the
+normal writer. Those application images have no `7F7` acceptance rule.
+
 ## Adding a variant
 
 1. Add a row to `data/toyota_eps_variant_matrix.csv` only after a concrete

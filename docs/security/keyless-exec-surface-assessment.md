@@ -46,19 +46,16 @@ the current authenticated bootstrap is lost.
 
 ## 1. Attack 1 — boot copy of the application XCP route descriptor (negative)
 
-The application XCP route uses physical IDs `0x7F7`/`0x7F8` and packed route
-records of the form `0x80000000 + (CAN_ID << 18) + attr`. A full scan of every
-tracked boot region (`<0x20000`) for the exact application descriptor encoding,
-in both byte orders, returns zero hits.
+Sienna's application uses standard IDs `0x7F7/0x7F8`; Corolla H/F and
+Camry use extended `0x1FDC0002/0x1FE00002`, stored with the hardware IDE bit
+as `0x9FDC0002/0x9FE00002`. Exact target filter loaders establish those
+encodings. Scanning Sienna, both Corollas, Camry and Crown below `0x20000`
+finds neither pair of literal words in either byte order.
 
-That result proves only that the **application's packed XCP route descriptor is
-not copied into boot**. Descriptor absence alone is not a universal proof that
-boot could not expose the same IDs through some different representation or
-hardware route. The broader Sienna result comes from the separate boot ingress,
-CanIf/dispatch, indirect-call, and retained-window consumer audit in
-SEC-BOOT-013: that audit recovers no boot XCP/control-transfer consumer. H/Span
-inherit the exact boot UDS handler cohort (§3), but the descriptor scan itself
-must remain a descriptor-scan claim.
+The separate Sienna boot ingress, CanIf/dispatch, indirect-call and
+retained-window consumer audit in SEC-BOOT-013 recovers no boot XCP or
+control-transfer consumer. H/Span inherit the exact boot UDS handler cohort
+(§3).
 
 ## 2. Attack 2 — RequestDownload interval wraparound (closed behind SA)
 
@@ -178,20 +175,21 @@ LocalRAM destination immediate. This is firmware-static provenance for the
 previously observed H/F RAM mirror; it is not an artifact of the authenticated
 RAM-dump payload.
 
-Both application-side memory readers can reach the mirror **before
-SecurityAccess**:
+The pre-SecurityAccess application-side reader is UDS SID `0x23`:
 
 - UDS SID `0x23` ReadMemoryByAddress is extended-session-only but has no
   configured SecurityAccess list on all three images. Its LocalRAM read class
   covers `FEBE0000..FEBFFFFF`, subject to the compiled exclusion intervals.
-- XCP `SHORT_UPLOAD` (`0xF4`) is configured while XCP `GET_SEED`/`UNLOCK` are
-  unconfigured. It applies the same LocalRAM exclusion policy.
+- XCP `SHORT_UPLOAD` (`0xF4`) implements the same reads with the same
+  exclusion policy, but stock XCP dispatch is closed by the family gate byte
+  (`0x30EF4` = `0x5A` on Sienna; the identical mechanism on H/F/F33), so it is
+  compiled-in behavior, not a stock reader. One byte reopens it
+  ([minimal-write-exec-patch](minimal-write-exec-patch.md)).
 
 The Sienna mirror at `FEBF7BE0` is above the final Sienna exclusion
 `FEBF6C00..FEBF78DF`; the H/F mirror at `FEBF7B80` is above the final H/F
 exclusion `FEBF6000..FEBF6CDF`. Therefore the complete 16-byte root is readable
-without first knowing it. `SHORT_UPLOAD` has a 7-byte maximum payload, so the
-root requires multiple reads there; SID `0x23` can return it in one request.
+without first knowing it via SID `0x23`, in one request.
 
 **Consequence:** rotation of the *application* SecurityAccess root does not, by
 itself, strand a tester on this implementation if the startup-copy and read

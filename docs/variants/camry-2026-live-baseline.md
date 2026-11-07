@@ -708,7 +708,10 @@ startup and executes. Production work therefore again needs a **stock-reachable 
 byte-placement surface as well as a safe control-transfer primitive**, or a different
 stock mechanism that supplies both. Do not patch `0x30D68` merely to preserve the old
 XCP architecture; that would turn a stock production design into another firmware-patch
-design.
+design. That firmware-patch design now exists as the explicit less-favorable
+alternative — the 29-byte gate-plus-trigger patch, its CRC fixup, and its brick
+boundary are specified in
+[minimal-write-exec-patch](../security/minimal-write-exec-patch.md).
 
 ### 13.2 Why the tail begins exactly at `FEBFF9F0`
 
@@ -804,10 +807,11 @@ write/control semantics** is now bounded away from a tester-chosen PC transfer.
 There is no remaining known UDS/proprietary/factory-test service to mine for a straightforward
 runtime call primitive. No Techstream engineering/calibration operation recovered
 to date improves this bound. The current Techstream/GTS+ host corpus also supplies no OEM-facing name
-that turns F33 RID `0x100F` into a general signer service. Its relevant `0x7F7`
-host evidence is instead bounded to Unified CUW/reset choreography: after ECU
-reset an EachArea writer emits raw `0x7F7 || FE 10 81` as one post-reset tail
-frame. That proves Toyota tooling knows the route family.
+that turns F33 RID `0x100F` into a general signer service. The Unified
+writer post-reset tail is `0x777‖10 81` and `0x77F‖FE 10 81`. Both the
+normal writer and the EachArea writer emit that pair. `T-0035-22` and
+`T-0036-22` select the normal writer, and those Tundra application images
+have no `0x7F7` acceptance rule.
 
 ### 13.5 Control-transfer audit: the missing primitive
 

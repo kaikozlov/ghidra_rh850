@@ -661,7 +661,7 @@ three queue-1 profiles (`00F/D7/B6`) and no `2E4/131` steering profiles. That
 profile-set difference is therefore a real target property layered onto a
 shared SecOC/ICU-S implementation.
 
-#### XCP-shaped command and 0x7F7/0x7F8 transport survive in a different descriptor encoding
+#### XCP-shaped commands survive on an extended-ID transport
 
 The seven-record custom command table is present at H `0x2AE38` with the same
 selectors `FB/FA/F5/F3/EB/EA/E4` and callbacks
@@ -669,21 +669,24 @@ selectors `FB/FA/F5/F3/EB/EA/E4` and callbacks
 handlers (`FB`, `F3`, `E4`) are exact complete-body transfers; the other four
 are 94–98% byte-equal at the same `-0x4FD0` island.
 
-An initial plain-u32 scan appeared to show that Sienna's `0x7F7/0x7F8` route was
-absent. Deeper table tracing disproves that provisional interpretation. H stores
-the two special route IDs in a packed standard-ID descriptor representation:
+H uses extended CAN IDs `0x1FDC0002/0x1FE00002`, unlike Sienna's standard
+`0x7F7/0x7F8` pair. The descriptor words are hardware-formatted extended IDs:
 
 ```text
-response @ 0x21EF4: 0x9FE00002 = 0x80000000 | (0x7F8 << 18) | 2
-request  @ 0x21EFC: 0x9FDC0002 = 0x80000000 | (0x7F7 << 18) | 2
+response @ 0x21EF4: 0x9FE00002 = IDE | 0x1FE00002
+request  @ 0x21EFC: 0x9FDC0002 = IDE | 0x1FDC0002
 ```
+
+The filter loader `0x7DAB4` copies the request rule at `0x23288` verbatim
+into GAFLID. Bit 31 is IDE; there is no standard-ID shift. Exact-image GNU
+simulation executes that loader and observes `GAFLID=0x9FDC0002`.
 
 The response descriptor is referenced from H `0x21954`. The request descriptor
 is referenced from the special receive-class record at H `0x21A50`, whose next
 word points to callback `0x7C43E`; that callback is 41/42 bytes identical to the
 Sienna `0x82042` callback. The request descriptor also retains DLC 8. The
-structural scanner now reports both plain and packed standard-ID forms so this
-encoding difference cannot produce the same false negative again.
+structural scanner reports standard and IDE-marked extended route words
+separately.
 
 The generic XCP-shaped configuration transfers even more strongly:
 
@@ -699,10 +702,10 @@ The generic XCP-shaped configuration transfers even more strongly:
   `FEBF0150..FEBF128F`, `FEBF4958..FEBF4B33`, and
   `FEBF6000..FEBF6CDF`.
 
-Thus **the physical 0x7F7/0x7F8 ingress and the unauthenticated command-map
-shape both survive** on H; what changed is the descriptor encoding and several
-RAM exclusion boundaries. Target-native decompilation now closes the generic
-memory-command semantics too:
+The command-map implementation survives on H, with a different wire-ID pair
+and read-exclusion boundaries. Its stock gate at `0x2CAA0` is `0x5A`, so the
+handlers below are compiled-in capabilities, not stock wire-reachable
+commands. Target-native decompilation closes their memory semantics:
 
 - H `0x7BF72` (`SET_MTA`) stores the supplied address;
 - H `0x7BE2A` (`SHORT_UPLOAD`) bounds the requested span to LocalRAM,

@@ -8,8 +8,8 @@
 >
 > **Evidence source:** firmware-static
 >
-> **Confidence:** verified disclosure + direct RAM-write primitives; bounded
-> downstream write impact
+> **Confidence:** verified handler semantics and write primitives behind a
+> stock-closed ingress gate; bounded downstream write impact
 >
 > **Canonical artifact:** `data/recovered_callback_tables.csv`
 >
@@ -30,9 +30,22 @@ calibration command family. That protocol identification is recovered from the
 firmware behavior; no OEM symbol or external specification is used as naming
 evidence.
 
-The same firmware path exposes an unauthenticated memory disclosure on the
-paired CAN `0x7F7` request / `0x7F8` response route. The configured generic
-command map has no GET_SEED (`0xF8`) or UNLOCK (`0xF7`) callback. After CONNECT
+**Stock dispatch of this family is closed.** The pre-dispatch gate byte at
+CodeFlash `0x30EF4` is `0x5A` in this image (sole reader: the `ld.bu` at
+`0x97168` inside `FUN_00097160`), and a nonzero value makes the dispatcher
+return "handled" before any selector or opcode lookup — the identical
+mechanism later recovered on exact F33 as `0x30D68`
+(live-baseline §13.1). Everything below is compiled-in handler semantics
+that become wire-reachable only after that one byte is cleared; the
+family-wide gate census and the one-byte reopen patch are specified in
+[minimal-write-exec-patch](../security/minimal-write-exec-patch.md). The
+route/transport analysis below is unchanged: frames reach the dispatcher,
+which suppresses them.
+
+The same firmware path would otherwise expose an unauthenticated memory
+disclosure on the paired CAN `0x7F7` request / `0x7F8` response route. The
+configured generic command map has no GET_SEED (`0xF8`) or UNLOCK (`0xF7`)
+callback. After CONNECT
 (`0xFF`), SET_MTA (`0xF6`) accepts a tester-supplied 32-bit address without an
 authorization check and the custom UPLOAD command (`0xF5`) returns one to seven
 bytes from permitted LocalRAM. Independently, configured standard SHORT_UPLOAD
@@ -236,7 +249,7 @@ SEC-BOOT-012 and `tools/test xcp`.
 The same composition is now independently verified in Span's persisted
 2026-08-21 Corolla CodeFlash (`SHA-256
 b8fa3d951f59fb75c190ce1b2c73164adb952f871650cfcd3b7656f08a9c448d`): the
-generic opcode map, all 18 callbacks, `0x7F7/0x7F8` packed descriptors,
+generic opcode map, all 18 callbacks, extended `0x1FDC0002/0x1FE00002` descriptors,
 LocalRAM/shadow bounds, five exclusion intervals, `0x5F208` handoff caller,
 complete `0x9F00` boot stub, `0x1472` state copier, and reset-only `0x13E8`
 initializer are byte-identical to tracked Corolla `8965H1202000`. GET_SEED and
