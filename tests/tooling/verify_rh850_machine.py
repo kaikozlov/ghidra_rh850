@@ -747,10 +747,11 @@ def check_event_schema_rejections(output_root: Path) -> None:
 
 
 def check_execution_event_boundaries(output_root: Path) -> None:
-    """Reserved interrupt requests must fault before executing the entry.
+    """Unknown interrupt requests fail closed unless exact firmware supplies the EIC control.
 
-    Manual Table6.11 reserves channel292. An external request must not
-    synthesize a reset value, handler vector, or delivery event.
+    Manual Table6.11 reserves channel292. The exact Camry image nevertheless
+    initializes EIC292 and installs its table-vector handler. A scenario must
+    supply that firmware-derived control word explicitly to exercise the handler.
     """
     output_dir = output_root / "execution-event-boundaries"
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -839,6 +840,177 @@ def check_execution_event_boundaries(output_root: Path) -> None:
                 f"{path.name}: fault must precede any entry instruction: {report!r}"
             )
         print(f"PASS {path.stem}: {kind} faults at the external-event boundary")
+
+    firmware_path = output_dir / "interrupt-292-firmware-derived.json"
+    firmware_path.write_text(json.dumps({
+        "schema": "rh850-p1me-machine-scenario-v2",
+        "name": "firmware-derived-interrupt-channel-292-enters-exact-vector",
+        "entry": PORTABLE_STORE_SELECTOR,
+        "max_instructions": 4,
+        "stop_addresses": ["0x00066146"],
+        "gpr_fill": "0",
+        "registers": {
+            **registers,
+            "RBASE": "0",
+            "INTBP": "0x00020200",
+        },
+        "memory": [],
+        "artifacts": [],
+        "checks": [{
+            "name": "firmware-derived channel requests once",
+            "kind": "event-count",
+            "operation": "interrupt-request",
+            "equals": "1",
+        }, {
+            "name": "firmware-derived channel enters exact vector",
+            "kind": "event-count",
+            "operation": "interrupt-enter",
+            "equals": "1",
+        }],
+        "events": [{
+            "kind": "interrupt",
+            "after_instructions": 0,
+            "evidence": (
+                "Exact Camry startup 62E6A writes EIC292=0x48 and "
+                "INTBP[292] contains 0x66142"
+            ),
+            "channel": 292,
+            "firmware_control": "0x48",
+        }],
+        "expected_termination": "stop-address",
+    }, indent=2) + "\n", encoding="utf-8")
+    run([
+        str(REPO_ROOT / "tools/rh850"), "test", "firmware",
+        "camry-8965F3307000", str(firmware_path),
+        "--output-dir", str(output_dir),
+    ])
+    firmware_report = json.loads(
+        (output_dir / "interrupt-292-firmware-derived.report.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    if firmware_report.get("passed") is not True:
+        raise AssertionError(
+            f"firmware-derived channel292 did not enter exact vector: {firmware_report!r}"
+        )
+    events = Counter(event["kind"] for event in firmware_report["device_events"])
+    if events["interrupt-request"] != 1 or events["interrupt-enter"] != 1:
+        raise AssertionError(
+            f"firmware-derived channel292 event count drift: {events!r}"
+        )
+    print("PASS firmware-derived interrupt292 enters exact table vector")
+
+
+def check_rscfd_transmit_results(output_root: Path) -> None:
+    """Tx completion publishes and clears the channel result-summary bit."""
+    output_dir = output_root / "rscfd-transmit-results"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    registers = {
+        "sp": "0xFEBE2000",
+        "gp": "0xFEBEB800",
+        "tp": "0x00023DFC",
+        "lp": "0x00010000",
+        "PSW": "0x20",
+        "PMR": "0",
+    }
+    scenarios = [{
+        "schema": "rh850-p1me-machine-scenario-v2",
+        "name": "rscfd-transmit-completion-summary",
+        "entry": PORTABLE_STORE_SELECTOR,
+        "max_instructions": 20,
+        "stop_addresses": ["0x00010000"],
+        "gpr_fill": "0",
+        "registers": {
+            **registers,
+            "r6": "0xFFD20266",
+            "r7": "1",
+        },
+        "memory": [
+            {"address": "0xFFD20266", "hex": "00",
+             "evidence": "Idle channel1 local-resource6 transmit control"},
+            {"address": "0xFFD242C0", "hex": "a9070000",
+             "evidence": "Synthetic standard identifier"},
+            {"address": "0xFFD242C4", "hex": "00000000",
+             "evidence": "Synthetic pointer word"},
+            {"address": "0xFFD242C8", "hex": "00000000",
+             "evidence": "Synthetic FD status word"},
+            {"address": "0xFFD242CC", "hex": "01020304",
+             "evidence": "Synthetic payload bytes0..3"},
+            {"address": "0xFFD242D0", "hex": "05060708",
+             "evidence": "Synthetic payload bytes4..7"},
+        ],
+        "artifacts": [],
+        "checks": [
+            {"name": "one transmit", "kind": "event-count",
+             "operation": "can-tx", "equals": "1"},
+            {"name": "one completion", "kind": "event-count",
+             "operation": "can-tx-complete", "equals": "1"},
+            {"name": "resource6 summary", "kind": "memory",
+             "address": "0xFFD20372", "size": 2, "equals_hex": "4000"},
+            {"name": "resource6 result", "kind": "memory",
+             "address": "0xFFD202E6", "size": 1, "equals_hex": "04"},
+            {"name": "request clears", "kind": "memory",
+             "address": "0xFFD20266", "size": 1, "equals_hex": "00"},
+        ],
+        "events": [
+            {"kind": "register-input", "register": "TMIEC1", "value": "0xc0",
+             "after_instructions": 0, "evidence": "Channel1 resources6 and7 interrupt enabled"},
+            {"kind": "can-tx-complete", "buffer": 22, "firmware_control": "0x8048",
+             "after_instructions": 2, "evidence": "External completion of emitted buffer22"},
+        ],
+        "expected_termination": "stop-address",
+    }, {
+        "schema": "rh850-p1me-machine-scenario-v2",
+        "name": "rscfd-transmit-result-clear",
+        "entry": PORTABLE_STORE_SELECTOR,
+        "max_instructions": 20,
+        "stop_addresses": ["0x00010000"],
+        "gpr_fill": "0",
+        "registers": {
+            **registers,
+            "r6": "0xFFD202E6",
+            "r7": "0",
+        },
+        "memory": [
+            {"address": "0xFFD202E6", "hex": "04",
+             "evidence": "Completed channel1 local-resource6 transmit result"},
+            {"address": "0xFFD20372", "hex": "4000",
+             "evidence": "Channel1 result summary bit6"},
+            {"address": "0xFFFFB178", "hex": "4890",
+             "evidence": "Exact level-triggered EIC188 control with EIRF asserted"},
+        ],
+        "artifacts": [],
+        "checks": [
+            {"name": "summary clears", "kind": "memory",
+             "address": "0xFFD20372", "size": 2, "equals_hex": "0000"},
+            {"name": "result clears", "kind": "memory",
+             "address": "0xFFD202E6", "size": 1, "equals_hex": "00"},
+            {"name": "level request clears", "kind": "memory",
+             "address": "0xFFFFB178", "size": 2, "equals_hex": "4880"},
+        ],
+        "events": [
+            {"kind": "register-input", "register": "TMIEC1", "value": "0xc0",
+             "after_instructions": 0, "evidence": "Channel1 resources6 and7 interrupt enabled"},
+        ],
+        "expected_termination": "stop-address",
+    }]
+    paths: list[Path] = []
+    for scenario in scenarios:
+        path = output_dir / f"{scenario['name']}.json"
+        path.write_text(json.dumps(scenario, indent=2) + "\n", encoding="utf-8")
+        paths.append(path)
+    run([
+        str(REPO_ROOT / "tools/rh850"), "test", "firmware",
+        "camry-8965F3307000", *(str(path) for path in paths),
+        "--output-dir", str(output_dir),
+    ])
+    for path in paths:
+        report = json.loads(
+            (output_dir / f"{path.stem}.report.json").read_text(encoding="utf-8")
+        )
+        if report.get("passed") is not True or report.get("termination_reason") != "stop-address":
+            raise AssertionError(f"{path.stem}: RSCFD result lifecycle drift: {report!r}")
+    print("PASS RSCFD transmit result summary publishes and clears")
 
 
 def check_peripheral_file(output_root: Path) -> None:
@@ -1006,6 +1178,7 @@ def main() -> int:
         check_execution_event_boundaries(output_root)
         check_register_input_boundaries(output_root)
         check_peripheral_file(output_root)
+        check_rscfd_transmit_results(output_root)
     print("PASS specification-backed multi-target RH850/P1M-E machine")
     return 0
 

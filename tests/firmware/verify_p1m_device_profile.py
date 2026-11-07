@@ -99,6 +99,21 @@ def main() -> int:
               and control["status_register"] == status["name"]
               and status["trigger"] == "rscfd-fd-status"
               and status["writable_mask"] == 0x380)
+    receive_fifo = registers[0xFFD200BC]
+    check(
+        "CAN FD receive FIFO 1 is linked to its exact polled access path",
+        receive_fifo.get("status_register") == "RFSTS1"
+        and receive_fifo.get("pointer_register") == "RFPCTR1"
+        and receive_fifo.get("window_register") == "RFID1"
+        and receive_fifo.get("channel_control_register") == "C1CTR"
+        and receive_fifo.get("global_control_register") == "GCTR"
+        and receive_fifo.get("interrupt_register") == "EIC190"
+        and receive_fifo.get("fifo_index") == receive_fifo.get("fifo_channel") == 1,
+    )
+    check(
+        "CAN FD receive FIFO 1 access window covers all 64 data bytes",
+        all(0xFFD23080 + 4 * word in registers for word in range(19)),
+    )
     check("CAN register gaps remain unmapped",
           all(address not in registers for address in
               (0xFFD20514, 0xFFD20518, 0xFFD20554, 0xFFD21100, 0xFFD24600)))

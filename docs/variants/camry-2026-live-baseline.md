@@ -1658,6 +1658,114 @@ RID-`1004` `FF FF` tail into an operation-5 state change, but normal short-reque
 dispatch rejects it before creating a continuation. Active-request ownership
 and cancellation prevent the tested slot-replacement and queued-resume paths.
 
+### 13.13 Instruction-boundary residuals: no transport overlap; one ICU-S stale-state race
+
+The normal CAN receive interrupt only appends a software-ring record. Original
+`service_ready_communication_policy_and_pdu_chains_7A254` later calls
+`cantp_foreground_cycle @ 0x7A408`, whose timeout, receive and transmit phases run
+serially before `dcm_foreground_cycle @ 0x988C2`. Injecting the exact CAN ISR at
+190 CanTp/DCM instruction boundaries and 391 near-full ring-consumer boundaries
+produced no cursor/capacity violation, control-pointer change or landing-zone
+write. Correcting software-ring bit30 as the CAN-FD marker also left the full
+43-route/12-length matrix (516 cases), the 12-length XCP transport matrix and the
+zero/`FF` payload destination differential bounded to their fixed workspaces.
+
+ICU-S completion is genuinely asynchronous. Exact startup writes `0x48` to
+EIC292/EIC293; `INTBP[292/293]` contains `0x66142/0x66184`. Those handlers call
+the guarded pointer at `FEBF1194` through `0x88700/0x88726`. The public manual
+reserves these channels, so machine scenarios must state the firmware-derived
+EIC control explicitly; no reset value or peripheral timing is inferred.
+
+An instruction-level stale-state race is reproducible in the command-5 timeout
+path. `service_tag_generation_completion_and_timeouts_88EC0` loads global state
+`FEBF1190` at `0x88EDE`. If IRQ292 completes command 5 after that load and before
+the comparison at `0x88EE2`, the interrupt callback releases the successful job,
+then the interrupted foreground continues with stale state `0xB4` and takes the
+timeout/recovery path. With the interrupt before the load, eight subsequent
+native command-7 requests issue. With the interrupt after the load, none issue.
+Both exact-CodeFlash cases enter and return from `0x66142`, terminate normally,
+and write no byte in `FEBFF9F0..FEBFFBFB`.
+
+The raced writes remain fixed crypto scheduler, result and SecOC work objects.
+Command-5 output copy is capped at 16 bytes and checks the complemented fixed
+destination/length pointers before copying. Timeout clears the guarded callback
+before recovery, and the upper completion path resets its callback selection
+before invoking it. The observed consequence is crypto-scheduler denial; it
+does not supply attacker-selected bytes or a mutable destination.
+
+Deterministic reproducer:
+`tools/targets/camry/research/explore_camry_f33_crypto_irq_preemption.py`;
+output schema `camry-f33-crypto-irq-preemption-v1`.
+
+### 13.14 Full normal-mode residual sweep closes the CanTp/DCM preemption candidate
+
+The exact normal CAN-FD ingress omitted by the earlier FIFO-5 model is receive
+FIFO 1. Stock configuration writes `RFCC1=0x1551` (32-byte payload storage,
+48-message depth) and `GCFG=0xFFFF0020` (`CMPOC=1`). Foreground
+`0x79EBA -> 0x83CE4 -> 0x83E0C` polls this FIFO. For an FD frame with DLC 48 or
+64, hardware retains the first 32 bytes and the firmware records the original
+DLC. `0x83E0C` copies eight fixed words into its 64-byte stack object, so the
+software ring receives a stale stack tail. Original-CodeFlash probes for the
+configured `0xD7` route reproduced that tail at `FEBE4600..FEBE4657`; all
+length-dependent differences remained in the bounded ring record and its
+producer/consumer indices. Downstream execution took the same path apart from
+the length-error counter, and no callback cell or
+`FEBFF9F0..FEBFFBFB` byte changed.
+Injecting a second `0xD7` frame after each of the 143 instructions in the first
+FIFO-1 drain invocation queued and popped both frames in every case. Final-state
+differences were limited to stack scratch at `FEBE1F1D..FEBE1F1F`, the second
+bounded ring record at `FEBE4638..FEBE4663`, and ring indices
+`FEBE48F8/FEBE48FA`.
+Bursts from one through the configured 48-frame hardware depth also popped
+every accepted frame and terminated normally. Their LocalRAM changes stayed in
+stack scratch and the software-ring workspace through `FEBE48FB`; the guarded
+callback range and executable landing zone received no write.
+The fixed-label physical path was also swept across all 43 normal routes: 16
+payload lengths from 0 through 64 plus FD-format variants for short DLCs,
+**1,075** cases total. Every frame was accepted into and popped from FIFO 1,
+every run terminated normally, and the memory-access trace contained no write
+to a guarded callback object or the landing zone.
+
+The physical FIFO-5 receive interrupt was then injected after every instruction
+of both recovered CanTp timeout/cleanup fixtures: 697 instructions in state
+`k`, 703 in state `z`, with single-frame, 0x100/0x101 first-frame, and sequence
+1/2 consecutive-frame inputs. All **7,000** exact-CodeFlash cases entered and
+returned from the stock ISR. None violated a receive-slot cursor, length,
+remaining-capacity or receiving-state invariant; none changed the guarded
+callback range or executable landing zone. Reproduce with
+`explore_camry_f33_cantp_preemption.py --full-instruction-sweep`.
+
+The exact channel-1 Tx-completion interrupt was swept against the diagnostic
+response path as well. Completion at offsets 1..55 after `0x853A4` precedes
+the ownership publication at `0x8024A` and changes fixed ring bookkeeping; an
+eight-byte classic frame at the configured 500 kbit/s cannot complete in that
+straight-line window. Offsets 56..275 were instruction-exhaustive. Another 467
+cases bracketed all 155 later CanTp/DCM state writes through instruction 103,317
+and sampled each intervening 5,000-instruction interval. Every realizable case
+returned from the interrupt, preserved all receive-slot bounds, and wrote
+neither a guarded callback object nor the executable landing zone. Reproduce
+the initial window with `explore_camry_f33_tx_confirmation_preemption.py`.
+
+Separate whole-LocalRAM campaigns exercised 13,332 primary-dispatch requests,
+3,855 secondary-session requests, and 2,305 pending/cancel/timeout/stale-
+completion/reuse sequences. They found no outside-envelope write, slot-bound
+violation or landing-zone mutation. The apparent marker hits were either
+fill-pattern collisions under a second-salt comparison or the configured
+12-byte security-seed result copy.
+
+The ten callback-vector routines at `0x6C358..0x6F910` match byte-for-byte
+counterparts in the Crown F30, both Corolla F/H, and Sienna P1M-E images. All
+40 counterpart entries have zero recovered callers and zero raw CodeFlash or
+DataFlash 32-bit entry pointers. The retained Camry LocalRAM and GlobalRAM
+snapshots also contain no pointer to an entry. This repeated cross-target shape
+classifies the family as an unreferenced linked-library bank.
+
+This closes instruction-level CanTp/DCM receive and Tx-confirmation preemption
+as placement candidates. The receive ISR appends a guarded ring record; the Tx
+ISR releases fixed transport/response state; DCM service, completion and
+cancellation remain serialized in foreground. The oversized-FD stale tail is
+confined to the fixed-ring data-disclosure condition above.
+
 ## 14. Exact F33 persistent Gate-2 development patch
 
 The non-persistent signer architecture in §13 remains the preferred production

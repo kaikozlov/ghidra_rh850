@@ -187,7 +187,8 @@ def _validate_events(rows: Any, context: str) -> list[dict[str, Any]]:
         "csih-word": {"unit", "value", "after_transmit_words", "delay_instructions"},
         "adc-sample": {"unit", "channel", "value", "boundary"},
         "rsent-frame": {"unit", "pulse_samples", "after_spc_triggers", "delay_hsb_cycles"},
-        "interrupt": {"channel"},
+        "interrupt": {"channel", "firmware_control"},
+        "can-tx-complete": {"buffer", "firmware_control"},
         "memory-write": {"address", "data_hex"},
         "register-input": {"register", "value"},
         "ecm-pin-drive": {"pin", "drive"},
@@ -207,6 +208,7 @@ def _validate_events(rows: Any, context: str) -> list[dict[str, Any]]:
             "adc-sample": {"unit", "channel", "value", "boundary"},
             "rsent-frame": {"unit", "pulse_samples"},
             "interrupt": {"channel"},
+            "can-tx-complete": {"buffer"},
             "memory-write": {"address", "data_hex"},
             "register-input": {"register", "value"},
             "ecm-pin-drive": {"pin", "drive"},
@@ -301,9 +303,24 @@ def _validate_events(rows: Any, context: str) -> list[dict[str, Any]]:
             if not 0 <= value <= 4095:
                 raise P1MEMachineError(f"{item_context}: ADC sample must fit 12 bits")
             row["value"] = hex(value)
-        elif kind == "interrupt":
-            if type(row["channel"]) is not int or not 0 <= row["channel"] < 512:
-                raise P1MEMachineError(f"{item_context}: invalid interrupt channel")
+        elif kind in {"interrupt", "can-tx-complete"}:
+            if kind == "interrupt":
+                if type(row["channel"]) is not int or not 0 <= row["channel"] < 512:
+                    raise P1MEMachineError(f"{item_context}: invalid interrupt channel")
+            elif type(row["buffer"]) is not int or not 0 <= row["buffer"] < 48:
+                raise P1MEMachineError(f"{item_context}: invalid RSCFD transmit buffer")
+            if "firmware_control" in row:
+                try:
+                    control = int(row["firmware_control"], 0)
+                except (ValueError, TypeError) as exc:
+                    raise P1MEMachineError(
+                        f"{item_context}: firmware-derived EIC control must be an integer string"
+                    ) from exc
+                if not 0 <= control <= 0xFFFF:
+                    raise P1MEMachineError(
+                        f"{item_context}: firmware-derived EIC control exceeds 16 bits"
+                    )
+                row["firmware_control"] = hex(control)
         elif kind == "ecm-pin-drive":
             if not isinstance(row["pin"], str) or row["pin"] not in {"ERROROUT", "ERROROUT_C"}:
                 raise P1MEMachineError(f"{item_context}: unsupported ECM pin")
@@ -626,7 +643,12 @@ def _failure_summary(report: dict[str, Any]) -> str:
     return "; ".join(pieces)
 
 
-def _execute(target_name: str, scenario_paths: Sequence[Path]) -> dict[str, Any]:
+def _execute(
+    target_name: str,
+    scenario_paths: Sequence[Path],
+    *,
+    instruction_trace: bool = False,
+) -> dict[str, Any]:
     if not scenario_paths:
         raise P1MEMachineError("at least one scenario is required")
     target = _target_contract(target_name)
@@ -656,6 +678,8 @@ def _execute(target_name: str, scenario_paths: Sequence[Path]) -> dict[str, Any]
             str(ROOT / "tools" / "gtarget"), target_name, "script", "run", str(SCRIPT),
             "--", str(contract_path), str(batch_report_path),
         ]
+        if instruction_trace:
+            command.append("--instruction-trace")
         # The instruction budget bounds execution; whole-image runs can exceed
         # the bridge's default 300-second response wait.
         environment = os.environ.copy()
@@ -673,7 +697,11 @@ def _execute(target_name: str, scenario_paths: Sequence[Path]) -> dict[str, Any]
 
 
 def capture_many(
-    target_name: str, scenario_paths: Sequence[Path], output_dir: Path,
+    target_name: str,
+    scenario_paths: Sequence[Path],
+    output_dir: Path,
+    *,
+    instruction_trace: bool = False,
 ) -> list[dict[str, Any]]:
     """Run a batch and return every report, including failed checks.
 
@@ -682,7 +710,7 @@ def capture_many(
     """
     output_dir = _absolute_input(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
-    batch = _execute(target_name, scenario_paths)
+    batch = _execute(target_name, scenario_paths, instruction_trace=instruction_trace)
     reports = batch["reports"]
     if len(reports) != len(scenario_paths):
         raise P1MEMachineError("batch report count drifted")
@@ -696,17 +724,32 @@ def capture_many(
 
 
 def run_many(
-    target_name: str, scenario_paths: Sequence[Path], output_dir: Path,
+    target_name: str,
+    scenario_paths: Sequence[Path],
+    output_dir: Path,
+    *,
+    instruction_trace: bool = False,
 ) -> list[dict[str, Any]]:
-    reports = capture_many(target_name, scenario_paths, output_dir)
+    reports = capture_many(
+        target_name,
+        scenario_paths,
+        output_dir,
+        instruction_trace=instruction_trace,
+    )
     failures = [report for report in reports if not report.get("passed")]
     if failures:
         raise P1MEMachineError("; ".join(_failure_summary(report) for report in failures))
     return reports
 
 
-def run(target_name: str, scenario_path: Path, report_path: Path) -> dict[str, Any]:
-    batch = _execute(target_name, [scenario_path])
+def run(
+    target_name: str,
+    scenario_path: Path,
+    report_path: Path,
+    *,
+    instruction_trace: bool = False,
+) -> dict[str, Any]:
+    batch = _execute(target_name, [scenario_path], instruction_trace=instruction_trace)
     report = batch["reports"][0]
     report_path = _absolute_input(report_path)
     report_path.parent.mkdir(parents=True, exist_ok=True)
@@ -724,9 +767,19 @@ def main() -> int:
     parser.add_argument("target")
     parser.add_argument("scenarios", nargs="+", type=Path)
     parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument(
+        "--instruction-trace",
+        action="store_true",
+        help="include every entered instruction and its scheduler tick in each report",
+    )
     args = parser.parse_args()
     try:
-        reports = run_many(args.target, args.scenarios, args.output_dir)
+        reports = run_many(
+            args.target,
+            args.scenarios,
+            args.output_dir,
+            instruction_trace=args.instruction_trace,
+        )
     except P1MEMachineError as exc:
         parser.error(str(exc))
     print(json.dumps({"reports": [report["report_path"] for report in reports]}, indent=2))

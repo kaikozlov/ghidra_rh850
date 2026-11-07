@@ -336,7 +336,9 @@ public class RunP1MEMachine extends GhidraScript {
         Long p_bus_cycles;
         Integer fifo;
         Integer channel;
+        Integer buffer;
         Integer unit;
+        String firmware_control;
         String can_id;
         String data_hex;
         boolean extended;
@@ -685,6 +687,7 @@ public class RunP1MEMachine extends GhidraScript {
         final RegisterDef[] interruptRegistersByAddress;
         final BitSet pendingInterrupts;
         final Map<Integer, ReceiveFifo> receiveFifos = new HashMap<>();
+        final Map<Long, RegisterDef> pendingRscfdTransmits = new HashMap<>();
         // R01UH0585EJ0120 Table 17.132: CFDC and CFPLS encodings.
         static final int[] FIFO_DEPTHS = {0, 4, 8, 16, 32, 48, 64, 128};
         static final int[] PAYLOAD_LENGTHS = {8, 12, 16, 20, 24, 32, 48, 64};
@@ -968,15 +971,25 @@ public class RunP1MEMachine extends GhidraScript {
         }
 
         void requestInterrupt(PcodeThread<byte[]> thread, int channel) {
+            requestInterrupt(thread, channel, null);
+        }
+
+        void requestInterrupt(PcodeThread<byte[]> thread, int channel, String firmwareControl) {
             RegisterDef eic = interruptRegisters.get(channel);
-            if (eic == null || eic.reset == null) {
+            if (eic == null || (eic.reset == null && firmwareControl == null)) {
                 throw fault("unsupported-interrupt", thread, channel, 0, "request", "manual",
                     "interrupt channel is not described by the device model");
             }
-            setRegisterValue(eic.name, unsigned(memory(eic.address, eic.size)) | 0x1000);
+            long control = eic.reset == null
+                ? parseUnsigned(firmwareControl)
+                : unsigned(memory(eic.address, eic.size));
+            setRegisterValue(eic.name, control | 0x1000);
             JsonObject event = new JsonObject();
             event.addProperty("kind", "interrupt-request");
             event.addProperty("channel", channel);
+            if (eic.reset == null) {
+                event.addProperty("firmware_control", String.format("0x%04X", control & 0xffff));
+            }
             event.addProperty("scheduler_tick", trace.instructions);
             trace.deviceEvents.add(event);
         }
@@ -2374,20 +2387,123 @@ public class RunP1MEMachine extends GhidraScript {
             trace.deviceEvents.add(event);
         }
 
-        void handleRscfdWrite(PcodeThread<byte[]> thread, RegisterDef register, byte[] value) {
-            if ((unsigned(value) & 1) == 0) return;
-            if (register.payload_address == null || register.completion_value == null) {
-                throw new IllegalStateException(register.name + " lacks RSCFD trigger metadata");
+        RegisterDef rscfdTransmitResultSummary(long buffer) {
+            long channel = buffer / 16;
+            if (channel < 0 || channel > 2) {
+                throw new IllegalStateException("RSCFD transmit buffer is outside channels0..2");
             }
-            long base = register.payload_address;
-            long bufferOffset = base - RSCFD_TX_RAM_BASE;
+            return requiredRegister("RSCFD", "transmit-result-summary",
+                "CFDTMTRF_CH" + channel);
+        }
+
+        RegisterDef rscfdTransmitInterruptEnable(long buffer) {
+            long channel = buffer / 16;
+            if (channel < 0 || channel > 2) {
+                throw new IllegalStateException("RSCFD transmit buffer is outside channels0..2");
+            }
+            return requiredRegister("RSCFD", "transmit-interrupt-enable", "TMIEC" + channel);
+        }
+
+        void setRscfdTransmitRequest(long buffer, boolean present) {
+            RegisterDef status = requiredRegister(
+                "RSCFD", "transmit-request-status", "CFDTMTRSTS" + (buffer / 32));
+            long bit = 1L << (buffer & 31);
+            setRegisterValue(status.name,
+                present ? registerValue(status) | bit : registerValue(status) & ~bit);
+        }
+
+        void setRscfdTransmitAbortRequest(long buffer, boolean present) {
+            RegisterDef status = requiredRegister(
+                "RSCFD", "transmit-abort-status", "CFDTMTARSTS" + (buffer / 32));
+            long bit = 1L << (buffer & 31);
+            setRegisterValue(status.name,
+                present ? registerValue(status) | bit : registerValue(status) & ~bit);
+        }
+
+        long rscfdTransmitBuffer(RegisterDef register) {
+            if (register.payload_address == null) {
+                throw new IllegalStateException(register.name + " lacks RSCFD payload metadata");
+            }
+            long bufferOffset = register.payload_address - RSCFD_TX_RAM_BASE;
             if (bufferOffset < 0 || bufferOffset % RSCFD_TX_RECORD_SIZE != 0) {
                 throw new IllegalStateException(
                     register.name + " has an invalid RSCFD payload address");
             }
-            long buffer = bufferOffset / RSCFD_TX_RECORD_SIZE;
-            RegisterDef status = requiredRegister(
-                register.name, "completion-status", register.status_register);
+            return bufferOffset / RSCFD_TX_RECORD_SIZE;
+        }
+
+
+        void setRscfdTransmitResult(long buffer, boolean present) {
+            long channel = buffer / 16;
+            RegisterDef summary = rscfdTransmitResultSummary(buffer);
+            long bit = 1L << (buffer & 15);
+            long next = present
+                ? registerValue(summary) | bit
+                : registerValue(summary) & ~bit;
+            setRegisterValue(summary.name, next);
+            long enabled = registerValue(rscfdTransmitInterruptEnable(buffer));
+            if (channel == 1 && (next & enabled) == 0) {
+                RegisterDef eic = interruptRegisters.get(188);
+                if (eic != null) {
+                    setRegisterValue(eic.name, registerValue(eic) & ~0x1000L);
+                }
+            }
+        }
+
+        void handleRscfdTransmitStatusWrite(RegisterDef register) {
+            long channel;
+            long channelBase;
+            if (register.address >= 0xFFD202D0L && register.address < 0xFFD202D4L) {
+                channel = 0;
+                channelBase = 0xFFD202D0L;
+            }
+            else if (register.address >= 0xFFD202E0L && register.address < 0xFFD202F0L) {
+                channel = 1;
+                channelBase = 0xFFD202E0L;
+            }
+            else if (register.address == 0xFFD202F0L) {
+                channel = 2;
+                channelBase = 0xFFD202F0L;
+            }
+            else {
+                throw new IllegalStateException(
+                    register.name + " is outside modeled RSCFD transmit-status banks");
+            }
+            for (int offset = 0; offset < register.size; offset++) {
+                long resource = register.address + offset - channelBase;
+                long result = unsigned(memory(register.address + offset, 1)) & 6;
+                setRscfdTransmitResult(channel * 16 + resource, result != 0);
+            }
+        }
+
+        void handleRscfdWrite(PcodeThread<byte[]> thread, RegisterDef register, byte[] value,
+                              long registerBeforeWrite) {
+            long command = unsigned(value);
+            long buffer = rscfdTransmitBuffer(register);
+            if ((command & 2) != 0) {
+                if (pendingRscfdTransmits.containsKey(buffer)) {
+                    setRegisterValue(register.name, registerBeforeWrite | 2);
+                    setRscfdTransmitAbortRequest(buffer, true);
+                }
+                else {
+                    setRegisterValue(register.name, registerBeforeWrite);
+                }
+                return;
+            }
+            if ((command & 1) == 0) {
+                setRegisterValue(register.name, registerBeforeWrite);
+                return;
+            }
+            if (register.completion_value == null) {
+                throw new IllegalStateException(register.name + " lacks RSCFD trigger metadata");
+            }
+            RegisterDef previous = pendingRscfdTransmits.putIfAbsent(buffer, register);
+            if (previous != null) {
+                throw new IllegalStateException(
+                    register.name + " requested while " + previous.name + " is still transmitting");
+            }
+            setRscfdTransmitRequest(buffer, true);
+            long base = register.payload_address;
             byte[] header = memory(base, 8);
             byte[] data = memory(base + 12, 8);
             long id = unsigned(Arrays.copyOfRange(header, 0, 4)) & 0x1fffffffL;
@@ -2408,9 +2524,54 @@ public class RunP1MEMachine extends GhidraScript {
                 event.addProperty("data_hex", payloadHex);
                 event.addProperty("evidence", register.source_ref);
                 trace.deviceEvents.add(event);
-                setRegisterValue(status.name, register.completion_value);
-                setRegisterValue(register.name, 0);
             });
+        }
+
+        void completeRscfdTransmit(PcodeThread<byte[]> thread, ExternalEvent input) {
+            if (input.buffer == null || input.buffer < 0 || input.buffer >= 48) {
+                throw new IllegalArgumentException(
+                    "can-tx-complete requires an RSCFD buffer in range 0..47");
+            }
+            long buffer = Integer.toUnsignedLong(input.buffer);
+            RegisterDef control = pendingRscfdTransmits.remove(buffer);
+            if (control == null) {
+                throw new IllegalArgumentException(
+                    "can-tx-complete buffer " + buffer + " has no pending transmission");
+            }
+            RegisterDef status = requiredRegister(
+                control.name, "completion-status", control.status_register);
+            long statusOffset = status.size == 1 ? 0 : buffer & 15;
+            if (statusOffset >= status.size) {
+                throw new IllegalStateException(
+                    control.name + " completion status lies outside " + status.name);
+            }
+            boolean abortRequested = (registerValue(control) & 2) != 0;
+            long result = abortRequested ? 6 : control.completion_value;
+            setMemory(status.address + statusOffset,
+                bytes(result, 1, language.isBigEndian()));
+            setRscfdTransmitResult(buffer, true);
+            setRscfdTransmitRequest(buffer, false);
+            setRscfdTransmitAbortRequest(buffer, false);
+            setRegisterValue(control.name, 0);
+
+            long enabled = registerValue(rscfdTransmitInterruptEnable(buffer));
+            boolean interrupt = (enabled & (1L << (buffer & 15))) != 0;
+            if (interrupt) {
+                long channel = buffer / 16;
+                if (channel != 1) {
+                    throw new IllegalStateException(
+                        "RSCFD transmit interrupt routing is not modeled for channel " + channel);
+                }
+                requestInterrupt(thread, 188, input.firmware_control);
+            }
+            JsonObject event = new JsonObject();
+            event.addProperty("kind", "can-tx-complete");
+            event.addProperty("scheduler_tick", trace.instructions);
+            event.addProperty("controller", "RSCFD");
+            event.addProperty("buffer", buffer);
+            event.addProperty("interrupt", interrupt);
+            event.addProperty("evidence", input.evidence);
+            trace.deviceEvents.add(event);
         }
 
         long registerValue(RegisterDef register) {
@@ -5459,11 +5620,14 @@ public class RunP1MEMachine extends GhidraScript {
                     rsent.receive(thread, input.unit, input.pulse_samples, input.evidence);
                     break;
                 case "can-rx": receiveFrame(thread, input); break;
+                case "can-tx-complete": completeRscfdTransmit(thread, input); break;
                 case "csih-word":
                     csih(requiredRegister("csih-word", "controller", "CSIH" + input.unit + "CTL0"))
                         .complete(thread, input);
                     break;
-                case "interrupt": requestInterrupt(thread, input.channel); break;
+                case "interrupt":
+                    requestInterrupt(thread, input.channel, input.firmware_control);
+                    break;
                 case "memory-write": externalMemoryWrite(input); break;
                 case "register-input": externalRegisterInput(input); break;
                 case "ecm-pin-drive": externalEcmPinDrive(input); break;
@@ -6560,7 +6724,10 @@ public class RunP1MEMachine extends GhidraScript {
                     dcraSeeded.add(crcControl.name);
                     break;
                 case "dcra-input": handleDcraInput(register, value); break;
-                case "rscfd-transmit": handleRscfdWrite(thread, register, value); break;
+                case "rscfd-transmit":
+                    handleRscfdWrite(thread, register, value, registerBeforeWrite);
+                    break;
+                case "rscfd-transmit-status": handleRscfdTransmitStatusWrite(register); break;
                 case "rscfd-fd-counter-clear": {
                     // Section17.2.2: classical mode maps this address to a rule word.
                     if ((registerValue(registersByName.get("GRMCFG")) & 1) == 0) break;
@@ -6780,9 +6947,8 @@ public class RunP1MEMachine extends GhidraScript {
             for (int index = low; index < interruptRegistersByAddress.length; index++) {
                 RegisterDef eic = interruptRegistersByAddress[index];
                 if (eic.address >= end) break;
-                if (eic.reset != null) {
-                    pendingInterrupts.set(index, (unsigned(memory(eic.address, eic.size)) & 0x1000) != 0);
-                }
+                pendingInterrupts.set(
+                    index, (unsigned(memory(eic.address, eic.size)) & 0x1000) != 0);
             }
         }
 

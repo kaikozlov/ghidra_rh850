@@ -716,7 +716,9 @@ also accept their controller-relative forms below. Supported kinds:
    "value":"0x6400","evidence":"Explicit synthetic wire input; functional latency"}
   ```
 - `interrupt`: `channel`; requests a modeled EIC source. Unknown/reserved
-  channels fail closed.
+  channels fail closed. A channel reserved by the public manual but initialized
+  by exact firmware requires its observed 16-bit `firmware_control`; this
+  explicit scenario value supplies no reset default or peripheral timing.
 - `memory-write`: 32-bit `address` and non-empty `data_hex`; supplies a
   deterministic asynchronous write to modeled writable RAM. It is explicit
   scenario state and does not invoke CPU-store callbacks or imply hardware

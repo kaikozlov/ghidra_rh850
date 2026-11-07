@@ -3268,8 +3268,12 @@ addrmap p1me {
     CFCC8->source_ref="R01UH0585EJ0120 section17.4.8.1 Table17.132 pp989-991";
     rscfd_init_word_t RFCC0 @ 0xFFD200B8;
     RFCC0->source_ref="R01UH0585EJ0120 section17.4.7.1 Table17.125 pp979-980";
-    rscfd_init_word_t RFCC1 @ 0xFFD200BC;
-    RFCC1->source_ref="R01UH0585EJ0120 section17.4.7.1 Table17.125 pp979-980";
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDRFCC1: receive FIFO 1 configuration/control; RFIE bit 1, RFPLS[6:4] payload size, RFDC[10:8] depth, RFIM bit 12 interrupt source, RFIGCV[15:13] threshold, RFE bit 0";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table 17.125, section 17.4.7.1 (pages 979-981); exact firmware constant 0x1551 at 0x233D8+0x34 configures 32-byte payload storage and 48-message depth";
+        behavior="rscfd"; status_register="RFSTS1"; pointer_register="RFPCTR1"; window_register="RFID1"; channel_control_register="C1CTR"; global_control_register="GCTR"; interrupt_register="EIC190"; fifo_index=1; fifo_channel=1;
+        field { sw=rw; reset=0; } value[31:0];
+    } RFCC1 @ 0xFFD200BC;
     rscfd_init_word_t RFCC2 @ 0xFFD200C0;
     RFCC2->source_ref="R01UH0585EJ0120 section17.4.7.1 Table17.125 pp979-980";
     rscfd_init_word_t RFCC3 @ 0xFFD200C4;
@@ -3282,6 +3286,64 @@ addrmap p1me {
     RFCC6->source_ref="R01UH0585EJ0120 section17.4.7.1 Table17.125 pp979-980";
     rscfd_init_word_t RFCC7 @ 0xFFD200D4;
     RFCC7->source_ref="R01UH0585EJ0120 section17.4.7.1 Table17.125 pp979-980";
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDRFSTS1: receive FIFO 1 status; RFMC[15:8] count, RFIF bit 3, RFMLT bit 2, RFFLL bit 1, RFEMP bit 0";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table 17.126, section 17.4.7.2 (pages 981-983); exact firmware reader 0x83E0C";
+        behavior="rscfd"; control_register="RFCC1"; pointer_register="RFPCTR1"; interrupt_register="EIC190"; fifo_index=1; fifo_channel=1;
+        field { sw=rw; reset=1; } value[31:0];
+    } RFSTS1 @ 0xFFD200DC;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDRFPCTR1: receive FIFO 1 pointer control; writing RFPC=0xFF pops the oldest unread message";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table 17.127, section 17.4.7.3 (pages 983-984); exact firmware reader 0x83E0C";
+        behavior="rscfd"; status_register="RFSTS1"; control_register="RFCC1"; fifo_index=1; fifo_channel=1;
+        field { sw=w; } value[31:0];
+    } RFPCTR1 @ 0xFFD200FC;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDRFID1: receive FIFO 1 access ID; RFIDE bit 31, RFRTR bit 30, RFID[28:0]; window through +0x48 aliases the oldest unread message";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Tables 17.128-17.131, sections 17.4.7.4-17.4.7.7 (pages 984-989); exact firmware base pointer 0xFFD23000 at 0x230AC and index stride 0x80 in reader 0x83E0C";
+        behavior="rscfd"; status_register="RFSTS1"; fifo_index=1; fifo_channel=1; access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } RFID1 @ 0xFFD23080;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDRFPTR1: receive FIFO 1 access pointer; RFDLC[31:28], RFPTR[27:16], RFTS[15:0]";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table 17.129, section 17.4.7.5 (pages 985-987)";
+        behavior="rscfd"; status_register="RFSTS1"; fifo_index=1; fifo_channel=1; access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } RFPTR1 @ 0xFFD23084;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDRFFDSTS1: receive FIFO 1 CAN FD status; RFFDF bit 2, RFBRS bit 1, RFESI bit 0";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table 17.130, section 17.4.7.6 (page 987)";
+        behavior="rscfd"; status_register="RFSTS1"; fifo_index=1; fifo_channel=1; access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } RFFDSTS1 @ 0xFFD23088;
+
+    rscfd_init_word_t RFDF0_1 @ 0xFFD2308C;
+    rscfd_init_word_t RFDF1_1 @ 0xFFD23090;
+    rscfd_init_word_t RFDF2_1 @ 0xFFD23094;
+    rscfd_init_word_t RFDF3_1 @ 0xFFD23098;
+    rscfd_init_word_t RFDF4_1 @ 0xFFD2309C;
+    rscfd_init_word_t RFDF5_1 @ 0xFFD230A0;
+    rscfd_init_word_t RFDF6_1 @ 0xFFD230A4;
+    rscfd_init_word_t RFDF7_1 @ 0xFFD230A8;
+    rscfd_init_word_t RFDF8_1 @ 0xFFD230AC;
+    rscfd_init_word_t RFDF9_1 @ 0xFFD230B0;
+    rscfd_init_word_t RFDF10_1 @ 0xFFD230B4;
+    rscfd_init_word_t RFDF11_1 @ 0xFFD230B8;
+    rscfd_init_word_t RFDF12_1 @ 0xFFD230BC;
+    rscfd_init_word_t RFDF13_1 @ 0xFFD230C0;
+    rscfd_init_word_t RFDF14_1 @ 0xFFD230C4;
+    rscfd_init_word_t RFDF15_1 @ 0xFFD230C8;
+
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD DMA transfer control";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.10.1, Table 17.145; exact firmware channel-mode cancellation path"; behavior="rscfd"; access_widths="1,2,4";
+        field { sw=rw; reset=0; } value[31:0];
+    } CFDCDTCT @ 0xFFD20490;
 
     // CAN FD receive-rule window: sixteen entries, no mapping of adjacent holes.
     rscfd_init_word_t GAFLID0 @ 0xFFD21000;
@@ -3735,6 +3797,13 @@ addrmap p1me {
     } CFSTS_CH1 @ 0xFFD20184;
 
     reg {
+        regwidth=32; accesswidth=32; desc="RSCFD common-FIFO 4 status";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.8.2, Table 17.133"; behavior="rscfd"; access_widths="1,2,4";
+        field { sw=rw; reset=1; } value[31:0];
+    } CFSTS_CH1_4 @ 0xFFD20188;
+
+
+    reg {
         regwidth=32; accesswidth=32; desc="RSCFD common-FIFO pointer control base (CFPCTRk = base+0x1D8+4k, k=0..8; write 0xFF to CFPC[7:0] advances)";
         evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role"; behavior="rscfd";
         field { sw=rw; } value[31:0];
@@ -3746,6 +3815,48 @@ addrmap p1me {
         status_register="CFSTS_CH1"; control_register="CFCC3"; fifo_index=3; fifo_channel=1;
         field { sw=w; } value[31:0];
     } CFPCTR_CH1 @ 0xFFD201E4;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD transmit-request status for buffers 0..31";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.12.1, Table 17.155"; behavior="rscfd"; access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDTMTRSTS0 @ 0xFFD20350;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD transmit-request status for buffers 32..47";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.12.1, Table 17.155"; behavior="rscfd"; access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDTMTRSTS1 @ 0xFFD20354;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD transmit-abort-request status for buffers 0..31";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.12.2"; behavior="rscfd"; access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDTMTARSTS0 @ 0xFFD20360;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD transmit-abort-request status for buffers 32..47";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.12.2"; behavior="rscfd"; access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDTMTARSTS1 @ 0xFFD20364;
+
+    reg {
+        regwidth=16; accesswidth=16; desc="RSCFD channel0 Tx message-buffer result summary (bit n reflects CFDTMSTSn.TMTRF)";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD transmit-buffer status and interrupt registers"; behavior="rscfd";
+        field { sw=r; reset=0; } value[15:0];
+    } CFDTMTRF_CH0 @ 0xFFD20370;
+
+    reg {
+        regwidth=16; accesswidth=16; desc="RSCFD channel1 Tx message-buffer result summary (bit n reflects local CFDTMSTSn.TMTRF)";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD transmit-buffer status and interrupt registers"; behavior="rscfd";
+        field { sw=r; reset=0; } value[15:0];
+    } CFDTMTRF_CH1 @ 0xFFD20372;
+
+    reg {
+        regwidth=16; accesswidth=16; desc="RSCFD channel2 Tx message-buffer result summary (bit n reflects local CFDTMSTSn.TMTRF)";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD transmit-buffer status and interrupt registers"; behavior="rscfd";
+        field { sw=r; reset=0; } value[15:0];
+    } CFDTMTRF_CH2 @ 0xFFD20374;
 
     reg {
         regwidth=32; accesswidth=32; desc="RSCFD Tx message-buffer control base (CFDTMCn.TMTR at +n)";
@@ -3761,11 +3872,36 @@ addrmap p1me {
     } CFDTMC16 @ 0xFFD20260;
 
     reg {
+        regwidth=16; accesswidth=8; desc="Application CAN1 Tx buffer local resources 1..2 control bytes";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; exact firmware cancellation loop"; behavior="rscfd";
+        field { sw=rw; } value[15:0];
+    } CFDTMC_CH1_1_2 @ 0xFFD20261;
+
+    reg {
+        regwidth=16; accesswidth=8; desc="Application CAN1 Tx buffer local resources 4..5 control bytes";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; exact firmware cancellation loop"; behavior="rscfd";
+        field { sw=rw; } value[15:0];
+    } CFDTMC_CH1_4_5 @ 0xFFD20264;
+
+    reg {
+        regwidth=64; accesswidth=8; desc="Application CAN1 Tx buffer local resources 8..15 control bytes";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; exact firmware cancellation loop"; behavior="rscfd";
+        field { sw=rw; } value[63:0];
+    } CFDTMC_CH1_8_15 @ 0xFFD20268;
+
+    reg {
         regwidth=8; accesswidth=8; desc="Application CAN1 Tx buffer n=16 control (TMTR bit 0)";
         evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; exact firmware table binding"; behavior="rscfd";
         trigger="rscfd-transmit"; payload_address=0xFFD24400; status_register="CFDTMSTS_CH1_16"; completion_value=4;
         field { sw=rw; } value[7:0];
     } CFDTMC_CH1_16 @ 0xFFD20270;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="Application CAN1 Tx buffer local resource 3 control (TMTR bit 0)";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; exact firmware table binding"; behavior="rscfd";
+        trigger="rscfd-transmit"; payload_address=0xFFD24260; status_register="CFDTMSTS_CH1"; completion_value=4;
+        field { sw=rw; } value[7:0];
+    } CFDTMC_CH1_3 @ 0xFFD20263;
 
     reg {
         regwidth=8; accesswidth=8; desc="Application CAN1 Tx buffer local resource 6 control (TMTR bit 0)";
@@ -3783,33 +3919,51 @@ addrmap p1me {
 
     reg {
         regwidth=32; accesswidth=32; desc="RSCFD Tx message-buffer status base (CFDTMSTSn at +n)";
-        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role"; behavior="rscfd";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role"; behavior="rscfd"; trigger="rscfd-transmit-status"; access_widths="1,2,4";
         field { sw=rw; } value[31:0];
     } CFDTMSTS @ 0xFFD202D0;
 
     reg {
         regwidth=32; accesswidth=32; desc="RSCFD Tx status base for application CAN1 record";
-        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role"; behavior="rscfd";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role"; behavior="rscfd"; trigger="rscfd-transmit-status"; access_widths="1,2,4";
         field { sw=rw; } value[31:0];
     } CFDTMSTS_CH1 @ 0xFFD202E0;
 
     reg {
+        regwidth=8; accesswidth=8; desc="Application CAN1 Tx buffer local resource 4 status";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; exact firmware receive-service scan"; behavior="rscfd"; trigger="rscfd-transmit-status";
+        field { sw=rw; reset=0; } value[7:0];
+    } CFDTMSTS_CH1_4 @ 0xFFD202E4;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="Application CAN1 Tx buffer local resource 5 status";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; exact firmware receive-service scan"; behavior="rscfd"; trigger="rscfd-transmit-status";
+        field { sw=rw; reset=0; } value[7:0];
+    } CFDTMSTS_CH1_5 @ 0xFFD202E5;
+
+    reg {
+        regwidth=64; accesswidth=32; desc="Application CAN1 Tx buffer local resources 8..15 status bytes";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; exact firmware receive-service scan"; behavior="rscfd"; access_widths="1,2,4";
+        field { sw=rw; reset=0; } value[63:0];
+    } CFDTMSTS_CH1_8_15 @ 0xFFD202E8;
+
+    reg {
         regwidth=8; accesswidth=8; desc="Application CAN1 Tx buffer n=16 status";
-        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; exact firmware table binding"; behavior="rscfd";
+        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; exact firmware table binding"; behavior="rscfd"; trigger="rscfd-transmit-status";
         field { sw=rw; } value[7:0];
     } CFDTMSTS_CH1_16 @ 0xFFD202F0;
 
     reg {
         regwidth=8; accesswidth=8; desc="Application CAN1 Tx buffer local resource 6 status";
         evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; exact registered-firmware response route";
-        behavior="rscfd";
+        behavior="rscfd"; trigger="rscfd-transmit-status";
         field { sw=rw; reset=0; } value[7:0];
     } CFDTMSTS_CH1_6 @ 0xFFD202E6;
 
     reg {
         regwidth=8; accesswidth=8; desc="Application CAN1 Tx buffer local resource 7 status";
         evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD register tables; exact registered-firmware response route";
-        behavior="rscfd";
+        behavior="rscfd"; trigger="rscfd-transmit-status";
         field { sw=rw; reset=0; } value[7:0];
     } CFDTMSTS_CH1_7 @ 0xFFD202E7;
 
@@ -4175,6 +4329,13 @@ addrmap p1me {
         access_widths="1,2,4";
         field { sw=rw; reset=5; } value[31:0];
     } C1STS @ 0xFFD20018;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDC1ERFL (CmERFL = base+0x0C+0x10*m, m=1): CAN1 channel error flags; flag bits are write-zero-clear and reset clear";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table 17.98, section 17.4.3.4 (pages 930-934); SFR list FFD2001C; exact firmware 0x837E8 reads BOEF bit3 and 0x837F6 writes 0x7FF7 to clear it"; behavior="rscfd";
+        access_widths="1,2,4";
+        field { sw=rw; reset=0; } value[31:0];
+    } C1ERFL @ 0xFFD2001C;
 
     reg {
         regwidth=32; accesswidth=32; desc="RSCFD Tx message-buffer RAM base (0x20-byte entries)";

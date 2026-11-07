@@ -2,7 +2,7 @@
   "schema": "rh850-p1me-machine-v2",
   "source": {
     "path": "data/devices/p1me.rdl",
-    "sha256": "5109bfb30012c3163c7463a8136b28e8824ffc5beced08dd03a5e19ebca12a69",
+    "sha256": "ef314d4567c62e78306a99bd8aa98ee0bea2ba500842a89fc098657d075a044b",
     "systemrdl_compiler": "1.33.0"
   },
   "products": [
@@ -15648,6 +15648,22 @@
         "description": "RSCFD0CFDC1STS (CmSTS = base+0x08+0x10*m, m=1): CAN1 channel status; TEC[31:24] and REC[23:16] error counters, ESIF bit 8, COMSTS bit 7, RECSTS bit 6, TRMSTS bit 5, BOSTS bit 4, EPSTS bit 3, CSLPSTS bit 2, CHLTSTS bit 1, CRSTSTS bit 0; reset 0x5 (channel stop + channel reset state); native diagnostic receive gate 0x83EF2 polls (C1STS & 7) == 0 before entering the CFIFO receive path"
       },
       {
+        "name": "C1ERFL",
+        "address": 4291952668,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 Table 17.98, section 17.4.3.4 (pages 930-934); SFR list FFD2001C; exact firmware 0x837E8 reads BOEF bit3 and 0x837F6 writes 0x7FF7 to clear it",
+        "description": "RSCFD0CFDC1ERFL (CmERFL = base+0x0C+0x10*m, m=1): CAN1 channel error flags; flag bits are write-zero-clear and reset clear"
+      },
+      {
         "name": "GCFG",
         "address": 4291952772,
         "size": 4,
@@ -15760,16 +15776,22 @@
         "address": 4291952828,
         "size": 4,
         "access_widths": [
-          1,
-          2,
           4
         ],
         "access": "rw",
         "reset": 0,
         "behavior": "rscfd",
         "evidence": "manual",
-        "source_ref": "R01UH0585EJ0120 section17.4.7.1 Table17.125 pp979-980",
-        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
+        "source_ref": "R01UH0585EJ0120 Table 17.125, section 17.4.7.1 (pages 979-981); exact firmware constant 0x1551 at 0x233D8+0x34 configures 32-byte payload storage and 48-message depth",
+        "description": "RSCFD0CFDRFCC1: receive FIFO 1 configuration/control; RFIE bit 1, RFPLS[6:4] payload size, RFDC[10:8] depth, RFIM bit 12 interrupt source, RFIGCV[15:13] threshold, RFE bit 0",
+        "status_register": "RFSTS1",
+        "interrupt_register": "EIC190",
+        "pointer_register": "RFPCTR1",
+        "window_register": "RFID1",
+        "channel_control_register": "C1CTR",
+        "global_control_register": "GCTR",
+        "fifo_index": 1,
+        "fifo_channel": 1
       },
       {
         "name": "RFCC2",
@@ -15866,6 +15888,43 @@
         "evidence": "manual",
         "source_ref": "R01UH0585EJ0120 section17.4.7.1 Table17.125 pp979-980",
         "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
+      },
+      {
+        "name": "RFSTS1",
+        "address": 4291952860,
+        "size": 4,
+        "access_widths": [
+          4
+        ],
+        "access": "rw",
+        "reset": 1,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 Table 17.126, section 17.4.7.2 (pages 981-983); exact firmware reader 0x83E0C",
+        "description": "RSCFD0CFDRFSTS1: receive FIFO 1 status; RFMC[15:8] count, RFIF bit 3, RFMLT bit 2, RFFLL bit 1, RFEMP bit 0",
+        "interrupt_register": "EIC190",
+        "control_register": "RFCC1",
+        "pointer_register": "RFPCTR1",
+        "fifo_index": 1,
+        "fifo_channel": 1
+      },
+      {
+        "name": "RFPCTR1",
+        "address": 4291952892,
+        "size": 4,
+        "access_widths": [
+          4
+        ],
+        "access": "w",
+        "reset": null,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 Table 17.127, section 17.4.7.3 (pages 983-984); exact firmware reader 0x83E0C",
+        "description": "RSCFD0CFDRFPCTR1: receive FIFO 1 pointer control; writing RFPC=0xFF pops the oldest unread message",
+        "status_register": "RFSTS1",
+        "control_register": "RFCC1",
+        "fifo_index": 1,
+        "fifo_channel": 1
       },
       {
         "name": "CFCC0",
@@ -16057,6 +16116,22 @@
         "fifo_channel": 1
       },
       {
+        "name": "CFSTS_CH1_4",
+        "address": 4291953032,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 1,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section 17.4.8.2, Table 17.133",
+        "description": "RSCFD common-FIFO 4 status"
+      },
+      {
         "name": "CFSTS5",
         "address": 4291953036,
         "size": 4,
@@ -16158,6 +16233,52 @@
         "completion_value": 4
       },
       {
+        "name": "CFDTMC_CH1_1_2",
+        "address": 4291953249,
+        "size": 2,
+        "access_widths": [
+          1
+        ],
+        "access": "rw",
+        "reset": null,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section 17, RSCFD register tables; exact firmware cancellation loop",
+        "description": "Application CAN1 Tx buffer local resources 1..2 control bytes"
+      },
+      {
+        "name": "CFDTMC_CH1_3",
+        "address": 4291953251,
+        "size": 1,
+        "access_widths": [
+          1
+        ],
+        "access": "rw",
+        "reset": null,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section 17, RSCFD register tables; exact firmware table binding",
+        "description": "Application CAN1 Tx buffer local resource 3 control (TMTR bit 0)",
+        "trigger": "rscfd-transmit",
+        "status_register": "CFDTMSTS_CH1",
+        "payload_address": 4291969632,
+        "completion_value": 4
+      },
+      {
+        "name": "CFDTMC_CH1_4_5",
+        "address": 4291953252,
+        "size": 2,
+        "access_widths": [
+          1
+        ],
+        "access": "rw",
+        "reset": null,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section 17, RSCFD register tables; exact firmware cancellation loop",
+        "description": "Application CAN1 Tx buffer local resources 4..5 control bytes"
+      },
+      {
         "name": "CFDTMC_CH1_6",
         "address": 4291953254,
         "size": 1,
@@ -16194,6 +16315,20 @@
         "completion_value": 4
       },
       {
+        "name": "CFDTMC_CH1_8_15",
+        "address": 4291953256,
+        "size": 8,
+        "access_widths": [
+          1
+        ],
+        "access": "rw",
+        "reset": null,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section 17, RSCFD register tables; exact firmware cancellation loop",
+        "description": "Application CAN1 Tx buffer local resources 8..15 control bytes"
+      },
+      {
         "name": "CFDTMC_CH1_16",
         "address": 4291953264,
         "size": 1,
@@ -16216,6 +16351,8 @@
         "address": 4291953360,
         "size": 4,
         "access_widths": [
+          1,
+          2,
           4
         ],
         "access": "rw",
@@ -16223,13 +16360,16 @@
         "behavior": "rscfd",
         "evidence": "manual",
         "source_ref": "R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role",
-        "description": "RSCFD Tx message-buffer status base (CFDTMSTSn at +n)"
+        "description": "RSCFD Tx message-buffer status base (CFDTMSTSn at +n)",
+        "trigger": "rscfd-transmit-status"
       },
       {
         "name": "CFDTMSTS_CH1",
         "address": 4291953376,
         "size": 4,
         "access_widths": [
+          1,
+          2,
           4
         ],
         "access": "rw",
@@ -16237,7 +16377,38 @@
         "behavior": "rscfd",
         "evidence": "manual",
         "source_ref": "R01UH0585EJ0120 section 17, RSCFD register tables; firmware-observed role",
-        "description": "RSCFD Tx status base for application CAN1 record"
+        "description": "RSCFD Tx status base for application CAN1 record",
+        "trigger": "rscfd-transmit-status"
+      },
+      {
+        "name": "CFDTMSTS_CH1_4",
+        "address": 4291953380,
+        "size": 1,
+        "access_widths": [
+          1
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section 17, RSCFD register tables; exact firmware receive-service scan",
+        "description": "Application CAN1 Tx buffer local resource 4 status",
+        "trigger": "rscfd-transmit-status"
+      },
+      {
+        "name": "CFDTMSTS_CH1_5",
+        "address": 4291953381,
+        "size": 1,
+        "access_widths": [
+          1
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section 17, RSCFD register tables; exact firmware receive-service scan",
+        "description": "Application CAN1 Tx buffer local resource 5 status",
+        "trigger": "rscfd-transmit-status"
       },
       {
         "name": "CFDTMSTS_CH1_6",
@@ -16251,7 +16422,8 @@
         "behavior": "rscfd",
         "evidence": "manual",
         "source_ref": "R01UH0585EJ0120 section 17, RSCFD register tables; exact registered-firmware response route",
-        "description": "Application CAN1 Tx buffer local resource 6 status"
+        "description": "Application CAN1 Tx buffer local resource 6 status",
+        "trigger": "rscfd-transmit-status"
       },
       {
         "name": "CFDTMSTS_CH1_7",
@@ -16265,7 +16437,24 @@
         "behavior": "rscfd",
         "evidence": "manual",
         "source_ref": "R01UH0585EJ0120 section 17, RSCFD register tables; exact registered-firmware response route",
-        "description": "Application CAN1 Tx buffer local resource 7 status"
+        "description": "Application CAN1 Tx buffer local resource 7 status",
+        "trigger": "rscfd-transmit-status"
+      },
+      {
+        "name": "CFDTMSTS_CH1_8_15",
+        "address": 4291953384,
+        "size": 8,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section 17, RSCFD register tables; exact firmware receive-service scan",
+        "description": "Application CAN1 Tx buffer local resources 8..15 status bytes"
       },
       {
         "name": "CFDTMSTS_CH1_16",
@@ -16279,7 +16468,114 @@
         "behavior": "rscfd",
         "evidence": "manual",
         "source_ref": "R01UH0585EJ0120 section 17, RSCFD register tables; exact firmware table binding",
-        "description": "Application CAN1 Tx buffer n=16 status"
+        "description": "Application CAN1 Tx buffer n=16 status",
+        "trigger": "rscfd-transmit-status"
+      },
+      {
+        "name": "CFDTMTRSTS0",
+        "address": 4291953488,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "r",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section 17.4.12.1, Table 17.155",
+        "description": "RSCFD transmit-request status for buffers 0..31"
+      },
+      {
+        "name": "CFDTMTRSTS1",
+        "address": 4291953492,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "r",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section 17.4.12.1, Table 17.155",
+        "description": "RSCFD transmit-request status for buffers 32..47"
+      },
+      {
+        "name": "CFDTMTARSTS0",
+        "address": 4291953504,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "r",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section 17.4.12.2",
+        "description": "RSCFD transmit-abort-request status for buffers 0..31"
+      },
+      {
+        "name": "CFDTMTARSTS1",
+        "address": 4291953508,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "r",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section 17.4.12.2",
+        "description": "RSCFD transmit-abort-request status for buffers 32..47"
+      },
+      {
+        "name": "CFDTMTRF_CH0",
+        "address": 4291953520,
+        "size": 2,
+        "access_widths": [
+          2
+        ],
+        "access": "r",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section 17, RSCFD transmit-buffer status and interrupt registers",
+        "description": "RSCFD channel0 Tx message-buffer result summary (bit n reflects CFDTMSTSn.TMTRF)"
+      },
+      {
+        "name": "CFDTMTRF_CH1",
+        "address": 4291953522,
+        "size": 2,
+        "access_widths": [
+          2
+        ],
+        "access": "r",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section 17, RSCFD transmit-buffer status and interrupt registers",
+        "description": "RSCFD channel1 Tx message-buffer result summary (bit n reflects local CFDTMSTSn.TMTRF)"
+      },
+      {
+        "name": "CFDTMTRF_CH2",
+        "address": 4291953524,
+        "size": 2,
+        "access_widths": [
+          2
+        ],
+        "access": "r",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section 17, RSCFD transmit-buffer status and interrupt registers",
+        "description": "RSCFD channel2 Tx message-buffer result summary (bit n reflects local CFDTMSTSn.TMTRF)"
       },
       {
         "name": "TMIEC0",
@@ -16328,6 +16624,22 @@
         "evidence": "manual",
         "source_ref": "R01UH0585EJ0120 section17.4.4.7 Table17.112 p962",
         "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
+      },
+      {
+        "name": "CFDCDTCT",
+        "address": 4291953808,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section 17.4.10.1, Table 17.145; exact firmware channel-mode cancellation path",
+        "description": "RSCFD DMA transfer control"
       },
       {
         "name": "GRMCFG",
@@ -17563,6 +17875,319 @@
       {
         "name": "GAFLP1_15",
         "address": 4291956988,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 Table17.89 and sections17.4.3-17.4.11",
+        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
+      },
+      {
+        "name": "RFID1",
+        "address": 4291965056,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "r",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 Tables 17.128-17.131, sections 17.4.7.4-17.4.7.7 (pages 984-989); exact firmware base pointer 0xFFD23000 at 0x230AC and index stride 0x80 in reader 0x83E0C",
+        "description": "RSCFD0CFDRFID1: receive FIFO 1 access ID; RFIDE bit 31, RFRTR bit 30, RFID[28:0]; window through +0x48 aliases the oldest unread message",
+        "status_register": "RFSTS1",
+        "fifo_index": 1,
+        "fifo_channel": 1
+      },
+      {
+        "name": "RFPTR1",
+        "address": 4291965060,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "r",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 Table 17.129, section 17.4.7.5 (pages 985-987)",
+        "description": "RSCFD0CFDRFPTR1: receive FIFO 1 access pointer; RFDLC[31:28], RFPTR[27:16], RFTS[15:0]",
+        "status_register": "RFSTS1",
+        "fifo_index": 1,
+        "fifo_channel": 1
+      },
+      {
+        "name": "RFFDSTS1",
+        "address": 4291965064,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "r",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 Table 17.130, section 17.4.7.6 (page 987)",
+        "description": "RSCFD0CFDRFFDSTS1: receive FIFO 1 CAN FD status; RFFDF bit 2, RFBRS bit 1, RFESI bit 0",
+        "status_register": "RFSTS1",
+        "fifo_index": 1,
+        "fifo_channel": 1
+      },
+      {
+        "name": "RFDF0_1",
+        "address": 4291965068,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 Table17.89 and sections17.4.3-17.4.11",
+        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
+      },
+      {
+        "name": "RFDF1_1",
+        "address": 4291965072,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 Table17.89 and sections17.4.3-17.4.11",
+        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
+      },
+      {
+        "name": "RFDF2_1",
+        "address": 4291965076,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 Table17.89 and sections17.4.3-17.4.11",
+        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
+      },
+      {
+        "name": "RFDF3_1",
+        "address": 4291965080,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 Table17.89 and sections17.4.3-17.4.11",
+        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
+      },
+      {
+        "name": "RFDF4_1",
+        "address": 4291965084,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 Table17.89 and sections17.4.3-17.4.11",
+        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
+      },
+      {
+        "name": "RFDF5_1",
+        "address": 4291965088,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 Table17.89 and sections17.4.3-17.4.11",
+        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
+      },
+      {
+        "name": "RFDF6_1",
+        "address": 4291965092,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 Table17.89 and sections17.4.3-17.4.11",
+        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
+      },
+      {
+        "name": "RFDF7_1",
+        "address": 4291965096,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 Table17.89 and sections17.4.3-17.4.11",
+        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
+      },
+      {
+        "name": "RFDF8_1",
+        "address": 4291965100,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 Table17.89 and sections17.4.3-17.4.11",
+        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
+      },
+      {
+        "name": "RFDF9_1",
+        "address": 4291965104,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 Table17.89 and sections17.4.3-17.4.11",
+        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
+      },
+      {
+        "name": "RFDF10_1",
+        "address": 4291965108,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 Table17.89 and sections17.4.3-17.4.11",
+        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
+      },
+      {
+        "name": "RFDF11_1",
+        "address": 4291965112,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 Table17.89 and sections17.4.3-17.4.11",
+        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
+      },
+      {
+        "name": "RFDF12_1",
+        "address": 4291965116,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 Table17.89 and sections17.4.3-17.4.11",
+        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
+      },
+      {
+        "name": "RFDF13_1",
+        "address": 4291965120,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 Table17.89 and sections17.4.3-17.4.11",
+        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
+      },
+      {
+        "name": "RFDF14_1",
+        "address": 4291965124,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 Table17.89 and sections17.4.3-17.4.11",
+        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
+      },
+      {
+        "name": "RFDF15_1",
+        "address": 4291965128,
         "size": 4,
         "access_widths": [
           1,
