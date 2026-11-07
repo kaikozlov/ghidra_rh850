@@ -36,6 +36,29 @@ application/boot security roots as the tracked Sienna, but their SecOC generated
 profile/configuration and vehicle-control message set differ. Each matrix cell
 records its own evidence source.
 
+### B6 angle supervision and contribution scaling
+
+The exact TSS3 EPS images expose two distinct kinds of target-angle limiting: a
+request-plausibility check on incoming B6 targets and a downstream target
+conditioner that slews the accepted target before controller use. They should not
+be conflated as one steering-rate limit.
+
+| Exact target | Incoming B6 supervision | Downstream target conditioner | B8/B9 contribution consumers |
+|---|---|---|---|
+| Camry `8965F3307000` | `CEC8A -> CEE46/CEE7C`: ID11 absolute `1745` raw; `78` raw per effective modulo-64 sequence gap, gap capped at 8 | `CCF0E -> CCFB2`: absolute `3490` and step `7` in the doubled target domain (`1745` / `3.5` B6-count equivalent) | `CE3AA` / `CDFF8`: ordinary paths multiply separate internal steering contributions by B8/100 and B9/100 |
+| Corolla H/F `8965H1202000` / `8965F1208000` | `CB246 -> CB46E/CB4F4`: ID11 absolute `1745` raw; `78` raw per effective modulo-64 sequence gap, gap capped at 8 | `C9E54`: absolute `3490`; selected low/vehicle bank step `7` in the doubled target domain (default/high bank step `4`) | `CC442` / `CBFCE`: ordinary paths multiply separate internal steering contributions by B8/100 and B9/100 |
+| Crown `8965F3012000` | ID11 mode selection is target-native; the maintained contract does not use a separate host request-jump bound | `CBC52 -> C9B22 -> C9B64 -> C9C08`: absolute `3490`, step `7` in the doubled target domain (`1745` / `3.5` B6-count equivalent) | `CB000` / `CAC4E`: ordinary paths multiply separate internal steering contributions by B8/100 and B9/100 |
+
+The shared controller-equivalent B6 angle scale is `1024/17870 deg/count`, so
+`1745` raw is about `99.9933 deg`, `78` raw is about `4.4696 deg`, and `3.5`
+raw is about `0.2006 deg`. Corolla's exact 5-ms foreground timing makes its
+selected-bank conditioner step about `40.1 deg/s` when invoked once per foreground
+cycle. Camry's `78`-raw value is therefore an incoming-request plausibility
+allowance, not a claim that the rack follows a `4.47 deg` step every 10 ms.
+
+Sienna `8965B4512000` is not in this table because its steering interface is the
+older protected `0x2E4/0x131` design rather than the B6 target-angle surface.
+
 The H/F raw-body transfer reports use the registered canonical Sienna inventory,
 `data/ghidra_project_inventory.baseline.jsonl`: 7,089 CodeFlash function ranges
 and 634 user-named functions. Both targets have 1,194 exact-body transfers.
