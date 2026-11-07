@@ -129,6 +129,60 @@ second full EPS application, but the CPU roles, motor-drive topology and
 fault-tolerant behavior remain to be reconstructed. This is a second EPS
 application controller, not an HSM processor.
 
+## CPU11 versus CPU12: application SecOC and ICU-S (2026-11-07)
+
+The two CUW-derived application images were compared in the existing analyzed
+`build/work/tundra-dual-cpu/ghidra/tundra_application` project. The relevant
+SecOC workers and lower ICU-S drivers decompile to the **same logic**, with
+changes restricted to relocated functions, callback pointers, and per-CPU
+`gp`/`tp` data offsets in the paired functions checked below. This does not
+mean the two complete EPS applications are identical.
+
+| Operation | CPU11 | CPU12 |
+|---|---|---|
+| SecOC verification scheduler/worker | `0x883BA` | `0x80998` |
+| Verify admission/retry | `0x880C2` | `0x806A0` |
+| Verify receive transport | `0x87FFA` | `0x805D8` |
+| Verify completion | `0x881C2` | `0x807A0` |
+| ICU-S AES encrypt/decrypt (commands 1/3) | `0x82E7C` | `0x7D9CC` |
+| ICU-S CMAC generation (command 5) | `0x82F60` | `0x7DAB0` |
+| ICU-S CMAC verification (command 7) | `0x83124` | `0x7DC74` |
+| ICU-S SHE key update (command 8) | `0x832AA` | `0x7DDFA` |
+| ICU-S init/status (`0x7000`/`0x7100`) | `0x8366E` | `0x7E1BE` |
+
+Both applications have nine instruction references to the `ICUSCMD`
+`0xFFC5D000` register: the same command families, including the two internal
+abort/reset (`0x3F`) writers. The command 5/7/8 staging and status code
+branches are identical modulo relocated callback addresses. Both applications
+use the same 20-byte type-1 crypto config with key selector **4** (CPU11
+`0x2568C`, CPU12 `0x25448`).
+
+The five **configured receive** profile records each have 0x50-byte stride
+(CPU11 auth-block markers `0x256AC/256FC/2574C/2579C/257EC`, CPU12
+`0x25468/254B8/25508/25558/255A8`) and the same profiles in the same order:
+
+| Authenticated DataID | CPU11 | CPU12 | MAC field |
+|---|---:|---:|---|
+| `0x00F` | `0x256AC` | `0x25468` | 28 bits |
+| `0x2E4` | `0x256FC` | `0x254B8` | 28 bits |
+| `0x131` | `0x2574C` | `0x25508` | 28 bits |
+| `0x076` | `0x2579C` | `0x25558` | 28 bits |
+| `0x0D7` | `0x257EC` | `0x255A8` | 28 bits |
+
+At each marker the exact common authentication bytes begin
+`80 00 1C 00 00 00`; each 0x50-byte record has 72 of 80 bytes in common,
+with the eight differences in relocated references/configuration indices.
+Thus the two processor applications independently implement the same received
+SecOC policy and use their own ICU-S hardware-facing driver. Neither image is
+a plaintext-key-in-software implementation like Willem's original
+`8965B4209000` RAV4 Prime EPS.
+
+These are **application-only** update payloads: neither CPU's bootloader
+`0x00000..0x17FFF` nor DataFlash is available from the CUW. Their runtime
+slot-4 contents, physical two-MCU communication and manufacturing/dealer
+provisioning remain outside this evidence. In particular, a stock ICU-S
+`CMD_LOAD_KEY` adapter does not establish a plaintext-key-to-NvM writer.
+
 ## CPU11 application: entry to programming mode
 
 The Tundra CPU11 application SID `10` service at `0x25B10` uses a

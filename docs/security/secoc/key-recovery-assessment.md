@@ -391,12 +391,33 @@ Neither tool issues any ICU-S command. Both read a CPU-visible key copy via the
 RAM-exec payload and transmit it over CAN:
 
 - **I-CAN-hack/secoc (Technique A)** dumps a RAM mirror of the SHE key-slot table
-  at `0xFEBE6E34` on `8965B4209/B4233/B4509100`: 704 bytes of 32-byte structs
-  (key@0x0C, checksum@0x1D), KEY_1 (master) at `0xFEBE6E60`, KEY_4 (SecOC) at
-  `0xFEBE6EC0`.
+  at `0xFEBE6E34..0xFEBE6FF3` on `8965B4209/B4233/B4509100`:
+  **448 bytes = fourteen 32-byte records** (key@`+0x0C`, checksum@`+0x1D`),
+  KEY_1 (master) at `0xFEBE6E60`, KEY_4 (SecOC) at `0xFEBE6EC0`.
+  The original [extractor's range and checksum code](https://github.com/I-CAN-hack/secoc/blob/main/extract_keys.py)
+  establish these exact widths; the earlier 704-byte figure was incorrect.
 - **Bk2ol (Technique B)** dumps DataFlash `0xFF1FF000..0xFF209000` and brute-scans
   for a CMAC-verifying 16-byte window. It is `8965B4514000`-only (its README excludes
   `8965B4512000`); it depends on the object-15 CPU-visible leak that is absent here.
+
+**Unrecovered original-2021 provisioning implementation.** Willem's
+[2021 RAV4 Prime research](https://icanhack.nl/blog/secoc-key-extraction/)
+explicitly describes CPU-software AES-CMAC, RAM/DataFlash-accessible operational
+keys and an application UDS **RID `0x0110`** key-update handler, plus a separate
+CAN `0x13..0x1A` temporary-key-update path. The public extractor proves a
+fourteen-record CPU-readable RAM key table and observes keys on supported
+`8965B4209000`, `8965B4233100`, and `8965B4509100` firmware, but does not
+contain their CodeFlash images or recover the executable that writes their
+keys to DataFlash. None of those three exact application images is retained
+here. `T-0015-20.cuw` is an *older dual-CPU RAV4 EPS update* for
+`8965B0R02300/01300`, **not** the `B4209000` research specimen; its
+application payloads fail authentication under our later EPS package root.
+A real original-generation image is needed to join `0x0110` to the software
+SHE key parser/decrypt/authentication code, key-table updates, NvM/flash
+persistence, and the software AES-CMAC SecOC verifier. Do not transfer this
+legacy layout or the `0x0110` RID into the newer `8965B4512000` image,
+whose independently recovered protected key update uses RID `0x1010` and ICU-S
+command 8. The two key-update pathways have not been proved equivalent.
 
 This confirms §1.3 operationally: no SHE command can exfiltrate slot 4 (SECOC-025 —
 `CMD_EXPORT_RAM_KEY` is `RAM_KEY`-only/plain-only; no nonvolatile KEY has an export
