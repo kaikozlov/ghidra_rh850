@@ -524,8 +524,8 @@ proves the application disposes of **exactly five** ROM-registered secure
 services — these two MAC paths (`0x12`), the RID-`0x1010` key update (`0x31`
 at entry `0xBE0CC`, descriptor `FEFF0398`), a mode-mapped query service
 (`0x04`, entry `0xBDA6E`, descriptor `FEFF0250`), and a previously
-undocumented opcode-`0x10` service (entry `0xBD8C8`, descriptor `FEFF01E8`,
-4-byte result) — with `0xBD69E -> 0x8A18A` the only submit path and
+undocumented opcode-`0x10` block-transform service (entry `0xBD8C8`,
+descriptor `FEFF01E8`, 16-byte-multiple input/output with a 4-byte output-length field) — with `0xBD69E -> 0x8A18A` the only submit path and
 `0x89F6E` the only `0xFF1F0044` trigger writer. All of it is byte-pinned in
 `tests/targets/venza/verify_yc_venza_airbag_reprogramming.py`.
 

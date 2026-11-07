@@ -171,9 +171,9 @@ cells at `0x1C7FC/0x1C840/0x1C884/0x1C8A8/0x1C8C8`):
 |---|---|---|---|---|
 | `0xBDC7A` | `FEFF02B8` | `0x12` | MAC generation (SecOC TX DataIDs `0x0326/0x0024`, selector 4) | SecOC TX worker `0xDE9F0 → 0xBCCF4` |
 | `0xBDE88` | `FEFF0330` | `0x12` | MAC verification (four RX profiles incl. `0x00F/0x090/0x0D7/0x024`, selector 4) | SecOC RX worker `0xDE09E → 0xBCEFA` |
-| `0xBD8C8` | `FEFF01E8` | **`0x10`** (new) | 16-byte-block-count input + logical key selector from a type-1 config; callback delivers a 4-byte result | **diagnostic RoutineControl** handler `0x7C05A` via engine thunk `0xBD44A` (session-gated at `0xFEF041C4`; exact routine mode and result meaning open) |
+| `0xBD8C8` | `FEFF01E8` | **`0x10`** | Key-selected, 16-byte-aligned input/output buffer transform; completion returns the output byte length through a 4-byte caller field | **diagnostic crypto-test** handler `0x7C05A` via engine thunk `0xBD44A` (compares 16 output bytes against a reference; exact algorithm and direction open) |
 | `0xBE0CC` | `FEFF0398` | `0x31` | authenticated 64-byte key update (SHE `CMD_LOAD_KEY` M1/M2/M3 → M4/M5) | RID `0x1010` worker (`0x7C13E` staging, `0xB76D4` async, dispatcher `0xBD2EC`) |
-| `0xBDA6E` | `FEFF0250` | **`0x04`** | mode-mapped query: caller byte `{1→0, 2→1, 4..14→n−2}` (SHE key-ID-like domain) | RID `0x1010` worker mode 2 (via `0xBD2EC` record 1) |
+| `0xBDA6E` | `FEFF0250` | **`0x04`** | mode-mapped key-ID service: `{1→0, 2→1, 4..13→n−2}` (compact SHE key-slot index) | RID `0x1010` worker mode 2 (via `0xBD2EC` record 1) |
 
 So the airbag application-facing secure-service opcode set is
 `{0x04, 0x10, 0x12, 0x31}` — five registered services, two more than the
@@ -200,23 +200,27 @@ register pokes for a **shared-memory descriptor ring a second core reads**.
 | `0xFEFF00F4` | HSM status: bit 0 = ready gate for submits (`0x89F6E` → error `0x404` if clear) |
 | `0xFEFF00FC` | shared spinlock: bit 1 = submit lock (`0x89E60`, `__snooze` backoff), bit 3 = completion/config lock (`0x8A04E`) |
 
-**Descriptor template** (in `0xFEFF00xx` shared RAM; per-service bases in the
-table above):
+**Descriptor layout** (`0xFEFF00xx` shared RAM; offsets relative to the
+opcode address in the table above):
 
-- `−1`: result byte, initialized `0x7F` (pending), written by the HSM;
-- `+0x00`: opcode dword;
-- `+0x08`: completion callback (RAM code pointer; sentinel `0xFFF1` set by the
-  submit wrapper `0x8A18A`, replaced by the service's finisher);
-- `+0x18`: state (`3` armed at build);
-- `+0x1C`: key/config selector byte (from the type-1 config record);
-- `+0x24`: timeout (`0x2580` MAC ops, `0xE10` block service; key update none);
-- op-specific fields: message/input and output pointers, bit-lengths
-  (`len<<3`), block counts (`bytes>>4`), staged expected-MAC buffer
-  (`0xFEFF0320` for verify), M1/M2/M3 pointers at request `+0x10/+0x30` and
-  M4/M5 at result `+0x00/+0x20` for key update;
-- submit-side fields: `+0x05` state byte (set 1 by `0x8A18A`), `+0x06` queued
-  flag (set 1 on ring insert; `4` = error, with error code at `+0x08`, e.g.
-  `0x37` on ring-full).
+- `+0x00`: opcode dword; `+0x05`: submit-state byte set to 1;
+  `+0x06`: queued flag set to 1 (4 on ring-full);
+  `+0x07`: completion-state byte initialized to `0x7F` (pending);
+  `+0x08`: HSM result-code word initialized to sentinel `0xFFF1` by `0x8A18A`;
+  `+0x10`: application-side finisher callback (e.g., `0xBDC3E`/`0xBDE24`).
+- For **both** opcode-`0x12` MAC descriptors, `+0x14` is the input pointer,
+  `+0x18` is the generated/expected MAC pointer, `+0x1C` is input bit length,
+  `+0x20` is set to 3, `+0x24` is the logical key selector (configured 4),
+  `+0x25` is tag bit length, and `+0x2C` is timeout `0x2580`.
+  **`+0x28` selects direction:** TX generation sets 0 (`0xBDC7A`,
+  `FEFF02E0`); RX verification sets 1 (`0xBDE88`, `FEFF0358`). The RX finisher
+  `0xBDE24` reads a separate verification-result word at descriptor `+0x34`.
+- The opcode-`0x10` adapter (`0xBD8C8`) supplies separate input/output
+  pointers, a block count `input_bytes >> 4`, and a key selector, with timeout
+  `0xE10`. Its finisher (`0xBD86C`) returns the input byte count as the
+  output length on success. The key-update adapter (`0xBE0CC`) points to
+  M1/M2/M3 at offsets `+0/+0x10/+0x30` in the caller's 64-byte package and
+  M4/M5 at `+0/+0x20` in the 48-byte output.
 
 **Submit sequence**: service adapter validates (global driver-ready cell
 `0xFEBFA298 == 0xE1` via `0xBD690`, per-service state pair) → builds the
@@ -229,8 +233,9 @@ stores the descriptor pointer, marks `+0x06 = 1`, releases the lock (ring
 full → `0x401`) → trigger word `2` written to `0xFF1F0044`.
 
 **Completion** (2026-10-08 closure): **task-polled, no interrupt dispatcher**. The
-HSM writes the result byte at `descriptor−1`; the finisher callback at `+0x08`
-runs in the polling owner's context. Evidence: no code outside the five adapters
+HSM updates the shared descriptor's completion/result fields; the finisher
+callback at `+0x10` runs in the polling owner's MainPE context, interpreting
+the HSM result word at `+0x08` via `0xBD728`. Evidence: no code outside the five adapters
 and three driver primitives references the FEFF flag window, ring registers, or
 descriptor addresses anywhere in the image (corpus + full disassembly);
 descriptors carry caller-side poll timeouts (`0x2580`/`0xE10`); init wraps in
@@ -251,6 +256,41 @@ Runtime-facing contrast with the EPS ICU-S: there is no register FIFO or
 pointer, and rings the doorbell. That makes the airbag ABI the *easier* one to
 drive from a RAM runtime (no per-block handshake), but also the more opaque
 one: opcode semantics live entirely in the HSM-side firmware we do not hold.
+
+### Inferred ICUMC firmware contract
+
+- The ICU-M security CPU must have a descriptor consumer and the ability to
+  read/write the permitted `0xFE...` shared-RAM regions: the MainPE queues
+  pointer-valued requests, not message bytes. The matching HSM endpoint must
+  interpret opcode, buffer addresses, lengths, selector and operation mode,
+  process the request, and publish completion/result fields. It is not
+  necessary for the secure CPU to know CAN arbitration IDs, SecOC freshness,
+  or truncated on-wire tag placement: the MainPE SecOC layer handles those.
+- Opcode `0x12` is a **single MAC service with an explicit generate/verify
+  discriminator** (`+0x28 = 0/1`). A likely internal handler branches on this
+  field and uses the same selected key for either full-MAC production or
+  supplied-tag verification. The host-provided byte selector `4` is a logical
+  `KEY_1` reference, not key material.
+- The `0x31` request passes an unchanged SHE `M1||M2||M3` envelope and returns
+  `M4||M5`, requiring the secure endpoint to validate and execute the
+  protected key update. After that submission, the MainPE worker `0xB76D4`
+  extracts the **high nibble of M1 byte 15** (`FEFF0177`) as the target SHE
+  key ID and calls opcode `0x04`. Its adapter `0xBDA6E` maps SHE IDs
+  `1→0`, `2→1`, and `4..13→2..11`: a **12-entry compact index** consistent
+  with `MASTER_ECU_KEY`, `BOOT_MAC_KEY`, and `KEY_1..KEY_10`. The result-only
+  callback and sequencing suggest a post-update key-state/status check;
+  what the HSM actually tests remains an inference.
+- Opcode `0x10` uses the same key-selecting service layer but requires an
+  input size divisible by 16 and output capacity at least that many bytes. Its
+  diagnostic callback compares the 16-byte output with a reference. This
+  strongly suggests a block-cipher transformation, but the precise
+  algorithm and operation are not identified in the MainPE code.
+
+This is the **MainPE-exposed service subset**, not a complete inventory of the
+ICUMC's programmable secure firmware. Renesas describes the P1x-C ICUMC as a
+dedicated RH850 G3K with hardware-separated secure memory and peripherals:
+[RH850/P1x-C datasheet](https://www.renesas.com/en/document/dst/rh850p1x-c-datasheet),
+[secure-boot architecture](https://www.renesas.com/en/blogs/achieving-root-trust-secure-boot-automotive-rh850-and-r-car-devices-part-2).
 
 ## 6. Cross-target comparison
 
@@ -558,9 +598,9 @@ execution in `build/out/firmware-question-campaign/secoc-native-wave1`.
 
 ## 8. Boundaries and open questions
 
-- The opcode-`0x10` airbag service is diagnostic-routine-driven (RoutineControl
-  handler `0x7C05A`, session-gated at `0xFEF041C4`); the exact routine-mode
-  number and the meaning of its 4-byte result remain open.
+- The opcode-`0x10` airbag service is diagnostic-crypto-test-driven
+  (callback `0x7C05A`). Its 16-byte-block input/output shape is recovered;
+  precise block-cipher algorithm, direction and test-mode mapping remain open.
 - Airbag completion is task-polled (no interrupt dispatcher found; see §5
   closure). Vector-level EIINT analysis was not performed on this project, and
   the `0x114C` boot enable sequence remains recorded but not decoded
