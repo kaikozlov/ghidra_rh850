@@ -1338,10 +1338,13 @@ sha-pinned in the generator and re-hashed by the test):
   selector 0 (`6a 00` at `0x10002b6e`). No type-table or unused-record meaning
   is claimed.
 
-The last-CPU-image tail of the EachArea writer additionally emits two raw
-J2534 frames after reset — CAN `0x777‖10 81` (len 6) and `0x7F7‖FE 10 81`
-(len 7, TxFlag `0x80`) — preserved as capture observables; their target-side
-interpretation is bounded.
+The last-CPU-image tail of both Unified writers emits two raw J2534 frames
+after reset — CAN `0x777‖10 81` (len 6, TxFlags 0) and `0x77F‖FE 10 81`
+(len 7, TxFlags `0x80`). V18 stores those CAN IDs as the Data-field dwords
+`00 00 07 77` and `00 00 07 7F`. The GTS+ builds store `07 77 10 81` and
+`07 7F FE 10` at Data+2 after the tail buffer is zeroed, which is the same
+pair of identifiers. None of the four writer binaries contains an
+`0x7F7` immediate.
 
 #### 5.2.4 Real format-0x67 FRC delta corpus: six `ReproMethod=07` packages and the modern unpacked GTS+ host
 

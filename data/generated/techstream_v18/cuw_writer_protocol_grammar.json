@@ -1992,14 +1992,14 @@
     "image_area_sequencing": {
       "TCUWCanUnifiedFlashWriter.dll": {
         "address_source": "per-area CFileHeaderInfo area objects (std::string StartAddress/Length, stride 0x38) summed across the three area tables for progress; RequestDownload uses OffsetAddress[5]+areaStart and the raw Length field bytes",
-        "last_cpu_image_tail": "GetWakeUpTimeAfterReset stored, StopSyncPeriodicMsg, 11 01 reset (fcn 0x10001a20, 180 ms), then raw J2534 tail frames (fcn 0x10001b10)",
+        "last_cpu_image_tail": "GetWakeUpTimeAfterReset stored, StopSyncPeriodicMsg, 11 01 reset (fcn 0x10001a20, 180 ms), then raw J2534 tail frames (fcn 0x10001b10): CAN ID 0x777 data 10 81 (len 6) and CAN ID 0x77F data FE 10 81 (len 7, TxFlag 0x80)",
         "predownload": "2E 02 03||OffsetAddress[5] -> 2E 02 01||SeedKey[16] -> 2E 02 02||Nonce[16] sent once per CPU image before the area loop (fcn 0x100010f0 called at VA 0x1000268a)",
         "routines_per_image": "one 10F0 pair (tag 0, whole image) before the area loop, then per area: FF00 (tag 1) always, 10F1 (tag 2) pair, 10F2 (tag 3) pair",
         "scope": "per node CPU image; verified from pinned unified_main_worker/unified_download_write_step/unified_routine_control bodies"
       },
       "TCUWCanUnifiedFlashWriterEachArea.dll": {
         "address_source": "three per-image area tables (CFileHeaderInfo-shaped +0x48/+0x90/+0xB4); area objects stride 0x38 = {std::string StartAddress@+0x00, std::string Length@+0x1C}; RequestDownload address = big-endian 40-bit GetOffsetAddress[5] combined with GetUnsignedLong(area StartAddress), Length bytes copied verbatim",
-        "last_cpu_image_tail": "GetWakeUpTimeAfterReset stored, StopSyncPeriodicMsg, 11 01 reset (fcn 0x100019c0, 180 ms), 50 ms-step wake countdown with per-step host callback, then two raw J2534 WriteMsgs tail frames: CAN ID 0x777 data 10 81 (len 6) and CAN ID 0x7F7 data FE 10 81 (len 7, TxFlag 0x80)",
+        "last_cpu_image_tail": "GetWakeUpTimeAfterReset stored, StopSyncPeriodicMsg, 11 01 reset (fcn 0x100019c0, 180 ms), 50 ms-step wake countdown with per-step host callback, then two raw J2534 WriteMsgs tail frames: CAN ID 0x777 data 10 81 (len 6) and CAN ID 0x77F data FE 10 81 (len 7, TxFlag 0x80)",
         "predownload": "2E 02 03||OffsetAddress[5] -> 2E 02 01||SeedKey[16] -> 2E 02 02||Nonce[16] re-sent inside the per-area loop (fcn 0x100010f0 called at VA 0x10002616) before every area group",
         "routines_per_area": "conditional 10F0 (tag 0) pair when the first area table is non-empty, FF00 (tag 1) always, conditional 10F1 (tag 2) pair when the second area table is non-empty, 10F2 (tag 3) pair always",
         "scope": "per node CPU image and per area group; verified from pinned each_area_main_worker/each_area_download_write_step bodies"

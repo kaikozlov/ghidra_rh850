@@ -93,6 +93,14 @@ import struct
 routines=[struct.unpack_from('<I H B B I',FW,0x8F44+i*12)[1] for i in range(5)]
 check('Sienna boot routine table exact',routines==[0x10F0,0x10F1,0x10F2,0x10F3,0xFF00],repr([hex(x) for x in routines]))
 
+print('\n== Unified post-reset tail IDs ==')
+for dll in ('TCUWCanUnifiedFlashWriter.dll','TCUWCanUnifiedFlashWriterEachArea.dll'):
+    blob=(CUW/dll).read_bytes()
+    tail=clo['image_area_sequencing'][dll]['last_cpu_image_tail']
+    check(dll+' stores CAN IDs 0x777 and 0x77F', blob.count(bytes.fromhex('00000777'))==1 and blob.count(bytes.fromhex('0000077f'))==1)
+    check(dll+' has no 0x7F7 immediate', bytes.fromhex('000007f7') not in blob)
+    check(dll+' tail text records 0x77F', 'CAN ID 0x77F' in tail and '0x7F7' not in tail)
+
 print('\n== raw-template scanner/regeneration ==')
 # The scanner covers every referenced writer plus support DLLs and preserves encoded store bytes.
 with tempfile.TemporaryDirectory() as td:
