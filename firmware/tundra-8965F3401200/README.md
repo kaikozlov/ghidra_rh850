@@ -121,7 +121,13 @@ and neither should be confused with the separate G3K security CPU (ICUP) in
 Renesas ICU-M devices. Tundra's CPU11 and CPU12 both contain EPS application
 and SecOC code; the evidence here establishes their independently programmed
 logical images and CPU11's external diagnostic role, but not the exact physical
-multi-MCU or inter-processor wiring.
+multi-MCU or inter-processor wiring. Willem reported seeing **two RH850 MCUs
+on the Tundra EPS PCB** and described it as a redundant architecture
+([community history and source pointers](https://github.com/optskug/docs));
+redundant steering control/fault tolerance is a plausible reason for the
+second full EPS application, but the CPU roles, motor-drive topology and
+fault-tolerant behavior remain to be reconstructed. This is a second EPS
+application controller, not an HSM processor.
 
 ## CPU11 application: entry to programming mode
 

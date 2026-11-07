@@ -286,6 +286,24 @@ one: opcode semantics live entirely in the HSM-side firmware we do not hold.
   strongly suggests a block-cipher transformation, but the precise
   algorithm and operation are not identified in the MainPE code.
 
+**Relation to the older software-only SecOC implementation.** Willem's
+[2021 RAV4 Prime EPS analysis](https://icanhack.nl/blog/secoc-key-extraction/)
+found software AES/CMAC, ordinary-CPU-accessible key material, and SecOC
+handling within the main application. In the Venza, the MainPE **still owns**
+CAN reception, freshness reconstruction, DataID/payload construction, and
+SecOC profile processing (`0xDE09E`/`0xDE9F0`). Its HSM calls receive the
+prepared authenticated input plus a logical key selector and return a MAC or
+verification result. The evidence supports moving the cryptographic/key
+boundary behind ICUMC, **not duplicating an entire ECU application** on ICUP.
+This is an architectural contrast, not a historical assertion that Toyota
+migrated the exact RAV4 EPS software into the Venza SRS HSM.
+
+The Venza ICUMC secure firmware need not be Toyota-authored: Renesas and
+ESCRYPT offered the P1x-C with
+[CycurHSM](https://www.renesas.com/en/about/press-room/renesas-electronics-and-escrypt-collaborate-state-art-combined-hardwaresoftware-solution-high-level)
+software back in 2016, and Renesas also lists other HSM firmware partners.
+The observed opcodes do not identify which stack the Venza uses.
+
 This is the **MainPE-exposed service subset**, not a complete inventory of the
 ICUMC's programmable secure firmware. Renesas describes the P1x-C ICUMC as a
 dedicated RH850 G3K with hardware-separated secure memory and peripherals:
