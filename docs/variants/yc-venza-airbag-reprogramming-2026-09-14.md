@@ -509,8 +509,10 @@ not evidence that the airbag lacks SecOC.**
 The airbag does not use the P1M-E EPS's `0xFFC5D000` ICU-S command-register ABI.
 Instead it uses a second, self-contained local crypto stack whose final service
 boundary is the RH850 `0xFF1F...` system-reserved window plus shared `0xFE...`
-RAM. Public P1x-C documentation identifies the corresponding security block as
-ICUMC, a dedicated secure RH850/G3K subsystem with Secure DataFlash; the detailed
+RAM. Renesas explicitly expands **ICUMC** to **Intelligent Cryptographic Unit –
+Master (ICU-M)** in its [RH850/P1x-C datasheet](https://www.renesas.com/en/document/dst/rh850p1x-c-datasheet).
+This is the dedicated RH850/G3K security-processor architecture, with Secure
+DataFlash, rather than the P1M-E EPS's ICU-S peripheral. The detailed
 security-hardware command semantics live in the separate Renesas Security
 Hardware Manual. Therefore the observed request opcodes below are intentionally
 left as numeric protocol values rather than assigned proprietary command names.
