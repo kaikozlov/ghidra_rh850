@@ -75,7 +75,7 @@ check(
 
 print("\n== structure triage stage ==")
 structure = check_structure(BLOB)
-check("triage stage summarizes the scanner output", structure["schema"] == "rh850-codeflash-structure-triage-v1" and structure["image_sha256"] == SHA)
+check("triage stage summarizes the scanner output", structure["schema"] == "rh850-codeflash-structure-triage-v2" and structure["image_sha256"] == SHA)
 check("canonical image classifies as bare 1 MiB CodeFlash", structure["geometry"] == "bare-codeflash-1m")
 check("Sienna image shows the XCP route/map anchors", structure["xcp_surface"]["command_map_window_count"] >= 1 and structure["xcp_surface"]["request_can_id_immediate_count"] >= 1)
 check("Sienna image shows boot-CRC descriptors and RAM-exec anchors", structure["boot_trust"]["crc_descriptor_count"] >= 1 and structure["ram_exec_gate"]["download_window_immediate_count"] >= 1)

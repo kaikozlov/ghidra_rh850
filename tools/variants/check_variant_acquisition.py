@@ -140,6 +140,8 @@ def check_structure(blob: bytes) -> dict[str, Any]:
         "xcp_surface": {
             "request_can_id_immediate_count": xcp["request_can_id_immediates"]["count"],
             "response_can_id_immediate_count": xcp["response_can_id_immediates"]["count"],
+            "request_can_id_extended_descriptor_count": xcp["request_can_id_extended_descriptors"]["count"],
+            "response_can_id_extended_descriptor_count": xcp["response_can_id_extended_descriptors"]["count"],
             "command_map_window_count": xcp["command_map_window_count"],
         },
         "semantic_resolver_prefilter": {

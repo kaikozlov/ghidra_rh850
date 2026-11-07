@@ -31,7 +31,7 @@ their own structure.
 | Image geometry | exact bare 1 MiB CodeFlash vs `0x108000` DataFlash+CodeFlash concatenation; truncated/oversized rejection with explicit diagnosis | shared `validate_codeflash_geometry` with the SecOC patch-image resolver |
 | Boot validity | self-describing boot-CRC descriptors; fixed `0x5AA5A55A` markers | ARCH-003 |
 | RAM-exec package gate | download-window base `FEBF0000..FEBF0FFF`; post-link package descriptor pair; callback-pointer slot | SEC-BOOT-005/009, MEM-SAFE-001 |
-| XCP `0x7F7/0x7F8` family | route constants; page-copy window `FEBF7C00..FEBFF9EF` and shadow-window bounds `FEBF7C00..FEBFFBFF`; eight-byte command-map records (selector byte + little-endian callback pointer) | COM-004/COM-005 |
+| XCP route family | standard `0x7F7/0x7F8` words or IDE-marked extended `0x1FDC0002/0x1FE00002` words; page-copy window `FEBF7C00..FEBFF9EF` and shadow-window bounds `FEBF7C00..FEBFFBFF`; eight-byte selector/callback records | COM-004/COM-005 |
 | SecOC semantic gate | byte-level prefilter for 32-bit-displacement byte loads feeding a `cmov`-family materialization | SecOC resolver prefilter |
 
 ## Output
@@ -41,6 +41,12 @@ addresses and the byte evidence. Presence of an anchor is a **triage
 candidate**: it flags where to point Ghidra first. Absence is weak evidence
 only. Nothing in the report asserts that a mechanism *functions* in the new
 image — every mechanism must be re-verified against the new firmware bytes.
+
+Schema v2 reports extended descriptors separately. `0x9FDC0002` is
+`IDE | 0x1FDC0002`, not a packed representation of standard ID `0x7F7`.
+Corolla H's filter loader `0x7DAB4` writes that word directly to GAFLID;
+exact-image GNU simulation confirms the register value. Sienna's loader
+`0x836B4` instead writes standard ID `0x7F7`.
 
 ## Boundary
 

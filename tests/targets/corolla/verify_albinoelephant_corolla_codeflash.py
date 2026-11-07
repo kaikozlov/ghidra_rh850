@@ -348,13 +348,13 @@ check("three foreign custom handlers are exact complete-body transfers",
           for name in ("xcp_command_fb_handler", "xcp_command_f3_handler", "xcp_command_e4_handler")))
 check("Sienna plain-u32 0x7F7/0x7F8 route representation is absent from H CodeFlash",
       struct.pack("<I", 0x7F7) not in codeflash and struct.pack("<I", 0x7F8) not in codeflash)
-packed_xcp_request = 0x80000000 | (0x7F7 << 18) | 0x2
-packed_xcp_response = 0x80000000 | (0x7F8 << 18) | 0x2
-check("H special response descriptor packs standard CAN 0x7F8",
-      struct.unpack_from("<I", codeflash, 0x21EF4)[0] == packed_xcp_response
+xcp_request = 0x80000000 | 0x1FDC0002
+xcp_response = 0x80000000 | 0x1FE00002
+check("H special response descriptor selects extended CAN 0x1FE00002",
+      struct.unpack_from("<I", codeflash, 0x21EF4)[0] == xcp_response
       and struct.unpack_from("<I", codeflash, 0x21954)[0] == 0x21EF4)
-check("H special request descriptor packs standard CAN 0x7F7 with DLC 8",
-      struct.unpack_from("<I", codeflash, 0x21EFC)[0] == packed_xcp_request
+check("H special request descriptor selects extended CAN 0x1FDC0002 with DLC 8",
+      struct.unpack_from("<I", codeflash, 0x21EFC)[0] == xcp_request
       and struct.unpack_from("<I", codeflash, 0x21F00)[0] == 8
       and struct.unpack_from("<I", codeflash, 0x21A50)[0] == 0x21EFC)
 check("H special request class points at relocated receive callback 0x7C43E",
@@ -367,11 +367,11 @@ check("H special receive callback is 41/42 bytes identical to Sienna callback",
 
 structure = analyze_codeflash_structure(codeflash)
 xcp_structure = structure["xcp_command_surface"]
-check("structure scanner distinguishes H packed XCP route from absent plain representation",
+check("structure scanner distinguishes H extended XCP route from Sienna standard IDs",
       xcp_structure["request_can_id_immediates"]["count"] == 0
       and xcp_structure["response_can_id_immediates"]["count"] == 0
-      and xcp_structure["request_can_id_packed_standard_descriptors"]["count"] == 2
-      and xcp_structure["response_can_id_packed_standard_descriptors"]["count"] == 1)
+      and xcp_structure["request_can_id_extended_descriptors"]["count"] == 2
+      and xcp_structure["response_can_id_extended_descriptors"]["count"] == 1)
 
 h_command_map = codeflash[0x22A48:0x22A48 + codeflash[0x22A15]]
 s_command_map = SIENNA[0x22C04:0x22C04 + SIENNA[0x22BD1]]

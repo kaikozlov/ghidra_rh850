@@ -8,8 +8,8 @@ Sienna 8965B4512000 calibration:
 - self-describing boot-CRC descriptors and the boot-validity marker value;
 - RAM-exec gate / MEM-SAFE-001 structural immediates (download-window base,
   post-link package descriptor pair);
-- XCP 0x7F7/0x7F8 route constants in both plain-u32 and the packed
-  standard-ID descriptor representation observed on the tracked Corolla H,
+- XCP standard 0x7F7/0x7F8 and extended 0x1FDC0002/0x1FE00002
+  route words (including the hardware IDE bit),
   page-copy window/shadow constants, and eight-byte command-map records
   (selector byte + little-endian callback);
 - a byte-level prefilter for the SecOC semantic gate resolver shape
@@ -41,7 +41,7 @@ from tools.security.build_secoc_patch_manifest import (
     discover_crc_descriptors,
 )
 
-SCHEMA = "rh850-codeflash-structure-triage-v1"
+SCHEMA = "rh850-codeflash-structure-triage-v2"
 CODEFLASH_SIZE = P1M_E_CODEFLASH_SIZE
 
 # Structural anchor constants. These FAMILY/GATE anchors identify the
@@ -53,6 +53,8 @@ RAM_EXEC_PACKAGE_LENGTH = 0x00000FF0
 RAM_EXEC_CALLBACK_SLOT = 0xFEBF0FD0
 XCP_REQUEST_CAN_ID = 0x7F7
 XCP_RESPONSE_CAN_ID = 0x7F8
+XCP_EXTENDED_REQUEST_CAN_ID = 0x1FDC0002
+XCP_EXTENDED_RESPONSE_CAN_ID = 0x1FE00002
 XCP_PAGE_COPY_WINDOW_END = 0x17DF0
 XCP_PAGE_COPY_SHADOW_BASE = 0xFEBF7C00
 
@@ -104,24 +106,10 @@ def _find_u32(blob: bytes, value: int, max_vas: int) -> dict[str, Any]:
     }
 
 
-def _packed_standard_can_id_word(can_id: int) -> int:
-    """Encode the alternative standard-ID descriptor word seen on Corolla H.
-
-    The tracked H image stores its special 0x7F7/0x7F8 route as
-    ``0x80000000 | (id << 18) | 2`` rather than as a plain u32 CAN ID.  This
-    helper records that exact structural representation only; it does not claim
-    every matching word is a live CAN route without target-side table tracing.
-    """
-    if not 0 <= can_id <= 0x7FF:
-        raise ValueError(f"standard CAN ID out of range: {can_id:#x}")
-    return 0x80000000 | (can_id << 18) | 0x2
-
-
-def _find_packed_standard_can_id(blob: bytes, can_id: int, max_vas: int) -> dict[str, Any]:
-    packed = _packed_standard_can_id_word(can_id)
-    result = _find_u32(blob, packed, max_vas)
-    result["decoded_standard_can_id"] = f"0x{can_id:03X}"
-    result["encoding"] = "0x80000000 | (standard_can_id << 18) | 0x2"
+def _find_extended_can_id(blob: bytes, can_id: int, max_vas: int) -> dict[str, Any]:
+    result = _find_u32(blob, 0x80000000 | can_id, max_vas)
+    result["can_id"] = f"0x{can_id:08X}"
+    result["encoding"] = "GAFLID IDE bit 31 | extended CAN ID"
     return result
 
 
@@ -245,18 +233,18 @@ def scan_xcp_surface(blob: bytes, max_vas: int) -> dict[str, Any]:
         "classification": "triage-candidate",
         "request_can_id_immediates": _find_u32(blob, XCP_REQUEST_CAN_ID, max_vas),
         "response_can_id_immediates": _find_u32(blob, XCP_RESPONSE_CAN_ID, max_vas),
-        "request_can_id_packed_standard_descriptors": _find_packed_standard_can_id(
-            blob, XCP_REQUEST_CAN_ID, max_vas
+        "request_can_id_extended_descriptors": _find_extended_can_id(
+            blob, XCP_EXTENDED_REQUEST_CAN_ID, max_vas
         ),
-        "response_can_id_packed_standard_descriptors": _find_packed_standard_can_id(
-            blob, XCP_RESPONSE_CAN_ID, max_vas
+        "response_can_id_extended_descriptors": _find_extended_can_id(
+            blob, XCP_EXTENDED_RESPONSE_CAN_ID, max_vas
         ),
         "page_copy_window_end_immediates": _find_u32(blob, XCP_PAGE_COPY_WINDOW_END, max_vas),
         "page_copy_shadow_base_immediates": _find_u32(blob, XCP_PAGE_COPY_SHADOW_BASE, max_vas),
         "command_map_window_count": len(windows),
         "command_map_windows": windows,
         "interpretation": (
-            "paired CAN route constants (plain or packed standard-ID representation), "
+            "paired standard or IDE-marked extended CAN route constants, "
             "page-copy window/shadow constants, and eight-byte selector/callback "
             "command-map records are the structural "
             "signature of the XCP-shaped calibration surface; candidate maps must be "
