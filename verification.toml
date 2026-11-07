@@ -541,6 +541,9 @@ tests = ["tests/targets/crown/verify_crown_8965F3012000.py"]
 [suite.camry_8965f3307000_flash_backend]
 tests = ["tests/targets/camry/verify_camry_8965F3307000_flash_backend.py"]
 
+[suite.camry_8965f3307000_minimal_write_exec_patch]
+tests = ["tests/targets/camry/verify_camry_f33_minimal_write_exec_patch.py"]
+
 [suite.t0035_faci_backend_external]
 tests = ["tests/firmware/verify_t0035_faci_backend_external.py"]
 requires_external = ["cuw_reference_corpus"]
