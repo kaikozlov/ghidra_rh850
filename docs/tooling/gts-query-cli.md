@@ -392,7 +392,7 @@ Use `bundle --bundle DIRECTORY` to select a different canonical directory,
 FILE.zip` to select a portable export path. Python consumers use
 `tools.techstream.diag_bundle.DiagnosticBundle` (`open`, `read`, `json`, `namelist`).
 Reads inflate only the selected member; verification and ZIP export stream all
-members rather than allocating the 844 MiB uncompressed index. `bundle sqlite` verifies
+members rather than allocating the full uncompressed index. `bundle sqlite` verifies
 the canonical bundle first, then writes the compact indexed vehicle/ECU/search projection
 used by `toyota-diagnostics`; the canonical gzip members remain the evidence source.
 
@@ -483,8 +483,10 @@ The legacy Camry registry schema **v6** predates the universal bundle and remain
   type-62/157 sort key, deduplicated by signal identity; DID signal rows also gain
   `data_range`/`graph_range` display metadata.
 - `catalogs.<id>.active_test_groups` — type-33 multi-control group geometry
-- generation-22/P6 catalog shards export the recovered Active-Test surface plus exact P6 DID/RID support-gate metadata; P6 Data List/FFD/RoB presentation remains intentionally unprojected from P5
-  (presently only Engine 372: 5 groups / 10 memberships).
+- P6 catalog shards export native P6 Data List, FFD and ROB projections, with exact DID/RID support-gate metadata. The `p6-native-msb0-u32-v1` decoder and integer `sign_mode` are not interchangeable with P5 signed-boolean decoding.
+- Every native-selected category with an existing source database receives a catalog, independently of its live support-plugin family. `source_tables` inventories source counts; this is not a claim of complete semantic recovery. `legacy_records` carry native P3/P4 response lengths, support-bit predicates, monitor bit geometry/conversion/ranges, Active Test parameters and symbolic request programs. Native scalar conversion retains integer sign modes and overflow behavior; protocol framing and P4 compact-byte expansion precede scalar extraction. Source positions and unused bytes remain available without inventing field meanings. Legacy DTC keys use `legacy:XXXX`, not fabricated UDS failure bytes.
+- Source catalogs additionally preserve all native physical definitions/patterns/units, DTC enable and exception metadata, Active Test definitions and support predicates, P5/P6 monitor aliases, legacy and modern DDR families, work-factor records, OBD results/scaling, diagnostic highlights and variable-drive frames. Disabled rows, duplicate keys and alternative physical conversions are retained, not silently discarded by presentation selection. StandardInfo references resolve through Viewer table 2, help kind 3, and the V_English string namespace, following native last-match selection. Their help ID, resolved standard-value guidance, Viewer row bytes and source hashes remain attached; an ECU M_English lookup would produce misleading text. OBD result metadata and regulatory scaling have distinct ECU owners; tables 24/25/34 remain explicitly `indexes_only` where the current corpus exposes indexes but no consuming implementation.
+- SQLite indexes these source collections, Data List, FFD, ROB, commands, selectors, groups and regional Customize records as well as the original summary kinds. `item_sources` identifies each canonical member and JSON pointer; `item_counts` derives coverage from actual rows. Protocol-specific `legacy-*` records stay separate from P5 UDS definitions. `support_catalog` retains native signal-group membership, support-query policies and freeze-frame-number request slots. Catalog availability is not a live support result or authorization to actuate. Supplemental PCS/ADU definitions resolve from the repository's canonical generated-source directory, not the bundle's incidental location; the exporter accepts an explicit `supplemental_root` override and records each supplement's exact-byte hash, path, presence and per-item JSON pointer.
 - `utilities` — a deliberately compact runtime `utility list/plan` surface: only the
   recovered generic category-0 families (TestPresent start/stop, check-mode
   get/confirm, set-default-session, move-session-CGWDK, and the four routine
