@@ -26,6 +26,7 @@ from pathlib import Path
 from tools.techstream.gts.active_tests import resolve_active_test
 from tools.techstream.gts.bundle import TOYOTA_DIAG_BUNDLE_PROFILE, TOYOTA_DIAG_BUNDLE_REGIONS, write_toyota_diag_bundle
 from tools.techstream.diag_bundle import DEFAULT_BUNDLE, DEFAULT_BUNDLE_ZIP, DiagnosticBundle
+from tools.techstream.diag_runtime_db import DEFAULT_OUTPUT as DEFAULT_RUNTIME_DB, export_runtime_db
 from tools.techstream.gts.commands import _master_command_plan
 from tools.techstream.gts.cuw import (
     _cuw_descriptor,
@@ -553,6 +554,9 @@ def cmd_bundle(args: argparse.Namespace) -> int:
     elif args.bundle_action == "export":
         bundle.export_zip(args.out)
         print(args.out)
+    elif args.bundle_action == "sqlite":
+        result = export_runtime_db(args.bundle, args.out)
+        print(json.dumps(result, sort_keys=True) if args.json else args.out)
     elif args.bundle_action == "verify":
         bundle.verify()
         if args.compare_zip:
@@ -661,6 +665,9 @@ def build_parser() -> argparse.ArgumentParser:
     action.add_argument("--path", help="case-insensitive dotted JSON path")
     action = actions.add_parser("export", help="generate a portable distribution ZIP on demand")
     action.add_argument("--out", type=Path, default=DEFAULT_BUNDLE_ZIP)
+    action = actions.add_parser("sqlite", help="generate the indexed runtime SQLite database")
+    action.add_argument("--out", type=Path, default=DEFAULT_RUNTIME_DB)
+    action.add_argument("--json", action="store_true")
     action = actions.add_parser("verify", help="verify all canonical members, optionally against an original ZIP")
     action.add_argument("--compare-zip", type=Path)
     p.set_defaults(func=cmd_bundle)

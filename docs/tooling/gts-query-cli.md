@@ -381,6 +381,8 @@ tools/toyota gts bundle read catalogs/NA/372.json --path category
 tools/toyota gts bundle verify
 tools/toyota gts bundle export
 # Default portable output: build/out/toyota_diag_bundle_current.zip (not tracked).
+tools/gts bundle sqlite
+# Indexed runtime projection: build/out/toyota_diag.sqlite (not tracked).
 # Byte-for-byte migration proof against a preserved original archive:
 tools/toyota gts bundle verify --compare-zip /path/to/original.zip
 ```
@@ -390,7 +392,9 @@ Use `bundle --bundle DIRECTORY` to select a different canonical directory,
 FILE.zip` to select a portable export path. Python consumers use
 `tools.techstream.diag_bundle.DiagnosticBundle` (`open`, `read`, `json`, `namelist`).
 Reads inflate only the selected member; verification and ZIP export stream all
-members rather than allocating the 844 MiB uncompressed index.
+members rather than allocating the 844 MiB uncompressed index. `bundle sqlite` verifies
+the canonical bundle first, then writes the compact indexed vehicle/ECU/search projection
+used by `toyota-diagnostics`; the canonical gzip members remain the evidence source.
 
 Bundle schema **`toyota-diagnostics-bundle-v4`** keeps Toyota's resolver layers independent: all regional vehicle/type-41/type-59 tables, install sets, physical category occurrences and native-selected categories, class-`0x10D` category/route-selector keys, per-category D1/D2/DD frames, selected support plugins, family-local `support_mode`, Toyota transport-controller selection, and lazy decoded catalogs. Route/VIN/type-41 rows expose `route_selector`, install rows `connection_route_selector`, and Customize rows `target_route_selector`. ECU generation remains a separate input. Catalog availability does not decide whether a category exists or is routable.
 

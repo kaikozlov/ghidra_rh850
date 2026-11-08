@@ -5,6 +5,7 @@ import hashlib
 import io
 import json
 import os
+import sqlite3
 import struct
 import tempfile
 import zipfile
@@ -17,6 +18,7 @@ REPO = REPO_ROOT
 
 from tools.techstream import techstream_paths
 from tools.techstream.diag_bundle import DEFAULT_BUNDLE, DiagnosticBundle, DiagnosticBundleWriter
+from tools.techstream.diag_runtime_db import export_runtime_db
 from tools.techstream.gts.bundle import _bundle_customize_catalog, _bundle_session_control, write_toyota_diag_bundle
 
 ART = DEFAULT_BUNDLE
@@ -151,7 +153,60 @@ def verify_member_storage() -> None:
             check("canonical integrity detects valid-gzip member substitution", False)
 
 
+def verify_runtime_sqlite_projection() -> None:
+    index = {
+        "schema": "toyota-diagnostics-bundle-v4",
+        "release": "test",
+        "default_region": "NA",
+        "regions": {
+            "NA": {
+                "vehicles": {"12704": {"vehicle_type": 12704, "name": "Camry HV", "install_set_ids": [12]}},
+                "install_sets": {"12": [{
+                    "category_id": 498, "connection_route_selector": 18,
+                    "connection_frame_id": 0, "route_key": "498:18",
+                }]},
+                "routes": {"498:18": {
+                    "physical_request_address": 0x792, "address_extension": 0,
+                    "transport_kind": "iso15765-phase-family",
+                }},
+                "selected_categories": {"498": {
+                    "name": "Front Recognition Camera 2", "short_name": "FRC_P5",
+                    "database": "FRC_P5.ddb", "generation": 20,
+                    "support_mode": "p5-standard",
+                    "catalog_member": "catalogs/NA/498.json",
+                }},
+                "utilities": {"bindings": [{
+                    "role": 0xD4, "semantic_kind": "single_routine_active_test",
+                    "dll": "SingleRoutineActiveTest.dll",
+                }]},
+            },
+        },
+    }
+    catalog = {
+        "dids": {"0x1601": [{"name": "LTA Control Condition"}]},
+        "dtcs": {}, "active_tests": [], "functions": [], "plugins": [], "utilities": [],
+    }
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp) / "bundle"
+        writer = DiagnosticBundleWriter(root)
+        writer.add("catalogs/NA/498.json", io.BytesIO((json.dumps(catalog) + "\n").encode()))
+        writer.add("index.json", io.BytesIO((json.dumps(index) + "\n").encode()))
+        writer.finish()
+        out = Path(tmp) / "runtime.sqlite"
+        with patch("tools.techstream.diag_runtime_db._supplemental_rows", return_value=[]):
+            result = export_runtime_db(root, out)
+        with sqlite3.connect(out) as db:
+            check("runtime SQLite records source schema and release",
+                  db.execute("SELECT value FROM meta WHERE key='schema'").fetchone()[0] == "toyota-diagnostics-sqlite-v1"
+                  and db.execute("SELECT value FROM meta WHERE key='release'").fetchone()[0] == "test")
+            check("runtime SQLite indexes vehicle routes and OEM search terms",
+                  db.execute("SELECT request_address FROM vehicle_ecus").fetchone()[0] == 0x792
+                  and db.execute("SELECT count(*) FROM items_fts WHERE items_fts MATCH 'LTA'").fetchone()[0] == 1
+                  and result["items"] == 4)
+
+
 def main() -> int:
+    verify_runtime_sqlite_projection()
     verify_session_program_projection()
     verify_customize_context_projection()
     verify_member_storage()
