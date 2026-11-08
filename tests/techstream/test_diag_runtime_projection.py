@@ -12,6 +12,22 @@ from tools.techstream.diag_bundle import DiagnosticBundleWriter
 from tools.techstream.diag_runtime_db import _category_key, _supplemental_rows, export_runtime_db
 
 
+def restore_document(db, member):
+    skeleton = json.loads(zlib.decompress(db.execute(
+        "SELECT data FROM runtime_documents WHERE member=?", (member,)).fetchone()[0]))
+    for pointer, packed in db.execute("""SELECT s.pointer,p.data FROM item_sources s
+            JOIN item_payloads p ON p.item_id=s.item_id WHERE s.member=? ORDER BY s.item_id""", (member,)):
+        if not pointer:
+            continue
+        parts = [part.replace("~1", "/").replace("~0", "~") for part in pointer.split("/")[1:]]
+        target = skeleton
+        for part in parts[:-1]:
+            target = target[int(part)] if isinstance(target, list) else target[part]
+        key = int(parts[-1]) if isinstance(target, list) else parts[-1]
+        target[key] = json.loads(zlib.decompress(packed))
+    return skeleton
+
+
 class RuntimeProjectionTests(unittest.TestCase):
     def test_all_semantic_collections_and_source_locations(self):
         catalog = {
@@ -76,6 +92,14 @@ class RuntimeProjectionTests(unittest.TestCase):
                 metadata = json.loads(db.execute("SELECT metadata FROM catalog_sources WHERE member=?", (member,)).fetchone()[0])
                 self.assertEqual(metadata["source_identity"], catalog["source_identity"])
                 self.assertNotIn("dids", metadata)
+                self.assertEqual(db.execute("SELECT count(*) FROM runtime_documents WHERE member NOT LIKE 'supplement://%'").fetchone()[0], 3)
+                for name, original in sources.items():
+                    self.assertEqual(restore_document(db, name), original)
+                skeleton = json.loads(zlib.decompress(db.execute(
+                    "SELECT data FROM runtime_documents WHERE member=?", (member,)).fetchone()[0]))
+                self.assertEqual(skeleton["dids"]["0x1000"], [None])
+                self.assertEqual(skeleton["active_tests"], [None])
+                self.assertEqual(skeleton["source_identity"], catalog["source_identity"])
 
     def test_native_source_families_and_metadata(self):
         from tools.techstream.diag_runtime_db import SOURCE_COLLECTIONS, SOURCE_LISTS, _catalog_rows, _source_metadata
@@ -200,9 +224,10 @@ class RuntimeProjectionTests(unittest.TestCase):
                 manifest=json.loads(db.execute("SELECT value FROM meta WHERE key='supplemental_sources'").fetchone()[0])
                 loaded=[entry for entry in manifest if entry["status"]=="loaded"]
                 self.assertEqual(loaded[0]["sha256"],hashlib.sha256(data).hexdigest())
-                self.assertEqual(sum(entry["status"]=="missing" for entry in manifest),1)
+                self.assertEqual(sum(entry["status"]=="missing" for entry in manifest),2)
                 self.assertEqual(db.execute("SELECT member,pointer FROM item_sources").fetchone(),
                     ("supplement://" + filename,"/adu/rows/0"))
+                self.assertEqual(restore_document(db, "supplement://" + filename), document)
             empty=root/"empty"
             empty.mkdir()
             export_runtime_db(candidate,out,supplemental_root=empty)
@@ -210,6 +235,54 @@ class RuntimeProjectionTests(unittest.TestCase):
                 self.assertEqual(db.execute("SELECT count(*) FROM items").fetchone()[0],0)
                 manifest=json.loads(db.execute("SELECT value FROM meta WHERE key='supplemental_sources'").fetchone()[0])
                 self.assertTrue(all(entry["status"]=="missing" for entry in manifest))
+
+    def test_shared_members_across_regions_and_escaped_pointers(self):
+        member = "catalogs/shared.json"
+        custom_member = "customize/shared.json"
+        catalog = {"dids": {"odd/~key": [{"name": "Exact name", "nested": {"null": None}}]},
+                   "metadata": {"opaque": [1, 2, 3]}}
+        customize = {"groups": [{"group_id": 1, "name": "Shared group"}]}
+        region = {"selected_categories": {"123": {"catalog_member": member}}, "vehicles": {},
+                  "customize_member": custom_member}
+        index = {"schema": "toyota-diagnostics-bundle-v4", "regions": {"NA": region, "EU": region}}
+        sources = {"index.json": index, member: catalog, custom_member: customize}
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "bundle"
+            writer = DiagnosticBundleWriter(root)
+            for name, value in sources.items():
+                writer.add(name, io.BytesIO(json.dumps(value).encode()))
+            writer.finish()
+            out = Path(tmp) / "runtime.sqlite"
+            empty = Path(tmp) / "empty"
+            empty.mkdir()
+            export_runtime_db(root, out, supplemental_root=empty)
+            with sqlite3.connect(out) as db:
+                self.assertEqual(db.execute("SELECT count(*) FROM runtime_documents").fetchone()[0], 3)
+                self.assertEqual(db.execute("SELECT count(*) FROM items WHERE kind='did'").fetchone()[0], 2)
+                for name, original in sources.items():
+                    self.assertEqual(restore_document(db, name), original)
+                self.assertEqual(set(row[0] for row in db.execute(
+                    "SELECT pointer FROM item_sources WHERE member=?", (member,))), {"/dids/odd~1~0key/0"})
+
+    def test_runtime_only_supplement_is_preserved_without_search_rows(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            supplemental = root / "supplements"
+            supplemental.mkdir()
+            document = {"transport": {"request": "22"}, "opaque": [None, {"a": 1}]}
+            filename = "tss3_native_recorder_protocol.json"
+            (supplemental / filename).write_text(json.dumps(document))
+            bundle = root / "bundle"
+            writer = DiagnosticBundleWriter(bundle)
+            writer.add("index.json", io.BytesIO(json.dumps({
+                "schema": "toyota-diagnostics-bundle-v4",
+                "regions": {"NA": {"selected_categories": {}, "vehicles": {}}}}).encode()))
+            writer.finish()
+            output = root / "runtime.sqlite"
+            export_runtime_db(bundle, output, supplemental_root=supplemental)
+            with sqlite3.connect(output) as db:
+                self.assertEqual(restore_document(db, "supplement://" + filename), document)
+                self.assertEqual(db.execute("SELECT count(*) FROM items").fetchone()[0], 0)
 
     def test_legacy_category_alias(self):
         self.assertEqual(_category_key(1, {"database": "Engine_P3.ddb"}), "engine")

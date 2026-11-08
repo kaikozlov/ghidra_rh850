@@ -17,7 +17,8 @@ from tools.techstream.diag_bundle import DEFAULT_BUNDLE, DiagnosticBundle
 DEFAULT_OUTPUT = REPO_ROOT / "build/out/toyota_diag.sqlite"
 # Supplements are repository artifacts, independent of candidate bundle location.
 DEFAULT_SUPPLEMENTAL_ROOT = DEFAULT_BUNDLE.parent
-SUPPLEMENTAL_FILES = ("pcs_data_viewer_tss3_managed_semantics.json", "pcs_data_viewer_adu_semantics.json")
+SUPPLEMENTAL_FILES = ("pcs_data_viewer_tss3_managed_semantics.json", "pcs_data_viewer_adu_semantics.json",
+                      "tss3_native_recorder_protocol.json")
 SCHEMA = "toyota-diagnostics-sqlite-v2"
 SOURCE_SCHEMA = "toyota-diagnostics-bundle-v4"
 
@@ -59,6 +60,7 @@ CREATE TABLE catalog_sources (
  region TEXT NOT NULL, category_id INTEGER NOT NULL, member TEXT NOT NULL,
  metadata TEXT NOT NULL, PRIMARY KEY(region, category_id, member)
 ) WITHOUT ROWID;
+CREATE TABLE runtime_documents (member TEXT PRIMARY KEY, data BLOB NOT NULL) WITHOUT ROWID;
 CREATE TABLE item_sources (
  item_id INTEGER PRIMARY KEY REFERENCES items(id), member TEXT NOT NULL, pointer TEXT NOT NULL
 );
@@ -268,7 +270,7 @@ def _supplemental_source(path: Path) -> dict[str, str]:
     """Stable source identity without leaking workstation directories."""
     try:
         relative = path.resolve().relative_to(REPO_ROOT.resolve()).as_posix()
-        return {"path":relative, "uri":"repo://" + relative, "path_scope":"repository"}
+        return {"path":relative, "uri":"supplement://" + path.name, "path_scope":"repository"}
     except ValueError:
         return {"path":path.name, "uri":"supplement://" + path.name, "path_scope":"supplemental_root"}
 
@@ -360,6 +362,27 @@ def export_runtime_db(bundle_path: Path = DEFAULT_BUNDLE, out: Path = DEFAULT_OU
             db.execute("INSERT INTO catalog_sources VALUES (?,?,?,?)",
                        (region, category_id, member, _json(metadata)))
 
+        def insert_document(member: str, document: dict[str, Any], rows: list[tuple] = ()) -> None:
+            # Item payloads own indexed rows. Keep the remaining document shape
+            # and fields once; the runtime restores rows through item_sources.
+            skeleton = json.loads(_json(document))
+            for row in rows:
+                parts = [part.replace("~1", "/").replace("~0", "~") for part in row[7].split("/")[1:]]
+                target = skeleton
+                for part in parts[:-1]:
+                    target = target[int(part)] if isinstance(target, list) else target[part]
+                if parts:
+                    key = int(parts[-1]) if isinstance(target, list) else parts[-1]
+                    target[key] = None
+            packed = zlib.compress(_json(skeleton).encode("utf-8"))
+            existing = db.execute("SELECT data FROM runtime_documents WHERE member=?", (member,)).fetchone()
+            if existing is not None:
+                if existing[0] != packed:
+                    raise ValueError(f"inconsistent runtime document projection for {member}")
+                return
+            db.execute("INSERT INTO runtime_documents VALUES (?,?)", (member, packed))
+
+        insert_document("index.json", index)
         item_count = 0
         for region, region_index in sorted(index["regions"].items()):
             categories = region_index["selected_categories"]
@@ -368,7 +391,9 @@ def export_runtime_db(bundle_path: Path = DEFAULT_BUNDLE, out: Path = DEFAULT_OU
             if customize_member:
                 customize = bundle.json(str(customize_member))
                 insert_source(region, 0, str(customize_member), customize)
-                for row in _customize_rows(region, customize):
+                customize_rows = list(_customize_rows(region, customize))
+                insert_document(str(customize_member), customize, customize_rows)
+                for row in customize_rows:
                     insert_item(row, str(customize_member))
                     item_count += 1
             for binding in (region_index.get("utilities") or {}).get("bindings", []):
@@ -407,6 +432,7 @@ def export_runtime_db(bundle_path: Path = DEFAULT_BUNDLE, out: Path = DEFAULT_OU
                         "utilities": len(catalog.get("utilities", [])),
                     }
                     rows = list(_catalog_rows(region, category_id, catalog))
+                    insert_document(str(member), catalog, rows)
                     for row in rows:
                         insert_item(row, str(member))
                     counts["items_by_kind"] = {kind: sum(row[2] == kind for row in rows) for kind in sorted({row[2] for row in rows})}
@@ -422,6 +448,11 @@ def export_runtime_db(bundle_path: Path = DEFAULT_BUNDLE, out: Path = DEFAULT_OU
 
         db.execute("INSERT INTO meta VALUES (?,?)", ("supplemental_sources", _json(supplemental_sources)))
         supplemental = list(_supplemental_rows(index, supplemental_root, documents=documents))
+        for name, document in documents.items():
+            member = _supplemental_source(supplemental_root / name)["uri"]
+            # Region-specific search summaries share one canonical document.
+            pointers = {row[7]: row for row in supplemental if row[8] == member}
+            insert_document(member, document, list(pointers.values()))
         for row in supplemental:
             insert_item(row, row[8])
         item_count += len(supplemental)
