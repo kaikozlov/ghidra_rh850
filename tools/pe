@@ -17,9 +17,10 @@
 # ghidra CLI bridge as normal.
 #
 # Environment:
-#   GHIDRA_AGENT=1   Force compact JSON output.
-#   PE_PROJECT       Override project name (default: pe_dlls)
-#   PE_PROGRAM       Override program name (default: CommandCommon.dll)
+#   GHIDRA_AGENT=1           Force JSON output for scripted callers.
+#   GHIDRA_CLI_DEFAULT_LIMIT Override the CLI's default page size (50; 0 = unlimited).
+#   PE_PROJECT              Override project name (default: pe_dlls)
+#   PE_PROGRAM              Override program name (default: CommandCommon.dll)
 
 set -euo pipefail
 
@@ -28,9 +29,33 @@ ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 source "$ROOT/tools/lib/build_paths.sh"
 PROJECT_NAME="${PE_PROJECT:-pe_dlls}"
 PROJECT_DIR="$BUILD_WORK/pe-project"
-mkdir -p "$PROJECT_DIR"
 
-GHIDRA_CLI=$("$ROOT/tools/project/resolve_ghidra_cli.sh" --ensure-vendored)
+# Parse output flags for the native importer; bridge commands keep their argv.
+IMPORT_ARGS=()
+IMPORT_JSON="${GHIDRA_AGENT:-0}"
+IMPORT_PRETTY=0
+IMPORT_QUIET=0
+IMPORT_HELP=0
+PARSE_GLOBALS=1
+for arg in "$@"; do
+  if ((PARSE_GLOBALS == 0)); then
+    IMPORT_ARGS+=("$arg")
+    continue
+  fi
+  if [[ "$arg" =~ ^-[qv]+$ ]]; then
+    if [[ "$arg" == *q* ]]; then IMPORT_QUIET=1; fi
+    continue
+  fi
+  case "$arg" in
+    --) PARSE_GLOBALS=0 ;;
+    --json) IMPORT_JSON=1 ;;
+    --pretty) IMPORT_JSON=1; IMPORT_PRETTY=1 ;;
+    --quiet) IMPORT_QUIET=1 ;;
+    --verbose) ;;
+    -h|--help) IMPORT_HELP=1 ;;
+    *) IMPORT_ARGS+=("$arg") ;;
+  esac
+done
 
 # --- Subcommand dispatch ------------------------------------------------------
 #
@@ -39,31 +64,50 @@ GHIDRA_CLI=$("$ROOT/tools/project/resolve_ghidra_cli.sh" --ensure-vendored)
 # but the resulting analysis is shallow (0 instructions, 0 functions for many
 # MSVC PEs).  analyzeHeadless runs the complete analysis pipeline (Aggressive
 # Instruction Finder, decompiler, etc.) and saves durably.
-if [[ "${1:-}" == "import" ]]; then
-  shift  # remove "import"
+if [[ "${IMPORT_ARGS[0]:-}" == "import" ]]; then
+  set -- "${IMPORT_ARGS[@]:1}"
+  if ((IMPORT_HELP)); then
+    echo "Usage: tools/pe [--json|--pretty] import FILE [-- HEADLESS_ARGS...]"
+    echo "Import and fully analyze a PE binary. PE_PROJECT selects the project."
+    echo "Set GHIDRA_ANALYSIS_TIMEOUT to override the 300-second analysis timeout."
+    exit 0
+  fi
   if [[ $# -lt 1 ]]; then
-    echo "Usage: tools/pe import <path/to/file.dll>" >&2
-    exit 1
+    echo "Usage: tools/pe [--json|--pretty] import FILE [-- HEADLESS_ARGS...]" >&2
+    exit 2
   fi
   BINARY="$1"
   shift
   PROGRAM_NAME="$(basename "$BINARY")"
-
   GHIDRA_HOME="$("$ROOT/tools/project/resolve_ghidra_home.sh")"
-  ANALYZE_HEADLESS="$GHIDRA_HOME/support/analyzeHeadless"
-  [[ -x "$ANALYZE_HEADLESS" ]] || { echo "missing analyzeHeadless: $ANALYZE_HEADLESS" >&2; exit 1; }
 
-  echo "Importing $PROGRAM_NAME via analyzeHeadless..." >&2
-  "$ANALYZE_HEADLESS" "$PROJECT_DIR" "$PROJECT_NAME" \
-    -import "$BINARY" \
-    -overwrite \
-    -analysisTimeoutPerFile 300 \
-    "$@" 2>&1 | grep -E 'INFO|ERROR' | tail -5
-  echo "Done. Use PE_PROGRAM=$PROGRAM_NAME tools/pe <subcommand> to query." >&2
+  if ((IMPORT_QUIET == 0)); then
+    echo "Importing $PROGRAM_NAME..." >&2
+  fi
+  GHIDRA_HOME="$GHIDRA_HOME" GHIDRA_NO_BOOTSTRAP=1 \
+    GHIDRA_ANALYSIS_TIMEOUT="${GHIDRA_ANALYSIS_TIMEOUT:-300}" \
+    "$ROOT/tools/project/run_headless" \
+      --project-dir "$PROJECT_DIR" --project "$PROJECT_NAME" \
+      --label pe-import --quiet -- -import "$BINARY" -overwrite "$@"
+
+  if [[ "$IMPORT_JSON" == "1" ]]; then
+    python3 - "$PROGRAM_NAME" "$IMPORT_PRETTY" <<'PY'
+import json, sys
+program, pretty = sys.argv[1:]
+print(json.dumps([{'status': 'success', 'program': program}],
+                 indent=2 if pretty == '1' else None,
+                 separators=None if pretty == '1' else (',', ':')))
+PY
+  else
+    echo "imported $PROGRAM_NAME into $PROJECT_NAME"
+    printf 'Use PE_PROGRAM=%q tools/pe <command> to query.\n' "$PROGRAM_NAME"
+  fi
   exit 0
 fi
 
 # --- All other subcommands: route through the bridge -------------------------
+mkdir -p "$PROJECT_DIR"
+GHIDRA_CLI=$("$ROOT/tools/project/resolve_ghidra_cli.sh" --ensure-vendored)
 PROGRAM_NAME="${PE_PROGRAM:-CommandCommon.dll}"
 
 CLI_ARGS=(

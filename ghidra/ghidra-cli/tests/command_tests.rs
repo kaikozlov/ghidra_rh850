@@ -107,7 +107,7 @@ fn test_config_set_launch_timeout() {
 }
 
 #[test]
-fn invalid_resource_overrides_leave_saved_config_unchanged() {
+fn portable_invalid_resource_overrides_leave_saved_config_unchanged() {
     let temp = tempfile::tempdir().unwrap();
     let config_path = temp.path().join("config.yaml");
     for (key, value) in [("max_heap", "1536m"), ("cpu_workers", "3")] {
@@ -136,6 +136,93 @@ fn invalid_resource_overrides_leave_saved_config_unchanged() {
             .failure();
         assert_eq!(std::fs::read(&config_path).unwrap(), saved, "{key}={value}");
     }
+}
+
+#[test]
+fn portable_output_options_fail_before_bridge_work() {
+    let temp = tempfile::tempdir().unwrap();
+    let config_path = temp.path().join("config.yaml");
+    for (option, value, message) in [
+        ("--format", "unknown", "Unknown format"),
+        (
+            "--filter",
+            "name=test garbage",
+            "invalid --filter expression",
+        ),
+    ] {
+        assert_cmd::cargo::cargo_bin_cmd!("ghidra")
+            .env("GHIDRA_CLI_CONFIG", &config_path)
+            .env_remove("GHIDRA_CLI_DEFAULT_LIMIT")
+            .args(["function", "list", option, value])
+            .assert()
+            .failure()
+            .stdout(predicate::str::is_empty())
+            .stderr(predicate::str::contains(message))
+            .stderr(predicate::str::contains("Starting Ghidra").not());
+    }
+    assert_cmd::cargo::cargo_bin_cmd!("ghidra")
+        .env("GHIDRA_CLI_CONFIG", &config_path)
+        .args(["function", "delete", "main", "-o", "c"])
+        .assert()
+        .failure()
+        .stdout(predicate::str::is_empty())
+        .stderr(predicate::str::contains("format 'c' requires decompile"))
+        .stderr(predicate::str::contains("Starting Ghidra").not());
+    assert!(!config_path.exists());
+}
+
+#[test]
+fn portable_configured_limit_defaults_and_environment_overrides() {
+    let temp = tempfile::tempdir().unwrap();
+    let config_path = temp.path().join("config.yaml");
+    let mut config = serde_yaml::to_value(ghidra_cli::config::Config::default()).unwrap();
+    config
+        .as_mapping_mut()
+        .unwrap()
+        .remove(serde_yaml::Value::from("default_limit"));
+    std::fs::write(&config_path, serde_yaml::to_string(&config).unwrap()).unwrap();
+
+    assert_cmd::cargo::cargo_bin_cmd!("ghidra")
+        .env("GHIDRA_CLI_CONFIG", &config_path)
+        .env_remove("GHIDRA_CLI_DEFAULT_LIMIT")
+        .args(["config", "get", "default_limit"])
+        .assert()
+        .success()
+        .stdout("50\n\n");
+    for value in ["0", "7"] {
+        assert_cmd::cargo::cargo_bin_cmd!("ghidra")
+            .env("GHIDRA_CLI_CONFIG", &config_path)
+            .env("GHIDRA_CLI_DEFAULT_LIMIT", value)
+            .args(["config", "get", "default_limit"])
+            .assert()
+            .success()
+            .stdout(format!("{value}\n\n"));
+    }
+    assert_cmd::cargo::cargo_bin_cmd!("ghidra")
+        .env("GHIDRA_CLI_CONFIG", &config_path)
+        .env("GHIDRA_CLI_DEFAULT_LIMIT", "invalid")
+        .args(["config", "get", "default_limit"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("must be a non-negative integer"));
+}
+
+#[test]
+fn portable_invalid_output_format_does_not_change_saved_config() {
+    let temp = tempfile::tempdir().unwrap();
+    let config_path = temp.path().join("config.yaml");
+    assert_cmd::cargo::cargo_bin_cmd!("ghidra")
+        .env("GHIDRA_CLI_CONFIG", &config_path)
+        .args(["config", "set", "default_output_format", "json"])
+        .assert()
+        .success();
+    let original = std::fs::read(&config_path).unwrap();
+    assert_cmd::cargo::cargo_bin_cmd!("ghidra")
+        .env("GHIDRA_CLI_CONFIG", &config_path)
+        .args(["config", "set", "default_output_format", "nonsense"])
+        .assert()
+        .failure();
+    assert_eq!(std::fs::read(config_path).unwrap(), original);
 }
 
 #[test]

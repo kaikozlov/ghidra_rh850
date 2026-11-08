@@ -3,12 +3,16 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Parser)]
 #[command(name = "ghidra")]
-#[command(version, about = "Rust CLI for Ghidra reverse engineering", long_about = None)]
+#[command(
+    version,
+    about = "Rust CLI for Ghidra reverse engineering",
+    long_about = "Ghidra reverse engineering with compact text output. Use --json or --pretty for structured output. List queries default to 50 results; --limit 0 returns all."
+)]
 pub struct Cli {
     #[command(subcommand)]
     pub command: Commands,
 
-    /// Increase log verbosity printed to stdout (-v=warn, -vv=info, -vvv=debug)
+    /// Increase log verbosity printed to stderr (-v=warn, -vv=info, -vvv=debug)
     #[arg(short, long, action = ArgAction::Count, global = true)]
     pub verbose: u8,
 
@@ -291,11 +295,11 @@ pub struct QueryArgs {
     #[arg(long)]
     pub fields: Option<String>,
 
-    /// Output format
+    /// Output format: compact, full, json, json-compact, ndjson, csv, tsv, table, ids, count, c, asm, hex
     #[arg(long, short = 'o')]
     pub format: Option<String>,
 
-    /// Maximum number of results (0 = unlimited; default 1000)
+    /// Maximum number of results (0 = unlimited; default 50)
     #[arg(long)]
     pub limit: Option<usize>,
 
@@ -311,7 +315,7 @@ pub struct QueryArgs {
     #[arg(long)]
     pub count: bool,
 
-    /// Output as JSON (shorthand for --format=json)
+    /// Output as compact JSON (shorthand for --format=json-compact)
     #[arg(long)]
     pub json: bool,
 }
@@ -652,7 +656,7 @@ pub enum MemoryCommands {
     Read(MemReadArgs),
     /// Write memory
     Write(MemWriteArgs),
-    /// Search memory
+    /// Search memory for a hex byte pattern
     Search(MemSearchArgs),
 }
 
@@ -676,6 +680,7 @@ pub struct MemWriteArgs {
 
 #[derive(Args, Clone, Serialize, Deserialize, Debug)]
 pub struct MemSearchArgs {
+    /// Hex bytes to search for (e.g. `deadbeef` or `de ad be ef`)
     pub pattern: String,
     #[command(flatten)]
     pub options: QueryOptions,
@@ -1314,25 +1319,31 @@ pub struct QueryOptions {
     #[arg(short, long)]
     pub filter: Option<String>,
 
+    /// Select comma-separated fields; prefix the list with '-' to exclude (e.g. --fields=-comment,signature)
     #[arg(long)]
     pub fields: Option<String>,
 
+    /// Output format: compact, full, json, json-compact, ndjson, csv, tsv, table, ids, count, c, asm, hex
     #[arg(long, short = 'o')]
     pub format: Option<String>,
 
-    /// Maximum number of results (0 = unlimited; default 1000)
+    /// Maximum number of results (0 = unlimited; default 50)
     #[arg(long)]
     pub limit: Option<usize>,
 
+    /// Skip the first N matching results
     #[arg(long)]
     pub offset: Option<usize>,
 
+    /// Sort by comma-separated fields; prefix with '-' for descending (e.g. --sort=-size)
     #[arg(long, allow_hyphen_values = true)]
     pub sort: Option<String>,
 
+    /// Print only the count; ignores the default limit, respects explicit --limit and --offset
     #[arg(long)]
     pub count: bool,
 
+    /// Output as compact JSON
     #[arg(long)]
     pub json: bool,
 }

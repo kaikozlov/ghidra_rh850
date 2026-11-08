@@ -80,7 +80,7 @@ fn test_comment_list() {
         .success();
 
     // Analysis generates thousands of auto EOL reference comments at low
-    // addresses; `comment list` is address-ordered and limited (default 1000),
+    // addresses; `comment list` is address-ordered and limited (default 50),
     // so a user comment at a high function address can fall outside the default
     // window. Pass an explicit large limit so the assertion is deterministic.
     assert_cmd::cargo::cargo_bin_cmd!("ghidra")

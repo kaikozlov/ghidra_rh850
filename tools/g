@@ -20,7 +20,8 @@
 #   tools/g stop
 #
 # Environment:
-#   GHIDRA_AGENT=1            Force compact JSON output (for scripted/agent consumption).
+#   GHIDRA_AGENT=1            Force JSON output for scripted callers.
+#   GHIDRA_CLI_DEFAULT_LIMIT  Override the CLI's default page size (50; 0 = unlimited).
 #   GHIDRA_PROJECT            Override the selected target's registered working project directory.
 #   GHIDRA_ANALYSIS_TARGET   Registered analysis target; omitted means registry default.
 #   GHIDRA_ALLOW_SYSTEM_CLI=1 Allow falling back to a system-installed ghidra binary.
@@ -175,6 +176,15 @@ fi # STATUS_ONLY == 0
 # --- Special commands ---------------------------------------------------------
 
 cmd_session_status() {
+  local json_output="${GHIDRA_AGENT:-0}" pretty_output=0 arg
+  for arg in "$@"; do
+    case "$arg" in
+      --) break ;;
+      --json) json_output=1 ;;
+      --pretty) json_output=1; pretty_output=1 ;;
+    esac
+  done
+
   local daemon_pid="" daemon_state="stopped"
   if daemon_pid=$(pgrep -f "$DAEMON_RE" 2>/dev/null | head -1); then
     daemon_state="running"
@@ -227,17 +237,16 @@ cmd_session_status() {
     fi
   fi
 
-  # Machine-readable output.
-  if [[ "${GHIDRA_AGENT:-}" == "1" ]]; then
+  if [[ "$json_output" == "1" ]]; then
     python3 - \
       "$daemon_state" "$daemon_pid" "$DAEMON_RE" \
       "$ABS_PROJECT_DIR" "$project_state" "$fingerprint_state" \
-      "$mutation_state" "$snapshot_state" <<'PY'
+      "$mutation_state" "$snapshot_state" "$pretty_output" <<'PY'
 import json, sys
 (
     daemon_state, daemon_pid, daemon_pattern,
     project_path, project_state, fingerprint_state,
-    mutation_state, snapshot_state,
+    mutation_state, snapshot_state, pretty_output,
 ) = sys.argv[1:]
 daemon = {
     'state': daemon_state,
@@ -256,7 +265,8 @@ print(json.dumps({
     'processor_fingerprint': fingerprint_state,
     'working_session': mutation_state,
     'snapshot': snapshot_state,
-}, indent=2))
+}, indent=2 if pretty_output == '1' else None,
+   separators=None if pretty_output == '1' else (',', ':')))
 PY
   else
     echo "daemon:              $daemon_state${daemon_pid:+ (pid $daemon_pid)}"
@@ -268,8 +278,8 @@ PY
 }
 
 # Handle session-status before any project materialization.
-if [[ "${1:-}" == "session-status" ]]; then
-  cmd_session_status
+if [[ "$USER_SUBCMD" == "session-status" ]]; then
+  cmd_session_status "$@"
   exit 0
 fi
 
@@ -385,7 +395,7 @@ CLI_ARGS=(
   --program "$PROGRAM_NAME"
 )
 
-# Force compact JSON when used as an agent tool.
+# Preserve the scripted-caller environment override.
 if [[ "${GHIDRA_AGENT:-}" == "1" ]]; then
   CLI_ARGS+=(--json)
 fi

@@ -23,6 +23,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Compact text is the default on terminals and through pipes.** Decompilation
+  prints C once; lists use concise rows; `inspect` and reference traces group
+  their sections. `--json` and `--pretty` select structured output. Explicit
+  output flags override saved `default_output_format`; `auto` means compact.
+  See [Output and query options](docs/output-format.md).
+- Query-capable commands share a built-in 50-row page size. Saved limits remain
+  effective; `GHIDRA_CLI_DEFAULT_LIMIT` and command `--limit` override them.
+  `--limit 0` returns all rows. Bridge limits are actual response caps, with an
+  extra match checked before reporting truncation. Client-side queries fetch
+  complete input for filtering, sorting, counting, and offsets. Truncation
+  notices, including nested inspection limits, go to stderr.
+- Compact details preserve type components, enum members, function signatures,
+  comments, and explicitly requested parameter/local storage. JSON retains
+  complete string values and detail metadata. Function records use `address`;
+  the duplicate `entry_point` and absent `comment`/`signature` fields are omitted.
+- `batch` retains its JSON envelope and applies each subcommand's query options.
+  `graph calls` queries select nodes and keep their outgoing edges. Standalone
+  `disasm -n N` overrides the default page size; explicit `--limit` still applies.
+- CSV/TSV exports quote cells correctly and include fields appearing in later
+  rows. `c`, `asm`, and `hex` render their corresponding source data, and DOT
+  export prints source directly. Unsupported formats fail with a usage error.
+
 - `ghidra script run` runs a checked-in script by absolute path with real
   positional arguments (everything after `--`) and captured stdout, returning
   `{script, path, stdout, args}`. New `--expect PATH[:MIN_ROWS]` (repeatable) fails
@@ -32,6 +54,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Incompatible source formats fail before command execution, including mutations.
+  Bridge lifecycle commands honor JSON flags and saved output preferences;
+  `restart` emits one final JSON result.
+- Filters reject trailing or incomplete syntax; existence and membership
+  expressions parse correctly. Sorting happens before field projection, so
+  `--fields` can omit the sort key.
+- Repository stats consumers explicitly request JSON. `tools/g session-status`
+  accepts output flags in either position; `tools/pe import` performs full
+  analysis with clean text or JSON results in either position.
+- `memory search HEX` now uses the working byte-pattern search path instead of
+  dispatching the nonexistent `search_memory` bridge command. Hex input is
+  validated for even length and valid digits.
 - Ghidra 12.2 bridge compilation uses the single-type `DataTypeManager.remove`
   API; type deletion retains its transaction and checks cancellation first.
 - Commands issued while the bridge is busy now wait in the queue instead of

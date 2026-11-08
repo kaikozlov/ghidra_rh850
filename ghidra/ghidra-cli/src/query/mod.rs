@@ -1,7 +1,6 @@
 use crate::cli::QueryOptions;
 use crate::error::{GhidraError, Result};
 use crate::filter::Filter;
-use crate::format::{DefaultFormatter, Formatter, OutputFormat};
 use serde_json::Value as JsonValue;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -56,11 +55,17 @@ pub struct Query {
     pub data_type: DataType,
     pub filter: Option<Filter>,
     pub fields: Option<FieldSelector>,
-    pub format: OutputFormat,
     pub limit: Option<usize>,
     pub offset: Option<usize>,
     pub sort: Option<Vec<SortKey>>,
     pub count_only: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ProcessedData {
+    pub values: Vec<JsonValue>,
+    pub displayed: usize,
+    pub truncated: bool,
 }
 
 impl Query {
@@ -70,7 +75,6 @@ impl Query {
             data_type,
             filter: None,
             fields: None,
-            format: OutputFormat::Json,
             limit: None,
             offset: None,
             sort: None,
@@ -79,7 +83,7 @@ impl Query {
     }
 
     /// Build a Query from CLI QueryOptions. Returns None if no query processing is needed.
-    pub fn from_options(opts: &QueryOptions, format: OutputFormat) -> Result<Option<Self>> {
+    pub fn from_options(opts: &QueryOptions) -> Result<Option<Self>> {
         let has_filter = opts.filter.is_some();
         let has_fields = opts.fields.is_some();
         let has_sort = opts.sort.is_some();
@@ -87,12 +91,8 @@ impl Query {
         let has_offset = opts.offset.is_some();
         let has_limit = opts.limit.is_some();
 
-        // No query processing needed if no filter/fields/sort/count/offset/limit.
-        // Offset and limit must be handled here because some bridge list handlers
-        // (e.g. imports/exports) never paginate — when either is set,
-        // `bridge_list_params` (main.rs) may fetch the full dataset and this Query
-        // must apply the real offset/limit itself. Applying the limit again on a
-        // dataset the bridge already capped is idempotent, so this is safe.
+        // Apply pagination after filtering and sorting the rows returned by
+        // the bridge.
         if !has_filter && !has_fields && !has_sort && !has_count && !has_offset && !has_limit {
             return Ok(None);
         }
@@ -106,10 +106,9 @@ impl Query {
         let sort = opts.sort.as_ref().map(|s| SortKey::parse(s));
 
         Ok(Some(Self {
-            data_type: DataType::Functions, // placeholder, not used in process_results
+            data_type: DataType::Functions, // Query operations are independent of entity type.
             filter,
             fields,
-            format,
             // The bridge only skips limit/filter when filter/sort/count/offset is
             // requested (see `bridge_list_params` in main.rs) — in that case it
             // returns the full dataset and we must paginate here ourselves.
@@ -123,12 +122,6 @@ impl Query {
     #[allow(dead_code)]
     pub fn with_filter(mut self, filter: Filter) -> Self {
         self.filter = Some(filter);
-        self
-    }
-
-    #[allow(dead_code)]
-    pub fn with_format(mut self, format: OutputFormat) -> Self {
-        self.format = format;
         self
     }
 
@@ -150,43 +143,35 @@ impl Query {
         self
     }
 
-    /// Process query results from pre-fetched data.
-    ///
-    /// Note: Data fetching is now handled by the daemon via IPC.
-    /// This method only handles filtering, field selection, sorting, and formatting.
-    pub fn process_results(&self, data: Vec<JsonValue>) -> Result<String> {
-        // Apply filter
+    /// Filter, sort, paginate, and project rows without rendering them.
+    pub fn process_data(&self, data: Vec<JsonValue>) -> Result<ProcessedData> {
         let filtered = if let Some(filter) = &self.filter {
             self.apply_filter(&data, filter)?
         } else {
             data
         };
-
-        // Apply field selection
-        let selected = if let Some(fields) = &self.fields {
-            self.select_fields(&filtered, fields)?
+        let sorted = if let Some(sort) = &self.sort {
+            self.apply_sort(&filtered, sort)?
         } else {
             filtered
         };
 
-        // Apply sorting
-        let sorted = if let Some(sort) = &self.sort {
-            self.apply_sort(&selected, sort)?
+        let available = sorted.len().saturating_sub(self.offset.unwrap_or(0));
+        let finite_limit = self.limit.filter(|limit| *limit > 0);
+        let truncated = !self.count_only && finite_limit.is_some_and(|limit| available > limit);
+        let paginated = self.apply_pagination(&sorted);
+        let displayed = paginated.len();
+        let values = if let Some(fields) = &self.fields {
+            self.select_fields(&paginated, fields)?
         } else {
-            selected
+            paginated
         };
 
-        // Apply pagination
-        let paginated = self.apply_pagination(&sorted);
-
-        // Return count if requested
-        if self.count_only {
-            return Ok(paginated.len().to_string());
-        }
-
-        // Format output
-        let formatter = DefaultFormatter;
-        formatter.format(&paginated, self.format)
+        Ok(ProcessedData {
+            values,
+            displayed,
+            truncated,
+        })
     }
 
     fn apply_filter(&self, data: &[JsonValue], filter: &Filter) -> Result<Vec<JsonValue>> {
@@ -416,6 +401,67 @@ mod tests {
         let page = query.apply_pagination(&rows(5));
         assert_eq!(page.len(), 2);
         assert_eq!(page[0]["id"], 1);
+    }
+
+    #[test]
+    fn test_sort_precedes_field_projection() {
+        let mut query = Query::new(DataType::Functions);
+        query.sort = Some(SortKey::parse("-size"));
+        query.fields = Some(FieldSelector::parse("name").unwrap());
+        query.limit = Some(1);
+        let processed = query
+            .process_data(vec![
+                serde_json::json!({"name": "small", "size": 2}),
+                serde_json::json!({"name": "large", "size": 100}),
+            ])
+            .unwrap();
+        assert_eq!(processed.values, vec![serde_json::json!({"name": "large"})]);
+        assert_eq!(processed.displayed, 1);
+        assert!(processed.truncated);
+    }
+
+    #[test]
+    fn test_count_respects_explicit_pagination() {
+        let mut query = Query::new(DataType::Functions);
+        query.count_only = true;
+        query.filter = Some(Filter::parse("id>0").unwrap());
+        query.offset = Some(1);
+        query.limit = Some(2);
+        let processed = query.process_data(rows(5)).unwrap();
+        assert_eq!(processed.values, rows(5)[2..4]);
+        assert_eq!(processed.displayed, 2);
+        assert!(!processed.truncated);
+    }
+
+    #[test]
+    fn test_exact_final_page_is_not_truncated() {
+        let mut query = Query::new(DataType::Functions);
+        query.offset = Some(1);
+        query.limit = Some(2);
+        let processed = query.process_data(rows(3)).unwrap();
+        assert_eq!(processed.values, rows(3)[1..]);
+        assert!(!processed.truncated);
+    }
+
+    #[test]
+    fn test_processed_query_reports_truncation_after_offset() {
+        let mut query = Query::new(DataType::Functions);
+        query.limit = Some(2);
+        query.offset = Some(1);
+        let processed = query.process_data(rows(5)).unwrap();
+        assert_eq!(processed.values, rows(5)[1..3]);
+        assert_eq!(processed.displayed, 2);
+        assert!(processed.truncated);
+    }
+
+    #[test]
+    fn test_processed_query_limit_zero_is_not_truncated() {
+        let mut query = Query::new(DataType::Functions);
+        query.limit = Some(0);
+        let processed = query.process_data(rows(5)).unwrap();
+        assert_eq!(processed.values, rows(5));
+        assert_eq!(processed.displayed, 5);
+        assert!(!processed.truncated);
     }
 
     #[test]

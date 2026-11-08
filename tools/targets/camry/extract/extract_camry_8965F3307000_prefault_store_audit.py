@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Promote exact-F33 pre-fault call-cone store audit output.
 
-Input is the JSON wrapper emitted by `tools/gtarget ... script run` for
+Input is the JSON wrapper emitted by `tools/gtarget TARGET --json script run` for
 AuditCallConeStores/AuditCallConeParamStores.  The promoted artifact keeps the
 function denominator and cryptographic digests of the full STORE row set while
 remaining compact enough to review and verify without Ghidra.

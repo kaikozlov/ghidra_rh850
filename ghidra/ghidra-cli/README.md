@@ -20,16 +20,17 @@ built from the vendored `src/` by `make ghidra-cli`:
 make ghidra-cli    # cargo build --release into build/cache/ghidra-cli/
 ```
 
-`tools/project/build_ghidra_cli.sh` runs the isolated release build and emits
-`build/cache/ghidra-cli.env`, which the repo's tool scripts source to find the
-binary. When the vendored build is present, it is preferred over any `ghidra`
-on `PATH`; otherwise the PATH binary is used with a version check.
+`tools/project/build_ghidra_cli.sh` runs the isolated release build. The wrappers
+rebuild missing or stale vendored binaries automatically. `tools/g` permits a
+system `ghidra` fallback only when `GHIDRA_ALLOW_SYSTEM_CLI=1` is set.
 
 Repository-facing ergonomic extensions are exposed through `tools/g`:
 
 ```bash
 tools/g inspect TARGET [TARGET ...]
 tools/g x-ref trace-to ADDRESS [--max-functions N]
+tools/g find function '*aes*' --limit 20
+tools/g memory search deadbeef
 printf 'stats\nquery functions --count\n' | tools/g batch --read-only -
 ```
 
@@ -40,9 +41,16 @@ partial aggregates. Batch input accepts `-` for stdin, preflights every command
 before execution, defaults to 100 commands, and offers a conservative
 `--read-only` allowlist for scripted investigation.
 
+Output defaults to compact text for terminals and pipes. Use `--json` for
+machine-readable results or `--pretty` for indented JSON. The built-in page size
+is 50; saved `default_limit` values are preserved, `GHIDRA_CLI_DEFAULT_LIMIT`
+overrides the saved value, and command `--limit` takes precedence. `--limit 0`
+returns all rows. See [Output and query options](docs/output-format.md) for
+filtering, projection, pagination, source/table formats, and batch behavior.
+
 ## Headless resource configuration
 
-Defaults live in `src/config.rs`: `max_heap` is `2G`; `cpu_workers` is available
+Defaults live in `src/config.rs`: `max_heap` is `8G`; `cpu_workers` is available
 CPUs plus one, capped at ten.
 
 Machine-local overrides via configuration commands:

@@ -341,6 +341,21 @@ tools/gtarget sienna-8965B4512000 decompile 0x8db22
 tools/gtarget camry-8965F3307000 x-ref to 0xfebe66a8
 ```
 
+Analysis commands default to compact text, including through pipes. Request `--json`
+when a script parses stdout, or `--pretty` for indented JSON. The built-in page
+size is 50; saved `default_limit` values remain effective and
+`GHIDRA_CLI_DEFAULT_LIMIT` overrides them. Use explicit `--limit 0` for a complete
+list. Truncation notices go to stderr.
+
+```bash
+tools/g function list --filter 'name~secoc' --sort=-size --fields address,name --limit 20
+tools/g function list --json --limit 0
+tools/g stats --json
+```
+
+[Output and query options](../ghidra/ghidra-cli/docs/output-format.md) covers
+formats, pagination, field selection, and configuration.
+
 For the common multi-command read paths, prefer the compound CLI operations:
 
 ```bash
@@ -355,16 +370,18 @@ tools/g x-ref trace-to 0xfebe5504 --disasm 20
 printf 'stats\nquery functions --count\n' | tools/g batch --read-only -
 ```
 
-These paths are deliberately bounded and fail closed. `inspect` and `x-ref
-trace-to` default to at most 20 targets/source functions; `batch` defaults to
-100 commands. They abort rather than truncate, and the bound can be raised only
-with the corresponding `--max-targets`, `--max-functions`, or `--max-commands`
-option. Multi-target inspection resolves every target before decompiling any of
-them. `batch --read-only` preflights the complete batch against a conservative
-allowlist and rejects mutation-capable commands, nested batches, lifecycle
-operations, and executable scripts before its first command. Without
-`--read-only`, batch retains its existing mutation-capable behavior and
-`tools/g` conservatively marks the working session potentially mutated.
+`inspect` and `x-ref trace-to` accept at most 20 targets/source functions by
+default; `batch` accepts 100 commands. Exceeding these scope bounds fails the
+command. Raise them with `--max-targets`, `--max-functions`, or `--max-commands`.
+Reference and call lists inside an inspection obey `--limit`; `--disasm N`
+sets the instruction count. Reference tracing retains its complete reference/owner census. Multi-target inspection resolves every target
+before decompiling any of them.
+
+`batch` returns a JSON envelope and applies each command's query options.
+`batch --read-only` preflights the complete batch and rejects mutation-capable
+commands, nested batches, lifecycle operations, and executable scripts before
+its first command. Ordinary batches can mutate the project, so `tools/g` marks
+the working session potentially mutated.
 
 If you re-run `analyze` or any `script run` and want to keep the result in the
 working copy, run `tools/g stop` afterward. To promote a finished working copy
@@ -1024,8 +1041,8 @@ corpus, run `ghidra/scripts/investigate/AuditComputedStoreTargets.java` through
 project. Supply each census artifact's `targets` list after `--`, separately for
 `camry_8965F3307000_computed_store_target_census.json` and
 `camry_8965F3307000_dmac_destination_computed_store_census.json` in
-`data/generated/`. Retain each script's stdout or single-result JSON wrapper,
-then run
+`data/generated/`. Retain each script's stdout, or add `--json` to retain its
+single-result wrapper, then run
 `uv run python -m tools.targets.camry.builders.build_camry_8965F3307000_hidden_ingress_residuals
 --refresh-e1-output E1_OUTPUT --refresh-e2-output E2_OUTPUT`.
 The producer binds the refreshed censuses to the corpus hash and rejects stale

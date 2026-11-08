@@ -286,6 +286,22 @@ fn test_memory_map_schema_validation() {
     );
 }
 
+#[test]
+#[serial]
+fn test_memory_search_hex_bytes() {
+    require_ghidra!();
+    let harness = harness();
+
+    let result = ghidra(harness)
+        .arg("memory")
+        .arg("search")
+        .arg("4883ec08")
+        .with_project(TEST_PROJECT, TEST_PROGRAM)
+        .run();
+
+    result.assert_success();
+}
+
 // ============================================================================
 // Summary Tests
 // ============================================================================
@@ -572,6 +588,27 @@ fn test_find_function() {
 
 #[test]
 #[serial]
+fn test_find_function_limit_is_honored() {
+    require_ghidra!();
+    let harness = harness();
+
+    let result = ghidra(harness)
+        .arg("find")
+        .arg("function")
+        .arg("*")
+        .arg("--limit")
+        .arg("1")
+        .with_project(TEST_PROJECT, TEST_PROGRAM)
+        .run();
+
+    result.assert_success();
+    result.assert_line_count(1);
+    result.assert_stderr_contains("showing 1 results from offset 0");
+    result.assert_stderr_contains("--offset 1");
+}
+
+#[test]
+#[serial]
 fn test_find_function_glob() {
     require_ghidra!();
     let harness = harness();
@@ -780,7 +817,9 @@ fn test_stats_normal() {
         .run();
 
     result.assert_success();
-    result.assert_stdout_contains("stats");
+    result.assert_stdout_contains("program_name:");
+    result.assert_stdout_contains("functions:");
+    result.assert_stdout_contains(TEST_PROGRAM);
     result.assert_stdout_contains("functions");
     result.assert_stdout_contains("symbols");
 }
@@ -794,6 +833,7 @@ fn test_stats_has_all_fields() {
     let result = ghidra(harness)
         .arg("stats")
         .with_project(TEST_PROJECT, TEST_PROGRAM)
+        .json_format()
         .run();
 
     result.assert_success();
@@ -839,6 +879,7 @@ fn test_stats_json_format() {
     let result = ghidra(harness)
         .arg("stats")
         .with_project(TEST_PROJECT, TEST_PROGRAM)
+        .json_format()
         .run();
 
     result.assert_success();
@@ -922,9 +963,8 @@ fn test_inspect_multiple_targets_is_atomic_and_ordered() {
 
     result.assert_success();
     let payload: serde_json::Value = result.json();
-    let payload = &payload.as_array().expect("query result array")[0];
-    assert_eq!(payload["target_count"], 2);
-    let rows = payload["inspections"].as_array().expect("inspection array");
+    let rows = payload.as_array().expect("inspection array");
+    assert_eq!(rows.len(), 2);
     assert_eq!(rows[0]["target"], main_addr);
     assert_eq!(rows[1]["target"], add_addr);
     assert!(rows
@@ -1523,16 +1563,37 @@ fn test_batch_reads_bounded_read_only_commands_from_stdin() {
     let harness = harness();
 
     let result = ghidra(harness)
-        .args(["batch", "--read-only", "--max-commands", "2", "-"])
-        .stdin("stats\nfunction list --limit 1\n")
+        .args(["batch", "--read-only", "--max-commands", "5", "-"])
+        .stdin(concat!(
+            "stats\n",
+            "function list --limit 1\n",
+            "function list --filter 'name~add_numbers' --fields name --limit 0\n",
+            "function list --count\n",
+            "graph calls --count\n",
+        ))
         .with_project(TEST_PROJECT, TEST_PROGRAM)
         .run();
 
     result.assert_success();
     let payload: serde_json::Value = result.json();
     let payload = &payload.as_array().expect("batch result array")[0];
-    assert_eq!(payload["commands_parsed"], 2);
-    assert_eq!(payload["results"].as_array().map(Vec::len), Some(2));
+    assert_eq!(payload["commands_parsed"], 5);
+    assert_eq!(payload["results"].as_array().map(Vec::len), Some(5));
+    let page = &payload["results"][1]["result"];
+    assert_eq!(page["functions"].as_array().unwrap().len(), 1);
+    assert_eq!(page["count"], 1);
+    assert_eq!(page["truncated"], true);
+    let selected = payload["results"][2]["result"]["functions"]
+        .as_array()
+        .unwrap();
+    assert!(!selected.is_empty());
+    assert!(selected
+        .iter()
+        .all(|row| row.as_object().unwrap().len() == 1
+            && row["name"].as_str().unwrap().contains("add_numbers")));
+    let count = payload["results"][3]["result"].as_u64().unwrap();
+    assert!(count > 1);
+    assert_eq!(payload["results"][4]["result"], count);
 }
 
 #[test]

@@ -287,7 +287,7 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 BRIDGE_STARTED=1
-STATS_OUTPUT=$("$BUILD_CACHE/ghidra-cli/ghidra" "${CLI_ARGS[@]}" stats)
+STATS_OUTPUT=$("$BUILD_CACHE/ghidra-cli/ghidra" "${CLI_ARGS[@]}" stats --json)
 printf '%s\n' "$STATS_OUTPUT"
 "$BUILD_CACHE/ghidra-cli/ghidra" "${CLI_ARGS[@]}" stop
 BRIDGE_STARTED=0

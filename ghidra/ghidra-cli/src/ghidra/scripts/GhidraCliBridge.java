@@ -709,9 +709,9 @@ public class GhidraCliBridge extends GhidraScript {
             case "delete_function": return handleDeleteFunction(args);
             case "decompile":       return handleDecompile(args);
             case "list_strings":    return handleListStrings(args);
-            case "list_imports":    return handleListImports();
-            case "list_exports":    return handleListExports();
-            case "memory_map":      return handleMemoryMap();
+            case "list_imports":    return handleListImports(args);
+            case "list_exports":    return handleListExports(args);
+            case "memory_map":      return handleMemoryMap(args);
             case "xrefs_to":        return handleXrefsTo(args);
             case "xrefs_from":      return handleXrefsFrom(args);
             case "xrefs_list":      return handleXrefsList(args);
@@ -728,8 +728,8 @@ public class GhidraCliBridge extends GhidraScript {
             case "find_bytes":      return handleFindBytes(args);
             case "find_function":   return handleFindFunction(args);
             case "find_calls":      return handleFindCalls(args);
-            case "find_crypto":     return handleFindCrypto();
-            case "find_interesting": return handleFindInteresting();
+            case "find_crypto":     return handleFindCrypto(args);
+            case "find_interesting": return handleFindInteresting(args);
             // Symbol commands
             case "symbol_list":     return handleSymbolList(args);
             case "symbol_get":      return handleSymbolGet(args);
@@ -835,6 +835,7 @@ public class GhidraCliBridge extends GhidraScript {
         int disasmCount = hasDisasm
             ? getArgInt(args, "disasm", 40)
             : 40;
+        int collectionLimit = getArgInt(args, "limit", 0);
 
         // Resolve target to a function up front — this is a hard error, not
         // partial. Use the same resolveAddress + getFunctionContaining pattern
@@ -876,6 +877,7 @@ public class GhidraCliBridge extends GhidraScript {
         if (wantCallers) {
             JsonObject callersArgs = makeArg("function", entryPoint);
             callersArgs.addProperty("depth", 1);
+            if (collectionLimit > 0) callersArgs.addProperty("limit", collectionLimit);
             runSection(result, "callers", () -> handleGraphCallers(callersArgs));
         }
 
@@ -883,15 +885,20 @@ public class GhidraCliBridge extends GhidraScript {
         if (wantCallees) {
             JsonObject calleesArgs = makeArg("function", entryPoint);
             calleesArgs.addProperty("depth", 1);
+            if (collectionLimit > 0) calleesArgs.addProperty("limit", collectionLimit);
             runSection(result, "callees", () -> handleGraphCallees(calleesArgs));
         }
 
         // --- xrefs to + xrefs from ---
         if (wantXrefs) {
-            runSection(result, "xrefs_to",
-                () -> handleXrefsTo(makeArg("address", entryPoint)));
-            runSection(result, "xrefs_from",
-                () -> handleXrefsFrom(makeArg("address", entryPoint)));
+            JsonObject xrefsToArgs = makeArg("address", entryPoint);
+            JsonObject xrefsFromArgs = makeArg("address", entryPoint);
+            if (collectionLimit > 0) {
+                xrefsToArgs.addProperty("limit", collectionLimit);
+                xrefsFromArgs.addProperty("limit", collectionLimit);
+            }
+            runSection(result, "xrefs_to", () -> handleXrefsTo(xrefsToArgs));
+            runSection(result, "xrefs_from", () -> handleXrefsFrom(xrefsFromArgs));
         }
 
         // --- disassembly ---
@@ -1032,6 +1039,7 @@ public class GhidraCliBridge extends GhidraScript {
         result.addProperty("callers", getArgBool(source, "callers", false));
         result.addProperty("callees", getArgBool(source, "callees", false));
         result.addProperty("xrefs", getArgBool(source, "xrefs", false));
+        result.addProperty("limit", getArgInt(source, "limit", 0));
         if (source.has("disasm") && !source.get("disasm").isJsonNull()) {
             result.addProperty("disasm", getArgInt(source, "disasm", 40));
         }
@@ -1062,6 +1070,23 @@ public class GhidraCliBridge extends GhidraScript {
         JsonObject o = new JsonObject();
         o.addProperty(key, value);
         return o;
+    }
+
+    // Scan one extra matching row to distinguish a full page from an exact-size
+    // result, then remove the lookahead before returning the response.
+    private JsonObject finishListResult(JsonObject section, String arrayKey, int displayLimit) {
+        if (section == null || section.has("error") || displayLimit <= 0 ||
+                !section.has(arrayKey) || !section.get(arrayKey).isJsonArray()) {
+            return section;
+        }
+
+        JsonArray rows = section.getAsJsonArray(arrayKey);
+        if (rows.size() > displayLimit) {
+            while (rows.size() > displayLimit) rows.remove(rows.size() - 1);
+            section.addProperty("count", rows.size());
+            section.addProperty("truncated", true);
+        }
+        return section;
     }
 
     /**
@@ -1571,7 +1596,7 @@ public class GhidraCliBridge extends GhidraScript {
 
         FunctionIterator iter = fm.getFunctions(true);
         while (iter.hasNext()) {
-            if (limit > 0 && count >= limit) break;
+            if (limit > 0 && count > limit) break;
 
             Function func = iter.next();
             String name = func.getName();
@@ -1584,7 +1609,6 @@ public class GhidraCliBridge extends GhidraScript {
             funcData.addProperty("name", name);
             funcData.addProperty("address", func.getEntryPoint().toString());
             funcData.addProperty("size", func.getBody().getNumAddresses());
-            funcData.addProperty("entry_point", func.getEntryPoint().toString());
 
             String sig = null;
             try {
@@ -1594,8 +1618,6 @@ public class GhidraCliBridge extends GhidraScript {
             }
             if (sig != null) {
                 funcData.addProperty("signature", sig);
-            } else {
-                funcData.add("signature", JsonNull.INSTANCE);
             }
 
             funcData.addProperty("calling_convention", func.getCallingConventionName());
@@ -1603,8 +1625,6 @@ public class GhidraCliBridge extends GhidraScript {
             String comment = func.getComment();
             if (comment != null) {
                 funcData.addProperty("comment", comment);
-            } else {
-                funcData.add("comment", JsonNull.INSTANCE);
             }
 
             functions.add(funcData);
@@ -1614,6 +1634,7 @@ public class GhidraCliBridge extends GhidraScript {
         JsonObject result = new JsonObject();
         result.add("functions", functions);
         result.addProperty("count", functions.size());
+        finishListResult(result, "functions", limit);
         return result;
     }
 
@@ -1622,7 +1643,6 @@ public class GhidraCliBridge extends GhidraScript {
         funcData.addProperty("name", func.getName());
         funcData.addProperty("address", func.getEntryPoint().toString());
         funcData.addProperty("size", func.getBody().getNumAddresses());
-        funcData.addProperty("entry_point", func.getEntryPoint().toString());
 
         String sig = null;
         try {
@@ -1632,8 +1652,6 @@ public class GhidraCliBridge extends GhidraScript {
         }
         if (sig != null) {
             funcData.addProperty("signature", sig);
-        } else {
-            funcData.add("signature", JsonNull.INSTANCE);
         }
 
         funcData.addProperty("calling_convention", func.getCallingConventionName());
@@ -1641,10 +1659,7 @@ public class GhidraCliBridge extends GhidraScript {
         String comment = func.getComment();
         if (comment != null) {
             funcData.addProperty("comment", comment);
-        } else {
-            funcData.add("comment", JsonNull.INSTANCE);
         }
-
         return funcData;
     }
 
@@ -1986,7 +2001,7 @@ public class GhidraCliBridge extends GhidraScript {
         int count = 0;
 
         while (dataIter.hasNext()) {
-            if (limit > 0 && count >= limit) break;
+            if (limit > 0 && count > limit) break;
 
             Data data = dataIter.next();
             if (data.hasStringValue()) {
@@ -2012,14 +2027,16 @@ public class GhidraCliBridge extends GhidraScript {
         JsonObject result = new JsonObject();
         result.add("strings", strings);
         result.addProperty("count", strings.size());
+        finishListResult(result, "strings", limit);
         return result;
     }
 
-    private JsonObject handleListImports() {
+    private JsonObject handleListImports(JsonObject args) {
         if (currentProgram == null) {
             return errorResult("No program loaded");
         }
 
+        int limit = getArgInt(args, "limit", 0);
         JsonArray imports = new JsonArray();
         SymbolTable symbolTable = currentProgram.getSymbolTable();
         ExternalManager extMgr = currentProgram.getExternalManager();
@@ -2034,20 +2051,23 @@ public class GhidraCliBridge extends GhidraScript {
                 importData.addProperty("address", symbol.getAddress().toString());
                 importData.addProperty("library", extLoc.getLibraryName());
                 imports.add(importData);
+                if (limit > 0 && imports.size() > limit) break;
             }
         }
 
         JsonObject result = new JsonObject();
         result.add("imports", imports);
         result.addProperty("count", imports.size());
+        finishListResult(result, "imports", limit);
         return result;
     }
 
-    private JsonObject handleListExports() {
+    private JsonObject handleListExports(JsonObject args) {
         if (currentProgram == null) {
             return errorResult("No program loaded");
         }
 
+        int limit = getArgInt(args, "limit", 0);
         JsonArray exports = new JsonArray();
         SymbolTable symbolTable = currentProgram.getSymbolTable();
 
@@ -2059,20 +2079,23 @@ public class GhidraCliBridge extends GhidraScript {
                 exportData.addProperty("name", symbol.getName());
                 exportData.addProperty("address", symbol.getAddress().toString());
                 exports.add(exportData);
+                if (limit > 0 && exports.size() > limit) break;
             }
         }
 
         JsonObject result = new JsonObject();
         result.add("exports", exports);
         result.addProperty("count", exports.size());
+        finishListResult(result, "exports", limit);
         return result;
     }
 
-    private JsonObject handleMemoryMap() {
+    private JsonObject handleMemoryMap(JsonObject args) {
         if (currentProgram == null) {
             return errorResult("No program loaded");
         }
 
+        int limit = getArgInt(args, "limit", 0);
         JsonArray blocks = new JsonArray();
         Memory memory = currentProgram.getMemory();
 
@@ -2091,11 +2114,13 @@ public class GhidraCliBridge extends GhidraScript {
             blockData.addProperty("is_initialized", block.isInitialized());
             blockData.addProperty("is_loaded", block.isLoaded());
             blocks.add(blockData);
+            if (limit > 0 && blocks.size() > limit) break;
         }
 
         JsonObject result = new JsonObject();
         result.add("blocks", blocks);
         result.addProperty("count", blocks.size());
+        finishListResult(result, "blocks", limit);
         return result;
     }
 
@@ -2114,6 +2139,7 @@ public class GhidraCliBridge extends GhidraScript {
             return errorResult(buildFunctionTargetHint(addrStr));
         }
 
+        int limit = getArgInt(args, "limit", 0);
         JsonArray xrefs = new JsonArray();
         ReferenceManager refMgr = currentProgram.getReferenceManager();
         FunctionManager fm = currentProgram.getFunctionManager();
@@ -2138,11 +2164,13 @@ public class GhidraCliBridge extends GhidraScript {
                 xrefData.add("to_function", JsonNull.INSTANCE);
             }
             xrefs.add(xrefData);
+            if (limit > 0 && xrefs.size() > limit) break;
         }
 
         JsonObject result = new JsonObject();
         result.add("xrefs", xrefs);
         result.addProperty("count", xrefs.size());
+        finishListResult(result, "xrefs", limit);
         return result;
     }
 
@@ -2161,15 +2189,17 @@ public class GhidraCliBridge extends GhidraScript {
             return errorResult(buildFunctionTargetHint(addrStr));
         }
 
+        int limit = getArgInt(args, "limit", 0);
         JsonArray xrefs = new JsonArray();
         ReferenceManager refMgr = currentProgram.getReferenceManager();
         FunctionManager fm = currentProgram.getFunctionManager();
 
-        // If address is a function entry point, scan the entire function body
+        // If address is a function entry point, scan the entire function body.
         Function func = fm.getFunctionAt(addr);
         if (func != null) {
             ghidra.program.model.address.AddressSetView body = func.getBody();
             ghidra.program.model.address.AddressIterator addrIter = body.getAddresses(true);
+            xrefsFromBody:
             while (addrIter.hasNext()) {
                 Address instrAddr = addrIter.next();
                 Reference[] refs = refMgr.getReferencesFrom(instrAddr);
@@ -2188,10 +2218,11 @@ public class GhidraCliBridge extends GhidraScript {
                         xrefData.add("to_function", JsonNull.INSTANCE);
                     }
                     xrefs.add(xrefData);
+                    if (limit > 0 && xrefs.size() > limit) break xrefsFromBody;
                 }
             }
         } else {
-            // Not a function entry point — just get refs from this single address
+            // Not a function entry point — just get refs from this single address.
             Reference[] refs = refMgr.getReferencesFrom(addr);
             for (Reference ref : refs) {
                 Address toAddr = ref.getToAddress();
@@ -2213,12 +2244,14 @@ public class GhidraCliBridge extends GhidraScript {
                     xrefData.add("to_function", JsonNull.INSTANCE);
                 }
                 xrefs.add(xrefData);
+                if (limit > 0 && xrefs.size() > limit) break;
             }
         }
 
         JsonObject result = new JsonObject();
         result.add("xrefs", xrefs);
         result.addProperty("count", xrefs.size());
+        finishListResult(result, "xrefs", limit);
         return result;
     }
 
@@ -2237,6 +2270,7 @@ public class GhidraCliBridge extends GhidraScript {
             return errorResult(buildFunctionTargetHint(addrStr));
         }
 
+        int limit = getArgInt(args, "limit", 0);
         JsonArray xrefs = new JsonArray();
         ReferenceManager refMgr = currentProgram.getReferenceManager();
         FunctionManager fm = currentProgram.getFunctionManager();
@@ -2263,13 +2297,15 @@ public class GhidraCliBridge extends GhidraScript {
                 xrefData.add("to_function", JsonNull.INSTANCE);
             }
             xrefs.add(xrefData);
+            if (limit > 0 && xrefs.size() > limit) break;
         }
 
         // References FROM the target — if it's a function, scan the entire body
         Function func = fm.getFunctionAt(addr);
-        if (func != null) {
+        if ((limit <= 0 || xrefs.size() <= limit) && func != null) {
             ghidra.program.model.address.AddressSetView body = func.getBody();
             ghidra.program.model.address.AddressIterator addrIter = body.getAddresses(true);
+            xrefsListFromBody:
             while (addrIter.hasNext()) {
                 Address instrAddr = addrIter.next();
                 Reference[] refs = refMgr.getReferencesFrom(instrAddr);
@@ -2289,9 +2325,10 @@ public class GhidraCliBridge extends GhidraScript {
                         xrefData.add("to_function", JsonNull.INSTANCE);
                     }
                     xrefs.add(xrefData);
+                    if (limit > 0 && xrefs.size() > limit) break xrefsListFromBody;
                 }
             }
-        } else {
+        } else if (limit <= 0 || xrefs.size() <= limit) {
             // Not a function entry — just get refs from this single address
             Reference[] refs = refMgr.getReferencesFrom(addr);
             for (Reference ref : refs) {
@@ -2315,12 +2352,14 @@ public class GhidraCliBridge extends GhidraScript {
                     xrefData.add("to_function", JsonNull.INSTANCE);
                 }
                 xrefs.add(xrefData);
+                if (limit > 0 && xrefs.size() > limit) break;
             }
         }
 
         JsonObject result = new JsonObject();
         result.add("xrefs", xrefs);
         result.addProperty("count", xrefs.size());
+        finishListResult(result, "xrefs", limit);
         return result;
     }
 
@@ -2763,6 +2802,7 @@ public class GhidraCliBridge extends GhidraScript {
 
         String pattern = getArgString(args, "pattern");
         if (pattern == null) pattern = "";
+        int limit = getArgInt(args, "limit", 0);
 
         try {
             JsonArray results = new JsonArray();
@@ -2786,6 +2826,7 @@ public class GhidraCliBridge extends GhidraScript {
                         }
                     } catch (Exception e) { /* skip */ }
                 }
+                if (limit > 0 && results.size() > limit) break;
             }
 
             // Phase 2: If listing search found nothing and we have a pattern,
@@ -2804,7 +2845,7 @@ public class GhidraCliBridge extends GhidraScript {
                 byte[] searchBytes = pattern.getBytes(java.nio.charset.StandardCharsets.UTF_8);
 
                 Address addr = memory.getMinAddress();
-                while (addr != null && results.size() < 100) {
+                while (addr != null && (limit <= 0 || results.size() <= limit)) {
                     Address found = memory.findBytes(addr, searchBytes, null, true, monitor);
                     if (found == null) break;
 
@@ -2830,6 +2871,7 @@ public class GhidraCliBridge extends GhidraScript {
             JsonObject result = new JsonObject();
             result.add("results", results);
             result.addProperty("count", results.size());
+            finishListResult(result, "results", limit);
             return result;
         } catch (Exception e) {
             return errorResult("Failed to find strings: " + e.getMessage());
@@ -2888,8 +2930,12 @@ public class GhidraCliBridge extends GhidraScript {
             return errorResult("No hex pattern provided");
         }
 
+        int limit = getArgInt(args, "limit", 0);
         try {
-            String hexClean = hexPattern.replace("0x", "").replace(" ", "");
+            String hexClean = hexPattern.replace("0x", "").replace("0X", "").replaceAll("\\s+", "");
+            if (hexClean.isEmpty() || (hexClean.length() % 2) != 0 || !hexClean.matches("[0-9a-fA-F]+")) {
+                return errorResult("Hex pattern must contain an even number of hexadecimal digits");
+            }
             byte[] searchBytes = new byte[hexClean.length() / 2];
             for (int i = 0; i < searchBytes.length; i++) {
                 searchBytes[i] = (byte) Integer.parseInt(hexClean.substring(i * 2, i * 2 + 2), 16);
@@ -2899,7 +2945,7 @@ public class GhidraCliBridge extends GhidraScript {
             JsonArray results = new JsonArray();
 
             Address addr = memory.getMinAddress();
-            while (addr != null && results.size() < 100) {
+            while (addr != null && (limit <= 0 || results.size() <= limit)) {
                 Address found = memory.findBytes(addr, searchBytes, null, true, monitor);
                 if (found == null) break;
                 JsonObject item = new JsonObject();
@@ -2911,6 +2957,7 @@ public class GhidraCliBridge extends GhidraScript {
             JsonObject result = new JsonObject();
             result.add("results", results);
             result.addProperty("count", results.size());
+            finishListResult(result, "results", limit);
             return result;
         } catch (Exception e) {
             return errorResult("Failed to find bytes: " + e.getMessage());
@@ -2922,6 +2969,7 @@ public class GhidraCliBridge extends GhidraScript {
 
         String pattern = getArgString(args, "pattern");
         if (pattern == null) pattern = "";
+        int limit = getArgInt(args, "limit", 0);
 
         try {
             FunctionManager fm = currentProgram.getFunctionManager();
@@ -2948,12 +2996,14 @@ public class GhidraCliBridge extends GhidraScript {
                     item.addProperty("address", func.getEntryPoint().toString());
                     item.addProperty("size", func.getBody().getNumAddresses());
                     results.add(item);
+                    if (limit > 0 && results.size() > limit) break;
                 }
             }
 
             JsonObject result = new JsonObject();
             result.add("results", results);
             result.addProperty("count", results.size());
+            finishListResult(result, "results", limit);
             return result;
         } catch (Exception e) {
             return errorResult("Failed to find functions: " + e.getMessage());
@@ -2967,6 +3017,7 @@ public class GhidraCliBridge extends GhidraScript {
         if (functionTarget == null || functionTarget.isEmpty()) {
             return errorResult("No function target provided");
         }
+        int limit = getArgInt(args, "limit", 0);
 
         try {
             FunctionManager fm = currentProgram.getFunctionManager();
@@ -2989,6 +3040,7 @@ public class GhidraCliBridge extends GhidraScript {
                     item.addProperty("caller", callerFunc != null ? callerFunc.getName() : "unknown");
                     item.addProperty("type", ref.getReferenceType().toString());
                     results.add(item);
+                    if (limit > 0 && results.size() > limit) break;
                 }
             }
 
@@ -2996,15 +3048,17 @@ public class GhidraCliBridge extends GhidraScript {
             result.add("results", results);
             result.addProperty("count", results.size());
             result.addProperty("target", functionTarget);
+            finishListResult(result, "results", limit);
             return result;
         } catch (Exception e) {
             return errorResult("Failed to find calls: " + e.getMessage());
         }
     }
 
-    private JsonObject handleFindCrypto() {
+    private JsonObject handleFindCrypto(JsonObject args) {
         if (currentProgram == null) return errorResult("No program loaded");
 
+        int limit = getArgInt(args, "limit", 0);
         try {
             Memory memory = currentProgram.getMemory();
             JsonArray results = new JsonArray();
@@ -3038,9 +3092,10 @@ public class GhidraCliBridge extends GhidraScript {
             }
             com.google.gson.JsonArray signatures = root.getAsJsonArray();
 
-            // Scan for every signature, finding ALL occurrences
-            int totalHits = 0;
+            int signaturesScanned = 0;
+            cryptoScan:
             for (int si = 0; si < signatures.size(); si++) {
+                signaturesScanned++;
                 com.google.gson.JsonObject sig = signatures.get(si).getAsJsonObject();
                 String name = sig.has("name") ? sig.get("name").getAsString() : "unknown";
                 String hexPattern = sig.get("hexBytes").getAsString();
@@ -3063,7 +3118,7 @@ public class GhidraCliBridge extends GhidraScript {
                     item.addProperty("address", found.toString());
                     item.addProperty("pattern_length", searchBytes.length);
                     results.add(item);
-                    totalHits++;
+                    if (limit > 0 && results.size() > limit) break cryptoScan;
 
                     // Advance past this hit to find the next occurrence
                     searchFrom = found.add(searchBytes.length);
@@ -3099,7 +3154,7 @@ public class GhidraCliBridge extends GhidraScript {
                             item.addProperty("pattern_length", swappedBytes.length);
                             item.addProperty("endian_swap", true);
                             results.add(item);
-                            totalHits++;
+                            if (limit > 0 && results.size() > limit) break cryptoScan;
 
                             searchFrom = found.add(swappedBytes.length);
                         }
@@ -3109,17 +3164,19 @@ public class GhidraCliBridge extends GhidraScript {
 
             JsonObject result = new JsonObject();
             result.add("results", results);
-            result.addProperty("count", totalHits);
-            result.addProperty("signatures_scanned", signatures.size());
+            result.addProperty("count", results.size());
+            result.addProperty("signatures_scanned", signaturesScanned);
+            finishListResult(result, "results", limit);
             return result;
         } catch (Exception e) {
             return errorResult("Failed to find crypto: " + e.getMessage());
         }
     }
 
-    private JsonObject handleFindInteresting() {
+    private JsonObject handleFindInteresting(JsonObject args) {
         if (currentProgram == null) return errorResult("No program loaded");
 
+        int limit = getArgInt(args, "limit", 0);
         try {
             FunctionManager fm = currentProgram.getFunctionManager();
             ReferenceManager refMgr = currentProgram.getReferenceManager();
@@ -3170,14 +3227,15 @@ public class GhidraCliBridge extends GhidraScript {
             resultsList.sort((a, b) -> b.getAsJsonArray("reasons").size() - a.getAsJsonArray("reasons").size());
 
             JsonArray results = new JsonArray();
-            int limit = Math.min(50, resultsList.size());
-            for (int i = 0; i < limit; i++) {
+            int resultLimit = limit > 0 ? Math.min(limit, resultsList.size()) : resultsList.size();
+            for (int i = 0; i < resultLimit; i++) {
                 results.add(resultsList.get(i));
             }
 
             JsonObject result = new JsonObject();
             result.add("results", results);
             result.addProperty("count", resultsList.size());
+            if (resultsList.size() > results.size()) result.addProperty("truncated", true);
             return result;
         } catch (Exception e) {
             return errorResult("Failed to find interesting functions: " + e.getMessage());
@@ -3198,7 +3256,7 @@ public class GhidraCliBridge extends GhidraScript {
 
         SymbolIterator symIter = symbolTable.getAllSymbols(true);
         while (symIter.hasNext()) {
-            if (limit > 0 && count >= limit) break;
+            if (limit > 0 && count > limit) break;
 
             Symbol symbol = symIter.next();
             String name = symbol.getName();
@@ -3220,6 +3278,7 @@ public class GhidraCliBridge extends GhidraScript {
         JsonObject result = new JsonObject();
         result.add("symbols", symbols);
         result.addProperty("count", symbols.size());
+        finishListResult(result, "symbols", limit);
         return result;
     }
 
@@ -3412,7 +3471,7 @@ public class GhidraCliBridge extends GhidraScript {
         int count = 0;
         while (dtIter.hasNext()) {
             DataType dt = dtIter.next();
-            if (limit > 0 && count >= limit) break;
+            if (limit > 0 && count > limit) break;
 
             if (nameFilter != null && !dt.getName().toLowerCase().contains(nameFilter.toLowerCase())) {
                 continue;
@@ -3440,6 +3499,7 @@ public class GhidraCliBridge extends GhidraScript {
         JsonObject result = new JsonObject();
         result.add("types", types);
         result.addProperty("count", types.size());
+        finishListResult(result, "types", limit);
         return result;
     }
 
@@ -4049,7 +4109,7 @@ public class GhidraCliBridge extends GhidraScript {
         String[] commentNames = {"EOL", "PRE", "POST", "PLATE"};
 
         for (MemoryBlock block : memory.getBlocks()) {
-            if (limit > 0 && count >= limit) break;
+            if (limit > 0 && count > limit) break;
 
             ghidra.program.model.address.AddressSet addrSet =
                 new ghidra.program.model.address.AddressSet(block.getStart(), block.getEnd());
@@ -4058,14 +4118,14 @@ public class GhidraCliBridge extends GhidraScript {
                 listing.getCommentAddressIterator(addrSet, true);
 
             while (addrIter.hasNext()) {
-                if (limit > 0 && count >= limit) break;
+                if (limit > 0 && count > limit) break;
 
                 Address addr = addrIter.next();
                 CodeUnit cu = listing.getCodeUnitAt(addr);
                 if (cu == null) continue;
 
                 for (int i = 0; i < commentNames.length; i++) {
-                    if (limit > 0 && count >= limit) break;
+                    if (limit > 0 && count > limit) break;
 
                     String text = cu.getComment(commentTypes[i][0]);
                     if (text != null) {
@@ -4087,6 +4147,7 @@ public class GhidraCliBridge extends GhidraScript {
         JsonObject result = new JsonObject();
         result.add("comments", comments);
         result.addProperty("count", comments.size());
+        finishListResult(result, "comments", limit);
         return result;
     }
 
@@ -4253,6 +4314,9 @@ public class GhidraCliBridge extends GhidraScript {
         result.add("edges", edges);
         result.addProperty("node_count", nodes.size());
         result.addProperty("edge_count", edges.size());
+        if (limit > 0 && iter.hasNext()) {
+            result.addProperty("truncated", true);
+        }
         return result;
     }
 
@@ -4287,6 +4351,7 @@ public class GhidraCliBridge extends GhidraScript {
         String funcName = getArgString(args, "function");
         if (funcName == null) return errorResult("Function name required");
         int depth = getArgInt(args, "depth", 1);
+        int limit = getArgInt(args, "limit", 0);
 
         Function targetFunc = findFunctionByNameOrAddress(funcName);
         if (targetFunc == null) return errorResult(buildFunctionTargetHint(funcName));
@@ -4296,17 +4361,19 @@ public class GhidraCliBridge extends GhidraScript {
         JsonArray callers = new JsonArray();
         Set<String> visited = new HashSet<>();
 
-        findCallersRecursive(targetFunc, 0, depth, callers, visited, refMgr, fm);
+        findCallersRecursive(targetFunc, 0, depth, limit, callers, visited, refMgr, fm);
 
         JsonObject result = new JsonObject();
         result.addProperty("function", funcName);
         result.add("callers", callers);
         result.addProperty("count", callers.size());
+        finishListResult(result, "callers", limit);
         return result;
     }
 
-    private void findCallersRecursive(Function func, int currentDepth, int maxDepth,
+    private void findCallersRecursive(Function func, int currentDepth, int maxDepth, int limit,
             JsonArray callers, Set<String> visited, ReferenceManager refMgr, FunctionManager fm) {
+        if (limit > 0 && callers.size() > limit) return;
         if (maxDepth > 0 && currentDepth >= maxDepth) return;
         String funcAddrStr = func.getEntryPoint().toString();
         if (visited.contains(funcAddrStr)) return;
@@ -4323,9 +4390,12 @@ public class GhidraCliBridge extends GhidraScript {
                     callerInfo.addProperty("call_site", fromAddr.toString());
                     callerInfo.addProperty("depth", currentDepth);
                     callers.add(callerInfo);
+                    if (limit > 0 && callers.size() > limit) return;
 
                     if (maxDepth == 0 || currentDepth + 1 < maxDepth) {
-                        findCallersRecursive(callerFunc, currentDepth + 1, maxDepth, callers, visited, refMgr, fm);
+                        findCallersRecursive(callerFunc, currentDepth + 1, maxDepth, limit,
+                            callers, visited, refMgr, fm);
+                        if (limit > 0 && callers.size() > limit) return;
                     }
                 }
             }
@@ -4338,6 +4408,7 @@ public class GhidraCliBridge extends GhidraScript {
         String funcName = getArgString(args, "function");
         if (funcName == null) return errorResult("Function name required");
         int depth = getArgInt(args, "depth", 1);
+        int limit = getArgInt(args, "limit", 0);
 
         Function targetFunc = findFunctionByNameOrAddress(funcName);
         if (targetFunc == null) return errorResult(buildFunctionTargetHint(funcName));
@@ -4347,17 +4418,19 @@ public class GhidraCliBridge extends GhidraScript {
         JsonArray callees = new JsonArray();
         Set<String> visited = new HashSet<>();
 
-        findCalleesRecursive(targetFunc, 0, depth, callees, visited, refMgr, fm);
+        findCalleesRecursive(targetFunc, 0, depth, limit, callees, visited, refMgr, fm);
 
         JsonObject result = new JsonObject();
         result.addProperty("function", funcName);
         result.add("callees", callees);
         result.addProperty("count", callees.size());
+        finishListResult(result, "callees", limit);
         return result;
     }
 
-    private void findCalleesRecursive(Function func, int currentDepth, int maxDepth,
+    private void findCalleesRecursive(Function func, int currentDepth, int maxDepth, int limit,
             JsonArray callees, Set<String> visited, ReferenceManager refMgr, FunctionManager fm) {
+        if (limit > 0 && callees.size() > limit) return;
         if (maxDepth > 0 && currentDepth >= maxDepth) return;
         String funcAddrStr = func.getEntryPoint().toString();
         if (visited.contains(funcAddrStr)) return;
@@ -4378,9 +4451,12 @@ public class GhidraCliBridge extends GhidraScript {
                         calleeInfo.addProperty("call_site", ref.getFromAddress().toString());
                         calleeInfo.addProperty("depth", currentDepth);
                         callees.add(calleeInfo);
+                        if (limit > 0 && callees.size() > limit) return;
 
                         if (maxDepth == 0 || currentDepth + 1 < maxDepth) {
-                            findCalleesRecursive(calleeFunc, currentDepth + 1, maxDepth, callees, visited, refMgr, fm);
+                            findCalleesRecursive(calleeFunc, currentDepth + 1, maxDepth, limit,
+                                callees, visited, refMgr, fm);
+                            if (limit > 0 && callees.size() > limit) return;
                         }
                     }
                 }

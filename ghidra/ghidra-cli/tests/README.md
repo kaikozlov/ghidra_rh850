@@ -22,7 +22,7 @@ tests/
 ├── script_tests.rs      # Script execution
 ├── symbol_tests.rs      # Symbol operations
 ├── type_tests.rs        # Type operations
-├── output_format_integration.rs  # Output format detection
+├── output_format_integration.rs  # Live output and pagination contract
 └── e2e.rs               # Lightweight smoke test
 ```
 
@@ -30,9 +30,10 @@ tests/
 
 Tests requiring bridge interaction use `DaemonTestHarness` from `common/mod.rs`. Each test suite starts its own bridge instance to amortize 5-30s startup overhead across all tests in that file.
 
-**Why per-suite instead of per-test**: Starting a bridge for every test would add 5-30 minutes to CI time for 60+ tests. Per-suite bridges run tests serially within the suite but allow parallel execution across different test files.
-
-**Why not shared global bridge**: State leakage between suites causes flaky tests and debugging nightmares. Each suite gets isolation.
+A suite reuses its bridge to avoid repeated startup costs. Several suites use
+the cached `ci-test` project and reopen it between suites. Run test binaries
+sequentially; concurrent Cargo test processes can interfere with that shared
+project. The live output-contract test owns a local harness and stops it on exit.
 
 ## Data Flow
 
@@ -74,9 +75,12 @@ Run single test:
 cargo test --test command_tests test_version
 ```
 
-Run tests that don't need Ghidra:
+From the repository root, run the portable compile/unit gate with
+`make test-ghidra-cli`. The live output-contract test requires Ghidra and the
+analyzed sample fixture:
+
 ```bash
-cargo test --test e2e --test output_format_integration
+cargo test --test output_format_integration -- --test-threads=1
 ```
 
 ## Test Requirements
@@ -149,7 +153,7 @@ Mark with `#[serial]` to prevent bridge state races within suite.
 ## Invariants
 
 - Bridge must be fully started before any query test runs
-- Each test suite gets its own bridge instance (no sharing)
+- Test binaries sharing the cached project run sequentially
 - Port/PID files must be cleaned up even on test failure (Drop impl)
 - Tests must not assume specific function addresses (use name-based lookups)
 

@@ -15,7 +15,8 @@ pub struct Function {
     pub size: u64,
     #[serde(default)]
     pub signature: Option<String>,
-    pub entry_point: String,
+    #[serde(default)]
+    pub entry_point: Option<String>,
     #[serde(default)]
     pub calling_convention: Option<String>,
     #[serde(default)]
@@ -281,13 +282,6 @@ impl Validate for Function {
             errors.push(format!(
                 "Function address '{}' should be hex format (0x...)",
                 self.address
-            ));
-        }
-
-        if !is_hex_address(&self.entry_point) {
-            errors.push(format!(
-                "Function entry_point '{}' should be hex format",
-                self.entry_point
             ));
         }
 

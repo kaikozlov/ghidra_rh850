@@ -109,7 +109,7 @@ cp "$PROCESSOR_MANIFEST" "$PROJECT_DIR/processor_manifest.json"
 # tools/project/generate_decompiler_corpus.py after two-build inventory parity is established.
 GHIDRA_ANALYSIS_TARGET="$TARGET" PROJECT_DIR="$PROJECT_DIR" \
   "$ROOT/tools/project/export_ghidra_project.sh" project-inventory "$BUILD_OUT/targets/$TARGET/project_inventory.jsonl"
-STATS=$(GHIDRA_ANALYSIS_TARGET="$TARGET" GHIDRA_PROJECT="$PROJECT_DIR" GHIDRA_AGENT=1 "$ROOT/tools/g" stats)
+STATS=$(GHIDRA_ANALYSIS_TARGET="$TARGET" GHIDRA_PROJECT="$PROJECT_DIR" "$ROOT/tools/g" stats --json)
 GHIDRA_ANALYSIS_TARGET="$TARGET" GHIDRA_PROJECT="$PROJECT_DIR" "$ROOT/tools/g" stop >/dev/null 2>&1 || true
 printf '%s\n' "$STATS" > "$BUILD_OUT/targets/$TARGET/stats.json"
 python3 - "$BUILD_OUT/targets/$TARGET/stats.json" <<'PY'

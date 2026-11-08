@@ -12,12 +12,11 @@ use clap::Parser;
 use cli::{Cli, Commands, QueryOptions};
 use config::Config;
 use error::GhidraError;
-use format::{auto_detect_format, DefaultFormatter, Formatter, OutputFormat};
+use format::{DefaultFormatter, Formatter, OutputFormat};
 use ghidra::bridge::{self, BridgeStartMode, BridgeStatus};
 use ghidra::GhidraClient;
 use ipc::client::BridgeClient;
 use query::Query;
-use std::io::IsTerminal;
 use std::path::{Path, PathBuf};
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
@@ -61,11 +60,11 @@ fn main() {
         .with(stdout_layer)
         .init();
 
-    // Compute JSON output mode up front, before `cli` is moved into a command
-    // handler. This lets the error path in main() render structured JSON errors
-    // for the same conditions (--json/--pretty/--format json/piped) that would
-    // have produced JSON on success.
-    let json_mode = is_json_output_mode(&cli);
+    // Match error formatting to the requested success format before moving cli.
+    let configured_format = Config::load()
+        .ok()
+        .and_then(|config| config.default_output_format);
+    let json_mode = is_json_output_mode(&cli, configured_format.as_deref());
 
     let result = match &cli.command {
         Commands::Setup(_) => {
@@ -87,8 +86,12 @@ fn main() {
     };
 
     if let Err(e) = result {
-        // In JSON mode, emit a structured JSON error object to stderr so
-        // machine consumers (piped/--json/--pretty) can parse the failure.
+        if e.downcast_ref::<std::io::Error>()
+            .is_some_and(|err| err.kind() == std::io::ErrorKind::BrokenPipe)
+        {
+            return;
+        }
+        // In JSON mode, emit a structured error on stderr for machine consumers.
         // This preserves structured fields (code, diagnostics) from the bridge
         // that would otherwise be collapsed into a flat string.
         if json_mode {
@@ -124,35 +127,62 @@ fn apply_global_env_overrides(cli: &Cli) {
     }
 }
 
-/// Determine whether error output should be JSON (machine-readable) rather than
-/// human-readable text.
-///
-/// Mirrors the format-selection logic in [`run_with_bridge`]: any explicit
-/// `--format` JSON variant, `--json`, `--pretty`, or a piped (non-TTY) stdout
-/// means we are in JSON mode. This ensures errors are parseable by automated
-/// consumers in exactly the situations where stdout would have been JSON.
-fn is_json_output_mode(cli: &Cli) -> bool {
-    use std::io::IsTerminal;
+/// Select a format before any bridge command can execute.
+fn requested_output_format(cli: &Cli, default_format: Option<&str>) -> error::Result<OutputFormat> {
+    let opts = extract_query_options(&cli.command);
+    if let Some(format) = opts.as_ref().and_then(|opts| opts.format.as_deref()) {
+        return OutputFormat::from_str(format);
+    }
+    if cli.pretty {
+        return Ok(OutputFormat::Json);
+    }
+    if cli.json
+        || opts.as_ref().is_some_and(|opts| opts.json)
+        || matches!(cli.command, Commands::Batch(_))
+    {
+        return Ok(OutputFormat::JsonCompact);
+    }
+    match default_format {
+        None | Some("auto") => Ok(OutputFormat::Compact),
+        Some(format) => OutputFormat::from_str(format),
+    }
+}
 
-    // Per-command --format that resolves to a JSON variant.
-    if let Some(opts) = extract_query_options(&cli.command) {
-        if let Some(fmt) = &opts.format {
-            if let Ok(fmt) = OutputFormat::from_str(fmt) {
-                if matches!(fmt, OutputFormat::Json | OutputFormat::JsonCompact | OutputFormat::JsonStream) {
-                    return true;
-                }
-            }
-        }
-        if opts.json {
-            return true;
-        }
+fn is_json_output_mode(cli: &Cli, default_format: Option<&str>) -> bool {
+    matches!(
+        requested_output_format(cli, default_format),
+        Ok(OutputFormat::Json | OutputFormat::JsonCompact | OutputFormat::JsonStream)
+    )
+}
+
+fn validate_command_output(command: &Commands, format: OutputFormat) -> anyhow::Result<()> {
+    if extract_query_options(command).is_some_and(|opts| opts.count) {
+        return Ok(());
     }
-    // Global flags.
-    if cli.pretty || cli.json {
-        return true;
+    let supported = match format {
+        OutputFormat::C => matches!(
+            command,
+            Commands::Decompile(_) | Commands::Function(cli::FunctionCommands::Decompile(_))
+        ),
+        OutputFormat::Asm => matches!(
+            command,
+            Commands::Disasm(_) | Commands::Function(cli::FunctionCommands::Disasm(_))
+        ),
+        OutputFormat::Hex => matches!(command, Commands::Memory(cli::MemoryCommands::Read(_))),
+        _ => true,
+    };
+    if !supported {
+        let (name, source) = match format {
+            OutputFormat::C => ("c", "decompile"),
+            OutputFormat::Asm => ("asm", "disasm"),
+            OutputFormat::Hex => ("hex", "memory read"),
+            _ => unreachable!(),
+        };
+        anyhow::bail!(
+            "format '{name}' requires {source}; use --json or -o compact for this command"
+        );
     }
-    // Piped output: auto-detects to JSON compact for machine consumption.
-    !std::io::stdout().is_terminal()
+    Ok(())
 }
 
 /// Run a command, starting the bridge if needed.
@@ -524,6 +554,79 @@ fn extract_query_options(command: &Commands) -> Option<QueryOptions> {
     }
 }
 
+/// Apply the configured page size to every query-capable command unless the
+/// caller explicitly chose a limit or requested a full count. `--limit 0`
+/// remains the explicit unlimited form.
+fn effective_query_options(
+    command: &Commands,
+    default_limit: Option<usize>,
+) -> Option<QueryOptions> {
+    let mut opts = extract_query_options(command)?;
+    if opts.limit.is_none() && !opts.count {
+        opts.limit = match command {
+            Commands::Disasm(args) if args.num_instructions.is_some() => args.num_instructions,
+            _ => default_limit.filter(|limit| *limit > 0),
+        };
+    }
+    Some(opts)
+}
+
+fn emit_output(output: &str) -> std::io::Result<()> {
+    use std::io::Write;
+    if output.is_empty() {
+        return Ok(());
+    }
+    let mut stdout = std::io::stdout().lock();
+    stdout.write_all(output.as_bytes())?;
+    if !output.ends_with('\n') {
+        stdout.write_all(b"\n")?;
+    }
+    stdout.flush()
+}
+
+fn emit_truncation_notice(shown: usize, offset: usize) {
+    eprintln!(
+        "… showing {} results from offset {}; continue with --offset {} or use --limit 0 for all",
+        shown,
+        offset,
+        offset.saturating_add(shown)
+    );
+}
+
+fn emit_nested_truncation_notices(value: &serde_json::Value, path: &str) {
+    use serde_json::Value;
+    match value {
+        Value::Object(map) => {
+            if !path.is_empty() && map.get("truncated").and_then(Value::as_bool) == Some(true) {
+                let shown = map
+                    .get("count")
+                    .or_else(|| map.get("node_count"))
+                    .and_then(Value::as_u64)
+                    .unwrap_or(0);
+                eprintln!(
+                    "… {path}: showing {shown} results; raise --limit or use --limit 0 for all"
+                );
+            }
+            for (key, child) in map {
+                if child.is_array() || child.is_object() {
+                    let child_path = if path.is_empty() {
+                        key.clone()
+                    } else {
+                        format!("{path}.{key}")
+                    };
+                    emit_nested_truncation_notices(child, &child_path);
+                }
+            }
+        }
+        Value::Array(items) => {
+            for (index, child) in items.iter().enumerate() {
+                emit_nested_truncation_notices(child, &format!("{path}[{index}]"));
+            }
+        }
+        _ => {}
+    }
+}
+
 /// Commands whose successful completion must be followed by clean bridge
 /// teardown so the persistent AnalyzeHeadless transaction is committed.
 fn command_requires_teardown_persist(command: &Commands) -> bool {
@@ -591,30 +694,25 @@ fn command_is_read_only(command: &Commands) -> bool {
 
 /// Run a command that requires the bridge.
 fn run_with_bridge(cli: Cli) -> anyhow::Result<()> {
-    // Reject a malformed --filter up front, before any bridge work: the bridge
-    // fetch for a filtered query pulls the *full* dataset, so failing late
-    // wastes that transfer (and used to silently dump it — TODO.md Bug 2).
-    if let Some(opts) = extract_query_options(&cli.command) {
-        if let Some(expr) = &opts.filter {
-            filter::Filter::parse(expr).map_err(describe_query_error)?;
-        }
-    }
-
+    requested_output_format(&cli, None)?;
     let config = load_config(&cli.projects_dir)?;
+    let format = requested_output_format(&cli, config.default_output_format.as_deref())?;
+    validate_command_output(&cli.command, format)?;
+    let opts = effective_query_options(&cli.command, config.default_limit);
+    let query = opts
+        .as_ref()
+        .map(|opts| Query::from_options(opts).map_err(describe_query_error))
+        .transpose()?
+        .flatten();
 
     // Extract project from command args, fall back to global --project, then config default
     let project_from_cmd =
         extract_project_from_command(&cli.command).or_else(|| cli.project.clone());
     let project_path = resolve_project_path(&project_from_cmd, &config)?;
 
-    let ghidra_install_dir = config
-        .get_ghidra_install_dir()
-        .ok()
-        .ok_or_else(|| {
-            anyhow::anyhow!(
-                "Ghidra installation directory not configured. Run 'ghidra setup' first."
-            )
-        })?;
+    let ghidra_install_dir = config.get_ghidra_install_dir().ok().ok_or_else(|| {
+        anyhow::anyhow!("Ghidra installation directory not configured. Run 'ghidra setup' first.")
+    })?;
 
     // Import and Quick produce their own result and don't need execute_via_bridge.
     // Other commands (including Analyze) produce a result via execute_via_bridge.
@@ -839,46 +937,67 @@ fn run_with_bridge(cli: Cli) -> anyhow::Result<()> {
         check_dotnet_decompile_warning(&cli.command, &result);
     }
 
-    // Determine output format: explicit -o flag > --json/--pretty > TTY detection
-    let opts = extract_query_options(&cli.command);
-    let explicit_format = opts
-        .as_ref()
-        .and_then(|o| o.format.as_ref())
-        .map(|f| OutputFormat::from_str(f))
-        .transpose()
-        .ok()
-        .flatten();
-
-    let format = if let Some(fmt) = explicit_format {
-        fmt
-    } else if cli.pretty {
-        OutputFormat::Json
-    } else if cli.json || opts.as_ref().is_some_and(|o| o.json) {
-        OutputFormat::JsonCompact
-    } else {
-        auto_detect_format(std::io::stdout().is_terminal())
-    };
-
-    // Unwrap bridge response envelopes before formatting
-    let values = unwrap_bridge_response(result);
-
-    // Apply Rust-side query processing (filter, fields, sort) if QueryOptions are present.
-    // A parse error (e.g. malformed --filter) must abort: falling through to the
-    // default formatter would dump the entire unfiltered dataset (TODO.md Bug 2).
-    if let Some(opts) = &opts {
-        if let Some(query) = Query::from_options(opts, format).map_err(describe_query_error)? {
-            let output = query.process_results(values)?;
-            if !output.is_empty() {
-                println!("{}", output);
-            }
+    // Graph query options select nodes and their outgoing edges.
+    let (result, query) = if matches!(&cli.command, Commands::Graph(cli::GraphCommands::Calls(_))) {
+        let result = process_batch_result(&cli.command, result, config.default_limit)?;
+        if opts.as_ref().is_some_and(|opts| opts.count) {
+            emit_output(&result.to_string())?;
             return Ok(());
         }
+        (result, None)
+    } else {
+        (result, query)
+    };
+
+    // Preserve response metadata before unwrapping the bridge envelope. Some
+    // compound responses (notably call graphs) carry their own truncation flag,
+    // while flat collections can expose a total count larger than the returned
+    // page (e.g. `find interesting`).
+    let bridge_truncated = result
+        .get("truncated")
+        .and_then(|v| v.as_bool())
+        .unwrap_or(false);
+    let declared_count = result.get("count").and_then(|v| v.as_u64());
+    let nested_display_count = result.get("node_count").and_then(|v| v.as_u64());
+
+    // Unwrap bridge response envelopes before formatting, remembering whether
+    // the result truly represented a flat collection. A generic `count` field
+    // on a compound report must not be mistaken for pagination metadata.
+    let (values, flat_collection) = unwrap_bridge_response(result);
+    let bridge_count_implies_truncation =
+        flat_collection && declared_count.is_some_and(|count| count > values.len() as u64);
+
+    // Apply Rust-side query processing (filter, fields, sort, pagination) if
+    // QueryOptions are present. A parse error must abort rather than falling
+    // through and dumping the unfiltered dataset.
+    let offset = opts.as_ref().and_then(|opts| opts.offset).unwrap_or(0);
+    if let Some(query) = query {
+        let processed = query.process_data(values)?;
+        if query.count_only {
+            emit_output(&processed.displayed.to_string())?;
+            return Ok(());
+        }
+        emit_output(&DefaultFormatter.format(&processed.values, format)?)?;
+        for value in &processed.values {
+            emit_nested_truncation_notices(value, "");
+        }
+        if processed.truncated || bridge_truncated || bridge_count_implies_truncation {
+            emit_truncation_notice(processed.displayed, offset);
+        }
+        return Ok(());
     }
 
-    let formatter = DefaultFormatter;
-    let output = formatter.format(&values, format)?;
-    if !output.is_empty() {
-        println!("{}", output);
+    emit_output(&DefaultFormatter.format(&values, format)?)?;
+    for value in &values {
+        emit_nested_truncation_notices(value, "");
+    }
+    if bridge_truncated || bridge_count_implies_truncation {
+        emit_truncation_notice(
+            nested_display_count
+                .map(|n| n as usize)
+                .unwrap_or(values.len()),
+            offset,
+        );
     }
     Ok(())
 }
@@ -929,6 +1048,9 @@ fn parse_expect_spec(spec: &str) -> serde_json::Value {
 /// `query::Filter`. When a full filter expression, sort, or count is requested,
 /// fetch the complete dataset (no server-side limit/filter) so Rust-side query
 /// processing can filter, sort, and paginate correctly.
+///
+/// The bridge returns at most the requested cap and reports whether more
+/// matches exist. Client-side query operations require the complete source set.
 fn bridge_list_params(
     limit: Option<usize>,
     filter: Option<String>,
@@ -942,13 +1064,33 @@ fn bridge_list_params(
     } else {
         // `--limit 0` means "all rows": suppress both the explicit limit and
         // the config default. Omitting --limit still applies default_limit.
-        let limit = match limit {
+        let display_limit = match limit {
             Some(0) => None,
             Some(n) => Some(n),
-            None => default_limit,
+            None => default_limit.filter(|limit| *limit > 0),
         };
-        (limit, filter)
+        (display_limit, filter)
     }
+}
+
+fn display_limit_for_options(opts: &QueryOptions, default_limit: Option<usize>) -> Option<usize> {
+    match opts.limit {
+        Some(0) => None,
+        Some(limit) => Some(limit),
+        None => default_limit.filter(|limit| *limit > 0),
+    }
+}
+
+fn bridge_limit_for_options(opts: &QueryOptions, default_limit: Option<usize>) -> Option<usize> {
+    bridge_list_params(
+        opts.limit,
+        opts.filter.clone(),
+        opts.sort.as_deref(),
+        opts.count,
+        opts.offset,
+        default_limit,
+    )
+    .0
 }
 
 /// Execute a command via the bridge client.
@@ -999,9 +1141,39 @@ fn execute_via_bridge(
                 );
                 client.list_strings(lim, filt)
             }
-            "imports" => client.list_imports(),
-            "exports" => client.list_exports(),
-            "memory" => client.memory_map(),
+            "imports" => {
+                let (lim, _) = bridge_list_params(
+                    args.limit,
+                    args.filter.clone(),
+                    args.sort.as_deref(),
+                    args.count,
+                    args.offset,
+                    default_limit,
+                );
+                client.list_imports(lim)
+            }
+            "exports" => {
+                let (lim, _) = bridge_list_params(
+                    args.limit,
+                    args.filter.clone(),
+                    args.sort.as_deref(),
+                    args.count,
+                    args.offset,
+                    default_limit,
+                );
+                client.list_exports(lim)
+            }
+            "memory" => {
+                let (lim, _) = bridge_list_params(
+                    args.limit,
+                    args.filter.clone(),
+                    args.sort.as_deref(),
+                    args.count,
+                    args.offset,
+                    default_limit,
+                );
+                client.memory_map(lim)
+            }
             other => anyhow::bail!("Query type '{}' not supported", other),
         },
         Commands::Decompile(args) => client.decompile(
@@ -1033,10 +1205,14 @@ fn execute_via_bridge(
                     Some(json!({"address": args.resolved_target()})),
                 ),
                 FunctionCommands::Disasm(args) => client.disasm(args.resolved_target(), None),
-                FunctionCommands::Calls(args) => client.find_calls(args.resolved_target()),
-                FunctionCommands::XRefs(args) => {
-                    client.xrefs_to(args.resolved_target().to_string())
-                }
+                FunctionCommands::Calls(args) => client.find_calls(
+                    args.resolved_target(),
+                    bridge_limit_for_options(&args.options, default_limit),
+                ),
+                FunctionCommands::XRefs(args) => client.xrefs_to(
+                    args.resolved_target().to_string(),
+                    bridge_limit_for_options(&args.options, default_limit),
+                ),
                 FunctionCommands::Rename(args) => client.send_command(
                     "rename_function",
                     Some(json!({
@@ -1102,13 +1278,18 @@ fn execute_via_bridge(
                     );
                     client.list_strings(lim, filt)
                 }
-                StringsCommands::Refs(args) => client.xrefs_to(args.string.clone()),
+                StringsCommands::Refs(args) => client.xrefs_to(
+                    args.string.clone(),
+                    bridge_limit_for_options(&args.options, default_limit),
+                ),
             }
         }
         Commands::Memory(cmd) => {
             use cli::MemoryCommands;
             match cmd {
-                MemoryCommands::Map(_) => client.memory_map(),
+                MemoryCommands::Map(opts) => {
+                    client.memory_map(bridge_limit_for_options(opts, default_limit))
+                }
                 MemoryCommands::Read(args) => client.send_command(
                     "read_memory",
                     Some(json!({
@@ -1123,19 +1304,21 @@ fn execute_via_bridge(
                         "bytes": args.bytes,
                     })),
                 ),
-                MemoryCommands::Search(args) => client.send_command(
-                    "search_memory",
-                    Some(json!({
-                        "pattern": args.pattern,
-                    })),
+                MemoryCommands::Search(args) => client.find_bytes(
+                    &args.pattern,
+                    bridge_limit_for_options(&args.options, default_limit),
                 ),
             }
         }
         Commands::Dump(cmd) => {
             use cli::DumpCommands;
             match cmd {
-                DumpCommands::Imports(_) => client.list_imports(),
-                DumpCommands::Exports(_) => client.list_exports(),
+                DumpCommands::Imports(opts) => {
+                    client.list_imports(bridge_limit_for_options(opts, default_limit))
+                }
+                DumpCommands::Exports(opts) => {
+                    client.list_exports(bridge_limit_for_options(opts, default_limit))
+                }
                 DumpCommands::Functions(opts) => {
                     let (lim, filt) = bridge_list_params(
                         opts.limit,
@@ -1164,11 +1347,20 @@ fn execute_via_bridge(
         Commands::XRef(cmd) => {
             use cli::XRefCommands;
             match cmd {
-                XRefCommands::To(args) => client.xrefs_to(args.resolved_target().to_string()),
-                XRefCommands::From(args) => client.xrefs_from(args.resolved_target().to_string()),
+                XRefCommands::To(args) => client.xrefs_to(
+                    args.resolved_target().to_string(),
+                    bridge_limit_for_options(&args.options, default_limit),
+                ),
+                XRefCommands::From(args) => client.xrefs_from(
+                    args.resolved_target().to_string(),
+                    bridge_limit_for_options(&args.options, default_limit),
+                ),
                 XRefCommands::List(args) => client.send_command(
                     "xrefs_list",
-                    Some(json!({"address": args.resolved_target()})),
+                    Some(json!({
+                        "address": args.resolved_target(),
+                        "limit": bridge_limit_for_options(&args.options, default_limit),
+                    })),
                 ),
                 XRefCommands::TraceTo(args) => {
                     if args.max_functions == 0 {
@@ -1183,6 +1375,7 @@ fn execute_via_bridge(
                             "xrefs": args.xrefs,
                             "disasm": args.disasm,
                             "max_functions": args.max_functions,
+                            "limit": display_limit_for_options(&args.options, default_limit),
                         })),
                     )
                 }
@@ -1210,9 +1403,7 @@ fn execute_via_bridge(
                 ProgramCommands::Export(args) => {
                     client.program_export(&args.format, args.output.as_deref())
                 }
-                ProgramCommands::Save(args) => {
-                    client.program_save(args.message.as_deref())
-                }
+                ProgramCommands::Save(args) => client.program_save(args.message.as_deref()),
             }
         }
         Commands::Symbol(cmd) => {
@@ -1319,25 +1510,57 @@ fn execute_via_bridge(
         Commands::Graph(cmd) => {
             use cli::GraphCommands;
             match cmd {
-                GraphCommands::Calls(opts) => client.graph_calls(opts.limit.or(default_limit)),
-                GraphCommands::Callers(args) => {
-                    client.graph_callers(args.resolved_target(), args.depth)
+                GraphCommands::Calls(opts) => {
+                    // Graph query options select source nodes before their outgoing edges.
+                    let limit = if opts.filter.is_some()
+                        || opts.sort.is_some()
+                        || opts.count
+                        || opts.offset.is_some()
+                    {
+                        None
+                    } else {
+                        display_limit_for_options(opts, default_limit)
+                    };
+                    client.graph_calls(limit)
                 }
-                GraphCommands::Callees(args) => {
-                    client.graph_callees(args.resolved_target(), args.depth)
-                }
+                GraphCommands::Callers(args) => client.graph_callers(
+                    args.resolved_target(),
+                    args.depth,
+                    bridge_limit_for_options(&args.options, default_limit),
+                ),
+                GraphCommands::Callees(args) => client.graph_callees(
+                    args.resolved_target(),
+                    args.depth,
+                    bridge_limit_for_options(&args.options, default_limit),
+                ),
                 GraphCommands::Export(args) => client.graph_export(&args.format),
             }
         }
         Commands::Find(cmd) => {
             use cli::FindCommands;
             match cmd {
-                FindCommands::String(args) => client.find_string(&args.pattern),
-                FindCommands::Bytes(args) => client.find_bytes(&args.hex),
-                FindCommands::Function(args) => client.find_function(&args.pattern),
-                FindCommands::Calls(args) => client.find_calls(args.resolved_target()),
-                FindCommands::Crypto(_) => client.find_crypto(),
-                FindCommands::Interesting(_) => client.find_interesting(),
+                FindCommands::String(args) => client.find_string(
+                    &args.pattern,
+                    bridge_limit_for_options(&args.options, default_limit),
+                ),
+                FindCommands::Bytes(args) => client.find_bytes(
+                    &args.hex,
+                    bridge_limit_for_options(&args.options, default_limit),
+                ),
+                FindCommands::Function(args) => client.find_function(
+                    &args.pattern,
+                    bridge_limit_for_options(&args.options, default_limit),
+                ),
+                FindCommands::Calls(args) => client.find_calls(
+                    args.resolved_target(),
+                    bridge_limit_for_options(&args.options, default_limit),
+                ),
+                FindCommands::Crypto(opts) => {
+                    client.find_crypto(bridge_limit_for_options(opts, default_limit))
+                }
+                FindCommands::Interesting(opts) => {
+                    client.find_interesting(bridge_limit_for_options(opts, default_limit))
+                }
             }
         }
         Commands::Diff(cmd) => {
@@ -1447,17 +1670,30 @@ fn execute_via_bridge(
                         index + 1
                     );
                 }
+                let sub_format = requested_output_format(&sub_cli, None).map_err(|e| {
+                    anyhow::anyhow!("batch command {} failed preflight: {}", index + 1, e)
+                })?;
+                validate_command_output(&sub_cli.command, sub_format).map_err(|e| {
+                    anyhow::anyhow!("batch command {} failed preflight: {}", index + 1, e)
+                })?;
+                if let Some(opts) = effective_query_options(&sub_cli.command, default_limit) {
+                    Query::from_options(&opts)
+                        .map_err(describe_query_error)
+                        .map_err(|e| {
+                            anyhow::anyhow!("batch command {} failed preflight: {:#}", index + 1, e)
+                        })?;
+                }
                 parsed.push(sub_cli);
             }
 
             let mut results = Vec::new();
             for (cmd, sub_cli) in commands.iter().zip(parsed.iter()) {
-                let sub_result = execute_via_bridge(client, &sub_cli.command, true, default_limit);
+                let sub_result = execute_via_bridge(client, &sub_cli.command, true, default_limit)
+                    .and_then(|value| process_batch_result(&sub_cli.command, value, default_limit));
                 match &sub_result {
                     Ok(val) => results.push(json!({"command": cmd.display, "result": val})),
                     Err(e) => {
-                        results
-                            .push(json!({"command": cmd.display, "error": e.to_string()}));
+                        results.push(json!({"command": cmd.display, "error": e.to_string()}));
                         if !args.continue_on_error {
                             // Fail-fast: surface the first error and exit non-zero.
                             return Err(anyhow::anyhow!("{}", e));
@@ -1496,6 +1732,10 @@ fn execute_via_bridge(
                 "callees": args.callees || want_all,
                 "xrefs": args.xrefs || want_all,
                 "disasm": if want_all { Some(40) } else { args.disasm },
+                // Nested inspect collections cannot be paginated by the outer
+                // Rust query layer. The bridge performs its own one-row lookahead
+                // and returns exactly this many visible rows in every format.
+                "limit": display_limit_for_options(&args.options, default_limit),
             });
             if targets.len() == 1 {
                 let mut single = payload;
@@ -1514,49 +1754,93 @@ fn execute_via_bridge(
 
 /// Dispatch bridge management commands.
 fn handle_bridge_command(cli: Cli) -> anyhow::Result<()> {
-    // Global --project/--program flags serve as fallbacks for subcommand-level args
+    let config = load_config(&cli.projects_dir)?;
+    let format = requested_output_format(&cli, config.default_output_format.as_deref())?;
+    validate_command_output(&cli.command, format)?;
+    let json_output = matches!(
+        format,
+        OutputFormat::Json | OutputFormat::JsonCompact | OutputFormat::JsonStream
+    );
+    let pretty = format == OutputFormat::Json;
     let global_project = cli.project.clone();
     let global_program = cli.program.clone();
     let projects_dir = cli.projects_dir.clone();
-    let json_output = cli.json || cli.pretty || !std::io::stdout().is_terminal();
-    match cli.command {
+    let result = match cli.command {
         Commands::Start { project, program } => handle_bridge_start(
             project.or(global_project),
             program.or(global_program),
             &projects_dir,
+            json_output,
+            cli.quiet,
         ),
         Commands::Stop { project, save: _ } => {
-            // Teardown itself is the durable boundary for the persistent
-            // AnalyzeHeadless bridge. Retain --save as a compatibility spelling
-            // without attempting Program.save() inside the active transaction.
-            handle_bridge_stop(project.or(global_project), &projects_dir)
+            // Clean teardown is the durable boundary; --save is a compatibility spelling.
+            handle_bridge_stop(
+                project.or(global_project),
+                &projects_dir,
+                json_output,
+                cli.quiet,
+            )
         }
         Commands::Restart { project, program } => {
             let proj = project.or(global_project);
             let prog = program.or(global_program);
-            handle_bridge_stop(proj.clone(), &projects_dir)?;
+            handle_bridge_stop(proj.clone(), &projects_dir, json_output, cli.quiet)?;
             std::thread::sleep(std::time::Duration::from_secs(1));
-            handle_bridge_start(proj, prog, &projects_dir)
+            let mut result =
+                handle_bridge_start(proj, prog, &projects_dir, json_output, cli.quiet)?;
+            result["restarted"] = serde_json::json!(true);
+            Ok(result)
         }
         Commands::Status { project } => {
-            handle_bridge_status(project.or(global_project), &projects_dir)
+            handle_bridge_status(project.or(global_project), &projects_dir, json_output)
         }
-        Commands::Ping { project } => handle_bridge_ping(project.or(global_project), &projects_dir),
-        Commands::Jobs { job_id, project } => handle_bridge_jobs(
-            project.or(global_project),
-            &projects_dir,
-            job_id,
-            json_output,
-            cli.pretty,
-        ),
-        Commands::Cancel { job_id, project } => handle_bridge_cancel(
-            project.or(global_project),
-            &projects_dir,
-            job_id,
-            json_output,
-            cli.pretty,
-        ),
+        Commands::Ping { project } => {
+            handle_bridge_ping(project.or(global_project), &projects_dir, json_output)
+        }
+        Commands::Jobs { job_id, project } => {
+            return handle_bridge_jobs(
+                project.or(global_project),
+                &projects_dir,
+                job_id,
+                json_output,
+                pretty,
+            );
+        }
+        Commands::Cancel { job_id, project } => {
+            return handle_bridge_cancel(
+                project.or(global_project),
+                &projects_dir,
+                job_id,
+                json_output,
+                pretty,
+            );
+        }
         _ => unreachable!(),
+    }?;
+    if json_output {
+        emit_bridge_json(&result, pretty)?;
+    }
+    Ok(())
+}
+
+fn emit_bridge_json(result: &serde_json::Value, pretty: bool) -> anyhow::Result<()> {
+    let output = if pretty {
+        serde_json::to_string_pretty(result)?
+    } else {
+        serde_json::to_string(result)?
+    };
+    emit_output(&output)?;
+    Ok(())
+}
+
+fn bridge_progress(message: &str, json_output: bool, quiet: bool) {
+    if !quiet {
+        if json_output {
+            eprintln!("{message}");
+        } else {
+            println!("{message}");
+        }
     }
 }
 
@@ -1565,143 +1849,185 @@ fn handle_bridge_start(
     project: Option<String>,
     program: Option<String>,
     projects_dir: &Option<PathBuf>,
-) -> anyhow::Result<()> {
+    json_output: bool,
+    quiet: bool,
+) -> anyhow::Result<serde_json::Value> {
     let config = load_config(projects_dir)?;
     let project_path = resolve_project_path(&project, &config)?;
+    let ghidra_install_dir = config.get_ghidra_install_dir().ok().ok_or_else(|| {
+        anyhow::anyhow!("Ghidra installation directory not configured. Run 'ghidra setup' first.")
+    })?;
 
-    let ghidra_install_dir = config
-        .get_ghidra_install_dir()
-        .ok()
-        .ok_or_else(|| {
-            anyhow::anyhow!(
-                "Ghidra installation directory not configured. Run 'ghidra setup' first."
-            )
-        })?;
-
-    // Check if bridge is already running
-    if bridge::is_bridge_running(&project_path).is_some() {
-        println!(
-            "Bridge is already running for project: {}",
-            project_path.display()
-        );
-        return Ok(());
+    if let Some(port) = bridge::is_bridge_running(&project_path) {
+        if !json_output {
+            println!(
+                "Bridge is already running for project: {}",
+                project_path.display()
+            );
+        }
+        return Ok(serde_json::json!({
+            "status": "running",
+            "project": project_path,
+            "port": port,
+            "started": false
+        }));
     }
 
-    // Determine start mode
-    let mode = if let Some(prog) = program {
-        BridgeStartMode::Process { program_name: prog }
-    } else if let Some(prog) = config.get_default_program() {
-        BridgeStartMode::Process { program_name: prog }
-    } else {
-        BridgeStartMode::Project
+    let mode = match program.or_else(|| config.get_default_program()) {
+        Some(program_name) => BridgeStartMode::Process { program_name },
+        None => BridgeStartMode::Project,
     };
-
-    println!("Starting bridge for project: {}", project_path.display());
-
+    bridge_progress(
+        &format!("Starting bridge for project: {}", project_path.display()),
+        json_output,
+        quiet,
+    );
     let port = bridge::ensure_bridge_running(&project_path, &ghidra_install_dir, mode)?;
-
-    println!("Bridge started on port {}", port);
-    Ok(())
+    if !json_output {
+        println!("Bridge started on port {}", port);
+    }
+    Ok(serde_json::json!({
+        "status": "running",
+        "project": project_path,
+        "port": port,
+        "started": true
+    }))
 }
 
 /// Stop the bridge for a project.
 fn handle_bridge_stop(
     project: Option<String>,
     projects_dir: &Option<PathBuf>,
-) -> anyhow::Result<()> {
+    json_output: bool,
+    quiet: bool,
+) -> anyhow::Result<serde_json::Value> {
     let config = load_config(projects_dir)?;
     let project_path = resolve_project_path(&project, &config)?;
-
-    if bridge::is_bridge_running(&project_path).is_some() {
-        println!("Stopping bridge...");
+    let was_running = bridge::is_bridge_running(&project_path).is_some();
+    if was_running {
+        bridge_progress("Stopping bridge...", json_output, quiet);
         bridge::stop_bridge(&project_path)?;
-        println!("Bridge stopped");
-    } else {
+        if !json_output {
+            println!("Bridge stopped");
+        }
+    } else if !json_output {
         println!("No bridge running for project: {}", project_path.display());
     }
-
-    Ok(())
+    Ok(serde_json::json!({
+        "status": "stopped",
+        "project": project_path,
+        "was_running": was_running
+    }))
 }
 
 /// Get bridge status for a project.
 fn handle_bridge_status(
     project: Option<String>,
     projects_dir: &Option<PathBuf>,
-) -> anyhow::Result<()> {
+    json_output: bool,
+) -> anyhow::Result<serde_json::Value> {
     let config = load_config(projects_dir)?;
     let project_path = resolve_project_path(&project, &config)?;
-
     match bridge::bridge_status(&project_path)? {
         BridgeStatus::Running { port, pid } => {
-            println!("Bridge is running:");
-            println!("  PID: {}", pid);
-            println!("  Port: {}", port);
-            println!("  Project: {}", project_path.display());
-
-            // Try to get extended info from the bridge
+            let mut result = serde_json::json!({
+                "status": "running",
+                "pid": pid,
+                "port": port,
+                "project": project_path
+            });
+            if !json_output {
+                println!("Bridge is running:");
+                println!("  PID: {}", pid);
+                println!("  Port: {}", port);
+                println!("  Project: {}", project_path.display());
+            }
             let client = BridgeClient::new(port);
             if let Ok(info) = client.bridge_info() {
-                if let Some(prog) = info.get("current_program").and_then(|v| v.as_str()) {
-                    println!("  Current program: {}", prog);
+                if let Some(fields) = info.as_object() {
+                    result.as_object_mut().unwrap().extend(fields.clone());
                 }
-                if let Some(count) = info.get("program_count").and_then(|v| v.as_u64()) {
-                    println!("  Programs: {}", count);
-                }
-                if let Some(state) = info.get("bridge_state").and_then(|v| v.as_str()) {
-                    println!("  State: {}", state);
-                }
-                if let Some(depth) = info.get("queue_depth").and_then(|v| v.as_u64()) {
-                    println!("  Queue depth: {}", depth);
-                }
-                if let Some(job) = info.get("active_job").filter(|v| !v.is_null()) {
-                    let id = job.get("id").and_then(|v| v.as_u64()).unwrap_or(0);
-                    let command = job
-                        .get("command")
-                        .and_then(|v| v.as_str())
-                        .unwrap_or("unknown");
-                    let state = job
-                        .get("state")
-                        .and_then(|v| v.as_str())
-                        .unwrap_or("unknown");
-                    let elapsed = job.get("elapsed_ms").and_then(|v| v.as_u64()).unwrap_or(0);
-                    println!(
-                        "  Active job: {} {} ({}, {:.1}s)",
-                        id,
-                        command,
-                        state,
-                        elapsed as f64 / 1000.0
-                    );
+                if !json_output {
+                    if let Some(prog) = info.get("current_program").and_then(|v| v.as_str()) {
+                        println!("  Current program: {}", prog);
+                    }
+                    if let Some(count) = info.get("program_count").and_then(|v| v.as_u64()) {
+                        println!("  Programs: {}", count);
+                    }
+                    if let Some(state) = info.get("bridge_state").and_then(|v| v.as_str()) {
+                        println!("  State: {}", state);
+                    }
+                    if let Some(depth) = info.get("queue_depth").and_then(|v| v.as_u64()) {
+                        println!("  Queue depth: {}", depth);
+                    }
+                    if let Some(job) = info.get("active_job").filter(|v| !v.is_null()) {
+                        let id = job.get("id").and_then(|v| v.as_u64()).unwrap_or(0);
+                        let command = job
+                            .get("command")
+                            .and_then(|v| v.as_str())
+                            .unwrap_or("unknown");
+                        let state = job
+                            .get("state")
+                            .and_then(|v| v.as_str())
+                            .unwrap_or("unknown");
+                        let elapsed = job.get("elapsed_ms").and_then(|v| v.as_u64()).unwrap_or(0);
+                        println!(
+                            "  Active job: {} {} ({}, {:.1}s)",
+                            id,
+                            command,
+                            state,
+                            elapsed as f64 / 1000.0
+                        );
+                    }
                 }
             }
+            Ok(result)
         }
         BridgeStatus::Stopped => {
-            println!("No bridge running for project: {}", project_path.display());
+            if !json_output {
+                println!("No bridge running for project: {}", project_path.display());
+            }
+            Ok(serde_json::json!({"status": "stopped", "project": project_path}))
         }
     }
-
-    Ok(())
 }
 
 /// Ping the bridge.
 fn handle_bridge_ping(
     project: Option<String>,
     projects_dir: &Option<PathBuf>,
-) -> anyhow::Result<()> {
+    json_output: bool,
+) -> anyhow::Result<serde_json::Value> {
     let config = load_config(projects_dir)?;
     let project_path = resolve_project_path(&project, &config)?;
-
     if let Some(port) = bridge::is_bridge_running(&project_path) {
-        let client = BridgeClient::new(port);
-        if client.ping()? {
-            println!("Bridge is responsive");
-        } else {
-            println!("Bridge is not responding");
+        let responsive = BridgeClient::new(port).ping()?;
+        if !json_output {
+            println!(
+                "{}",
+                if responsive {
+                    "Bridge is responsive"
+                } else {
+                    "Bridge is not responding"
+                }
+            );
         }
+        Ok(serde_json::json!({
+            "status": if responsive { "running" } else { "unresponsive" },
+            "project": project_path,
+            "port": port,
+            "responsive": responsive
+        }))
     } else {
-        println!("No bridge running for project: {}", project_path.display());
+        if !json_output {
+            println!("No bridge running for project: {}", project_path.display());
+        }
+        Ok(serde_json::json!({
+            "status": "stopped",
+            "project": project_path,
+            "responsive": false
+        }))
     }
-
-    Ok(())
 }
 
 fn handle_bridge_jobs(
@@ -1722,10 +2048,8 @@ fn handle_bridge_jobs(
     } else {
         client.status()?
     };
-    if pretty {
-        println!("{}", serde_json::to_string_pretty(&jobs)?);
-    } else if json_output {
-        println!("{}", serde_json::to_string(&jobs)?);
+    if json_output {
+        emit_bridge_json(&jobs, pretty)?;
     } else if let Some(job) = jobs.get("job") {
         print_bridge_job("Job", job);
     } else if jobs.get("found").and_then(|v| v.as_bool()) == Some(false) {
@@ -1805,10 +2129,8 @@ fn handle_bridge_cancel(
         anyhow::anyhow!("No bridge running for project: {}", project_path.display())
     })?;
     let result = BridgeClient::new(port).cancel_job(job_id)?;
-    if pretty {
-        println!("{}", serde_json::to_string_pretty(&result)?);
-    } else if json_output {
-        println!("{}", serde_json::to_string(&result)?);
+    if json_output {
+        emit_bridge_json(&result, pretty)?;
     } else {
         let id = result
             .get("job_id")
@@ -2095,7 +2417,12 @@ fn handle_config_command(cmd: cli::ConfigCommands) -> anyhow::Result<()> {
         ConfigCommands::Set { key, value } => {
             let mut config = Config::load()?;
             match key.as_str() {
-                "default_output_format" => config.default_output_format = Some(value),
+                "default_output_format" => {
+                    if value != "auto" {
+                        OutputFormat::from_str(&value)?;
+                    }
+                    config.default_output_format = Some(value);
+                }
                 "timeout" => anyhow::bail!(
                     "'timeout' has been removed because it no longer controlled bridge waits. \
                      Use GHIDRA_CLI_READ_TIMEOUT for normal commands, GHIDRA_CLI_OP_TIMEOUT \
@@ -2266,21 +2593,9 @@ fn check_dotnet_decompile_warning(command: &Commands, result: &serde_json::Value
     }
 }
 
-/// Unwrap bridge response envelopes into a flat array of objects.
-///
-/// Bridge returns envelopes like `{"count": N, "functions": [...]}`.
-/// This extracts the inner array so formatters can render individual items.
-fn unwrap_bridge_response(value: serde_json::Value) -> Vec<serde_json::Value> {
-    // Already an array - return as-is
-    if let serde_json::Value::Array(arr) = &value {
-        return arr.clone();
-    }
-
-    // Must be an object to unwrap
-    let obj = match value {
-        serde_json::Value::Object(ref map) => map,
-        other => return vec![other],
-    };
+/// Identify a collection envelope while preserving compound report objects.
+fn bridge_collection_key(value: &serde_json::Value) -> Option<&'static str> {
+    let obj = value.as_object()?;
 
     // Known array keys from bridge responses
     const ARRAY_KEYS: &[&str] = &[
@@ -2301,6 +2616,8 @@ fn unwrap_bridge_response(value: serde_json::Value) -> Vec<serde_json::Value> {
         "instructions",
         "sections",
         "references",
+        "inspections",
+        "scripts",
     ];
 
     // Metadata keys that accompany array keys (not data themselves)
@@ -2313,28 +2630,115 @@ fn unwrap_bridge_response(value: serde_json::Value) -> Vec<serde_json::Value> {
         "current_program_name",
         "has_current_program",
         "data",
+        "target_count",
+        "signatures_scanned",
+        "truncated",
     ];
 
-    // Special case: decompile responses have a "code" key - return as-is for special rendering
     if obj.contains_key("code") {
-        return vec![value];
+        return None;
     }
 
-    // Look for a known array key
-    for &key in ARRAY_KEYS {
-        if let Some(serde_json::Value::Array(arr)) = obj.get(key) {
-            // Verify remaining keys are metadata
-            let all_meta = obj
+    ARRAY_KEYS.iter().copied().find(|key| {
+        obj.get(*key).is_some_and(serde_json::Value::is_array)
+            && obj
                 .keys()
-                .all(|k| k == key || META_KEYS.contains(&k.as_str()));
-            if all_meta {
-                return arr.clone();
-            }
+                .all(|k| k == key || META_KEYS.contains(&k.as_str()))
+    })
+}
+
+fn unwrap_bridge_response(mut value: serde_json::Value) -> (Vec<serde_json::Value>, bool) {
+    if let serde_json::Value::Array(rows) = value {
+        return (rows, true);
+    }
+    if let Some(key) = bridge_collection_key(&value) {
+        if let serde_json::Value::Array(rows) = value[key].take() {
+            return (rows, true);
         }
     }
+    (vec![value], false)
+}
 
-    // No known array key found - return as single-item vec
-    vec![value]
+/// Apply query options while retaining bridge envelopes for batch and graph output.
+fn process_batch_result(
+    command: &Commands,
+    mut result: serde_json::Value,
+    default_limit: Option<usize>,
+) -> anyhow::Result<serde_json::Value> {
+    use serde_json::{json, Value};
+    let Some(opts) = effective_query_options(command, default_limit) else {
+        return Ok(result);
+    };
+    let Some(mut query) = Query::from_options(&opts).map_err(describe_query_error)? else {
+        return Ok(result);
+    };
+    let graph = matches!(command, Commands::Graph(cli::GraphCommands::Calls(_)))
+        && result.get("nodes").is_some_and(Value::is_array);
+    let key = if graph {
+        Some("nodes")
+    } else {
+        bridge_collection_key(&result)
+    };
+    let was_array = result.is_array();
+    let (rows, flat) = if graph {
+        (result["nodes"].as_array().unwrap().clone(), true)
+    } else {
+        unwrap_bridge_response(result.clone())
+    };
+    let source_len = rows.len();
+    let count_key = if graph { "node_count" } else { "count" };
+    let source_truncated = result
+        .get("truncated")
+        .and_then(Value::as_bool)
+        .unwrap_or(false)
+        || (flat
+            && result
+                .get(count_key)
+                .and_then(Value::as_u64)
+                .is_some_and(|count| count > source_len as u64));
+    let fields = if graph { query.fields.take() } else { None };
+    let mut processed = query.process_data(rows)?;
+    if query.count_only {
+        return Ok(json!(processed.displayed));
+    }
+    if graph {
+        let ids: std::collections::HashSet<_> = processed
+            .values
+            .iter()
+            .filter_map(|node| node["id"].as_str())
+            .collect();
+        if let Some(edges) = result["edges"].as_array_mut() {
+            edges.retain(|edge| edge["from"].as_str().is_some_and(|id| ids.contains(id)));
+            let count = edges.len();
+            result["edge_count"] = json!(count);
+        }
+        result["node_count"] = json!(processed.displayed);
+        if let Some(fields) = fields {
+            let mut projection = Query::new(query::DataType::CallGraph);
+            projection.fields = Some(fields);
+            processed.values = projection.process_data(processed.values)?.values;
+        }
+    }
+    if let Some(key) = key {
+        result[key] = Value::Array(processed.values);
+        for count_key in ["count", "target_count"] {
+            if result.get(count_key).is_some() {
+                result[count_key] = json!(processed.displayed);
+            }
+        }
+        if source_truncated || processed.truncated {
+            result["truncated"] = json!(true);
+        } else if result.get("truncated").is_some() {
+            result["truncated"] = json!(false);
+        }
+        Ok(result)
+    } else if was_array {
+        Ok(Value::Array(processed.values))
+    } else if processed.values.len() == 1 {
+        Ok(processed.values.into_iter().next().unwrap())
+    } else {
+        Ok(Value::Array(processed.values))
+    }
 }
 
 /// Whether a Ghidra project already exists on disk for the given project path.
@@ -2412,7 +2816,7 @@ mod tests {
 
     #[test]
     fn bridge_list_params_limit_zero_means_unlimited() {
-        // Regression (TODO.md Bug 1): --limit 0 must fetch all rows, not zero,
+        // --limit 0 must fetch all rows, not zero,
         // and must not fall back to the config default limit.
         let (limit, filter) = bridge_list_params(Some(0), None, None, false, None, Some(1000));
         assert_eq!(limit, None);
@@ -2421,13 +2825,13 @@ mod tests {
 
     #[test]
     fn bridge_list_params_no_limit_uses_default() {
-        let (limit, _) = bridge_list_params(None, None, None, false, None, Some(1000));
-        assert_eq!(limit, Some(1000));
+        let (limit, _) = bridge_list_params(None, None, None, false, None, Some(50));
+        assert_eq!(limit, Some(50));
     }
 
     #[test]
     fn bridge_list_params_explicit_limit_wins() {
-        let (limit, _) = bridge_list_params(Some(25), None, None, false, None, Some(1000));
+        let (limit, _) = bridge_list_params(Some(25), None, None, false, None, Some(50));
         assert_eq!(limit, Some(25));
     }
 
@@ -2446,9 +2850,260 @@ mod tests {
     }
 
     #[test]
+    fn effective_query_options_injects_default_limit() {
+        let cli = Cli::try_parse_from(["ghidra", "memory", "map"]).unwrap();
+        let opts = effective_query_options(&cli.command, Some(50)).unwrap();
+        assert_eq!(opts.limit, Some(50));
+    }
+
+    #[test]
+    fn effective_query_options_preserves_unlimited_and_count() {
+        let unlimited =
+            Cli::try_parse_from(["ghidra", "function", "list", "--limit", "0"]).unwrap();
+        assert_eq!(
+            effective_query_options(&unlimited.command, Some(50))
+                .unwrap()
+                .limit,
+            Some(0)
+        );
+
+        let count = Cli::try_parse_from(["ghidra", "function", "list", "--count"]).unwrap();
+        assert_eq!(
+            effective_query_options(&count.command, Some(50))
+                .unwrap()
+                .limit,
+            None
+        );
+    }
+
+    #[test]
+    fn output_format_precedence_matches_error_mode() {
+        for (args, expected, json) in [
+            (
+                vec!["ghidra", "function", "list"],
+                OutputFormat::Compact,
+                false,
+            ),
+            (
+                vec!["ghidra", "--json", "function", "list"],
+                OutputFormat::JsonCompact,
+                true,
+            ),
+            (
+                vec!["ghidra", "--pretty", "function", "list"],
+                OutputFormat::Json,
+                true,
+            ),
+            (
+                vec!["ghidra", "--json", "function", "list", "-o", "compact"],
+                OutputFormat::Compact,
+                false,
+            ),
+            (
+                vec!["ghidra", "function", "list", "-o", "ndjson"],
+                OutputFormat::JsonStream,
+                true,
+            ),
+            (
+                vec!["ghidra", "batch", "-"],
+                OutputFormat::JsonCompact,
+                true,
+            ),
+            (
+                vec!["ghidra", "--pretty", "batch", "-"],
+                OutputFormat::Json,
+                true,
+            ),
+        ] {
+            let cli = Cli::try_parse_from(args).unwrap();
+            assert_eq!(requested_output_format(&cli, None).unwrap(), expected);
+            assert_eq!(is_json_output_mode(&cli, None), json);
+        }
+        let cli = Cli::try_parse_from(["ghidra", "function", "list", "-o", "bogus"]).unwrap();
+        assert!(requested_output_format(&cli, None).is_err());
+
+        let cli = Cli::try_parse_from(["ghidra", "function", "list"]).unwrap();
+        assert_eq!(
+            requested_output_format(&cli, Some("auto")).unwrap(),
+            OutputFormat::Compact
+        );
+        assert_eq!(
+            requested_output_format(&cli, Some("json")).unwrap(),
+            OutputFormat::Json
+        );
+        assert!(is_json_output_mode(&cli, Some("json")));
+        let explicit =
+            Cli::try_parse_from(["ghidra", "function", "list", "-o", "compact"]).unwrap();
+        assert_eq!(
+            requested_output_format(&explicit, Some("json")).unwrap(),
+            OutputFormat::Compact
+        );
+    }
+
+    #[test]
+    fn source_formats_are_validated_before_command_execution() {
+        for (args, format, valid) in [
+            (vec!["ghidra", "decompile", "main"], OutputFormat::C, true),
+            (
+                vec!["ghidra", "function", "decompile", "main"],
+                OutputFormat::C,
+                true,
+            ),
+            (vec!["ghidra", "disasm", "main"], OutputFormat::Asm, true),
+            (
+                vec!["ghidra", "memory", "read", "0x100", "16"],
+                OutputFormat::Hex,
+                true,
+            ),
+            (
+                vec!["ghidra", "function", "delete", "main"],
+                OutputFormat::C,
+                false,
+            ),
+            (
+                vec!["ghidra", "function", "delete", "main"],
+                OutputFormat::Asm,
+                false,
+            ),
+            (
+                vec!["ghidra", "symbol", "delete", "name"],
+                OutputFormat::Hex,
+                false,
+            ),
+        ] {
+            let cli = Cli::try_parse_from(args).unwrap();
+            assert_eq!(validate_command_output(&cli.command, format).is_ok(), valid);
+        }
+    }
+
+    #[test]
+    fn explicit_instruction_count_overrides_default_page_size() {
+        let cli = Cli::try_parse_from(["ghidra", "disasm", "main", "-n", "100"]).unwrap();
+        assert_eq!(
+            effective_query_options(&cli.command, Some(50))
+                .unwrap()
+                .limit,
+            Some(100)
+        );
+        let cli = Cli::try_parse_from(["ghidra", "disasm", "main", "-n", "100", "--limit", "10"])
+            .unwrap();
+        assert_eq!(
+            effective_query_options(&cli.command, Some(50))
+                .unwrap()
+                .limit,
+            Some(10)
+        );
+    }
+
+    #[test]
+    fn batch_queries_filter_sort_project_and_paginate() {
+        let cli = Cli::try_parse_from([
+            "ghidra", "function", "list", "--filter", "size>1", "--sort", "-size", "--fields",
+            "name", "--offset", "1", "--limit", "1",
+        ])
+        .unwrap();
+        let result = process_batch_result(
+            &cli.command,
+            serde_json::json!({
+                "functions": [
+                    {"name": "small", "size": 2},
+                    {"name": "large", "size": 10},
+                    {"name": "medium", "size": 5},
+                    {"name": "excluded", "size": 1}
+                ],
+                "count": 4
+            }),
+            Some(50),
+        )
+        .unwrap();
+        assert_eq!(result["functions"], serde_json::json!([{"name": "medium"}]));
+        assert_eq!(result["count"], 1);
+        assert_eq!(result["truncated"], true);
+    }
+
+    #[test]
+    fn batch_uses_display_limit_and_preserves_bridge_metadata() {
+        let cli = Cli::try_parse_from(["ghidra", "find", "crypto", "--limit", "1"]).unwrap();
+        let result = process_batch_result(
+            &cli.command,
+            serde_json::json!({
+                "results": [{"address": "1000"}, {"address": "2000"}],
+                "count": 2, "signatures_scanned": 4
+            }),
+            Some(50),
+        )
+        .unwrap();
+        assert_eq!(result["results"].as_array().unwrap().len(), 1);
+        assert_eq!(result["signatures_scanned"], 4);
+        assert_eq!(result["truncated"], true);
+    }
+
+    #[test]
+    fn batch_inspection_count_matches_selected_targets() {
+        let cli = Cli::try_parse_from(["ghidra", "inspect", "a", "b", "--limit", "1"]).unwrap();
+        let result = process_batch_result(
+            &cli.command,
+            serde_json::json!({
+                "target_count": 2,
+                "inspections": [
+                    {"target": "a", "inspection": {"function": {"name": "a"}}},
+                    {"target": "b", "inspection": {"function": {"name": "b"}}}
+                ]
+            }),
+            Some(50),
+        )
+        .unwrap();
+        assert_eq!(result["target_count"], 1);
+        assert_eq!(result["inspections"].as_array().unwrap().len(), 1);
+        assert_eq!(result["truncated"], true);
+    }
+
+    #[test]
+    fn graph_queries_count_nodes_and_keep_selected_sources_edges() {
+        let graph = serde_json::json!({
+            "nodes": [
+                {"id": "1", "address": "1", "name": "one"},
+                {"id": "2", "address": "2", "name": "two"}
+            ],
+            "edges": [
+                {"from": "1", "to": "2", "type": "call"},
+                {"from": "2", "to": "3", "type": "call"}
+            ],
+            "node_count": 2, "edge_count": 2
+        });
+        let cli = Cli::try_parse_from(["ghidra", "graph", "calls", "--count"]).unwrap();
+        assert_eq!(
+            process_batch_result(&cli.command, graph.clone(), Some(1)).unwrap(),
+            2
+        );
+        let cli = Cli::try_parse_from([
+            "ghidra", "graph", "calls", "--filter", "name=two", "--fields", "name",
+        ])
+        .unwrap();
+        let result = process_batch_result(&cli.command, graph, Some(50)).unwrap();
+        assert_eq!(result["nodes"], serde_json::json!([{"name": "two"}]));
+        assert_eq!(result["node_count"], 1);
+        assert_eq!(result["edge_count"], 1);
+        assert_eq!(result["edges"][0]["to"], "3");
+    }
+
+    #[test]
+    fn unwraps_crypto_results_despite_scan_metadata() {
+        let (values, flat) = unwrap_bridge_response(serde_json::json!({
+            "results": [
+                {"address": "00001000", "type": "AES", "pattern_length": 256},
+                {"address": "00002000", "type": "SHA", "pattern_length": 64}
+            ],
+            "count": 2,
+            "signatures_scanned": 130
+        }));
+        assert!(flat);
+        assert_eq!(values.len(), 2);
+    }
+
+    #[test]
     fn describe_query_error_mentions_filter_usage() {
-        // Regression (TODO.md Bug 2): a bare word is not a valid filter and the
-        // error must surface (previously swallowed, dumping the whole dataset).
+        // A bare word must fail with an actionable filter-usage hint.
         let Err(err) = filter::Filter::parse("PK") else {
             panic!("bare word must not parse");
         };

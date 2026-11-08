@@ -258,7 +258,7 @@ fn test_script_run_artifact_contract() {
         stderr
     );
     assert!(
-        stdout.contains("artifacts") && stdout.contains("\"rows\""),
+        stdout.contains("## artifacts") && stdout.contains("rows=5"),
         "expected artifact manifest with row count, got: {}",
         stdout
     );

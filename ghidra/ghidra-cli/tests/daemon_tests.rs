@@ -34,6 +34,113 @@ fn try_start_daemon() -> Option<DaemonTestHarness> {
 
 #[test]
 #[serial]
+fn test_lifecycle_json_and_configured_format() {
+    require_ghidra!();
+    ensure_test_project(TEST_PROJECT, TEST_PROGRAM);
+    let harness = DaemonTestHarness::new(TEST_PROJECT, TEST_PROGRAM)
+        .expect("Failed to start lifecycle JSON test bridge");
+    let temp = tempfile::tempdir().unwrap();
+    let config_path = temp.path().join("config.yaml");
+    let mut config = ghidra_cli::config::Config::load().unwrap();
+    config.default_output_format = Some("auto".into());
+    std::fs::write(&config_path, serde_yaml::to_string(&config).unwrap()).unwrap();
+
+    // File-backed output avoids inherited pipe handles from restarted JVMs on Windows.
+    let mut invocation = 0;
+    let mut run = |args: &[&str]| {
+        invocation += 1;
+        let stdout_path = temp.path().join(format!("stdout-{invocation}"));
+        let stderr_path = temp.path().join(format!("stderr-{invocation}"));
+        let mut child = std::process::Command::new(assert_cmd::cargo::cargo_bin!("ghidra"))
+            .args(args)
+            .args(["--project", TEST_PROJECT])
+            .env("GHIDRA_CLI_CONFIG", &config_path)
+            .env(
+                "GHIDRA_PROJECT_DIR",
+                ghidra_cli::config::Config::default_project_dir().unwrap(),
+            )
+            .stdout(std::fs::File::create(&stdout_path).unwrap())
+            .stderr(std::fs::File::create(&stderr_path).unwrap())
+            .spawn()
+            .unwrap();
+        let deadline = std::time::Instant::now() + Duration::from_secs(240);
+        let status = loop {
+            if let Some(status) = child.try_wait().unwrap() {
+                break status;
+            }
+            if std::time::Instant::now() >= deadline {
+                let _ = child.kill();
+                let _ = child.wait();
+                panic!("Lifecycle command timed out: {args:?}");
+            }
+            std::thread::sleep(Duration::from_millis(100));
+        };
+        let stdout = std::fs::read_to_string(stdout_path).unwrap();
+        let stderr = std::fs::read_to_string(stderr_path).unwrap();
+        assert!(status.success(), "{args:?}: {stderr}\n{stdout}");
+        let value: serde_json::Value = serde_json::from_str(&stdout).unwrap_or_else(|error| {
+            panic!("{args:?} must emit one JSON result: {error}\n{stdout}")
+        });
+        (value, stdout, stderr)
+    };
+
+    let (status, stdout, _) = run(&["status", "--json"]);
+    assert_eq!(status["status"], "running");
+    assert_eq!(status["port"].as_u64(), Some(harness.port() as u64));
+    assert!(status["pid"].as_u64().is_some());
+    assert_eq!(stdout.trim().lines().count(), 1);
+
+    let (status, stdout, _) = run(&["--pretty", "status"]);
+    assert_eq!(status["status"], "running");
+    assert!(stdout.trim().lines().count() > 1);
+
+    let (ping, _, _) = run(&["--json", "ping"]);
+    assert_eq!(ping["status"], "running");
+    assert_eq!(ping["responsive"], true);
+
+    let (start, _, _) = run(&["start", "--json", "--program", TEST_PROGRAM]);
+    assert_eq!(start["status"], "running");
+    assert_eq!(start["started"], false);
+
+    let (restart, _, stderr) = run(&["restart", "--json", "--quiet", "--program", TEST_PROGRAM]);
+    assert_eq!(restart["status"], "running");
+    assert_eq!(restart["restarted"], true);
+    assert!(
+        !stderr.contains("Stopping bridge...") && !stderr.contains("Starting bridge for project:"),
+        "{stderr}"
+    );
+
+    let (stop, stdout, _) = run(&["stop", "--pretty"]);
+    assert_eq!(stop["status"], "stopped");
+    assert_eq!(stop["was_running"], true);
+    assert!(stdout.trim().lines().count() > 1);
+
+    let (status, _, _) = run(&["status", "--json"]);
+    assert_eq!(status["status"], "stopped");
+    let (ping, _, _) = run(&["ping", "--json"]);
+    assert_eq!(ping["status"], "stopped");
+    assert_eq!(ping["responsive"], false);
+
+    let (start, _, stderr) = run(&["start", "--json", "--quiet", "--program", TEST_PROGRAM]);
+    assert_eq!(start["status"], "running");
+    assert_eq!(start["started"], true);
+    assert!(!stderr.contains("Starting bridge for project:"), "{stderr}");
+
+    config.default_output_format = Some("json".into());
+    std::fs::write(&config_path, serde_yaml::to_string(&config).unwrap()).unwrap();
+    let (status, stdout, _) = run(&["status"]);
+    assert_eq!(status["status"], "running");
+    assert!(stdout.trim().lines().count() > 1);
+    let (ping, _, _) = run(&["ping"]);
+    assert_eq!(ping["responsive"], true);
+    let (jobs, _, _) = run(&["jobs"]);
+    assert_eq!(jobs["bridge_state"], "running");
+
+    drop(harness);
+}
+
+#[test]
+#[serial]
 fn test_daemon_start() {
     require_ghidra!();
 

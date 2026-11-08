@@ -123,7 +123,7 @@ stop_cli_daemon() {
 echo "Verifying working project stats before snapshot..."
 trap stop_cli_daemon EXIT
 STOP_REQUIRED=1
-STATS_OUTPUT=$("$GHIDRA_CLI" "${CLI_ARGS[@]}" stats)
+STATS_OUTPUT=$("$GHIDRA_CLI" "${CLI_ARGS[@]}" stats --json)
 stop_cli_daemon
 trap - EXIT
 printf '%s\n' "$STATS_OUTPUT" | python3 "$ROOT/tools/testing/processor/verify_ghidra_stats.py"

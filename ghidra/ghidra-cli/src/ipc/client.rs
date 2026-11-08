@@ -276,7 +276,9 @@ impl BridgeClient {
         self.send_command("bridge_info", None)
     }
 
-    /// List functions.
+    /// List functions. Positive limits cap returned rows; the bridge sets
+    /// `truncated` only after finding an additional matching row. None or zero
+    /// requests the complete collection.
     pub fn list_functions(
         &self,
         limit: Option<usize>,
@@ -320,18 +322,18 @@ impl BridgeClient {
     }
 
     /// List imports.
-    pub fn list_imports(&self) -> Result<serde_json::Value> {
-        self.send_command("list_imports", None)
+    pub fn list_imports(&self, limit: Option<usize>) -> Result<serde_json::Value> {
+        self.send_command("list_imports", Some(json!({"limit": limit})))
     }
 
     /// List exports.
-    pub fn list_exports(&self) -> Result<serde_json::Value> {
-        self.send_command("list_exports", None)
+    pub fn list_exports(&self, limit: Option<usize>) -> Result<serde_json::Value> {
+        self.send_command("list_exports", Some(json!({"limit": limit})))
     }
 
     /// Get memory map.
-    pub fn memory_map(&self) -> Result<serde_json::Value> {
-        self.send_command("memory_map", None)
+    pub fn memory_map(&self, limit: Option<usize>) -> Result<serde_json::Value> {
+        self.send_command("memory_map", Some(json!({"limit": limit})))
     }
 
     /// Get program info.
@@ -340,13 +342,19 @@ impl BridgeClient {
     }
 
     /// Get cross-references to an address.
-    pub fn xrefs_to(&self, address: String) -> Result<serde_json::Value> {
-        self.send_command("xrefs_to", Some(json!({"address": address})))
+    pub fn xrefs_to(&self, address: String, limit: Option<usize>) -> Result<serde_json::Value> {
+        self.send_command(
+            "xrefs_to",
+            Some(json!({"address": address, "limit": limit})),
+        )
     }
 
     /// Get cross-references from an address.
-    pub fn xrefs_from(&self, address: String) -> Result<serde_json::Value> {
-        self.send_command("xrefs_from", Some(json!({"address": address})))
+    pub fn xrefs_from(&self, address: String, limit: Option<usize>) -> Result<serde_json::Value> {
+        self.send_command(
+            "xrefs_from",
+            Some(json!({"address": address, "limit": limit})),
+        )
     }
 
     /// Import a binary. Unbounded read timeout: importing a large binary can
@@ -476,17 +484,29 @@ impl BridgeClient {
         self.send_command("graph_calls", Some(json!({"limit": limit})))
     }
 
-    pub fn graph_callers(&self, function: &str, depth: Option<usize>) -> Result<serde_json::Value> {
+    /// List caller edges, with one shared result limit across recursion depths.
+    pub fn graph_callers(
+        &self,
+        function: &str,
+        depth: Option<usize>,
+        limit: Option<usize>,
+    ) -> Result<serde_json::Value> {
         self.send_command(
             "graph_callers",
-            Some(json!({"function": function, "depth": depth})),
+            Some(json!({"function": function, "depth": depth, "limit": limit})),
         )
     }
 
-    pub fn graph_callees(&self, function: &str, depth: Option<usize>) -> Result<serde_json::Value> {
+    /// List callee edges, with one shared result limit across recursion depths.
+    pub fn graph_callees(
+        &self,
+        function: &str,
+        depth: Option<usize>,
+        limit: Option<usize>,
+    ) -> Result<serde_json::Value> {
         self.send_command(
             "graph_callees",
-            Some(json!({"function": function, "depth": depth})),
+            Some(json!({"function": function, "depth": depth, "limit": limit})),
         )
     }
 
@@ -494,28 +514,37 @@ impl BridgeClient {
         self.send_command("graph_export", Some(json!({"format": format})))
     }
 
-    pub fn find_string(&self, pattern: &str) -> Result<serde_json::Value> {
-        self.send_command("find_string", Some(json!({"pattern": pattern})))
+    pub fn find_string(&self, pattern: &str, limit: Option<usize>) -> Result<serde_json::Value> {
+        self.send_command(
+            "find_string",
+            Some(json!({"pattern": pattern, "limit": limit})),
+        )
     }
 
-    pub fn find_bytes(&self, hex: &str) -> Result<serde_json::Value> {
-        self.send_command("find_bytes", Some(json!({"hex": hex})))
+    pub fn find_bytes(&self, hex: &str, limit: Option<usize>) -> Result<serde_json::Value> {
+        self.send_command("find_bytes", Some(json!({"hex": hex, "limit": limit})))
     }
 
-    pub fn find_function(&self, pattern: &str) -> Result<serde_json::Value> {
-        self.send_command("find_function", Some(json!({"pattern": pattern})))
+    pub fn find_function(&self, pattern: &str, limit: Option<usize>) -> Result<serde_json::Value> {
+        self.send_command(
+            "find_function",
+            Some(json!({"pattern": pattern, "limit": limit})),
+        )
     }
 
-    pub fn find_calls(&self, function: &str) -> Result<serde_json::Value> {
-        self.send_command("find_calls", Some(json!({"function": function})))
+    pub fn find_calls(&self, function: &str, limit: Option<usize>) -> Result<serde_json::Value> {
+        self.send_command(
+            "find_calls",
+            Some(json!({"function": function, "limit": limit})),
+        )
     }
 
-    pub fn find_crypto(&self) -> Result<serde_json::Value> {
-        self.send_command("find_crypto", None)
+    pub fn find_crypto(&self, limit: Option<usize>) -> Result<serde_json::Value> {
+        self.send_command("find_crypto", Some(json!({"limit": limit})))
     }
 
-    pub fn find_interesting(&self) -> Result<serde_json::Value> {
-        self.send_command("find_interesting", None)
+    pub fn find_interesting(&self, limit: Option<usize>) -> Result<serde_json::Value> {
+        self.send_command("find_interesting", Some(json!({"limit": limit})))
     }
 
     pub fn diff_programs(&self, program1: &str, program2: &str) -> Result<serde_json::Value> {

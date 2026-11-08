@@ -4,7 +4,8 @@
 The expanded root set includes the original receive/interrupt cone plus all six
 resolved diagnostic transport callbacks.  Two compact outputs preserve exact
 function/operation denominators and row digests without checking large Ghidra
-stdout blobs into the repository.
+stdout blobs into the repository. Capture inputs with
+`tools/gtarget TARGET --json script run` to retain the JSON wrapper.
 """
 from __future__ import annotations
 

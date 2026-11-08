@@ -115,6 +115,7 @@ fn parse_comparison(pair: pest::iterators::Pair<Rule>) -> Result<FilterExpr> {
     let mut value = None;
     let mut string_op = None;
     let mut existence = None;
+    let mut negate_existence = false;
     let mut in_values = None;
 
     for inner in pair.into_inner() {
@@ -161,22 +162,24 @@ fn parse_comparison(pair: pest::iterators::Pair<Rule>) -> Result<FilterExpr> {
                 value = Some(parse_value(inner)?);
             }
             Rule::existence_check => {
-                let check_str = inner.as_str();
-                existence = Some(match check_str {
-                    "EXISTS" => ExistenceCheck::Exists,
-                    "EMPTY" => ExistenceCheck::Empty,
-                    "NULL" => ExistenceCheck::Null,
-                    _ => {
-                        return Err(GhidraError::FilterParseError(format!(
-                            "Unknown existence check: {}",
-                            check_str
-                        )))
+                for part in inner.into_inner() {
+                    match part.as_rule() {
+                        Rule::existence_not => negate_existence = true,
+                        Rule::existence_op => {
+                            existence = Some(match part.as_str() {
+                                "EXISTS" => ExistenceCheck::Exists,
+                                "EMPTY" => ExistenceCheck::Empty,
+                                "NULL" => ExistenceCheck::Null,
+                                unknown => {
+                                    return Err(GhidraError::FilterParseError(format!(
+                                        "Unknown existence check: {unknown}"
+                                    )))
+                                }
+                            });
+                        }
+                        _ => {}
                     }
-                });
-            }
-            Rule::in_check => {
-                // Already handled field
-                continue;
+                }
             }
             Rule::value_list => {
                 let mut values = Vec::new();
@@ -193,10 +196,12 @@ fn parse_comparison(pair: pest::iterators::Pair<Rule>) -> Result<FilterExpr> {
 
     let field = field.ok_or_else(|| GhidraError::FilterParseError("Missing field".to_string()))?;
 
-    if let Some(existence_check) = existence {
-        return Ok(FilterExpr::Exists {
-            field,
-            check: existence_check,
+    if let Some(check) = existence {
+        let expr = FilterExpr::Exists { field, check };
+        return Ok(if negate_existence {
+            FilterExpr::Not(Box::new(expr))
+        } else {
+            expr
         });
     }
 
@@ -293,6 +298,110 @@ mod tests {
     fn test_parse_and() {
         let filter = parse_filter("name=test AND size>100").unwrap();
         assert!(matches!(filter.expr, FilterExpr::Logical { .. }));
+    }
+
+    #[test]
+    fn test_existence_checks() {
+        let data = serde_json::json!({
+            "name": "alpha", "empty": "", "nil": null, "values": [],
+            "number": 0, "function": {"name": "callee"},
+        });
+        for (input, expected) in [
+            ("name EXISTS", true),
+            ("missing EXISTS", false),
+            ("nil EXISTS", true),
+            ("NOT missing EXISTS", true),
+            ("missing NOT EXISTS", true),
+            ("name NOT \t EXISTS", false),
+            ("NOT (name EXISTS)", false),
+            ("empty EMPTY", true),
+            ("values EMPTY", true),
+            ("missing EMPTY", true),
+            ("number EMPTY", false),
+            ("nil NULL", true),
+            ("missing NULL", true),
+            ("name NULL", false),
+            ("function.name EXISTS", true),
+            ("name EXISTS AND nil NULL", true),
+        ] {
+            let filter = parse_filter(input).unwrap_or_else(|err| panic!("{input}: {err}"));
+            assert_eq!(filter.evaluate(&data).unwrap(), expected, "{input}");
+        }
+    }
+
+    #[test]
+    fn test_in_checks() {
+        let data = serde_json::json!({"name": "Beta", "size": 32, "enabled": true});
+        for (input, expected) in [
+            ("size IN [16,0x20,64]", true),
+            ("size IN [16,64]", false),
+            ("size IN [16,32.0]", true),
+            ("name IN [alpha,'beta',\"gamma delta\"]", true),
+            ("name IN [alpha,gamma]", false),
+            ("enabled IN [false,true]", true),
+            ("enabled IN [false]", false),
+            ("missing IN [true,1,name]", false),
+            ("NOT size IN [16,64]", true),
+            ("(size IN [0x20]) AND NOT (name IN [missing])", true),
+        ] {
+            let filter = parse_filter(input).unwrap_or_else(|err| panic!("{input}: {err}"));
+            assert_eq!(filter.evaluate(&data).unwrap(), expected, "{input}");
+        }
+    }
+
+    #[test]
+    fn test_rejects_malformed_existence_and_membership() {
+        for input in [
+            "name NOT",
+            "name NOT EXISTS trailing",
+            "name EXISTS AND",
+            "name IN []",
+            "name IN [a,]",
+            "name IN [a",
+            "name IN [a] trailing",
+        ] {
+            assert!(
+                parse_filter(input).is_err(),
+                "accepted malformed filter: {input}"
+            );
+        }
+    }
+
+    #[test]
+    fn test_rejects_trailing_syntax() {
+        for input in [
+            "name=test junk",
+            "name=test AND",
+            "name=test OR size>",
+            "name=test &&",
+            "name=test)",
+            "name=test\nsize>100",
+            "size>=10garbage",
+            "address=0x1234junk",
+            "name='test' 'ignored'",
+            "(name=test OR size>100) unexpected",
+        ] {
+            assert!(
+                parse_filter(input).is_err(),
+                "accepted trailing input: {input}"
+            );
+        }
+    }
+
+    #[test]
+    fn test_nested_expression_with_surrounding_whitespace() {
+        let filter =
+            parse_filter(" \t(name=test OR size>100) AND NOT (size=0 OR name=ignored)\r\n")
+                .unwrap();
+        assert!(filter
+            .evaluate(&serde_json::json!({"name": "test", "size": 1}))
+            .unwrap());
+        assert!(!filter
+            .evaluate(&serde_json::json!({"name": "test", "size": 0}))
+            .unwrap());
+        assert!(!filter
+            .evaluate(&serde_json::json!({"name": "ignored", "size": 101}))
+            .unwrap());
     }
 
     #[test]

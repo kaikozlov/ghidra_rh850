@@ -66,7 +66,7 @@ test-ghidra-cli:
 	cargo test --locked --manifest-path ghidra/ghidra-cli/Cargo.toml --lib
 	cargo test --locked --manifest-path ghidra/ghidra-cli/Cargo.toml --bin ghidra
 	cargo test --locked --manifest-path ghidra/ghidra-cli/Cargo.toml --test batch_tests
-	cargo test --locked --manifest-path ghidra/ghidra-cli/Cargo.toml --test command_tests invalid_resource_overrides_leave_saved_config_unchanged
+	cargo test --locked --manifest-path ghidra/ghidra-cli/Cargo.toml --test command_tests portable_
 
 verify:
 	tools/test core

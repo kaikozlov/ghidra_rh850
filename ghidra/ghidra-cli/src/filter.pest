@@ -1,7 +1,7 @@
 WHITESPACE = _{ " " | "\t" | "\n" | "\r" }
 
-// Main expression
-expr = { logical_expr }
+// Require the complete filter; nested expressions use logical_expr directly.
+expr = { SOI ~ logical_expr ~ EOI }
 
 // Logical expressions
 logical_expr = { logical_term ~ (logical_op ~ logical_term)* }
@@ -10,17 +10,19 @@ logical_not = { ("NOT" | "!") ~ logical_term }
 logical_op = { "AND" | "OR" | "&&" | "||" }
 
 // Comparison expressions
-comparison = { field ~ compare_op ~ value | field ~ string_op ~ string_value | existence_check | in_check }
+comparison = { field ~ (compare_op ~ value | string_op ~ string_value | existence_check | in_check) }
 
 // Operators
 compare_op = { ">=" | "<=" | "!=" | "=" | ">" | "<" }
 string_op = { "=~" | "~" | "^" | "$" }
 
 // Existence checks
-existence_check = { field ~ ("EXISTS" | "EMPTY" | "NULL") }
+existence_check = { existence_not? ~ existence_op }
+existence_not = { "NOT" }
+existence_op = { "EXISTS" | "EMPTY" | "NULL" }
 
 // IN operator
-in_check = { field ~ "IN" ~ "[" ~ value_list ~ "]" }
+in_check = _{ "IN" ~ "[" ~ value_list ~ "]" }
 value_list = { value ~ ("," ~ value)* }
 
 // Field access (including nested fields and arrays)

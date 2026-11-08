@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the JSON emitted by ``ghidra stats`` after a full rebuild."""
+"""Validate the JSON emitted by ``ghidra stats --json`` after a full rebuild."""
 from __future__ import annotations
 
 import json

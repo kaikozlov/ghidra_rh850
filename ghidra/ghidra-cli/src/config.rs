@@ -3,6 +3,8 @@ use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::{Component, Path, PathBuf};
 
+pub const DEFAULT_RESULT_LIMIT: usize = 50;
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
     pub ghidra_install_dir: Option<PathBuf>,
@@ -52,7 +54,7 @@ impl Default for Config {
             default_program: None,
             default_project: None,
             default_output_format: Some("auto".to_string()),
-            default_limit: Some(1000),
+            default_limit: Some(DEFAULT_RESULT_LIMIT),
             launch_timeout_secs: None,
             aliases: std::collections::HashMap::new(),
         }
@@ -62,15 +64,24 @@ impl Default for Config {
 impl Config {
     pub fn load() -> Result<Self> {
         let config_path = Self::config_path()?;
+        let mut config = if config_path.exists() {
+            let content = fs::read_to_string(&config_path)?;
+            serde_yaml::from_str(&content)?
+        } else {
+            Self::default()
+        };
 
-        if !config_path.exists() {
-            return Ok(Self::default());
+        if let Ok(raw) = std::env::var("GHIDRA_CLI_DEFAULT_LIMIT") {
+            let limit = raw.parse::<usize>().map_err(|_| {
+                GhidraError::ConfigError(
+                    "GHIDRA_CLI_DEFAULT_LIMIT must be a non-negative integer".to_string(),
+                )
+            })?;
+            config.default_limit = Some(limit);
         }
 
-        let content = fs::read_to_string(&config_path)?;
-        let config: Config = serde_yaml::from_str(&content)?;
+        config.default_limit.get_or_insert(DEFAULT_RESULT_LIMIT);
         config.validate_resources()?;
-
         Ok(config)
     }
 
@@ -274,7 +285,7 @@ mod tests {
     #[test]
     fn test_default_config() {
         let config = Config::default();
-        assert_eq!(config.default_limit, Some(1000));
+        assert_eq!(config.default_limit, Some(DEFAULT_RESULT_LIMIT));
     }
 
     #[test]
