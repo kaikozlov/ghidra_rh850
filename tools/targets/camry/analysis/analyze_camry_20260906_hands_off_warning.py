@@ -48,6 +48,8 @@ MIN_SPEED_MS = 15.0
 MAX_STATE_AGE_S = 0.2
 PAIR_WINDOW_S = 2.0
 DRIVER_DETECT_FOLLOW_S = 0.35
+BRAKE_RESULT_MAX_AGE_S = 0.12
+BRAKE_RESULT_STATUS_BYTES = (0, 1, 2, 3, 6, 8, 9, 10, 11, 12, 13, 14, 15, 26, 27)
 TORQUE_BINS_NM = (
   (0.0, 0.25), (0.25, 0.5), (0.5, 0.75), (0.75, 1.0),
   (1.0, 1.25), (1.25, 1.5), (1.5, 2.0), (2.0, 99.0),
@@ -124,6 +126,8 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
   steering_torque = None
   latest_eps_torque = None
   latest_eps_torque_t = None
+  latest_brake_result = None
+  latest_brake_result_t = None
   latest_lane_probs = None
   latest_lane_probs_t = None
   v_ego = 0.0
@@ -168,6 +172,9 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
   prev_detect_t = None
   prev_detect_eligible = False
   driver_detect_samples: list[tuple[float, bool]] = []
+  brake_result_fresh_pairs = 0
+  brake_result_status_bytes: dict[int, Counter[int]] = {i: Counter() for i in BRAKE_RESULT_STATUS_BYTES}
+  brake_result_state_join: Counter[tuple[int, int, int, bool]] = Counter()
   prev_id11_detect = None
   prev_lane_change_state = None
   lane_change_starts: list[dict] = []
@@ -247,11 +254,14 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
       elif which == "can":
         for frame in msg.can:
           dat = bytes(frame.dat)
-          if frame.address in (0x030, 0x08A, 0x371, 0x412):
+          if frame.address in (0x030, 0x081, 0x08A, 0x371, 0x412):
             source_counts[(frame.address, frame.src)] += 1
           if frame.address == 0x030 and frame.src == 0 and len(dat) >= 18:
             latest_eps_torque = decode_eps_driver_torque(dat)
             latest_eps_torque_t = t
+          if frame.address == 0x081 and frame.src == 0 and len(dat) == 32:
+            latest_brake_result = dat
+            latest_brake_result_t = t
           if frame.src != 2:
             continue
           if frame.address == 0x08A and len(dat) > 21:
@@ -346,6 +356,13 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
                       cruise and v_ego > MIN_SPEED_MS and not blinker and latest_stock_id == 11)
           if eligible:
             eligible_371_frames += 1
+            if (latest_brake_result is not None and latest_brake_result_t is not None and
+                0 <= t - latest_brake_result_t <= BRAKE_RESULT_MAX_AGE_S):
+              brake_result_fresh_pairs += 1
+              for i in BRAKE_RESULT_STATUS_BYTES:
+                brake_result_status_bytes[i][latest_brake_result[i]] += 1
+              brake_result_state_join[(latest_brake_result[6], latest_brake_result[11],
+                                       latest_brake_result[13], driver_detect)] += 1
             b19_values[dat[19]] += 1
             state_tuples[(dat[17] & 0x01, dat[19], dat[20])] += 1
             state_name = "warning" if state_371 else ("driver_steering_detected" if driver_detect else "no_touch")
@@ -503,6 +520,18 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
       "all_episode_target_lateral_ids": sorted({lid for episode in cruise_hold_episodes_out for lid in episode["target_lateral_ids"]}),
       "boundary": "Dynamic stock-ACC resume-required/hold interpretation is bounded to B4[5] with the B3[3] latch in the retained routes. The state enters only after several seconds already stopped and all three retained episodes clear with accelerator input before motion; no RES-button clear join is established. B7 is a checksum and the raw B6/B7 pairs are not two requester identities. OEM name for B4[5] remains unknown.",
     },
+    "brake_081_driver_detection_join": {
+      "max_brake_frame_age_s": BRAKE_RESULT_MAX_AGE_S,
+      "fresh_native_bus0_pairs": brake_result_fresh_pairs,
+      "eligible_frc_detector_samples": eligible_371_frames,
+      "status_byte_value_counts": {f"B{i}": {f"0x{value:02X}": n for value, n in sorted(counts.items())}
+                                   for i, counts in brake_result_status_bytes.items()},
+      "b6_b11_b13_by_frc_detector": {
+        f"{b6:02X},{b11:02X},{b13:02X},detect={int(detected)}": n
+        for (b6, b11, b13, detected), n in sorted(brake_result_state_join.items())
+      },
+      "scope": "Clean native ID11 LTA; compare Brake-owned native bus0 0x081 to FRC-owned native bus2 0x371 B20[4]",
+    },
     "native_state_machine_candidate": {
       "driver_steering_candidate": "native bus2 0x371 B20 bit4",
       "structural_complement": "native bus2 0x371 B17 bit0",
@@ -604,7 +633,7 @@ def main() -> int:
     routes[short] = analyze_route(LogReader, args.log_root / day / route, label)
 
   payload = {
-    "schema_version": 8,
+    "schema_version": 9,
     "method": {
       "touch_proxy": f"abs(carState.steeringTorque) >= {TOUCH_TORQUE_NM} N.m",
       "clean_stock_lta": f"carState cruise enabled, vEgo > {MIN_SPEED_MS} m/s, no blinker, latest native bus2 0x08A B21 low6 == 11",

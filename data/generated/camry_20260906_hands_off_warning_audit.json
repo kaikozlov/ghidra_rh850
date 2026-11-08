@@ -27,6 +27,71 @@
         "0x20": 18032,
         "0x40": 157
       },
+      "brake_081_driver_detection_join": {
+        "b6_b11_b13_by_frc_detector": {
+          "0B,04,00,detect=1": 4,
+          "0B,04,0B,detect=0": 10292,
+          "0B,04,0B,detect=1": 5487,
+          "3F,04,00,detect=0": 1,
+          "3F,04,0B,detect=0": 970,
+          "3F,04,0B,detect=1": 1435
+        },
+        "eligible_frc_detector_samples": 18189,
+        "fresh_native_bus0_pairs": 18189,
+        "max_brake_frame_age_s": 0.12,
+        "scope": "Clean native ID11 LTA; compare Brake-owned native bus0 0x081 to FRC-owned native bus2 0x371 B20[4]",
+        "status_byte_value_counts": {
+          "B0": {
+            "0x00": 18189
+          },
+          "B1": {
+            "0x00": 18189
+          },
+          "B10": {
+            "0x00": 18189
+          },
+          "B11": {
+            "0x04": 18189
+          },
+          "B12": {
+            "0x00": 18189
+          },
+          "B13": {
+            "0x00": 5,
+            "0x0B": 18184
+          },
+          "B14": {
+            "0x00": 18189
+          },
+          "B15": {
+            "0x00": 18189
+          },
+          "B2": {
+            "0x00": 18189
+          },
+          "B26": {
+            "0x00": 18188,
+            "0x1F": 1
+          },
+          "B27": {
+            "0x00": 18188,
+            "0xFC": 1
+          },
+          "B3": {
+            "0x18": 18189
+          },
+          "B6": {
+            "0x0B": 15783,
+            "0x3F": 2406
+          },
+          "B8": {
+            "0x00": 18189
+          },
+          "B9": {
+            "0x00": 18189
+          }
+        }
+      },
       "clean_stock_lta_371_frames": 18189,
       "clean_stock_lta_duration_s": 3341.532535,
       "hud_companion_candidate": {
@@ -153,6 +218,9 @@
         "0x030/src0": 658209,
         "0x030/src130": 656920,
         "0x030/src2": 1292,
+        "0x081/src0": 219397,
+        "0x081/src130": 218967,
+        "0x081/src2": 432,
         "0x08A/src0": 514,
         "0x08A/src128": 262749,
         "0x08A/src2": 263265,
@@ -442,6 +510,70 @@
         "0x20": 6918,
         "0x40": 144
       },
+      "brake_081_driver_detection_join": {
+        "b6_b11_b13_by_frc_detector": {
+          "0B,04,00,detect=1": 1,
+          "0B,04,04,detect=0": 1,
+          "0B,04,0B,detect=0": 4984,
+          "0B,04,0B,detect=1": 1766,
+          "3F,04,0B,detect=0": 122,
+          "3F,04,0B,detect=1": 188
+        },
+        "eligible_frc_detector_samples": 7062,
+        "fresh_native_bus0_pairs": 7062,
+        "max_brake_frame_age_s": 0.12,
+        "scope": "Clean native ID11 LTA; compare Brake-owned native bus0 0x081 to FRC-owned native bus2 0x371 B20[4]",
+        "status_byte_value_counts": {
+          "B0": {
+            "0x00": 7062
+          },
+          "B1": {
+            "0x00": 7062
+          },
+          "B10": {
+            "0x00": 7062
+          },
+          "B11": {
+            "0x04": 7062
+          },
+          "B12": {
+            "0x00": 7062
+          },
+          "B13": {
+            "0x00": 1,
+            "0x04": 1,
+            "0x0B": 7060
+          },
+          "B14": {
+            "0x00": 7062
+          },
+          "B15": {
+            "0x00": 7062
+          },
+          "B2": {
+            "0x00": 7062
+          },
+          "B26": {
+            "0x00": 7062
+          },
+          "B27": {
+            "0x00": 7062
+          },
+          "B3": {
+            "0x18": 7062
+          },
+          "B6": {
+            "0x0B": 6752,
+            "0x3F": 310
+          },
+          "B8": {
+            "0x00": 7062
+          },
+          "B9": {
+            "0x00": 7062
+          }
+        }
+      },
       "clean_stock_lta_371_frames": 7062,
       "clean_stock_lta_duration_s": 1322.468169,
       "hud_companion_candidate": {
@@ -564,6 +696,9 @@
         "0x030/src0": 483508,
         "0x030/src130": 482611,
         "0x030/src2": 897,
+        "0x081/src0": 161167,
+        "0x081/src130": 160865,
+        "0x081/src2": 305,
         "0x08A/src0": 359,
         "0x08A/src128": 193030,
         "0x08A/src2": 193390,
@@ -834,6 +969,68 @@
         "0x20": 11331,
         "0x40": 519
       },
+      "brake_081_driver_detection_join": {
+        "b6_b11_b13_by_frc_detector": {
+          "0B,04,00,detect=1": 1,
+          "0B,04,0B,detect=0": 8291,
+          "0B,04,0B,detect=1": 2505,
+          "3F,04,0B,detect=0": 403,
+          "3F,04,0B,detect=1": 650
+        },
+        "eligible_frc_detector_samples": 11850,
+        "fresh_native_bus0_pairs": 11850,
+        "max_brake_frame_age_s": 0.12,
+        "scope": "Clean native ID11 LTA; compare Brake-owned native bus0 0x081 to FRC-owned native bus2 0x371 B20[4]",
+        "status_byte_value_counts": {
+          "B0": {
+            "0x00": 11850
+          },
+          "B1": {
+            "0x00": 11850
+          },
+          "B10": {
+            "0x00": 11850
+          },
+          "B11": {
+            "0x04": 11850
+          },
+          "B12": {
+            "0x00": 11850
+          },
+          "B13": {
+            "0x00": 1,
+            "0x0B": 11849
+          },
+          "B14": {
+            "0x00": 11850
+          },
+          "B15": {
+            "0x00": 11850
+          },
+          "B2": {
+            "0x00": 11850
+          },
+          "B26": {
+            "0x00": 11850
+          },
+          "B27": {
+            "0x00": 11850
+          },
+          "B3": {
+            "0x18": 11850
+          },
+          "B6": {
+            "0x0B": 10797,
+            "0x3F": 1053
+          },
+          "B8": {
+            "0x00": 11850
+          },
+          "B9": {
+            "0x00": 11850
+          }
+        }
+      },
       "clean_stock_lta_371_frames": 11850,
       "clean_stock_lta_duration_s": 2216.899157,
       "hud_companion_candidate": {
@@ -958,6 +1155,9 @@
         "0x030/src0": 371448,
         "0x030/src130": 370501,
         "0x030/src2": 933,
+        "0x081/src0": 123812,
+        "0x081/src130": 123497,
+        "0x081/src2": 316,
         "0x08A/src0": 377,
         "0x08A/src128": 148190,
         "0x08A/src2": 148567,
@@ -1213,6 +1413,70 @@
         "0x20": 16261,
         "0x40": 484
       },
+      "brake_081_driver_detection_join": {
+        "b6_b11_b13_by_frc_detector": {
+          "0B,04,00,detect=1": 3,
+          "0B,04,0B,detect=0": 11311,
+          "0B,04,0B,detect=1": 4823,
+          "3F,04,00,detect=0": 2,
+          "3F,04,00,detect=1": 1,
+          "3F,04,0B,detect=0": 266,
+          "3F,04,0B,detect=1": 339
+        },
+        "eligible_frc_detector_samples": 16745,
+        "fresh_native_bus0_pairs": 16745,
+        "max_brake_frame_age_s": 0.12,
+        "scope": "Clean native ID11 LTA; compare Brake-owned native bus0 0x081 to FRC-owned native bus2 0x371 B20[4]",
+        "status_byte_value_counts": {
+          "B0": {
+            "0x00": 16745
+          },
+          "B1": {
+            "0x00": 16745
+          },
+          "B10": {
+            "0x00": 16745
+          },
+          "B11": {
+            "0x04": 16745
+          },
+          "B12": {
+            "0x00": 16745
+          },
+          "B13": {
+            "0x00": 6,
+            "0x0B": 16739
+          },
+          "B14": {
+            "0x00": 16745
+          },
+          "B15": {
+            "0x00": 16745
+          },
+          "B2": {
+            "0x00": 16745
+          },
+          "B26": {
+            "0x00": 16745
+          },
+          "B27": {
+            "0x00": 16745
+          },
+          "B3": {
+            "0x18": 16745
+          },
+          "B6": {
+            "0x0B": 16137,
+            "0x3F": 608
+          },
+          "B8": {
+            "0x00": 16745
+          },
+          "B9": {
+            "0x00": 16745
+          }
+        }
+      },
       "clean_stock_lta_371_frames": 16745,
       "clean_stock_lta_duration_s": 3142.291958,
       "hud_companion_candidate": {
@@ -1323,6 +1587,9 @@
         "0x030/src0": 468073,
         "0x030/src130": 467121,
         "0x030/src2": 950,
+        "0x081/src0": 156018,
+        "0x081/src130": 155703,
+        "0x081/src2": 316,
         "0x08A/src0": 379,
         "0x08A/src128": 186836,
         "0x08A/src2": 187216,
@@ -1731,6 +1998,69 @@
         "0x20": 16107,
         "0x40": 769
       },
+      "brake_081_driver_detection_join": {
+        "b6_b11_b13_by_frc_detector": {
+          "0B,04,00,detect=1": 5,
+          "0B,04,0B,detect=0": 12045,
+          "0B,04,0B,detect=1": 3657,
+          "3F,04,00,detect=1": 3,
+          "3F,04,0B,detect=0": 578,
+          "3F,04,0B,detect=1": 588
+        },
+        "eligible_frc_detector_samples": 16876,
+        "fresh_native_bus0_pairs": 16876,
+        "max_brake_frame_age_s": 0.12,
+        "scope": "Clean native ID11 LTA; compare Brake-owned native bus0 0x081 to FRC-owned native bus2 0x371 B20[4]",
+        "status_byte_value_counts": {
+          "B0": {
+            "0x00": 16876
+          },
+          "B1": {
+            "0x00": 16876
+          },
+          "B10": {
+            "0x00": 16876
+          },
+          "B11": {
+            "0x04": 16876
+          },
+          "B12": {
+            "0x00": 16876
+          },
+          "B13": {
+            "0x00": 8,
+            "0x0B": 16868
+          },
+          "B14": {
+            "0x00": 16876
+          },
+          "B15": {
+            "0x00": 16876
+          },
+          "B2": {
+            "0x00": 16876
+          },
+          "B26": {
+            "0x00": 16876
+          },
+          "B27": {
+            "0x00": 16876
+          },
+          "B3": {
+            "0x18": 16876
+          },
+          "B6": {
+            "0x0B": 15707,
+            "0x3F": 1169
+          },
+          "B8": {
+            "0x00": 16876
+          },
+          "B9": {
+            "0x00": 16876
+          }
+        }
+      },
       "clean_stock_lta_371_frames": 16876,
       "clean_stock_lta_duration_s": 3172.015706,
       "hud_companion_candidate": {
@@ -1835,6 +2165,9 @@
         "0x030/src0": 501427,
         "0x030/src130": 500243,
         "0x030/src2": 1185,
+        "0x081/src0": 167142,
+        "0x081/src130": 166743,
+        "0x081/src2": 401,
         "0x08A/src0": 474,
         "0x08A/src128": 200081,
         "0x08A/src2": 200559,
@@ -2292,5 +2625,5 @@
       }
     }
   },
-  "schema_version": 8
+  "schema_version": 9
 }

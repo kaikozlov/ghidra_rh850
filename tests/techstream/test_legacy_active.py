@@ -62,6 +62,29 @@ class LegacyActiveTests(unittest.TestCase):
         struct.pack_into("<H", raw, 74, 0xA002)
         self.assertEqual(len(legacy_request_program(raw)["operations"]), 1)
 
+    def test_all_source_bytes_accounted_for_and_unknowns_retained(self):
+        from tools.techstream.diag_product_projection import project_document
+        from tools.techstream.gts.legacy_catalog import _json_value
+        layouts = {
+            11: (92, [(20, 60), (62, 70), (74, 80), (82, 83), (84, 86), (88, 90)],
+                 {"0_19": (0,20), "60_61": (60,62), "70_73": (70,74),
+                  "80_81": (80,82), "83": (83,84), "86_87": (86,88), "90_91": (90,92)}),
+            12: (24, [(0,14), (18,22)], {"14_17": (14,18), "22_23": (22,24)}),
+        }
+        for table, (size, known, unknown) in layouts.items():
+            occupied = [p for start,end in known + list(unknown.values()) for p in range(start,end)]
+            self.assertEqual(sorted(occupied), list(range(size)))
+            for nonzero in (False, True):
+                raw = bytearray(size)
+                for start,end in unknown.values():
+                    raw[start:end] = bytes(range(start+1,end+1)) if nonzero else bytes(end-start)
+                db = SimpleNamespace(sections={table: section(table,[raw])})
+                rows = legacy_active_tests(db,SimpleNamespace(get_string=lambda _: None),"fixture") if table==11 else legacy_active_patterns(db,"fixture")
+                expected = {k:raw[start:end].hex() for k,(start,end) in unknown.items()}
+                self.assertEqual(rows[0]["uninterpreted_bytes"], expected)
+                product = project_document("catalogs/NA/1.json", {"legacy_records": _json_value(rows)})
+                self.assertEqual(product["legacy_records"][0]["uninterpreted_bytes"], expected)
+
     def test_rejects_unknown_layout(self):
         db = SimpleNamespace(sections={12: section(12, [bytes(23)])})
         with self.assertRaises(ValueError):

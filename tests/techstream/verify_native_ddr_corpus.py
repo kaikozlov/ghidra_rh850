@@ -30,6 +30,14 @@ for region, regional in sorted(index["regions"].items()):
             counts[field] += len(rows)
             for row in rows:
                 actual[row["table"]] += 1
+                ranges = {
+                    "monitors": {"8_11": (8,12), "42_43": (42,44), "46_47": (46,48)},
+                    "triggers": {"33_35": (33,36)}, "addresses": {"13_15": (13,16)},
+                    "invalid_conditions": {"15": (15,16)}, "header_data_ids": {"7": (7,8)},
+                    "case_data_ids": {"9": (9,10), "11": (11,12)},
+                }[field]
+                assert row["uninterpreted_bytes"] == {key: row["raw"][start:end].hex() for key,(start,end) in ranges.items()}
+                counts["unknown_ranges"] += len(ranges)
         expected = {table: sec.header.record_count for table,sec in db.sections.items() if table in tables}
         assert actual == expected, (region,filename,actual,expected)
         for row in out["monitors"]:

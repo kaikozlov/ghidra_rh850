@@ -32,6 +32,7 @@ def variable_drive_catalog(db: Any, strings: Any, source: str) -> dict[str, Any]
             "ecu_item_key":_u16(raw,0), "bit_start":_u16(raw,2), "bit_end":_u16(raw,4),
             "exception_id":_u16(raw,6), "pid":raw[8], "exception_flag":raw[9],
             "communication_frame_key":0x6b,
+            "uninterpreted_bytes":{"10":raw[10:12].hex()},
             "support_semantics":"PID availability followed by support-bit range check",
             "response_semantics":"ConvertPid then extract the inclusive bit range",
         })
@@ -68,6 +69,8 @@ def variable_drive_catalog(db: Any, strings: Any, source: str) -> dict[str, Any]
             "support_mode":raw[81],"initial_value_mode":raw[82],"presentation_pattern":raw[83],
             "exception_flag":raw[85],"request_constant":raw[86],"data_limits_mode":raw[87],
             "request_constant_16":raw[88],"pattern":pattern,"pattern_match_count":len(matches),
+            "uninterpreted_bytes":{"0":raw[:20].hex(),"70":raw[70:72].hex(),
+                                   "84":raw[84:85].hex(),"89":raw[89:92].hex()},
             "signal_info":info,
             "support_semantics":{0:"PID length and optional table9 DID-bit predicate",
                                  1:"supported",2:"not_supported"}.get(raw[81],"unsupported_mode"),
@@ -94,6 +97,7 @@ def variable_drive_catalog(db: Any, strings: Any, source: str) -> dict[str, Any]
             "source":source,"table":55,"record":index,"raw":raw,
             "communication_frame_key":_u16(raw,0),"exception_id":_u16(raw,2),
             "pid":raw[4],"exception_flag":raw[5],
+            "uninterpreted_bytes":{"6":raw[6:8].hex()},
             "semantics":"Append the referenced communication-frame send bytes to the PID length request",
         })
     # Kgp60:1006c220/1006c330/1006c370/1006c3b0; DataMonitorPSA
@@ -104,6 +108,7 @@ def variable_drive_catalog(db: Any, strings: Any, source: str) -> dict[str, Any]
             "source":source,"table":60,"record":index,"raw":raw,
             "active_test_id":_u16(raw,0),"service_override":raw[2],
             "exception_id":_u16(raw,4),"exception_flag":raw[6],
+            "uninterpreted_bytes":{"3":raw[3:4].hex(),"7":raw[7:8].hex()},
             "semantics":"Override request service byte for the matching active-test ID",
         })
     return {"active_tests":active,"communication_data":communication,

@@ -45,6 +45,7 @@ def legacy_active_patterns(db: Any, source: str) -> list[dict[str, Any]]:
         "key_invalid_flag": raw[18],
         "key_operation_pattern": raw[19],
         "button_size": raw[21],
+        "uninterpreted_bytes": {"14_17": raw[14:18].hex(), "22_23": raw[22:24].hex()},
     } for index, raw in _rows(db, 12, 24)]
 
 
@@ -122,6 +123,12 @@ def legacy_active_tests(db: Any, strings: Any, source: str) -> list[dict[str, An
             "data_min_monitor_key": _u16(raw, 78),
             "initial_value_mode": raw[84], "presentation_pattern": raw[85],
             "data_limits_mode": raw[89],
+            "uninterpreted_bytes": {
+                "0_19": raw[:20].hex(), "60_61": raw[60:62].hex(),
+                "70_73": raw[70:74].hex(), "80_81": raw[80:82].hex(),
+                "83": raw[83:84].hex(), "86_87": raw[86:88].hex(),
+                "90_91": raw[90:92].hex(),
+            },
             "pattern": pattern,
             "pattern_match_count": len(matches),
             "signal_info": info,

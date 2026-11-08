@@ -26,6 +26,9 @@ for region, regional in sorted(index["regions"].items()):
             expected = db.sections[table].header.record_count if table in db.sections else 0
             assert len(out[field]) == expected, (region, filename, table)
             counts[field] += len(out[field])
+        for row in out["invalid_conditions"]:
+            assert row["uninterpreted_bytes"] == {"15":row["raw"][15:16].hex()}
+            counts["nonzero_unknown_conditions"] += bool(row["raw"][15])
         for row in out["signals"]:
             assert row["signal_info"] is not None, (region, filename, row["signal_key"])
             assert row["data_id_records"], (region, filename, row["did"])

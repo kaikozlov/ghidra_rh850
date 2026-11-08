@@ -40,6 +40,25 @@ class LegacyFreezeTest(unittest.TestCase):
         self.assertEqual(result["data_max"], 9000)
         self.assertTrue(result["live_member"])
 
+    def test_dynamic_source_bytes_include_unknown_ranges_and_arbitrary_tail(self):
+        from tools.techstream.gts.legacy_freeze import dynamic_lsb_rows
+        from tools.techstream.gts.legacy_catalog import _json_value
+        from tools.techstream.diag_product_projection import project_document
+        for size in (18,20,23):
+            known = [(0,14),(17,18)]
+            unknown = {"14_16": (14,17), "18_end": (18,size)}
+            occupied = [p for start,end in known + list(unknown.values()) for p in range(start,end)]
+            self.assertEqual(sorted(occupied), list(range(size)))
+            for nonzero in (False,True):
+                raw = bytearray(size)
+                for start,end in unknown.values():
+                    raw[start:end] = bytes(range(start+1,end+1)) if nonzero else bytes(end-start)
+                rows = dynamic_lsb_rows(NS(sections={39:section(raw)}))
+                expected = {k:raw[start:end].hex() for k,(start,end) in unknown.items()}
+                self.assertEqual(rows[0]["uninterpreted_bytes"], expected)
+                product = project_document("catalogs/NA/1.json", {"dynamic_lsb": _json_value(rows)})
+                self.assertEqual(product["dynamic_lsb"][0]["uninterpreted_bytes"], expected)
+
     def test_payload_extraction_and_signed_scaling(self):
         phy = {"bit_width": 8, "sign_mode": 1, "mul": 3, "div": 2, "offset": 10,
                "decimal_point_count": 1, "patterns": [{"value": 7, "text": "seven"}]}

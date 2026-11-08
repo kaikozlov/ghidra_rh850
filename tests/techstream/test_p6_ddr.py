@@ -56,6 +56,17 @@ class P6DDRTests(unittest.TestCase):
         self.assertEqual(row["data_id_records"], [])
         self.assertEqual(row["invalid_condition_records"], [])
 
+    def test_invalid_condition_retains_last_byte(self):
+        for value in (0, 0xa5):
+            raw = bytes(15) + bytes([value])
+            db = SimpleNamespace(sections={168:section(168,[raw])})
+            row = p6_ddr_catalog(db, None, "fixture")["invalid_conditions"][0]
+            self.assertEqual(row["uninterpreted_bytes"], {"15":raw[15:].hex()})
+            from tools.techstream.diag_product_projection import project_document
+            product = project_document("catalogs/NA/1.json", {"ddr":{"invalid_conditions":[row]}})
+            self.assertEqual(product["ddr"]["invalid_conditions"][0]["uninterpreted_bytes"],
+                             row["uninterpreted_bytes"])
+
     def test_unknown_layout_rejected(self):
         with self.assertRaises(ValueError):
             p6_ddr_catalog(SimpleNamespace(sections={165:section(165,[bytes(19)])}), None, "fixture")

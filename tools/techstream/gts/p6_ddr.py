@@ -43,6 +43,7 @@ def ddr_invalid_condition(raw: bytes, *, source: str, table: int, record: int) -
         "exception_id": _u16(raw, 10), "exception_flag": raw[14],
         "combination_mode": raw[12], "comparison_mode": raw[13],
         "comparison": {1: "equal", 2: "not_equal"}.get(raw[13], "unsupported"),
+        "uninterpreted_bytes": {"15": raw[15:16].hex()},
     }
 
 

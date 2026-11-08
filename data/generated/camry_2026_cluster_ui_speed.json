@@ -12,6 +12,552 @@
       "p95": 0.4275
     }
   },
+  "carrier_map": {
+    "d7_signal247": {
+      "evidence": "exact F33 wire geometry and dataflow; no diagnostic DID or runtime consumer recovered after the foreground snapshot",
+      "exact_f33_ram": "FEBE809C -> FEBEF1B8 -> FEBEAED6",
+      "exact_f33_signal_id": 247,
+      "oem_name": null,
+      "scale": "0.01 km/h/count",
+      "wire": "0x0D7 B3:B4 big-endian unsigned 16-bit"
+    },
+    "frc_integer_mirror": {
+      "evidence": "FRC-side publication closely mirrors 0x610 B2; no OEM field-level name is assigned",
+      "oem_name": null,
+      "scale": "1 km/h/count",
+      "wire": "0x1B2 B2 unsigned 8-bit"
+    },
+    "meter_integer": {
+      "direct_live_meter_did_read": false,
+      "evidence": "strong semantic join: among every native bus0 byte on the complete route3e highway capture, 0x610 B2 is the unique field matching the Toyota Vehicle Speed Meter 8-bit/1-km/h geometry; with 0x610 timestamps as the anchor, high-speed captures match nearest-integer SP1 in about nine-tenths of samples",
+      "gts_candidates": [
+        {
+          "bit_end": 7,
+          "bit_start": 0,
+          "bit_width": 8,
+          "data_range": [
+            0,
+            255
+          ],
+          "decimal_point_count": 0,
+          "did": "0x1041",
+          "div": 1,
+          "ecu": "Meter_P5",
+          "mul": 1,
+          "name": "Vehicle Speed Meter",
+          "offset": 0,
+          "signed": false,
+          "unit": "km/h"
+        },
+        {
+          "bit_end": 7,
+          "bit_start": 0,
+          "bit_width": 8,
+          "data_range": [
+            0,
+            255
+          ],
+          "decimal_point_count": 0,
+          "did": "0x1081",
+          "div": 1,
+          "ecu": "Meter_P5",
+          "mul": 1,
+          "name": "Vehicle Speed Meter",
+          "offset": 0,
+          "signed": false,
+          "unit": "km/h"
+        }
+      ],
+      "scale": "1 km/h/count",
+      "wire": "0x610 B2 unsigned 8-bit"
+    },
+    "sp1": {
+      "evidence": "direct OEM join: exact F33 DID 0x1185 reads FEBE809A and exact F33 0x0D7 signal246 writes FEBE809A",
+      "exact_f33_did_callback": "0x0004e5a8",
+      "exact_f33_did_callback_sha256": "83927df7c7d82290c7c82db6df18ab097a3ee37213e019d5f1b8273458e36a74",
+      "exact_f33_ram": "FEBE809A",
+      "exact_f33_signal_id": 246,
+      "exact_f33_unpacker": "0x0004bb62",
+      "exact_f33_unpacker_sha256": "8d279b79ecd86c408f52d1df5ae0d2d3048c71b71b7ad7e53863b71532833f55",
+      "gts": {
+        "bit_end": 15,
+        "bit_start": 0,
+        "bit_width": 16,
+        "data_range": [
+          0,
+          30000
+        ],
+        "decimal_point_count": 1,
+        "did": "0x1185",
+        "div": 10,
+        "ecu": "EMPS_P5",
+        "mul": 1,
+        "name": "CAN Vehicle Speed (SP1)",
+        "offset": 0,
+        "signed": false,
+        "unit": "km/h"
+      },
+      "scale": "0.01 km/h/count",
+      "wire": "0x0D7 B1:B2 big-endian unsigned 16-bit"
+    },
+    "wheel_reference": {
+      "decode": "four 15-bit 0.01 km/h channels with -67.67 km/h offset; arithmetic mean is the analysis reference",
+      "wire": "0x0AA FL/FR/RL/RR wheel-speed fields"
+    }
+  },
+  "gts_meter": {
+    "interpretation": "Toyota exposes separate Combination Meter active-test stages named Speedometer Operation and Speed Signal Input; Speed Signal Input is an active-test/status surface, not a second passive numeric speed DID.",
+    "retained_meter_endpoint_traffic": "none found on 0x7C0 in the retained Camry rlogs; no live 0x1041/0x1081 meter read is available",
+    "speed_signal_input_40": {
+      "active_test_id": 301,
+      "bit_end": 9,
+      "bit_start": 9,
+      "did": "0x2A01",
+      "name": "Speed Signal Input (40)",
+      "return_control_examples": [
+        {
+          "return_control": "2f2a01000040"
+        }
+      ],
+      "start_examples": [
+        {
+          "raw_0": "2f2a010300000040",
+          "raw_1": "2f2a010300400040"
+        }
+      ]
+    },
+    "speedometer_operation_40": {
+      "active_test_id": 200,
+      "bit_end": 9,
+      "bit_start": 9,
+      "did": "0x2801",
+      "name": "Speedometer Operation (40km/h,40MPH)",
+      "return_control_examples": [
+        {
+          "return_control": "2f2801000040"
+        }
+      ],
+      "start_examples": [
+        {
+          "raw_0": "2f28010300000040",
+          "raw_1": "2f28010300400040"
+        }
+      ]
+    },
+    "transport": {
+      "category_id": 409,
+      "database": "Meter_P5.ddb",
+      "generation": 20,
+      "name": "Combination Meter",
+      "protocol_info_id": 131,
+      "request_address": 1984,
+      "request_address_hex": "0x7C0",
+      "response_mask": 4095,
+      "route_selector": 18
+    }
+  },
+  "highway_routes": [
+    {
+      "bins_mph": {
+        "0-20": {
+          "meter_integer_equals_ceil_signal247_fraction": 0.655977,
+          "meter_integer_equals_ceil_wheel_fraction": 0.651118,
+          "meter_integer_equals_round_sp1_fraction": 0.909621,
+          "meter_integer_minus_signal247_kph_p50": 0.0,
+          "meter_integer_minus_sp1_kph_p50": 0.0,
+          "samples": 1029,
+          "signal247_minus_wheel_mph_p50": 0.0,
+          "sp1_minus_wheel_mph_p50": 0.027962
+        },
+        "20-30": {
+          "meter_integer_equals_ceil_signal247_fraction": 0.627151,
+          "meter_integer_equals_ceil_wheel_fraction": 0.623327,
+          "meter_integer_equals_round_sp1_fraction": 0.902486,
+          "meter_integer_minus_signal247_kph_p50": 0.13,
+          "meter_integer_minus_sp1_kph_p50": -0.05,
+          "samples": 523,
+          "signal247_minus_wheel_mph_p50": -0.0,
+          "sp1_minus_wheel_mph_p50": 0.10408
+        },
+        "30-40": {
+          "meter_integer_equals_ceil_signal247_fraction": 0.758542,
+          "meter_integer_equals_ceil_wheel_fraction": 0.765376,
+          "meter_integer_equals_round_sp1_fraction": 0.908884,
+          "meter_integer_minus_signal247_kph_p50": 0.25,
+          "meter_integer_minus_sp1_kph_p50": 0.01,
+          "samples": 439,
+          "signal247_minus_wheel_mph_p50": -0.003107,
+          "sp1_minus_wheel_mph_p50": 0.152236
+        },
+        "40-50": {
+          "meter_integer_equals_ceil_signal247_fraction": 0.833333,
+          "meter_integer_equals_ceil_wheel_fraction": 0.82702,
+          "meter_integer_equals_round_sp1_fraction": 0.941919,
+          "meter_integer_minus_signal247_kph_p50": 0.35,
+          "meter_integer_minus_sp1_kph_p50": 0.03,
+          "samples": 792,
+          "signal247_minus_wheel_mph_p50": 0.0,
+          "sp1_minus_wheel_mph_p50": 0.206606
+        },
+        "50-60": {
+          "meter_integer_equals_ceil_signal247_fraction": 0.894383,
+          "meter_integer_equals_ceil_wheel_fraction": 0.888889,
+          "meter_integer_equals_round_sp1_fraction": 0.918803,
+          "meter_integer_minus_signal247_kph_p50": 0.44,
+          "meter_integer_minus_sp1_kph_p50": 0.02,
+          "samples": 1638,
+          "signal247_minus_wheel_mph_p50": -0.001553,
+          "sp1_minus_wheel_mph_p50": 0.260976
+        },
+        "60-70": {
+          "meter_integer_equals_ceil_signal247_fraction": 0.913326,
+          "meter_integer_equals_ceil_wheel_fraction": 0.921344,
+          "meter_integer_equals_round_sp1_fraction": 0.928599,
+          "meter_integer_minus_signal247_kph_p50": 0.54,
+          "meter_integer_minus_sp1_kph_p50": -0.01,
+          "samples": 2619,
+          "signal247_minus_wheel_mph_p50": -0.003107,
+          "sp1_minus_wheel_mph_p50": 0.33088
+        },
+        "70-80": {
+          "meter_integer_equals_ceil_signal247_fraction": 0.870838,
+          "meter_integer_equals_ceil_wheel_fraction": 0.877693,
+          "meter_integer_equals_round_sp1_fraction": 0.889989,
+          "meter_integer_minus_signal247_kph_p50": 0.51,
+          "meter_integer_minus_sp1_kph_p50": -0.06,
+          "samples": 9190,
+          "signal247_minus_wheel_mph_p50": -0.003107,
+          "sp1_minus_wheel_mph_p50": 0.341754
+        }
+      },
+      "bus0_byte_census_vs_round_sp1": [
+        {
+          "mae_to_round_sp1": 0.09036,
+          "range": [
+            20,
+            126
+          ],
+          "samples": 15571,
+          "wire": "0x610/8 B2"
+        },
+        {
+          "mae_to_round_sp1": 16.355355,
+          "range": [
+            0,
+            120
+          ],
+          "samples": 87445,
+          "wire": "0x3FC/8 B6"
+        },
+        {
+          "mae_to_round_sp1": 16.71983,
+          "range": [
+            55,
+            105
+          ],
+          "samples": 185484,
+          "wire": "0x113/8 B2"
+        },
+        {
+          "mae_to_round_sp1": 20.408841,
+          "range": [
+            96,
+            112
+          ],
+          "samples": 4366,
+          "wire": "0x3B1/8 B1"
+        },
+        {
+          "mae_to_round_sp1": 23.205505,
+          "range": [
+            34,
+            226
+          ],
+          "samples": 137612,
+          "wire": "0x0FE/32 B7"
+        },
+        {
+          "mae_to_round_sp1": 23.853829,
+          "range": [
+            0,
+            110
+          ],
+          "samples": 4570,
+          "wire": "0x3B6/8 B5"
+        },
+        {
+          "mae_to_round_sp1": 25.078598,
+          "range": [
+            64,
+            127
+          ],
+          "samples": 4364,
+          "wire": "0x3BF/8 B4"
+        },
+        {
+          "mae_to_round_sp1": 25.317308,
+          "range": [
+            64,
+            127
+          ],
+          "samples": 4368,
+          "wire": "0x1D5/8 B4"
+        },
+        {
+          "mae_to_round_sp1": 26.431153,
+          "range": [
+            64,
+            127
+          ],
+          "samples": 4372,
+          "wire": "0x24D/8 B4"
+        },
+        {
+          "mae_to_round_sp1": 26.773742,
+          "range": [
+            0,
+            128
+          ],
+          "samples": 4570,
+          "wire": "0x3B6/8 B0"
+        }
+      ],
+      "frc_integer_mirror": {
+        "difference_p10": 0.0,
+        "difference_p50": 0.0,
+        "difference_p90": 0.0,
+        "exact_fraction": 0.840092,
+        "samples": 23401
+      },
+      "highway_60_80_mph": {
+        "meter_integer_equals_ceil_signal247_fraction": 0.880261,
+        "meter_integer_equals_ceil_wheel_fraction": 0.887374,
+        "meter_integer_equals_round_sp1_fraction": 0.898552,
+        "meter_integer_minus_signal247_kph_p50": 0.52,
+        "meter_integer_minus_sp1_kph_p50": -0.04,
+        "samples": 11809,
+        "signal247_minus_wheel_mph_p50": -0.003107,
+        "sp1_minus_wheel_mph_p50": 0.340201
+      },
+      "joined_samples": 16230,
+      "native_counts": {
+        "0x0AA_bus0": 468057,
+        "0x0D7_bus0": 234030,
+        "0x1B2_bus2": 23401,
+        "0x610_bus0": 16230
+      },
+      "route": "0000003e--1a2f20417d",
+      "segments": 78,
+      "sp1_vs_signal247": {
+        "intercept_kph": -0.049984,
+        "ratio_p10": 1.003576218,
+        "ratio_p50": 1.004758327,
+        "ratio_p90": 1.005873099,
+        "samples": 212268,
+        "slope": 1.005253023
+      }
+    },
+    {
+      "bins_mph": {
+        "0-20": {
+          "meter_integer_equals_ceil_signal247_fraction": 0.815534,
+          "meter_integer_equals_ceil_wheel_fraction": 0.807983,
+          "meter_integer_equals_round_sp1_fraction": 0.942826,
+          "meter_integer_minus_signal247_kph_p50": 0.0,
+          "meter_integer_minus_sp1_kph_p50": 0.0,
+          "samples": 1854,
+          "signal247_minus_wheel_mph_p50": 0.0,
+          "sp1_minus_wheel_mph_p50": 0.0
+        },
+        "20-30": {
+          "meter_integer_equals_ceil_signal247_fraction": 0.671756,
+          "meter_integer_equals_ceil_wheel_fraction": 0.656489,
+          "meter_integer_equals_round_sp1_fraction": 0.881679,
+          "meter_integer_minus_signal247_kph_p50": 0.16,
+          "meter_integer_minus_sp1_kph_p50": -0.02,
+          "samples": 524,
+          "signal247_minus_wheel_mph_p50": -0.003107,
+          "sp1_minus_wheel_mph_p50": 0.105633
+        },
+        "30-40": {
+          "meter_integer_equals_ceil_signal247_fraction": 0.78903,
+          "meter_integer_equals_ceil_wheel_fraction": 0.774262,
+          "meter_integer_equals_round_sp1_fraction": 0.938819,
+          "meter_integer_minus_signal247_kph_p50": 0.27,
+          "meter_integer_minus_sp1_kph_p50": 0.02,
+          "samples": 474,
+          "signal247_minus_wheel_mph_p50": -0.001553,
+          "sp1_minus_wheel_mph_p50": 0.170877
+        },
+        "40-50": {
+          "meter_integer_equals_ceil_signal247_fraction": 0.853278,
+          "meter_integer_equals_ceil_wheel_fraction": 0.850156,
+          "meter_integer_equals_round_sp1_fraction": 0.920916,
+          "meter_integer_minus_signal247_kph_p50": 0.36,
+          "meter_integer_minus_sp1_kph_p50": 0.01,
+          "samples": 961,
+          "signal247_minus_wheel_mph_p50": 0.0,
+          "sp1_minus_wheel_mph_p50": 0.215926
+        },
+        "50-60": {
+          "meter_integer_equals_ceil_signal247_fraction": 0.900931,
+          "meter_integer_equals_ceil_wheel_fraction": 0.893617,
+          "meter_integer_equals_round_sp1_fraction": 0.915559,
+          "meter_integer_minus_signal247_kph_p50": 0.43,
+          "meter_integer_minus_sp1_kph_p50": 0.02,
+          "samples": 1504,
+          "signal247_minus_wheel_mph_p50": 0.0,
+          "sp1_minus_wheel_mph_p50": 0.256316
+        },
+        "60-70": {
+          "meter_integer_equals_ceil_signal247_fraction": 0.897303,
+          "meter_integer_equals_ceil_wheel_fraction": 0.899598,
+          "meter_integer_equals_round_sp1_fraction": 0.905909,
+          "meter_integer_minus_signal247_kph_p50": 0.46,
+          "meter_integer_minus_sp1_kph_p50": -0.02,
+          "samples": 1743,
+          "signal247_minus_wheel_mph_p50": 0.001553,
+          "sp1_minus_wheel_mph_p50": 0.309132
+        },
+        "70-80": {
+          "meter_integer_equals_ceil_signal247_fraction": 0.910805,
+          "meter_integer_equals_ceil_wheel_fraction": 0.908826,
+          "meter_integer_equals_round_sp1_fraction": 0.923309,
+          "meter_integer_minus_signal247_kph_p50": 0.47,
+          "meter_integer_minus_sp1_kph_p50": -0.08,
+          "samples": 9597,
+          "signal247_minus_wheel_mph_p50": 0.001553,
+          "sp1_minus_wheel_mph_p50": 0.349521
+        }
+      },
+      "bus0_byte_census_vs_round_sp1": [
+        {
+          "mae_to_round_sp1": 0.076071,
+          "range": [
+            20,
+            129
+          ],
+          "samples": 15170,
+          "wire": "0x610/8 B2"
+        },
+        {
+          "mae_to_round_sp1": 18.225816,
+          "range": [
+            87,
+            106
+          ],
+          "samples": 183193,
+          "wire": "0x113/8 B2"
+        },
+        {
+          "mae_to_round_sp1": 18.570722,
+          "range": [
+            0,
+            124
+          ],
+          "samples": 86373,
+          "wire": "0x3FC/8 B6"
+        },
+        {
+          "mae_to_round_sp1": 24.216936,
+          "range": [
+            77,
+            153
+          ],
+          "samples": 4393,
+          "wire": "0x611/8 B7"
+        },
+        {
+          "mae_to_round_sp1": 24.986617,
+          "range": [
+            34,
+            226
+          ],
+          "samples": 135917,
+          "wire": "0x0FE/32 B7"
+        },
+        {
+          "mae_to_round_sp1": 25.200371,
+          "range": [
+            64,
+            127
+          ],
+          "samples": 4312,
+          "wire": "0x24D/8 B4"
+        },
+        {
+          "mae_to_round_sp1": 25.616701,
+          "range": [
+            0,
+            144
+          ],
+          "samples": 4323,
+          "wire": "0x2F9/8 B0"
+        },
+        {
+          "mae_to_round_sp1": 26.015057,
+          "range": [
+            64,
+            127
+          ],
+          "samples": 4317,
+          "wire": "0x1D5/8 B4"
+        },
+        {
+          "mae_to_round_sp1": 26.13239,
+          "range": [
+            64,
+            127
+          ],
+          "samples": 4313,
+          "wire": "0x3BF/8 B4"
+        },
+        {
+          "mae_to_round_sp1": 26.288322,
+          "range": [
+            0,
+            128
+          ],
+          "samples": 4547,
+          "wire": "0x3B6/8 B0"
+        }
+      ],
+      "frc_integer_mirror": {
+        "difference_p10": 0.0,
+        "difference_p50": 0.0,
+        "difference_p90": 0.0,
+        "exact_fraction": 0.849057,
+        "samples": 25069
+      },
+      "highway_60_80_mph": {
+        "meter_integer_equals_ceil_signal247_fraction": 0.90873,
+        "meter_integer_equals_ceil_wheel_fraction": 0.907407,
+        "meter_integer_equals_round_sp1_fraction": 0.920635,
+        "meter_integer_minus_signal247_kph_p50": 0.47,
+        "meter_integer_minus_sp1_kph_p50": -0.08,
+        "samples": 11340,
+        "signal247_minus_wheel_mph_p50": 0.001553,
+        "sp1_minus_wheel_mph_p50": 0.343308
+      },
+      "joined_samples": 16657,
+      "native_counts": {
+        "0x0AA_bus0": 501425,
+        "0x0D7_bus0": 250713,
+        "0x1B2_bus2": 25069,
+        "0x610_bus0": 16658
+      },
+      "route": "0000003f--36e72f5fdc",
+      "segments": 84,
+      "sp1_vs_signal247": {
+        "intercept_kph": -0.029249,
+        "ratio_p10": 1.00352556,
+        "ratio_p50": 1.00467012,
+        "ratio_p90": 1.005805637,
+        "samples": 210090,
+        "slope": 1.004964714
+      }
+    }
+  ],
   "moving_over_2kph_join": {
     "absolute_error_kph": {
       "max": 1.575,
@@ -30,9 +576,9 @@
     "0x610_bus0": 3247
   },
   "route": "0000002c--c784367b7e",
-  "schema_version": 1,
+  "schema_version": 2,
   "segments": 26,
-  "semantic_boundary": "0x610.UI_SPEED is strongly wheel-speed coherent and is suitable as the retained openpilot vEgoCluster carrier, but this reduction does not observe the physical meter display. Toyota Operation-FFD 5235 Vehicle speed meter and 5236 Vehicle speed meter status remain the passive synchronized oracle for literal-dash semantics.",
+  "semantic_boundary": "Exact F33 directly binds 0x0D7 B1:B2 to Toyota CAN Vehicle Speed (SP1). SP1 runs about 0.5% above the wheel-equivalent 0x0D7 signal247 on highway captures, and 0x610 B2 most closely matches SP1 rounded to the nearest whole km/h. 0x610 B2 is also the unique whole-km/h bus0 carrier matching Meter_P5 Vehicle Speed Meter geometry, but the retained logs contain no Combination Meter 0x7C0 diagnostic read to make that second join direct. The physical dashboard number is not logged, so its additional 1-2 mph optimism remains downstream of the recovered whole-km/h carrier or otherwise internal to the meter.",
   "source_files": [
     {
       "name": "0000002c--c784367b7e--0.rlog.zst",
@@ -164,7 +710,5 @@
       "sha256": "d2a77bdfb6e670f21353eccfe9c5f29d1ac767c303555a409f7e123e9704fd23",
       "size": 5440395
     }
-  ],
-  "ui_speed_decode": "0x610 B2 unsigned integer km/h (retained legacy UI_SPEED geometry)",
-  "wheel_reference": "nearest same-segment native bus0 0x0AA four-wheel mean within 100 ms"
+  ]
 }

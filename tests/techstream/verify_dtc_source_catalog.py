@@ -23,6 +23,11 @@ def main():
                     db.sections[table].header.record_count if table in db.sections else 0),(path,table)
             json.dumps(rows,allow_nan=False)
             for row in rows:
+                raw = bytes.fromhex(row["raw"])
+                expected = {"24_25": raw[24:26].hex()} if row["table"] == 5 else {"67": raw[67:68].hex()}
+                assert row["uninterpreted_bytes"] == expected, (path, row["table"], row["record"])
+                counts["unknown_ranges"] += len(expected)
+                counts["nonzero_unknown_ranges"] += any(bytes.fromhex(value) != bytes(len(bytes.fromhex(value))) for value in expected.values())
                 counts[row["table"]]+=1
                 counts["enabled"]+=int(row["enabled"])
                 assert row["enabled"]==(row["enabled_value"]!=0)

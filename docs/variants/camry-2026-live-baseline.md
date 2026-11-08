@@ -2652,7 +2652,7 @@ activation counter trio.
 |---|---|---|---|
 | `FEBEACCE` | `0x0D5` signal211 B0[3] (`0x4B86E`→`FEBEF097`) | CAN, brake-domain monitor gate | verified (§18 census) |
 | `FEBEC5FC`/`FEBEC600` | `0x0D5` s213/s212 monitor pair `FEBEAE06`/`FEBEAE04` (clamp ±1000/±100, trips `[0xB044A]=1000`/`[0xB044C]=100`, Dem 200/201) | CAN monitor channels | verified |
-| `FEBEADF6` | filtered `0x0D7` signal283 SP1 speed (`0xBECF4` clamp 30000 → `0xBEDC4/0xBEE2C`, status `FEBEBEF0`) | CAN, 0.01 km/h; UDS `0xBA` op `FA` tester override | verified |
+| `FEBEADF6` | filtered `0x0D7` signal246 `CAN Vehicle Speed (SP1)` (`0xBECF4` clamp 30000 → `0xBEDC4/0xBEE2C`, status `FEBEBEF0`) | CAN, 0.01 km/h; exact `EMPS_P5` DID `0x1185`; UDS `0xBA` op `FA` tester override | verified |
 | `FEBEACBD` | `FEBEF000 ← FEBE7F68`, then `BCD62` normalization | Internal source-admission state 0..3, normalized to 0/1/2/4 | recovered |
 | `FEBEAD19` | `FEBEF014 ← FEBE687B ← FEBE7FC8` | internal service/lifecycle state | verified internal |
 | `FEBEACBE` | `FEBEB1A4==0x11` | internal system-transition phase | verified internal |
@@ -3962,23 +3962,58 @@ native bus0 `0x610/8 = BODY_CONTROL_STATE_2` is present throughout the TSS3 driv
 (1,388 native bus0 frames), and the pre-TSS3 DBC layout decodes its `UNITS` field
 as `0` on every retained frame. Upstream Toyota's production CarState contract is
 `UNITS in (1,2) => metric`, otherwise imperial, so the observed `0` independently
-selects the imperial interpretation of `0x251 B2`. This is not merely an ID-name
-transfer: the retained legacy `0x610.UI_SPEED` field also remains numerically
-coherent on this Camry, tracking logged wheel/`vEgo` speed as km/h with about
-0.22 mph median absolute error after conversion. That does **not** prove it is the
-literal displayed meter value: the inherited `_toyota_2017.dbc` itself warns
-that `UI_SPEED` "Does not appear to match dash", and no synchronized target-Camry
-meter observation has yet been joined to `0x610`. Current FRC Operation-FFD
-provides the passive oracle `5235 Vehicle speed meter` plus `5236 Vehicle speed
-meter status`; a synchronized capture can close that distinction. `0x611
-UI_SETTING` is likewise present and its legacy `UNITS` field also reads zero, but
-openpilot follows the existing upstream `0x610` unit contract rather than
-introducing a second authority.
+selects the imperial interpretation of `0x251 B2`. The inherited name `UI_SPEED`
+is not Toyota vocabulary: current GTS has no such string.
+
+The exact F33/GTS join identifies the protected high-resolution speed separately.
+`EMPS_P5` DID `0x1185` is Toyota **`CAN Vehicle Speed (SP1)`**. Its exact F33
+callback `0x4E5A8` reads `FEBE809A`; the exact `0x0D7` unpacker `0x4BB62` writes
+signal246 to that cell; and the current PDU geometry puts signal246 at
+**`0x0D7 B1:B2` big-endian u16, 0.01 km/h/count**. Adjacent signal247 is
+`0x0D7 B3:B4` at the same scale and follows the four-wheel mean almost exactly,
+but in F33 it terminates at `FEBE809C -> FEBEF1B8 -> FEBEAED6` with no recovered
+runtime consumer or diagnostic name.
+
+The September-6 highway routes show why `0x610 B2` originally looked like a
+ceiling of wheel speed. SP1 itself runs about **0.5% high** relative to signal247:
+the route-3e fit is `SP1 = 1.005253 * signal247 - 0.050 km/h`, and route 3f gives
+`1.004965 * signal247 - 0.029 km/h`. Median SP1 minus the four-wheel mean rises
+from about +0.21 mph at 40-50 mph to +0.34..+0.35 mph at 70-80 mph, while
+signal247 remains within a few thousandths of a mph of the wheel mean. With each
+`0x610` publication as the timestamp anchor, **nearest-integer SP1** matches B2 in
+89.9% and 92.1% of the 60-80 mph samples. The apparent upward quantization of raw
+wheel speed is therefore explained by the SP1 bias followed by whole-km/h
+rounding, not by a demonstrated `ceil(wheel_speed)` operation.
+
+GTS supplies the meter-domain name and shape independently. `Meter_P5` DIDs
+`0x1041` and `0x1081` are both Toyota **`Vehicle Speed Meter`**, unsigned 8-bit at
+1 km/h/count. Across every native bus0 byte in the complete route-3e highway
+capture, `0x610 B2` is the unique field with that speed/width/resolution behavior.
+This is the strongest current semantic identification of `0x610 B2`, but it is
+not yet a direct live-DID join: the exact current Combination Meter is category
+409 / `Meter_P5`, routed by GTS through selector `0x12` to request address
+**`0x7C0`**, and the retained Camry logs contain no `0x7C0` diagnostic session.
+The FRC-side `0x1B2 B2` closely mirrors the same whole-km/h state (84.0% and
+84.9% exact against the nearest `0x610 B2` on routes 3e/3f, with the 10th through
+90th percentiles of the difference all equal to zero);
+no Toyota field-level name is assigned to that copy.
+
+Toyota also exposes two distinct Combination Meter active-test stages:
+`0x2801 Speedometer Operation` and `0x2A01 Speed Signal Input`. These are IOControl
+active-test/status surfaces, not passive numeric speed DIDs. Their separation is
+consistent with an input stage and a later speedometer-output stage inside the
+meter. The physical dashboard number itself is not logged, so the additional
+1-2 mph optimism observed by the driver remains downstream of the recovered
+whole-km/h carrier or otherwise internal to the meter. The inherited
+`_toyota_2017.dbc` warning that `UI_SPEED` "Does not appear to match dash" is
+therefore still material. FRC Operation-FFD `5235 Vehicle speed meter` and `5236
+Vehicle speed meter status` remain an additional synchronized oracle for a future
+live capture.
 
 The observations establish separate internal and cluster cruise-set-speed
-carriers. The `0x610.UI_SPEED` field remains wheel-correlated without a
-synchronized dash observation. The metric unit branch follows upstream
-Toyota's contract; these captures use the imperial setting.
+carriers and now separate the high-resolution SP1 speed from the whole-km/h meter
+carrier. The metric unit branch follows upstream Toyota's contract; these
+captures use the imperial setting.
 
 ### 49.5 SecOC-shaped `0x0FE` carries stock cruise set-speed commands (VAR-127)
 

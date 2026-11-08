@@ -26,6 +26,24 @@ for region, regional in sorted(index["regions"].items()):
             expected = db.sections[table].header.record_count if table in db.sections else 0
             assert len(out[field]) == expected, (region, filename, table)
             counts[field] += len(out[field])
+            ranges = {
+                133: {"36_39": (36, 40), "42": (42, 43)},
+                134: {"16_19": (16, 20), "28_31": (28, 32), "36_43": (36, 44),
+                      "64_65": (64, 66), "68_71": (68, 72)},
+                135: {"19_23": (19, 24)},
+            }[table]
+            for row in out[field]:
+                assert row["uninterpreted_bytes"] == {
+                    key: row["raw"][start:end].hex() for key, (start, end) in ranges.items()
+                }, (region, filename, table, row["record"])
+                counts["uninterpreted_ranges"] += len(ranges)
+        for row in out["codes"]:
+            if "identifier" in row:
+                encoded = row["identifier"].encode("utf-16-le")
+                assert encoded + bytes(12 - len(encoded)) == row["raw"][:12]
+            else:
+                assert bytes.fromhex(row["uninterpreted_identifier_bytes"]) == row["raw"][:12]
+            counts["original_identifiers"] += 1
         for row in out["signals"]:
             assert row["signal_info"] is not None, (region, filename, row["signal_key"])
             assert row["signal_info"]["bit_width"] > 0

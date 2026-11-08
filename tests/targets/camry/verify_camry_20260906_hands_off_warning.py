@@ -127,6 +127,25 @@ for short, expected_starts in (("3e", 20), ("3f", 25)):
   check(f"{short} 0x371 is native FRC-side",
         counts["0x371/src2"] > 100 * counts["0x371/src0"])
 
+# Brake/VMM 0x081 result status has no direct hands-on flag in clean LTA.
+for short, expected_pairs in (("3e", 16745), ("3f", 16876)):
+  joined = routes[short]["brake_081_driver_detection_join"]
+  fields = joined["status_byte_value_counts"]
+  check(f"{short} all native FRC detector samples have fresh Brake 0x081",
+        joined["fresh_native_bus0_pairs"] == joined["eligible_frc_detector_samples"] == expected_pairs)
+  for field, raw in (("B0", "0x00"), ("B1", "0x00"), ("B2", "0x00"), ("B3", "0x18"),
+                     ("B8", "0x00"), ("B9", "0x00"), ("B10", "0x00"), ("B11", "0x04"),
+                     ("B12", "0x00"), ("B14", "0x00"), ("B15", "0x00"),
+                     ("B26", "0x00"), ("B27", "0x00")):
+    check(f"{short} Brake 0x081 {field} stable at {raw}", fields[field] == {raw: expected_pairs})
+  check(f"{short} Brake 0x081 B6 varies only by result-source identity",
+        set(fields["B6"]) == {"0x0B", "0x3F"})
+  check(f"{short} Brake 0x081 B13 varies only by lateral result identity",
+        set(fields["B13"]) == {"0x00", "0x0B"})
+  check(f"{short} FRC hands-on detector varies with Brake 0x081 result-ID11 unchanged",
+        all(joined["b6_b11_b13_by_frc_detector"].get(f"0B,04,0B,detect={value}", 0) > 1000
+            for value in (0, 1)))
+
 sm3d = routes["3d"]["native_state_machine_candidate"]
 sm3f = routes["3f"]["native_state_machine_candidate"]
 check("3d has one ~6 s second-stage escalation episode",

@@ -67,6 +67,7 @@ def native_ddr_catalog(db: Any, strings: Any, source: str) -> dict[str, Any]:
                 "graph_max": struct.unpack_from("<i", raw, 0)[0],
                 "graph_min": struct.unpack_from("<i", raw, 4)[0],
                 "data_max": _u32(raw, 12), "data_min": _u32(raw, 16),
+                "uninterpreted_bytes": {"8_11": raw[8:12].hex(), "42_43": raw[42:44].hex(), "46_47": raw[46:48].hex()},
             })
         for ordinal, raw in _rows(db, base+1, 36, "CDbDDRTriggerTable"):
             result["triggers"].append({
@@ -77,6 +78,7 @@ def native_ddr_catalog(db: Any, strings: Any, source: str) -> dict[str, Any]:
                 "dependent_data_0": _u32(raw, 0), "dependent_data_1": _u32(raw, 4),
                 "header_parameters": list(struct.unpack_from("<6H", raw, 16)),
                 "exception_id": _u16(raw, 28), "exception_flag": raw[32],
+                "uninterpreted_bytes": {"33_35": raw[33:36].hex()},
             })
         for ordinal, raw in _rows(db, base+2, 16, "CDbDDRAddressTable"):
             result["addresses"].append({
@@ -85,12 +87,14 @@ def native_ddr_catalog(db: Any, strings: Any, source: str) -> dict[str, Any]:
                 "record_length": _u16(raw, 6), "exception_id": _u16(raw, 8),
                 "trigger_id": raw[10], "section_kind": raw[11], "exception_flag": raw[12],
                 "header_member": raw[11] == 1,
+                "uninterpreted_bytes": {"13_15": raw[13:16].hex()},
             })
         # All aliases have the same factory class, not merely similar bytes.
         for ordinal, raw in _rows(db, base+3, 16, "CDbDDRInvalidConditionTable"):
             result["invalid_conditions"].append({
                 **ddr_invalid_condition(raw, source=source, table=base+3, record=ordinal),
                 "family": f"native-ddr-{base}", "record_class": "CDbDDRInvalidConditionTable",
+                "uninterpreted_bytes": {"15": raw[15:16].hex()},
             })
 
     for table in HEADER_TABLES:
@@ -100,12 +104,14 @@ def native_ddr_catalog(db: Any, strings: Any, source: str) -> dict[str, Any]:
                 **identity(table, ordinal, raw, family), "header_did": _u16(raw, 0),
                 "header_parameter": _u16(raw, 2),
                 "exception_id": _u16(raw, 4), "exception_flag": raw[6],
+                "uninterpreted_bytes": {"7": raw[7:8].hex()},
             })
         for ordinal, raw in _rows(db, table+1, 12, "CDbDDRCaseInfoDataIdTable"):
             result["case_data_ids"].append({
                 **identity(table+1, ordinal, raw, family), "header_did": _u16(raw, 0),
                 "case_did": _u16(raw, 2), "case_parameter": _u16(raw, 4),
                 "exception_id": _u16(raw, 6), "case_selector": raw[8], "exception_flag": raw[10],
+                "uninterpreted_bytes": {"9": raw[9:10].hex(), "11": raw[11:12].hex()},
             })
     # References are family-scoped: equal keys across aliases must never merge.
     monitor_refs = {}

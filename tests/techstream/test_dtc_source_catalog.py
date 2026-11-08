@@ -34,6 +34,30 @@ class DtcSourceTests(unittest.TestCase):
         self.assertEqual(r["exception_handler_flag"],9)
         self.assertEqual([f["value"] for f in r["diag_code_info_fields"]],[8,19])
 
+    def test_known_layout_covers_all_bytes_and_unknown_values_survive(self):
+        from tools.techstream.diag_product_projection import project_document
+        layouts = {
+            5: (28, [(0, 12), (12, 16), (16, 20), (20, 22), (22, 24), (26, 27), (27, 28)],
+                {"24_25": (24, 26)}),
+            65: (68, [(0, 44), (44, 48), (48, 52), (52, 56), (56, 60),
+                      (60, 62), (62, 64), (64, 65), (65, 66), (66, 67)],
+                 {"67": (67, 68)}),
+        }
+        for table, (size, decoded, unknown) in layouts.items():
+            occupied = [position for start, end in decoded + list(unknown.values())
+                        for position in range(start, end)]
+            self.assertEqual(sorted(occupied), list(range(size)))
+            for nonzero in (False, True):
+                raw = bytearray(size)
+                for start, end in unknown.values():
+                    raw[start:end] = bytes(range(start + 1, end + 1)) if nonzero else bytes(end - start)
+                rows = dtc_source_catalog(NS(sections={table: section(table, raw)}),
+                                          NS(get_string=lambda _: None), "fixture")
+                expected = {key: raw[start:end].hex() for key, (start, end) in unknown.items()}
+                self.assertEqual(rows[0]["uninterpreted_bytes"], expected)
+                actual = project_document("catalogs/NA/1.json", {"dtc_source": rows})
+                self.assertEqual(actual["dtc_source"][0]["uninterpreted_bytes"], expected)
+
     def test_wrong_stride_rejected(self):
         with self.assertRaises(ValueError):
             dtc_source_catalog(NS(sections={5:section(5,bytes(27))}),None,"ecu")

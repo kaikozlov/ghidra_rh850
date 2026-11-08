@@ -578,6 +578,48 @@ def _simple_utility_rows(
     return sorted(result, key=lambda row: (int(row["sort_key"]), int(row["id"])))
 
 
+def _bundle_ecu_overlays(
+    gts_root: Path, region: str, parser: DDBParser, strings: StringDataBase,
+) -> list[dict[str, Any]]:
+    """Inventory Spe ECU facts and proven query rules, not vehicle activation."""
+    directory = gts_db_root(gts_root, region, "Spe")
+    result = []
+    for path in sorted(directory.glob("*.ddb")):
+        if path.name in {"Toyota.ddb", "Vehicle.ddb", "Viewer.ddb"}:
+            continue
+        database = parser.parse_ecu_db(path)
+        nonempty = {table: section.header.record_count
+                    for table, section in database.sections.items()
+                    if section.header.record_count}
+        unsupported = set(nonempty) - {54}
+        if unsupported:
+            raise ValueError(f"unadmitted Spe ECU tables in {path}: {sorted(unsupported)}")
+        rows = diagnostic_metadata(database, strings, path.name)["operation_freeze"]
+        if len(rows) != nonempty.get(54, 0):
+            raise ValueError(f"incomplete Spe operation-freeze decoding: {path}")
+        result.append({
+            "source_scope": {"region": region, "family": "Spe", "database": path.name},
+            "source_identity": {
+                "path": str(path.relative_to(gts_root)),
+                "bytes": path.stat().st_size,
+                "sha256": _file_sha256(path),
+            },
+            "activation": {
+                "status": "unresolved",
+                "reason": "Vehicle-specific plugin selection, support gates and live activation are not established.",
+            },
+            "native_query": {
+                "ecu_loading": "lazy_same_family_selected_category_filename",
+                "family_order": ["Gen", "Spe"],
+                "merge": "concatenate_without_replacement_or_deduplication",
+                "missing_family": "allowed_if_other_family_query_succeeds",
+                "evidence": "docs/tooling/gts-query-cli.md#spe-ecu-operation-freeze-selection",
+            },
+            "operation_freeze": rows,
+        })
+    return result
+
+
 def _bundle_category_catalog(
     parser: DDBParser,
     master: Any,
@@ -1055,6 +1097,7 @@ def _build_toyota_diag_region(
         "raw_role_bindings": [row.as_dict() for row in context.raw_records(19)],
         "native_context": context_identity,
         "raw_catalog_boundary": "Install sets, routes, vehicle decisions, Customize tables and ECU catalogs are raw/unproved live selection; native proof covers only category/DLL/selector/frame/CommSet/timer tables.",
+        "ecu_overlays": _bundle_ecu_overlays(gts_root, region, parser, strings),
         "install_sets": install_sets,
         "routes": routes,
         "connection_frames": {

@@ -138,6 +138,7 @@ def dynamic_lsb_rows(db: Any) -> list[dict[str, Any]]:
             "div": struct.unpack_from("<i", raw, 4)[0],
             "bit_start": struct.unpack_from("<H", raw, 10)[0],
             "bit_end": struct.unpack_from("<H", raw, 12)[0], "pid": raw[17],
+            "uninterpreted_bytes": {"14_16": raw[14:17].hex(), "18_end": raw[18:].hex()},
             "raw": raw,
         })
     return result

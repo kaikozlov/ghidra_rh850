@@ -145,6 +145,11 @@ def p6_catalog(
     behaviors = []
     # KgpDataCtrl100C4BE0 stride68;100C4C20 flag+64,100C4C60 id+60.
     for index, raw in enumerate(_rows(db, 163, 68)):
+        if len(raw) != 68:
+            raise ValueError(f"{source}: ROB table163 requires exact68-byte layout, got{len(raw)}")
+        terminator = next((offset for offset in range(0, 44, 2) if raw[offset:offset + 2] == b"\0\0"), 44)
+        if terminator < 44 and any(raw[terminator + 2:44]):
+            raise ValueError(f"{source}: ROB table163 has nonzero signature suffix after terminator")
         behaviors.append({"source": source, "table": 163, "record": index, "raw": raw.hex(),
                           "name_string_index": _u32(raw,48),
                           "division_string_index": _u32(raw,52),
@@ -156,9 +161,12 @@ def p6_catalog(
                           "name": strings.get_string(_u32(raw, 48)),
                           "division": strings.get_string(_u32(raw, 52)),
                           "comment": strings.get_string(_u32(raw, 56)),
-                          "enabled": raw[62], "memory_override": raw[63]})
+                          "enabled": raw[62], "memory_override": raw[63],
+                          "uninterpreted_bytes": {"65_67": raw[65:68].hex()}})
     rob = []
     for index, raw in enumerate(_rows(db, 164, 48)):
+        if len(raw) != 48:
+            raise ValueError(f"{source}: ROB table164 requires exact48-byte layout, got{len(raw)}")
         key, cond, phy, start, end, order, pattern = struct.unpack_from("<7H", raw, 20)
         did = _u16(raw, 36)
         support = rob_support.get(did)
@@ -177,7 +185,8 @@ def p6_catalog(
                     "did_support": support,
                     "local_support_mode": None if support is None else support["support_mode"],
                     "signal_info": physical(phy, start, end, pattern),
-                    "decoder": "p6-native-msb0-u32-v1"})
+                    "decoder": "p6-native-msb0-u32-v1",
+                    "uninterpreted_bytes": {"38_39": raw[38:40].hex(), "43_47": raw[43:48].hex()}})
     return {
         "dids": dids,
         "data_list": {"tables": [62] if 62 in db.sections else [],

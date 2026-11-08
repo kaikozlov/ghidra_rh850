@@ -25,6 +25,16 @@ for region,regional in sorted(index["regions"].items()):
             expected=db.sections[table].header.record_count if table in db.sections else 0
             assert len(out[field])==expected,(region,filename,table)
             counts[field]+=len(out[field])
+            spans = {38:((10,12),),41:((0,20),(70,72),(84,85),(89,92)),
+                     55:((6,8),),60:((3,4),(7,8))}[table]
+            for row in out[field]:
+                raw = row["raw"]
+                assert row["uninterpreted_bytes"] == {
+                    str(start):raw[start:end].hex() for start,end in spans
+                }, (region,filename,table,row["record"])
+                counts["unknown_ranges"] += len(spans)
+                counts["nonzero_unknown_rows"] += any(
+                    any(raw[start:end]) for start,end in spans)
         for row in out["active_tests"]:
             assert row["signal_info"] is not None,(region,filename,row["id"])
             assert row["pattern_match_count"]>0,(region,filename,row["id"])

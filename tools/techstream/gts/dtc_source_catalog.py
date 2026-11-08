@@ -37,11 +37,13 @@ def dtc_source_catalog(db: Any, strings: Any, source: str) -> list[dict[str, Any
                  "exception_handler_flag":raw[27 if table==5 else 66]}
             if table==5:
                 row.update(dtc_identifier=u16(20),detail_table=47,detail_lookup_key=u16(20),
-                           unconsumed_descriptor_offsets=[24,25])
+                           unconsumed_descriptor_offsets=[24,25],
+                           uninterpreted_bytes={"24_25": raw[24:26].hex()})
             else:
                 packed=u32(44)
                 row.update(packed_dtc=packed,base_dtc=(packed>>8)&0xffff,failure_type=packed&0xff,
                            failure_string_index=u32(52),failure_description=strings.get_string(u32(52)),
+                           uninterpreted_bytes={"67": raw[67:68].hex()},
                            diag_code_info_fields=[
                                {"source_offset":65,"output_offset":52,"width":1,"value":raw[65]},
                                {"source_offset":62,"output_offset":54,"width":2,"value":u16(62)}])

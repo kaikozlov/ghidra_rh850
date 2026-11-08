@@ -46,6 +46,32 @@ class VariableDriveTests(unittest.TestCase):
         self.assertEqual(out["active_test_communication_modes"][0]["service_override"],0x2f)
         self.assertEqual(out["active_test_communication_modes"][0]["active_test_id"],123)
 
+    def test_uninterpreted_ranges_cover_remaining_bytes(self):
+        layouts = (
+            (38, 12, "communication_data", [(0,10)], [(10,12)]),
+            (41, 92, "active_tests", [(20,70),(72,84),(85,89)],
+             [(0,20),(70,72),(84,85),(89,92)]),
+            (55, 8, "pid_addition_frames", [(0,6)], [(6,8)]),
+            (60, 8, "active_test_communication_modes", [(0,3),(4,7)],
+             [(3,4),(7,8)]),
+        )
+        for table, size, field, decoded, unknown in layouts:
+            covered = [i for start,end in decoded + unknown for i in range(start,end)]
+            self.assertEqual(sorted(covered), list(range(size)))
+            for fill in (0, 0xa5):
+                with self.subTest(table=table, fill=fill):
+                    raw = bytearray(size)
+                    for start,end in unknown:
+                        raw[start:end] = bytes([fill]) * (end-start)
+                    db = SimpleNamespace(sections={table:section(table,[raw])})
+                    row = variable_drive_catalog(db,SimpleNamespace(get_string=lambda _: ""), "fixture")[field][0]
+                    self.assertEqual(row["uninterpreted_bytes"],
+                                     {str(start):raw[start:end].hex() for start,end in unknown})
+                    from tools.techstream.diag_product_projection import project_document
+                    projected = project_document("catalogs/NA/1.json", {"variable_drive":{field:[row]}})
+                    self.assertEqual(projected["variable_drive"][field][0]["uninterpreted_bytes"],
+                                     row["uninterpreted_bytes"])
+
     def test_reject_unknown_geometry(self):
         with self.assertRaises(ValueError):
             variable_drive_catalog(SimpleNamespace(sections={38:section(38,[bytes(11)])}),None,"fixture")

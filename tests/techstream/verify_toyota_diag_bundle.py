@@ -8,7 +8,6 @@ import json
 import os
 import re
 import sqlite3
-import zlib
 import struct
 import tempfile
 import zipfile
@@ -21,7 +20,10 @@ REPO = REPO_ROOT
 
 from tools.techstream import techstream_paths
 from tools.techstream.diag_bundle import DEFAULT_BUNDLE, DiagnosticBundle, DiagnosticBundleWriter
-from tools.techstream.diag_runtime_db import export_runtime_db
+from tools.techstream.diag_runtime_db import SCHEMA, export_runtime_db
+from tests.techstream.runtime_db_helpers import read_item
+from tools.techstream.diag_product_projection import project_document
+from tests.techstream.verify_runtime_candidate import verify_product_database
 from tools.techstream.gts.bundle import _bundle_customize_catalog, _bundle_session_control, write_toyota_diag_bundle
 
 ART = DEFAULT_BUNDLE
@@ -166,6 +168,7 @@ def verify_runtime_sqlite_projection() -> None:
                 "vehicles": {"12704": {"vehicle_type": 12704, "name": "Camry HV", "install_set_ids": [12]}},
                 "install_sets": {"12": [{
                     "category_id": 498, "connection_route_selector": 18,
+                    "connection_comm_set_id": 0,
                     "connection_frame_id": 0, "route_key": "498:18",
                 }]},
                 "routes": {"498:18": {
@@ -185,6 +188,15 @@ def verify_runtime_sqlite_projection() -> None:
             },
         },
     }
+    from tools.techstream.diag_vehicle_index import ROUTE_INTS, ROUTE_NULLABLE_INTS, ROUTE_TEXT
+    route = index["regions"]["NA"]["routes"]["498:18"]
+    for field in ROUTE_INTS:
+        route.setdefault(field, 0)
+    for field in ROUTE_NULLABLE_INTS:
+        route.setdefault(field, None)
+    for field in ROUTE_TEXT:
+        route.setdefault(field, "" if field != "controller" else None)
+    route["route_selector"] = 18
     catalog = {
         "dids": {"0x1601": [{"name": "LTA Control Condition", "bit_start": 3, "bit_length": 2, "patterns": {"0": "Off", "1": "On"}}]},
         "dtcs": {}, "active_tests": [{"id": 42, "name": "Control", "kind": "direct", "start_frames": [{"service": 47, "base_frame": {"native": {"selector": 202, "bytes": [1, 2, 3]}}}], "encoding_requirements": {"mode": 4, "width": 8}}], "functions": [], "plugins": [], "utilities": [],
@@ -200,22 +212,82 @@ def verify_runtime_sqlite_projection() -> None:
             result = export_runtime_db(root, out)
         with sqlite3.connect(out) as db:
             check("runtime SQLite records source schema and release",
-                  db.execute("SELECT value FROM meta WHERE key='schema'").fetchone()[0] == "toyota-diagnostics-sqlite-v2"
+                  db.execute("SELECT value FROM meta WHERE key='schema'").fetchone()[0] == SCHEMA
                   and db.execute("SELECT value FROM meta WHERE key='release'").fetchone()[0] == "test")
             check("runtime SQLite indexes vehicle routes and OEM search terms",
                   db.execute("SELECT request_address FROM vehicle_ecus").fetchone()[0] == 0x792
                   and db.execute("SELECT count(*) FROM items_fts WHERE items_fts MATCH 'LTA'").fetchone()[0] == 1
                   and result["items"] == 5)
-            record = json.loads(zlib.decompress(db.execute("SELECT p.data FROM item_payloads p JOIN items i ON i.id=p.item_id WHERE i.kind='did'").fetchone()[0]))
-            check("runtime SQLite preserves full source record metadata", record == catalog["dids"]["0x1601"][0])
-            active = json.loads(zlib.decompress(db.execute("SELECT p.data FROM item_payloads p JOIN items i ON i.id=p.item_id WHERE i.kind='active-test'").fetchone()[0]))
-            check("runtime SQLite retains nested Active Test geometry and frames", active == catalog["active_tests"][0])
-            rows = db.execute("SELECT i.id,i.kind,i.identifier,p.data FROM items i JOIN item_payloads p ON p.item_id=i.id ORDER BY i.id").fetchall()
+            record = read_item(db, db.execute("SELECT id FROM items WHERE kind='did'").fetchone()[0])
+            check("runtime SQLite preserves projected diagnostic semantics", record == project_document("catalogs/NA/498.json", catalog)["dids"]["0x1601"][0])
+            active = read_item(db, db.execute("SELECT id FROM items WHERE kind='active-test'").fetchone()[0])
+            check("runtime SQLite retains nested Active Test geometry and frames", active == project_document("catalogs/NA/498.json", catalog)["active_tests"][0])
+            rows = [(identity, kind, identifier, read_item(db, identity))
+                    for identity, kind, identifier in db.execute("SELECT id,kind,identifier FROM items ORDER BY id")]
+        check("runtime product verifier checks every document and indexed path",
+              verify_product_database(root, out)["items"] == result["items"])
         with patch("tools.techstream.diag_runtime_db._supplemental_rows", return_value=[]):
             export_runtime_db(root, out)
         with sqlite3.connect(out) as db:
             check("runtime SQLite item IDs are reproducible for unchanged source",
-                  db.execute("SELECT i.id,i.kind,i.identifier,p.data FROM items i JOIN item_payloads p ON p.item_id=i.id ORDER BY i.id").fetchall() == rows)
+                  [(identity, kind, identifier, read_item(db, identity))
+                   for identity, kind, identifier in db.execute("SELECT id,kind,identifier FROM items ORDER BY id")] == rows)
+            try:
+                read_item(db, -1)
+            except ValueError:
+                check("runtime reader rejects missing semantic items", True)
+            else:
+                check("runtime reader rejects missing semantic items", False)
+            from tools.techstream.diag_codec import compress, decompress
+            doc_id, packed = db.execute("SELECT id,data FROM source_documents WHERE member=?", ("catalogs/NA/498.json",)).fetchone()
+            damaged = json.loads(decompress(packed))
+            damaged["unexpected_semantic_field"] = 1
+            db.execute("UPDATE source_documents SET data=? WHERE id=?", (compress(json.dumps(damaged).encode()), doc_id))
+        try:
+            verify_product_database(root, out)
+        except AssertionError:
+            check("product verifier rejects changed semantic documents", True)
+        else:
+            check("product verifier rejects changed semantic documents", False)
+
+
+def verify_ecu_overlay_sources(index: dict, gts_root: Path) -> dict[str, int]:
+    """Compare admitted overlays directly with original DDB bytes, not projector output."""
+    from tools.techstream.parse_ddb import DDBParser
+    parser = DDBParser()
+    files = rows = 0
+    for region in ("EU", "JP", "NA"):
+        paths = sorted(path for path in (gts_root / region / "DB" / "Spe").glob("*.ddb")
+                       if path.name not in {"Toyota.ddb", "Vehicle.ddb", "Viewer.ddb"})
+        admitted = index["regions"][region]["ecu_overlays"]
+        assert len(admitted) == len(paths), ("overlay file membership", region)
+        for path, entry in zip(paths, admitted):
+            assert entry["source_scope"] == {"region": region, "family": "Spe", "database": path.name}
+            data = path.read_bytes()
+            assert entry["source_identity"] == {
+                "path": str(path.relative_to(gts_root)), "bytes": len(data),
+                "sha256": hashlib.sha256(data).hexdigest(),
+            }, ("overlay source identity", path)
+            assert entry["activation"]["status"] == "unresolved"
+            assert entry["activation"]["reason"], ("missing activation boundary", path)
+            database = parser.parse_ecu_db(path)
+            nonempty = {table for table, section in database.sections.items() if section.header.record_count}
+            assert nonempty <= {54}, ("unverified overlay table", path, nonempty)
+            expected = []
+            section = database.sections.get(54)
+            for ordinal, record in enumerate(section.iter_records() if section else []):
+                raw = record.raw
+                assert len(raw) == 8, ("operation freeze record width", path)
+                expected.append({
+                    "source": path.name, "table": 54, "record": ordinal, "raw": raw.hex(),
+                    "group_selector": raw[7], "freeze_frame_number": raw[5],
+                    "exception_handler_id": struct.unpack_from("<H", raw)[0],
+                    "exception_handler_flag": raw[6], "unassigned_bytes_2_4": raw[2:5].hex(),
+                })
+            assert entry["operation_freeze"] == expected, ("overlay decoded facts", path)
+            files += 1
+            rows += len(expected)
+    return {"files": files, "rows": rows}
 
 
 def _workstation_path_leak(root: Path, files: set[Path]) -> str | None:
@@ -253,6 +325,9 @@ def main() -> int:
     check("bundle members match their exact-byte integrity manifest", True)
     with archive.open("index.json") as index_source:
         index = json.load(index_source)
+        overlay_coverage = verify_ecu_overlay_sources(index, gts)
+        check("Spe ECU overlays match every original source file and decoded row",
+              overlay_coverage == {"files": 14, "rows": 56})
         check("bundle declares the route-selector schema",
               index["schema"] == "toyota-diagnostics-bundle-v4")
 
