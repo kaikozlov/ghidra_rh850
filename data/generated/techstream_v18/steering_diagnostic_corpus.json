@@ -7422,8 +7422,9 @@
       "dids": [
         {
           "record_index": 0,
-          "identifier_u16_le": 273,
-          "identifier_bytes_hex": "1101",
+          "identifier_u8": 17,
+          "response_data_length": 1,
+          "identifier_bytes_hex": "11",
           "raw_hex": "0000000011010000"
         }
       ],

@@ -43,6 +43,26 @@ from tools.techstream.gts.master import (
     _master_variable,
 )
 from tools.techstream.parse_ddb import DDBParser, StringDataBase
+from tools.techstream.gts.p6_catalog import p6_catalog
+from tools.techstream.gts.legacy_catalog import legacy_catalog_rows
+from tools.techstream.gts.legacy_support import support_catalog
+from tools.techstream.gts.legacy_freeze import dynamic_lsb_rows
+from tools.techstream.gts.legacy_catalog import _json_value
+from tools.techstream.gts.physical_catalog import physical_catalog
+from tools.techstream.legacy_rob import legacy_rob_catalog
+from tools.techstream.gts.p6_ddr import p6_ddr_catalog
+from tools.techstream.gts.work_factor import work_factor_catalog, viewer_help_index
+from tools.techstream.gts.native_ddr import native_ddr_catalog
+from tools.techstream.gts.ddr_behavior import ddr_behavior_catalog
+from tools.techstream.gts.trigger_catalog import trigger_catalog
+from tools.techstream.gts.active_test_support import active_test_support_catalog
+from tools.techstream.gts.variable_drive import variable_drive_catalog
+from tools.techstream.gts.monitor_source_catalog import monitor_source_catalog
+from tools.techstream.gts.obd_monitor import obd_monitor_catalog
+from tools.techstream.gts.diagnostic_metadata import diagnostic_metadata
+from tools.techstream.gts.dtc_source_catalog import dtc_source_catalog
+from tools.techstream.gts.active_test_source import active_test_source_catalog
+from tools.techstream.gts.rob_source_catalog import rob_source_catalog
 from tools.techstream.gts import support
 from tools.techstream.gts.query import native_ecu_catalog_category, native_selection_context
 from tools.techstream.techstream_paths import gts_db_root
@@ -569,6 +589,8 @@ def _bundle_category_catalog(
     raw_master: Any,
     gts_root: Path,
     context_identity: dict[str, Any],
+    viewer_help: Any,
+    viewer_identity: dict[str, Any],
 ) -> dict[str, Any]:
     db_path = Path(category["catalog_database_path"])
     db = parser.parse_ecu_db(db_path)
@@ -581,8 +603,43 @@ def _bundle_category_catalog(
         support.support_plugin(master, category_id, 0xD5),
     )
     support_mode = support.support_mode(category_id, int(category["generation"]), support_family)
+    def resolve_variable(key: int) -> bytes:
+        return bytes.fromhex(_master_variable(raw_master if key > 10000 else db, key)["bytes"])
+
+    rob_source = rob_source_catalog(db, strings, db_path.name, resolve_variable=resolve_variable)
     common = {
         "category": category,
+        "p6_rob_source": _json_value({key: rob_source[key] for key in ("behavior_codes", "signals")}),
+        "legacy_records": legacy_catalog_rows(
+            db, strings, db_path.name,
+            lambda key: bytes.fromhex(_master_variable(raw_master if key > 10000 else db, key)["bytes"]),
+        ),
+        "support_catalog": support_catalog(db, strings, db_path.name),
+        "physical_catalog": physical_catalog(db, strings, db_path.name),
+        "dynamic_lsb": _json_value(dynamic_lsb_rows(db)),
+        "legacy_rob": _json_value(legacy_rob_catalog(db, strings, db_path.name)),
+        "ddr": _json_value(p6_ddr_catalog(db, strings, db_path.name)),
+        "work_factor": _json_value(work_factor_catalog(db, strings, db_path.name, viewer_help=viewer_help)),
+        "native_ddr": _json_value(native_ddr_catalog(db, strings, db_path.name)),
+        "ddr_behavior": _json_value(ddr_behavior_catalog(db, strings, db_path.name)),
+        "trigger_catalog": _json_value(trigger_catalog(db, strings, db_path.name)),
+        "active_test_support": _json_value(active_test_support_catalog(
+            db, strings, db_path.name, resolve_variable=resolve_variable,
+            variable_namespace=lambda key: "master" if key > 10000 else "ecu",
+        )),
+        "variable_drive": _json_value(variable_drive_catalog(db, strings, db_path.name)),
+        "monitor_source": _json_value(monitor_source_catalog(
+            db, strings, db_path.name, resolve_variable=resolve_variable,
+        )),
+        "obd_monitor": _json_value(obd_monitor_catalog(db, strings, db_path.name)),
+        "diagnostic_metadata": _json_value(diagnostic_metadata(db, strings, db_path.name)),
+        "dtc_source": _json_value(dtc_source_catalog(db, strings, db_path.name)),
+        "active_test_source": _json_value(active_test_source_catalog(db, strings, db_path.name)),
+        "source_tables": [
+            {"table": table, "record_count": section.header.record_count,
+             "record_size": section.decoded_record_size}
+            for table, section in sorted(db.sections.items())
+        ],
         "active_tests": _registry_active_tests(parser, master, category, db_root, strings, monitor_rows, selected_bindings),
         "functions": _registry_function_hierarchy(parser, raw_master, strings, category_id),
         "plugins": bindings,
@@ -601,6 +658,7 @@ def _bundle_category_catalog(
                 "bytes": db_path.stat().st_size,
                 "sha256": _file_sha256(db_path),
             },
+            **({"viewer_help": viewer_identity} if db.sections.get(18) is not None else {}),
         },
     }
     if support_mode != "p6-standard":
@@ -618,26 +676,21 @@ def _bundle_category_catalog(
     if support_mode == "p6-standard":
         return {
             **common,
-            "dids": {},
-            "dtcs": {},
-            "data_list": {
-                "tables": [], "record_counts": {}, "row_count": 0,
-                "display_order": "P6 Data List presentation semantics are not exported by this catalog yet",
-                "rows": [],
-            },
-            "generic_ffd": {
-                "signals": [], "boundary": "P6 generic freeze-frame semantics are not projected from P5",
-            },
-            "rob": {
-                "behavior_codes": [], "signals": [],
-                "boundary": "P6 Record-of-Behavior semantics are not projected from P5",
-            },
+            **p6_catalog(
+                db, strings, db_path.name,
+                resolve_variable=lambda variable_id: bytes.fromhex(_master_variable(raw_master, variable_id)["bytes"]),
+            ),
+            "dtcs": _registry_dtc_catalog(parser, db, strings, db_path.name),
         }
     raise AssertionError(f"unreachable catalog support mode for category {category_id}: {support_mode!r}")
 
 
 def _bundle_json_bytes(payload: Any) -> bytes:
-    return (json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n").encode()
+    # Native query identities and plugin metadata may carry absolute source
+    # paths internally. Persist portable repository-relative identities only.
+    serialized = json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False)
+    serialized = serialized.replace(str(REPO_ROOT) + "/", "")
+    return (serialized + "\n").encode()
 
 
 def _bundle_write_json(archive: zipfile.ZipFile, member: str, payload: Any) -> None:
@@ -824,6 +877,16 @@ def _build_toyota_diag_region(
     strings_path = db_root / "M_English.ddb"
     master = parser.parse_master_db(master_path)
     strings = _english_strings(parser, db_root)
+    viewer_path = db_root / "Viewer.ddb"
+    viewer_strings_path = db_root / "V_English.ddb"
+    viewer_help = viewer_help_index(
+        parser.parse_viewer_db(viewer_path), parser.load_string_db(viewer_strings_path), viewer_path.name,
+    )
+    viewer_identity = {
+        key: {"path": str(path.relative_to(gts_root)), "bytes": path.stat().st_size,
+              "sha256": _file_sha256(path)}
+        for key, path in (("database", viewer_path), ("strings", viewer_strings_path))
+    }
     context = native_selection_context(gts_root, region, history=native_history, history_known=history_known)
     initial_context = (
         context if native_history is None and history_known else
@@ -843,14 +906,8 @@ def _build_toyota_diag_region(
         if result.status == 0 and result.records
     ]
 
-    # Preserve the exact P5 catalog set that shipped before P6 catalog support, then
-    # add current p6-standard categories. Do not broaden or shrink legacy partner P5 shards here.
-    p5_catalog_ids = {
-        int(row["category_id"])
-        for row in selected_categories
-        if (binding := support.support_plugin(context, int(row["category_id"]), 0x67))
-        and binding["dll"] == "GetSupportP5_DT.dll"
-    }
+    # Catalog availability follows the selected source database, independently
+    # of which support plugin a live diagnostic session uses.
     catalog_categories = []
     for row in selected_categories:
         category_id = int(row["category_id"])
@@ -858,13 +915,7 @@ def _build_toyota_diag_region(
         source_path = Path(cached.source.path) if cached is not None else db_root / str(row["database"])
         if not row.get("database") or not source_path.is_file():
             continue
-        category_support_family = support.support_family(
-            support.support_plugin(context, category_id, 0x67),
-            support.support_plugin(context, category_id, 0xD5),
-        )
-        mode = support.support_mode(category_id, int(row["generation"]), category_support_family)
-        if category_id in p5_catalog_ids or mode == "p6-standard":
-            catalog_categories.append(native_ecu_catalog_category(context, row, db_root, parser))
+        catalog_categories.append(native_ecu_catalog_category(context, row, db_root, parser))
     catalog_ids = {int(row["category_id"]) for row in catalog_categories}
     catalog_by_id = {int(row["category_id"]): row for row in catalog_categories}
     context_identity = context.as_dict()
@@ -1062,6 +1113,7 @@ def _build_toyota_diag_region(
             payload = _bundle_category_catalog(
                 parser, context, strings, db_root, bin_root, category,
                 raw_master=master, gts_root=gts_root, context_identity=context_identity,
+                viewer_help=viewer_help, viewer_identity=viewer_identity,
             )
             _bundle_write_json(archive, f"catalogs/{region}/{category_id}.json", payload)
     return region_index
@@ -1213,7 +1265,7 @@ def write_toyota_diag_bundle(
     }
     if native_history is not None:
         index["source_identity"]["native_history"] = {
-            "path": str(native_history.resolve()),
+            "path": str(native_history.resolve().relative_to(REPO_ROOT)),
             "bytes": native_history.stat().st_size,
             "sha256": _file_sha256(native_history),
         }

@@ -1316,16 +1316,9 @@ class DDBParser:
             raise ValueError(
                 f"expected CDbDidTable section 7, got {section.header.table_type}"
             )
-        dids = []
-        rec_size = 8
-        for i in range(section.header.record_count):
-            off = i * rec_size
-            raw = section.raw_data[off : off + rec_size]
-            if len(raw) < rec_size:
-                break
-            did = struct.unpack_from("<H", raw, 4)[0]
-            dids.append(did)
-        return dids
+        # CDbDidTable::FindDbItem1 reads one byte at +4 (current GTS+
+        # VA 100AA180); +5 is its response-data length, not identifier bits.
+        return [raw[4] for raw in _records(section, 7, 8)]
 
     @staticmethod
     def extract_supported_pid_records(section: Section) -> list[bytes]:

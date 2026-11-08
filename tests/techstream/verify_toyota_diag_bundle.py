@@ -1,11 +1,14 @@
 """Verify the universal clean Toyota diagnostic bundle derived from current GTS+."""
 from __future__ import annotations
 
+import gzip
 import hashlib
 import io
 import json
 import os
+import re
 import sqlite3
+import zlib
 import struct
 import tempfile
 import zipfile
@@ -183,8 +186,8 @@ def verify_runtime_sqlite_projection() -> None:
         },
     }
     catalog = {
-        "dids": {"0x1601": [{"name": "LTA Control Condition"}]},
-        "dtcs": {}, "active_tests": [], "functions": [], "plugins": [], "utilities": [],
+        "dids": {"0x1601": [{"name": "LTA Control Condition", "bit_start": 3, "bit_length": 2, "patterns": {"0": "Off", "1": "On"}}]},
+        "dtcs": {}, "active_tests": [{"id": 42, "name": "Control", "kind": "direct", "start_frames": [{"service": 47, "base_frame": {"native": {"selector": 202, "bytes": [1, 2, 3]}}}], "encoding_requirements": {"mode": 4, "width": 8}}], "functions": [], "plugins": [], "utilities": [],
     }
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp) / "bundle"
@@ -197,12 +200,33 @@ def verify_runtime_sqlite_projection() -> None:
             result = export_runtime_db(root, out)
         with sqlite3.connect(out) as db:
             check("runtime SQLite records source schema and release",
-                  db.execute("SELECT value FROM meta WHERE key='schema'").fetchone()[0] == "toyota-diagnostics-sqlite-v1"
+                  db.execute("SELECT value FROM meta WHERE key='schema'").fetchone()[0] == "toyota-diagnostics-sqlite-v2"
                   and db.execute("SELECT value FROM meta WHERE key='release'").fetchone()[0] == "test")
             check("runtime SQLite indexes vehicle routes and OEM search terms",
                   db.execute("SELECT request_address FROM vehicle_ecus").fetchone()[0] == 0x792
                   and db.execute("SELECT count(*) FROM items_fts WHERE items_fts MATCH 'LTA'").fetchone()[0] == 1
-                  and result["items"] == 4)
+                  and result["items"] == 5)
+            record = json.loads(zlib.decompress(db.execute("SELECT p.data FROM item_payloads p JOIN items i ON i.id=p.item_id WHERE i.kind='did'").fetchone()[0]))
+            check("runtime SQLite preserves full source record metadata", record == catalog["dids"]["0x1601"][0])
+            active = json.loads(zlib.decompress(db.execute("SELECT p.data FROM item_payloads p JOIN items i ON i.id=p.item_id WHERE i.kind='active-test'").fetchone()[0]))
+            check("runtime SQLite retains nested Active Test geometry and frames", active == catalog["active_tests"][0])
+            rows = db.execute("SELECT i.id,i.kind,i.identifier,p.data FROM items i JOIN item_payloads p ON p.item_id=i.id ORDER BY i.id").fetchall()
+        with patch("tools.techstream.diag_runtime_db._supplemental_rows", return_value=[]):
+            export_runtime_db(root, out)
+        with sqlite3.connect(out) as db:
+            check("runtime SQLite item IDs are reproducible for unchanged source",
+                  db.execute("SELECT i.id,i.kind,i.identifier,p.data FROM items i JOIN item_payloads p ON p.item_id=i.id ORDER BY i.id").fetchall() == rows)
+
+
+def _workstation_path_leak(root: Path, files: set[Path]) -> str | None:
+    pattern = re.compile(rb"/Volumes/|/Users/|/home/|[A-Za-z]:\\\\")
+    for path in sorted(files):
+        blob = (root / path).read_bytes()
+        if path.suffix == ".gz":
+            blob = gzip.decompress(blob)
+        if pattern.search(blob):
+            return str(path)
+    return None
 
 
 def main() -> int:
@@ -215,7 +239,9 @@ def main() -> int:
     def source_matches(source: dict[str, object]) -> bool:
         path = Path(str(source["path"]))
         if not path.is_absolute():
-            path = gts / path
+            # Sources serialize either gts-relative (NA/DB/Gen/...) or
+            # repository-relative (software/Techstream/...).
+            path = (REPO if (REPO / path).is_file() else gts) / path
         path = path.resolve()
         if not path.is_relative_to(gts.resolve()) or not path.is_file():
             return False
@@ -294,6 +320,10 @@ def main() -> int:
         for region in ("NA", "EU", "JP"):
             regional = index["regions"][region]
             categories = regional["selected_categories"]
+            check(f"{region} exports every selected existing source without a support-family gate",
+                  all(row.get("catalog_available") and row.get("catalog_member") in archive.namelist()
+                      for row in categories.values()
+                      if row.get("database") and (gts / region / "DB" / "Gen" / row["database"]).is_file()))
             raw_categories = [
                 row for row in regional["raw_category_occurrences"]
                 if row["source"]["family"] == "Gen"
@@ -404,7 +434,25 @@ def main() -> int:
             else:
                 check(f"{region} TSS3 category-local D1/D2 session executor is recovered", True)
 
+        na_categories = index["regions"]["NA"]["selected_categories"]
+        legacy_category = next(row for row in na_categories.values() if row.get("database") == "Engine_P3.ddb")
+        legacy = archive.json(legacy_category["catalog_member"])
+        check("legacy Engine retains DTCs and decoded native signal/test schemas",
+              sum(len(rows) for key, rows in legacy["dtcs"].items() if key.startswith("legacy:")) == 2344
+              and sum(row["kind"] == "freeze_frame" for row in legacy["legacy_records"]) == 407
+              and sum(row["kind"] == "active_test" for row in legacy["legacy_records"]) == 66
+              and all(row["physical_records"] for row in legacy["legacy_records"] if row["kind"] == "freeze_frame")
+              and all(row["request_program"] for row in legacy["legacy_records"] if row["kind"] == "active_test")
+              and all(row["native_status"] == "valid" for row in legacy["legacy_records"] if row["kind"] in {"pid_bit", "did_bit"}))
+        sbw_category = next(row for row in na_categories.values() if row.get("database") == "SBW_P5.ddb")
+        check("P4-bound SBW exports its 16 recovered monitors",
+              archive.json(sbw_category["catalog_member"])["data_list"]["row_count"] == 16)
         p6_engine_catalog = json.loads(archive.read("catalogs/NA/6000.json"))
+        check("P6 Engine exports native signals rather than empty placeholders",
+              bool(p6_engine_catalog["dids"]) and p6_engine_catalog["data_list"]["row_count"] > 0
+              and bool(p6_engine_catalog["generic_ffd"]["signals"])
+              and bool(p6_engine_catalog["rob"]["signals"])
+              and bool(p6_engine_catalog["source_tables"]))
         p6_mode6 = next(row for row in p6_engine_catalog["active_tests"]
                         if row["kind"] == "direct" and row["id"] == 1)
         check("P6 direct Active Test mode-6 geometry and live support gate are explicit",
@@ -590,6 +638,11 @@ def main() -> int:
               and all(hashlib.sha256((ART / path).read_bytes()).digest()
                       == hashlib.sha256((regenerated_path / path).read_bytes()).digest()
                       for path in tracked_files))
+        leak = _workstation_path_leak(regenerated_path, regenerated_files)
+        check("bundle artifacts carry no workstation paths", leak is None)
+        if leak:
+            print(f"       first leak: {leak}")
+
         portable = Path(tmp) / "toyota_diag_bundle_current.zip"
         archive.export_zip(portable)
         archive.compare_zip(portable)

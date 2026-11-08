@@ -90,15 +90,13 @@ def extract_dids(db: ECUDataBase) -> list[dict]:
     section = db.sections.get(7)
     if section is None:
         return []
-    records = [
-        section.raw_data[index * 8 : (index + 1) * 8]
-        for index in range(section.header.record_count)
-    ]
+    records = [record.raw for record in section.iter_records()]
     return [
         {
             "record_index": index,
-            "identifier_u16_le": identifier,
-            "identifier_bytes_hex": raw[4:6].hex(),
+            "identifier_u8": identifier,
+            "response_data_length": raw[5],
+            "identifier_bytes_hex": raw[4:5].hex(),
             "raw_hex": raw.hex(),
         }
         for index, (identifier, raw) in enumerate(

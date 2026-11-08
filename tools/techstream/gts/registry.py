@@ -190,12 +190,18 @@ def _registry_dtc_catalog(parser: DDBParser, db: Any, strings: StringDataBase, s
     grouped: dict[str, list[dict[str, Any]]] = {}
     for row in _dtc_rows(parser, db, strings, source):
         packed = str(row.get("packed_dtc") or "").removeprefix("0x").upper()
-        if not packed:
-            continue
-        grouped.setdefault(packed, []).append({
-            "code": row.get("code") or "",
-            "description": row.get("description") or "",
-            "failure": row.get("failure") or "",
+        if packed:
+            key = packed
+        elif row.get("dtc_identifier") is not None:
+            # Legacy identifiers are not UDS packed DTCs with a failure byte.
+            identifier = row["dtc_identifier"]
+            identifier = int(identifier, 0) if isinstance(identifier, str) else int(identifier)
+            key = f"legacy:{identifier:04X}"
+        else:
+            raise ValueError(f"DTC row has no decoded identifier: {row!r}")
+        grouped.setdefault(key, []).append({
+            field: value.hex() if isinstance(value, bytes) else value
+            for field, value in row.items()
         })
     return grouped
 
@@ -637,6 +643,19 @@ def _registry_active_test_groups(
 ) -> dict[str, Any]:
     """Compact current type-33 multi-control geometry plus composer executability."""
     plan = _multi_active_test_category_plan(parser, category, db_root)
+    db_path = Path(category.get("catalog_database_path") or db_root / str(category["database"]))
+    db = parser.parse_ecu_db(db_path)
+    if 68 not in db.sections:
+        # Legacy membership exists without the P5 direct-test materializer.
+        # Preserve its decoded relation, not invented P5 start/stop frames.
+        groups = [{**group, "execution": "unresolved_static_plan",
+                   "reason": "legacy membership has no type-68 direct materializer"}
+                  for group in plan["groups"]]
+        return {"group_count": plan["group_count"],
+                "membership_count": plan["membership_count"],
+                "materializable_group_count": 0, "blocked_group_count": len(groups),
+                "groups": groups,
+                "boundary": "Membership fields retained; legacy execution semantics are not projected from P5."}
     groups = []
     for group in plan["groups"]:
         parent = _direct_active_test_selected_row(

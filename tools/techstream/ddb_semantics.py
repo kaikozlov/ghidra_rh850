@@ -6,8 +6,10 @@ import hashlib
 import struct
 from collections.abc import Iterable
 from dataclasses import asdict, dataclass, field
+from pathlib import Path
 from typing import Any, Callable, Literal, overload
 
+from tools import REPO_ROOT
 from tools.techstream.parse_ddb import DDBParser, ECUDataBase, Section
 
 
@@ -78,14 +80,28 @@ class NativeSource:
     format_version: int
 
     @property
+    def repo_path(self) -> str:
+        """Path relative to the repository root, for identities and artifacts.
+
+        ``path`` stays the absolute filesystem handle for IO; identities and
+        serialized bundles must not embed workstation paths.
+        """
+        try:
+            return str(Path(self.path).resolve().relative_to(REPO_ROOT))
+        except ValueError:
+            return self.path
+
+    @property
     def identity(self) -> str:
         return (
-            f"{self.product}/{self.region}/{self.family}:{self.path}:"
+            f"{self.product}/{self.region}/{self.family}:{self.repo_path}:"
             f"sha256:{self.sha256}:format:{self.format_version}:{self.schema_family}"
         )
 
     def as_dict(self) -> dict[str, Any]:
-        return {**asdict(self), "identity": self.identity}
+        data = asdict(self)
+        data["path"] = self.repo_path
+        return {**data, "identity": self.identity}
 
 
 @dataclass(frozen=True)
@@ -1117,10 +1133,25 @@ def ffd_rows(
 
 
 def dtc_rows(parser: DDBParser, db: Any, strings: Any, source: str) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    legacy = db.sections.get(5)
+    if legacy is not None:
+        for index, raw in enumerate(records(legacy)):
+            if len(raw) != 28:
+                raise ValueError(f"table 5: expected 28-byte DTC record, got {len(raw)}")
+            description_index, comment_index = struct.unpack_from("<II", raw, 12)
+            rows.append({
+                "kind": "dtc", "source": source, "table": 5, "record": index,
+                "code": raw[:12].decode("utf-16-le").rstrip("\x00"),
+                "dtc_identifier": struct.unpack_from("<H", raw, 20)[0],
+                "description": strings.get_string(description_index),
+                "comment": strings.get_string(comment_index),
+                "raw": raw,
+            })
     section = db.sections.get(65)
     if section is None:
-        return []
-    return [{
+        return rows
+    rows.extend({
         "kind": "dtc",
         "source": source,
         "table": 65,
@@ -1130,7 +1161,8 @@ def dtc_rows(parser: DDBParser, db: Any, strings: Any, source: str) -> list[dict
         "description": strings.get_string(entry.description_string_index),
         "failure": strings.get_string(entry.failure_string_index),
         "raw": entry.raw,
-    } for index, entry in enumerate(parser.extract_dtc_failure_entries(section))]
+    } for index, entry in enumerate(parser.extract_dtc_failure_entries(section)))
+    return rows
 
 
 def behavior_rows(db: Any, strings: Any, source: str) -> list[dict[str, Any]]:
