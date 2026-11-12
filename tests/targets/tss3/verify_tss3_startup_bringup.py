@@ -96,9 +96,15 @@ with tempfile.TemporaryDirectory() as td:
     marker_path.write_text(json.dumps({**native_marker, "target": "TOYOTA_COROLLA_TSS3"}), encoding="utf-8")
     check("UI resume does not re-derive the platform gate pandad already enforced",
           ui_bringup.load_native_catch(marker_path)["target"] == "TOYOTA_COROLLA_TSS3")
+    prewarm_marker = {**native_marker, "ignition_monotonic_ns": 0}
+    marker_path.write_text(json.dumps(prewarm_marker), encoding="utf-8")
+    check("UI resume accepts a prewarm catch before ignition",
+          ui_bringup.load_native_catch(marker_path) == prewarm_marker)
     for bad in (
         {"target": ""},
         {"verdict": "other"},
+        {"ignition_monotonic_ns": -1},
+        {"programming_tx_monotonic_ns": 0},
         {"programming_tx_monotonic_ns": 200},
         {"positive_extended_frame_hex": "065003006401f400"},
         {"positive_extended_frame_hex": "065002003201f400"},

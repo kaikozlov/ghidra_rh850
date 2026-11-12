@@ -80,7 +80,8 @@ def load_native_catch(path: Path) -> dict[str, Any]:
         "positive_extended_monotonic_ns",
         "programming_tx_monotonic_ns",
     ):
-        if not isinstance(native.get(key), int) or native[key] <= 0:
+        # Prewarm catches precede ignition, whose timestamp is then zero.
+        if not isinstance(native.get(key), int) or native[key] < (0 if key == "ignition_monotonic_ns" else 1):
             raise UiBringupError(f"native startup-catch marker has invalid {key}: {path}")
     if native["programming_tx_monotonic_ns"] < native["positive_extended_monotonic_ns"]:
         raise UiBringupError(f"native startup-catch marker has reversed response/programming order: {path}")
