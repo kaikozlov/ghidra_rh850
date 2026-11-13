@@ -44,6 +44,10 @@ class RamExecError(RuntimeError):
     pass
 
 
+class BootloaderNotReachedError(RamExecError):
+    pass
+
+
 @dataclass(frozen=True)
 class RamExecGeometry:
     load_addr: int = RAM_LOAD_ADDR
@@ -558,7 +562,7 @@ def execute_ram_payload(
     direct_bootloader = False
     if programming_already_requested:
         if initial_f181_hex is None or initial_f181_hex.lower() != expected_boot_f181_hex.lower():
-            raise RamExecError(
+            raise BootloaderNotReachedError(
                 "caught PROGRAMMING transition did not reach the exact boot endpoint: "
                 f"expected {expected_boot_f181_hex}, last observed {initial_f181_hex}"
             )

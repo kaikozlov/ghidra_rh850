@@ -17,12 +17,13 @@ import json
 import os
 import socket
 import sys
+import time
 from pathlib import Path
 from typing import Any, TextIO
-from tsk.common.ram_exec import _import_isotp_send, _import_uds
+from tsk.common.ram_exec import BootloaderNotReachedError, _import_isotp_send, _import_uds
 from tsk.ram_runtime.tss3_request_signer import install, self_test
 from tsk.ram_runtime.tss3_post_install_recovery import control_domain_state, recovery_target
-from tsk.ram_runtime.tss3_startup_programming import race_to_bootloader
+from tsk.ram_runtime.tss3_startup_programming import StartupProgrammingError, race_to_bootloader
 
 
 STATUS_SCHEMA = "tss3-request-signer-ui-status-v1"
@@ -94,8 +95,73 @@ def manual_startup_race(meta: Path, *, cancel_requested: Any) -> dict[str, Any]:
     return race_to_bootloader(cancel_requested=cancel_requested, target=target)
 
 
+class _VehicleBusSleeping(Exception):
+    pass
+
+
+class _BusActivityPanda:
+    """Observe vehicle traffic through the existing direct-Panda connection."""
+
+    def __init__(self, panda: Any):
+        self.panda = panda
+        self.last_vehicle_rx = time.monotonic()
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self.panda, name)
+
+    def can_recv(self):
+        rows = self.panda.can_recv()
+        if any(int(row[-1]) == 0 and int(row[0]) not in (0x777, 0x7A1, 0x7A9) for row in rows):
+            self.last_vehicle_rx = time.monotonic()
+        return rows
+
+    def check_awake(self) -> bool:
+        if time.monotonic() - self.last_vehicle_rx > 3.0:
+            raise _VehicleBusSleeping
+        return False
+
+
+def _resume_automatic(payload: Path, meta: Path, output_dir: Path, panda: _BusActivityPanda) -> dict[str, Any]:
+    try:
+        return install(payload, meta, direct_boot=True, panda=panda)
+    except BootloaderNotReachedError:
+        # A shutdown can end the EPS conversation. Keep the existing arm routine
+        # listening until the vehicle bus sleeps or the next start answers.
+        target = json.loads(meta.read_text(encoding="utf-8"))["target"]["name"]
+        emit("armed", "Request-signer bringup armed", "Waiting for EPS while the vehicle bus is awake.",
+             progress=5, output_dir=output_dir)
+        while True:
+            panda.check_awake()
+            try:
+                race = race_to_bootloader(
+                    timeout=None, cancel_requested=panda.check_awake, target=target, panda=panda,
+                )
+            except StartupProgrammingError:
+                panda.check_awake()
+                health = panda.health()
+                if health["ignition_line"] or health["ignition_can"]:
+                    raise
+                continue
+            write_json(output_dir / "startup-programming.json", race)
+            return install(payload, meta, direct_boot=True, panda=panda)
+
+
 def run(payload: Path, meta: Path, output_dir: Path, *,
         native_catch: Path | None = None, panda: Any | None = None) -> dict[str, Any]:
+    if native_catch is not None and not isinstance(panda, _BusActivityPanda):
+        if panda is None:
+            from panda import Panda
+            with Panda(cli=False) as connection:
+                return run(payload, meta, output_dir, native_catch=native_catch, panda=connection)
+        panda = _BusActivityPanda(panda)
+        try:
+            return run(payload, meta, output_dir, native_catch=native_catch, panda=panda)
+        except _VehicleBusSleeping:
+            result = {"schema": "tss3-request-signer-ui-bringup-v1", "verdict": "vehicle_bus_asleep"}
+            write_json(output_dir / "summary.json", result)
+            emit("sleeping", "Vehicle bus asleep", "Waiting for the next vehicle bus wake.",
+                 progress=0, output_dir=output_dir)
+            return result
     if output_dir.exists() and any(output_dir.iterdir()):
         raise UiBringupError(f"output directory is not empty: {output_dir}")
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -123,10 +189,25 @@ def run(payload: Path, meta: Path, output_dir: Path, *,
         "programming", "EPS programming caught", "Installing the volatile 0x08A request signer into EPS RAM.",
         progress=20, output_dir=output_dir,
     )
-    install_result = install(payload, meta, direct_boot=True, panda=panda)
+    install_result = (
+        _resume_automatic(payload, meta, output_dir, panda) if native_catch is not None
+        else install(payload, meta, direct_boot=True, panda=panda)
+    )
     write_json(output_dir / "request-signer-install.json", install_result)
     if install_result.get("verdict") != "request_signer_live_probe_pass":
+        if native_catch is not None:
+            panda.check_awake()
         raise UiBringupError(f"request-signer install/probe failed: {install_result.get('verdict')}")
+    if native_catch is not None:
+        # Installation can finish before POWER. Remain on the same connection
+        # while OFF; normal ignition handling takes over when the car starts.
+        while True:
+            panda.can_recv()
+            panda.check_awake()
+            health = panda.health()
+            if health["ignition_line"] or health["ignition_can"]:
+                break
+            time.sleep(0.01)
 
     emit(
         "verifying", "Verifying bringup",

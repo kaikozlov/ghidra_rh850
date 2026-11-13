@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import json
 import time
+from collections import deque
 from pathlib import Path
 from typing import Any, Callable
 
@@ -77,10 +78,11 @@ def _read_boot_identity(
 
 def race_to_bootloader(
     *,
-    timeout: float = DEFAULT_RACE_TIMEOUT_SECONDS,
+    timeout: float | None = DEFAULT_RACE_TIMEOUT_SECONDS,
     cancel_requested: Callable[[], bool] | None = None,
     bus: int = BUS,
     target: str = "",
+    panda: Any | None = None,
 ) -> dict[str, Any]:
     """Enter the EPS bootloader from a pre-armed OFF-state worker.
 
@@ -101,12 +103,13 @@ def race_to_bootloader(
     except ImportError as exc:
         raise StartupProgrammingError("panda module unavailable") from exc
 
-    panda = Panda()
+    owns_panda = panda is None
+    panda = Panda() if owns_panda else panda
     start_ns = time.monotonic_ns()
-    tx_rows: list[dict[str, Any]] = []
-    rx_rows: list[dict[str, Any]] = []
+    tx_rows: deque[dict[str, Any]] = deque(maxlen=256 if timeout is None else None)
+    rx_rows: deque[dict[str, Any]] = deque(maxlen=256 if timeout is None else None)
     try:
-        if hasattr(panda, "set_power_save"):
+        if owns_panda and hasattr(panda, "set_power_save"):
             panda.set_power_save(0)
         panda.set_safety_mode(ELM327_SAFETY_MODE, route.elm327_param)
 
@@ -115,12 +118,12 @@ def race_to_bootloader(
         # worker is started before POWER; in auto-arm it burns the startup window.
         panda.can_recv()
         armed_ns = time.monotonic_ns()
-        deadline = time.monotonic() + timeout
+        deadline = None if timeout is None else time.monotonic() + timeout
         next_extended = time.monotonic()
         positive_extended_ns: int | None = None
         positive_extended_event: dict[str, Any] | None = None
 
-        while time.monotonic() < deadline and positive_extended_ns is None:
+        while (deadline is None or time.monotonic() < deadline) and positive_extended_ns is None:
             if cancel_requested is not None and cancel_requested():
                 raise StartupProgrammingError("startup race cancelled before PROGRAMMING")
             now = time.monotonic()
@@ -188,8 +191,8 @@ def race_to_bootloader(
             "programming_after_50_03_ms": (programming_ns - positive_extended_ns) / 1e6,
             "boot_f181_hex": boot_f181_hex,
             "f181_samples": f181_samples,
-            "tx": tx_rows,
-            "rx": rx_rows,
+            "tx": list(tx_rows),
+            "rx": list(rx_rows),
             "security_access_used": False,
             "payload_upload": False,
             "ecu_reset": False,
@@ -197,10 +200,11 @@ def race_to_bootloader(
             "verdict": "bootloader_caught_during_normal_startup",
         }
     finally:
-        try:
-            panda.close()
-        except Exception:
-            pass
+        if owns_panda:
+            try:
+                panda.close()
+            except Exception:
+                pass
 
 
 def main() -> int:
