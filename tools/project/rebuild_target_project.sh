@@ -55,7 +55,7 @@ if [[ -n "$DATAFLASH_REL" ]]; then
   DATAFLASH="$ROOT/$DATAFLASH_REL"
   [[ "$(shasum -a 256 "$DATAFLASH" | cut -d' ' -f1)" == "$(field dataflash_sha256)" ]] || { echo "DataFlash identity drift" >&2; exit 1; }
   [[ "$(python3 -c 'from pathlib import Path; import sys; print(Path(sys.argv[1]).stat().st_size)' "$DATAFLASH")" == "$(field dataflash_size)" ]] || { echo "DataFlash size drift" >&2; exit 1; }
-  IMPORT_POSTS+=(-postScript AddDataFlash.java "$DATAFLASH")
+  IMPORT_POSTS+=(-postScript AddDataFlash.java "$DATAFLASH" "$(field dataflash_base)" "$(printf '0x%X' "$(field dataflash_size)")")
 fi
 if [[ "$SFR_CONTEXT" == p1m ]]; then
   IMPORT_POSTS+=(-postScript ApplyP1MDeviceProfile.java "$ROOT/data/p1m_sfr_labels.csv" -postScript ApplyP1MSfrTypes.java)

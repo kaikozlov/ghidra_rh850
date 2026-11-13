@@ -1,0 +1,205 @@
+address,provenance,note
+0x00011350,receive-decompilation,Receive critical-section enter
+0x0001135e,receive-decompilation,Receive critical-section leave
+0x000113ae,receive-decompilation,Raw PDU acceptance callback
+0x0001140e,receive-decompilation,Arrival bookkeeping notification
+0x00012f08,meter-report,Processed SPI packet builder and record publication
+0x0001537a,meter-report,Raw frame SPI packet builder
+0x000155cc,receive-decompilation,Raw packet descriptor count
+0x00015722,transfer-decompilation,Transfer scheduler timestamp
+0x00015734,meter-report,SPI first halfword and remaining DMA transfer
+0x000158e6,transfer-decompilation,Packet exchange state input
+0x0001597c,transfer-decompilation,Packet exchange state input
+0x000159a6,transfer-decompilation,Incoming SPI packet check
+0x00015a0a,transfer-decompilation,Packet exchange timing input
+0x00015a32,transfer-decompilation,Packet exchange dispatch selector
+0x00015a84,transfer-decompilation,Packet operation table selector
+0x00015a8e,meter-report,SPI packet exchange dispatcher
+0x00015bd2,meter-report,SPI packet publication
+0x00015d58,transfer-decompilation,Transmit path status input
+0x00015d62,transfer-decompilation,Alternate transmit path callback
+0x00015d70,meter-report,SPI packet transmit callback
+0x000162de,meter-report,Display mailboxes into processed SPI packet
+0x00016386,display-decompilation,Display mailbox write guard
+0x00016390,meter-report,Display control mailbox write
+0x00017dce,security-decompilation,Application seed entropy input
+0x00019710,security-decompilation,Application SecurityAccess state clear
+0x00019732,security-decompilation,Application nonzero seed generation
+0x00019784,meter-report,Application response transform and full sixteen-byte comparison
+0x0001a7ca,security-decompilation,Application seed reset caller
+0x0001a7e8,security-decompilation,Application seed lifecycle caller
+0x0001a968,security-decompilation,Application request-seed policy callback
+0x0001a992,security-decompilation,Application send-key verifier wrapper
+0x0001f88c,meter-report,Multi Display control commit
+0x0001f8be,meter-report,Multi Display return-control handler
+0x00023874,diagnostic-decompilation,DID support payload length lookup
+0x0002389a,meter-report,DID support dispatcher proves seventy-four rows of twenty bytes
+0x0002392a,diagnostic-decompilation,DID support query caller
+0x00023c36,diagnostic-decompilation,DID read callback dispatch
+0x0002462c,display-decompilation,Multi Display control state callback
+0x0002849c,meter-report,DID1101 read callback
+0x0002881c,meter-report,DID2041 read callback
+0x00028868,diagnostic-decompilation,DID2042 read callback with returning fill continuation
+0x00028ca6,diagnostic-table,DID2041 write callback at row31 field8
+0x000293f4,display-decompilation,Multi Display diagnostic control callback
+0x0002941e,display-decompilation,Multi Display control value input callback
+0x0002a9e8,display-decompilation,Multi Display control value cache write
+0x0002aa8e,display-decompilation,Multi Display control reset callback
+0x0002ab42,diagnostic-decompilation,DID1101 byte-pair getter
+0x0002adf2,meter-report,Application setting mask explicitly clears FCFF complement
+0x0002d380,diagnostic-decompilation,DID2041 service callback and post-fill continuation
+0x0002db32,diagnostic-decompilation,DID1101 service callback and post-fill continuation
+0x0004f944,meter-report,CAN411 and CAN3B7 composite packet consumer
+0x0005ce50,meter-report,DID2041 support builder excludes Stop Lamp Switch Function
+0x0006227c,receive-decompilation,Record assembler state input
+0x000622da,receive-decompilation,Record sample cache export
+0x0006230e,meter-report,PDUA6 through BC frame history capture
+0x00062348,receive-decompilation,Record publication state callback
+0x00062d7c,receive-decompilation,Record assembly state maintenance
+0x00062e22,receive-decompilation,Record fragment state selector
+0x00062e66,meter-report,Three big-endian halfwords into thirty-halfword record
+0x00062e9c,meter-report,Record fragment update
+0x00062f80,meter-report,Sample selector compares byte1 and requires nonzero byte0
+0x00062fb4,meter-report,Multi-frame record assembly dispatcher
+0x0006310a,meter-report,Record publication to processed SPI builder
+0x00064040,receive-decompilation,PDU91 status input to composite consumer
+0x000735f6,receive-decompilation,CAN3B7 byte1 field getter consumed by composite
+0x000768b4,meter-report,CAN3B7 byte2 bits2 and3 extraction with unresolved display caller
+0x00076b30,receive-decompilation,Composite consumer receive-status input
+0x000797da,security-decompilation,Returning byte copy helper
+0x000797f4,receive-decompilation,Record halfword copy helper
+0x0007983e,receive-decompilation,Record halfword fill helper
+0x0007a976,security-decompilation,Application SecurityAccess PRNG reset
+0x0007a98c,meter-report,Application xorshift128 generator
+0x0007a9b8,security-decompilation,Application sixteen-byte seed expansion
+0x0007aa30,meter-report,Application substitution permutation response transform
+0x0007c654,transfer-decompilation,SPI transfer channel setup callee
+0x0007c86e,transfer-decompilation,DMA descriptor setup callee
+0x0007cb36,transfer-decompilation,SPI transfer setup callee
+0x0007f632,transfer-decompilation,SPI transfer configuration callee
+0x0007f798,transfer-decompilation,SPI first halfword write callee
+0x00081118,diagnostic-decompilation,Item010A storage accessor for DID2041
+0x00085d1e,security-decompilation,Application SecurityAccess success callback
+0x0009c56e,receive-decompilation,Whole PDU frame reader
+0x0009c618,meter-report,Receive status reports initial and timeout separately
+0x0009c66a,meter-report,Configured CAN bitfield extraction
+0x0009d998,receive-decompilation,Receive copy critical-section enter
+0x0009d9a4,receive-decompilation,Receive copy critical-section leave
+0x000a4106,receive-decompilation,Receive timeout scheduler channel input
+0x000a4280,meter-report,Receive timeout expiration
+0x000a44b0,receive-decompilation,Receive state update
+0x000a4502,meter-report,Accepted PDU bytes copied unchanged into raw buffer
+0x000a45e4,receive-decompilation,Receive timeout notification
+0x000a7cd4,meter-report,Channel-specific receive table dispatcher
+0x000af3e0,security-decompilation,Registered application SID27 subfunction03
+0x000af3f4,security-decompilation,Registered application SID27 subfunction04
+0x000af408,security-decompilation,Application request-seed policy adapter
+0x000af428,security-decompilation,Application send-key policy adapter
+0x000b0e64,security-decompilation,Application request-seed protocol worker
+0x000b0f54,security-decompilation,Application seed lifecycle worker
+0x000b10a0,security-decompilation,Application request-seed protocol validation
+0x000b1196,security-decompilation,Application request-seed registered adapter target
+0x000b11b6,security-decompilation,Application send-key protocol validation
+0x000b125e,security-decompilation,Application send-key policy adapter caller
+0x000b12b0,security-decompilation,Application send-key registered adapter target
+0x000b15de,security-decompilation,Application request-seed policy wrapper
+0x000b1602,security-decompilation,Application send-key verifier wrapper
+0xfedc1e72,security-decompilation,Boot seed source input
+0xfedc1e8c,security-decompilation,RPRG byte copy implementation
+0xfedc48ce,payload-decompilation,CMAC block update adapter
+0xfedc48f0,payload-decompilation,Authentication chunk length calculation
+0xfedc491e,payload-decompilation,Authentication read adapter
+0xfedc4948,meter-report,IV is authenticated before payload plaintext
+0xfedc49a4,payload-decompilation,Authentication pending-state input
+0xfedc49d4,payload-decompilation,Authenticated plaintext chunk processing
+0xfedc4a68,meter-report,Full sixteen-byte authentication tag comparison
+0xfedc4bc2,meter-report,Payload authentication AES key derivation
+0xfedc4c28,payload-decompilation,CMAC key context and subkey setup
+0xfedc4c48,payload-decompilation,Payload authentication setup
+0xfedc4c70,payload-decompilation,Authenticated region descriptor selection
+0xfedc4cf4,payload-decompilation,Authentication context cleanup
+0xfedc4d06,payload-decompilation,Authentication cleanup dispatcher
+0xfedc4d22,payload-decompilation,Authentication progress state
+0xfedc4d62,payload-decompilation,Authentication result state
+0xfedc5404,payload-assembly,Payload decryption setup adapter
+0xfedc5420,payload-assembly,Payload transfer adapter
+0xfedc548e,payload-assembly,Reprogramming WDBI adapter
+0xfedc54c6,payload-assembly,DID0201 read adapter
+0xfedc550c,security-assembly,Boot request-seed adapter
+0xfedc5524,security-assembly,Boot send-key adapter
+0xfedc5564,payload-decompilation,Authentication read preparation adapter
+0xfedc558e,payload-decompilation,Authentication read worker adapter
+0xfedc586e,security-assembly,Boot seed source adapter
+0xfedc587e,security-assembly,RPRG byte copy adapter
+0xfedc588c,security-decompilation,RPRG byte fill adapter
+0xfedc58f2,payload-assembly,CMAC key setup adapter
+0xfedc5900,payload-assembly,CMAC context cleanup adapter
+0xfedc590c,payload-assembly,CMAC subkey generation adapter
+0xfedc5918,payload-assembly,CMAC update adapter with fifth context argument
+0xfedc592c,security-assembly,AES key setup adapter with three arguments
+0xfedc593a,security-decompilation,AES context cleanup adapter
+0xfedc5946,security-assembly,AES encrypt adapter with four arguments
+0xfedc5954,security-assembly,AES decrypt adapter with four arguments
+0xfedc5e90,payload-decompilation,CBC payload block adapter
+0xfedc5eac,payload-decompilation,CBC plaintext processing worker
+0xfedc5ff0,meter-report,Payload decryption AES key derivation
+0xfedc6054,payload-decompilation,DID0202 CBC IV setup
+0xfedc60a6,payload-decompilation,Payload decryption initialization
+0xfedc6228,payload-decompilation,DID0201 sixteen-byte credential writer
+0xfedc625e,payload-decompilation,DID0202 sixteen-byte IV writer
+0xfedc6294,payload-decompilation,Reprogramming WDBI dispatcher
+0xfedc6412,payload-decompilation,DID0201 sixteen-byte credential reader
+0xfedc6460,payload-decompilation,DID0202 sixteen-byte IV reader
+0xfedc6526,payload-decompilation,Payload authentication start state
+0xfedc65ca,payload-decompilation,Payload authentication completion state
+0xfedc663c,payload-decompilation,Payload authentication scheduler
+0xfedc6bc8,security-decompilation,Dynamic-key AES boot seed generation
+0xfedc6bf4,security-decompilation,Boot seed acceptance check
+0xfedc6c54,security-decompilation,Boot nonzero seed generation
+0xfedc6ca0,meter-report,Boot SID27 request-seed callback
+0xfedc6d56,meter-report,Boot root AES decrypts auxiliary record
+0xfedc6d8e,meter-report,Derived boot working key AES encrypts seed
+0xfedc6dc2,meter-report,Boot send-key callback and full response comparison
+0xfedc6e84,security-decompilation,Boot dynamic key material source
+0xfedc7ac0,payload-assembly,CBC key and IV setup adapter
+0xfedc7af0,payload-assembly,CBC decrypt block adapter
+0xfedc7afe,security-assembly,Seed-generator key setup adapter
+0xfedc7b1a,security-decompilation,Seed-generator context cleanup adapter
+0xfedc7b26,security-assembly,Seed-generator zero-block transform adapter
+0xfedcb90c,security-decompilation,Boot SID27 subfunction validation
+0xfedcb956,security-decompilation,Boot SID27 request validation
+0xfedcb9b6,security-decompilation,Boot SID27 request length validation
+0xfedcba88,security-decompilation,Boot request-seed protocol worker
+0xfedcbb94,security-decompilation,Boot SID27 seed response handling
+0xfedcbc80,security-decompilation,Boot send-key protocol worker
+0xfedcbd8a,security-decompilation,Boot SID27 request dispatcher
+0xfedcbe4c,security-decompilation,Boot SID27 alternate request path
+0xfedcbe6c,security-assembly,Boot SID27 registered dispatch callback
+0xfedcbe86,security-assembly,Boot SID27 registered state callback
+0xfedcbf02,security-table,Boot SID27 registration callback field4
+0xfedcbf38,security-assembly,Boot SID27 returning callback field12
+0xfedcbf68,security-table,Boot SID27 registration callback field28
+0xfedcc91c,payload-decompilation,Download descriptor validation
+0xfedcc970,payload-decompilation,Download descriptor unpacking
+0xfedcc9ca,payload-decompilation,Download identifier comparison
+0xfedcca16,payload-decompilation,Download authorization path
+0xfedccaa4,payload-decompilation,Download authorization path
+0xfedccbc6,payload-decompilation,Download request processing
+0xfedd0134,security-assembly,Seed-generator zero-IV setup
+0xfedd0196,meter-report,AES128 block encryption with four arguments
+0xfedd02b4,meter-report,AES128 block decryption with four arguments
+0xfedd03d8,security-decompilation,AES128 round-key expansion
+0xfedd04c4,security-assembly,AES128 key setup with three arguments
+0xfedd04fa,payload-assembly,AES context memory cleanup
+0xfedd051e,security-decompilation,AES encryption round helper
+0xfedd05ec,security-decompilation,AES encryption round helper
+0xfedd06b2,security-decompilation,AES encryption round helper
+0xfedd06da,security-decompilation,AES encryption round helper
+0xfedd0910,security-decompilation,Seed-generator AES chaining worker
+0xfedd0a68,security-decompilation,Seed-generator key and IV setup
+0xfedd0b1e,meter-report,AES-CMAC subkey generation
+0xfedd0bbe,meter-report,AES-CMAC update and finalization
+0xfedd0d66,payload-decompilation,CMAC key context initialization
+0xfedd0dae,payload-decompilation,CMAC context cleanup
+0xfedd0ecc,meter-report,AES-CBC inverse block and ciphertext chaining
+0xfedd1020,payload-decompilation,AES-CBC key and IV initialization

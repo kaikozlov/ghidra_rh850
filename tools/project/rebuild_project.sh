@@ -169,7 +169,7 @@ run_headless "import" "$PROJECT_DIR" "$PROJECT_NAME" \
   -import "$CODEFLASH" \
   -processor "$PROCESSOR" \
   -noanalysis \
-  -postScript AddDataFlash.java "$DATAFLASH" \
+  -postScript AddDataFlash.java "$DATAFLASH" "$(TARGET_FIELD dataflash_base)" "$(printf '0x%X' "$(TARGET_FIELD dataflash_size)")" \
   -postScript ApplyP1MDeviceProfile.java "$ROOT/data/p1m_sfr_labels.csv" \
   -postScript ApplyP1MSfrTypes.java \
   -postScript ApplyRamTypes.java "$ROOT/data/checkpoint_payload_map.csv" \

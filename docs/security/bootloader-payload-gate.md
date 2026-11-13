@@ -12,7 +12,7 @@
 >
 > **Verification:** `tests/runtime/verify_payload_gate.py`
 >
-> **Related:** [bootloader diagnostics](../diagnostics/bootloader.md), [bootloader-dids](../diagnostics/bootloader-dids.md)
+> **Related:** [bootloader diagnostics](../diagnostics/bootloader.md), [bootloader-dids](../diagnostics/bootloader-dids.md), [R4P meter payload comparison](../variants/yc-r4p-2024-meter.md#payload-decryption-and-authentication)
 
 This note traces the complete firmware-side path used by the public RH850/P1M-E
 payload toolchain: UDS download, AES-CBC decryption, CRC + CMAC authentication,
@@ -385,3 +385,4 @@ wrong GP/TP/RAM/interrupt context for the initialized ICU and CAN application
 drivers. A persistent application hook would solve that context mismatch, but it
 would also replace an OEM safety boundary and must be engineered and validated as
 safety-critical firmware.
+

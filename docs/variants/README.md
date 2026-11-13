@@ -16,6 +16,7 @@ for target IDs, images, snapshots, corpora, and working paths.
 | `corolla-8965F1208000` | First-class; Span's reported 2025 Corolla | [Corolla F report](corolla-8965F1208000.md) |
 | `corolla-8965H1202000` | First-class; albinoelephant's reported 2023 US Corolla; historical auxiliary-identity label | [Corpus and public-route report](corolla-2023-us-public-route.md) |
 | `sienna-8965B4512000` | Legacy deep-reference calibration | [Sienna report](sienna-8965B4512000.md) · [reference overview](sienna-8965B4512000-overview.md) |
+| `r4p-838004AD91` | Reference; yc's 2024 US RAV4 Prime combination meter | [Firmware, receive paths, and security keys](yc-r4p-2024-meter.md) |
 
 **Corolla identity trap:** both retained specimens report primary application
 F181 `8965F1208000`. Their secondary records differ: `8A3111202000` for

@@ -232,6 +232,11 @@ Use `tools/know QUERY` to locate an owning report, artifact, or verification sui
 
 Use `tools/gtarget list` / `tools/gtarget show TARGET` before target-specific work. `data/analysis_targets.json` owns registered image identities, work/snapshot/corpus paths, function seeds, and target-specific rebuild stage scripts. The generic target rebuild/snapshot drivers consume those fields and intentionally contain no Camry-specific path/profile switch.
 
+`AddDataFlash.java` and `AddExtendedUser.java` take
+`<image-path> <baseHex> <sizeHex>` from the selected target's registry fields.
+Image sizes are target-specific; DataFlash presence does not imply a 1 MiB
+P1M-E CodeFlash image.
+
 ### External software corpus layout
 
 Proprietary software distributions used as reverse-engineering inputs live only

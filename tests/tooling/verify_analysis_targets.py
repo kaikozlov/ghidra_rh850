@@ -42,15 +42,17 @@ for name, row in targets.items():
         df = ROOT / row["dataflash"]
         check(f"{name} DataFlash exists/size", df.is_file() and df.stat().st_size == row["dataflash_size"])
         check(f"{name} DataFlash hash", df.is_file() and sha(df) == row["dataflash_sha256"])
-        check(f"{name} bases exact", row["codeflash_base"] == "0x00000000" and row["dataflash_base"] == "0xFF200000")
-        expected_mcu = "R7F701383" if name.startswith("corolla-") else "R7F701381"
-        check(f"{name} RH850 target exact", row["mcu"] == expected_mcu and row["processor"] == "v850e3:LE:32:default")
-    else:
+        check(f"{name} DataFlash base exact", row["dataflash_base"] == "0xFF200000")
+    if "extended_user" in row:
         extended = ROOT / row["extended_user"]
         check(f"{name} extended-user exists/size", extended.is_file() and extended.stat().st_size == row["extended_user_size"])
         check(f"{name} extended-user hash", extended.is_file() and sha(extended) == row["extended_user_sha256"])
-        check(f"{name} image bases exact", row["codeflash_base"] == "0x00000000" and row["extended_user_base"] == "0x01000000")
-        check(f"{name} bounded RH850 target", row["mcu"] == "unknown (RH850 P1x-C family)" and row["processor"] == "v850e3:LE:32:default")
+        check(f"{name} extended-user base exact", row["extended_user_base"] == "0x01000000")
+    check(f"{name} CodeFlash base exact", row["codeflash_base"] == "0x00000000")
+    check(f"{name} RH850 processor", row["processor"] == "v850e3:LE:32:default")
+    if row.get("sfr_context", "p1m") == "p1m":
+        expected_mcu = "R7F701383" if name.startswith("corolla-") else "R7F701381"
+        check(f"{name} P1M-E device profile matches MCU", row["mcu"] == expected_mcu)
     check(f"{name} safe Ghidra names", bool(name_re.fullmatch(row["project_name"])) and bool(name_re.fullmatch(row["program_name"])))
     work = ROOT / row["work_dir"]; snap = ROOT / row["snapshot_dir"]
     work_paths.append(work); snapshot_paths.append(snap)
@@ -81,6 +83,19 @@ check("Crown canonical DataFlash equals supplied 32KiB snapshot", (ROOT / crown[
 check("Crown identities embedded", crown_cf[0x20860:0x2086C] == b"8965F3012000" and crown_cf[0x17DC0:0x17DCC] == b"8A3113008000" and crown_cf[0x17D80:0x17D8C] == b"8965H3008000")
 r = subprocess.run([sys.executable, str(ROOT / "tools/targets/crown/builders/promote_crown_analysis_inputs.py"), "--check"], cwd=ROOT, capture_output=True, text=True)
 check("Crown canonical input promotion reproduces tracked outputs", r.returncode == 0, r.stderr.strip())
+
+meter = targets["r4p-838004AD91"]
+for field, source in (
+    ("codeflash", "r4p-us-2024-dash-cflash.bin"),
+    ("dataflash", "r4p-us-2024-dash-dflash.bin"),
+    ("extended_user", "r4p-us-2024-dash-bootflash.bin"),
+):
+    captured = ROOT / meter["capture_root"] / source
+    check(f"R4P meter canonical {field} preserves complete capture",
+          (ROOT / meter[field]).read_bytes() == captured.read_bytes())
+meter_cf = (ROOT / meter["codeflash"]).read_bytes()
+check("R4P meter identity retains linked CodeFlash address",
+      meter_cf[0x156898:0x1568A4] == b"838004AD9110")
 
 h = targets["corolla-8965H1202000"]
 f = targets["corolla-8965F1208000"]

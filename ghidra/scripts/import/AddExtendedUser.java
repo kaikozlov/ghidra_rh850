@@ -2,8 +2,7 @@
 //@category Analysis
 // Normalize the block at 0x0 as CodeFlash and attach an optional extended-user
 // image at a registered base (e.g. boot.bin at 0x01000000).
-// Unlike AddDataFlash this makes no P1M-E assumption: the CodeFlash block may be
-// any size and the extended-user area is read/execute like the code area.
+// The CodeFlash block may be any size; the extended-user area is read/execute.
 // Usage: AddExtendedUser.java /absolute/path/to/boot.bin <baseHex> <sizeHex>
 import ghidra.app.script.GhidraScript;
 import ghidra.program.model.address.Address;
