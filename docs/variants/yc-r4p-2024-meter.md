@@ -160,6 +160,113 @@ Observed checks:
 
 These checks execute firmware offline; no vehicle diagnostics were sent.
 
+## Application SecOC
+
+**The meter verifies synchronization on CAN `0x00F` and signs outgoing
+CAN `0x24D`, using hardware key selector `4` for both.** This is the
+classic Toyota SecOC format: a 28-bit truncated AES-CMAC and packed
+trip/reset/message freshness.
+
+Evidence: registered target `r4p-838004AD91`, application decompilation,
+CodeFlash configuration bytes, and disassembly of the routing, command
+issue, freshness comparison, and commit gates below.
+
+### Configured messages and routing
+
+| Direction | CAN ID / DataID | Frame bytes | Application bytes | Full / transmitted freshness bits | MAC bits | Profile |
+|---|---|---:|---:|---:|---:|---|
+| Receive synchronization | `0x00F` | 8 | 0 | 36 / 36 | 28 | `0x1732C4` |
+| Transmit authenticated data | `0x24D` | 8 | 4 | 46 / 4 | 28 | `0x173314` |
+
+The module has one RX and one TX profile: `0xBFBE6` and `0xC04C8`
+map only RX PDU `0x47` and TX PDU `0`, respectively; `0xC0E66`
+gives a queue count of one in each direction.
+
+- **RX:** channel-0 CAN table `0x1706E4`, row 20, maps `0x00F` to
+  PDU `0x47`. Router `0xA8A88` uses row `0x1710B2` and descriptor
+  `0x17040C` to call SecOC ingress `0xBF6C6`.
+- **TX:** router descriptor `0x1704C4` selects SecOC submission
+  `0xBF5D2`. After signing, `0xC0BA2 → 0xC0DA2 → 0xA8178`
+  reaches CAN submission `0x9DD00`. Its domain-0 table pointer at
+  `0x16D0E0` resolves to `0x17054C`; entry 0 contains CAN ID
+  `0x24D`, channel 0. Hook `0xA7DB6` sees a zero flag byte at
+  `0x170C3C`, so it does not add a Toyota byte checksum.
+- CAN `0x090` and `0x0D7` are ordinary receives here: their router
+  rows `0x1711D2/0x1711D6` select COM copier `0xA4502`, without
+  entering this SecOC verifier.
+
+### Authenticated bytes
+
+`0xC12C4` prepends the big-endian DataID. Packers `0xC174A` and
+`0xC166E` produce the freshness bytes; `0xBFD52` extracts the RX
+tag and `0xC09B8` assembles the TX trailer.
+
+```text
+T = trip counter (16 bits), R = reset counter (20 bits)
+M = message counter (8 bits), P = four application bytes
+|| = bit concatenation; fields are most-significant-bit first
+
+0x00F CMAC input:  00 0F || T16 || R20 || zero4       (7 bytes)
+0x00F CAN data:    T16 || R20 || CMAC_msb28           (8 bytes)
+
+0x24D CMAC input:  02 4D || P32 || T16 || R20 ||
+                  M8 || R_low2 || zero2             (12 bytes)
+0x24D CAN data:    P32 || M_low2 || R_low2 ||
+                  CMAC_msb28                        (8 bytes)
+```
+
+### Freshness and commit gates
+
+`0xC1A3C` compares synchronization candidates with committed trip/reset
+at `0xFEDDC448/0xFEDDC44C`. It stages a newer trip, or a larger reset
+within the same trip. The configured rollover window (`0x1732C0 = 15`)
+also permits stored trip `65520..65535` to advance to trip `1..16`.
+An identical pair returns `1`; other stale candidates return `0x22`.
+
+Candidates live at `0xFEDDC450/0xFEDDC454` until verification completes.
+`0xC0196` treats verification result `0` at `0xFEDDC3C4` as success;
+`0xC0160 → 0xC1550 → 0xC1B9A` then commits the pair and its bitwise
+complements at `0xFEDDC458/0xFEDDC45C`. Failed authentication does not
+commit the candidate.
+
+For TX, `0xC1924` starts each new trip/reset epoch at message counter
+`1` and increments within that epoch. Counter `255` or reset `0xFFFFF`
+returns `0x24`, preventing another MAC request. The usable message
+counters are `1..254`. Complement-check failure also prevents freshness
+generation.
+
+TX state is staged at `0xFEDDC470..0xFEDDC47B`.
+Only a zero return from lower CAN submission makes `0xC0BA2` call
+`0xC1532 → 0xC1B2A`, copying it to committed TX state
+`0xFEDDC464..0xFEDDC46F`. This is queue acceptance, not a physical
+bus-delivery acknowledgement.
+
+### Hardware key and provisioning
+
+Initializer `0xBF52E` installs key configuration `0x1732A4`:
+mode word `1`, selector byte `4`. `0xBFA8C` copies it to
+`0xFEDDC368/0xFEDDC36C`; both SecOC profiles select key reference `0`.
+The provider reads the selector byte, rather than a plaintext AES key.
+
+- RX worker `0xBFF14` submits verification through `0xBC43A`.
+  Provider `0xBEF84` writes `(4 << 16) | 7` to `0xFFF60000`.
+- TX worker `0xC07FA` submits MAC generation through `0xBCAA4`.
+  Provider `0xBEDD8` writes `(4 << 16) | 5` to the same register.
+- The hardware interface streams input through `0xFFF60004` and
+  reads output through `0xFFF60008`.
+
+Application RID `0x1010` exposes the hardware key-update path:
+`0x1D4E8` stages 64 request bytes; `0x1D51A` calls `0xBC882`;
+`0xBF094` issues command `8` with four input blocks and three output
+blocks. Result handler `0x1D5DE` returns a status byte plus 48 result
+bytes. This matches the family's SHE `M1/M2/M3 → M4/M5` exchange
+documented in the [hardware command census](../security/icu-hsm-command-surface.md).
+
+The operational SecOC key value has not been recovered. The configured
+selector is established; the software boot/payload AES roots above
+belong to a separate crypto path. The four application bytes in
+`0x24D` remain undecoded.
+
 ## Receive and diagnostic paths
 
 **The brake-graphic display predicate remains unresolved.** Getter
