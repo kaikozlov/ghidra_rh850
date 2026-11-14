@@ -574,6 +574,99 @@ installation and HUD state:
 Source: `tools/gts did Meter_P5 DID --json`. Positions in this table refer
 to diagnostic records.
 
+### Cruise-status messages and the meter stop-light indicator
+
+Road testing confirms that the meter's brake indicator works in PCM-less operation.
+
+The byte census below covers **236 segments**: stock routes `3b/3c`, PCM-enabled openpilot routes
+`64/67`, and PCM-less routes `126/128`. It contains **70,143 native `0x1B2`,
+15,358 `0x251`, and 14,219 `0x252` frames**. Byte positions below are zero-based.
+Comparisons use preceding samples with bounded age, separately per route.
+Source paths, SHA-256 hashes, counts and raw witnesses are retained in
+[`camry_2026_cruise_status_decode.json`](../../data/generated/camry_2026_cruise_status_decode.json).
+
+#### `0x1B2`: cruise, driver-input and speed summary
+
+Native publication is approximately **5 Hz**, with 32-byte payloads.
+
+| Field | Observed role and evidence |
+|---|---|
+| B0 mask `02` | Native cruise-operating latch: agrees with `0x08A B3[3]` in **70,141/70,143** samples. Remains clear in both PCM-less native streams while OP operates. |
+| B0 mask `04` | Drive-gear indication: agrees with logged D versus P/R/N in **69,969/69,976** fresh comparisons. |
+| B0 mask `08` | Driver-brake-switch indication: agrees with preceding `0x101 B0[3]` in **69,854/70,143** samples. In pedal-free native-active braking with `0x3B7 B2[2]` asserted, it is clear in **2,692/2,693** samples. |
+| B0 mask `10` | Startup assertion. Four observed rising edges, no falling edges. |
+| B0 masks `20`, `40`, `80` | CANCEL, SET and RES event-associated indications. All **39/39**, **39/39** and **120/120** respective rises follow the corresponding raw `0x0FE` press within 300 ms. They commonly persist about half a second after physical release. |
+| B1 | Retained cruise set-speed representation in the internal whole-km/h range. During native operation, B1 minus `0x08A B10` is 0 or +1 in **39,255/39,258** samples; three transition samples differ by +2/+3. All 356 observed B1 changes occur with the native latch set. B1 persists after cancellation while `0x08A B10` clears. |
+| B2 | Whole-km/h vehicle-speed representation: equals preceding `0x610 B2` in **60,480/70,132** comparisons; asynchronous updates produce differences during motion. |
+| B0 mask `01`; B3–B31 | Zero throughout this corpus. |
+
+#### `0x251`: display scenes, set speed and stopped-hold status
+
+Native publication is approximately **1 Hz**, with additional updates on
+changes. The eight-byte frame has no observed rolling counter.
+
+| Field | Observed structure |
+|---|---|
+| B0 top bits | Normal `A0`/`C0` scenes broadly follow native inactive/operating state. `80` occurs during initialization; `E0` is a separate short scene on route 67. |
+| B1 mask `10` | Persistent availability/latch, retained across cancellation; its established switch lifecycle is in [baseline §49.4](camry-2026-live-baseline.md#494-tss3-preserves-toyotas-separate-internal-and-cluster-cruise-set-speeds). |
+| B1 mask `04` | SET-decrement-associated transient: 44 frames in 13 episodes. Every onset follows raw SET by 90–221 ms and accompanies a one-unit B2 decrement. |
+| B2 | Retained cluster-domain cruise set speed, mph in these captures. |
+| B3 `[7:6]`, B3 `[5:3]`, B5 `[4:3]` | Three fields take identical values 0/1/2 across the census. Values 1 and 2 produce B3 bases `48` and `90`. Scene 1 includes inactive, accelerator-override and stopped-hold contexts. |
+| B3 mask `02`; B4 `[4:3]` | Coupled scene fields: B4 is `10` in scene 1 and `08` in scene 2 when B3 mask `02` is set. One transition exception. |
+| B4 `[7:5]` | Values 0–4. Model-lead-distance distributions overlap, including a nonmonotonic bin 0. |
+| B4 mask `02` | Delayed stopped-hold-associated indication: eight set frames in three episodes. Its rising and falling edges coincide with `0x252 B2` mask `10`; see the cross-message join below. |
+| B5 `[7:5]` | Vehicle-interval selector. This corpus exercises normal native value 1; the independent GTS/251 selector join is recorded in the baseline report. |
+| B6 low bits and B7 | 197 coupled transient frames on stock routes; none in the two PCM-enabled OP-long routes. |
+
+#### `0x252`: native operating, response and stopped-state indications
+
+Native publication is approximately **1 Hz**, with event-driven updates.
+Nine eight-byte payloads occur; only ten bits vary.
+
+| Field | Observed structure |
+|---|---|
+| B0 mask `02` | Usually inverse to the native operating latch: set with FRC inactive in **6,238/6,299** set frames, and clear with FRC active in **7,866/7,920** clear frames. Exceptions include active-stopped payload `03` and initialization. |
+| B0 mask `01` | Three stopped stock episodes, 18 frames, with native cruise still latched. Precedes the delayed-hold indication below. |
+| B1 masks `08/10/20` | Always occur together as `38`. All 15 rising episodes follow MAIN/RES attempts within 500 ms. Stock examples have the brake held; PCM-less examples occur with the actual belt latched and brake released. |
+| B1 mask `40` | Three roughly 5.3-second pulses after early MAIN presses. Entire PCM-enabled route 67 lacks it. |
+| B2 masks `08/20` | Always occur together as `28`. All 40 frames have accelerator input, native cruise latched, raw brake released and result ID 63. Many accelerator-input samples lack this state. |
+| B2 mask `10` | Delayed stopped-hold-associated indication, seven frames across the same three episodes as `0x251 B4` mask `02`. |
+| B4 mask `20` | 26 pulses lasting 1.044–1.055 seconds. Accompanies several response events but also occurs alone with route 67's `0x251=E0…` scene. |
+| Other 54 bits | Zero throughout this corpus. |
+
+All-zero `0x252` spans **83 qualified automatic-deceleration intervals** across
+stock and PCM-enabled OP-long operation.
+
+#### Cross-message observations
+
+The three stopped episodes link `0x251 B4` mask `02` and `0x252 B2` mask `10`
+to the previously recovered [delayed zero-speed hold](#stock-acc-delayed-hold)
+state in `0x08A B4[5]`. The two display/status messages change in the same
+receive batch in all three episodes. Their rises are within 11 ms of the
+request flag; their clears precede it by 52–63 ms.
+
+The relevant OP-long/PCM-enabled witnesses are route `64`, segment 2,
+monotonic **2570.2406–2576.4019 s** (**43.59→25.49 mph**) and route `67`,
+segment 6, **1214.2487–1218.7025 s** (**20.50→6.72 mph**). Both have accepted
+longitudinal result ID 11, no driver pedals, native `0x1B2 B0=16`,
+all-zero `0x252`, and `0x251=C0 10 <set speed> 90 80 30 A0 80`.
+That matches the PCM-less sender's active non-speed payload at commit `931d45b7`.
+
+PCM-less commit `931d45b7` sends the unlatched-driver-belt pattern to
+the FRC, blocks native `0x1B2/0x251/0x252` toward the chassis, and replaces only
+`0x251`. During the route-126 braking witness, native `0x1B2` has
+B0=`14`, B1=`00`, and native `0x252` is `02 00 00 00 00 00 00 00`;
+neither is forwarded. The chassis brake-associated flags still assert.
+
+GTS names `Meter_P5 1101` bit 45 **Stop Lamp Switch**, `2041` bit 30
+**Stop Lamp Switch Function**, and `ABS_P5 102D` bits 10/26/61 **Stop Light
+SW / Stop Light Relay / Stop Light Relay State for ECU Control**.
+
+The separate [2024 R4P meter analysis](yc-r4p-2024-meter.md#receive-and-diagnostic-paths)
+identifies a consumer of `0x3B7 B1[4:3]`. Those bits stay zero in both
+PCM-enabled OP-long routes and both PCM-less routes examined here.
+Use a newer-meter firmware dump to trace the brake-display logic.
+
 ## PDA and SDG lateral profiles
 
 Toyota's customer-facing **Proactive Driving Assist (PDA)** name resolves an otherwise

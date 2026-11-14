@@ -668,8 +668,7 @@ from the RAV4 meter image.
 
 ## Receive and diagnostic paths
 
-**The brake-graphic display predicate remains unresolved.** Getter
-`0x768B4` returns `(0x3B7.B2 >> 2) & 3` through signal `0x550` at
+Getter `0x768B4` returns `(0x3B7.B2 >> 2) & 3` through signal `0x550` at
 `0x9C66A`. Its `0x768D0` call is the sole extraction covering B2 bit 2
 among all 1,344 direct calls found in the image bytes. No application
 caller of `0x768B4` has been identified.
@@ -715,7 +714,6 @@ handled by the multi-frame record assembler `0x6230E → 0x62FB4`.
 `0x62F80` selects samples with `B1 == selector && B0 != 0`;
 `0x62E9C/0x62E66` assemble 30-halfword records. `0x6310A → 0x12F08`
 publishes records selected by incoming SPI packet offset `0x240`.
-The independent pedal input has not been identified.
 
 Consumer `0x4F944` combines `0x411` fields with `0x3B7` B1 bits 4:3.
 Its cached output is consumed by the selector table at `0x15E5A4` and
