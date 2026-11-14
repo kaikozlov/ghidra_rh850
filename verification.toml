@@ -849,6 +849,9 @@ tests = [
 [suite.codeflash_dumper]
 tests = ["tests/firmware/verify_codeflash_dumper.py"]
 
+[suite.rav4_meter_dumper]
+tests = ["tests/firmware/verify_rav4_meter_dumper.py"]
+
 [suite.crypto_test_bank0_composition]
 tests = ["tests/firmware/verify_crypto_test_bank0_composition.py"]
 

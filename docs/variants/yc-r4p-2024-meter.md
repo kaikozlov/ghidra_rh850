@@ -104,6 +104,114 @@ is `[0:0x7F0]`, followed by the 16-byte tag. The
 [Sienna EPS payload](../security/bootloader-payload-gate.md#7-exact-4-kib-plaintext-format)
 uses a `0x1000`-byte image.
 
+### Calvin/Willem range-dumper adaptation
+
+The EPS dumper's addressed-word protocol and reassembler are reused for the
+meter's **2 MiB** CodeFlash. The meter source is
+`tsk/dumper/rav4_meter_main.c`; its authenticated-package builder is
+`tsk/dumper/build_rav4_meter_payload.py`. The retained EPS client is
+`targets/camry-2026/raw-20260826/camry_codeflash_dump.py`, and the maintained
+EPS payload is `tsk/dumper/main.c`.
+
+The meter package is exactly `0x800` bytes. The builder places code and zero
+padding in `[0,0x7EC)`, writes little-endian
+`CRC32(plaintext[0:0x7EC])` at `0x7EC`, writes the CMAC at `0x7F0`, then
+encrypts the complete plaintext with the CBC construction above. The `10F0`
+handler reads the CRC field separately and compares it with the CRC32 computed
+over `[0,0x7EC)`. The builder emits upload ciphertext as `payload.bin` and the
+decrypted inspection image as `payload.plaintext.bin`. DID `0201` and `0202`
+use the retained all-zero package values.
+
+The accepted RoutineControl start request is:
+
+```text
+31 01 FF 00 45 00 00 01 00 00 00 1F 00 00
+|  |  RID   |  |---- address ----| |---- length -----|
+SID SF      tag selector
+```
+
+`0xFEDC67BE` requires session mask `0x02`, SecurityAccess bit 0, start
+subfunction, exactly ten option bytes, tag `0x45`, and selector `0`.
+The selector-0 table at runtime `0xFEDD4DD4` contains the exact tuple
+`0x10000/0x1F0000/0/0`, covering the application CodeFlash window. The path is
+`FF00 → FEDC66D2 → FEDCEEC8 → FEDC6F08 → FEDC77BE → FEDC71D8`.
+At `0xFEDC7218` it calls `0xFEDD7800` with mode 1. A zero return would continue
+to uploaded offset `0x7E` and the stock erase driver. The payload accepts only
+mode 1 and never returns from that mode; other modes return failure.
+
+These values are target-specific, not corrections to the EPS package or
+client. The Sienna `8965B4512000`, Camry `8965F3307000`, and Crown
+`8965F3012000` bootloaders are byte-identical across the CRC validator,
+RoutineControl handler, policy tables, erase path, and callback path. The
+Corolla `8965F1208000` and `8965H1202000` copies have the same implementation
+and table contents shifted earlier in CodeFlash.
+
+The EPS RAM CRC descriptor is
+`{0xFEBF0000, 0xFF0, 0xFEBF0FE0, 0xFEBF0FE4}`. Its validator (`0x481A`, or
+Corolla `0x47FE`) verifies the embedded address and length, feeds the complete
+`0xFF0` bytes to the hardware CRC engine with seed `0xFFFFFFFF`, and requires
+the result to pass its zero-result check. The pinned EPS RAM-dump plaintext has
+prefix CRC `0xF675E81A`, stored fixup `0x098A17E5`, and Python CRC32 residue
+`0xFFFFFFFF` over all `0xFF0` bytes. The meter instead reads its four-byte CRC
+field separately and compares it directly with CRC32 over the preceding
+`0x7EC` bytes. The verified meter plaintext stores `0xD4681225`; the EPS
+residue-style value would be `0x2B97EDDA` and is rejected.
+
+The EPS `FF00` handler (`0x567E`, or Corolla `0x5662`) does not match an exact
+address/length tuple. It checks that the requested range is contained in its
+CodeFlash policy and validity-region rows, then maps both endpoints through
+the physical erase-block table. `0xE0000/0x8000` is exactly block 34,
+`0xE0000..0xE7FFF`, inside the permitted `0x18000..0xFFDFF` region. The meter
+adds the exact four-field matcher at `0xFEDCAF38`; selector 0 uses the
+BootFlash record at source offset `0x762C`, relocated to `0xFEDD4DD4`, whose
+tuple is `{0x10000, 0x1F0000, 0, 0}`. Thus the CRC construction and `FF00`
+arguments are real bootloader-contract differences. The EPS values remain
+correct for the EPS callback setup; the meter values are required by the
+meter's package and operation tables.
+
+The compiled payload uses classic RSCAN channel 2 transmit buffer 2 and emits
+response ID `0x7C8`. BootFlash records `0x7ADC/0x7AEC` route physical `0x7C0`
+and functional `0x777` to ISO-TP receive callback `0xFEDC9814`; `0x7AFC`
+routes `0x7C8` to the send-completion callback. The EPS RSCFD registers,
+`0x7A1/0x7A9` route, and Panda bus assumptions do not apply.
+
+After disabling interrupts, the payload calls the meter's WDTA0/1 service at
+`0xFEDC1D7E`. That service reads the option-byte enable and variable-activation
+bits, programs mode `0x5F` from the meter's retained configuration, and feeds
+either `0xAC` or `0xAC-reference`. Mode `0x5F` selects the 100% watchdog
+window. Completion and transport failures call the meter's own `0xAD4`
+protected `SWRESA` sequence. The normal mode-1 path therefore cannot return
+success into the erase continuation.
+
+Offline verification:
+
+```sh
+uv run python tests/firmware/verify_rav4_meter_dumper.py --full
+```
+
+One continuous GNU RH850 simulation now consumes the retained programming
+handoff, enters programming session `10 02`, completes SecurityAccess `27
+01/02` with the firmware's seed and key routines, writes DIDs `0203/0201/0202`,
+downloads the encrypted package with `34/36/37`, accepts `31 01 10F0`, verifies
+the package CRC32 and CMAC, accepts the exact `FF00` request above, executes the
+uploaded payload, and reassembles its nine-frame 16-byte dump byte-for-byte.
+The simulator enters the receive path at the firmware's PduR/DCM
+StartOfReception/CopyRxData/RxIndication APIs. GDB invokes the exact foreground
+task entries in scheduler order and supplies successful lower-layer transmit
+confirmation, one RTOS resource/timer read, inherited RSCAN configuration, and
+RSCAN transmit completion.
+
+The same test executes fixed and variable watchdog-feed paths, mode rejection,
+first/last-word and progress-boundary reads, and busy, missing-completion,
+abort, and uninitialized-controller failures. Its full payload run emits
+524,421 frames; the retained reassembler produces 2,097,152 bytes with
+SHA-256
+`cc75cac2aaa4a648dadcad3d3d59d0c1bb293c53f1dbfcf9bc0fc88b4b6a4322`,
+identical to the registered specimen. The simulator does not model D1L RSCAN,
+the RTOS scheduler, physical CAN, or reset side effects. No vehicle traffic was
+sent. A Camry combination meter still requires its own firmware and boot
+contract.
+
 ### Application SecurityAccess
 
 The application's SID `0x27` table at `0x172414` selects **`03/04`**,
