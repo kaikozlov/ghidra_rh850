@@ -372,8 +372,299 @@ documented in the [hardware command census](../security/icu-hsm-command-surface.
 
 The operational SecOC key value has not been recovered. The configured
 selector is established; the software boot/payload AES roots above
-belong to a separate crypto path. The four application bytes in
-`0x24D` remain undecoded.
+belong to a separate crypto path.
+
+### `0x24D` application producer
+
+**The meter assembles `0x24D` from CXPI frame `0x10` in its
+Steering Switch Control Module communication group, adding local
+presence/receive-status fields.** The recovered layout matches the existing
+cruise-switch DBC. The byte-source map and OEM peer-role join follow.
+
+ROM table `0x170DDA`, COM PDU **28**, selects lower PDU `0`. Its route
+row at `0x170F96` is `{0x001C, 0x0000}`; router `0xA875A` selects
+`0x170284 → 0x1704C4 → 0xBF5D2`. Sender `0x9D122` passes the buffer
+selected by `0x16FBF0[28] = 0x00E0`: **`0xFEDDB498`**, eight bytes.
+The SecOC queue retains the four application bytes and constructs the trailer.
+
+Producer `0x3F482` runs when its input bit 3 is set. It checks configuration
+item `0x4A` through `0x5FD42`, then receive record `0x8B` through
+`0x863F4(0x8B, 0x101, 300)`. With configuration value `1`, low two status
+bits zero, and combined timeout flag `0xFEDD2380` clear, it copies:
+
+| CAN application field | Source at `0xFEDD69A8` | Signal IDs |
+|---|---|---|
+| B0 bits 7..2 | Record B0 bits 7..2 | `0x10C..0x111` |
+| B1 bits 7..3 | Record B1 bits 7..3 | `0x112..0x116` |
+| B3 bits 3..0 | Record B3 bits 3..0 | `0x11B` |
+| B3 bits 7..6 | `1` when configuration is `1`, otherwise `2` | `0x119` |
+| B3 bit 5 | Combined timeout flag | `0x11A` |
+
+Packers `0x9C728/0x9C870` write these fields at COM-buffer offsets
+`0xE0/0xE1/0xE3`. `0x3EF6E` builds the combined timeout flag from
+status bit 1 of records `0x89..0x8C`, using the same threshold `300`,
+when configuration is `1`; otherwise it clears the flag.
+
+The invalid-reception branch clears B0 bits 7..2, sets B1 bits 7..3,
+and retains the previous B3 low nibble. The unconfigured branch uses the
+same B0/B1 defaults, clears the low nibble, and selects status `2`.
+ROM initialization bytes at `0x16D7CC` are `00 F8 00 00 00 00 00 00`.
+B2 has generated setters for bits 7/6 (`0x641C6/0x641E8` and their
+pointer-argument wrappers); the recovered producer does not update them.
+Their live application writers remain open.
+
+Configuration getter `0x5FD42` reads cached byte
+`0xFEDD324B + 0x4A`. Loader `0x5FBFC` obtains this item through internal
+key **`0x055B`**, read from ROM `0x1619DE`, via `0x83938`.
+Item `0x4A` is managed as a received-device presence state: callback
+`0x11664 → 0x112F8` marks it present when logical record **2**
+(`0x89`) is received and its status is available. The callback selects
+`0x5FC96(0x4A) → 0x5FDEE → 0x5FD5A(..., 1)`; the generic manager
+`0x5F06C/0x5EFCC` promotes the cached value after three qualifying samples.
+Policy row `0x161834` uses callback `0x5FA68`, which reads calibration
+word `0x17` bits 1:0; all nine variant tables select policy `1`.
+The default is zero, and the NVM-slot entry at `0x161930` is `0xFFFF`.
+This is a receive-driven gate, rather than a direct read of a static
+installed-option bit.
+
+### Upstream serial record
+
+Receive-copy table `0x177474`, slot **4**, points to descriptor
+`0x17754C`; descriptor `+0x24` is `0xFEDD69A8`.
+Callback `0xCBCAC → 0xCA4F8` copies exactly **12 bytes** from its supplied
+record pointer to that destination. The descriptor's completion callback
+`0xCA01C → 0xCBCA4` is empty.
+
+The associated low-level configuration chain is
+`0x177720 + 0x10 → 0x177824`, with I/O configuration at `0x177844`
+and serial configuration at `0x177968`. The serial peripheral base is
+**`0xFFCE2000`**. Initializer `0xCDACC` writes `0x21` at base `+0x08`;
+the D1L/D1M manual **R01UH0451EJ0220**, table 20.5 and section 20.3.3.3
+(p. 1186), identifies **RLIN32 in UART mode**, with receive noise filtering
+disabled. This establishes the hardware transport used by the serial stack.
+The framing identifies **CXPI normal frames**: validator `0xCC8A6`
+checks seven-bit IDs with odd parity using `0x1779D0..0x177A4F`
+(all 128 entries verified); parser `0xCC9B6` reads FI bits 7:4 as DLC
+and bits 1:0 as the two-bit counter; `0xCBAD4` constructs the network-state
+bits 3:2; CRC routine `0xCDCDC` right-shifts and XORs `0xC8` over
+PID, FI, and data. This combined fingerprint matches the normal-frame
+layout in [Infineon's CXPI training, slide 8](https://www.infineon.com/assets/row/public/documents/10/56/infineon-traveo-ii-clock-extension-peripheral-interface-cxpi-training-en.pdf).
+Protocol identification is inferred from those independently checked fields.
+
+ID lookup `0x17769E` maps **CXPI ID `0x10` to slot 4**.
+Its configuration row `0x17766E` is `10 08 02 02 00 00 00 00`:
+eight-byte configured payload, receive mode `2` (`0xCA800` uses mode `1`
+for transmission). The twelve-byte application record is storage capacity.
+The sibling slot 2 maps **CXPI ID `0x50`**, also eight-byte receive,
+through row `0x17765E` and descriptor `0x1774EC` to `0xFEDD6990`.
+These frame IDs select messages; physical node ownership needs separate
+evidence.
+
+The sibling logical record **2**, at `0xFEDD6990`, has an exact OEM
+switch-field join. DID `0x1002` dispatch row `0x156908` selects reader
+`0x27F76 → 0x2AB42(0, 1)`. Callback rows `0x1575F4..0x15761C`
+select `0x116F2`, which extracts record B0. GTS `Meter_P5` Data List
+DID `0x1002` names the resulting fields:
+
+| Record-2 B0 bit | DID payload byte 1 bit | OEM name |
+|---:|---:|---|
+| 3 | 7 | Multi Switch (Up) |
+| 2 | 6 | Multi Switch (Down) |
+| 5 | 5 | Multi Switch (Left) |
+| 4 | 4 | Multi Switch (Right) |
+| 7 | 3 | Multi Switch (Enter) |
+| 6 | 2 | Multi Switch (Back) |
+
+These names identify the multiplex-switch input carried by the same
+serial interface and the record that enables item `0x4A`.
+
+The exact firmware also supplies the peer's **OEM diagnostic role**.
+Communication monitor rows `0x154458/0x154462/0x15446C/0x154476`
+cover records `0x89..0x8C`, including `0x8B` for CAN `0x24D`.
+Group row `0x154564` selects all four (start index 24, count 4) and
+reports event **20** through `0x1A32C → 0x1A11E → 0xB1982`.
+Event resolver `0xB5AE2` subtracts one, yielding internal event index
+**19**. Its descriptor at `0x172FC8` selects DTC row `0x172E38`,
+containing **`0x951287`**. GTS `Meter_P5` names **B151287**
+**Lost Communication with Steering Switch Control Module**, failure
+**Missing Message**. This joins the four-record CXPI group to a named
+steering-switch peer role. A frame ID remains a message identifier;
+installation and physical node ownership need wiring or capture evidence.
+
+The pinned Toyota SecOC DBC calls B0 bits 7/6/5/4/2
+`INCREASE/ENABLE/DECREASE/CANCEL/DISTANCE` and B3's low nibble `COUNTER`.
+Those are external-source labels consistent with the recovered layout and
+Steering Switch Control Module diagnostic role; the meter dataflow above
+supplies the source bytes and gates. B0 bit 3 and the B1 fields remain
+unnamed. The named cruise inputs are DBC-derived interpretations, pending
+an exact physical-switch/capture or peer-firmware join for this specimen. The
+[Camry steering-touch investigation](camry-2026-tss3-opendbc-port.md)
+separately identifies a meter/CXPI architecture on newer vehicles.
+The recovered RAV4 sibling record has named multi-switch inputs; assigning
+ID `0x10` to a capacitive touch sensor would require additional evidence.
+
+### Camry capture comparison and verification
+
+The two retained relay-correct August 27 Camry CAN captures contain
+`0x24D/8` on Panda buses **0 and 2**, with zero bus-1 observations:
+
+| Capture under `targets/camry-2026/raw-20260827/` | Frames per bus 0/2 | Median interval, bus 0 |
+|---|---:|---:|
+| `camry_relay_route_can_20260827.ndjson.gz` | 517 / 517 | 1.003356 s |
+| `camry_relay_lta_confirm_route_can_20260827.ndjson.gz` | 600 / 600 | 1.003403 s |
+
+Every application prefix in these captures is **`00 00 00 80`**.
+Bus 2 is the retained relay mirror. The second capture spans 598.992039 s
+between first/last `0x24D` frames, giving 1.000013 Hz. These are observed
+Camry bytes; RAV4's unconfigured path includes B1=`F8`, so a shared
+arbitration ID does not establish identical configuration semantics.
+
+Verification used the registered corpus, original CodeFlash table bytes,
+and offline GNU V850 disassembly of `0x3F482`, `0x3EF6E`, `0xCA4F8`,
+`0xCDACC`, `0x112F8`, `0x116F2`, `0x27F76`, and `0x2AB42`, plus
+the CXPI PID/FI/CRC routines and communication-event selection at
+`0x1A32C/0x1A11E/0xB5AE2`. OEM field/DTC names come from
+`tools/gts did Meter_P5 0x1002` and `tools/gts dtc Meter_P5 B151287`
+(`Meter_P5.ddb` SHA-256
+`79b2bf8b8edeb40321b82d3b170143179cddac124b94588c670fbc176eaf0576`).
+The repository's installed toolchain image ran with
+network disabled and firmware mounted read-only; the existing Ghidra
+working session was left untouched. Capture counts were recomputed directly
+from retained incoming-CAN NDJSON. No vehicle traffic was transmitted.
+
+## Speedometer input and display correction
+
+**This meter applies an upward, table-driven calibration after receiving speed.**
+The normal input is **CAN `0x0D7` B1:B2**, unsigned big-endian in
+hundredths of km/h: receive row `0x1709CC`, PDU `0x90`, COM buffer
+start `0x471`, signal `0x543` at offset `0x472`. Getter
+`0x73504 → 0x11850 → 0x57B5C` supplies `0x57D20`; values through
+`175` become zero. The valid-input state machine `0x57C42` stores the
+input in `0xFEDD2C80`, read by `0x57D74(0, 180)`.
+IOControl `0x2A01` can substitute test speeds inside `0x11850`;
+its metric table `0xDA4A6` contains `0, 4000, …, 40000`, independently
+establishing the input scale.
+
+DID **`0x1041 Vehicle Speed Meter`** reads the input before display
+correction: dispatch row `0x15696C → 0x2804C → 0x57A52 → 0x57D74`,
+with normal result `floor((raw + 50) / 100)` km/h. The reader returns
+`0xFF` when the status gate fails; otherwise it caps the computed byte at `0xFE`.
+`0x57C16 → 0x6A814` separately publishes the same rounded input as
+**CAN `0x610` B2**: signal `0x19`, PDU 2, COM offset `0x12`, lower
+TX index `0x18`, transmit row `0x17060C`.
+The adjacent DID `0x1042` is Engine RPM and belongs to another subsystem.
+
+The digital-speed path is `0x58406`:
+
+1. `0x58026` takes the integer mean of a fourteen-sample ring of input
+   hundredths of km/h.
+2. For imperial output, it computes
+   `floor((mean * 5096 + 4100) / 8200)`; the metric path retains `mean`.
+3. `0x58608(value, unit, 1)` selects a ROM curve from `0x15FD9C`.
+   `0x796D2` clamps at the endpoints and linearly interpolates between
+   knots using integer division.
+4. The calibrated hundredths are divided by `50` into half-unit steps.
+   `0x5819C` updates the held half-unit value only when the new value
+   differs by more than one step. The whole-number candidate is
+   `(held + 1) >> 1`. `0x58240` adds low-speed state handling and
+   `0x582E8` applies a configured upper limit.
+5. Metric/imperial integers occupy `0xFEDD2CD2/0xFEDD2CD0`.
+   The processed SPI builder `0x12F08` places them at packet offsets
+   **`0x88/0x8C`**, alongside the uncorrected input at `0x80` and a
+   separately calibrated high-resolution metric value at `0x84`.
+   `0x5838A` also publishes the selected-unit integer as nine-bit COM
+   signal `0xA5` through `0x64D44/0x688B4`: **CAN `0x376` B0 bit 0
+   followed by B1**, with value `((B0 & 1) << 8) | B1`. This is PDU
+   `0x12`, lower TX index 4, transmit row `0x17056C`.
+
+There are **six selector slots (`0..5`): five calibration IDs and a zero
+fallback**. Selector `0x58788` uses the low byte of saved item `0x131`
+when it is `1..5`; after a successful read with another value, it uses
+variant word 0 bits 24:27 (`0x5C50E`). A failed saved-item read selects
+zero. `0x58608` bounds values above five back to zero. Digital curve pairs
+below are `(imperial, metric)` ROM addresses:
+
+| Profile | Curve addresses | Examples in native units, before whole-number rounding |
+|---:|---|---|
+| 0 | `0x15FFA0`, `0x15FFA0` | All output knots zero |
+| 1 | `0x15FDF2`, `0x15FDCC` | Imperial `100.00 → 101.70`; metric `96.53 → 98.14` |
+| 2 | `0x15FE4E`, `0x15FE18` | Metric `100.00 → 101.70`, `120.00 → 122.10` |
+| 3 / 4 | `0x15FFA0`, `0x15FF12` | Imperial zero; metric `100.00 → 106.50` |
+| 5 | `0x15FF76`, `0x15FF4C` | Imperial `100.00 → 106.00`; metric `96.53 → 103.77` |
+
+The separate high-resolution path `0x57E42` uses pointer table `0x15FD6C`;
+profiles 3–5 have different curves there. Profile IDs therefore identify
+paired calibration policies, rather than six unique digital curves.
+
+**No existing profile is an identity/bypass calibration.** Every nonzero
+curve applies positive correction at its normal-speed knots. Slot 0's
+all-zero ordinates make `0x796D2` return zero for every input; they are
+absolute outputs, not additive corrections. Profiles 3/4 likewise give
+zero imperial output. Profile 2 retains roughly the same uplift as profile
+1, and profile 5 increases it. Writing saved selector zero on variant 1
+would select the configured fallback, profile 1, through `0x58788`.
+Removing the uplift while preserving unit conversion, filtering,
+hysteresis and limits would require changing the calibration or calculation;
+there is no stock selector value that does this.
+### YC specimen: saved profile 1
+
+The supplied DataFlash selects **profile 1**, with saved variant **1**.
+`0x58648 → 0x81118(0x131)` loads `0x0101`; `0x58788` uses its low
+byte directly. Variant initialization `0x5C57C → 0x811E0(0)` loads `1`.
+Its ROM table `0x160ED8` has word 0 = `0x11000000`, independently
+selecting profile 1 as the configured fallback. Word 27 = `0xD4440000`
+selects the digital limits **140 mph / 220 km/h** at `0x15FD52`.
+
+| Saved item | Storage / physical ID | DataFlash file offset | Header | Payload | Commit |
+|---|---|---:|---|---|---|
+| `0x131` | `0x237 / 0x236` | `0x8D40` | `36 02 E2 C2` | `01 01 00 00` | `AA AA AA AA` |
+| `0` | `0x16 / 0x15` | `0x0500` | `15 00 BE C2` | `01 00 00 00` | `AA AA AA AA` |
+
+Exact mapping: saved-item descriptors `0x153894/0x1517E0` identify the
+storage IDs; `0xC63BC` uses service records `0x176B10/0x174900` to select
+the physical IDs. `0xC25E8` uses the slot table at
+`0x173708 + physical_ID * 6`; `0xC99AE` adds DataFlash base
+`0xFF200000`. Both records pass the image's commit
+check `0xC559A`, ID check `0xC534C`, and short-payload checksum check
+`0xC51FC/0xC4E2C`: `0xC2A8 + sum(ID bytes) + sum(payload bytes)` is
+`0xC2E2/0xC2BE`, matching the stored little-endian checksum.
+**All three copies agree and validate.** Speed storage IDs `0x237..0x239`
+map to physical IDs `0x236..0x238`, offsets `0x8D40/0x8D80/0x8DC0`,
+with checksums `0xC2E2/0xC2E3/0xC2E4`. Variant storage IDs
+`0x16..0x18` map to physical IDs `0x15..0x17`, offsets
+`0x500/0x540/0x580`, checksums `0xC2BE/0xC2BF/0xC2C0`.
+Type rows `0x151398/0x1513AC` specify three copies; `0x81382`
+computes their stride and `0x83514` processes all three.
+DataFlash SHA-256:
+`569ef4661fb2e98a156c698e3eba160d6389cd811b41a75cebb78baa681618eb`.
+The storage accessor's `0x3FCE4xxx..0x3FCE5xxx` pointers are retention
+RAM, within `0x3FCE4000..0x3FCE7FFF` in hardware manual figure 5.3.
+
+Thus the specimen's digital imperial curve is **`0x15FDF2`**, with
+knots `(input mph, corrected mph)`:
+`(1.09,0), (20,20.35), (40,40.70), (60,61.00), (80,81.40),
+(100,101.70), (120,122.10), (140,142.40), (160,162.70)`.
+It is an interpolated positive calibration, not a fixed mph addition.
+
+For example, a stable input of **109.44 km/h** (about 68 mph) converts
+to `6801` hundredths of mph, interpolates to `6917`, and produces
+half-unit candidate `138`. Held values `137`, `138`, or `139` survive
+the one-step deadband; the integer output is respectively **69, 69,
+or 70 mph**. A previous higher speed can therefore leave 70 displayed
+at this input. The exact output depends on the fourteen-sample history,
+held half-unit state, and update phase. This reproduces the possible
+68-to-70 difference within the verified RAV4 arithmetic; relating an
+external true-speed measurement to the incoming CAN value requires a
+synchronized observation.
+
+Verification: registered decompilation corpus, original CodeFlash table
+bytes, and read-only offline disassembly of `0x73504`, `0x57B5C`,
+`0x58026`, `0x5819C`, `0x58326..0x587BA`, `0x796D2`, and SPI stores
+`0x13386..0x133A2`. GTS `Meter_P5` supplies the DID names. The SPI peer's
+final pixel rendering is outside this RH850 image. The
+[Camry speed analysis](camry-2026-live-baseline.md#494-tss3-preserves-toyotas-separate-internal-and-cluster-cruise-set-speeds)
+provides a cross-target lead; this report's tables and calculations are
+from the RAV4 meter image.
 
 ## Receive and diagnostic paths
 
