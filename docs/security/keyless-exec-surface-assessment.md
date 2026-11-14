@@ -390,6 +390,21 @@ transfers, only nine target-def chains read a LocalRAM cell: boot payload cell
 `FEBF1240..FEBF1260` appear in adjacent currently-unowned body fragments. Every
 one of these cells is below the XCP write window `FEBF7C00..FEBFFBFF`.
 
+The H/F callback cells are not interchangeable generic hooks. In the exact F
+image, `0x81A10`/`0x81A36` load `FEBF1058`, require its bitwise complement at
+`FEBF105C`, and only then indirect-call it with no arguments; a mismatch sets
+`FEBF1055=1`. The adjacent callback state at `FEBF1040/FEBF104C` and
+`FEBF1044/FEBF1050` uses the same pointer/complement integrity convention.
+By contrast, `0x6D1EA` calls `FEBF6B04` directly; its setter `0x6D1FE` installs
+one of two fixed CodeFlash targets (`0x6FAFA` or `0x6FA04`) and no complement
+check appears in that wrapper. `FEBE5514` is the Dcm active-service callback and
+is invoked with Dcm phase/context arguments rather than as a periodic no-argument
+hook. These distinctions matter for any live callback-repointing experiment:
+changing only a guarded pointer is expected to trip the firmware's own corruption
+flag before the replacement target can be treated as a valid callback. The
+callback census does not establish the scheduling cadence of any homolog in a
+different EPS variant.
+
 The census also produced 98 decoded computed transfers outside a recognized
 function body. Their definition chains were reviewed separately: 16 are in the
 `0x10000..0x1FFFF` calibration region, two in the `0x20000` vector/identity
