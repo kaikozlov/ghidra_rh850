@@ -226,10 +226,24 @@ reassembly, so the patch does not need a second transport or a periodic callback
 
 For the request signer, such a loader can place the resident/config directly in
 the verified `FEBFF9F0..FEBFFBFF` tail and the helper directly in its verified
-GlobalRAM pocket. Execution should be a one-shot handoff into a late-attach
-resident entry, not recurring work in the diagnostic callback. The remaining
-design work is therefore the exact loader/launch stub and a clean foreground-boundary
-handoff; no XCP dependency is required.
+GlobalRAM pocket. Execution can reuse the existing resident entry rather than introducing a
+second late-attach lifecycle. The trigger should disable interrupts and make a
+non-returning jump to `_resident_entry`. That entry reinstalls the target's
+application CPU context (`INTBP/EBASE/GP/TP/SP`), abandons the active DCM stack,
+and replays the same recovered startup sequence already used after the current
+application -> PROGRAMMING -> boot-RAM-payload transition. The startup sequence
+reinitializes communication, SecOC/crypto, diagnostics, DMA, error state and
+timers before the resident takes foreground ownership; the calibration shadow
+copy ends at `FEBFF9EF`, one byte below the resident.
+
+This is an application soft restart, so the launch request should not be expected
+to complete through DCM. The host can instead wait for the application identity
+and signer probe, as the current installer already does after its bootloader
+handoff. Disabling interrupts before resetting the application stack is the one
+extra entry requirement when launching from a live DCM callback. The current
+programming-mode installer already re-enters this startup path without a hardware
+reset, so it exercises the same basic stale-RAM/application-reinitialization
+condition with an intervening boot-runtime phase.
 
 ## Cross-target transfer
 
