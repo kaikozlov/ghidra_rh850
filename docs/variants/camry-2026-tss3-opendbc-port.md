@@ -111,27 +111,126 @@ but its delay-compensated design identifies the correct architectural
 boundary: planner/model action shaping belongs above the vehicle-specific
 `CarController`, with any introduced delay represented to the model.
 
-A proper long-term fix therefore has two parts:
+The immediate idiomatic software fix is a **generic 100-Hz curvature
+reference for the angle/open-loop lateral path in `controlsd`**. The retained
+prototype filters `new_desired_curvature` before `clip_curvature()` and before
+lateral-controller dispatch whenever `steerControlType == angle`. This placement
+also covers Ford, whose interface currently selects the angle-control path but
+whose `CarController` consumes `actuators.curvature` directly; filtering inside
+`LatControlAngle` would miss Ford's real actuator input.
 
-- **Well-conditioned low-speed lateral action.** The learned/control action
-  should not require an increasingly sensitive lateral-acceleration-to-curvature
-  division as speed approaches walking pace. A curvature/yaw-rate-like
-  low-speed action, a hybrid speed-conditioned representation, or a short
-  action trajectory would avoid that singular geometry rather than merely
-  increasing the denominator floor again.
-- **A generic high-rate lateral reference for angle-control cars.** The 20-Hz
-  receding-horizon action needs a continuous 100-Hz reference before
-  `LatControlAngle`/the vehicle port. That reference generator must reconcile
-  successive model revisions and expose its known phase/delay through the same
-  action-horizon accounting used by `LAT_SMOOTH_SECONDS`. `LatControlAngle` can
-  then consume the continuous reference while `CarController` returns to its
-  normal role: vehicle protocol, safety, and actuator limits.
+The filter time constant is derived from model cadence rather than a Toyota
+calibration. The primary prototype uses `ANGLE_CONTROL_REF_FILTER_RC = DT_MDL /
+4` = **12.5 ms**. With the current discrete `FirstOrderFilter` at 100 Hz, only
+5.3% of a step remains after one 50-ms model period. A stronger alternate uses
+`DT_MDL / 3` = **16.67 ms** and leaves 9.5%. `modeld` adds the same RC to the
+lateral `action_t` for the angle-control path so the learned action can account
+for the reference filter's low-frequency group delay. The local Camry rlogs do
+not retain camera streams, so the exact shifted-`action_t` network response
+cannot be replayed here; the 100-Hz control/reference behavior is fully
+replayable.
+
+The retained 11-segment Camry corpus gives the following comparison in the
+three relevant coordinate systems:
+
+| Reference | angle RMS step | angle step at model update | equivalent `k*v^2` RMS step | `k*v^2` step at model update | VMC RMS step | VMC mean / p95 / max deviation |
+|---|---:|---:|---:|---:|---:|---:|
+| current | 0.3850 deg | 0.6996 deg | 0.00754 m/s2 | 0.01430 m/s2 | 0.3389 deg | — |
+| **generic `DT_MDL/4`** | **0.2136 deg** | **0.3155 deg** | **0.00422 m/s2** | **0.00643 m/s2** | **0.2135 deg** | **0.122 / 0.460 / 1.398 deg** |
+| generic `DT_MDL/3` | 0.1923 deg | 0.2677 deg | 0.00378 m/s2 | 0.00543 m/s2 | 0.1923 deg | 0.157 / 0.554 / 1.852 deg |
+
+Thus the primary `DT_MDL/4` reference cuts the model-boundary equivalent
+lateral-acceleration step by about **55%** before Toyota sees the request and
+cuts final VMC RMS by about **37%**. `DT_MDL/3` is the stronger alternate
+(~62% and ~43%, respectively) at greater trajectory displacement.
+
+Full `controlsd -> card` process replay on both November-12 low-speed segments
+confirms the implementation rather than only the reducer. Pooled across 1,483
+active 1-9 m/s control samples, `DT_MDL/4` changes angle-step RMS
+**0.2740 -> 0.1641 deg**, model-boundary angle step **0.5629 -> 0.2653 deg**,
+equivalent lateral-acceleration step **0.00713 -> 0.00436 m/s2**, and
+model-boundary equivalent lateral-acceleration step **0.01452 -> 0.00693
+m/s2**. Final generated VMC-request RMS changes **0.2593 -> 0.1432 deg** with
+0.110-deg mean, 0.380-deg p95, and 0.860-deg maximum deviation.
+
+This is also consistent across public upstream angle/open-loop routes rather
+than being Camry-specific. Current-code process replay gives:
+
+- Ford F-150 MK14, route
+  `e36b272d5679115f/00000369--a3e8499a85/0`, 2,273 active 1-15 m/s
+  samples: actual curvature model-boundary/intersample ratio **27.0 -> 3.00**;
+  curvature RMS **1.255e-4 -> 6.613e-5 1/m**; post-`CarController`
+  curvature RMS **1.114e-4 -> 9.592e-5 1/m**.
+- Tesla Model 3, route
+  `79d0f04c82980004/00000003--fb0b5d9cfc/0`, 1,507 active 1-40 m/s
+  samples: angle model-boundary/intersample ratio **5.25 -> 2.33**; angle RMS
+  **0.0594 -> 0.0320 deg**; mean/p95/max angle displacement only
+  **0.024 / 0.086 / 0.373 deg**. In its 15-40 m/s subset the ratio changes
+  **6.96 -> 2.61**, so the artifact and the fix are not confined to parking-lot
+  speeds.
+- Peugeot 208, route
+  `6a7075a4fdd765ee/0000004e--1f612006dd/0`, 3,262 active
+  ~10.8-19.0 m/s samples: angle model-boundary/intersample ratio
+  **3.50 -> 2.25** and angle RMS **0.220 -> 0.153 deg**, with
+  **0.090 / 0.272 / 0.588 deg** mean/p95/max displacement.
+- A recorded torque-control Toyota RAV4 2022 segment
+  (`a5c341bb250ca2f0/2022-05-18--16-05-17/2`) has torque-command
+  model-boundary/intersample RMS ratio only **1.15**, consistent with the
+  100-Hz torque controller naturally suppressing the 20-Hz model cadence.
+
+The primary openpilot prototype is
+`experiment/generic-angle-curvature-ref-mdl4` at **`58b4f9b63`**; the
+stronger `DT_MDL/3` alternate is
+`experiment/generic-angle-curvature-ref-mdl3` at **`6b5983c0c`**. The
+existing lateral-controller test suite passes on the primary branch. Nissan's
+vehicle-specific low-pass from opendbc #3415 becomes duplicate state under this
+architecture; its removal is preserved separately as
+`experiment/generic-angle-ref-nissan-cleanup` at **`de57e0a8`**. The full
+opendbc unit suite passes 4,189 tests with 710 expected skips on that cleanup;
+the repository's existing Toyota MISRA violation at `toyota.h:150` remains the
+same on untouched HEAD and on the cleanup branch.
+
+The deeper model-action representation is still worth improving. The direct
+action's lateral-acceleration-to-curvature conversion is poorly conditioned as
+speed falls, and a curvature/yaw-rate-like low-speed action, hybrid
+speed-conditioned representation, or short action trajectory could reduce the
+revisions at their source. That is separable from the reference-interface
+problem: even a well-conditioned 20-Hz receding-horizon planner needs a defined
+100-Hz reference when the downstream actuator path has no torque-style feedback
+controller.
 
 The important distinction is placement, not whether the reference generator
 contains filtering mathematics. Smoothing inside Toyota `CarController` is a
-vehicle-specific mitigation for an upstream reference discontinuity. A
-reference governor/interpolator at the planner-to-angle-controller boundary is
-part of the control architecture.
+vehicle-specific mitigation for an upstream reference discontinuity. The
+`controlsd` curvature-reference filter is the generic multirate control layer;
+vehicle `CarController` code returns to protocol, safety, and actual actuator
+limits.
+
+### Comparison with downstream and model-side alternatives
+
+The generic `controlsd` reference is preferred for ownership as well as its
+metrics:
+
+- **YC second-order governor:** strongest request smoothing, but it is
+  vehicle-side state added after the generic control reference is already
+  discontinuous. Across the retained Camry corpus it carries 0.626-deg mean /
+  1.909-deg p95 trajectory deviation and about 91 ms best-fit lag.
+- **Toyota-side RC20:** a useful fallback and diagnostic, but it leaves
+  `carControl`, curvature, and equivalent lateral acceleration unchanged and
+  only repairs the final Toyota request. The generic reference removes roughly
+  half of the model-boundary `k*v^2` step before entering opendbc.
+- **20-Hz model-side smoothing (`LAT_SMOOTH_SECONDS` style):** attenuates
+  successive model revisions but still publishes one scalar target per model
+  frame; it does not itself define the missing 100-Hz reference. Its historic
+  action-horizon compensation is retained in the generic prototype.
+- **C1 trajectory stitching:** solves continuity by construction and remains a
+  promising higher-order design, but a correct implementation needs the
+  model's future direct action at the stitch horizon. The logged-plan proxy
+  moves the trajectory more than the short first-order reference and cannot
+  validate the live learned action without camera/model replay.
+- **Generic `controlsd` curvature reference:** minimal state, naturally
+  multirate, applies before vehicle representation, improves Ford/Tesla as well
+  as Camry, and lets duplicated per-car LPFs be deleted.
 
 ### Downstream mitigation bakeoff
 

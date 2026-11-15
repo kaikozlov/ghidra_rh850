@@ -644,6 +644,257 @@ def root_layer_diagnostics(LogReader, get_curvature_from_plan, root: Path) -> di
     }
 
 
+
+GENERIC_REFERENCE_RCS = {
+    "curvature_ref_mdl4": 0.0125,
+    "curvature_ref_mdl3": 1.0 / 60.0,
+}
+
+
+def generic_reference_bakeoff(
+    LogReader,
+    FirstOrderFilter,
+    apply_steer_angle_limits_vm,
+    get_safety_CP,
+    CarControllerParams,
+    VehicleModel,
+    root: Path,
+) -> dict[str, Any]:
+    """Compare a 100-Hz generic curvature reference against the recorded angle path."""
+
+    variants = ("baseline", *GENERIC_REFERENCE_RCS.keys())
+    per_variant: dict[str, list[dict[str, Any]]] = {variant: [] for variant in variants}
+
+    for rel in CORPUS:
+        path = root / rel
+        msgs = list(LogReader(str(path), only_union_types=True))
+        if not msgs:
+            continue
+        t0 = msgs[0].logMonoTime
+        cp = next(msg.carParams for msg in msgs if msg.which() == "carParams")
+
+        states: list[tuple[float, float, float, float, float]] = []
+        params_rows: list[tuple[float, float, float, float, float]] = []
+        model_times: list[float] = []
+        controls: list[tuple[float, float, bool, bool]] = []
+
+        for msg in msgs:
+            t = (msg.logMonoTime - t0) * 1e-9
+            which = msg.which()
+            if which == "carState":
+                cs = msg.carState
+                states.append((
+                    t,
+                    float(cs.vEgo),
+                    float(cs.vEgoRaw),
+                    float(cs.steeringAngleDeg),
+                    float(cs.steeringAngleOffsetDeg),
+                ))
+            elif which == "vehicleParameters":
+                vp = msg.vehicleParameters
+                params_rows.append((
+                    t,
+                    float(vp.stiffnessFactor),
+                    float(vp.steerRatio),
+                    float(vp.roll),
+                    float(vp.angleOffsetDeg),
+                ))
+            elif which == "modelV2":
+                model_times.append(t)
+            elif which == "carControl":
+                cc = msg.carControl
+                controls.append((
+                    t,
+                    float(cc.actuators.steeringAngleDeg),
+                    bool(cc.enabled),
+                    bool(cc.latActive),
+                ))
+
+        if not states or not params_rows or not model_times or not controls:
+            continue
+
+        state_times = [row[0] for row in states]
+        params_times = [row[0] for row in params_rows]
+        vm = VehicleModel(cp)
+        controller_params = CarControllerParams(get_safety_CP())
+        filters = {
+            name: FirstOrderFilter(0.0, rc, 0.01, initialized=False)
+            for name, rc in GENERIC_REFERENCE_RCS.items()
+        }
+        last_vmc = {variant: 0.0 for variant in variants}
+        vmc_initialized = {variant: False for variant in variants}
+        output: dict[str, list[tuple[float, bool, float, int, float, float, float, float, float]]] = {
+            variant: [] for variant in variants
+        }
+        last_t: float | None = None
+
+        for t, raw_angle, enabled, lat_active in controls:
+            si = bisect.bisect_right(state_times, t) - 1
+            pi = bisect.bisect_right(params_times, t) - 1
+            mi = bisect.bisect_right(model_times, t) - 1
+            if min(si, pi, mi) < 0:
+                continue
+
+            _, v_ego, v_ego_raw, measured_angle, carstate_offset = states[si]
+            _, stiffness_factor, steer_ratio, roll, angle_offset = params_rows[pi]
+            vm.update_params(max(stiffness_factor, 0.1), max(steer_ratio, 0.1))
+            raw_curvature = -vm.calc_curvature(math.radians(raw_angle - angle_offset), v_ego, roll)
+            active = enabled and lat_active
+            dt = 0.01 if last_t is None else float(np.clip(t - last_t, 0.005, 0.03))
+
+            reference: dict[str, tuple[float, float]] = {
+                "baseline": (raw_angle, raw_curvature),
+            }
+            for name, filt in filters.items():
+                if not active or not filt.initialized:
+                    filt.x = raw_curvature
+                    filt.initialized = True
+                filt.update_dt(dt)
+                filtered_curvature = filt.update(raw_curvature) if active else raw_curvature
+                filtered_angle = math.degrees(
+                    vm.get_steer_from_curvature(-filtered_curvature, v_ego, roll)
+                ) + angle_offset
+                reference[name] = (filtered_angle, filtered_curvature)
+
+            measured_for_vmc = measured_angle + carstate_offset
+            for name, (angle, curvature) in reference.items():
+                if not vmc_initialized[name] or not active:
+                    last_vmc[name] = measured_for_vmc
+                    vmc_initialized[name] = True
+                target = angle + carstate_offset
+                last_vmc[name] = apply_steer_angle_limits_vm(
+                    target,
+                    last_vmc[name],
+                    v_ego_raw,
+                    measured_for_vmc,
+                    active,
+                    controller_params,
+                    vm,
+                )
+                output[name].append((
+                    t,
+                    active,
+                    v_ego_raw,
+                    mi,
+                    angle,
+                    curvature,
+                    curvature * v_ego * v_ego,
+                    curvature * max(2.5, v_ego) ** 2,
+                    last_vmc[name],
+                ))
+            last_t = t
+
+        baseline = np.asarray(output["baseline"], dtype=float)
+        if not len(baseline):
+            continue
+
+        for name in variants:
+            values = np.asarray(output[name], dtype=float)
+            active_idx = np.where(
+                (values[:, 1] > 0.5) & (values[:, 2] >= 1.0) & (values[:, 2] < 9.0)
+            )[0]
+            pair_idx = np.asarray([
+                i for i in active_idx
+                if i > 0
+                and values[i - 1, 1] > 0.5
+                and values[i, 0] - values[i - 1, 0] < 0.03
+            ], dtype=int)
+            if not len(pair_idx):
+                continue
+            model_update_idx = np.asarray([
+                i for i in pair_idx if int(values[i, 3]) != int(values[i - 1, 3])
+            ], dtype=int)
+            intersample_idx = np.asarray([
+                i for i in pair_idx if int(values[i, 3]) == int(values[i - 1, 3])
+            ], dtype=int)
+
+            def signal_metrics(col: int) -> dict[str, float]:
+                steps = values[pair_idx, col] - values[pair_idx - 1, col]
+                second = np.diff(values[active_idx, col], 2)
+                update_steps = (
+                    values[model_update_idx, col] - values[model_update_idx - 1, col]
+                    if len(model_update_idx) else np.asarray([], dtype=float)
+                )
+                intersample_steps = (
+                    values[intersample_idx, col] - values[intersample_idx - 1, col]
+                    if len(intersample_idx) else np.asarray([], dtype=float)
+                )
+                return {
+                    "step_rms": float(np.sqrt(np.mean(steps * steps))),
+                    "step_p95": float(np.percentile(np.abs(steps), 95)),
+                    "second_difference_rms": float(np.sqrt(np.mean(second * second))) if len(second) else 0.0,
+                    "model_update_step_rms": float(np.sqrt(np.mean(update_steps * update_steps))) if len(update_steps) else 0.0,
+                    "intersample_step_rms": float(np.sqrt(np.mean(intersample_steps * intersample_steps))) if len(intersample_steps) else 0.0,
+                }
+
+            angle_dev = np.abs(values[active_idx, 4] - baseline[active_idx, 4])
+            vmc_dev = np.abs(values[active_idx, 8] - baseline[active_idx, 8])
+            per_variant[name].append({
+                "frames": int(len(active_idx)),
+                "angle": signal_metrics(4),
+                "lateral_accel": signal_metrics(6),
+                "model_lateral_action": signal_metrics(7),
+                "vmc_angle": signal_metrics(8),
+                "angle_mean_abs_deviation_deg": float(np.mean(angle_dev)),
+                "angle_p95_abs_deviation_deg": float(np.percentile(angle_dev, 95)),
+                "angle_max_abs_deviation_deg": float(np.max(angle_dev)),
+                "vmc_mean_abs_deviation_deg": float(np.mean(vmc_dev)),
+                "vmc_p95_abs_deviation_deg": float(np.percentile(vmc_dev, 95)),
+                "vmc_max_abs_deviation_deg": float(np.max(vmc_dev)),
+            })
+
+    pooled: dict[str, Any] = {}
+    for name, rows in per_variant.items():
+        frames = sum(row["frames"] for row in rows)
+        if not frames:
+            continue
+
+        def weighted_mean(key: str) -> float:
+            return sum(row[key] * row["frames"] for row in rows) / frames
+
+        def pooled_rms(group: str, key: str) -> float:
+            return math.sqrt(sum(
+                row[group][key] ** 2 * row["frames"] for row in rows
+            ) / frames)
+
+        pooled[name] = {
+            "segments": len(rows),
+            "frames": frames,
+            "angle": {
+                key: pooled_rms("angle", key)
+                for key in ("step_rms", "second_difference_rms", "model_update_step_rms", "intersample_step_rms")
+            },
+            "lateral_accel": {
+                key: pooled_rms("lateral_accel", key)
+                for key in ("step_rms", "second_difference_rms", "model_update_step_rms", "intersample_step_rms")
+            },
+            "model_lateral_action": {
+                key: pooled_rms("model_lateral_action", key)
+                for key in ("step_rms", "second_difference_rms", "model_update_step_rms", "intersample_step_rms")
+            },
+            "vmc_angle": {
+                key: pooled_rms("vmc_angle", key)
+                for key in ("step_rms", "second_difference_rms", "model_update_step_rms", "intersample_step_rms")
+            },
+            "angle_mean_abs_deviation_deg": weighted_mean("angle_mean_abs_deviation_deg"),
+            "angle_p95_abs_deviation_deg": weighted_mean("angle_p95_abs_deviation_deg"),
+            "angle_max_abs_deviation_deg": max(row["angle_max_abs_deviation_deg"] for row in rows),
+            "vmc_mean_abs_deviation_deg": weighted_mean("vmc_mean_abs_deviation_deg"),
+            "vmc_p95_abs_deviation_deg": weighted_mean("vmc_p95_abs_deviation_deg"),
+            "vmc_max_abs_deviation_deg": max(row["vmc_max_abs_deviation_deg"] for row in rows),
+        }
+
+    dt = 0.01
+    for name, rc in GENERIC_REFERENCE_RCS.items():
+        alpha = dt / (rc + dt)
+        pooled[name]["filter"] = {
+            "rc_seconds": rc,
+            "alpha_at_100hz": alpha,
+            "fraction_remaining_after_one_model_period": (1.0 - alpha) ** 5,
+        }
+    return pooled
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--log-root", default=DEFAULT_LOG_ROOT)
@@ -708,6 +959,15 @@ def main() -> None:
         },
         "request_update_structure": request_update_structure(samples_by_file),
         "root_layer_diagnostics": root_layer_diagnostics(LogReader, get_curvature_from_plan, log_root),
+        "generic_reference_bakeoff": generic_reference_bakeoff(
+            LogReader,
+            FirstOrderFilter,
+            apply_steer_angle_limits_vm,
+            get_safety_CP,
+            CarControllerParams,
+            VehicleModel,
+            log_root,
+        ),
         "pooled": pooled,
         "segments": segment_rows,
         "native_stock": stock_request_scan(LogReader, log_root),

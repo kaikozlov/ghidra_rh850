@@ -1,4 +1,118 @@
 {
+  "generic_reference_bakeoff": {
+    "baseline": {
+      "angle": {
+        "intersample_step_rms": 0.2501445443807464,
+        "model_update_step_rms": 0.6995719766647763,
+        "second_difference_rms": 0.5335044868901971,
+        "step_rms": 0.3850238365422698
+      },
+      "angle_max_abs_deviation_deg": 0.0,
+      "angle_mean_abs_deviation_deg": 0.0,
+      "angle_p95_abs_deviation_deg": 0.0,
+      "frames": 9967,
+      "lateral_accel": {
+        "intersample_step_rms": 0.004437348418503558,
+        "model_update_step_rms": 0.014304777494117986,
+        "second_difference_rms": 0.01030373292785672,
+        "step_rms": 0.007537234507411877
+      },
+      "model_lateral_action": {
+        "intersample_step_rms": 0.0044512760593485865,
+        "model_update_step_rms": 0.0143309208570487,
+        "second_difference_rms": 0.010327936948438185,
+        "step_rms": 0.007553748634260065
+      },
+      "segments": 11,
+      "vmc_angle": {
+        "intersample_step_rms": 0.23369449464267167,
+        "model_update_step_rms": 0.595673035133697,
+        "second_difference_rms": 0.43227731417101545,
+        "step_rms": 0.33892629831781046
+      },
+      "vmc_max_abs_deviation_deg": 0.0,
+      "vmc_mean_abs_deviation_deg": 0.0,
+      "vmc_p95_abs_deviation_deg": 0.0
+    },
+    "curvature_ref_mdl3": {
+      "angle": {
+        "intersample_step_rms": 0.16812405117595267,
+        "model_update_step_rms": 0.26774760847909634,
+        "second_difference_rms": 0.1660610373049222,
+        "step_rms": 0.19230706991683685
+      },
+      "angle_max_abs_deviation_deg": 4.141479300595958,
+      "angle_mean_abs_deviation_deg": 0.16903879214377776,
+      "angle_p95_abs_deviation_deg": 0.6219720150761524,
+      "filter": {
+        "alpha_at_100hz": 0.37500000000000006,
+        "fraction_remaining_after_one_model_period": 0.095367431640625,
+        "rc_seconds": 0.016666666666666666
+      },
+      "frames": 9967,
+      "lateral_accel": {
+        "intersample_step_rms": 0.003238410269988867,
+        "model_update_step_rms": 0.005433761687438089,
+        "second_difference_rms": 0.003266445166970175,
+        "step_rms": 0.003782752043051077
+      },
+      "model_lateral_action": {
+        "intersample_step_rms": 0.00324581094882759,
+        "model_update_step_rms": 0.005443889038030559,
+        "second_difference_rms": 0.0032733610608176793,
+        "step_rms": 0.0037907360095672973
+      },
+      "segments": 11,
+      "vmc_angle": {
+        "intersample_step_rms": 0.16841804189494963,
+        "model_update_step_rms": 0.26706446012073654,
+        "second_difference_rms": 0.16523522966083593,
+        "step_rms": 0.1923218767167142
+      },
+      "vmc_max_abs_deviation_deg": 1.852259733289923,
+      "vmc_mean_abs_deviation_deg": 0.1574806375342384,
+      "vmc_p95_abs_deviation_deg": 0.5539387734793361
+    },
+    "curvature_ref_mdl4": {
+      "angle": {
+        "intersample_step_rms": 0.17910847915406064,
+        "model_update_step_rms": 0.3154538396993833,
+        "second_difference_rms": 0.19867337398755566,
+        "step_rms": 0.21357693860700283
+      },
+      "angle_max_abs_deviation_deg": 3.6879217887082794,
+      "angle_mean_abs_deviation_deg": 0.13305389876994503,
+      "angle_p95_abs_deviation_deg": 0.526219150098796,
+      "filter": {
+        "alpha_at_100hz": 0.4444444444444445,
+        "fraction_remaining_after_one_model_period": 0.05292214940134466,
+        "rc_seconds": 0.0125
+      },
+      "frames": 9967,
+      "lateral_accel": {
+        "intersample_step_rms": 0.0034438934370897263,
+        "model_update_step_rms": 0.006428098332749071,
+        "second_difference_rms": 0.00389850490326236,
+        "step_rms": 0.004215945977826565
+      },
+      "model_lateral_action": {
+        "intersample_step_rms": 0.003451784381224937,
+        "model_update_step_rms": 0.00643988457071484,
+        "second_difference_rms": 0.003906891507541867,
+        "step_rms": 0.004224705133937345
+      },
+      "segments": 11,
+      "vmc_angle": {
+        "intersample_step_rms": 0.17995032971804736,
+        "model_update_step_rms": 0.31326006958400626,
+        "second_difference_rms": 0.19625321159532788,
+        "step_rms": 0.2134940185468065
+      },
+      "vmc_max_abs_deviation_deg": 1.3976286288954292,
+      "vmc_mean_abs_deviation_deg": 0.12173094958359724,
+      "vmc_p95_abs_deviation_deg": 0.46045521987959415
+    }
+  },
   "native_stock": {
     "files_scanned": 287,
     "files_with_native_id11_low_speed": 2,
