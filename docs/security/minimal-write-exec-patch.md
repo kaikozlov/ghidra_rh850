@@ -200,6 +200,37 @@ pre-authenticated arbitrary-write (no SID `0x3D`; `0x2E` is DID-table-bound —
 live-baseline §13.4); and re-hosting placement in the stub would duplicate a
 transport the image already ships.
 
+## Universal application-UDS bootstrap candidate
+
+The XCP design above is not the universal TSS3 answer: Crown omits XCP, and the
+stock application UDS `0x34/0x36/0x37` path does not provide an arbitrary RAM
+writer. A patch that must transfer across the registered EPS family should use
+the ordinary DCM transport instead of a calibration bundle.
+
+TesterPresent is a strong candidate. Its application phase dispatcher is a
+byte-identical 36-byte function on all four maintained targets:
+
+| target | dispatcher | request worker |
+|---|---:|---:|
+| Camry `8965F3307000` | `0x95A14` | `0x959C6` |
+| Crown `8965F3012000` | `0x934B4` | `0x93466` |
+| Corolla H/F | `0x8ED24` | `0x8ECD6` |
+
+The 64-byte request worker is also byte-identical across all four. Phase 0 receives
+the normal DCM message-context pointer; standard `3E 00` reaches it with zero
+remaining request bytes and gets the normal positive response, while extra bytes
+are currently rejected with NRC `0x13`. This gives a natural patched protocol:
+preserve the zero-length stock case, and use the otherwise-invalid trailing bytes
+as a bounded RAM write/launch command. The DCM layer has already performed ISO-TP
+reassembly, so the patch does not need a second transport or a periodic callback.
+
+For the request signer, such a loader can place the resident/config directly in
+the verified `FEBFF9F0..FEBFFBFF` tail and the helper directly in its verified
+GlobalRAM pocket. Execution should be a one-shot handoff into a late-attach
+resident entry, not recurring work in the diagnostic callback. The remaining
+design work is therefore the exact loader/launch stub and a clean foreground-boundary
+handoff; no XCP dependency is required.
+
 ## Cross-target transfer
 
 The XCP command family is present in Sienna, both Corollas and Camry, with
