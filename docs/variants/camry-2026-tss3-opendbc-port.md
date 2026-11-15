@@ -38,66 +38,94 @@ distinction belongs in the
 ## Low-speed steering-command replay (November 14, 2026)
 
 A six-date scan (September 6/7/10/11/18 and November 12) examined 287 rlogs.
-128 contained some active lateral control below 9 m/s. Eleven segments with
-sustained moving low-speed control were retained, giving 9,981 controller
-samples / 100.02 s at 1-9 m/s across five dates.
+128 contain some active lateral control below 9 m/s. Eleven segments with
+sustained moving low-speed control form the retained comparison corpus: 9,981
+controller samples / 100.02 s at 1-9 m/s across five dates. The tracked
+reducer is
+`tools/targets/camry/analysis/analyze_camry_20261114_low_speed_steering_filter.py`;
+its retained output is
+`data/generated/camry_20261114_low_speed_steering_filter.json`.
 
-The offline controller reducer replays each recorded `carControl` request at
-the recorded CAN-loop cadence, uses recorded steering state, runs the current
-`apply_steer_angle_limits_vm()`, and quantizes the resulting request with the
-TSS3 `1024/17870` deg/count scale. On November-12 segment 0 its unmodified
-request-shape metrics match full openpilot `card` process replay of the actual
-generated `0x08A`: RMS step 0.27046° versus 0.27065°, p95 0.68763° versus
-0.68763°, and total variation 116.10° versus 115.18°.
+The request source has a clear two-rate shape. Across the retained corpus,
+81.1% of consecutive 100-Hz `carControl` angle changes are <=0.05 deg, while
+changes >=0.02 deg recur at a **49.74-ms median interval** and 72.3% fall in
+40-60 ms. Thus most of the visible request roughness is a roughly 20-Hz jump
+process riding on small 100-Hz drift. The problem is strongest at walking
+speed: the unmodified request RMS step is about 0.82 deg at 1-2 m/s and 0.72
+deg at 2-3 m/s, versus roughly 0.16-0.32 deg across 3-9 m/s.
 
-The sweep covered YC's second-order governor, upstream-style and lighter
-speed-dependent first-order filters, HKG-style micro-adjustment EMA variants,
-hysteresis/deadband, quantization, fixed low-speed rate caps, and asymmetric
-wind/unwind caps. Derivative metrics below use only contiguous active moving
-samples.
+The offline reducer replays each recorded `carControl` request at the recorded
+CAN-loop cadence, uses recorded steering state, runs the current
+`apply_steer_angle_limits_vm()`, and quantizes the result with the TSS3
+`1024/17870` deg/count request scale. On November-12 segment 0 its unmodified
+request-shape statistics reproduce full `card` process replay closely (RMS
+step 0.27046 deg versus 0.27065 deg; p95 0.68763 deg in both).
+
+The bakeoff included YC's second-order governor; first-order filters from 10 to
+120 ms; dense speed-dependent first-order schedules; HKG-style micro-only and
+winding-only EMA; hysteresis/deadband; 0.1-deg quantization; fixed and
+asymmetric rate limits; finite linear/smoothstep ramps; short FIR/binomial
+filters; alpha-beta trackers; predictive ramps; lead-lag filters;
+error-adaptive filters; jump-only/reversal-aware filters; filtered-command
+velocity; acceleration-limited trajectories; high-cutoff second-order
+Butterworth filters; and an effective-speed floor applied to the existing VM
+jerk limiter. None cleanly dominates the small first-order filter once request
+smoothness, trajectory error, lag, and reversal energy are considered.
 
 | Candidate | RMS step | RMS 2nd diff | Mean abs deviation | p95 deviation | Best-fit lag |
 |---|---:|---:|---:|---:|---:|
-| Unmodified | 0.341° | 0.436° | — | — | — |
-| YC second-order | 0.106° | 0.119° | 0.626° | 1.909° | ~91 ms |
-| Upstream-style 0.2 s first-order | 0.070° | 0.046° | 0.664° | 1.901° | ~105 ms |
-| HKG micro-adjustment EMA (<1°) | 0.300° | 0.373° | 0.107° | 0.371° | ~2 ms |
-| 0.5° hysteresis | 0.294° | 0.376° | 0.161° | 0.239° | ~0 ms |
-| First-order RC 15 ms | 0.241° | 0.245° | 0.077° | 0.346° | ~0 ms |
-| **First-order RC 20 ms** | **0.221°** | **0.212°** | **0.103°** | **0.433°** | **~2 ms** |
-| First-order RC 25 ms | 0.206° | 0.188° | 0.127° | 0.494° | ~5 ms |
-| First-order RC 30 ms | 0.193° | 0.169° | 0.149° | 0.561° | ~10 ms |
+| Unmodified | 0.341 deg | 0.436 deg | — | — | — |
+| YC second-order | 0.106 deg | 0.119 deg | 0.626 deg | 1.909 deg | ~91 ms |
+| First-order RC 15 ms | 0.241 deg | 0.246 deg | 0.077 deg | 0.338 deg | ~0 ms |
+| **First-order RC 20 ms** | **0.222 deg** | **0.214 deg** | **0.103 deg** | **0.426 deg** | **~3 ms** |
+| First-order RC 25 ms | 0.206 deg | 0.190 deg | 0.127 deg | 0.497 deg | ~6 ms |
+| Speed-shaped 30/8/8 ms | 0.220 deg | 0.213 deg | 0.104 deg | 0.435 deg | ~2 ms |
 
-The light first-order family cuts repeated direction-change energy without
-discarding the low-frequency maneuver. At 20 ms RC, request-step RMS is 35%
-lower, second-difference RMS 51% lower, and reversal energy 78% lower than the
-unmodified controller while total request travel falls only 5.7%. Fixed and
-asymmetric rate caps produced multi-degree worst-case tracking errors (about
-7-10° in this corpus), and 0.1° input quantization did not improve the request.
+The dynamic-interval RC sweep places the practical knee at about 18-20 ms.
+RC19 reduces request-step RMS 33.7% and second-difference RMS 49.6% with
+0.098-deg mean deviation; RC20 gives 34.8% / 50.9% with 0.103-deg mean
+deviation. The one-millisecond numerical distinction is not a useful vehicle
+calibration; the retained round-number candidate is RC20. The 30/8/8 speed
+shape is a near-sidegrade: it improves pooled RMS by only ~0.002 deg while
+worsening p95 and worst-case trajectory deviation, so the simpler RC schedule
+is preferred for road validation.
 
 A separate scan of the same 287 logs found two native FRC ID11 low-speed
-windows (356 consecutive steps / 8.44 s, 5-9 m/s). Toyota's native request is
-much smoother: RMS step 0.0496°, p95 0.1146°, with no step >=0.3°. On the
-shared September-6 segment, the unmodified simulated request is 0.1137° RMS /
-0.2865° p95; RC20 gives 0.0682° / 0.1719°, RC25 gives 0.0642° / 0.1146°, and
-RC30 gives 0.0604° / 0.1146°. YC goes below the native texture at 0.0354° /
-0.0573° while adding substantially more trajectory delay.
+windows (356 consecutive steps / 8.44 s, all at 5-9 m/s). Toyota's native
+request is much smoother: RMS step **0.0496 deg**, p95 **0.1146 deg**, with no
+step >=0.3 deg. On the shared September-6 segment, the unmodified simulated
+request is 0.1137-deg RMS / 0.2865-deg p95; the light first-order family moves
+substantially toward the native texture without YC's long trajectory lag.
 
-Full `card` process replay on both usable November-12 low-speed segments
-confirms the direct-reducer trend. RC20 reduces actual generated `0x08A`
-request RMS by 37.1% and 33.9%, with mean deviations of only 0.081° and
-0.049° from the unmodified request. Forced-RC20 execution also passes the
-existing Toyota test suite (49 tests, 2 expected skips).
+Full openpilot `card` process replay verifies the exact saved branch code on
+both usable November-12 low-speed segments:
 
-**Offline candidate:** a speed-dependent `FirstOrderFilter` before the
-existing VM limiter, with its state synchronized to the post-limit
-`last_angle`, reset to measured angle on inactive/reference-reset paths, and
-a low-speed RC around 15-20 ms. The tested RC20 schedule is 20 ms at 0 m/s,
-7 ms at 9 m/s, and zero at 12 m/s. RC25 is the next stronger candidate if a
-road test still shows audible/physical thrashing. YC's governor and the
-upstream 0.2 s time constant are substantially more aggressive than the
-recorded Camry data supports. This candidate is not yet in the maintained
-controller.
+| Branch | Segment 0 RMS reduction / mean deviation | Segment 1 RMS reduction / mean deviation | Toyota tests |
+|---|---:|---:|---:|
+| `experiment/tss3-angle-rc15` (`834096ba`) | 33.8% / 0.067 deg | 29.5% / 0.041 deg | 49 pass, 2 expected skips |
+| `experiment/tss3-angle-rc20` (`458e14ab`) | 38.9% / 0.087 deg | 36.4% / 0.056 deg | 49 pass, 2 expected skips |
+
+Both implementations use the existing `FirstOrderFilter`, run only when a new
+signed request is due, reset to measured angle on inactive/reference-reset
+paths, update their coefficient from the actual request interval, feed the
+filtered target into the existing VM limiter, and synchronize filter state to
+the post-limit `last_angle`. RC15 is the deliberately conservative candidate;
+RC20 is the primary offline candidate. The earlier speed-shaped experiment is
+preserved on `experiment/tss3-angle-shape30` (`2c03541c`) but is no longer a
+finalist.
+
+The low-speed added delay is not learned away by openpilot's `lagd`: that
+estimator only accepts data above 50 mph, while these candidates taper to zero
+by 12 m/s (~27 mph). This is why the low single-digit-millisecond region is
+material. The EPS `0x030 B22:B23` motor/current-family proxy does respond
+directionally to request changes, but target error, steering motion, driver
+torque, damping, and assist mode are inseparable in these logs, so it is not
+used as a synthetic counterfactual scoring signal.
+
+**Road-test order:** RC20 first; RC15 if the steering feels perceptibly
+softened. A stronger RC25 is retained in the reducer as a diagnostic next step
+if RC20 still leaves physical/audible thrashing. No smoothing change is in the
+maintained controller yet.
 
 ### Relevant upstream/community prior art
 
