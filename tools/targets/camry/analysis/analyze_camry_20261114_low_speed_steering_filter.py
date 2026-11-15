@@ -66,12 +66,13 @@ def load_stack(openpilot_root: str):
             sys.path.insert(0, str(p))
 
     from openpilot.tools.lib.logreader import LogReader
+    from openpilot.selfdrive.controls.lib.drive_helpers import get_curvature_from_plan
     from opendbc.car.common.filter_simple import FirstOrderFilter
     from opendbc.car.lateral import apply_steer_angle_limits_vm
     from opendbc.car.toyota.carcontroller import get_safety_CP
     from opendbc.car.toyota.values import CarControllerParams
     from opendbc.car.vehicle_model import VehicleModel
-    return LogReader, FirstOrderFilter, apply_steer_angle_limits_vm, get_safety_CP, CarControllerParams, VehicleModel
+    return LogReader, get_curvature_from_plan, FirstOrderFilter, apply_steer_angle_limits_vm, get_safety_CP, CarControllerParams, VehicleModel
 
 
 @dataclass
@@ -522,6 +523,127 @@ def stock_request_scan(LogReader, root: Path) -> dict[str, Any]:
     }
 
 
+
+def root_layer_diagnostics(LogReader, get_curvature_from_plan, root: Path) -> dict[str, Any]:
+    """Trace the low-speed staircase to model updates and the action->curvature conversion."""
+    november = (
+        root / "2026-11-12/00000126--a98b6dd040--0/rlog.zst",
+        root / "2026-11-12/00000126--a98b6dd040--1/rlog.zst",
+    )
+
+    update_ages_ms: list[float] = []
+    plan_diffs: list[float] = []
+    action_bins: dict[int, list[float]] = {b: [] for b in range(1, 9)}
+    lat_action_bins: dict[int, list[float]] = {b: [] for b in range(1, 9)}
+
+    for path in november:
+        v_ego = 0.0
+        v_ego_raw = 0.0
+        lateral_delay = 0.3
+        last_model_t: float | None = None
+        previous_angle: float | None = None
+        active = False
+
+        for msg in LogReader(str(path), only_union_types=True):
+            t = msg.logMonoTime * 1e-9
+            which = msg.which()
+            if which == "carState":
+                v_ego = float(msg.carState.vEgo)
+                v_ego_raw = float(msg.carState.vEgoRaw)
+            elif which == "lateralDelay":
+                lateral_delay = float(msg.lateralDelay.lateralDelay)
+            elif which == "modelV2":
+                last_model_t = t
+                if active and 1.0 <= v_ego_raw < 9.0:
+                    model = msg.modelV2
+                    tids = np.asarray(list(model.orientation.t), dtype=float)
+                    yaws = np.asarray(list(model.orientation.z), dtype=float)
+                    yaw_rates = np.asarray(list(model.orientationRate.z), dtype=float)
+                    plan_curvature = get_curvature_from_plan(
+                        yaws,
+                        yaw_rates,
+                        tids,
+                        v_ego,
+                        lateral_delay + 0.075,
+                    )
+                    plan_diffs.append(plan_curvature - float(model.action.desiredCurvature))
+            elif which == "carControl":
+                cc = msg.carControl
+                active = bool(cc.enabled and cc.latActive)
+                if not (active and 1.0 <= v_ego_raw < 9.0):
+                    previous_angle = None
+                    continue
+                angle = float(cc.actuators.steeringAngleDeg)
+                if previous_angle is not None and abs(angle - previous_angle) > 0.05 and last_model_t is not None:
+                    update_ages_ms.append((t - last_model_t) * 1000.0)
+                previous_angle = angle
+
+    for rel in CORPUS:
+        path = root / rel
+        v_ego = 0.0
+        v_ego_raw = 0.0
+        active = False
+        previous_curvature: float | None = None
+        previous_lat_action: float | None = None
+
+        for msg in LogReader(str(path), only_union_types=True):
+            which = msg.which()
+            if which == "carState":
+                v_ego = float(msg.carState.vEgo)
+                v_ego_raw = float(msg.carState.vEgoRaw)
+            elif which == "carControl":
+                active = bool(msg.carControl.enabled and msg.carControl.latActive)
+                if not active:
+                    previous_curvature = None
+                    previous_lat_action = None
+            elif which == "modelV2":
+                if not (active and 1.0 <= v_ego_raw < 9.0):
+                    previous_curvature = None
+                    previous_lat_action = None
+                    continue
+                curvature = float(msg.modelV2.action.desiredCurvature)
+                lat_action = curvature * max(2.5, v_ego) ** 2
+                if previous_curvature is not None and previous_lat_action is not None:
+                    speed_bin = int(v_ego_raw)
+                    action_bins[speed_bin].append(curvature - previous_curvature)
+                    lat_action_bins[speed_bin].append(lat_action - previous_lat_action)
+                previous_curvature = curvature
+                previous_lat_action = lat_action
+
+    ages = np.asarray(update_ages_ms, dtype=float)
+    pdiff = np.asarray(plan_diffs, dtype=float)
+    by_speed: dict[str, Any] = {}
+    for speed_bin in range(1, 9):
+        curv = np.asarray(action_bins[speed_bin], dtype=float)
+        lat = np.asarray(lat_action_bins[speed_bin], dtype=float)
+        if not len(curv):
+            continue
+        by_speed[f"{speed_bin}-{speed_bin + 1}"] = {
+            "samples": len(curv),
+            "curvature_delta_rms": float(np.sqrt(np.mean(curv * curv))),
+            "curvature_delta_p95": float(np.percentile(np.abs(curv), 95)),
+            "decoded_lateral_action_delta_rms": float(np.sqrt(np.mean(lat * lat))),
+            "decoded_lateral_action_delta_p95": float(np.percentile(np.abs(lat), 95)),
+        }
+
+    return {
+        "november_significant_angle_update_alignment": {
+            "count": len(ages),
+            "model_update_age_median_ms": float(np.median(ages)) if len(ages) else None,
+            "model_update_age_p90_ms": float(np.percentile(ages, 90)) if len(ages) else None,
+            "fraction_within_15_ms": float(np.mean(ages <= 15.0)) if len(ages) else None,
+            "fraction_within_20_ms": float(np.mean(ages <= 20.0)) if len(ages) else None,
+        },
+        "november_action_vs_plan_at_action_horizon": {
+            "samples": len(pdiff),
+            "mean_abs_curvature_difference": float(np.mean(np.abs(pdiff))) if len(pdiff) else None,
+            "p95_abs_curvature_difference": float(np.percentile(np.abs(pdiff), 95)) if len(pdiff) else None,
+            "rms_curvature_difference": float(np.sqrt(np.mean(pdiff * pdiff))) if len(pdiff) else None,
+        },
+        "model_action_deltas_by_speed_mps": by_speed,
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--log-root", default=DEFAULT_LOG_ROOT)
@@ -531,6 +653,7 @@ def main() -> None:
 
     (
         LogReader,
+        get_curvature_from_plan,
         FirstOrderFilter,
         apply_steer_angle_limits_vm,
         get_safety_CP,
@@ -584,6 +707,7 @@ def main() -> None:
             "request_angle_scale_deg_per_count": 1024 / 17870,
         },
         "request_update_structure": request_update_structure(samples_by_file),
+        "root_layer_diagnostics": root_layer_diagnostics(LogReader, get_curvature_from_plan, log_root),
         "pooled": pooled,
         "segments": segment_rows,
         "native_stock": stock_request_scan(LogReader, log_root),

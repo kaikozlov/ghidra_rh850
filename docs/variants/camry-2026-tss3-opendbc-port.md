@@ -35,24 +35,94 @@ Exact EPS transmit tables and field maps belong in the
 distinction belongs in the
 [vehicle-movement report](../architecture/toyota-tss3-vehicle-movement-arbitration.md).
 
-## Low-speed steering-command replay (November 14, 2026)
+## Low-speed steering-command replay and root-layer diagnosis (November 14, 2026)
 
 A six-date scan (September 6/7/10/11/18 and November 12) examined 287 rlogs.
 128 contain some active lateral control below 9 m/s. Eleven segments with
 sustained moving low-speed control form the retained comparison corpus: 9,981
 controller samples / 100.02 s at 1-9 m/s across five dates. The tracked
-reducer is
+analyzer is
 `tools/targets/camry/analysis/analyze_camry_20261114_low_speed_steering_filter.py`;
 its retained output is
 `data/generated/camry_20261114_low_speed_steering_filter.json`.
 
-The request source has a clear two-rate shape. Across the retained corpus,
-81.1% of consecutive 100-Hz `carControl` angle changes are <=0.05 deg, while
-changes >=0.02 deg recur at a **49.74-ms median interval** and 72.3% fall in
-40-60 ms. Thus most of the visible request roughness is a roughly 20-Hz jump
-process riding on small 100-Hz drift. The problem is strongest at walking
-speed: the unmodified request RMS step is about 0.82 deg at 1-2 m/s and 0.72
-deg at 2-3 m/s, versus roughly 0.16-0.32 deg across 3-9 m/s.
+### Root-layer diagnosis
+
+The rough VMC request originates above the Toyota controller. Across the
+retained corpus, 81.1% of consecutive 100-Hz `carControl` angle changes are
+<=0.05 deg, while changes >=0.02 deg recur at a **49.74-ms median interval**
+and 72.3% fall in 40-60 ms. On the two November low-speed windows, 278
+significant `carControl` angle changes (>0.05 deg) occur a median **11.85 ms**
+after the latest `modelV2` publication; 97.8% occur within 15 ms and 98.2%
+within 20 ms. The visible staircase is therefore tied to the 20-Hz model
+update cadence rather than being created by the signer or TSS3 `CarController`.
+
+The current control path makes that update visible on angle-command cars:
+
+1. `modeld` publishes `modelV2` at 20 Hz. For current direct-action models it
+   decodes lateral action as
+   `desired_curvature = action[0] / max(2.5, v_ego)^2`.
+2. `controlsd` runs at 100 Hz and repeatedly consumes the most recent scalar
+   `modelV2.action.desiredCurvature`. `clip_curvature()` limits curvature rate
+   from lateral jerk, but its allowed curvature rate grows as `1 / v^2`, so it
+   becomes weak at low speed.
+3. `LatControlAngle` converts that curvature to steering angle through the
+   vehicle model and otherwise provides essentially no high-rate reference
+   dynamics.
+4. The vehicle `CarController` then receives the already-stepped angle target.
+
+The low-speed action parameterization further amplifies the update. Commit
+`249cafe89` / openpilot #38125 introduced the direct action path using the
+`action[0] / v^2` conversion. Commit `0c40995cd` / openpilot #39182, merged
+November 2, 2026, raised its low-speed denominator floor from 1.0 to 2.5 m/s.
+That upstream change directly targets the same low-speed curvature
+amplification. In the retained active corpus, the decoded action variation is
+not exceptional at walking speed, yet converting it to curvature produces much
+larger revisions because of the speed-squared division.
+
+The full model trajectory does not provide a trivial interpolation fix. On the
+November active samples, plan-derived curvature evaluated at the same action
+horizon agrees closely with the scalar action (mean absolute difference
+4.5e-6 1/m, p95 1.1e-5 1/m). Advancing along the previously published plan
+between model frames was tested, but the next receding-horizon model update
+revises that trajectory enough that the model-boundary angle jump became
+larger, not smaller. The defect is therefore not merely zero-order hold of an
+otherwise continuous reference; continuity must be handled across successive
+model revisions.
+
+There is explicit upstream precedent for doing that above the car port.
+`modeld` already has `LAT_SMOOTH_SECONDS`, and its value is added to the
+model's lateral `action_t` so the model predicts farther ahead when smoothing
+is present. It was 0.1 s in earlier releases and was changed to 0.0 by
+`f51c2aec` / openpilot #36987 (`Modeld: less lat smoothing`, January 9, 2026).
+Simply restoring that constant is not a complete 100-Hz reference generator,
+but its delay-compensated design identifies the correct architectural
+boundary: planner/model action shaping belongs above the vehicle-specific
+`CarController`, with any introduced delay represented to the model.
+
+A proper long-term fix therefore has two parts:
+
+- **Well-conditioned low-speed lateral action.** The learned/control action
+  should not require an increasingly sensitive lateral-acceleration-to-curvature
+  division as speed approaches walking pace. A curvature/yaw-rate-like
+  low-speed action, a hybrid speed-conditioned representation, or a short
+  action trajectory would avoid that singular geometry rather than merely
+  increasing the denominator floor again.
+- **A generic high-rate lateral reference for angle-control cars.** The 20-Hz
+  receding-horizon action needs a continuous 100-Hz reference before
+  `LatControlAngle`/the vehicle port. That reference generator must reconcile
+  successive model revisions and expose its known phase/delay through the same
+  action-horizon accounting used by `LAT_SMOOTH_SECONDS`. `LatControlAngle` can
+  then consume the continuous reference while `CarController` returns to its
+  normal role: vehicle protocol, safety, and actuator limits.
+
+The important distinction is placement, not whether the reference generator
+contains filtering mathematics. Smoothing inside Toyota `CarController` is a
+vehicle-specific mitigation for an upstream reference discontinuity. A
+reference governor/interpolator at the planner-to-angle-controller boundary is
+part of the control architecture.
+
+### Downstream mitigation bakeoff
 
 The offline reducer replays each recorded `carControl` request at the recorded
 CAN-loop cadence, uses recorded steering state, runs the current
@@ -63,103 +133,75 @@ step 0.27046 deg versus 0.27065 deg; p95 0.68763 deg in both).
 
 The bakeoff included YC's second-order governor; first-order filters from 10 to
 120 ms; dense speed-dependent first-order schedules; HKG-style micro-only and
-winding-only EMA; hysteresis/deadband; 0.1-deg quantization; fixed and
-asymmetric rate limits; finite linear/smoothstep ramps; short FIR/binomial
-filters; alpha-beta trackers; predictive ramps; lead-lag filters;
-error-adaptive filters; jump-only/reversal-aware filters; filtered-command
-velocity; acceleration-limited trajectories; high-cutoff second-order
-Butterworth filters; and an effective-speed floor applied to the existing VM
-jerk limiter. None cleanly dominates the small first-order filter once request
-smoothness, trajectory error, lag, and reversal energy are considered.
+winding-only EMA; hysteresis/deadband; quantization; fixed/asymmetric rate
+limits; finite ramps; FIR/binomial filters; alpha-beta trackers; predictive
+ramps; lead-lag and error-adaptive filters; jump/reversal-aware filters;
+velocity/acceleration-limited trajectories; high-cutoff second-order filters;
+and a low-speed effective-speed floor applied to the existing VM jerk limiter.
+None cleanly dominates a small first-order filter as a downstream mitigation.
 
 | Candidate | RMS step | RMS 2nd diff | Mean abs deviation | p95 deviation | Best-fit lag |
 |---|---:|---:|---:|---:|---:|
 | Unmodified | 0.341 deg | 0.436 deg | — | — | — |
 | YC second-order | 0.106 deg | 0.119 deg | 0.626 deg | 1.909 deg | ~91 ms |
 | First-order RC 15 ms | 0.241 deg | 0.246 deg | 0.077 deg | 0.338 deg | ~0 ms |
-| **First-order RC 20 ms** | **0.222 deg** | **0.214 deg** | **0.103 deg** | **0.426 deg** | **~3 ms** |
+| First-order RC 20 ms | 0.222 deg | 0.214 deg | 0.103 deg | 0.426 deg | ~3 ms |
 | First-order RC 25 ms | 0.206 deg | 0.190 deg | 0.127 deg | 0.497 deg | ~6 ms |
 | Speed-shaped 30/8/8 ms | 0.220 deg | 0.213 deg | 0.104 deg | 0.435 deg | ~2 ms |
-
-The dynamic-interval RC sweep places the practical knee at about 18-20 ms.
-RC19 reduces request-step RMS 33.7% and second-difference RMS 49.6% with
-0.098-deg mean deviation; RC20 gives 34.8% / 50.9% with 0.103-deg mean
-deviation. The one-millisecond numerical distinction is not a useful vehicle
-calibration; the retained round-number candidate is RC20. The 30/8/8 speed
-shape is a near-sidegrade: it improves pooled RMS by only ~0.002 deg while
-worsening p95 and worst-case trajectory deviation, so the simpler RC schedule
-is preferred for road validation.
 
 A separate scan of the same 287 logs found two native FRC ID11 low-speed
 windows (356 consecutive steps / 8.44 s, all at 5-9 m/s). Toyota's native
 request is much smoother: RMS step **0.0496 deg**, p95 **0.1146 deg**, with no
-step >=0.3 deg. On the shared September-6 segment, the unmodified simulated
-request is 0.1137-deg RMS / 0.2865-deg p95; the light first-order family moves
-substantially toward the native texture without YC's long trajectory lag.
+step >=0.3 deg. The filter experiments therefore remain useful diagnostics of
+how much request texture the TSS3 VMC tolerates, but they are not the preferred
+architectural fix.
 
-Full openpilot `card` process replay verifies the exact saved branch code on
-both usable November-12 low-speed segments:
+The exact downstream mitigations are preserved for controlled comparison:
 
 | Branch | Segment 0 RMS reduction / mean deviation | Segment 1 RMS reduction / mean deviation | Toyota tests |
 |---|---:|---:|---:|
 | `experiment/tss3-angle-rc15` (`834096ba`) | 33.8% / 0.067 deg | 29.5% / 0.041 deg | 49 pass, 2 expected skips |
 | `experiment/tss3-angle-rc20` (`458e14ab`) | 38.9% / 0.087 deg | 36.4% / 0.056 deg | 49 pass, 2 expected skips |
 
-Both implementations use the existing `FirstOrderFilter`, run only when a new
-signed request is due, reset to measured angle on inactive/reference-reset
-paths, update their coefficient from the actual request interval, feed the
-filtered target into the existing VM limiter, and synchronize filter state to
-the post-limit `last_angle`. RC15 is the deliberately conservative candidate;
-RC20 is the primary offline candidate. The earlier speed-shaped experiment is
-preserved on `experiment/tss3-angle-shape30` (`2c03541c`) but is no longer a
-finalist.
-
-The low-speed added delay is not learned away by openpilot's `lagd`: that
-estimator only accepts data above 50 mph, while these candidates taper to zero
-by 12 m/s (~27 mph). This is why the low single-digit-millisecond region is
-material. The EPS `0x030 B22:B23` motor/current-family proxy does respond
-directionally to request changes, but target error, steering motion, driver
-torque, damping, and assist mode are inseparable in these logs, so it is not
-used as a synthetic counterfactual scoring signal.
-
-**Road-test order:** RC20 first; RC15 if the steering feels perceptibly
-softened. A stronger RC25 is retained in the reducer as a diagnostic next step
-if RC20 still leaves physical/audible thrashing. No smoothing change is in the
-maintained controller yet.
+These branches should remain comparison/fallback mitigations while the generic
+planner-to-angle-controller reference path is investigated. No smoothing
+change is in the maintained controller.
 
 ### Relevant upstream/community prior art
 
-- **Nissan, commaai/opendbc #3415 (merged May 29, 2026):** added a
-  speed-dependent `FirstOrderFilter` before `apply_std_steer_angle_limits()`
-  for low-speed request jitter/grinding. The PR explicitly attributes the
-  symptom to rapidly stepping angle requests.
-- **Subaru, commaai/opendbc #3948 (draft November 12, 2026):** applies the same
-  pattern before `apply_steer_angle_limits_vm()`: update the
-  `FirstOrderFilter` every control-loop frame, taper its time constant with
-  speed, then feed the filtered angle into the normal VM limiter.
-- **Hyundai angle-steering experiments (March-April 2026):** the retained
-  opendbc history contains several alternatives tried on the HKG angle branch:
-  low-speed EMA smoothing, 0.1-degree input quantization, filtering only
-  micro-adjustments while passing larger maneuvers through, a speed-dependent
-  hysteresis/deadzone experiment, and a later speed-dependent
-  `FirstOrderFilter` implementation (`ef3f455d`, `5a2d1aee`,
-  `6904a8c4`, `c1602ef2`, `088fd818`). The hysteresis path was left
-  commented out while its tuning was unresolved.
-- **Subaru angle work, commaai/opendbc #3454:** explored asymmetric wind-up and
-  unwind rate limits; the discussion specifically notes that symmetric limits
-  may contribute to low-speed oscillation and make turn exit feel slow.
-- **openpilot lateral maneuver reports, #37562 / #38107:** upstream's own
-  lateral tuning workflow compares desired control with `carControl` and
-  post-controller `carOutput`, and includes a high-frequency `jitter`
-  maneuver. Issue #38107 explicitly calls out the need to compare the final
-  request to the car against what the car actuates and to distinguish desired
-  commands from controller limiting.
+The upstream history reinforces the layer split rather than pointing only to a
+Toyota tune:
 
-Candidate controller shapes worth replaying on the Camry are therefore:
-speed-dependent first-order filtering; a small low-speed deadzone/hysteresis;
-filtering only sub-degree micro-adjustments; and asymmetric wind/unwind
-limiting. Keep each before the existing VM/safety limiter and compare the
-resulting `0x08A` angle trajectory against the unmodified controller.
+- **openpilot #35056 (`Disable low speed steer in modeld`, April 2025):** froze
+  the model lateral-curvature action below 0.3 m/s in `get_action_from_model()`.
+- **openpilot #36987 (`Modeld: less lat smoothing`, January 2026):** changed
+  `LAT_SMOOTH_SECONDS` from 0.1 s to zero with the rationale that lateral was
+  already sufficiently smooth. That smoothing lived in `modeld`, and its delay
+  was added to the model action horizon.
+- **openpilot #38125 (`Prereqs deep models`, June 2026):** introduced the
+  direct action path and decoded lateral action as curvature through division
+  by speed squared.
+- **openpilot #39182 (`modeld: raise low-speed curvature thresholds`, November
+  2026):** raised that direct-action speed floor from 1.0 to 2.5 m/s, directly
+  reducing low-speed curvature amplification.
+- **Nissan, commaai/opendbc #3415:** added a speed-dependent
+  `FirstOrderFilter` in the vehicle controller for EPS-specific low-speed
+  request jitter/grinding.
+- **Subaru, commaai/opendbc #3948:** applies the same vehicle-controller
+  filtering pattern before `apply_steer_angle_limits_vm()`.
+- **Hyundai angle-steering experiments (March-April 2026):** tried low-speed
+  EMA smoothing, quantization, micro-adjustment filtering, hysteresis, and a
+  later speed-dependent `FirstOrderFilter` on angle-control platforms.
+- **Subaru angle work, commaai/opendbc #3454:** explored asymmetric wind-up and
+  unwind rate limits for low-speed oscillation/turn-exit behavior.
+- **openpilot lateral maneuver reports, #37562 / #38107:** upstream's tuning
+  workflow explicitly distinguishes desired control from the final request to
+  the car and includes a high-frequency `jitter` maneuver.
+
+The opendbc examples remain valid vehicle-level mitigations for EPS-specific
+sensitivity. The Camry evidence, however, now traces the dominant request
+staircase to the generic model/action-to-angle-control path, so they should not
+be treated as proof that the TSS3 port owns the defect.
 
 ## Brake/FRC feedback observations
 

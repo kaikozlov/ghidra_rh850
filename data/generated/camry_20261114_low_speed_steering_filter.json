@@ -136,6 +136,79 @@
     "pairs": 9966,
     "significant_update_interval_median_ms": 49.738800499980584
   },
+  "root_layer_diagnostics": {
+    "model_action_deltas_by_speed_mps": {
+      "1-2": {
+        "curvature_delta_p95": 0.0017137588118202982,
+        "curvature_delta_rms": 0.000946170158188111,
+        "decoded_lateral_action_delta_p95": 0.010710992573876863,
+        "decoded_lateral_action_delta_rms": 0.005913563488675695,
+        "samples": 68
+      },
+      "2-3": {
+        "curvature_delta_p95": 0.0014352462167153135,
+        "curvature_delta_rms": 0.0007687398729079155,
+        "decoded_lateral_action_delta_p95": 0.00897028885447071,
+        "decoded_lateral_action_delta_rms": 0.004942794022525109,
+        "samples": 56
+      },
+      "3-4": {
+        "curvature_delta_p95": 0.0003462167856923769,
+        "curvature_delta_rms": 0.00019331347044503996,
+        "decoded_lateral_action_delta_p95": 0.004876484883973081,
+        "decoded_lateral_action_delta_rms": 0.0025988328670518267,
+        "samples": 38
+      },
+      "4-5": {
+        "curvature_delta_p95": 0.0005472443910548461,
+        "curvature_delta_rms": 0.00025414471356646783,
+        "decoded_lateral_action_delta_p95": 0.013755754000740413,
+        "decoded_lateral_action_delta_rms": 0.005629780886873806,
+        "samples": 40
+      },
+      "5-6": {
+        "curvature_delta_p95": 0.000249417033046484,
+        "curvature_delta_rms": 0.0001359225646838406,
+        "decoded_lateral_action_delta_p95": 0.00800104727763316,
+        "decoded_lateral_action_delta_rms": 0.003940931858702439,
+        "samples": 121
+      },
+      "6-7": {
+        "curvature_delta_p95": 0.00021001439763494994,
+        "curvature_delta_rms": 0.00010170229349440682,
+        "decoded_lateral_action_delta_p95": 0.008836835930088605,
+        "decoded_lateral_action_delta_rms": 0.0042399173082892025,
+        "samples": 102
+      },
+      "7-8": {
+        "curvature_delta_p95": 0.0006353386212140324,
+        "curvature_delta_rms": 0.00031087518236669424,
+        "decoded_lateral_action_delta_p95": 0.03907994107381908,
+        "decoded_lateral_action_delta_rms": 0.018916432236646463,
+        "samples": 564
+      },
+      "8-9": {
+        "curvature_delta_p95": 0.0006073264870792626,
+        "curvature_delta_rms": 0.00028459133449839296,
+        "decoded_lateral_action_delta_p95": 0.041201573360374145,
+        "decoded_lateral_action_delta_rms": 0.019176910236130523,
+        "samples": 1000
+      }
+    },
+    "november_action_vs_plan_at_action_horizon": {
+      "mean_abs_curvature_difference": 4.509060247363877e-06,
+      "p95_abs_curvature_difference": 1.0952452930127389e-05,
+      "rms_curvature_difference": 7.65300402084879e-06,
+      "samples": 298
+    },
+    "november_significant_angle_update_alignment": {
+      "count": 278,
+      "fraction_within_15_ms": 0.9784172661870504,
+      "fraction_within_20_ms": 0.9820143884892086,
+      "model_update_age_median_ms": 11.846193000110361,
+      "model_update_age_p90_ms": 12.544650699965132
+    }
+  },
   "scope": {
     "corpus": [
       "2026-09-18/0000010c--506d7277c7/rlog-18.zst",
