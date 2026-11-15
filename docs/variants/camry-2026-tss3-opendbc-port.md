@@ -35,6 +35,35 @@ Exact EPS transmit tables and field maps belong in the
 distinction belongs in the
 [vehicle-movement report](../architecture/toyota-tss3-vehicle-movement-arbitration.md).
 
+## Low-speed steering-command replay (November 14, 2026)
+
+**Scope:** offline process replay of the November 12 Camry route
+`00000126--a98b6dd040`, segment 0
+(`/Users/kai/dev/inspect/logs/camry-2026/2026-11-12/00000126--a98b6dd040--0/rlog.zst`).
+Used the existing openpilot `process_replay.replay_process_with_name("card", ...)`
+with the same recorded CAN and `carControl` inputs across three separate
+opendbc checkouts. Compared the resulting `sendcan` `0x08A CONTROL_REQUEST`
+B18:B19 signed angle, at `1024/17870` degrees/count, rather than
+`carOutput`. This is a request-output comparison.
+
+| CarController | Frames | Different from baseline | RMS request step | p95 absolute step | Total absolute angle travel |
+|---|---:|---:|---:|---:|---:|
+| Unmodified | 1,126 | — | 0.271° | 0.688° | 115.18° |
+| YC's low-speed second-order patch | 1,126 | 1,087 | 0.093° | 0.115° | 46.64° |
+| Nissan-style first-order prototype (0.15/0.10/0 s RC at 0/5/9 m/s) | 1,126 | 951 | 0.126° | 0.229° | 95.12° |
+
+Every request's timestamp, request ID, and sequence matched across the three
+replays; only the B18:B19 target-angle bytes differed within the 28-byte
+application section. YC's patch differs from baseline by a mean absolute
+0.514° and maximum 2.349°; the first-order prototype differs by 0.188° and
+1.375°, respectively. A best-RMS time-shift comparison to the unmodified
+trajectory found approximately 100 ms for YC and 10 ms for the first-order
+prototype, illustrating their different tracking delays in this segment.
+
+The replay demonstrates smoother requests from both filters, with more
+smoothing and delay from YC's version. Filter coefficients are experimental;
+neither patch is part of the maintained controller.
+
 ## Brake/FRC feedback observations
 
 Retained September-17/18 comparisons distinguish request loss, feature handoff
