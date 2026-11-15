@@ -193,12 +193,10 @@ Rollback is the exact inverse: restore 29 bytes, re-fix the CRC.
 
 ## Why this shape
 
-The alternatives are strictly worse on byte count or universality: repointing
-the table field instead of overwriting in place splits the patch across two
-blocks; a UDS-side hook cannot work because application UDS has no
-pre-authenticated arbitrary-write (no SID `0x3D`; `0x2E` is DID-table-bound —
-live-baseline §13.4); and re-hosting placement in the stub would duplicate a
-transport the image already ships.
+For the XCP-specific design above, repointing the table field instead of
+overwriting in place splits the patch across two blocks. Stock application UDS
+has no arbitrary-memory writer, so the UDS alternative below hosts its own tiny
+placement primitive in the malformed TesterPresent path.
 
 ## Universal application-UDS bootstrap candidate
 
@@ -247,11 +245,13 @@ condition with an intervening boot-runtime phase.
 
 ### Exact patch footprint
 
-A compiled malformed-TesterPresent loader needs **110 bytes** with the maintained
-patched GCC toolchain. It accepts a region selector plus 16-bit offset, copies the
-remaining ISO-TP payload into either `FEBFF9F0` or `FEF07C00`, ACKs completed
-writes through the stock positive-response helper, and uses a launch opcode to
-perform `dummy read -> SYNCP -> SYNCI -> DI -> resident entry`.
+The minimal bootstrap is
+`tsk/ram_runtime/request_signer/tss3_application_uds_bootstrap.c`. It compiles to
+**110 bytes** with the maintained patched GCC toolchain. It accepts a region
+selector plus 16-bit offset, copies the remaining ISO-TP payload into either
+`FEBFF9F0` or `FEF07C00`, ACKs completed writes through the stock positive-response
+helper, and uses selector `0xFF` to perform
+`dummy read -> SYNCP -> SYNCI -> DI -> resident entry`.
 
 The family already contains one structurally matching **116-byte orphaned helper
 with zero xrefs** in the same 32-KiB erase block as the TesterPresent malformed-
@@ -268,9 +268,9 @@ modifying the terminal fixup at `0xFFDEC`.
 | Corolla H/F | `0x8E106` | `0x8ED0C` | `0x8E174 = 05 18 A9 85` | **113** | `0x88000..0x8FFFF` |
 
 Thus the persistent semantic delta is 113 bytes in the 1-MiB image, while the
-actual flash operation is one `0x8000`/32-KiB block. This is larger in changed-byte
-count than the earlier XCP gate+trigger design (31 bytes), but that design spans
-three separate 32-KiB blocks on Camry; the UDS bootstrap needs only one.
+actual flash operation is one `0x8000`/32-KiB block. The exact Camry candidate
+passes GNU simulation for stock `3E 00`, resident/helper writes, and the `0xFF`
+launch into `FEBFF9F0` with interrupts disabled.
 
 ## Cross-target transfer
 
@@ -333,11 +333,6 @@ post-reset writer-frame correction are maintained in
 The Sep-10 C7 helper proves stock mailbox reachability, not an OEM C7
 protocol consumer.
 
-Consequence for Crown: nothing to re-enable and nowhere to repoint — a Crown
-equivalent would be a different design: one self-contained stub hosting its
-own ingress (the stock functional-`0x777` software RX ring is the natural
-carrier; it is live-proven on the family and Crown's ring/producer are
-already resolved) plus the same exec core and CRC procedure, roughly a
-hundred bytes rather than twenty-nine. The window, MPU region, retained
-tail, boot gate, and fixup machinery all transfer to Crown unchanged, so
-that future variant keeps this report's brick boundary and install route.
+Consequence for Crown: the XCP design does not transfer, but the application-UDS
+bootstrap above does; Crown carries the same TesterPresent worker shape and the
+same 116-byte orphaned carrier pattern.
