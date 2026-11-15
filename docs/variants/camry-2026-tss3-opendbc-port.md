@@ -37,32 +37,67 @@ distinction belongs in the
 
 ## Low-speed steering-command replay (November 14, 2026)
 
-**Scope:** offline process replay of the November 12 Camry route
-`00000126--a98b6dd040`, segment 0
-(`/Users/kai/dev/inspect/logs/camry-2026/2026-11-12/00000126--a98b6dd040--0/rlog.zst`).
-Used the existing openpilot `process_replay.replay_process_with_name("card", ...)`
-with the same recorded CAN and `carControl` inputs across three separate
-opendbc checkouts. Compared the resulting `sendcan` `0x08A CONTROL_REQUEST`
-B18:B19 signed angle, at `1024/17870` degrees/count, rather than
-`carOutput`. This is a request-output comparison.
+A six-date scan (September 6/7/10/11/18 and November 12) examined 287 rlogs.
+128 contained some active lateral control below 9 m/s. Eleven segments with
+sustained moving low-speed control were retained, giving 9,981 controller
+samples / 100.02 s at 1-9 m/s across five dates.
 
-| CarController | Frames | Different from baseline | RMS request step | p95 absolute step | Total absolute angle travel |
+The offline controller reducer replays each recorded `carControl` request at
+the recorded CAN-loop cadence, uses recorded steering state, runs the current
+`apply_steer_angle_limits_vm()`, and quantizes the resulting request with the
+TSS3 `1024/17870` deg/count scale. On November-12 segment 0 its unmodified
+request-shape metrics match full openpilot `card` process replay of the actual
+generated `0x08A`: RMS step 0.27046° versus 0.27065°, p95 0.68763° versus
+0.68763°, and total variation 116.10° versus 115.18°.
+
+The sweep covered YC's second-order governor, upstream-style and lighter
+speed-dependent first-order filters, HKG-style micro-adjustment EMA variants,
+hysteresis/deadband, quantization, fixed low-speed rate caps, and asymmetric
+wind/unwind caps. Derivative metrics below use only contiguous active moving
+samples.
+
+| Candidate | RMS step | RMS 2nd diff | Mean abs deviation | p95 deviation | Best-fit lag |
 |---|---:|---:|---:|---:|---:|
-| Unmodified | 1,126 | — | 0.271° | 0.688° | 115.18° |
-| YC's low-speed second-order patch | 1,126 | 1,087 | 0.093° | 0.115° | 46.64° |
-| Nissan-style first-order prototype (0.15/0.10/0 s RC at 0/5/9 m/s) | 1,126 | 951 | 0.126° | 0.229° | 95.12° |
+| Unmodified | 0.341° | 0.436° | — | — | — |
+| YC second-order | 0.106° | 0.119° | 0.626° | 1.909° | ~91 ms |
+| Upstream-style 0.2 s first-order | 0.070° | 0.046° | 0.664° | 1.901° | ~105 ms |
+| HKG micro-adjustment EMA (<1°) | 0.300° | 0.373° | 0.107° | 0.371° | ~2 ms |
+| 0.5° hysteresis | 0.294° | 0.376° | 0.161° | 0.239° | ~0 ms |
+| First-order RC 15 ms | 0.241° | 0.245° | 0.077° | 0.346° | ~0 ms |
+| **First-order RC 20 ms** | **0.221°** | **0.212°** | **0.103°** | **0.433°** | **~2 ms** |
+| First-order RC 25 ms | 0.206° | 0.188° | 0.127° | 0.494° | ~5 ms |
+| First-order RC 30 ms | 0.193° | 0.169° | 0.149° | 0.561° | ~10 ms |
 
-Every request's timestamp, request ID, and sequence matched across the three
-replays; only the B18:B19 target-angle bytes differed within the 28-byte
-application section. YC's patch differs from baseline by a mean absolute
-0.514° and maximum 2.349°; the first-order prototype differs by 0.188° and
-1.375°, respectively. A best-RMS time-shift comparison to the unmodified
-trajectory found approximately 100 ms for YC and 10 ms for the first-order
-prototype, illustrating their different tracking delays in this segment.
+The light first-order family cuts repeated direction-change energy without
+discarding the low-frequency maneuver. At 20 ms RC, request-step RMS is 35%
+lower, second-difference RMS 51% lower, and reversal energy 78% lower than the
+unmodified controller while total request travel falls only 5.7%. Fixed and
+asymmetric rate caps produced multi-degree worst-case tracking errors (about
+7-10° in this corpus), and 0.1° input quantization did not improve the request.
 
-The replay demonstrates smoother requests from both filters, with more
-smoothing and delay from YC's version. Filter coefficients are experimental;
-neither patch is part of the maintained controller.
+A separate scan of the same 287 logs found two native FRC ID11 low-speed
+windows (356 consecutive steps / 8.44 s, 5-9 m/s). Toyota's native request is
+much smoother: RMS step 0.0496°, p95 0.1146°, with no step >=0.3°. On the
+shared September-6 segment, the unmodified simulated request is 0.1137° RMS /
+0.2865° p95; RC20 gives 0.0682° / 0.1719°, RC25 gives 0.0642° / 0.1146°, and
+RC30 gives 0.0604° / 0.1146°. YC goes below the native texture at 0.0354° /
+0.0573° while adding substantially more trajectory delay.
+
+Full `card` process replay on both usable November-12 low-speed segments
+confirms the direct-reducer trend. RC20 reduces actual generated `0x08A`
+request RMS by 37.1% and 33.9%, with mean deviations of only 0.081° and
+0.049° from the unmodified request. Forced-RC20 execution also passes the
+existing Toyota test suite (49 tests, 2 expected skips).
+
+**Offline candidate:** a speed-dependent `FirstOrderFilter` before the
+existing VM limiter, with its state synchronized to the post-limit
+`last_angle`, reset to measured angle on inactive/reference-reset paths, and
+a low-speed RC around 15-20 ms. The tested RC20 schedule is 20 ms at 0 m/s,
+7 ms at 9 m/s, and zero at 12 m/s. RC25 is the next stronger candidate if a
+road test still shows audible/physical thrashing. YC's governor and the
+upstream 0.2 s time constant are substantially more aggressive than the
+recorded Camry data supports. This candidate is not yet in the maintained
+controller.
 
 ### Relevant upstream/community prior art
 
