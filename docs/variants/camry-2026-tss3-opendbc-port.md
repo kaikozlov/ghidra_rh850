@@ -130,9 +130,18 @@ physical steering plant:
 
 In compact form:
 
-`u_dot = kp * (desired_curvature - actual_curvature) + ki * integral(error) - kd * actual_curvature_rate`
+`rate_error = (desired_curvature - actual_curvature) / lateral_delay`
+
+`u_dot = kp * rate_error + ki * integral(rate_error) - kd * actual_curvature_rate`
 
 `u = u + u_dot * DT_CTRL`
+
+The model action already targets the future at the actuator horizon. Dividing
+the position error by the existing `lateralDelay` turns that future target into
+the rate needed to reach it on that timescale. Torque control instead uses a
+delayed setpoint for feedback and can apply the future target as effort
+feedforward; passing a future **position** directly through angle feedforward
+would recreate the step this controller is intended to avoid.
 
 This is also consistent with historical openpilot prior art. The removed INDI
 lateral controller used position error to produce a desired steering rate, then
@@ -159,27 +168,29 @@ fit, held out by sequence, selects a two-control-tick command delay:
 with DC gain 0.965 and held-out one-step curvature RMSE 1.81e-5 1/m. Thirteen
 sequence-local stable fits are retained as a rough robustness ensemble.
 
-The first offline rate-servo tune is **kp=2.6, ki=0, kd=2.8**. It was chosen by
-matching the identified direct plant's step-response timescale while targeting
-critical damping, not by selecting a smoothing time constant. On the global
-identified plant, a 0.02 1/m step gives:
+The first offline rate-servo tune is **kp=1.0, ki=0, kd=2.8**. The outer
+position-to-rate gain comes from `lateralDelay`, not a Toyota constant. Median
+low-speed `lateralDelay` in the retained sequences is 0.3803 s, so the effective
+position gain is about 2.63/s. The derivative gain is the provisional TSS3
+plant tune; it was chosen from the identified plant for approximately critical
+damping. On the global identified plant, a 0.02 1/m step gives:
 
 | Path | t50 | t90 | overshoot | peak command / target | command 2nd-diff RMS |
 |---|---:|---:|---:|---:|---:|
 | direct angle | 0.99 s | 3.19 s | 0.15% | 1.00x | 1.41e-3 |
 | RC20 baseline | 1.01 s | 3.21 s | 0.16% | 1.00x | 2.11e-4 |
-| **rate servo 2.6/2.8** | **1.24 s** | **2.84 s** | **0.02%** | **1.18x** | **3.87e-6** |
+| **rate servo 1.0/2.8 + `lateralDelay`** | **1.23 s** | **2.81 s** | **0.02%** | **1.19x** | **3.92e-6** |
 
 Across the 13 local plant fits, the rate servo's median/worst command
-second-difference RMS is 2.66e-6 / 7.29e-6, versus 3.41e-5 / 1.00e-4 for RC20.
+second-difference RMS is 2.69e-6 / 7.37e-6, versus 3.41e-5 / 1.00e-4 for RC20.
 Its simulated response varies more across those local fits than RC20, so these
 gains are an **initial road-test tune**, not a completed calibration.
 
 The experimental implementation is split along the normal repository boundary:
 
-- openpilot `experiment/angle-rate-control` (`95c7a90f5`): optional
+- openpilot `experiment/angle-rate-control` (`cae726555`): optional
   rate-domain PID inside `LatControlAngle`;
-- opendbc `experiment/tss3-angle-rate-tune` (`550c288e`): TSS3 PID tune plus
+- opendbc `experiment/tss3-angle-rate-tune` (`b05654d1`): TSS3 PID tune plus
   the `kd` tuning field.
 
 The current implementation passes all 20 openpilot controls tests, the Toyota

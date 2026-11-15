@@ -10,11 +10,11 @@
         "target_curvature": 0.02
       },
       "rate_controller": {
-        "command_second_difference_rms": 3.865023695369418e-06,
-        "overshoot_fraction": 0.00019894108274381666,
-        "peak_command_to_target_ratio": 1.1801402138541055,
-        "t50_seconds": 1.24,
-        "t90_seconds": 2.84,
+        "command_second_difference_rms": 3.91649188903917e-06,
+        "overshoot_fraction": 0.0001606719523324138,
+        "peak_command_to_target_ratio": 1.1873654684395276,
+        "t50_seconds": 1.23,
+        "t90_seconds": 2.81,
         "target_curvature": 0.02
       },
       "rc20": {
@@ -40,12 +40,12 @@
     },
     "local_model_robustness": {
       "rate_controller": {
-        "command_second_difference_rms_median": 2.6572038470014813e-06,
-        "command_second_difference_rms_worst": 7.289213388594652e-06,
-        "command_step_rms_median": 9.088040324182187e-06,
-        "command_step_rms_worst": 3.491080016325298e-05,
-        "tracking_error_ratio_median": 1.2796190363879865,
-        "tracking_error_ratio_worst": 2.86237410388057
+        "command_second_difference_rms_median": 2.6869912045997816e-06,
+        "command_second_difference_rms_worst": 7.372680906117935e-06,
+        "command_step_rms_median": 9.181693552142141e-06,
+        "command_step_rms_worst": 3.5241818891799724e-05,
+        "tracking_error_ratio_median": 1.2742551404077134,
+        "tracking_error_ratio_worst": 2.846752859119702
       },
       "rc20": {
         "command_second_difference_rms_median": 3.406647251608896e-05,
@@ -57,12 +57,13 @@
       }
     },
     "prototype": {
-      "form": "u_dot = kp*(desired_curvature-actual_curvature) - kd*actual_curvature_rate + ki*integral(error)",
+      "form": "u_dot = kp*(desired_curvature-actual_curvature)/lateral_delay - kd*actual_curvature_rate + ki*integral(rate_error)",
       "kd": 2.8,
       "ki": 0.0,
-      "kp": 2.6
+      "kp": 1.0
     },
     "scope": {
+      "feedback_delay_median_seconds": 0.38027262687683105,
       "local_models": 13,
       "sample_period_seconds": 0.01,
       "samples": 9958,

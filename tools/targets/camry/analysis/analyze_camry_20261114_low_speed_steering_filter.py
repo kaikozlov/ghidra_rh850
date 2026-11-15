@@ -896,7 +896,7 @@ def generic_reference_bakeoff(
 
 
 ANGLE_RATE_CONTROLLER_TUNE = {
-    "kp": 2.6,
+    "kp": 1.0,
     "ki": 0.0,
     "kd": 2.8,
 }
@@ -906,6 +906,7 @@ def angle_rate_controller_diagnostics(LogReader, VehicleModel, root: Path) -> di
     """Identify the low-speed angle plant and score the rate-domain controller prototype."""
 
     sequences: list[np.ndarray] = []
+    lateral_delays: list[float] = []
     for rel in CORPUS:
         msgs = list(LogReader(str(root / rel), only_union_types=True))
         if not msgs:
@@ -949,6 +950,8 @@ def angle_rate_controller_diagnostics(LogReader, VehicleModel, root: Path) -> di
                 ))
             elif which == "carOutput":
                 outputs.append((t, float(msg.carOutput.actuatorsOutput.steeringAngleDeg)))
+            elif which == "lateralDelay":
+                lateral_delays.append(float(msg.lateralDelay.lateralDelay))
 
         if not states or not params_rows or not controls or not outputs:
             continue
@@ -1063,6 +1066,7 @@ def angle_rate_controller_diagnostics(LogReader, VehicleModel, root: Path) -> di
             local_models.append((seq_i, *best_local))
 
     dt = 0.01
+    feedback_delay = float(np.median(lateral_delays)) if lateral_delays else 0.38
 
     def simulate_direct(seq: np.ndarray, model) -> tuple[np.ndarray, np.ndarray]:
         _, _, delay, a, b, c, _ = model
@@ -1102,10 +1106,11 @@ def angle_rate_controller_diagnostics(LogReader, VehicleModel, root: Path) -> di
         kd = ANGLE_RATE_CONTROLLER_TUNE["kd"]
         for k in range(len(seq) - 1):
             error = ref[k] - y[k]
+            rate_error = error / max(feedback_delay, dt)
             measured_rate = (y[k] - previous_y) / dt if k else 0.0
             previous_y = y[k]
-            integral += ki * dt * error
-            rate_command = kp * error - kd * measured_rate + integral
+            integral += ki * dt * rate_error
+            rate_command = kp * rate_error - kd * measured_rate + integral
             u[k] = float(np.clip(
                 (u[k - 1] if k else y[k]) + rate_command * dt,
                 -0.2,
@@ -1161,11 +1166,12 @@ def angle_rate_controller_diagnostics(LogReader, VehicleModel, root: Path) -> di
                 u[k] = ref[k] if k == 0 else alpha * ref[k] + (1.0 - alpha) * u[k - 1]
             else:
                 error = ref[k] - y[k]
+                rate_error = error / max(feedback_delay, dt)
                 measured_rate = (y[k] - previous_y) / dt if k else 0.0
                 previous_y = y[k]
-                integral += ANGLE_RATE_CONTROLLER_TUNE["ki"] * dt * error
+                integral += ANGLE_RATE_CONTROLLER_TUNE["ki"] * dt * rate_error
                 rate_command = (
-                    ANGLE_RATE_CONTROLLER_TUNE["kp"] * error
+                    ANGLE_RATE_CONTROLLER_TUNE["kp"] * rate_error
                     - ANGLE_RATE_CONTROLLER_TUNE["kd"] * measured_rate
                     + integral
                 )
@@ -1208,6 +1214,7 @@ def angle_rate_controller_diagnostics(LogReader, VehicleModel, root: Path) -> di
             "samples": int(sum(len(seq) for seq in sequences)),
             "local_models": len(local_models),
             "sample_period_seconds": dt,
+            "feedback_delay_median_seconds": feedback_delay,
         },
         "identified_plant": {
             "form": "y[k+1] = a*y[k] + b*u[k-delay] + c",
@@ -1222,7 +1229,7 @@ def angle_rate_controller_diagnostics(LogReader, VehicleModel, root: Path) -> di
             "test_samples": test_samples,
         },
         "prototype": {
-            "form": "u_dot = kp*(desired_curvature-actual_curvature) - kd*actual_curvature_rate + ki*integral(error)",
+            "form": "u_dot = kp*(desired_curvature-actual_curvature)/lateral_delay - kd*actual_curvature_rate + ki*integral(rate_error)",
             **ANGLE_RATE_CONTROLLER_TUNE,
         },
         "global_step_response": {
