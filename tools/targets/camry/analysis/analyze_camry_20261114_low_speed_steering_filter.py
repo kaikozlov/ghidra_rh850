@@ -895,6 +895,348 @@ def generic_reference_bakeoff(
     return pooled
 
 
+ANGLE_RATE_CONTROLLER_TUNE = {
+    "kp": 2.6,
+    "ki": 0.0,
+    "kd": 2.8,
+}
+
+
+def angle_rate_controller_diagnostics(LogReader, VehicleModel, root: Path) -> dict[str, Any]:
+    """Identify the low-speed angle plant and score the rate-domain controller prototype."""
+
+    sequences: list[np.ndarray] = []
+    for rel in CORPUS:
+        msgs = list(LogReader(str(root / rel), only_union_types=True))
+        if not msgs:
+            continue
+        t0 = msgs[0].logMonoTime
+        cp = next(msg.carParams for msg in msgs if msg.which() == "carParams")
+        vm = VehicleModel(cp)
+
+        states: list[tuple[float, float, float, float]] = []
+        params_rows: list[tuple[float, float, float, float, float]] = []
+        controls: list[tuple[float, float, bool, bool]] = []
+        outputs: list[tuple[float, float]] = []
+
+        for msg in msgs:
+            t = (msg.logMonoTime - t0) * 1e-9
+            which = msg.which()
+            if which == "carState":
+                cs = msg.carState
+                states.append((
+                    t,
+                    float(cs.vEgo),
+                    float(cs.vEgoRaw),
+                    float(cs.steeringAngleDeg + cs.steeringAngleOffsetDeg),
+                ))
+            elif which == "vehicleParameters":
+                vp = msg.vehicleParameters
+                params_rows.append((
+                    t,
+                    float(vp.stiffnessFactor),
+                    float(vp.steerRatio),
+                    float(vp.roll),
+                    float(vp.angleOffsetDeg),
+                ))
+            elif which == "carControl":
+                cc = msg.carControl
+                controls.append((
+                    t,
+                    float(cc.actuators.steeringAngleDeg),
+                    bool(cc.enabled),
+                    bool(cc.latActive),
+                ))
+            elif which == "carOutput":
+                outputs.append((t, float(msg.carOutput.actuatorsOutput.steeringAngleDeg)))
+
+        if not states or not params_rows or not controls or not outputs:
+            continue
+
+        params_times = [row[0] for row in params_rows]
+        control_times = [row[0] for row in controls]
+        output_times = [row[0] for row in outputs]
+        rows: list[tuple[float, float, float, float, float, bool]] = []
+
+        for t, v_ego, v_ego_raw, measured_angle in states:
+            pi = bisect.bisect_right(params_times, t) - 1
+            ci = bisect.bisect_right(control_times, t) - 1
+            oi = bisect.bisect_right(output_times, t) - 1
+            if min(pi, ci, oi) < 0:
+                continue
+
+            _, stiffness_factor, steer_ratio, roll, angle_offset = params_rows[pi]
+            vm.update_params(max(stiffness_factor, 0.1), max(steer_ratio, 0.1))
+            measured_curvature = -vm.calc_curvature(
+                math.radians(measured_angle - angle_offset), v_ego, roll
+            )
+            output_curvature = -vm.calc_curvature(
+                math.radians(outputs[oi][1] - angle_offset), v_ego, roll
+            )
+            desired_curvature = -vm.calc_curvature(
+                math.radians(controls[ci][1] - angle_offset), v_ego, roll
+            )
+            active = controls[ci][2] and controls[ci][3] and 1.0 <= v_ego_raw < 9.0
+            rows.append((
+                t,
+                v_ego_raw,
+                measured_curvature,
+                output_curvature,
+                desired_curvature,
+                active,
+            ))
+
+        current: list[tuple[float, float, float, float, float, bool]] = []
+        for row in rows:
+            if row[5] and (not current or row[0] - current[-1][0] < 0.025):
+                current.append(row)
+            else:
+                if len(current) >= 80:
+                    sequences.append(np.asarray(current, dtype=float))
+                current = []
+        if len(current) >= 80:
+            sequences.append(np.asarray(current, dtype=float))
+
+    if not sequences:
+        return {}
+
+    # First-order ARX plant: y[k+1] = a*y[k] + b*u[k-d] + c.
+    train = [seq for i, seq in enumerate(sequences) if i % 3 != 0]
+    test = [seq for i, seq in enumerate(sequences) if i % 3 == 0]
+    best_global: tuple[float, int, np.ndarray, int, int] | None = None
+    for delay in range(31):
+        x_rows: list[list[float]] = []
+        y_rows: list[float] = []
+        for seq in train:
+            for k in range(delay, len(seq) - 1):
+                x_rows.append([seq[k, 2], seq[k - delay, 3], 1.0])
+                y_rows.append(seq[k + 1, 2])
+        if not x_rows:
+            continue
+        x = np.asarray(x_rows)
+        y = np.asarray(y_rows)
+        coef = np.linalg.lstsq(x, y, rcond=None)[0]
+
+        errors: list[float] = []
+        for seq in test:
+            for k in range(delay, len(seq) - 1):
+                errors.append(
+                    float(np.dot([seq[k, 2], seq[k - delay, 3], 1.0], coef) - seq[k + 1, 2])
+                )
+        if not errors:
+            continue
+        rmse = float(np.sqrt(np.mean(np.square(errors))))
+        candidate = (rmse, delay, coef, len(y_rows), len(errors))
+        if best_global is None or rmse < best_global[0]:
+            best_global = candidate
+
+    if best_global is None:
+        return {}
+
+    test_rmse, plant_delay, plant_coef, train_samples, test_samples = best_global
+    plant_a, plant_b, plant_c = (float(x) for x in plant_coef)
+    dc_gain = plant_b / (1.0 - plant_a)
+
+    local_models: list[tuple[int, float, int, float, float, float, float]] = []
+    for seq_i, seq in enumerate(sequences):
+        best_local: tuple[float, int, float, float, float, float] | None = None
+        for delay in range(31):
+            x_rows = []
+            y_rows = []
+            for k in range(delay, len(seq) - 1):
+                x_rows.append([seq[k, 2], seq[k - delay, 3], 1.0])
+                y_rows.append(seq[k + 1, 2])
+            if len(x_rows) < 60:
+                continue
+            x = np.asarray(x_rows)
+            y = np.asarray(y_rows)
+            coef = np.linalg.lstsq(x, y, rcond=None)[0]
+            a, b, c = (float(v) for v in coef)
+            gain = b / (1.0 - a) if abs(1.0 - a) > 1e-9 else math.inf
+            if not (0.90 < a < 0.9999 and b > 0.0 and 0.2 < gain < 2.0):
+                continue
+            rmse = float(np.sqrt(np.mean(np.square(x @ coef - y))))
+            candidate = (rmse, delay, a, b, c, gain)
+            if best_local is None or rmse < best_local[0]:
+                best_local = candidate
+        if best_local is not None:
+            local_models.append((seq_i, *best_local))
+
+    dt = 0.01
+
+    def simulate_direct(seq: np.ndarray, model) -> tuple[np.ndarray, np.ndarray]:
+        _, _, delay, a, b, c, _ = model
+        ref = seq[:, 4]
+        y = np.zeros(len(seq))
+        y[0] = seq[0, 2]
+        for k in range(len(seq) - 1):
+            y[k + 1] = a * y[k] + b * ref[max(0, k - delay)] + c
+        return y, ref.copy()
+
+    def simulate_rc20(seq: np.ndarray, model) -> tuple[np.ndarray, np.ndarray]:
+        _, _, delay, a, b, c, _ = model
+        ref = seq[:, 4]
+        y = np.zeros(len(seq))
+        u = np.zeros(len(seq))
+        y[0] = seq[0, 2]
+        u[0] = ref[0]
+        alpha = dt / (0.020 + dt)
+        for k in range(len(seq) - 1):
+            u[k] = ref[k] if k == 0 else alpha * ref[k] + (1.0 - alpha) * u[k - 1]
+            y[k + 1] = a * y[k] + b * u[max(0, k - delay)] + c
+        if len(seq) > 1:
+            u[-1] = u[-2]
+        return y, u
+
+    def simulate_rate_controller(seq: np.ndarray, model) -> tuple[np.ndarray, np.ndarray]:
+        _, _, delay, a, b, c, _ = model
+        ref = seq[:, 4]
+        y = np.zeros(len(seq))
+        u = np.zeros(len(seq))
+        y[0] = seq[0, 2]
+        u[0] = y[0]
+        previous_y = y[0]
+        integral = 0.0
+        kp = ANGLE_RATE_CONTROLLER_TUNE["kp"]
+        ki = ANGLE_RATE_CONTROLLER_TUNE["ki"]
+        kd = ANGLE_RATE_CONTROLLER_TUNE["kd"]
+        for k in range(len(seq) - 1):
+            error = ref[k] - y[k]
+            measured_rate = (y[k] - previous_y) / dt if k else 0.0
+            previous_y = y[k]
+            integral += ki * dt * error
+            rate_command = kp * error - kd * measured_rate + integral
+            u[k] = float(np.clip(
+                (u[k - 1] if k else y[k]) + rate_command * dt,
+                -0.2,
+                0.2,
+            ))
+            y[k + 1] = a * y[k] + b * u[max(0, k - delay)] + c
+        if len(seq) > 1:
+            u[-1] = u[-2]
+        return y, u
+
+    def robust_metrics(simulator) -> dict[str, float]:
+        response_ratios: list[float] = []
+        step_rms: list[float] = []
+        second_rms: list[float] = []
+        for model in local_models:
+            seq = sequences[model[0]]
+            baseline_y, _ = simulate_direct(seq, model)
+            candidate_y, candidate_u = simulator(seq, model)
+            ref = seq[:, 4]
+            start = 50
+            baseline_error = float(np.sqrt(np.mean(np.square(baseline_y[start:] - ref[start:]))))
+            candidate_error = float(np.sqrt(np.mean(np.square(candidate_y[start:] - ref[start:]))))
+            if baseline_error > 0.0:
+                response_ratios.append(candidate_error / baseline_error)
+            step_rms.append(float(np.sqrt(np.mean(np.square(np.diff(candidate_u)[start:])))))
+            second_rms.append(float(np.sqrt(np.mean(np.square(np.diff(candidate_u, 2)[start - 1:])))))
+        return {
+            "tracking_error_ratio_median": float(np.median(response_ratios)),
+            "tracking_error_ratio_worst": float(np.max(response_ratios)),
+            "command_step_rms_median": float(np.median(step_rms)),
+            "command_step_rms_worst": float(np.max(step_rms)),
+            "command_second_difference_rms_median": float(np.median(second_rms)),
+            "command_second_difference_rms_worst": float(np.max(second_rms)),
+        }
+
+    def global_step_response(kind: str) -> dict[str, float]:
+        samples = 900
+        step_start = 100
+        target = 0.02
+        ref = np.zeros(samples)
+        ref[step_start:] = target
+        y = np.zeros(samples)
+        u = np.zeros(samples)
+        input_history = [0.0] * (plant_delay + 1)
+        previous_y = 0.0
+        integral = 0.0
+        alpha = dt / (0.020 + dt)
+
+        for k in range(samples - 1):
+            if kind == "direct":
+                u[k] = ref[k]
+            elif kind == "rc20":
+                u[k] = ref[k] if k == 0 else alpha * ref[k] + (1.0 - alpha) * u[k - 1]
+            else:
+                error = ref[k] - y[k]
+                measured_rate = (y[k] - previous_y) / dt if k else 0.0
+                previous_y = y[k]
+                integral += ANGLE_RATE_CONTROLLER_TUNE["ki"] * dt * error
+                rate_command = (
+                    ANGLE_RATE_CONTROLLER_TUNE["kp"] * error
+                    - ANGLE_RATE_CONTROLLER_TUNE["kd"] * measured_rate
+                    + integral
+                )
+                u[k] = float(np.clip(
+                    (u[k - 1] if k else y[k]) + rate_command * dt,
+                    -0.2,
+                    0.2,
+                ))
+            input_history.append(u[k])
+            y[k + 1] = (
+                plant_a * y[k]
+                + plant_b * input_history[-plant_delay - 1]
+                + plant_c
+            )
+
+        if samples > 1:
+            u[-1] = u[-2]
+        baseline = float(np.mean(y[70:95]))
+        final = float(np.mean(y[-100:]))
+        amplitude = final - baseline
+
+        def crossing_time(fraction: float) -> float | None:
+            threshold = baseline + fraction * amplitude
+            hits = np.where(y[step_start:] >= threshold)[0]
+            return float(hits[0] * dt) if len(hits) else None
+
+        overshoot = (float(np.max(y[step_start:])) - final) / abs(amplitude)
+        return {
+            "target_curvature": target,
+            "t50_seconds": crossing_time(0.5),
+            "t90_seconds": crossing_time(0.9),
+            "overshoot_fraction": overshoot,
+            "peak_command_to_target_ratio": float(np.max(u) / target),
+            "command_second_difference_rms": float(np.sqrt(np.mean(np.square(np.diff(u, 2)[99:299])))),
+        }
+
+    return {
+        "scope": {
+            "sequences": len(sequences),
+            "samples": int(sum(len(seq) for seq in sequences)),
+            "local_models": len(local_models),
+            "sample_period_seconds": dt,
+        },
+        "identified_plant": {
+            "form": "y[k+1] = a*y[k] + b*u[k-delay] + c",
+            "delay_samples": plant_delay,
+            "delay_seconds": plant_delay * dt,
+            "a": plant_a,
+            "b": plant_b,
+            "c": plant_c,
+            "dc_gain": dc_gain,
+            "held_out_rmse_curvature": test_rmse,
+            "train_samples": train_samples,
+            "test_samples": test_samples,
+        },
+        "prototype": {
+            "form": "u_dot = kp*(desired_curvature-actual_curvature) - kd*actual_curvature_rate + ki*integral(error)",
+            **ANGLE_RATE_CONTROLLER_TUNE,
+        },
+        "global_step_response": {
+            "direct": global_step_response("direct"),
+            "rc20": global_step_response("rc20"),
+            "rate_controller": global_step_response("rate"),
+        },
+        "local_model_robustness": {
+            "rc20": robust_metrics(simulate_rc20),
+            "rate_controller": robust_metrics(simulate_rate_controller),
+        },
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--log-root", default=DEFAULT_LOG_ROOT)
@@ -968,6 +1310,7 @@ def main() -> None:
             VehicleModel,
             log_root,
         ),
+        "angle_rate_controller_diagnostics": angle_rate_controller_diagnostics(LogReader, VehicleModel, log_root),
         "pooled": pooled,
         "segments": segment_rows,
         "native_stock": stock_request_scan(LogReader, log_root),

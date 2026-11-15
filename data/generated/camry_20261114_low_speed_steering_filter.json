@@ -1,4 +1,74 @@
 {
+  "angle_rate_controller_diagnostics": {
+    "global_step_response": {
+      "direct": {
+        "command_second_difference_rms": 0.001414213562373095,
+        "overshoot_fraction": 0.0015473527853974874,
+        "peak_command_to_target_ratio": 1.0,
+        "t50_seconds": 0.99,
+        "t90_seconds": 3.19,
+        "target_curvature": 0.02
+      },
+      "rate_controller": {
+        "command_second_difference_rms": 3.865023695369418e-06,
+        "overshoot_fraction": 0.00019894108274381666,
+        "peak_command_to_target_ratio": 1.1801402138541055,
+        "t50_seconds": 1.24,
+        "t90_seconds": 2.84,
+        "target_curvature": 0.02
+      },
+      "rc20": {
+        "command_second_difference_rms": 0.00021081851067789202,
+        "overshoot_fraction": 0.0015702134685675352,
+        "peak_command_to_target_ratio": 0.9999999999999998,
+        "t50_seconds": 1.01,
+        "t90_seconds": 3.21,
+        "target_curvature": 0.02
+      }
+    },
+    "identified_plant": {
+      "a": 0.9928878030663186,
+      "b": 0.006864407306321653,
+      "c": -3.2038597664366064e-06,
+      "dc_gain": 0.9651599035192271,
+      "delay_samples": 2,
+      "delay_seconds": 0.02,
+      "form": "y[k+1] = a*y[k] + b*u[k-delay] + c",
+      "held_out_rmse_curvature": 1.806821541952556e-05,
+      "test_samples": 3740,
+      "train_samples": 6176
+    },
+    "local_model_robustness": {
+      "rate_controller": {
+        "command_second_difference_rms_median": 2.6572038470014813e-06,
+        "command_second_difference_rms_worst": 7.289213388594652e-06,
+        "command_step_rms_median": 9.088040324182187e-06,
+        "command_step_rms_worst": 3.491080016325298e-05,
+        "tracking_error_ratio_median": 1.2796190363879865,
+        "tracking_error_ratio_worst": 2.86237410388057
+      },
+      "rc20": {
+        "command_second_difference_rms_median": 3.406647251608896e-05,
+        "command_second_difference_rms_worst": 9.996821982201935e-05,
+        "command_step_rms_median": 4.028721881711938e-05,
+        "command_step_rms_worst": 0.00012297611237358292,
+        "tracking_error_ratio_median": 1.0184206498093826,
+        "tracking_error_ratio_worst": 1.0863536644913434
+      }
+    },
+    "prototype": {
+      "form": "u_dot = kp*(desired_curvature-actual_curvature) - kd*actual_curvature_rate + ki*integral(error)",
+      "kd": 2.8,
+      "ki": 0.0,
+      "kp": 2.6
+    },
+    "scope": {
+      "local_models": 13,
+      "sample_period_seconds": 0.01,
+      "samples": 9958,
+      "sequences": 14
+    }
+  },
   "generic_reference_bakeoff": {
     "baseline": {
       "angle": {

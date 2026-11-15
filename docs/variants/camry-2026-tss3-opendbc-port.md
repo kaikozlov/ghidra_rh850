@@ -101,136 +101,115 @@ its `action_t` shifted by the stitch horizon and stitch to that actual future
 action. The retained rlogs contain no camera streams, so that model rerun cannot
 be reconstructed from this local corpus alone.
 
-There is explicit upstream precedent for doing that above the car port.
-`modeld` already has `LAT_SMOOTH_SECONDS`, and its value is added to the
-model's lateral `action_t` so the model predicts farther ahead when smoothing
-is present. It was 0.1 s in earlier releases and was changed to 0.0 by
-`f51c2aec` / openpilot #36987 (`Modeld: less lat smoothing`, January 9, 2026).
-Simply restoring that constant is not a complete 100-Hz reference generator,
-but its delay-compensated design identifies the correct architectural
-boundary: planner/model action shaping belongs above the vehicle-specific
-`CarController`, with any introduced delay represented to the model.
+The controller architecture differs materially between torque and angle cars.
+`LatControlTorque` already runs a real 100-Hz feedback loop: it converts the
+20-Hz desired curvature to desired lateral acceleration, compares that against
+measured lateral acceleration, applies PI/torque feedforward, and sends torque
+as an **effort** command. The steering plant then turns that effort into angle
+over time. A 20-Hz target revision therefore does not become an instantaneous
+steering-position revision.
 
-The immediate idiomatic software fix is a **generic 100-Hz curvature
-reference for the angle/open-loop lateral path in `controlsd`**. The retained
-prototype filters `new_desired_curvature` before `clip_curvature()` and before
-lateral-controller dispatch whenever `steerControlType == angle`. This placement
-also covers Ford, whose interface currently selects the angle-control path but
-whose `CarController` consumes `actuators.curvature` directly; filtering inside
-`LatControlAngle` would miss Ford's real actuator input.
+`LatControlAngle` currently has no corresponding dynamics. It converts desired
+curvature directly to an absolute steering-angle target every control tick.
+For an absolute-position actuator, copying the torque controller as a normal
+position PID with `desired_angle` feedforward does not solve the cadence problem:
+the feedforward passes the 20-Hz position step straight through.
 
-The filter time constant is derived from model cadence rather than a Toyota
-calibration. The primary prototype uses `ANGLE_CONTROL_REF_FILTER_RC = DT_MDL /
-4` = **12.5 ms**. With the current discrete `FirstOrderFilter` at 100 Hz, only
-5.3% of a step remains after one 50-ms model period. A stronger alternate uses
-`DT_MDL / 3` = **16.67 ms** and leaves 9.5%. `modeld` adds the same RC to the
-lateral `action_t` for the angle-control path so the learned action can account
-for the reference filter's low-frequency group delay. The local Camry rlogs do
-not retain camera streams, so the exact shifted-`action_t` network response
-cannot be replayed here; the 100-Hz control/reference behavior is fully
-replayable.
+The closest upstream-native analogue is a **rate-domain servo inside
+`LatControlAngle`**. This reuses the same 100-Hz controller boundary as torque
+control while adding the integration order that torque cars get from their
+physical steering plant:
 
-The retained 11-segment Camry corpus gives the following comparison in the
-three relevant coordinate systems:
+1. compute actual curvature from measured steering angle;
+2. compute actual curvature rate from measured steering rate;
+3. run the existing `PIDController` on curvature error, using measured curvature
+   rate as derivative feedback;
+4. interpret the PID output as curvature rate and integrate it at `DT_CTRL`;
+5. convert the integrated curvature command to angle with the existing vehicle
+   model.
 
-| Reference | angle RMS step | angle step at model update | equivalent `k*v^2` RMS step | `k*v^2` step at model update | VMC RMS step | VMC mean / p95 / max deviation |
-|---|---:|---:|---:|---:|---:|---:|
-| current | 0.3850 deg | 0.6996 deg | 0.00754 m/s2 | 0.01430 m/s2 | 0.3389 deg | — |
-| **generic `DT_MDL/4`** | **0.2136 deg** | **0.3155 deg** | **0.00422 m/s2** | **0.00643 m/s2** | **0.2135 deg** | **0.122 / 0.460 / 1.398 deg** |
-| generic `DT_MDL/3` | 0.1923 deg | 0.2677 deg | 0.00378 m/s2 | 0.00543 m/s2 | 0.1923 deg | 0.157 / 0.554 / 1.852 deg |
+In compact form:
 
-Thus the primary `DT_MDL/4` reference cuts the model-boundary equivalent
-lateral-acceleration step by about **55%** before Toyota sees the request and
-cuts final VMC RMS by about **37%**. `DT_MDL/3` is the stronger alternate
-(~62% and ~43%, respectively) at greater trajectory displacement.
+`u_dot = kp * (desired_curvature - actual_curvature) + ki * integral(error) - kd * actual_curvature_rate`
 
-Full `controlsd -> card` process replay on both November-12 low-speed segments
-confirms the implementation rather than only the reducer. Pooled across 1,483
-active 1-9 m/s control samples, `DT_MDL/4` changes angle-step RMS
-**0.2740 -> 0.1641 deg**, model-boundary angle step **0.5629 -> 0.2653 deg**,
-equivalent lateral-acceleration step **0.00713 -> 0.00436 m/s2**, and
-model-boundary equivalent lateral-acceleration step **0.01452 -> 0.00693
-m/s2**. Final generated VMC-request RMS changes **0.2593 -> 0.1432 deg** with
-0.110-deg mean, 0.380-deg p95, and 0.860-deg maximum deviation.
+`u = u + u_dot * DT_CTRL`
 
-This is also consistent across public upstream angle/open-loop routes rather
-than being Camry-specific. Current-code process replay gives:
+This is also consistent with historical openpilot prior art. The removed INDI
+lateral controller used position error to produce a desired steering rate, then
+used measured steering rate before integrating an actuator update. Current
+`LatControlCurvature` likewise keeps its PID in the generic lateral-controller
+layer; during openpilot #38141 the implementation was explicitly kept in
+`controlsd` for consistency with angle and torque control.
 
-- Ford F-150 MK14, route
-  `e36b272d5679115f/00000369--a3e8499a85/0`, 2,273 active 1-15 m/s
-  samples: actual curvature model-boundary/intersample ratio **27.0 -> 3.00**;
-  curvature RMS **1.255e-4 -> 6.613e-5 1/m**; post-`CarController`
-  curvature RMS **1.114e-4 -> 9.592e-5 1/m**.
-- Tesla Model 3, route
-  `79d0f04c82980004/00000003--fb0b5d9cfc/0`, 1,507 active 1-40 m/s
-  samples: angle model-boundary/intersample ratio **5.25 -> 2.33**; angle RMS
-  **0.0594 -> 0.0320 deg**; mean/p95/max angle displacement only
-  **0.024 / 0.086 / 0.373 deg**. In its 15-40 m/s subset the ratio changes
-  **6.96 -> 2.61**, so the artifact and the fix are not confined to parking-lot
-  speeds.
-- Peugeot 208, route
-  `6a7075a4fdd765ee/0000004e--1f612006dd/0`, 3,262 active
-  ~10.8-19.0 m/s samples: angle model-boundary/intersample ratio
-  **3.50 -> 2.25** and angle RMS **0.220 -> 0.153 deg**, with
-  **0.090 / 0.272 / 0.588 deg** mean/p95/max displacement.
-- A recorded torque-control Toyota RAV4 2022 segment
-  (`a5c341bb250ca2f0/2022-05-18--16-05-17/2`) has torque-command
-  model-boundary/intersample RMS ratio only **1.15**, consistent with the
-  100-Hz torque controller naturally suppressing the 20-Hz model cadence.
+The retained prototype therefore makes **no model/action-horizon change and no
+Toyota `CarController` smoothing change**. `LatControlAngle` optionally enables
+the rate servo when an angle platform supplies PID gains. Existing angle cars
+have empty PID gains and remain on the current direct path. The prototype adds
+only `kd` to the existing `LateralPIDTuning` structure; the shared
+`PIDController` already supports derivative gain.
 
-The primary openpilot prototype is
-`experiment/generic-angle-curvature-ref-mdl4` at **`58b4f9b63`**; the
-stronger `DT_MDL/3` alternate is
-`experiment/generic-angle-curvature-ref-mdl3` at **`6b5983c0c`**. The
-existing lateral-controller test suite passes on the primary branch. Nissan's
-vehicle-specific low-pass from opendbc #3415 becomes duplicate state under this
-architecture; its removal is preserved separately as
-`experiment/generic-angle-ref-nissan-cleanup` at **`de57e0a8`**. The full
-opendbc unit suite passes 4,189 tests with 710 expected skips on that cleanup;
-the repository's existing Toyota MISRA violation at `toyota.h:150` remains the
-same on untouched HEAD and on the cleanup branch.
+### TSS3 angle-plant identification and provisional tune
 
-The deeper model-action representation is still worth improving. The direct
-action's lateral-acceleration-to-curvature conversion is poorly conditioned as
-speed falls, and a curvature/yaw-rate-like low-speed action, hybrid
-speed-conditioned representation, or short action trajectory could reduce the
-revisions at their source. That is separable from the reference-interface
-problem: even a well-conditioned 20-Hz receding-horizon planner needs a defined
-100-Hz reference when the downstream actuator path has no torque-style feedback
-controller.
+The tracked analyzer identifies the observed low-speed command-to-steering
+plant from 14 contiguous active sequences / 9,958 samples. A first-order ARX
+fit, held out by sequence, selects a two-control-tick command delay:
 
-The important distinction is placement, not whether the reference generator
-contains filtering mathematics. Smoothing inside Toyota `CarController` is a
-vehicle-specific mitigation for an upstream reference discontinuity. The
-`controlsd` curvature-reference filter is the generic multirate control layer;
-vehicle `CarController` code returns to protocol, safety, and actual actuator
-limits.
+`y[k+1] = 0.99289*y[k] + 0.006864*u[k-2] - 3.20e-6`
 
-### Comparison with downstream and model-side alternatives
+with DC gain 0.965 and held-out one-step curvature RMSE 1.81e-5 1/m. Thirteen
+sequence-local stable fits are retained as a rough robustness ensemble.
 
-The generic `controlsd` reference is preferred for ownership as well as its
-metrics:
+The first offline rate-servo tune is **kp=2.6, ki=0, kd=2.8**. It was chosen by
+matching the identified direct plant's step-response timescale while targeting
+critical damping, not by selecting a smoothing time constant. On the global
+identified plant, a 0.02 1/m step gives:
 
-- **YC second-order governor:** strongest request smoothing, but it is
-  vehicle-side state added after the generic control reference is already
-  discontinuous. Across the retained Camry corpus it carries 0.626-deg mean /
-  1.909-deg p95 trajectory deviation and about 91 ms best-fit lag.
-- **Toyota-side RC20:** a useful fallback and diagnostic, but it leaves
-  `carControl`, curvature, and equivalent lateral acceleration unchanged and
-  only repairs the final Toyota request. The generic reference removes roughly
-  half of the model-boundary `k*v^2` step before entering opendbc.
-- **20-Hz model-side smoothing (`LAT_SMOOTH_SECONDS` style):** attenuates
-  successive model revisions but still publishes one scalar target per model
-  frame; it does not itself define the missing 100-Hz reference. Its historic
-  action-horizon compensation is retained in the generic prototype.
-- **C1 trajectory stitching:** solves continuity by construction and remains a
-  promising higher-order design, but a correct implementation needs the
-  model's future direct action at the stitch horizon. The logged-plan proxy
-  moves the trajectory more than the short first-order reference and cannot
-  validate the live learned action without camera/model replay.
-- **Generic `controlsd` curvature reference:** minimal state, naturally
-  multirate, applies before vehicle representation, improves Ford/Tesla as well
-  as Camry, and lets duplicated per-car LPFs be deleted.
+| Path | t50 | t90 | overshoot | peak command / target | command 2nd-diff RMS |
+|---|---:|---:|---:|---:|---:|
+| direct angle | 0.99 s | 3.19 s | 0.15% | 1.00x | 1.41e-3 |
+| RC20 baseline | 1.01 s | 3.21 s | 0.16% | 1.00x | 2.11e-4 |
+| **rate servo 2.6/2.8** | **1.24 s** | **2.84 s** | **0.02%** | **1.18x** | **3.87e-6** |
+
+Across the 13 local plant fits, the rate servo's median/worst command
+second-difference RMS is 2.66e-6 / 7.29e-6, versus 3.41e-5 / 1.00e-4 for RC20.
+Its simulated response varies more across those local fits than RC20, so these
+gains are an **initial road-test tune**, not a completed calibration.
+
+The experimental implementation is split along the normal repository boundary:
+
+- openpilot `experiment/angle-rate-control` (`95c7a90f5`): optional
+  rate-domain PID inside `LatControlAngle`;
+- opendbc `experiment/tss3-angle-rate-tune` (`550c288e`): TSS3 PID tune plus
+  the `kd` tuning field.
+
+The current implementation passes all 20 openpilot controls tests, the Toyota
+suite (49 pass, 2 expected skips), and the opendbc Python suite (4,189 pass,
+710 expected skips). The full opendbc hook still reports the same pre-existing
+Toyota MISRA violation at `toyota.h:150` as the unmodified tree. Full
+`controlsd -> card` replay completes with unchanged frame counts; because the
+recorded `carState` cannot respond to a counterfactual feedback command, that
+replay is used only for integration validation.
+
+The next tuning step is the repository's existing
+`tools/lateral_maneuvers` real-car harness. That directly measures step/sine
+tracking and actuator behavior under the new closed loop. The RC15/RC20 and
+`DT_MDL/4` filter experiments remain comparison baselines, not the preferred
+controller architecture.
+
+### Comparison with previous ideas
+
+- **Toyota RC15/RC20 and the `DT_MDL/4` reference filter:** useful diagnostics
+  and fallback mitigations. They smooth a signal but do not provide the
+  torque-like 100-Hz feedback/controller layer.
+- **YC second-order governor:** produces a smooth final request but adds a
+  separate vehicle-side trajectory generator and substantial lag/deviation.
+- **20-Hz `LAT_SMOOTH_SECONDS`:** attenuates model revisions but remains a
+  20-Hz model-side scalar operation rather than an actuator controller.
+- **C1 trajectory stitching:** mathematically guarantees reference continuity,
+  but needs the model's future direct action for a faithful live evaluation.
+- **Rate-domain `LatControlAngle`:** reuses openpilot's existing controller
+  boundary, PID implementation, measured steering state, and historical INDI
+  structure. This is the preferred architecture to validate on the Camry.
 
 ### Downstream mitigation bakeoff
 
@@ -273,9 +252,9 @@ The exact downstream mitigations are preserved for controlled comparison:
 | `experiment/tss3-angle-rc15` (`834096ba`) | 33.8% / 0.067 deg | 29.5% / 0.041 deg | 49 pass, 2 expected skips |
 | `experiment/tss3-angle-rc20` (`458e14ab`) | 38.9% / 0.087 deg | 36.4% / 0.056 deg | 49 pass, 2 expected skips |
 
-These branches should remain comparison/fallback mitigations while the generic
-planner-to-angle-controller reference path is investigated. No smoothing
-change is in the maintained controller.
+These branches remain comparison/fallback mitigations while the rate-domain
+`LatControlAngle` controller is validated. No smoothing change is in the
+maintained Toyota controller.
 
 ### Relevant upstream/community prior art
 
@@ -288,6 +267,13 @@ Toyota tune:
   `LAT_SMOOTH_SECONDS` from 0.1 s to zero with the rationale that lateral was
   already sufficiently smooth. That smoothing lived in `modeld`, and its delay
   was added to the model action horizon.
+- **historical `LatControlINDI`:** used steering-position error to produce a
+  desired steering rate, then measured steering rate before integrating the
+  actuator update. This is the closest upstream structural precedent for the
+  rate-domain angle servo.
+- **openpilot #38141 (`Add latcontrol for curvature`, June 2026):** added a
+  curvature PID in the generic lateral-controller layer; review discussion
+  explicitly kept the controller there for consistency with angle and torque.
 - **openpilot #38125 (`Prereqs deep models`, June 2026):** introduced the
   direct action path and decoded lateral action as curvature through division
   by speed squared.
@@ -308,10 +294,10 @@ Toyota tune:
   workflow explicitly distinguishes desired control from the final request to
   the car and includes a high-frequency `jitter` maneuver.
 
-The opendbc examples remain valid vehicle-level mitigations for EPS-specific
-sensitivity. The Camry evidence, however, now traces the dominant request
-staircase to the generic model/action-to-angle-control path, so they should not
-be treated as proof that the TSS3 port owns the defect.
+The opendbc filters remain valid vehicle-level mitigations for EPS-specific
+sensitivity. For the Camry, the preferred experiment is instead to restore the
+100-Hz feedback layer that torque control already has, while keeping Toyota
+`CarController` limited to the normal request translation and actuator limits.
 
 ## Brake/FRC feedback observations
 
