@@ -64,6 +64,40 @@ The replay demonstrates smoother requests from both filters, with more
 smoothing and delay from YC's version. Filter coefficients are experimental;
 neither patch is part of the maintained controller.
 
+### Relevant upstream/community prior art
+
+- **Nissan, commaai/opendbc #3415 (merged May 29, 2026):** added a
+  speed-dependent `FirstOrderFilter` before `apply_std_steer_angle_limits()`
+  for low-speed request jitter/grinding. The PR explicitly attributes the
+  symptom to rapidly stepping angle requests.
+- **Subaru, commaai/opendbc #3948 (draft November 12, 2026):** applies the same
+  pattern before `apply_steer_angle_limits_vm()`: update the
+  `FirstOrderFilter` every control-loop frame, taper its time constant with
+  speed, then feed the filtered angle into the normal VM limiter.
+- **Hyundai angle-steering experiments (March-April 2026):** the retained
+  opendbc history contains several alternatives tried on the HKG angle branch:
+  low-speed EMA smoothing, 0.1-degree input quantization, filtering only
+  micro-adjustments while passing larger maneuvers through, a speed-dependent
+  hysteresis/deadzone experiment, and a later speed-dependent
+  `FirstOrderFilter` implementation (`ef3f455d`, `5a2d1aee`,
+  `6904a8c4`, `c1602ef2`, `088fd818`). The hysteresis path was left
+  commented out while its tuning was unresolved.
+- **Subaru angle work, commaai/opendbc #3454:** explored asymmetric wind-up and
+  unwind rate limits; the discussion specifically notes that symmetric limits
+  may contribute to low-speed oscillation and make turn exit feel slow.
+- **openpilot lateral maneuver reports, #37562 / #38107:** upstream's own
+  lateral tuning workflow compares desired control with `carControl` and
+  post-controller `carOutput`, and includes a high-frequency `jitter`
+  maneuver. Issue #38107 explicitly calls out the need to compare the final
+  request to the car against what the car actuates and to distinguish desired
+  commands from controller limiting.
+
+Candidate controller shapes worth replaying on the Camry are therefore:
+speed-dependent first-order filtering; a small low-speed deadzone/hysteresis;
+filtering only sub-degree micro-adjustments; and asymmetric wind/unwind
+limiting. Keep each before the existing VM/safety limiter and compare the
+resulting `0x08A` angle trajectory against the unmodified controller.
+
 ## Brake/FRC feedback observations
 
 Retained September-17/18 comparisons distinguish request loss, feature handoff
