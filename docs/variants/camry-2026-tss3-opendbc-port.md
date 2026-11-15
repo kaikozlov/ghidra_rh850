@@ -90,6 +90,17 @@ larger, not smaller. The defect is therefore not merely zero-order hold of an
 otherwise continuous reference; continuity must be handled across successive
 model revisions.
 
+A causal C1 reference-stitching prototype was also tested: each model update
+replans a cubic segment from the current curvature/reference-rate state to a
+future state on the new model trajectory. This removes the model-update
+discontinuity itself (the November model-boundary angle delta falls to about
+0.0005 deg RMS in the prototype), but using the logged plan as a proxy for an
+unlogged future direct action produces more trajectory displacement than the
+small downstream RC filter. The correct experiment is to rerun the model with
+its `action_t` shifted by the stitch horizon and stitch to that actual future
+action. The retained rlogs contain no camera streams, so that model rerun cannot
+be reconstructed from this local corpus alone.
+
 There is explicit upstream precedent for doing that above the car port.
 `modeld` already has `LAT_SMOOTH_SECONDS`, and its value is added to the
 model's lateral `action_t` so the model predicts farther ahead when smoothing
