@@ -245,6 +245,33 @@ programming-mode installer already re-enters this startup path without a hardwar
 reset, so it exercises the same basic stale-RAM/application-reinitialization
 condition with an intervening boot-runtime phase.
 
+### Exact patch footprint
+
+A compiled malformed-TesterPresent loader needs **110 bytes** with the maintained
+patched GCC toolchain. It accepts a region selector plus 16-bit offset, copies the
+remaining ISO-TP payload into either `FEBFF9F0` or `FEF07C00`, ACKs completed
+writes through the stock positive-response helper, and uses a launch opcode to
+perform `dummy read -> SYNCP -> SYNCI -> DI -> resident entry`.
+
+The family already contains one structurally matching **116-byte orphaned helper
+with zero xrefs** in the same 32-KiB erase block as the TesterPresent malformed-
+request branch on every maintained target. Replacing that orphan leaves six bytes;
+four are sufficient for an in-block CRC compensator. The existing malformed
+TesterPresent `JARL` is then retargeted to the loader. A constructed patched image
+for each target preserves the stock region-1 CRC residue `0xFFFFFFFF` without
+modifying the terminal fixup at `0xFFDEC`.
+
+| target | loader body | malformed-`3E` redirect | local CRC word | changed bytes | erased/programmed block |
+|---|---:|---:|---:|---:|---:|
+| Camry `8965F3307000` | `0x94DF6` | `0x959FC` | `0x94E64 = 86 96 81 4B` | **113** | `0x90000..0x97FFF` |
+| Crown `8965F3012000` | `0x92896` | `0x9349C` | `0x92904 = FA 22 77 C0` | **113** | `0x90000..0x97FFF` |
+| Corolla H/F | `0x8E106` | `0x8ED0C` | `0x8E174 = 05 18 A9 85` | **113** | `0x88000..0x8FFFF` |
+
+Thus the persistent semantic delta is 113 bytes in the 1-MiB image, while the
+actual flash operation is one `0x8000`/32-KiB block. This is larger in changed-byte
+count than the earlier XCP gate+trigger design (31 bytes), but that design spans
+three separate 32-KiB blocks on Camry; the UDS bootstrap needs only one.
+
 ## Cross-target transfer
 
 The XCP command family is present in Sienna, both Corollas and Camry, with
