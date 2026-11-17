@@ -69,12 +69,12 @@ PCS**, **Partially Dirt Detection**, **Foreign Matter Detection**, **Dirt
 Detection**, and **Blockage Detection**. Mapping those six bits onto the
 observed two-byte B7:B8 word places them exactly at B8[7:2]. The only dynamic
 CAN bit seen in the archive is B8[4], which therefore lands exactly on GTS+
-bit11 **Foreign Matter Detection**. This closes the generation-correct
-0x123 status definition used by opendbc; it is not the legacy
-RADAR_STATUS/RADAR_PRE_FAULT layout. GTS+ separately names temporary optical-
-axis unavailability in DID 0x1012 and function restriction in DID 0x2093;
-their CAN carriers remain unassigned and should not be invented from the
-constant bytes of 0x123.
+bit11 **Foreign Matter Detection**. At opendbc `8e1dd8e6`, the TSS3 radar
+DBC generator and `RadarInterface` omit `0x123`; its status fields have no
+runtime projection. GTS+ separately names
+temporary optical-axis unavailability in DID 0x1012 and function restriction
+in DID 0x2093; their CAN carriers remain unassigned and should not be invented
+from the constant bytes of 0x123.
 
 ### Source-driven object lifecycle
 
@@ -93,19 +93,28 @@ empty record; 121 nonempty records also carry zero and must not be accepted
 merely because the geometry bytes remain populated. The parser filters state
 zero and sentinel/zero ranges. Nonzero states 1/2/3 remain structurally named;
 no unsupported confidence percentage or sensor-source enum is assigned.
+Both cycle bytes increment independently modulo256.
 
-The decoder now consumes **every** source cycle in a host publication, so an
-intermediate deletion/new-track flag is not lost by reading only the last CAN
-parser value. Each cycle byte increments independently modulo256. Missing cycles
-retire identity because they may hide a one-frame
-lifecycle event. Duplicates, mixed-cycle geometry/motion, bad CRC, truncation and
-wrong buses cannot manufacture an update; ordinary CAN timeout clears stale
-tracks and publishes a CAN error rather than waiting forever for a missing
-trigger PDU. End-old/start-new ordering is explicit.
+The September-15 implementation `b579c04d` (identical radar source in rebased
+`a39ec1bb`) consumed every source cycle in a host publication and retired track
+identity across missing cycles. Its retained replay of 60,969 held-out bank
+pairs produced **20,323 complete updates**, **308,111 qualified point
+observations**, **17,868 observed identity replacements**, and **zero reported
+CAN errors**. These are historical implementation results.
 
-The retained opendbc replay of 60,969 held-out bank pairs produced **20,323
-complete updates**, **308,111 qualified point observations**, **17,868 observed
-identity replacements**, and **zero reported CAN errors** in source replay.
+Cleanup `9145977b` replaced that per-source-cycle path. Current opendbc
+`8e1dd8e6` uses the latest CAN-parser values and checks which banks arrived
+since the trigger. Profile-5 CRC and ordinary slot lifecycle checks remain.
+
+**Software reproduction, 2026-11-17:** using the existing
+`TestToyotaTSS3RadarInterface` helpers in `car/toyota/tests/test_toyota.py`,
+initialize occupied slot 0 with `TRACK | {'new': 1}` (track ID 0). Build all
+three geometry/motion banks for a 45-m occupied replacement (`new=1, ended=1`),
+then for a 44-m ordinary update, 50 ms later. Pass both timestamped cycles to
+one `RadarInterface.update()` call: the result retains **track ID 0**, range
+**44 m**, and `canError=False`. Delivering the same cycles in separate calls
+produces **track ID 1** at 44 m. The batched path loses the intermediate
+replacement flag. Its frequency in vehicle logs has not been measured.
 
 Reproducible source reduction:
 `tools/targets/camry/analysis/analyze_camry_2026_radar_lifecycle.py`,
@@ -179,8 +188,10 @@ These are separate from the selected hardware/DEM aggregate at B6[2]. Fresh
 stock-code tracing closes their RTE staging through `D0D7C -> BF3AA -> 4C2DC ->
 4C97A`; generated-COM signals 25 and 31 bind them to those wire locations.
 `CE772` requires both clear before entering ready, and `CE7A6` leaves ready
-when either asserts. The inspected CarState maps B6[2] (`EPS_FAULT_INHIBIT`) to
-`steerFaultTemporary`; the two cooperative inhibits remain decoded DBC fields.
+when either asserts. At opendbc `8e1dd8e6`, CarState maps B6[2]
+(`EPS_FAULT_INHIBIT`) to `steerFaultTemporary`; the two cooperative inhibits
+remain decoded DBC fields without a CarState projection. The angle-reference
+correction separately consumes `STEER_ANGLE_STATUS` for sensor validity.
 
 The permanent/transient distinction is provably lossy at this projection:
 `CEC72` ORs `CAFB==1` and `CAFD==1`. `CEE7C` clears the request-failure source

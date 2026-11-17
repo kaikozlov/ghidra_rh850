@@ -1,0 +1,528 @@
+{
+  "schema": "camry-post-policy-one-20261117-v1",
+  "analysis_date": "2026-11-17",
+  "analysis_repo_commit": "3e16782e3cb9513ab7719c80da5eff7eb269d8c5",
+  "analysis_sources": [
+    {
+      "path": "tools/targets/camry/analysis/extract_camry_20260930_vmc_corpus.py",
+      "sha256": "c3d59884b098a4994cf0439fd7576a6e4a9dacdfd572ed235d10e199291753aa"
+    },
+    {
+      "path": "tools/targets/camry/analysis/join_camry_20260930_vmc_corpus.py",
+      "sha256": "9571d06531a88a66d8fdefe7248ca49162f122cf51c469f74a4413ee7e6fadff"
+    }
+  ],
+  "logreader": {
+    "checkout": "/Users/kai/dev/inspect/repos/kai-openpilot",
+    "commit": "469e8a0163ed5294cf2079a93616f6a4e431c4ad",
+    "path": "openpilot/tools/lib/logreader.py",
+    "sha256": "b9f7427157958aae7b3e7c8f652acb9e42e7400a9b152c7a4f1a4ff3d6f82c33"
+  },
+  "logs_root": "/Users/kai/dev/inspect/logs",
+  "method": {
+    "selection": "Screen every qlog for minimum carControl.actuators.accel while longActive; extract the three strongest-demand segments per route.",
+    "qlog_minimum": "Minimum carControl.actuators.accel among longActive samples, rounded to three decimals.",
+    "quantiles": [
+      0,
+      0.05,
+      0.5,
+      0.95,
+      1
+    ],
+    "join": "Existing preceding-only joiner: native bus0 0x081; delivered bus128 0x08A matched exactly to host sendcan within 100ms; request age <=75ms; CarState/CarControl/wheels/pedals <=60ms.",
+    "eligible_expression": "(origin == 1) & (cc[:,3] == 1) & ~gas_on & ~brake_on & (v > 2) & (result_id == 11) & (request_loss == 0) & (abs(applied[:,0] - applied[:,1]) < 0.0011)",
+    "quantities": {
+      "request": "delivered 0x08A B8:B9 signed16BE * 0.001",
+      "lower": "delivered 0x08A B11:B12 signed16BE * 0.001",
+      "B4": "native 0x081 B4:B5 signed16BE * 0.001",
+      "B18": "native 0x081 B18:B19 signed16BE * 0.001",
+      "policy": "preceding delivered 0x08A B20 >> 6, age <=75ms"
+    },
+    "historical_excitation_expression": "eligible & (request < -0.7) & (request - B18 < -1.1)",
+    "units": "m/s^2 for request/result quantities; m/s for speed",
+    "timing": "CAN batch logMonoTime; representative t_relative_to_origin_s uses the retained extraction origin_ns.",
+    "decoder_note": "The existing extractor accesses the removed optional selfdriveState.experimentalMode member. That stream is empty; all eligible request/CarState/CarControl/gas/brake/wheel joins are fresh."
+  },
+  "reproduce": {
+    "cwd": "/Users/kai/dev/inspect/repos/ghidra_rh850_analysis",
+    "interpreter": "../kai-openpilot/.venv/bin/python",
+    "existing_reducer_invocation": "from pathlib import Path\nfrom tools.targets.camry.analysis.extract_camry_20260930_vmc_corpus import inventory, extract, load_logreader\nfrom tools.targets.camry.analysis.join_camry_20260930_vmc_corpus import join\nop = Path('/Users/kai/dev/inspect/repos/kai-openpilot')\nfor tag, rid, segments in [('13a', '0000013a--8201802acc', (12,13,42)), ('13e', '0000013e--27d453251c', (5,8,18))]:\n    logs = Path('/Users/kai/dev/inspect/logs') / rid\n    out = Path('build/cache') / f'review_20261117_route{tag}_vmc'\n    route = inventory(logs, out)[0]\n    route['files'] = [f for f in route['files'] if f['segment'] in segments]\n    extract(route, logs, out, op, load_logreader(op))\n    join(rid, out)\n",
+    "summary": "Apply method.eligible_expression and the documented field arithmetic to each joined NPZ; calculate the listed quantiles and minima. No selfdriveState fields enter this selection."
+  },
+  "routes": [
+    {
+      "route": "0000013a--8201802acc",
+      "capture_init": {
+        "version": "0.11.3",
+        "gitCommit": "c4d5e394cac76489460c89d3abe03fa0cecffcaa",
+        "gitBranch": "experiment/pcm-less",
+        "wallTimeNanos": 1794863844358013700,
+        "deviceType": "mici"
+      },
+      "capture_car_params": {
+        "carFingerprint": "TOYOTA_CAMRY_TSS3",
+        "brand": "toyota",
+        "openpilotLongitudinalControl": true,
+        "dashcamOnly": false,
+        "flags": 5123,
+        "safetyConfigs": [
+          {
+            "safetyModel": "toyota",
+            "deprecated": {
+              "safetyParam": 0,
+              "safetyParam2": 0
+            },
+            "safetyParam": 4169
+          }
+        ],
+        "wheelSpeedFactor": 1,
+        "longitudinalActuatorDelay": 0.20000000298023224,
+        "longitudinalTuning": {
+          "deprecated": {
+            "kf": 0
+          },
+          "kiBP": [
+            0
+          ],
+          "kiV": [
+            0
+          ]
+        }
+      },
+      "origin_ns": 67039058329998,
+      "qlog_screen": {
+        "segment_count": 83,
+        "minimum_active_request_mps2": -1.444,
+        "strongest_segments": [
+          {
+            "segment": 42,
+            "long_active_samples": 572,
+            "minimum_request_mps2": -1.444
+          },
+          {
+            "segment": 12,
+            "long_active_samples": 29,
+            "minimum_request_mps2": -1.241
+          },
+          {
+            "segment": 13,
+            "long_active_samples": 471,
+            "minimum_request_mps2": -1.205
+          }
+        ],
+        "source_inventory": {
+          "relative_path_template": "0000013a--8201802acc/0000013a--8201802acc--{segment}/qlog.zst",
+          "segments": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            82
+          ],
+          "total_size_bytes": 36030430,
+          "sha256": "0566ec3ae5d9087b8a7e2f8ac3a7a98f967c42487f3ef5b1f05d7a61f1fb0d0f",
+          "hash_input": "UTF-8 json.dumps([[segment, size_bytes, file_sha256], ...], separators=(\",\", \":\")); entries sorted by numeric segment."
+        }
+      },
+      "rlog_sources": [
+        {
+          "relative_path": "0000013a--8201802acc/0000013a--8201802acc--12/rlog.zst",
+          "segment": 12,
+          "size_bytes": 10970905,
+          "sha256": "29dcde94f2f8fe0407133fe9596cc5a8d5203ee529117363489b47988b1e97c6"
+        },
+        {
+          "relative_path": "0000013a--8201802acc/0000013a--8201802acc--13/rlog.zst",
+          "segment": 13,
+          "size_bytes": 11119851,
+          "sha256": "5ea7d718507eef5ac924d274355ada7eecee42eb719b2b528942f0d31d7e19e3"
+        },
+        {
+          "relative_path": "0000013a--8201802acc/0000013a--8201802acc--42/rlog.zst",
+          "segment": 42,
+          "size_bytes": 10939124,
+          "sha256": "8aaf4845e1a62ff2e82fd86a71184160a6d8e0ee0086b499c5372161c929005e"
+        }
+      ],
+      "extraction_rows": {
+        "req": 34430,
+        "status": 12000,
+        "cs": 18000,
+        "cc": 18002,
+        "out": 18000,
+        "plan": 3600,
+        "sd": 0,
+        "wheel": 17978,
+        "pedal": 16641
+      },
+      "decode_error_counts": {
+        "decode_error:selfdriveState:-1": 18002
+      },
+      "eligible_missing_join_counts": {
+        "age_applied": 0,
+        "age_cs": 0,
+        "age_cc": 0,
+        "age_gas": 0,
+        "age_brake": 0,
+        "age_wheel": 0
+      },
+      "summary": {
+        "selected_segments": [
+          12,
+          13,
+          42
+        ],
+        "git": "c4d5e394cac76489460c89d3abe03fa0cecffcaa",
+        "long": true,
+        "n_eligible": 3572,
+        "policy_counts": {
+          "1": 3572
+        },
+        "request_q": [
+          -1.444,
+          -0.715,
+          0.029,
+          0.2624,
+          0.475
+        ],
+        "request_minus_B18_q": [
+          -0.722,
+          -0.1312,
+          0.001,
+          0.0124,
+          0.106
+        ],
+        "B4_minus_B18_q": [
+          -0.721,
+          -0.1109,
+          0,
+          0,
+          0
+        ],
+        "B4_minus_request_q": [
+          -0.171,
+          -0.017,
+          -0.001,
+          0.01,
+          0.432
+        ],
+        "old_ceiling_excitation_rows": 0,
+        "max_extra_demand_sample": {
+          "segment": 42,
+          "t_relative_to_origin_s": 2541.014842103,
+          "request": -1.444,
+          "B4": -1.44,
+          "B18": -0.722,
+          "request_minus_B18": -0.722,
+          "B4_minus_B18": -0.718,
+          "v_mps": 24.68125,
+          "policy": 1,
+          "status_hex": "00000018fa600b0600000004000b0000000dfd2efd2e0acffd2e0000c8c3d8c4"
+        },
+        "strongest_request_sample": {
+          "segment": 42,
+          "t_relative_to_origin_s": 2540.986390853,
+          "request": -1.444,
+          "B4": -1.423,
+          "B18": -0.725,
+          "request_minus_B18": -0.719,
+          "B4_minus_B18": -0.6980000000000001,
+          "v_mps": 24.731944444444444,
+          "policy": 1,
+          "status_hex": "00000018fa710b1700000004000b0000000dfd2bfd2b0accfd2b0000881d99ea"
+        },
+        "excitation_episodes": [],
+        "decode_error_counts": {
+          "decode_error:selfdriveState:-1": 18002
+        }
+      }
+    },
+    {
+      "route": "0000013e--27d453251c",
+      "capture_init": {
+        "version": "0.11.3",
+        "gitCommit": "433eb007b8bbf014677557b08af83d7854f09778",
+        "gitBranch": "experiment/pcm-less",
+        "wallTimeNanos": 1794893354893876500,
+        "deviceType": "mici"
+      },
+      "capture_car_params": {
+        "carFingerprint": "TOYOTA_CAMRY_TSS3",
+        "brand": "toyota",
+        "openpilotLongitudinalControl": true,
+        "dashcamOnly": false,
+        "flags": 5123,
+        "safetyConfigs": [
+          {
+            "safetyModel": "toyota",
+            "deprecated": {
+              "safetyParam": 0,
+              "safetyParam2": 0
+            },
+            "safetyParam": 4169
+          }
+        ],
+        "wheelSpeedFactor": 1,
+        "longitudinalActuatorDelay": 0.20000000298023224,
+        "longitudinalTuning": {
+          "deprecated": {
+            "kf": 0
+          },
+          "kiBP": [
+            0
+          ],
+          "kiV": [
+            0
+          ]
+        }
+      },
+      "origin_ns": 691416814799,
+      "qlog_screen": {
+        "segment_count": 33,
+        "minimum_active_request_mps2": -1.111,
+        "strongest_segments": [
+          {
+            "segment": 18,
+            "long_active_samples": 504,
+            "minimum_request_mps2": -1.111
+          },
+          {
+            "segment": 8,
+            "long_active_samples": 600,
+            "minimum_request_mps2": -0.903
+          },
+          {
+            "segment": 5,
+            "long_active_samples": 356,
+            "minimum_request_mps2": -0.778
+          }
+        ],
+        "source_inventory": {
+          "relative_path_template": "0000013e--27d453251c/0000013e--27d453251c--{segment}/qlog.zst",
+          "segments": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32
+          ],
+          "total_size_bytes": 14167437,
+          "sha256": "3b74f97b522873c14ef2ff96d86c190caa46834ae22cdaeac6f4f2b5c52eb2f9",
+          "hash_input": "UTF-8 json.dumps([[segment, size_bytes, file_sha256], ...], separators=(\",\", \":\")); entries sorted by numeric segment."
+        }
+      },
+      "rlog_sources": [
+        {
+          "relative_path": "0000013e--27d453251c/0000013e--27d453251c--5/rlog.zst",
+          "segment": 5,
+          "size_bytes": 10985581,
+          "sha256": "bedef0c8168f6f1607f389490346b620a3f64d2ab3f8ffc002d6d59499b35b8d"
+        },
+        {
+          "relative_path": "0000013e--27d453251c/0000013e--27d453251c--8/rlog.zst",
+          "segment": 8,
+          "size_bytes": 10971328,
+          "sha256": "a70c053b24530707891c436cbe0c059d93acae6d345682dca75e35576741ea18"
+        },
+        {
+          "relative_path": "0000013e--27d453251c/0000013e--27d453251c--18/rlog.zst",
+          "segment": 18,
+          "size_bytes": 11203112,
+          "sha256": "9c83c77dcadd7c6370d989d6565f2555f3d7ff0cc131298e3192d4f4150c9d1b"
+        }
+      ],
+      "extraction_rows": {
+        "req": 39214,
+        "status": 12000,
+        "cs": 18000,
+        "cc": 18001,
+        "out": 18000,
+        "plan": 3600,
+        "sd": 0,
+        "wheel": 17976,
+        "pedal": 16641
+      },
+      "decode_error_counts": {
+        "decode_error:selfdriveState:-1": 18001
+      },
+      "eligible_missing_join_counts": {
+        "age_applied": 0,
+        "age_cs": 0,
+        "age_cc": 0,
+        "age_gas": 0,
+        "age_brake": 0,
+        "age_wheel": 0
+      },
+      "summary": {
+        "selected_segments": [
+          5,
+          8,
+          18
+        ],
+        "n_eligible": 4860,
+        "policy_counts": {
+          "1": 4860
+        },
+        "request_q": [
+          -1.111,
+          -0.851,
+          0.004,
+          0.252,
+          0.433
+        ],
+        "request_minus_B18_q": [
+          -0.654,
+          -0.1401,
+          0,
+          0.016,
+          0.26
+        ],
+        "B4_minus_B18_q": [
+          -0.621,
+          -0.136,
+          0,
+          0,
+          0
+        ],
+        "B4_minus_request_q": [
+          -0.26,
+          -0.016,
+          -0.001,
+          0.023,
+          0.099
+        ],
+        "old_ceiling_excitation_rows": 0,
+        "max_extra_demand_sample": {
+          "segment": 18,
+          "t_relative_to_origin_s": 1109.223414159,
+          "request": -1.067,
+          "B4": -1.032,
+          "B18": -0.41300000000000003,
+          "request_minus_B18": -0.6539999999999999,
+          "B4_minus_B18": -0.619,
+          "v_mps": 4.480555555555556,
+          "policy": 1,
+          "status_hex": "00000018fbf80b9f00000004000b00000058fe63fe630e70fe630000866c883a"
+        },
+        "strongest_request_sample": {
+          "segment": 18,
+          "t_relative_to_origin_s": 1108.325496578,
+          "request": -1.111,
+          "B4": -1.072,
+          "B18": -0.516,
+          "request_minus_B18": -0.595,
+          "B4_minus_B18": -0.556,
+          "v_mps": 5.429166666666666,
+          "policy": 1,
+          "status_hex": "00000018fbd00b7700000004000b00000047fdfcfdfc0bc1fdfc00009c366053"
+        }
+      }
+    }
+  ]
+}

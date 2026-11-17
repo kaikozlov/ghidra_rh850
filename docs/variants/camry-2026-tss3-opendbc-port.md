@@ -111,6 +111,44 @@ below is a separate controller-dynamics issue. The openpilot segment65
 highway witness also has genuine EPS/request residual: median +0.516°,
 alongside a 1.767° raw-to-EPS reference difference.
 
+### Corrected-reference drive (reviewed 2026-11-17)
+
+Route `5211e3c6c7b088d3/0000013e--27d453251c` starts at **2026-11-16
+23:29:14.894 Central**. Its clean `initData` identifies openpilot `433eb007b8bb`,
+whose Git tree equals maintained `469e8a0163ed`; both pin opendbc `8e1dd8e66d`.
+Recorded CarParams select non-PCM engagement and openpilot longitudinal.
+Sources are the 33 segments under `~/dev/inspect/logs/0000013e--27d453251c/`.
+
+All 33 qlogs cover 1,926 s and contain 14,851 lateral-active samples at 10 Hz.
+The 14,376 active samples with valid CAN/sensors and no steering override have
+offset median **−0.736°** (5th–95th percentile **−0.975° to −0.398°**).
+Active samples contain no steering fault, ACC fault, signer-unavailable,
+sensor-invalid or CAN-invalid indication, and no angle-controller saturation.
+The 24 sensor-invalid samples occur during the final five seconds, parked.
+
+Selected rlogs directly join host `0x08A` TX echoes (source 128) to valid
+EPS `0x030 B20:B21` measurements in the same angle reference. Each uses the
+latest preceding request under 100 ms old, fresh active CarControl/CarState,
+valid CAN/sensors and no steering override; no delay fitting is applied.
+
+| Segment | Samples | Median request − EPS | RMSE |
+|---|---:|---:|---:|
+| 0 | 3,026 | +0.057° | 1.632° |
+| 1 | 4,315 | −0.057° | 0.580° |
+| 7 | 5,978 | 0° | 0.238° |
+| 8 | 5,966 | 0° | 0.258° |
+| 25 | 5,969 | 0° | 0.244° |
+
+Segments 7/8 each contain 6,000 host requests over 60 s and 6,000 valid EPS
+angle samples. Panda's final TX-block count is 20; its increments align with
+disengagement edges. The three raw rejects inspected in segment 11 are final
+`0x777` signer fragments around control release. This review measures request
+tracking; path centering requires a separate measurement.
+
+The original angle-rate experiment and tuning branch use pre-correction
+opendbc `931d45b7`. Reevaluate their fit and comparison on the corrected
+reference before using the provisional gains below.
+
 ## Low-speed steering-command replay and root-layer diagnosis (November 14, 2026)
 
 A six-date scan (September 6/7/10/11/18 and November 12) examined 287 rlogs.

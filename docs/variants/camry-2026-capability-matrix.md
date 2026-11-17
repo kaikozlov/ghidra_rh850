@@ -8,12 +8,18 @@ signer.
 
 - **Maintainer report, 2026-10-26:** both axes have been in use with the signer
   setup for approximately a month.
-- **Source inspected, 2026-10-26:** sibling `../kai-openpilot`, branch
-  `tss3-camry-port`, commit `f9d6e3883ec5d54a55d63e9b6e2d24b39c7f426f`;
-  its pinned `opendbc_repo` is `90aeb85b7cf68a2eb7103b2bd645ed41ff3598bd`.
+- **Source inspected, 2026-11-17:** sibling `../kai-openpilot`, branch
+  `tss3-camry-port`, commit `469e8a0163ed5294cf2079a93616f6a4e431c4ad`;
+  its pinned `opendbc_repo` is `8e1dd8e66d263876d8291b50b3ad160ace9b8c33`
+  (`tss3-refine`). Both checkouts were clean and matched their remote heads.
   The controller, interface, signer transport and Toyota safety code establish
   the implementation described below.
-- **Local build supplied by the maintainer:** `build/out/tss3-oracle/`.
+- **Capture inspected, 2026-11-17:** route
+  `5211e3c6c7b088d3/0000013e--27d453251c` records clean openpilot
+  `433eb007b8bbf014677557b08af83d7854f09778`, whose tree and opendbc pin
+  equal the inspected checkout. It uses non-PCM openpilot longitudinal.
+  The [port report](camry-2026-tss3-opendbc-port.md) owns its measured
+  steering-reference and request-tracking results.
 
 The target is EPS `8965F3307000 / 8A3113303100`. Linked capture reports retain
 their software and vehicle identities.

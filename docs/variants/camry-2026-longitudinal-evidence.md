@@ -1112,6 +1112,34 @@ it is not a longitudinal feedback-gain setting. The acceleration requests
 and B20 policy are separate controls. GTS's responsiveness vocabulary remains
 relevant, but has no verified B20 mapping.
 
+### November 17 post-policy-one capture check
+
+Screened all **83 qlogs** from `0000013a--8201802acc` and **33 qlogs** from
+`0000013e--27d453251c`, then ran the existing VMC extractor/joiner on each
+route's three strongest-demand segments. Both captures enable openpilot longitudinal;
+the recorded openpilot commits are `c4d5e394` and `433eb007`, respectively.
+
+| Route | Rlog segments | Eligible status rows | Minimum request (m/s²) | Minimum request minus B18 (m/s²) |
+|---|---|---:|---:|---:|
+| `13a` | 12, 13, 42 | 3,572 | −1.444 | −0.722 |
+| `13e` | 5, 8, 18 | 4,860 | −1.111 | −0.654 |
+
+All **8,432** eligible rows carry delivered B20 policy `1`. Selection requires
+an exact host-payload match, active longitudinal control, no driver pedals,
+speed >2 m/s, result ID11, request-loss clear, and equal request bounds.
+All selected request/state/pedal joins satisfy the existing freshness windows.
+
+Median `B4−request` is **−0.001 m/s²** in both selections. A segment-42
+`13a` sample has request **−1.444**, B4 **−1.440**, and B18 **−0.722 m/s²**
+at 24.681 m/s. These captures show ordinary request/result tracking. Neither
+selection reaches the historical ceiling discriminator
+`request < −0.7 && request−B18 < −1.1`; stronger-demand evidence is needed to
+settle that regime after the policy change.
+
+[Retained comparison](../../data/generated/camry_20260930_vmc_status/post_policy_one_20261117.json)
+contains source hashes, capture identities, exact existing-reducer invocation,
+selection arithmetic, quantiles, and representative raw status packets.
+
 ### GTS request-policy definitions and patent interpretation
 
 Direct offline queries of the shipped `FRC_P5.ddb` records (`tools/gts did
