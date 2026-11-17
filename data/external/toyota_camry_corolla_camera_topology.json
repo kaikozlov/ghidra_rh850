@@ -1,0 +1,1175 @@
+{
+  "title": "Camry/Corolla camera-radar CAN topology comparison",
+  "date": "2026-11-17",
+  "evidence_kind": "source-derived comparison; no new vehicle experiment",
+  "sources": {
+    "master": {
+      "path": "NA/DB/Gen/Toyota.ddb",
+      "size": 18967903,
+      "sha256": "f11e820968ac383a8fc5105b65322f0b9c3673df2c8dac46c9847e3d691b39b1"
+    },
+    "strings": {
+      "path": "NA/DB/Gen/M_English.ddb",
+      "size": 4254372,
+      "sha256": "458a7039851fc66dc2385fff2efa910337218b8b23985b3c1afc0db7bc5f8014"
+    }
+  },
+  "query_commands": [
+    "tools/gts canbus 12823 --json",
+    "tools/gts canbus 12984 --json"
+  ],
+  "raw_join": "Toyota.ddb table75 vehicle -> car ID; table77 car ID -> component group at +44; table78 group -> component at +14, bus at +8, junction-name string at +4; names from tables76/79 and M_English.ddb.",
+  "cli_caveat": "Current canbus placement grouping compares component/domain/bus but omits junction_name. It reports one Camry placement variant and prints the first junction assignment. This comparison retains all 18 raw options.",
+  "models": [
+    {
+      "model": "Corolla HV H/F family",
+      "vehicle_type_ids": [
+        12514,
+        12515,
+        12823,
+        12824
+      ],
+      "can_bus_car_id": "0x00A7D901",
+      "table75_raw": [
+        "01d9a700e230000000000000",
+        "01d9a700e330000000000000",
+        "01d9a7001732000000000000",
+        "01d9a7001832000000000000"
+      ],
+      "install_sets": [
+        {
+          "vehicle_id": 12514,
+          "vehicle_name": "Corolla HV",
+          "install_set_id": 7550,
+          "architecture_label": "EMPS+ABS+BRKBST+FRC",
+          "selected_category_ids": [
+            405,
+            435,
+            466,
+            498
+          ]
+        },
+        {
+          "vehicle_id": 12515,
+          "vehicle_name": "Corolla HV",
+          "install_set_id": 7553,
+          "architecture_label": "EMPS+ABS+BRKBST+FRC",
+          "selected_category_ids": [
+            405,
+            435,
+            466,
+            498
+          ]
+        },
+        {
+          "vehicle_id": 12823,
+          "vehicle_name": "Corolla HV",
+          "install_set_id": 8477,
+          "architecture_label": "EMPS+ABS+BRKBST+FRC",
+          "selected_category_ids": [
+            405,
+            435,
+            466,
+            498
+          ]
+        },
+        {
+          "vehicle_id": 12824,
+          "vehicle_name": "Corolla HV",
+          "install_set_id": 8480,
+          "architecture_label": "EMPS+ABS+BRKBST+FRC",
+          "selected_category_ids": [
+            405,
+            435,
+            466,
+            498
+          ]
+        }
+      ],
+      "option_count": 1,
+      "variants": [
+        {
+          "component_group": "0x004DD237",
+          "option_raw": "01d9a7000000000000000000000000000000000000000000000000000000000000000000000000000000000037d24d000100000025030000010000000000000000000000000000000000000000000000",
+          "option_label_slots": {},
+          "placements": [
+            {
+              "component": "0x0F",
+              "name": "Front Radar",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "FCM",
+              "raw_hex": "37d24d0068a402001d00000000000f00"
+            },
+            {
+              "component": "0x6D",
+              "name": "Front Camera Module",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "No. 18 CAN Junction Connector",
+              "raw_hex": "37d24d00069301001d00000000006d00"
+            },
+            {
+              "component": "0x28",
+              "name": "Brake Booster",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 10 CAN Junction Connector",
+              "raw_hex": "37d24d00ff9201002000000000002800"
+            },
+            {
+              "component": "0x29",
+              "name": "Skid Control (ABS/VSC/TRAC)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 10 CAN Junction Connector",
+              "raw_hex": "37d24d00ff9201002000000000002900"
+            },
+            {
+              "component": "0x32",
+              "name": "Power Steering (EPS)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 13 CAN Junction Connector",
+              "raw_hex": "37d24d00029301002000000000003200"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "model": "Camry HV F33 family",
+      "vehicle_type_ids": [
+        12704,
+        12862,
+        12984
+      ],
+      "can_bus_car_id": "0x00A7D910",
+      "table75_raw": [
+        "10d9a700a031000000000000",
+        "10d9a7003e32000000000000",
+        "10d9a700b832000000000000"
+      ],
+      "install_sets": [
+        {
+          "vehicle_id": 12704,
+          "vehicle_name": "Camry HV",
+          "install_set_id": 8120,
+          "architecture_label": "EMPS+ABS+BRKBST+FRC",
+          "selected_category_ids": [
+            405,
+            435,
+            466,
+            498
+          ]
+        },
+        {
+          "vehicle_id": 12862,
+          "vehicle_name": "Camry HV",
+          "install_set_id": 8594,
+          "architecture_label": "EMPS+ABS+BRKBST+FRC",
+          "selected_category_ids": [
+            405,
+            435,
+            466,
+            498
+          ]
+        },
+        {
+          "vehicle_id": 12984,
+          "vehicle_name": "Camry HV",
+          "install_set_id": 8960,
+          "architecture_label": "EMPS+ABS+BRKBST+FRC",
+          "selected_category_ids": [
+            405,
+            435,
+            466,
+            498
+          ]
+        }
+      ],
+      "option_count": 18,
+      "variants": [
+        {
+          "component_group": "0x004DD26A",
+          "option_raw": "10d9a700fd28030001290300082903000d2903000000000000000000000000000000000000000000000000006ad24d000100000042030000010001000100010000000000000000000000000000000000",
+          "option_label_slots": {
+            "4": "202404-202509",
+            "8": "w/o BSM and w/o R-CA",
+            "12": "w/ FS-MR",
+            "16": "w/ DST"
+          },
+          "placements": [
+            {
+              "component": "0x0F",
+              "name": "Front Radar",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "No. 1 Global CAN Junction Connector",
+              "raw_hex": "6ad24d002e1a02001d00000000000f00"
+            },
+            {
+              "component": "0x6D",
+              "name": "Front Camera Module",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "-",
+              "raw_hex": "6ad24d000b8501001d00000000006d00"
+            },
+            {
+              "component": "0x28",
+              "name": "Brake Booster",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "6ad24d00331a02002000000000002800"
+            },
+            {
+              "component": "0x29",
+              "name": "Skid Control (ABS/VSC/TRAC)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "6ad24d00331a02002000000000002900"
+            },
+            {
+              "component": "0x32",
+              "name": "Power Steering (EPS)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "EBU",
+              "raw_hex": "6ad24d0067a402002000000000003200"
+            }
+          ]
+        },
+        {
+          "component_group": "0x004DD270",
+          "option_raw": "10d9a700fd28030001290300082903000e29030000000000000000000000000000000000000000000000000070d24d000100000043030000010001000100070000000000000000000000000000000000",
+          "option_label_slots": {
+            "4": "202404-202509",
+            "8": "w/o BSM and w/o R-CA",
+            "12": "w/ FS-MR",
+            "16": "w/o DST"
+          },
+          "placements": [
+            {
+              "component": "0x0F",
+              "name": "Front Radar",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "No. 1 Global CAN Junction Connector",
+              "raw_hex": "70d24d002e1a02001d00000000000f00"
+            },
+            {
+              "component": "0x6D",
+              "name": "Front Camera Module",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "-",
+              "raw_hex": "70d24d000b8501001d00000000006d00"
+            },
+            {
+              "component": "0x28",
+              "name": "Brake Booster",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "70d24d00331a02002000000000002800"
+            },
+            {
+              "component": "0x29",
+              "name": "Skid Control (ABS/VSC/TRAC)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "70d24d00331a02002000000000002900"
+            },
+            {
+              "component": "0x32",
+              "name": "Power Steering (EPS)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "EBU",
+              "raw_hex": "70d24d0067a402002000000000003200"
+            }
+          ]
+        },
+        {
+          "component_group": "0x004DD26C",
+          "option_raw": "10d9a700fd28030001290300052903000d2903000000000000000000000000000000000000000000000000006cd24d000100000044030000010001000300030000000000000000000000000000000000",
+          "option_label_slots": {
+            "4": "202404-202509",
+            "8": "w/o BSM and w/o R-CA",
+            "12": "[w/o FS-MR and w/o PAC] or [w/o FS-MR and w/o CS]",
+            "16": "w/ DST"
+          },
+          "placements": [
+            {
+              "component": "0x0F",
+              "name": "Front Radar",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "-",
+              "raw_hex": "6cd24d000b8501001d00000000000f00"
+            },
+            {
+              "component": "0x6D",
+              "name": "Front Camera Module",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "-",
+              "raw_hex": "6cd24d000b8501001d00000000006d00"
+            },
+            {
+              "component": "0x28",
+              "name": "Brake Booster",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "6cd24d00331a02002000000000002800"
+            },
+            {
+              "component": "0x29",
+              "name": "Skid Control (ABS/VSC/TRAC)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "6cd24d00331a02002000000000002900"
+            },
+            {
+              "component": "0x32",
+              "name": "Power Steering (EPS)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "EBU",
+              "raw_hex": "6cd24d0067a402002000000000003200"
+            }
+          ]
+        },
+        {
+          "component_group": "0x004DD272",
+          "option_raw": "10d9a700fd28030001290300052903000e29030000000000000000000000000000000000000000000000000072d24d000100000045030000010001000300090000000000000000000000000000000000",
+          "option_label_slots": {
+            "4": "202404-202509",
+            "8": "w/o BSM and w/o R-CA",
+            "12": "[w/o FS-MR and w/o PAC] or [w/o FS-MR and w/o CS]",
+            "16": "w/o DST"
+          },
+          "placements": [
+            {
+              "component": "0x0F",
+              "name": "Front Radar",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "-",
+              "raw_hex": "72d24d000b8501001d00000000000f00"
+            },
+            {
+              "component": "0x6D",
+              "name": "Front Camera Module",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "-",
+              "raw_hex": "72d24d000b8501001d00000000006d00"
+            },
+            {
+              "component": "0x28",
+              "name": "Brake Booster",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "72d24d00331a02002000000000002800"
+            },
+            {
+              "component": "0x29",
+              "name": "Skid Control (ABS/VSC/TRAC)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "72d24d00331a02002000000000002900"
+            },
+            {
+              "component": "0x32",
+              "name": "Power Steering (EPS)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "EBU",
+              "raw_hex": "72d24d0067a402002000000000003200"
+            }
+          ]
+        },
+        {
+          "component_group": "0x004DD26E",
+          "option_raw": "10d9a700fd28030001290300042903000d2903000000000000000000000000000000000000000000000000006ed24d000100000046030000010001000500050000000000000000000000000000000000",
+          "option_label_slots": {
+            "4": "202404-202509",
+            "8": "w/o BSM and w/o R-CA",
+            "12": "[w/o FS-MR and w/ PAC] or [w/o FS-MR and w/ CS]",
+            "16": "w/ DST"
+          },
+          "placements": [
+            {
+              "component": "0x0F",
+              "name": "Front Radar",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "No. 8 Global CAN Junction Connector",
+              "raw_hex": "6ed24d00391a02001d00000000000f00"
+            },
+            {
+              "component": "0x6D",
+              "name": "Front Camera Module",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "-",
+              "raw_hex": "6ed24d000b8501001d00000000006d00"
+            },
+            {
+              "component": "0x28",
+              "name": "Brake Booster",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "6ed24d00331a02002000000000002800"
+            },
+            {
+              "component": "0x29",
+              "name": "Skid Control (ABS/VSC/TRAC)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "6ed24d00331a02002000000000002900"
+            },
+            {
+              "component": "0x32",
+              "name": "Power Steering (EPS)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "EBU",
+              "raw_hex": "6ed24d0067a402002000000000003200"
+            }
+          ]
+        },
+        {
+          "component_group": "0x004DD274",
+          "option_raw": "10d9a700fd28030001290300042903000e29030000000000000000000000000000000000000000000000000074d24d0001000000470300000100010005000b0000000000000000000000000000000000",
+          "option_label_slots": {
+            "4": "202404-202509",
+            "8": "w/o BSM and w/o R-CA",
+            "12": "[w/o FS-MR and w/ PAC] or [w/o FS-MR and w/ CS]",
+            "16": "w/o DST"
+          },
+          "placements": [
+            {
+              "component": "0x0F",
+              "name": "Front Radar",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "No. 8 Global CAN Junction Connector",
+              "raw_hex": "74d24d00391a02001d00000000000f00"
+            },
+            {
+              "component": "0x6D",
+              "name": "Front Camera Module",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "-",
+              "raw_hex": "74d24d000b8501001d00000000006d00"
+            },
+            {
+              "component": "0x28",
+              "name": "Brake Booster",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "74d24d00331a02002000000000002800"
+            },
+            {
+              "component": "0x29",
+              "name": "Skid Control (ABS/VSC/TRAC)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "74d24d00331a02002000000000002900"
+            },
+            {
+              "component": "0x32",
+              "name": "Power Steering (EPS)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "EBU",
+              "raw_hex": "74d24d0067a402002000000000003200"
+            }
+          ]
+        },
+        {
+          "component_group": "0x004DD26B",
+          "option_raw": "10d9a700fd28030076ef0200082903000d2903000000000000000000000000000000000000000000000000006bd24d000100000048030000010002000200020000000000000000000000000000000000",
+          "option_label_slots": {
+            "4": "202404-202509",
+            "8": "Other",
+            "12": "w/ FS-MR",
+            "16": "w/ DST"
+          },
+          "placements": [
+            {
+              "component": "0x0F",
+              "name": "Front Radar",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "No. 1 Global CAN Junction Connector",
+              "raw_hex": "6bd24d002e1a02001d00000000000f00"
+            },
+            {
+              "component": "0x6D",
+              "name": "Front Camera Module",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "FRD",
+              "raw_hex": "6bd24d0069a402001d00000000006d00"
+            },
+            {
+              "component": "0x28",
+              "name": "Brake Booster",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "6bd24d00331a02002000000000002800"
+            },
+            {
+              "component": "0x29",
+              "name": "Skid Control (ABS/VSC/TRAC)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "6bd24d00331a02002000000000002900"
+            },
+            {
+              "component": "0x32",
+              "name": "Power Steering (EPS)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "EBU",
+              "raw_hex": "6bd24d0067a402002000000000003200"
+            }
+          ]
+        },
+        {
+          "component_group": "0x004DD271",
+          "option_raw": "10d9a700fd28030076ef0200082903000e29030000000000000000000000000000000000000000000000000071d24d000100000049030000010002000200080000000000000000000000000000000000",
+          "option_label_slots": {
+            "4": "202404-202509",
+            "8": "Other",
+            "12": "w/ FS-MR",
+            "16": "w/o DST"
+          },
+          "placements": [
+            {
+              "component": "0x0F",
+              "name": "Front Radar",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "No. 1 Global CAN Junction Connector",
+              "raw_hex": "71d24d002e1a02001d00000000000f00"
+            },
+            {
+              "component": "0x6D",
+              "name": "Front Camera Module",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "FRD",
+              "raw_hex": "71d24d0069a402001d00000000006d00"
+            },
+            {
+              "component": "0x28",
+              "name": "Brake Booster",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "71d24d00331a02002000000000002800"
+            },
+            {
+              "component": "0x29",
+              "name": "Skid Control (ABS/VSC/TRAC)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "71d24d00331a02002000000000002900"
+            },
+            {
+              "component": "0x32",
+              "name": "Power Steering (EPS)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "EBU",
+              "raw_hex": "71d24d0067a402002000000000003200"
+            }
+          ]
+        },
+        {
+          "component_group": "0x004DD26D",
+          "option_raw": "10d9a700fd28030076ef0200052903000d2903000000000000000000000000000000000000000000000000006dd24d00010000004a030000010002000400040000000000000000000000000000000000",
+          "option_label_slots": {
+            "4": "202404-202509",
+            "8": "Other",
+            "12": "[w/o FS-MR and w/o PAC] or [w/o FS-MR and w/o CS]",
+            "16": "w/ DST"
+          },
+          "placements": [
+            {
+              "component": "0x0F",
+              "name": "Front Radar",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "-",
+              "raw_hex": "6dd24d000b8501001d00000000000f00"
+            },
+            {
+              "component": "0x6D",
+              "name": "Front Camera Module",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "FRD",
+              "raw_hex": "6dd24d0069a402001d00000000006d00"
+            },
+            {
+              "component": "0x28",
+              "name": "Brake Booster",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "6dd24d00331a02002000000000002800"
+            },
+            {
+              "component": "0x29",
+              "name": "Skid Control (ABS/VSC/TRAC)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "6dd24d00331a02002000000000002900"
+            },
+            {
+              "component": "0x32",
+              "name": "Power Steering (EPS)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "EBU",
+              "raw_hex": "6dd24d0067a402002000000000003200"
+            }
+          ]
+        },
+        {
+          "component_group": "0x004DD273",
+          "option_raw": "10d9a700fd28030076ef0200052903000e29030000000000000000000000000000000000000000000000000073d24d00010000004b0300000100020004000a0000000000000000000000000000000000",
+          "option_label_slots": {
+            "4": "202404-202509",
+            "8": "Other",
+            "12": "[w/o FS-MR and w/o PAC] or [w/o FS-MR and w/o CS]",
+            "16": "w/o DST"
+          },
+          "placements": [
+            {
+              "component": "0x0F",
+              "name": "Front Radar",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "-",
+              "raw_hex": "73d24d000b8501001d00000000000f00"
+            },
+            {
+              "component": "0x6D",
+              "name": "Front Camera Module",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "FRD",
+              "raw_hex": "73d24d0069a402001d00000000006d00"
+            },
+            {
+              "component": "0x28",
+              "name": "Brake Booster",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "73d24d00331a02002000000000002800"
+            },
+            {
+              "component": "0x29",
+              "name": "Skid Control (ABS/VSC/TRAC)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "73d24d00331a02002000000000002900"
+            },
+            {
+              "component": "0x32",
+              "name": "Power Steering (EPS)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "EBU",
+              "raw_hex": "73d24d0067a402002000000000003200"
+            }
+          ]
+        },
+        {
+          "component_group": "0x004DD26F",
+          "option_raw": "10d9a700fd28030076ef0200042903000d2903000000000000000000000000000000000000000000000000006fd24d00010000004c030000010002000600060000000000000000000000000000000000",
+          "option_label_slots": {
+            "4": "202404-202509",
+            "8": "Other",
+            "12": "[w/o FS-MR and w/ PAC] or [w/o FS-MR and w/ CS]",
+            "16": "w/ DST"
+          },
+          "placements": [
+            {
+              "component": "0x0F",
+              "name": "Front Radar",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "No. 8 Global CAN Junction Connector",
+              "raw_hex": "6fd24d00391a02001d00000000000f00"
+            },
+            {
+              "component": "0x6D",
+              "name": "Front Camera Module",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "FRD",
+              "raw_hex": "6fd24d0069a402001d00000000006d00"
+            },
+            {
+              "component": "0x28",
+              "name": "Brake Booster",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "6fd24d00331a02002000000000002800"
+            },
+            {
+              "component": "0x29",
+              "name": "Skid Control (ABS/VSC/TRAC)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "6fd24d00331a02002000000000002900"
+            },
+            {
+              "component": "0x32",
+              "name": "Power Steering (EPS)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "EBU",
+              "raw_hex": "6fd24d0067a402002000000000003200"
+            }
+          ]
+        },
+        {
+          "component_group": "0x004DD275",
+          "option_raw": "10d9a700fd28030076ef0200042903000e29030000000000000000000000000000000000000000000000000075d24d00010000004d0300000100020006000c0000000000000000000000000000000000",
+          "option_label_slots": {
+            "4": "202404-202509",
+            "8": "Other",
+            "12": "[w/o FS-MR and w/ PAC] or [w/o FS-MR and w/ CS]",
+            "16": "w/o DST"
+          },
+          "placements": [
+            {
+              "component": "0x0F",
+              "name": "Front Radar",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "No. 8 Global CAN Junction Connector",
+              "raw_hex": "75d24d00391a02001d00000000000f00"
+            },
+            {
+              "component": "0x6D",
+              "name": "Front Camera Module",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "FRD",
+              "raw_hex": "75d24d0069a402001d00000000006d00"
+            },
+            {
+              "component": "0x28",
+              "name": "Brake Booster",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "75d24d00331a02002000000000002800"
+            },
+            {
+              "component": "0x29",
+              "name": "Skid Control (ABS/VSC/TRAC)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "75d24d00331a02002000000000002900"
+            },
+            {
+              "component": "0x32",
+              "name": "Power Steering (EPS)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "EBU",
+              "raw_hex": "75d24d0067a402002000000000003200"
+            }
+          ]
+        },
+        {
+          "component_group": "0x004DD29F",
+          "option_raw": "10d9a70067ef02000029030082ef0200000000000000000000000000000000000000000000000000000000009fd24d00010000004e030000020003000700000000000000000000000000000000000000",
+          "option_label_slots": {
+            "4": "202509-",
+            "8": "w/ FS-MR",
+            "12": "w/ DST"
+          },
+          "placements": [
+            {
+              "component": "0x0F",
+              "name": "Front Radar",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "No. 1 Global CAN Junction Connector",
+              "raw_hex": "9fd24d002e1a02001d00000000000f00"
+            },
+            {
+              "component": "0x6D",
+              "name": "Front Camera Module",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "FRD",
+              "raw_hex": "9fd24d0069a402001d00000000006d00"
+            },
+            {
+              "component": "0x28",
+              "name": "Brake Booster",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "9fd24d00331a02002000000000002800"
+            },
+            {
+              "component": "0x29",
+              "name": "Skid Control (ABS/VSC/TRAC)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "9fd24d00331a02002000000000002900"
+            },
+            {
+              "component": "0x32",
+              "name": "Power Steering (EPS)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "EBU",
+              "raw_hex": "9fd24d0067a402002000000000003200"
+            }
+          ]
+        },
+        {
+          "component_group": "0x004DD2A0",
+          "option_raw": "10d9a70067ef0200002903008bd4020000000000000000000000000000000000000000000000000000000000a0d24d00010000004f030000020003000800000000000000000000000000000000000000",
+          "option_label_slots": {
+            "4": "202509-",
+            "8": "w/ FS-MR",
+            "12": "w/o DST"
+          },
+          "placements": [
+            {
+              "component": "0x0F",
+              "name": "Front Radar",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "No. 1 Global CAN Junction Connector",
+              "raw_hex": "a0d24d002e1a02001d00000000000f00"
+            },
+            {
+              "component": "0x6D",
+              "name": "Front Camera Module",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "FRD",
+              "raw_hex": "a0d24d0069a402001d00000000006d00"
+            },
+            {
+              "component": "0x28",
+              "name": "Brake Booster",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "a0d24d00331a02002000000000002800"
+            },
+            {
+              "component": "0x29",
+              "name": "Skid Control (ABS/VSC/TRAC)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "a0d24d00331a02002000000000002900"
+            },
+            {
+              "component": "0x32",
+              "name": "Power Steering (EPS)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "EBU",
+              "raw_hex": "a0d24d0067a402002000000000003200"
+            }
+          ]
+        },
+        {
+          "component_group": "0x004DD2A1",
+          "option_raw": "10d9a70067ef0200ff28030082ef020000000000000000000000000000000000000000000000000000000000a1d24d000100000050030000020004000900000000000000000000000000000000000000",
+          "option_label_slots": {
+            "4": "202509-",
+            "8": "[w/o FS-MR and w/o PAC] or [w/o FS-MR and w/o CS]",
+            "12": "w/ DST"
+          },
+          "placements": [
+            {
+              "component": "0x0F",
+              "name": "Front Radar",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "-",
+              "raw_hex": "a1d24d000b8501001d00000000000f00"
+            },
+            {
+              "component": "0x6D",
+              "name": "Front Camera Module",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "FRD",
+              "raw_hex": "a1d24d0069a402001d00000000006d00"
+            },
+            {
+              "component": "0x28",
+              "name": "Brake Booster",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "a1d24d00331a02002000000000002800"
+            },
+            {
+              "component": "0x29",
+              "name": "Skid Control (ABS/VSC/TRAC)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "a1d24d00331a02002000000000002900"
+            },
+            {
+              "component": "0x32",
+              "name": "Power Steering (EPS)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "EBU",
+              "raw_hex": "a1d24d0067a402002000000000003200"
+            }
+          ]
+        },
+        {
+          "component_group": "0x004DD2A2",
+          "option_raw": "10d9a70067ef0200ff2803008bd4020000000000000000000000000000000000000000000000000000000000a2d24d000100000051030000020004000a00000000000000000000000000000000000000",
+          "option_label_slots": {
+            "4": "202509-",
+            "8": "[w/o FS-MR and w/o PAC] or [w/o FS-MR and w/o CS]",
+            "12": "w/o DST"
+          },
+          "placements": [
+            {
+              "component": "0x0F",
+              "name": "Front Radar",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "-",
+              "raw_hex": "a2d24d000b8501001d00000000000f00"
+            },
+            {
+              "component": "0x6D",
+              "name": "Front Camera Module",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "FRD",
+              "raw_hex": "a2d24d0069a402001d00000000006d00"
+            },
+            {
+              "component": "0x28",
+              "name": "Brake Booster",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "a2d24d00331a02002000000000002800"
+            },
+            {
+              "component": "0x29",
+              "name": "Skid Control (ABS/VSC/TRAC)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "a2d24d00331a02002000000000002900"
+            },
+            {
+              "component": "0x32",
+              "name": "Power Steering (EPS)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "EBU",
+              "raw_hex": "a2d24d0067a402002000000000003200"
+            }
+          ]
+        },
+        {
+          "component_group": "0x004DD2A3",
+          "option_raw": "10d9a70067ef0200fe28030082ef020000000000000000000000000000000000000000000000000000000000a3d24d000100000052030000020005000b00000000000000000000000000000000000000",
+          "option_label_slots": {
+            "4": "202509-",
+            "8": "[w/o FS-MR and w/ PAC] or [w/o FS-MR and w/ CS]",
+            "12": "w/ DST"
+          },
+          "placements": [
+            {
+              "component": "0x0F",
+              "name": "Front Radar",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "No. 8 Global CAN Junction Connector",
+              "raw_hex": "a3d24d00391a02001d00000000000f00"
+            },
+            {
+              "component": "0x6D",
+              "name": "Front Camera Module",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "FRD",
+              "raw_hex": "a3d24d0069a402001d00000000006d00"
+            },
+            {
+              "component": "0x28",
+              "name": "Brake Booster",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "a3d24d00331a02002000000000002800"
+            },
+            {
+              "component": "0x29",
+              "name": "Skid Control (ABS/VSC/TRAC)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "a3d24d00331a02002000000000002900"
+            },
+            {
+              "component": "0x32",
+              "name": "Power Steering (EPS)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "EBU",
+              "raw_hex": "a3d24d0067a402002000000000003200"
+            }
+          ]
+        },
+        {
+          "component_group": "0x004DD2A4",
+          "option_raw": "10d9a70067ef0200fe2803008bd4020000000000000000000000000000000000000000000000000000000000a4d24d000100000053030000020005000c00000000000000000000000000000000000000",
+          "option_label_slots": {
+            "4": "202509-",
+            "8": "[w/o FS-MR and w/ PAC] or [w/o FS-MR and w/ CS]",
+            "12": "w/o DST"
+          },
+          "placements": [
+            {
+              "component": "0x0F",
+              "name": "Front Radar",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "No. 8 Global CAN Junction Connector",
+              "raw_hex": "a4d24d00391a02001d00000000000f00"
+            },
+            {
+              "component": "0x6D",
+              "name": "Front Camera Module",
+              "bus_index": 29,
+              "bus_name": "Bus 1",
+              "junction": "FRD",
+              "raw_hex": "a4d24d0069a402001d00000000006d00"
+            },
+            {
+              "component": "0x28",
+              "name": "Brake Booster",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "a4d24d00331a02002000000000002800"
+            },
+            {
+              "component": "0x29",
+              "name": "Skid Control (ABS/VSC/TRAC)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "No. 2 Global CAN Junction Connector",
+              "raw_hex": "a4d24d00331a02002000000000002900"
+            },
+            {
+              "component": "0x32",
+              "name": "Power Steering (EPS)",
+              "bus_index": 32,
+              "bus_name": "Bus 4",
+              "junction": "EBU",
+              "raw_hex": "a4d24d0067a402002000000000003200"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "provided_drawings": [
+    {
+      "name": "image.png",
+      "sha256": "7d582dd56c9e0f175bb7870cddff9b8ff93fe6684447b0fbb5b1aee08642f5a1",
+      "description": "Corolla CAN system drawing supplied in ChatGPT Library; I173/I192/T21/A128/O203/O95 labels match GTS+ group 0x004DD237.",
+      "wire_connections": [
+        "I173-28 CA1H -> I192 No.18 -> T21-2 CA2P",
+        "I173-27 CA1L -> I192 No.18 -> T21-1 CA2L",
+        "T21-10 CA1P -> A128-10 CA3H",
+        "T21-9 CA1N -> A128-9 CA3L",
+        "A128-4 CA2H / A128-3 CA2L -> O203 No.19 -> O95 termination and optional O57 BSM"
+      ]
+    },
+    {
+      "name": "MPX-C.pdf",
+      "description": "User-supplied Camry Multiplex Communication System (CAN), rendered Library pages 2-9; raw export unavailable.",
+      "wire_connections": [
+        "T4-10 CA1P / T4-9 CA1N -> B5-10 CA3H / B5-9 CA3L (pages 3,8)",
+        "T4-12 CANH / T4-11 CANL -> B5-8 CA1P / B5-7 CA1N (pages 3,8)",
+        "H67 CA1 pair -> No.8/No.1 global CAN junction path -> B5 CA2 pair (pages 2-5)",
+        "T4 CA2 pair -> BSM/end-of-bus path on BSM-equipped drawing (pages 6-8)",
+        "T4 CA3 pair -> P63 No.3 CAN junction connector (pages 8-9)"
+      ]
+    },
+    {
+      "name": "image(2).png",
+      "sha256": "9efe556160f8e0b14ced2cf5d4b227d9dd7e351c4a2b09af25e4be51dcffec42",
+      "description": "Camry overview supplied in ChatGPT Library: Bus1 CGW -> No.8/No.1 junctions -> F-MR -> F-CAM -> No.10/No.11 junctions -> termination."
+    },
+    {
+      "name": "Toyota_B_Harness (1).pdf",
+      "sha256": "39126557ad6ae4400dd0ac44080437e860cb3a6923a42b0ab523a78f456a8fb6",
+      "description": "comma Toyota_B_Harness schematic dated 2025-03-07; inspected with connector views as labeled.",
+      "stock_pin_pairs": {
+        "9/10": "Panda CAN1 blue/pink pair",
+        "11/12": "Panda CAN2 camera / CAN0 car orange/green relay pair",
+        "1/2": "PT5 GREEN/WHITE and PT4 PURPLE, straight-through outside Panda interception",
+        "3/4": "PT6 PURPLE/BROWN and PT7 RED/BLACK, straight-through outside Panda interception"
+      }
+    }
+  ],
+  "source_finding": "The drawings reverse the CGW-to-camera/radar order: the Camry comparison has CGW -> radar -> FRC, Corolla has CGW -> FRC -> radar. The shared 9/10 repin splits the camera-radar connection in both. Corolla FRC retains its 1/2 connection toward CGW through untouched harness passthroughs.",
+  "inference": "This supplies a concrete explanation for the reported EPS/control reachability from camera-facing Panda bus2 without a reversed adapter. Camera-facing is not equivalent to an isolated-camera-only network.",
+  "unresolved": [
+    "The drawings expose external connections, not the electrical implementation of continuation inside the camera/radar.",
+    "GTS+ CAN Bus Check is not a packet-by-packet routing matrix; exact forwarding of 0x030/0x081/0x08A through this path needs capture evidence.",
+    "No new live bus capture, continuity measurement, or PCS handoff test was performed."
+  ],
+  "integration_implication": "Blocking only the 9/10 FRC->radar path does not establish isolation of FRC 0x08A from its untouched 1/2 gateway-facing path. Reversing bus constants alone is not a source-isolation proof."
+}

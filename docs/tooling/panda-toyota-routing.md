@@ -262,6 +262,15 @@ secondary/shared CAN -------- CAN1 ----- no CAN0/CAN2 intercept relay
 OBD / Comma Power path ------ CAN3 ----- separate harness-box path
 ```
 
+The CAN0/CAN2 names identify the two adapter ends of the intercepted pair.
+They do not isolate the entire camera ECU: Toyota-B also passes connector
+pins1/2 and 3/4 straight through outside those Panda channels. The discussed
+repin exchanges 9/10 with 11/12 and leaves those passthroughs intact. In the
+[Corolla OEM drawing](gtsplus-tss3-fleet-map.md#pin-level-reconciliation-with-the-supplied-wiring-drawings),
+FRC pins1/2 lead toward the central gateway, while pins9/10 lead toward the
+radar. This gives the camera-facing relay endpoint another vehicle-network
+connection; CAN2 cannot be equated with an isolated-camera-only segment.
+
 This makes the pinned optskug field statement precise: on the affected Toyota-B
 vehicles, the relevant network assignment was reported as "flipped" such that
 **the relay ends up on bus 1 instead of bus 0/2**. Physically exchanging the

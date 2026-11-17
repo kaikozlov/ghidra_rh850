@@ -1038,15 +1038,15 @@ the Toyota-B CAN0/CAN1 physical repin.
 
 The [current GTS+ Camry/Corolla attachment comparison](../tooling/gtsplus-tss3-fleet-map.md#camry--corolla-hv-harness-discrepancy-comparison-2026-11-17) resolves the OEM network-domain similarities and the actual junction differences.
 
-These are **pre-repin** network observations; they do not attest the placement
-or relay electrical state of a later modified harness. In particular they
-cannot validate a post-repin claim that EPS `0x030` or functional `0x777`
-belongs on the physical camera-side CAN2 connection. The repinned 2026 Camry
-independently exposes `0x08A` upstream-to-chassis and `0x081`
-chassis-to-upstream on opposite sides of the relay; the expected Corolla
-interception integration follows that established physical mapping. The
-strongest cross-generation interpretation is a persistent Toyota TSS3
-**control request/result plane**, already present by the 2023 Corolla.
+These are **pre-repin** network observations; their bus numbers describe
+that historical configuration. The shared wire geometry establishes a
+persistent Toyota TSS3 **control request/result plane**, already present
+by the 2023 Corolla. The Camry's observed relay-side attribution must not
+be transferred solely from that similarity: the
+[pin-level attachment comparison](../tooling/gtsplus-tss3-fleet-map.md#pin-level-reconciliation-with-the-supplied-wiring-drawings)
+shows that Corolla's FRC retains a gateway-facing connection on pins1/2
+when the camera–radar 9/10 pair is intercepted. Camera-facing CAN2 is not
+an isolated-camera-only network by definition.
 
 The retained Corolla segments never leave Target Lateral ID 0. Factory road traffic
 shows the same CAN reference family while the captured segments contain neither native

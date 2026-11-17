@@ -183,10 +183,18 @@ behind `Central Gateway`.
 
 ### Camry / Corolla HV harness-discrepancy comparison (2026-11-17)
 
-**The current GTS+ records contain real attachment differences, but no
-Corolla-specific reversal of the camera and chassis domains.** This comparison
-re-read the pinned NA/Gen DDBs through `tools/gts`, then inspected each raw option
-and component row rather than relying on the collapsed placement summary.
+**GTS+ and the supplied Toyota wiring drawings expose a real difference in
+which end of the camera–radar connection faces the central gateway.** On the
+Corolla drawing the chain is CGW → FRC → radar; on the Camry comparison it is
+CGW → radar → FRC. A correctly oriented adapter can therefore put the
+CGW-facing path on different Panda relay endpoints. The camera remains on
+Toyota Bus 1 and EPS/brakes on Toyota Bus 4 in both diagnostic network maps.
+
+This comparison re-read the pinned NA/Gen DDBs through `tools/gts`, inspected
+each raw option/component row, and traced the supplied OEM drawings against
+the Toyota-B schematic. The [source comparison](../../data/external/toyota_camry_corolla_camera_topology.json)
+retains the selected vehicle/install identities, every relevant option,
+raw component records and drawing identities.
 
 | Source selection | Corolla HV | Camry HV |
 |---|---|---|
@@ -241,16 +249,71 @@ GTS record supplies a Corolla FRC forwarding rule for `0x030`, `0x081`,
 when investigating an EPS-local leg; it does not establish a reversal of the
 comma relay endpoints.
 
-For the current Panda discrepancy, retain the distinction between **receiving
-a frame on an interface** and **identifying its original ECU and electrical
-path**. Exact `CANParser` source matching rules out accepting a high-bit TX
-receipt as plain bus2; it does not establish physical isolation or exclude
-an actual retransmission. GTS supplies network membership and attachment
-vocabulary, not that isolation measurement. The remaining discriminator is
-an end-to-end map of the actual harness/relay with the ECU paths isolated,
-paired with the exact running build and raw receive/receipt distinction.
-A reversed repin and concurrent stock/host `0x08A` are not established by
-these DDBs.
+#### Pin-level reconciliation with the supplied wiring drawings
+
+The Toyota-B adapter labels CAN2 as camera-facing and CAN0 as car-facing.
+Those labels describe the two ends of the **intercepted pair**, not every
+network reachable through the camera assembly. Its 2025-03-07 schematic
+also carries other CAN pairs straight through:
+
+| Toyota camera connector pins | Stock Toyota-B connection | After the discussed 9/10 ↔ 11/12 pair repin |
+|---|---|---|
+| 9/10 (`CA1N`/`CA1P`) | Panda CAN1, blue/pink | Camera-facing CAN2 ↔ relay ↔ car-facing CAN0 |
+| 11/12 (`CANL`/`CANH` on the Camry EWD) | Panda CAN2/CAN0, green/orange | Unsplit Panda CAN1 |
+| 1/2 (`CA2L`/`CA2P`) | PT5/PT4, green-white/purple | Unchanged straight-through connection |
+| 3/4 (`CA3L`/`CA3H` on the Camry EWD) | PT6/PT7, purple-brown/red-black | Unchanged straight-through connection |
+
+Toyota's CA1/CA2 names are not Panda bus numbers. In particular, Toyota
+pins1/2 are **not** the Panda CAN1 pair moved by this repin.
+
+The supplied Corolla CAN-system drawing (`image.png`, identified by SHA-256
+in the comparison artifact) shows:
+
+- CGW I173-28/27 (`CA1H/L`) → I192 No.18 CAN junction → FRC T21-2/1
+  (`CA2P/L`);
+- FRC T21-10/9 (`CA1P/N`) → radar A128-10/9 (`CA3H/L`);
+- radar A128-4/3 (`CA2H/L`) → O203 No.19 junction → O95 termination
+  and the optional O57 blind-spot monitor.
+
+This agrees with GTS+'s radar attachment `FCM` and camera attachment
+`No. 18 CAN Junction Connector`. The T21 labels match the user-supplied
+Corolla terminal page; the cropped network drawing carries no complete
+model-year header, so its applicability is joined by these connector and
+GTS attachment identities rather than an invented production date.
+
+The supplied Camry `MPX-C.pdf`, pp.3 and 8, places the same T4-10/9 pair on
+radar B5-10/9; it separately connects T4-12/11 to B5-8/7. Its pp.2–8 and the
+supplied Bus-1 overview put the gateway-facing network before the radar,
+then the FRC, then the BSM/end-of-bus network. GTS+ independently records
+camera attachment `FRD` for the applicable equipment variants and every
+`202509-` option. The earlier `w/o BSM and w/o R-CA` options must retain
+their separate `-` camera attachment.
+
+For that comparison, the 9/10 interception is:
+
+```text
+Camry:   CGW … radar — CAN0 | open relay | CAN2 — FRC … termination
+Corolla: CGW — FRC pins1/2 — FRC — CAN2 | open relay | CAN0 — radar … termination
+```
+
+These are external network-order diagrams, not asserted internal ECU
+shorts or forwarding implementations. The important physical fact is that
+**Corolla FRC pins1/2 retain their gateway-facing connection while the
+9/10 relay is open**. They pass through the adapter independently of Panda
+CAN1 and the CAN0/CAN2 relay.
+
+**Interpretation:** that alternate connection supplies a concrete explanation
+for the reported EPS/control reachability from camera-facing Panda CAN2
+without reversing the adapter. Receiving `src=2` establishes the Panda RX
+interface, not the exclusive physical location of the originating ECU.
+Exact per-message continuation through FRC/CGW, and the correspondence to the
+reported working capture, still require packet-path evidence.
+
+**Source-isolation consequence:** blocking the FRC-to-radar 9/10 leg does
+not establish that native FRC `0x08A` is excluded from the separate
+FRC-to-gateway 1/2 leg. Determine that route before treating a bus-constant
+swap as complete source replacement or assessing PCS handoff. This comparison
+contains no new live traffic, continuity measurement or PCS test.
 
 Reproduction:
 
