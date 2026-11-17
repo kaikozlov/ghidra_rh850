@@ -1041,12 +1041,13 @@ The [current GTS+ Camry/Corolla attachment comparison](../tooling/gtsplus-tss3-f
 These are **pre-repin** network observations; their bus numbers describe
 that historical configuration. The shared wire geometry establishes a
 persistent Toyota TSS3 **control request/result plane**, already present
-by the 2023 Corolla. The Camry's observed relay-side attribution must not
-be transferred solely from that similarity: the
-[pin-level attachment comparison](../tooling/gtsplus-tss3-fleet-map.md#pin-level-reconciliation-with-the-supplied-wiring-drawings)
-shows that Corolla's FRC retains a gateway-facing connection on pins1/2
-when the camera–radar 9/10 pair is intercepted. Whether that separate
-connection carries the reported control traffic onto CAN2 remains unresolved.
+by the 2023 Corolla. The Camry's relay-side attribution does not transfer to
+the Corolla: the
+[pin-level attachment and relay-open comparison](../tooling/gtsplus-tss3-fleet-map.md#pin-level-reconciliation-with-the-supplied-wiring-drawings)
+shows the Corolla FRC upstream of the intercepted radar leg. With the relay
+open, the broad chassis/FRC stream is native on Panda bus2 and forwarded to
+bus0; the bus0 native residue is the radar/BSM tail and is forwarded back to
+bus2.
 
 The retained Corolla segments never leave Target Lateral ID 0. Factory road traffic
 shows the same CAN reference family while the captured segments contain neither native

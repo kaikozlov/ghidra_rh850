@@ -263,14 +263,19 @@ OBD / Comma Power path ------ CAN3 ----- separate harness-box path
 ```
 
 The CAN0/CAN2 names identify the two adapter ends of the intercepted pair.
-They do not isolate the entire camera ECU: Toyota-B also passes connector
-pins1/2 and 3/4 straight through outside those Panda channels. The discussed
-repin exchanges 9/10 with 11/12 and leaves those passthroughs intact. In the
+They do not by themselves identify which end leads toward the vehicle gateway.
+The discussed repin exchanges 9/10 with 11/12 and leaves the other
+passthroughs intact. In the
 [Corolla OEM drawing](gtsplus-tss3-fleet-map.md#pin-level-reconciliation-with-the-supplied-wiring-drawings),
 FRC pins1/2 lead toward the central gateway, while pins9/10 lead toward the
-radar. The camera assembly therefore retains another network connection.
-Whether packets on that connection reach its intercepted 9/10 interface is
-an unresolved internal-routing question, not established by the wiring labels.
+radar. The exact 2ZR-FXE Corolla EWD instead shows three distinct physical
+interfaces: pins1/2 run through No.18 to Network Gateway `CA1H/L`; pins9/10
+form a direct FRC-radar pair; pins11/12 run through No.15 onto the gateway
+`CA3H/L` junctioned network. The repin puts the **direct 9/10 FRC-radar pair**
+on the CAN0/CAN2 relay. Relay-open logs prove that cutting this pair does not
+isolate the FRC endpoint from chassis/VMM/EPS traffic, but the EWD does not by
+itself identify which remaining interface carries or regenerates that traffic.
+Do not label pins1/2 and 9/10 as two literal halves of Toyota Bus 4.
 
 This makes the pinned optskug field statement precise: on the affected Toyota-B
 vehicles, the relevant network assignment was reported as "flipped" such that
