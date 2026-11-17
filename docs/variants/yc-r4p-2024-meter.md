@@ -666,6 +666,68 @@ final pixel rendering is outside this RH850 image. The
 provides a cross-target lead; this report's tables and calculations are
 from the RAV4 meter image.
 
+### Factory configuration access
+
+Private application service `0xBA` can write the saved speed-profile and
+variant blocks. It selects among the existing ROM profiles; none is an
+identity curve.
+
+Service dispatch `0x19DF4 → 0x19D04 → 0x19BAA → 0x1A8FC` uses command table
+`0x154668`. Write handler `0x1EECE` accepts
+`2E FE <virtual-address:BE16> <value:BE16>`; read handler `0x1EF24` accepts
+`22 FE <virtual-address:BE16> <length:8>`. These addresses index a private
+virtual-halfword table.
+
+Access requires application session `03`, SecurityAccess `03/04` at level 2,
+and a factory-enable input qualified at startup. SID row `0x172604` specifies
+the session; `0x1A9CC → 0x19E0A` applies security mask `0x0004` at
+`0x154658`. Both security seed and key handlers check the factory state.
+
+`0x118DE` samples active-low GPIO selector `0x95` at counter thresholds `0`,
+`1000`, and `2000`; `0x1192C` maintains a three-count qualification.
+`0x85B68` stores the result in `FEDD646B` bit 0. Scheduler `0x19BAA` latches
+eligibility as `((old_flags & 0x0C) + 3) & current_flags`; once cleared, the
+factory bit cannot recover within that diagnostic lifecycle. GPIO row
+`0x165D88` resolves selector `0x95` to `0xFF61054C` bit 5. Its package pin,
+board connection, and sampling-counter time unit are unknown.
+
+The writer also requires `FEDC0772 == 1`. Diagnostic initializers
+`0x19A50/0x19A6E/0x19A8C` reach `0x1EDEE → 0x11F0A`, which sets that byte.
+`0x120B8` then requires write permission `0xFF` from `0x11F4A`. The permitted
+entries in ROM table `0xDF4CA` include:
+
+| Saved value | NvM blocks | Virtual halfwords |
+|---|---|---|
+| Speed profile `0x131` | `0x237`, `0x238`, `0x239` | `0x0BCC/0x0BCD`, `0x0BCE/0x0BCF`, `0x0BD0/0x0BD1` |
+| Variant `0` | `0x16`, `0x17`, `0x18` | `0x0091/0x0092`, `0x0093/0x0094`, `0x0095/0x0096` |
+
+Each pair addresses offsets 0 and 2 of a four-byte block. For example, ROM row
+`0xE03F2 = CC 0B 37 02 04 00 00 00` maps `0x0BCC` to block `0x237`, offset 0.
+
+The profile descriptor `0x153894` and variant descriptor `0x1517E0` both set
+the bit-2 write-protection flag. Ordinary writer
+`0x80F8C → 0x80F22 → 0x80ED0` rejects writes to those items. The private
+writer instead reaches block callback `0x184F2` via
+`0x124BE → 0x81BA2 → 0x81B5E`. It reads the block, replaces the selected
+halfword in little-endian order (`0x12304`), queues the full block with
+`0xC676A`, and verifies the readback with bounded retries
+(`0x1235A/0x12386`). `0x122B0 → 0x812BC` reloads affected items; successful
+completion calls `0x11D80 → 0x58648` to refresh the profile cache.
+
+The profile has three replicas. When all are valid, `0x816E0` invokes
+`0x835D2 → 0x83514`, which selects bitwise majority `0x79A3A` from the profile
+descriptor. For example, `0x0102, 0x0101, 0x0101` resolves to `0x0101`.
+
+The SPI settings path `0x12AB2 → 0x60D8E` uses fixed value keys
+`0x402F..0x4047` from table `0x162728`; `0x60D32` commits eligible settings
+through their configured saved-item IDs. The SPI peer receives both raw and
+corrected speed values. Its rendering policy and engineering configuration
+remain open.
+
+Evidence: original CodeFlash and DataFlash tables, registered decompilation
+corpus, and disassembly of the access gates, writer, and replica decoder.
+Factory-mode entry and writes have not been exercised on a meter.
+
 ## Receive and diagnostic paths
 
 Getter `0x768B4` returns `(0x3B7.B2 >> 2) & 3` through signal `0x550` at
