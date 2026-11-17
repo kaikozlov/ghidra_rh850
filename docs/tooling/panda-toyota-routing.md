@@ -268,14 +268,14 @@ The discussed repin exchanges 9/10 with 11/12 and leaves the other
 passthroughs intact. In the
 [Corolla OEM drawing](gtsplus-tss3-fleet-map.md#pin-level-reconciliation-with-the-supplied-wiring-drawings),
 FRC pins1/2 lead toward the central gateway, while pins9/10 lead toward the
-radar. The exact 2ZR-FXE Corolla EWD instead shows three distinct physical
-interfaces: pins1/2 run through No.18 to Network Gateway `CA1H/L`; pins9/10
-form a direct FRC-radar pair; pins11/12 run through No.15 onto the gateway
-`CA3H/L` junctioned network. The repin puts the **direct 9/10 FRC-radar pair**
-on the CAN0/CAN2 relay. Relay-open logs prove that cutting this pair does not
-isolate the FRC endpoint from chassis/VMM/EPS traffic, but the EWD does not by
-itself identify which remaining interface carries or regenerates that traffic.
-Do not label pins1/2 and 9/10 as two literal halves of Toyota Bus 4.
+radar. The exact 2ZR-FXE drawing identifies the two sides of the through-path:
+T21 1/2 reaches gateway I173 pins27/28 through No.18; T21 9/10 reaches radar
+A128 pins9/10. Its non-PCS `*2` alternative explicitly bypasses the camera
+between these legs (IT1-2 to18, IT1-3 to19). T21 11/12 is a separate FRC-radar
+pair through No.15 terminals20/19 and9/8, not a connection to every other
+circuit in that junction connector. After the repin, the 9/10 control-traffic
+continuation is on Panda's relay and the 11/12 ADAS pair is on Panda bus1.
+The upstream pair for evaluating source isolation is T21 1/2.
 
 This makes the pinned optskug field statement precise: on the affected Toyota-B
 vehicles, the relevant network assignment was reported as "flipped" such that

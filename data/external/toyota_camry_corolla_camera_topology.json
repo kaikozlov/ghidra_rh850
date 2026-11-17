@@ -1162,17 +1162,32 @@
         "1/2": "PT5 GREEN/WHITE and PT4 PURPLE, straight-through outside Panda interception",
         "3/4": "PT6 PURPLE/BROWN and PT7 RED/BLACK, straight-through outside Panda interception"
       }
+    },
+    {
+      "name": "MPX-SFX-F.pdf",
+      "sha256": "7fa1fc9b2db55038365917df98819fa759435bd8e93715eed6ea1292c857740d",
+      "description": "2ZR-FXE Corolla, TMC Made S/D From Sep. 2022 Production; pages 3,5,6 visually traced.",
+      "connections": [
+        "T21-1 CA2L -> IT1-2 -> I192-6/7 -> I173-27 CA1L",
+        "T21-2 CA2P -> IT1-3 -> I192-2/3 -> I173-28 CA1H",
+        "T21-9 CA1N -> IT1-18 -> AI5-7 -> A128-9 CA3L",
+        "T21-10 CA1P -> IT1-19 -> AI5-8 -> A128-10 CA3H",
+        "T21-11/12 CANL/H -> IT1-10/11 -> I214 No.15 -> I173-29/30 CA3L/H and A128-7/8 CA1N/P"
+      ],
+      "equipment_alternatives": {
+        "*1": "w/ Pre-Collision System; FRC and radar connections fitted",
+        "*2": "w/o Pre-Collision System; IT1-2 to IT1-18 and IT1-3 to IT1-19 bypass the FRC; not a simultaneous path on the PCS car"
+      }
     }
   ],
   "source_finding": "The drawings reverse the CGW-to-camera/radar order: the Camry comparison has CGW -> radar -> FRC, Corolla has CGW -> FRC -> radar. The shared 9/10 repin splits the camera-radar connection in both. Corolla FRC retains its 1/2 connection toward CGW through untouched harness passthroughs.",
-  "inference": "The untouched gateway-facing 1/2 connection is a candidate for alternate reachability, not an established packet-path explanation. No inspected source establishes forwarding between FRC interfaces 1/2 and 9/10 for the control/signing messages. Camera/radar attachment order does not explain a clean native-source reversal by itself.",
+  "inference": "T21 1/2 is physically the gateway-facing leg and 9/10 the onward leg of the FRC insertion. The separate 11/12 network is accounted for by the post-repin Panda-bus1 ADAS population. The broad chassis/control traffic on the camera-facing 9/10 endpoint is consistent with continued upstream reachability through 1/2.",
   "unresolved": [
-    "The drawings expose external connections, not the electrical implementation or packet forwarding inside the camera/radar.",
-    "The Toyota Bus-1 camera/radar attachment order has not been joined to the exact end-to-end SecOC packet path; the supplied Camry overview draws Toyota Bus 4 separately with CGW/EPS termination.",
-    "GTS+ CAN Bus Check is not a packet-by-packet routing matrix; the source-to-interface paths for 0x030, 0x081, 0x777, 0x7A9 and 0x08A remain unresolved.",
-    "No new live bus capture, continuity measurement, or PCS handoff test was performed."
+    "T21 1/2 has not been captured directly; moving interception there has not yet been checked for native-0x08A source isolation.",
+    "The electrical or software continuation mechanism inside FRC is not drawn.",
+    "No PCS handoff test was performed; coexisting ID0/ID11 traffic alone does not identify the cause of ID0 result samples."
   ],
-  "integration_implication": "Blocking only the 9/10 FRC->radar path does not establish isolation of FRC 0x08A from its untouched 1/2 gateway-facing path. Reversing bus constants alone is not a source-isolation proof.",
+  "integration_implication": "The physical upstream-interception candidate is T21 1/2, not the currently intercepted onward T21 9/10 pair. Verify the source split there before treating it as a validated harness fix.",
   "checked_runtime_configuration": {
     "repository": "spanconstant5/openpilot",
     "commit": "3a1063ceb801e8f7f3eed35cfabd2e8fe48b383a",
@@ -1185,5 +1200,8 @@
       "native_08a_bus": 2
     },
     "interpretation": "These source/audit records describe both PT and FRC request input on bus2, not a verified native FRC bus0 / chassis bus2 swap. The raw working November capture was not independently analyzed here."
+  }
+}
+e raw working November capture was not independently analyzed here."
   }
 }
