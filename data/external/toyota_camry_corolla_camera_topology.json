@@ -1165,11 +1165,25 @@
     }
   ],
   "source_finding": "The drawings reverse the CGW-to-camera/radar order: the Camry comparison has CGW -> radar -> FRC, Corolla has CGW -> FRC -> radar. The shared 9/10 repin splits the camera-radar connection in both. Corolla FRC retains its 1/2 connection toward CGW through untouched harness passthroughs.",
-  "inference": "This supplies a concrete explanation for the reported EPS/control reachability from camera-facing Panda bus2 without a reversed adapter. Camera-facing is not equivalent to an isolated-camera-only network.",
+  "inference": "The untouched gateway-facing 1/2 connection is a candidate for alternate reachability, not an established packet-path explanation. No inspected source establishes forwarding between FRC interfaces 1/2 and 9/10 for the control/signing messages. Camera/radar attachment order does not explain a clean native-source reversal by itself.",
   "unresolved": [
-    "The drawings expose external connections, not the electrical implementation of continuation inside the camera/radar.",
-    "GTS+ CAN Bus Check is not a packet-by-packet routing matrix; exact forwarding of 0x030/0x081/0x08A through this path needs capture evidence.",
+    "The drawings expose external connections, not the electrical implementation or packet forwarding inside the camera/radar.",
+    "The Toyota Bus-1 camera/radar attachment order has not been joined to the exact end-to-end SecOC packet path; the supplied Camry overview draws Toyota Bus 4 separately with CGW/EPS termination.",
+    "GTS+ CAN Bus Check is not a packet-by-packet routing matrix; the source-to-interface paths for 0x030, 0x081, 0x777, 0x7A9 and 0x08A remain unresolved.",
     "No new live bus capture, continuity measurement, or PCS handoff test was performed."
   ],
-  "integration_implication": "Blocking only the 9/10 FRC->radar path does not establish isolation of FRC 0x08A from its untouched 1/2 gateway-facing path. Reversing bus constants alone is not a source-isolation proof."
+  "integration_implication": "Blocking only the 9/10 FRC->radar path does not establish isolation of FRC 0x08A from its untouched 1/2 gateway-facing path. Reversing bus constants alone is not a source-isolation proof.",
+  "checked_runtime_configuration": {
+    "repository": "spanconstant5/openpilot",
+    "commit": "3a1063ceb801e8f7f3eed35cfabd2e8fe48b383a",
+    "file": "opendbc_repo/opendbc/car/toyota/carstate.py",
+    "corolla_pt_parser_bus": 2,
+    "camera_control_request_parser_bus": 2,
+    "reported_capture": {
+      "commit": "db66343e9276042202ad77e1015dce0e380db2c4",
+      "file": "docs/tss3-port-audit.md",
+      "native_08a_bus": 2
+    },
+    "interpretation": "These source/audit records describe both PT and FRC request input on bus2, not a verified native FRC bus0 / chassis bus2 swap. The raw working November capture was not independently analyzed here."
+  }
 }

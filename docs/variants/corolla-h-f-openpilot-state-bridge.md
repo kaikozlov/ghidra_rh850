@@ -1045,8 +1045,8 @@ by the 2023 Corolla. The Camry's observed relay-side attribution must not
 be transferred solely from that similarity: the
 [pin-level attachment comparison](../tooling/gtsplus-tss3-fleet-map.md#pin-level-reconciliation-with-the-supplied-wiring-drawings)
 shows that Corolla's FRC retains a gateway-facing connection on pins1/2
-when the camera–radar 9/10 pair is intercepted. Camera-facing CAN2 is not
-an isolated-camera-only network by definition.
+when the camera–radar 9/10 pair is intercepted. Whether that separate
+connection carries the reported control traffic onto CAN2 remains unresolved.
 
 The retained Corolla segments never leave Target Lateral ID 0. Factory road traffic
 shows the same CAN reference family while the captured segments contain neither native

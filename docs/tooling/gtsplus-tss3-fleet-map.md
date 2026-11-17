@@ -183,12 +183,13 @@ behind `Central Gateway`.
 
 ### Camry / Corolla HV harness-discrepancy comparison (2026-11-17)
 
-**GTS+ and the supplied Toyota wiring drawings expose a real difference in
-which end of the camera–radar connection faces the central gateway.** On the
-Corolla drawing the chain is CGW → FRC → radar; on the Camry comparison it is
-CGW → radar → FRC. A correctly oriented adapter can therefore put the
-CGW-facing path on different Panda relay endpoints. The camera remains on
-Toyota Bus 1 and EPS/brakes on Toyota Bus 4 in both diagnostic network maps.
+**GTS+ and the supplied Toyota drawings establish different camera/radar
+attachments, not the packet path responsible for the reported Panda bus-2
+control.** Their external network order is CGW → FRC → radar for Corolla
+and CGW → radar → FRC for the Camry comparison. Both diagnostic maps place
+the camera on Toyota Bus 1 and EPS/brakes on Toyota Bus 4. Connecting these
+facts to the intercepted SecOC traffic requires the exact pair and internal
+ECU routing; attachment order alone does not establish that connection.
 
 This comparison re-read the pinned NA/Gen DDBs through `tools/gts`, inspected
 each raw option/component row, and traced the supplied OEM drawings against
@@ -302,12 +303,24 @@ shorts or forwarding implementations. The important physical fact is that
 9/10 relay is open**. They pass through the adapter independently of Panda
 CAN1 and the CAN0/CAN2 relay.
 
-**Interpretation:** that alternate connection supplies a concrete explanation
-for the reported EPS/control reachability from camera-facing Panda CAN2
-without reversing the adapter. Receiving `src=2` establishes the Panda RX
-interface, not the exclusive physical location of the originating ECU.
-Exact per-message continuation through FRC/CGW, and the correspondence to the
-reported working capture, still require packet-path evidence.
+**Unresolved packet path:** the untouched 1/2 connection is a lead for
+alternate reachability, not an established explanation. The drawings do not
+show forwarding between the FRC's 1/2 and 9/10 interfaces or forwarding of
+`0x030`, `0x081`, `0x777`, `0x7A9`, or host `0x08A`. Such a mechanism would
+need to carry chassis traffic toward CAN2 and accepted host commands back
+toward the chassis. It would not, by itself, explain native FRC output
+originating on the opposite relay endpoint. The supplied Camry overview draws
+Toyota Bus 4 separately, terminating at CGW/EPS; it is not evidence that the
+camera/radar Bus-1 chain is the same electrical segment as the control link.
+
+The checked `spanconstant5/openpilot` Star revision
+`3a1063ceb801e8f7f3eed35cfabd2e8fe48b383a` configures both the Corolla PT
+parser and camera `CONTROL_REQUEST` parser on `TSS3_SOURCE_BUS` (bus2), in
+`opendbc_repo/opendbc/car/toyota/carstate.py:427–447`. The November-14 audit
+at `db66343e9276042202ad77e1015dce0e380db2c4` also describes native `0x08A`
+on bus2 (`docs/tss3-port-audit.md:624–628`). Those sources do not establish a
+clean native-source swap of FRC→bus0 and chassis→bus2. Keep their reported
+observations separate from an independently inspected raw capture.
 
 **Source-isolation consequence:** blocking the FRC-to-radar 9/10 leg does
 not establish that native FRC `0x08A` is excluded from the separate

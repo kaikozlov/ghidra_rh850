@@ -268,8 +268,9 @@ pins1/2 and 3/4 straight through outside those Panda channels. The discussed
 repin exchanges 9/10 with 11/12 and leaves those passthroughs intact. In the
 [Corolla OEM drawing](gtsplus-tss3-fleet-map.md#pin-level-reconciliation-with-the-supplied-wiring-drawings),
 FRC pins1/2 lead toward the central gateway, while pins9/10 lead toward the
-radar. This gives the camera-facing relay endpoint another vehicle-network
-connection; CAN2 cannot be equated with an isolated-camera-only segment.
+radar. The camera assembly therefore retains another network connection.
+Whether packets on that connection reach its intercepted 9/10 interface is
+an unresolved internal-routing question, not established by the wiring labels.
 
 This makes the pinned optskug field statement precise: on the affected Toyota-B
 vehicles, the relevant network assignment was reported as "flipped" such that
