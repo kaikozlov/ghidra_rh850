@@ -247,7 +247,7 @@ The retained pre-SecOC generated-COM buffer has B28..B31 all zero while live wir
 | 21 | B16[5] | cooperative-control status from `FEBEE82F` |
 | 22 | B16[4] | cooperative-control status from `FEBEE83D` |
 | 23 | B16[3] | cooperative-control status from `FEBEE83B` |
-| 24 | B16[2:1] | 2-bit cooperative-control state from `FEBEE83C` |
+| 24 | B16[2:1] | corrected EPS actual-angle feedback validity from `FEBEE83C`; value `1` means valid |
 | 25 | B16[0] | **cooperative-command inhibit** / CAFC family |
 | 26 | B17[7] | status mirror from `FEBE80E7` |
 | 27 | B17[6] | status mirror from `FEBE80E6` |
@@ -255,7 +255,7 @@ The retained pre-SecOC generated-COM buffer has B28..B31 all zero while live wir
 | 29 | B17[4] | status mirror from `FEBEE88C` |
 | 30 | B17[3:0] | **Steering Wheel Torque** fine signed4 component, `0.01 N.m/count` |
 | 31 | B19[0] | **cooperative-angle inhibit** / CAD9 family |
-| 32 | B20:B21 | signed steering-control/angle-family feedback from `FEBEE8BC` |
+| 32 | B20:B21 | corrected EPS actual steering angle, signed16 big-endian × `1024/17870` degrees, from `FEBEE8BC` |
 | 33 | B22:B23 | signed motor-feedback/current-family proxy; related to but not numerically identical to DID1151 Q-axis current |
 | 34 | B27[1] | constant clear in the normal producer |
 | 35 | B27[0] | constant clear in the normal producer |
@@ -280,6 +280,39 @@ B27[7:2]
 ```
 
 Signals 36, 37 and 283 are assigned to PDU0 by the exact signal-to-PDU table but have no literal call to either generated pack helper anywhere in the complete 6,065-function canonical decompiler corpus. We therefore do not invent a wire position for them. This is a bounded negative: an opaque computed call, DMA, or code outside the recovered corpus would be a different mechanism.
+
+### 4.3 Actual steering-angle reference
+
+`0x030 B20:B21` publishes the EPS controller's corrected **measured** angle.
+`0xCE9EA` captures the alignment between the internal electrical-angle-derived
+position and received `0x025` steering angle. `0xCEADA` subtracts that captured
+alignment and publishes corrected measurement `FEBECAD2`, with valid state
+`FEBECAD8=1`. `0xCD128` uses this measurement in its target-angle error.
+
+The transmit chain is:
+
+```text
+CEADA: CAD2 = 2*AE5E - captured_alignment
+D0D7C: AE5C = signed16(CAD2) / 2
+BF3AA: E8BC = AE5C
+4C2DC: 8156 = E8BC
+4C97A: signal32 -> 0x030 B20:B21
+```
+
+`0xCCF0E` doubles the incoming B6 target count into the controller's internal
+target representation. The transmit division by two restores the same
+`1024/17870` degrees/count scale. These conversions and the measurement path
+were checked against exact-F33 disassembly.
+
+Decode validity as `((B16 >> 1) & 3) == 1`; the source chain is
+`CAD8 -> AD4A -> E83C -> 80F9 -> signal24`. `B19[0]` is the separate
+angle-plausibility inhibit.
+
+The November drive logs expose a material difference between this EPS angle
+reference and raw `0x025`. The
+[port report](camry-2026-tss3-opendbc-port.md#steering-reference-mismatch-in-the-november-drives)
+owns the missing intersensor conversion and its observed control effect.
+
 
 ## 5. `0x351`: base status and qualified-action override
 

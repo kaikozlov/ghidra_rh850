@@ -5670,16 +5670,15 @@ openpilot asked for.  The deterministic reducer is
 `tools/targets/camry/analysis/analyze_camry_20260907_steering_reconciliation.py`; its compact artifact
 is `data/generated/camry_20260907_steering_reconciliation.json`.
 
-The static anchor is already exact-F33 evidence rather than a fit from this
-route.  B6 B4:B5 is the signed target-angle input compared against the
-reconstructed `0x025` measured steering domain with the same recovered gain,
-while VAR-081 independently established captured `0x08A B18:B19` at the same
-`1024/17870 = 0.057302742... deg/count` numeric scale.  Current Toyota
-`EMPS_P5` vocabulary calls the adjacent `0x08A`-side diagnostic concept
-**Target Steering Angle After Output Compensation**.  Shared units therefore do
-not imply that the two values are byte-for-byte interchangeable or that stock
-`0x08A` should be transformed into B6; stock LTA
-does not require such a transform.
+Exact-F33 B6 B4:B5 and captured `0x08A B18:B19` share the recovered
+`1024/17870 = 0.057302742... deg/count` numeric scale. The EPS compares its B6
+target against corrected internal angle feedback, exposed at `0x030 B20:B21`.
+That feedback is aligned to raw `0x025` through a captured offset; equal wire
+units do not make the live sensor references interchangeable. The
+[EPS transmit report](camry-f33-eps-tx.md#43-actual-steering-angle-reference)
+owns the exact feedback path, and the
+[port report](camry-2026-tss3-opendbc-port.md#steering-reference-mismatch-in-the-november-drives)
+owns the TSS3 intersensor-conversion omission.
 
 On the host side the mapping is tight.  Across **17,461** active B6 sends with a
 fresh `carControl`, decoded B6 target minus
@@ -5800,14 +5799,13 @@ ID0 itself follows measured angle and the driver/ordinary EPS assist remain in
 the loop.  They therefore do not supersede VAR-124/126's stronger B6
 non-response evidence or prove that this route's wheel motion was caused by B6.
 
-**Consequence.** There is no evidence here for changing B6 sign, scale, or adding a
-stock-derived steering offset. The fork is transmitting the steering angle that controls
-requested in the exact-F33 B6 physical-angle domain. The stock `0x08A` value supplies
-Toyota request/reference evidence.
-VAR-148 supplies the objective structural answer: accepted ID11 B6 is not sole authority;
-it is a contribution inside the ordinary EPS command sum. The remaining live question is
-whether the transmitted B6 reaches or is published into that controller.
-No steering sign/scale/offset tuning constant changes from this comparison.
+**Consequence.** The fork serializes the angle requested by controls with the
+recovered sign and scale. Its raw-SAS control reference must also be converted
+to the corrected EPS angle reference; the
+[port report](camry-2026-tss3-opendbc-port.md#steering-reference-mismatch-in-the-november-drives)
+owns that conversion. VAR-148 independently establishes that accepted ID11 B6
+is a contribution inside the ordinary EPS command sum. This route's live
+authority question remains whether transmitted B6 reaches that controller.
 
 
 ## 62. Route-48 Toyota-LTA-off B6 isolation (VAR-145)

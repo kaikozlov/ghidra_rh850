@@ -35,6 +35,82 @@ Exact EPS transmit tables and field maps belong in the
 distinction belongs in the
 [vehicle-movement report](../architecture/toyota-tss3-vehicle-movement-arbitration.md).
 
+## Steering reference mismatch in the November drives
+
+**The recorded TSS3 path omitted Toyota's existing SAS-to-EPS angle-reference conversion.**
+It read raw `0x025` steering angle into `carState`, left
+`steeringAngleOffsetDeg=0`, and sent the model-derived angle in that reference
+as a Toyota pinion-angle request. The EPS uses its own corrected actual-angle
+reference, exposed at `0x030 B20:B21`.
+
+In `0000013c--0a6b872c87`, segment 48, 10–30 s after the first `carState`,
+the car remains about 0.51 m left of the detected lane center while the model
+requests 0.000899/m rightward curvature and measured motion is 0.000587/m.
+The median angles are:
+
+| Quantity | Degrees, positive left |
+|---|---:|
+| Raw `0x025` / logged `carState` | +0.20 |
+| Comma `0x08A` request | −1.146 |
+| EPS actual `0x030 B20:B21` | −1.146 |
+| Inactive native FRC `0x08A` | −1.146 |
+
+The EPS angle is valid and uninhibited throughout the window. Its same-time
+request-tracking error has median 0° and RMSE 0.138°. The raw-to-EPS reference
+difference has median 1.346°. Native ID0 follows this independent EPS actual
+measurement with about 33 ms delay; at that delay 99.83% of the segment's
+matched native values agree exactly. The native field therefore explains the
+stock/reference comparison: equal request and EPS angles can coexist with a
+different raw SAS reading.
+
+Stock-controlled route `00000135--dc6b4d88c4`, segment 8, also exposes this
+distinction: a 10.5 s low-driver window has median raw SAS 2.5°, EPS actual 1.547°,
+and native request 1.604°. The
+[EPS transmit report](camry-f33-eps-tx.md#43-actual-steering-angle-reference)
+owns the exact firmware measurement and transmit proof.
+
+### Source-level cause and complete correction
+
+At recorded opendbc `931d45b7`, `toyota/carstate.py:99` reads raw SAS;
+the TSS3 return at 185–187 skips the legacy Toyota intersensor calibration
+at 237–244. The existing Toyota controller still adds
+`CS.steeringAngleOffsetDeg` to convert its command into the actuator reference.
+That field is zero throughout both recent drives. Sunny's recorded
+opendbc `50220454` has the same omission.
+
+The required coordinate contract is the existing Toyota convention:
+
+```text
+S = raw SAS angle
+A = valid EPS actual angle
+D = filtered(A - S)
+carState.steeringAngleDeg = A - D
+carState.steeringAngleOffsetDeg = D
+EPS-reference request = model-derived SAS-reference request + D
+```
+
+Use the existing 60 s offset filter and its small-angle, small-rate,
+CAN-valid update guards. Preserve `vehicleParameters.angleOffsetDeg`, which
+belongs to the vehicle-model reference. At the Sunny witness's instantaneous
+offset, converting a −1.146° SAS-reference target requires approximately
+−2.492° in the EPS reference; this is coordinate conversion, not a newly tuned
+steering bias.
+
+The `experiment/pcm-less` correction is opendbc `8e1dd8e66d`, pinned by
+openpilot `acd316f5a2`. It decodes EPS actual-angle/validity fields and shares
+the existing Toyota offset calculation between TSS3 and legacy Toyota.
+TSS3 safety now samples valid EPS actual feedback in request units. The existing
+controller addition of `D`, vehicle-model offset, and bank compensation are unchanged.
+
+Toyota car and safety verification: 332 passed, 40 skipped. The quality-flag
+measurement test follows the legacy Toyota LTA test pattern. The Panda
+repository and submodule revision are unchanged.
+
+This identifies a port-specific reference fault. The 20 Hz reference staircase
+below is a separate controller-dynamics issue. The openpilot segment65
+highway witness also has genuine EPS/request residual: median +0.516°,
+alongside a 1.767° raw-to-EPS reference difference.
+
 ## Low-speed steering-command replay and root-layer diagnosis (November 14, 2026)
 
 A six-date scan (September 6/7/10/11/18 and November 12) examined 287 rlogs.
