@@ -124,7 +124,12 @@ database, name) are **identical across NA/EU/JP**.
 
 ## 3. Diagnostic request addresses (v18 ECU_Setting_Table join)
 
-Current GTS+ ships no ECUNo→address table; the deterministic join is the v18
+The original fleet census used the v18 address join below. Current GTS+ also
+resolves category/route-selector pairs through master table13
+`CDbProtInfoTable`; the Camry/Corolla comparison in §4 uses that current
+binding, including Brake Booster's `0x750` / extension `0x29` route.
+
+The v18 source is the
 `IT3Data_BDC_{region}.vds` `ECU_Setting_Table` (40-byte Jet rows: ECUNo u32
 +0x02, phase u32 +0x06, address = 3 ASCII bytes after the FF FE marker at
 +0x1A). Matched phase-5 rows: NA 26, EU 24, JP 26 (EU lacks 402 Solar and 5005
@@ -175,6 +180,96 @@ Worked example (asserted by the verifier): the three NA Camry HV vehicle types
 12704/12862/12984 share car id `0x00A7D910`; its shape places FCM `0x6D` on
 `Bus 1` (index 29) and Skid `0x29` + EPS `0x32` on `Bus 4` (index 32), both
 behind `Central Gateway`.
+
+### Camry / Corolla HV harness-discrepancy comparison (2026-11-17)
+
+**The current GTS+ records contain real attachment differences, but no
+Corolla-specific reversal of the camera and chassis domains.** This comparison
+re-read the pinned NA/Gen DDBs through `tools/gts`, then inspected each raw option
+and component row rather than relying on the collapsed placement summary.
+
+| Source selection | Corolla HV | Camry HV |
+|---|---|---|
+| CAN topology key (table75) | `0x00A7D901` | `0x00A7D910` |
+| Vehicle-type rows sharing key | 20 | 3: 12704/12862/12984 |
+| Options (table77) | 1, component group `0x004DD237` | 18 |
+| Bus-membership shapes | 1 | 1 |
+| Shapes including attachment strings | 1 | 12 |
+| Front Camera Module `0x6D` | Toyota Bus 1, index29 | Toyota Bus 1, index29 |
+| EPS `0x32`, Skid Control `0x29`, Brake Booster `0x28` | Toyota Bus 4, index32 | Toyota Bus 4, index32 |
+
+The Corolla key covers types 12514/12515/12584/12585, 12614–12617,
+12719–12722, 12823–12826, and 12939–12942. Ten carry category498 in an
+install set: 12514/12515, 12614/12616, 12719/12720, 12823/12824,
+12939/12940. The common topology result does not depend on choosing a
+particular one of those types.
+
+The **attachment/junction strings** in table78 differ:
+
+| Component | Corolla HV, group `0x004DD237` | Camry HV, all 18 options |
+|---|---|---|
+| Front Radar `0x0F` | `FCM` | `No. 1 Global CAN Junction Connector`, `No. 8 Global CAN Junction Connector`, or `-` |
+| Front Camera Module `0x6D` | `No. 18 CAN Junction Connector` | `FRD` or `-` |
+| EPS `0x32` | `No. 13 CAN Junction Connector` | `EBU` |
+| Skid Control `0x29` / Brake Booster `0x28` | `No. 10 CAN Junction Connector` | `No. 2 Global CAN Junction Connector` |
+| Steering-angle sensor `0xF0` | `No. 13 CAN Junction Connector` | `No. 7 Global CAN Junction Connector` |
+
+`FCM`, `FRD`, `EBU`, and `-` above retain Toyota's literal strings. The
+Camry EPS attachment is invariant across the 18 options. Its radar/camera
+attachments have six combinations; the body-controller attachment accounts
+for the remaining split into 12 complete attachment shapes. The existing
+`canbus` placement grouping compares component/domain/bus, **not attachment
+strings**, so its `placement_variants=1` must not be read as identical wiring
+across all options. The particular Camry option requires vehicle option
+selection; do not promote the first option to the owner's exact wiring.
+
+Current master tables5/44/16 also bind both families to the same P5 categories:
+405 `EMPS_P5`, 435 `ABS_P5`, 466 `Brk_Bst_P5`, and 498 `FRC_P5`.
+For example Corolla type12823/set8477 and Camry type12862/set8594 carry all
+four. Current table13 gives the same `(category, route_selector)` routes:
+405/`0x12` → `0x7A1`, 435/`0x12` → `0x7B0`, 498/`0x12` → `0x792`,
+466/`0x22` → `0x750` extension `0x29`. Front radar429/`0x22`, in the
+separate radar install sets, uses `0x750` extension `0x0F` in both. These
+are diagnostic transport bindings, not Panda bus assignments.
+
+The shared `FRC_P5` dictionary includes `U012987` (Brake), `U013187` (EPS),
+and `U131757` (software incompatibility with Gateway E). `ABS_P5` includes
+`U013187` and `U11B187` (EPS ch2). Those are dictionary entries, not live
+fault observations or proof of a model-specific forwarding policy. No inspected
+GTS record supplies a Corolla FRC forwarding rule for `0x030`, `0x081`,
+`0x777`, or `0x7A9`. The EPS `EBU` versus junction difference is relevant
+when investigating an EPS-local leg; it does not establish a reversal of the
+comma relay endpoints.
+
+For the current Panda discrepancy, retain the distinction between **receiving
+a frame on an interface** and **identifying its original ECU and electrical
+path**. Exact `CANParser` source matching rules out accepting a high-bit TX
+receipt as plain bus2; it does not establish physical isolation or exclude
+an actual retransmission. GTS supplies network membership and attachment
+vocabulary, not that isolation measurement. The remaining discriminator is
+an end-to-end map of the actual harness/relay with the ECU paths isolated,
+paired with the exact running build and raw receive/receipt distinction.
+A reversed repin and concurrent stock/host `0x08A` are not established by
+these DDBs.
+
+Reproduction:
+
+```sh
+tools/gts canbus 'Corolla HV' --json
+tools/gts canbus 12862 --json
+tools/gts category FRC_P5 --json
+tools/gts dtc FRC_P5
+tools/gts dtc ABS_P5 'Power Steering'
+```
+
+Raw anchors in `NA/DB/Gen/Toyota.ddb` (zero-based ordinals): table75
+row585 is Corolla12823, row617 is Camry12862. In table78, Corolla group
+`0x004DD237` has radar24216, camera24218, brake24228, EPS24229, and
+steering-angle24231. Camry's first group `0x004DD26A` has radar26085,
+camera26090, brake26102, EPS26103, and steering-angle26105; inspect all
+18 table77 groups for the attachment comparison. Source SHA-256:
+`Toyota.ddb` = `f11e820968ac383a8fc5105b65322f0b9c3673df2c8dac46c9847e3d691b39b1`;
+`M_English.ddb` = `458a7039851fc66dc2385fff2efa910337218b8b23985b3c1afc0db7bc5f8014`.
 
 ### Identity namespaces — Toyota vs panda
 

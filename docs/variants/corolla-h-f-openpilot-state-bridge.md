@@ -1036,6 +1036,8 @@ the camera-family `0x160` equally on both bypassed relay buses. Both rlogs
 reported `harnessStatus=flipped`, which describes USB-C orientation, **not**
 the Toyota-B CAN0/CAN1 physical repin.
 
+The [current GTS+ Camry/Corolla attachment comparison](../tooling/gtsplus-tss3-fleet-map.md#camry--corolla-hv-harness-discrepancy-comparison-2026-11-17) resolves the OEM network-domain similarities and the actual junction differences.
+
 These are **pre-repin** network observations; they do not attest the placement
 or relay electrical state of a later modified harness. In particular they
 cannot validate a post-repin claim that EPS `0x030` or functional `0x777`
