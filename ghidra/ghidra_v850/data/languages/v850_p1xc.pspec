@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<processor_spec>
+  <programcounter register="PC"/>
+  <data_space space="ram"/>
+  <!-- P1x-C R01UH0517EJ0130 Fig. 4.1: P-Bus and LPB self, common
+       to all main CPUs. The H-Bus aperture can contain external memory. -->
+  <volatile outputop="write" inputop="read">
+    <range space="ram" first="0xFF000000" last="0xFF1FFFFF"/>
+    <range space="ram" first="0xFF400000" last="0xFFFDFFFF"/>
+    <range space="ram" first="0xFFFEE000" last="0xFFFEFFFF"/>
+    <range space="ram" first="0xFFFF5000" last="0xFFFFFFFF"/>
+  </volatile>
+  <register_data>
+    <register name="ICCTRL" volatile="true"/>
+    <register name="CDBCR" volatile="true"/>
+    <register name="PMR" volatile="true"/>
+    <register name="EBASE" volatile="true"/>
+  </register_data>
+</processor_spec>

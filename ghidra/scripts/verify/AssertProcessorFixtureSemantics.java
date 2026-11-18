@@ -192,6 +192,40 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
         }
     }
 
+    private void checkFlags(java.util.Map<String, Long> addrs, String name,
+            long r6, long r10, long flags, long out6, long out10, long outFlags) throws Exception {
+        EmulatorHelper emu = emulator(requireCaseAddr(addrs, name));
+        try {
+            emu.writeRegister("r6", r6);
+            emu.writeRegister("r10", r10);
+            emu.writeRegister("PSW", flags);
+            step(emu, name);
+            requireRegister(emu, name, "r6", out6);
+            requireRegister(emu, name, "r10", out10);
+            requireRegister(emu, name, "PSW", outFlags);
+        } finally {
+            emu.dispose();
+        }
+    }
+
+    private void verifyIndexedLoadAlias(java.util.Map<String, Long> addrs) throws Exception {
+        for (String width : List.of("b", "bu", "h", "hu", "w")) {
+            int size = width.charAt(0) == 'b' ? 1 : width.charAt(0) == 'h' ? 2 : 4;
+            for (int direction : new int[]{1, -1}) {
+                String name = "ld." + width + (direction > 0 ? "-inc-alias" : "-dec-alias");
+                EmulatorHelper emu = emulator(requireCaseAddr(addrs, name));
+                try {
+                    emu.writeRegister("r7", 0x2000);
+                    emu.writeMemory(toAddr(0x2000), new byte[]{-51, -85, 0x22, 0x11});
+                    step(emu, name);
+                    requireRegister(emu, name, "r7", 0x2000 + direction * size);
+                } finally {
+                    emu.dispose();
+                }
+            }
+        }
+    }
+
     private void verifyBorrowBoundaries(java.util.Map<String, Long> addrs) throws Exception {
         long address = requireCaseAddr(addrs, "sbfc");
         if (address < 0) return;
@@ -404,39 +438,19 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
             }
         }
 
-        a = requireCaseAddr(addrs, "satadd");
-        if (a >= 0) {
-            EmulatorHelper emu = emulator(a);
-            try {
-                emu.writeRegister("r6", 1);
-                emu.writeRegister("r10", 0x7fffffffL);
-                emu.writeRegister("PSW", 0);
-                step(emu, "satadd positive overflow");
-                requireRegister(emu, "satadd positive overflow", "r10", 0x7fffffffL);
-                if (!pswBit(emu, 4) || !pswBit(emu, 2)) {
-                    fail(String.format("satadd positive overflow: PSW=0x%x lacks SAT/OV",
-                            emu.readRegister("PSW").longValue()));
-                }
-            } finally {
-                emu.dispose();
-            }
-
-            emu = emulator(a);
-            try {
-                emu.writeRegister("r6", 0xffffffffL);
-                emu.writeRegister("r10", 1);
-                emu.writeRegister("PSW", 0);
-                step(emu, "satadd carry without overflow");
-                requireRegister(emu, "satadd carry without overflow", "r10", 0);
-                if (pswBit(emu, 4) || pswBit(emu, 2) || !pswBit(emu, 3)) {
-                    fail(String.format(
-                            "satadd carry without overflow: PSW=0x%x expected CY only",
-                            emu.readRegister("PSW").longValue()));
-                }
-            } finally {
-                emu.dispose();
-            }
-        }
+        final long max = 0x7fffffff, min = 0x80000000L;
+        checkFlags(addrs, "tst", 1, min, 0x1e, 1, min, 0x19);
+        checkFlags(addrs, "tst", min, min, 0x1e, min, min, 0x1a);
+        checkFlags(addrs, "satadd", 1, max, 0, 1, max, 0x14);
+        checkFlags(addrs, "satadd", min, min, 0, min, min, 0x1e);
+        checkFlags(addrs, "satadd", -1, 1, 0, -1, 0, 9);
+        checkFlags(addrs, "satadd-imm", 0, 1, 0x10, 0, 0, 0x19);
+        checkFlags(addrs, "satsub", 1, min, 0, 1, min, 0x16);
+        checkFlags(addrs, "satsubr", max, -1, 0, max, max, 0x1c);
+        checkFlags(addrs, "satsubi", max, 0, 0, max, max, 0x1c);
+        checkFlags(addrs, "satadd-aliased", 1, max, 0, max, max, 0x14);
+        checkFlags(addrs, "satsub-aliased", 1, min, 0, min, min, 0x16);
+        verifyIndexedLoadAlias(addrs);
 
         a = requireCaseAddr(addrs, "prepare");
         if (a >= 0) {

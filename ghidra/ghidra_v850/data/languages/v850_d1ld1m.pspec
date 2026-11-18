@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<processor_spec>
+  <programcounter register="PC"/>
+  <data_space space="ram"/>
+  <!-- D1L/D1M R01UH0451EJ0220 Fig. 5.1: CPU view, not DMA view.
+       XC1 can contain video RAM and external memory. -->
+  <volatile outputop="write" inputop="read">
+    <range space="ram" first="0xFF400000" last="0xFFFDFFFF"/>
+    <range space="ram" first="0xFFFEE000" last="0xFFFFFFFF"/>
+  </volatile>
+  <register_data>
+    <register name="ICCTRL" volatile="true"/>
+    <register name="CDBCR" volatile="true"/>
+    <register name="PMR" volatile="true"/>
+    <register name="EBASE" volatile="true"/>
+  </register_data>
+</processor_spec>

@@ -5,23 +5,26 @@
             endian="little"
             size="32"
             variant="V850E2M"
-            version="0.9"
+            version="0.10"
             slafile="v850e2.sla"
             processorspec="v850_generic.pspec"
+            manualindexfile="../manuals/v850.idx"
             id="v850:LE:32:default">
     <description>Renesas V850E2M</description>
     <compiler name="GHS MULTI" spec="v850_ghs.cspec" id="default"/>
     <compiler name="GCC (old V850 ABI)" spec="v850_gcc.cspec" id="gcc"/>
     <compiler name="CC-RH" spec="v850_ccrh.cspec" id="ccrh"/>
     <external_name tool="DWARF.register.mapping.file" name="v850.dwarf"/>
+    <external_name tool="gnu" name="v850e2v3"/>
   </language> 
   <language processor="v850"
             endian="little"
             size="32"
             variant="RH850G3M (P1M-E)"
-            version="0.12"
+            version="0.13"
             slafile="v850e3.sla"
             processorspec="v850.pspec"
+            manualindexfile="../manuals/rh850g3m.idx"
             id="v850e3:LE:32:default">
     <description>Renesas RH850G3M for RH850/P1M-E</description>
     <compiler name="GHS MULTI" spec="v850_ghs.cspec" id="default"/>
@@ -32,12 +35,13 @@
   <language processor="v850"
             endian="little"
             size="32"
-            variant="RH850 broad (DSP/SIMD/virtualization)"
-            version="1.2"
-            slafile="v850rh850.sla"
-            processorspec="v850_generic.pspec"
-            id="v850e3x:LE:32:default">
-    <description>Renesas RH850 with DSP, SIMD, virtualization, trace and debug</description>
+            variant="RH850G3M (P1x-C)"
+            version="1.0"
+            slafile="v850e3.sla"
+            processorspec="v850_p1xc.pspec"
+            manualindexfile="../manuals/rh850g3m.idx"
+            id="v850e3:LE:32:P1xC">
+    <description>Renesas RH850/P1x-C main CPU</description>
     <compiler name="GHS MULTI" spec="v850_ghs.cspec" id="default"/>
     <compiler name="GCC (old V850 ABI)" spec="v850_gcc.cspec" id="gcc"/>
     <compiler name="CC-RH" spec="v850_ccrh.cspec" id="ccrh"/>
@@ -46,8 +50,39 @@
   <language processor="v850"
             endian="little"
             size="32"
+            variant="RH850G3M (D1L/D1M)"
+            version="1.0"
+            slafile="v850e3.sla"
+            processorspec="v850_d1ld1m.pspec"
+            manualindexfile="../manuals/rh850g3m.idx"
+            id="v850e3:LE:32:D1LD1M">
+    <description>Renesas RH850/D1L and D1M CPU</description>
+    <compiler name="GHS MULTI" spec="v850_ghs.cspec" id="default"/>
+    <compiler name="GCC (old V850 ABI)" spec="v850_gcc.cspec" id="gcc"/>
+    <compiler name="CC-RH" spec="v850_ccrh.cspec" id="ccrh"/>
+    <external_name tool="DWARF.register.mapping.file" name="v850.dwarf"/>
+  </language>
+  <language processor="v850"
+            endian="little"
+            size="32"
+            variant="RH850 broad (DSP/SIMD/virtualization)"
+            version="1.3"
+            slafile="v850rh850.sla"
+            processorspec="v850_generic.pspec"
+            id="v850e3x:LE:32:default">
+    <description>Renesas RH850 with DSP, SIMD, virtualization, trace and debug</description>
+    <compiler name="GHS MULTI" spec="v850_ghs.cspec" id="default"/>
+    <compiler name="GCC (old V850 ABI)" spec="v850_gcc.cspec" id="gcc"/>
+    <compiler name="CC-RH" spec="v850_ccrh.cspec" id="ccrh"/>
+    <external_name tool="DWARF.register.mapping.file" name="v850.dwarf"/>
+    <external_name tool="gnu" name="v850e3v5"/>
+    <external_name tool="gnu" name="v850e2v4"/>
+  </language>
+  <language processor="v850"
+            endian="little"
+            size="32"
             variant="V850E1F"
-            version="1.1"
+            version="1.2"
             slafile="v850e1f.sla"
             processorspec="v850_generic.pspec"
             id="v850e1f:LE:32:default">

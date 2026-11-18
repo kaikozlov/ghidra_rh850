@@ -26,7 +26,8 @@
 }
 # TST reg1, reg2
 :tst R0004, R1115 is op0510=0x0B & R0004 & R1115 {
-	set_nOV_S_Z(R1115);
+	local res:4 = R1115 & R0004;
+	set_nOV_S_Z(res);
 }
 
 # ORI imm16, reg1, reg2

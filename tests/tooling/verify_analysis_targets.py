@@ -49,7 +49,9 @@ for name, row in targets.items():
         check(f"{name} extended-user hash", extended.is_file() and sha(extended) == row["extended_user_sha256"])
         check(f"{name} extended-user base exact", row["extended_user_base"] == "0x01000000")
     check(f"{name} CodeFlash base exact", row["codeflash_base"] == "0x00000000")
-    check(f"{name} RH850 processor", row["processor"] == "v850e3:LE:32:default")
+    expected_variant = {"venza_airbag_v1": "P1xC", "r4p_meter_v1": "D1LD1M"}.get(
+        row["rebuild_profile"], "default")
+    check(f"{name} RH850 device language", row["processor"] == f"v850e3:LE:32:{expected_variant}")
     if row.get("sfr_context", "p1m") == "p1m":
         expected_mcu = "R7F701383" if name.startswith("corolla-") else "R7F701381"
         check(f"{name} P1M-E device profile matches MCU", row["mcu"] == expected_mcu)

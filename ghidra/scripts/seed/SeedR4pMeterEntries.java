@@ -42,7 +42,7 @@ public class SeedR4pMeterEntries extends GhidraScript {
     @Override
     public void run() throws Exception {
         if (!IMAGE_SHA.equalsIgnoreCase(currentProgram.getExecutableSHA256()) ||
-                !"v850e3:LE:32:default".equals(currentProgram.getLanguageID().toString())) {
+                !"v850e3:LE:32:D1LD1M".equals(currentProgram.getLanguageID().toString())) {
             throw new IllegalStateException("wrong R4P meter image or processor");
         }
         if (currentProgram.getMemory().getBlock("RprgCode_FEDC0110") == null ||

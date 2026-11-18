@@ -282,16 +282,16 @@ public class ExportApplicationRxSignalEvidence extends GhidraScript {
                     signed = 1;
                 }
             } else if (mnem.equals("sst.w")) {
-                Integer slot = parseImm(op0);
-                // sst.w 0x0, ep, rX  -> signed flag on stack slot 0
+                Integer slot = parseImm(op1);
+                // sst.w rX, disp[ep]: stack slot 0 holds the signed flag.
                 if (slot != null && slot == 0) {
-                    if (op2.equalsIgnoreCase("r0")) signed = 0;
-                    if (op2.equalsIgnoreCase("r1")) signed = 1;
+                    if (op0.equalsIgnoreCase("r0")) signed = 0;
+                    if (op0.equalsIgnoreCase("r1")) signed = 1;
                 }
                 // Generated receive_signal callers pass the destination pointer in
                 // stack argument slot +4. Capture the pointer value *here*, rather
                 // than using whichever GP-relative movea happened to appear last.
-                if (slot != null && slot == 4 && op2.equalsIgnoreCase("r1")) {
+                if (slot != null && slot == 4 && op0.equalsIgnoreCase("r1")) {
                     dest = r1DirectDest;
                     stackDestOffset = r1StackOffset;
                 }

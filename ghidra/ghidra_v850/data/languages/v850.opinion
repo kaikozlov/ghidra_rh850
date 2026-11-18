@@ -1,6 +1,25 @@
 <opinions>
-    <constraint loader="Executable and Linking Format (ELF)" compilerSpecID="default">
-        <constraint primary="36"   processor="v850"                      size="32" />
-        <constraint primary="87"   processor="v850"                      size="32" />
+    <constraint loader="Executable and Linking Format (ELF)" processor="v850" size="32">
+        <!-- EM_V800 uses the RH850 ABI tag and a separate E3 bit. Neither
+             identifies a specific microcontroller or distinguishes GHS from CC-RH. -->
+        <constraint primary="36" secondary="0b1111 .... ...0 .... .... .... .... ...."
+                    variant="V850E2M" compilerSpecID="default"/>
+        <constraint primary="36" secondary="0b1111 .... ...1 .... .... .... .... ...."
+                    variant="RH850 broad (DSP/SIMD/virtualization)" compilerSpecID="default"/>
+
+        <!-- EM_V850 and legacy EM_CYGNUS_V850 (0x9080, signed ELF loader
+             key -28544) use the old V850 ABI and the top nibble for ISA. -->
+        <constraint primary="87" secondary="0b00.. .... .... .... .... .... .... ...."
+                    variant="V850E2M" compilerSpecID="gcc"/>
+        <constraint primary="87" secondary="0b0100 .... .... .... .... .... .... ...."
+                    variant="V850E2M" compilerSpecID="gcc"/>
+        <constraint primary="87" secondary="0b0110 .... .... .... .... .... .... ...."
+                    variant="RH850 broad (DSP/SIMD/virtualization)" compilerSpecID="gcc"/>
+        <constraint primary="-28544" secondary="0b00.. .... .... .... .... .... .... ...."
+                    variant="V850E2M" compilerSpecID="gcc"/>
+        <constraint primary="-28544" secondary="0b0100 .... .... .... .... .... .... ...."
+                    variant="V850E2M" compilerSpecID="gcc"/>
+        <constraint primary="-28544" secondary="0b0110 .... .... .... .... .... .... ...."
+                    variant="RH850 broad (DSP/SIMD/virtualization)" compilerSpecID="gcc"/>
     </constraint>
 </opinions>

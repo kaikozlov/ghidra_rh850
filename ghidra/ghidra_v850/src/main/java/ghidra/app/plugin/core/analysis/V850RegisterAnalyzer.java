@@ -595,10 +595,14 @@ public class V850RegisterAnalyzer extends ConstantPropagationAnalyzer {
 			return;
 		}
 		// A halfword offset of zero is legal: the target is CTBP itself.
+		// PHO3 forms the table-entry address as data, but transfers control
+		// through a 26-bit, halfword-aligned PC.
+		long targetMask = "v850e1f:LE:32:default".equals(program.getLanguageID().getIdAsString())
+				? 0x03fffffeL : 0xffffffffL;
 
 		Address target = instr.getMinAddress()
 				.getAddressSpace()
-				.getAddress((ctbp + halfword) & 0xffffffffL, true);
+				.getAddress((ctbp + halfword) & targetMask, true);
 
 		if (!hasReference(instr, tableEntry, RefType.READ)) {
 			instr.addOperandReference(0, tableEntry, RefType.READ, SourceType.ANALYSIS);

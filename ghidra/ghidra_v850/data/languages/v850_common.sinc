@@ -67,7 +67,7 @@ define register offset=0x10000 size=4 [
 ];
 define context popspContext
 	regNum = (0,4)
-	counter	= (5,9)
+	counter	= (5,10)
 ;
 @endif
 
@@ -144,6 +144,14 @@ define register offset=0x1050 size=4 [ MPIDX MPLA MPUA MPAT MPBK ];
 @endif
 @endif
 
+
+# PHO3 hardware manual §3.1.2: the E1F PC wraps at 26 bits. All
+# profiles fetch instructions on halfword boundaries.
+@if defined(V850E1F)
+@define V850_PC_MASK "0x03fffffe"
+@else
+@define V850_PC_MASK "0xfffffffe"
+@endif
 
 @define PSW_PP  "PSW[19,1]"
 @define PSW_NPW "PSW[18,1]"
@@ -420,10 +428,10 @@ R0004pair: xR0004pair is xR0004pair					{ export xR0004pair; }
 
 R1115pair: xR1115pair is xR1115pair & xR1115pair=0	{ local x:8 = zext(r1) << 32; export x; }
 R1115pair: xR1115pair is xR1115pair					{ export xR1115pair; }
-@endif
 
 R2731pair: xR2731pair is xR2731pair & xR2731pair=0	{ local x:8 = zext(r1) << 32; export x; }
 R2731pair: xR2731pair is xR2731pair					{ export xR2731pair; }
+@endif
 
 @if defined(V850E3)
 R2731pairEx: xR2731pairEx is xR2731pairEx & xR2731pairEx=0	{ local x:8 = zext(r1) << 32; export x; }
@@ -488,13 +496,15 @@ attach variables [ SR0004 SR1115 ] [
 
 
 addr9: rel is op0406 & s1115
-[ rel = ((s1115 << 4) | (op0406 << 1)) + inst_start; ] { export *:4 rel; }
+[ rel = (((s1115 << 4) | (op0406 << 1)) + inst_start) & $(V850_PC_MASK); ] { export *:4 rel; }
 addr22: rel is s0005; op1631 & op1616=0
-[ rel = ((s0005 << 16) | op1631) + inst_start; ] { export *:4 rel; }
+[ rel = (((s0005 << 16) | op1631) + inst_start) & $(V850_PC_MASK); ] { export *:4 rel; }
+@ifndef V850E1F
 addr32: rel is op1731 & op1616=0; op3247
 [ rel = ((op3247 << 16) | op1731 << 1) + inst_start; ] { export *:4 rel; }
 addr32abs: rel is op1731 & op1616=0; op3247
 [ rel = ((op3247 << 16) | op1731 << 1); ] { export *[const]:4 rel; }
+@endif
 
 @if defined (V850E3)
 addr17b: rel is s0404 ; op1731 & op1616=1

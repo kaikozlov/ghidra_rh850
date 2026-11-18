@@ -1,26 +1,8 @@
 //@author kaikozlov
 //@category Verification
-// Behavioral fixtures for the legacy V850E1F FPU language
-// (v850e1f:LE:32:default), following the contract classification of
-// v850_e1f.sinc. Two kinds of checks:
-// 1. Fully real p-code paths, asserted directly: decode parity; IEEE
-//    754-1985 result VALUES of add/sub/mul/div and conversions (PHO3
-//    CPU overview: the FPU is "single precision, according to IEEE
-//    754-85 standard"); the documented ECT-mask->TR derivation and the
-//    reserved-bit register layouts (R01UH0128ED0730 Rev.7.30
-//    pp.104-105 Tables 3-10..3-12).
-// 2. Unresolved vendor contracts, asserted ONLY at their explicit
-//    opaque boundary: per-instruction EFG update/retention
-//    (e1f_status_unresolved), TRFF's EFG->PSW mapping
-//    (e1f_trff_unresolved; IDA 9.5 Hex-Rays likewise renders trff as
-//    opaque inline asm), float->int overflow/NaN result values
-//    (e1f_cvt_range_unresolved), and minf/maxf with a NaN operand
-//    (e1f_minmax_nan_unresolved). Following the module's existing
-//    stepInterruptControl convention, stepping such an instruction
-//    stops at the userop and the p-code before the boundary (the result
-//    register write) has committed - so result values are asserted and
-//    NO guessed flag/mapping state is ever pinned.
-// Emits "ASSERT v850-e1f: passed" and throws on any failure.
+// Core fixtures: U14559EJ3V1UM and the PHO3 hardware manual, chapters 3–4.
+// FPU result and EFG/ECT checks follow v850_e1f.sinc. Where vendor status
+// semantics are unresolved, check the result committed before the opaque userop.
 import ghidra.app.script.GhidraScript;
 import ghidra.app.emulator.EmulatorHelper;
 import ghidra.app.util.PseudoDisassembler;
@@ -30,8 +12,9 @@ import ghidra.program.model.lang.Language;
 import ghidra.program.model.lang.LanguageID;
 import ghidra.program.model.lang.UnknownInstructionException;
 import ghidra.program.util.DefaultLanguageService;
-import java.io.ByteArrayInputStream;
 import ghidra.program.model.address.Address;
+import ghidra.program.model.symbol.RefType;
+import java.util.HexFormat;
 
 public class AssertV850E1f extends GhidraScript {
     private static final String LANGUAGE_ID = "v850e1f:LE:32:default";
@@ -65,11 +48,7 @@ public class AssertV850E1f extends GhidraScript {
     }
 
     private static byte[] bytes(String hex) {
-        byte[] out = new byte[hex.length() / 2];
-        for (int i = 0; i < out.length; i++) {
-            out[i] = (byte) Integer.parseInt(hex.substring(2 * i, 2 * i + 2), 16);
-        }
-        return out;
+        return HexFormat.of().parseHex(hex);
     }
 
     private static int f32(float f) {
@@ -92,9 +71,10 @@ public class AssertV850E1f extends GhidraScript {
         try {
             Address base = program.getAddressFactory().getDefaultAddressSpace()
                     .getAddress(0x1000);
-            program.getMemory().createInitializedBlock("code", base,
-                    new ByteArrayInputStream(new byte[0x1000]), 0x1000, monitor, false);
+            program.getMemory().createInitializedBlock("code", base, 0x1000, (byte) 0, monitor, false);
             decodeParity(program, base);
+            execCoreDataflow(program, base.add(0xc0));
+            execCoreTransfers(program, base.add(0xd0));
             execAdd(program, base);
             execSubZeroAndSign(program, base);
             execMulOverflow(program, base);
@@ -122,7 +102,8 @@ public class AssertV850E1f extends GhidraScript {
         println("ASSERT v850-e1f: passed (fixtures=" + checked + ")");
     }
 
-    // ---- decode parity: every E1F mnemonic decodes (IDA encodings) ----
+    // E1F FPU encodings and core-profile boundaries. A null mnemonic requires
+    // an undecoded instruction, not a later-profile operand form.
     private void decodeParity(ProgramDB program, Address base) throws Exception {
         String[][] fixtures = {
             {enc(DIVF, 1, 2, 3), "divf.s"}, {enc(SUBF, 1, 2, 3), "subf.s"},
@@ -133,6 +114,15 @@ public class AssertV850E1f extends GhidraScript {
             {enc(ABSF, 0, 2, 3), "absf.s"}, {enc(STFF, 0, 0, 3), "stff"},
             {enc(TRFF, 0, 0, 0), "trff"}, {enc(STFC, 0, 0, 3), "stfc"},
             {enc(LDFF, 0, 2, 0), "ldff"}, {enc(LDFC, 0, 2, 0), "ldfc"},
+            {"e03f4043", "bsw"}, {"e03f4243", "bsh"}, {"e03f4443", "hsw"},
+            {"e63f8000", "shr"}, {"4638", "divh"}, {"4038", "divh"},
+            {"4600", "switch"}, {"e0072001", "halt"},
+            {"e0076001", "di"}, {"e0876001", "ei"}, {"e0074001", "reti"},
+            {"40f8", "dbtrap"}, {"e0074601", "dbret"},
+            {"e03f4643", null}, {"e63f8240", null}, {"e63f8243", null},
+            {"e63fa243", null}, {"e63f9a43", null}, {"e63fba43", null},
+            {"e63ffc42", null}, {"e63fc043", null}, {"e1072001", null},
+            {"e00202000000", null}, {"e60202000000", null}, {"e60602000000", null},
         };
         PseudoDisassembler decoder = new PseudoDisassembler(program);
         for (String[] fixture : fixtures) {
@@ -144,7 +134,8 @@ public class AssertV850E1f extends GhidraScript {
             } catch (UnknownInstructionException e) {
                 instruction = null;
             }
-            if (instruction == null || !fixture[1].equals(instruction.getMnemonicString())) {
+            String actual = instruction == null ? null : instruction.getMnemonicString();
+            if (!java.util.Objects.equals(fixture[1], actual)) {
                 fail("decode: " + fixture[0] + " expected " + fixture[1]
                         + " got " + instruction);
             }
@@ -468,6 +459,99 @@ public class AssertV850E1f extends GhidraScript {
             // reserved EFG bits are permanently 0: only
             // RO,IV,ZD,VF,UD,PR,TR,OV,S,Z can read 1
             requireBits(emu, "layout-stff", "r7", 0xffffc0e8L, 0);
+        } finally {
+            emu.dispose();
+        }
+    }
+
+    private void execCoreDataflow(ProgramDB program, Address at) throws Exception {
+        EmulatorHelper emu = prepare(program, at, "e03f4243", "bsh");
+        try {
+            emu.writeRegister("r7", 0x12340000);
+            emu.writeRegister("PSW", 0x16);
+            step(emu, "bsh");
+            requireReg(emu, "bsh", "r8", 0x34120000);
+            requireReg(emu, "bsh", "PSW", 0x19);
+        } finally {
+            emu.dispose();
+        }
+
+        // Integer CMOV chooses one input. Neither predicate makes this a branch.
+        emu = prepare(program, at, "e63f2443", "cmove");
+        try {
+            if (new PseudoDisassembler(program).disassemble(at).getFlowType() != RefType.FALL_THROUGH) {
+                fail("cmove: expected ordinary fallthrough");
+            }
+            emu.writeRegister("r6", 0x123);
+            emu.writeRegister("r7", 0x456);
+            for (int z = 0; z <= 1; z++) {
+                emu.writeRegister("PC", at.getOffset());
+                emu.writeRegister("PSW", z);
+                step(emu, "cmove");
+                requireReg(emu, "cmove", "r8", z == 1 ? 0x123 : 0x456);
+                requireReg(emu, "cmove", "PC", at.getOffset() + 4);
+            }
+        } finally {
+            emu.dispose();
+        }
+    }
+
+    private void execCoreTransfers(ProgramDB program, Address at) throws Exception {
+        Address vectors = at.getNewAddress(0);
+        Address edge = at.getNewAddress(0x03fffff0);
+        program.getMemory().createInitializedBlock("vectors", vectors, 0x80, (byte) 0, monitor, false);
+        program.getMemory().createInitializedBlock("pc_wrap", edge, 0x10, (byte) 0, monitor, false);
+        program.getMemory().setBytes(vectors.add(0x60), bytes("e0074601")); // dbret
+        program.getMemory().setBytes(at.add(2), bytes("6600")); // jmp [r6]
+        EmulatorHelper emu = prepare(program, at, "40f8", "dbtrap");
+        try {
+            emu.writeRegister("PSW", 0x815);
+            step(emu, "dbtrap");
+            requireReg(emu, "dbtrap", "PC", 0x60);
+            requireReg(emu, "dbtrap", "DBPC", at.getOffset() + 2);
+            requireReg(emu, "dbtrap", "DBPSW", 0x815);
+            requireReg(emu, "dbtrap", "PSW", 0x8f5);
+            step(emu, "dbret");
+            requireReg(emu, "dbret", "PC", at.getOffset() + 2);
+            requireReg(emu, "dbret", "PSW", 0x815);
+            emu.writeRegister("r6", 0x04001003);
+            step(emu, "jmp");
+            requireReg(emu, "jmp", "PC", 0x1002);
+        } finally {
+            emu.dispose();
+        }
+
+        Address boundaryCall = edge.add(12);
+        program.getMemory().setBytes(edge, bytes("850d")); // br +0x10 wraps to 0
+        program.getMemory().setBytes(boundaryCall, bytes("803f0400")); // jarl +4, r7
+        emu = new EmulatorHelper(program);
+        try {
+            emu.writeRegister("PC", edge.getOffset());
+            step(emu, "br across PC boundary");
+            requireReg(emu, "br across PC boundary", "PC", 0);
+            emu.writeRegister("PC", boundaryCall.getOffset());
+            step(emu, "jarl across PC boundary");
+            requireReg(emu, "jarl across PC boundary", "PC", 0);
+            requireReg(emu, "jarl across PC boundary", "r7", 0);
+        } finally {
+            emu.dispose();
+        }
+
+        Address table = edge.add(8);
+        Address target = at.getNewAddress(0x1008);
+        program.getMemory().setBytes(table, bytes("1110")); // odd target above 26 bits
+        program.getMemory().setBytes(target, bytes("e0074401")); // ctret
+        emu = prepare(program, at, "0002", "callt");
+        try {
+            emu.writeRegister("CTBP", table.getOffset());
+            emu.writeRegister("PSW", 0x8b2);
+            step(emu, "callt");
+            requireReg(emu, "callt", "PC", target.getOffset());
+            requireReg(emu, "callt", "CTPSW", 0x8b2);
+            emu.writeRegister("PSW", 0);
+            step(emu, "ctret");
+            requireReg(emu, "ctret", "PC", at.getOffset() + 2);
+            requireReg(emu, "ctret", "PSW", 0x8b2);
         } finally {
             emu.dispose();
         }

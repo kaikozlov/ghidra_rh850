@@ -241,13 +241,14 @@ public class AssertV850ExtendedIsa extends GhidraScript {
         Language core = DefaultLanguageService.getLanguageService()
                 .getLanguage(new LanguageID("v850e3:LE:32:default"));
         ProgramDB program = new ProgramDB("g3m-zero-burst", core, core.getDefaultCompilerSpec(), this);
-        int tx = program.startTransaction("zero-register burst");
+        int tx = program.startTransaction("stack register ranges");
         try {
             Address base = program.getAddressFactory().getDefaultAddressSpace().getAddress(0x1000);
             program.getMemory().createInitializedBlock("code-stack", base,
                     new ByteArrayInputStream(new byte[0x1000]), 0x1000, monitor, false);
             // pushsp r0,r1; popsp r0,r1: r0 reads zero and discards a loaded word.
-            program.getMemory().setBytes(base, bytes("e0476009e0676009"));
+            program.getMemory().setBytes(base, bytes(
+                    "e0476009e0676009" + "e04760f9e06760f9" + "ea476031ea676031"));
             EmulatorHelper emu = new EmulatorHelper(program);
             try {
                 emu.writeRegister("PC", 0x1000);
@@ -266,6 +267,51 @@ public class AssertV850ExtendedIsa extends GhidraScript {
                 requireReg(emu, "core popsp zero", "sp", 0x1ff0);
                 requireReg(emu, "core popsp zero", "r0", 0xcafebabeL);
                 requireReg(emu, "core popsp r1", "r1", 0x12345678);
+
+                // A full register range has 32 words. Only the addresses are aligned.
+                emu.writeRegister("sp", 0x1ff2);
+                emu.writeRegister("gp", 0x55667788);
+                emu.writeRegister("lp", 0x2468ace0);
+                emu.writeRegister("PSW", 0x19);
+                emu.writeRegister("ll_addr", 0x1f70);
+                emu.writeRegister("ll_valid", 1);
+                step(emu, "core pushsp full range");
+                requireReg(emu, "core pushsp full range", "sp", 0x1f72);
+                requireReg(emu, "core pushsp full range", "ll_valid", 0);
+                requireMem(emu, "core pushsp full r0", 0x1fec, 0);
+                requireMem(emu, "core pushsp full r1", 0x1fe8, 0x12345678);
+                requireMem(emu, "core pushsp full original sp", 0x1fe0, 0x1ff2);
+                requireMem(emu, "core pushsp full gp", 0x1fdc, 0x55667788);
+                requireMem(emu, "core pushsp full lp", 0x1f70, 0x2468ace0);
+                emu.writeMemory(base.getNewAddress(0x1fe0), bytes("efbeadde"));
+                emu.writeRegister("r1", 0);
+                emu.writeRegister("gp", 0);
+                emu.writeRegister("lp", 0);
+                step(emu, "core popsp full range");
+                requireReg(emu, "core popsp full range", "sp", 0x1ff2);
+                requireReg(emu, "core popsp full range", "r0", 0xcafebabeL);
+                requireReg(emu, "core popsp full range", "r1", 0x12345678);
+                requireReg(emu, "core popsp full range", "gp", 0x55667788);
+                requireReg(emu, "core popsp full range", "lp", 0x2468ace0);
+
+                // A reversed range is valid and does not touch memory or SP.
+                Address stack = base.getNewAddress(0x1f70);
+                byte[] saved = emu.readMemory(stack, 0x84);
+                emu.writeRegister("r6", 0x1234);
+                emu.writeRegister("r10", 0x5678);
+                emu.writeRegister("ll_addr", 0x1fec);
+                emu.writeRegister("ll_valid", 1);
+                step(emu, "core pushsp reversed range");
+                requireReg(emu, "core pushsp reversed range", "sp", 0x1ff2);
+                if (!java.util.Arrays.equals(saved, emu.readMemory(stack, saved.length))) {
+                    fail("core pushsp reversed range changed stack memory");
+                }
+                step(emu, "core popsp reversed range");
+                requireReg(emu, "core popsp reversed range", "sp", 0x1ff2);
+                requireReg(emu, "core popsp reversed range", "r6", 0x1234);
+                requireReg(emu, "core popsp reversed range", "r10", 0x5678);
+                requireReg(emu, "core burst preserved reservation", "ll_valid", 1);
+                requireReg(emu, "core burst preserved flags", "PSW", 0x19);
             } finally {
                 emu.dispose();
             }

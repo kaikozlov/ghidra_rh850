@@ -374,11 +374,13 @@ macro pushsp_one(tmp, register_number, rh, rt) {
 	if (cur < rh) goto <pskip>;
 	if (cur > rt) goto <pskip>;
 	tmp = tmp - 4;
+	local addr:4 = tmp & 0xfffffffc;
+	invalidate_link_store(addr, 4);
 	if (cur != 0) goto <preg>;
-	*:4 (tmp & 0xfffffffc) = 0;
+	*:4 addr = 0;
 	goto <pdone>;
 	<preg>
-	*:4 (tmp & 0xfffffffc) = *[register]:4 (cur << 2);
+	*:4 addr = *[register]:4 (cur << 2);
 	<pdone>
 	<pskip>
 }

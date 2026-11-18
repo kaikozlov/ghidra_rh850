@@ -129,9 +129,9 @@ attach variables [ SR0004_d SR1115_d ] [
 }
 
 
-#{ "jarl",	two (0xc7e0, 0x0160),	two (0xffe0, 0x07ff),	{R1, R3_NOTR0},   	1, PROCESSOR_V850E3V5_UP},
-:jarl [R0004], R2731 is op0515=0x63f & R0004; op1626=0x160 & R2731 {
-    local target:4 = R0004;
+# Register-indirect JARL (G3M pp.239–240; G4MH pp.83–84).
+:jarl [R0004], R2731 is op0515=0x63f & R0004; op1626=0x160 & R2731 & op2731!=0 {
+    local target:4 = R0004 & $(V850_PC_MASK);
     R2731 = inst_next;
     PC = target;
     call [target];
@@ -226,56 +226,68 @@ attach variables [ SR0004_d SR1115_d ] [
 
 
 # extended load/store
+# With reg1 == reg3, base writeback wins and uses the original address
+# (R01US0209EJ0220, post-indexed LD instruction cautions).
 
 # LD.B [reg1]+, reg3
 :ld.b [R0004]+, R2731	is op0515=0x0BF & R0004 ; op1626=0x370 & R2731 {
-	R2731 = sext(*:1 R0004);
-	R0004 = R0004 + 1;
+	local addr:4 = R0004;
+	R2731 = sext(*:1 addr);
+	R0004 = addr + 1;
 }
 # LD.B [reg1]-, reg3
 :ld.b [R0004]-, R2731	is op0515=0x13F & R0004 ; op1626=0x370 & R2731 {
-	R2731 = sext(*:1 R0004);
-	R0004 = R0004 - 1;
+	local addr:4 = R0004;
+	R2731 = sext(*:1 addr);
+	R0004 = addr - 1;
 }
 # LD.H [reg1]+, reg3
 :ld.h [R0004]+, R2731	is op0515=0x0BF & R0004 ; op1626=0x374 & R2731 {
-	R2731 = sext(*:2 R0004);
-	R0004 = R0004 + 2;
+	local addr:4 = R0004;
+	R2731 = sext(*:2 addr);
+	R0004 = addr + 2;
 }
 # LD.H [reg1]-, reg3
 :ld.h [R0004]-, R2731	is op0515=0x13F & R0004 ; op1626=0x374 & R2731 {
-	R2731 = sext(*:2 R0004);
-	R0004 = R0004 - 2;
+	local addr:4 = R0004;
+	R2731 = sext(*:2 addr);
+	R0004 = addr - 2;
 }
 # LD.BU [reg1]+, reg3
 :ld.bu [R0004]+, R2731	is op0515=0x0FF & R0004 ; op1626=0x370 & R2731 {
-	R2731 = zext(*:1 R0004);
-	R0004 = R0004 + 1;
+	local addr:4 = R0004;
+	R2731 = zext(*:1 addr);
+	R0004 = addr + 1;
 }
 # LD.BU [reg1]-, reg3
 :ld.bu [R0004]-, R2731	is op0515=0x17F & R0004 ; op1626=0x370 & R2731 {
-	R2731 = zext(*:1 R0004);
-	R0004 = R0004 - 1;
+	local addr:4 = R0004;
+	R2731 = zext(*:1 addr);
+	R0004 = addr - 1;
 }
 # LD.HU [reg1]+, reg3
 :ld.hu [R0004]+, R2731	is op0515=0x0FF & R0004 ; op1626=0x374 & R2731 {
-	R2731 = zext(*:2 R0004);
-	R0004 = R0004 + 2;
+	local addr:4 = R0004;
+	R2731 = zext(*:2 addr);
+	R0004 = addr + 2;
 }
 # LD.HU [reg1]-, reg3
 :ld.hu [R0004]-, R2731	is op0515=0x17F & R0004 ; op1626=0x374 & R2731 {
-	R2731 = zext(*:2 R0004);
-	R0004 = R0004 - 2;
+	local addr:4 = R0004;
+	R2731 = zext(*:2 addr);
+	R0004 = addr - 2;
 }
 # LD.W [reg1]+, reg3
 :ld.w [R0004]+, R2731	is op0515=0x0BF & R0004 ; op1626=0x378 & R2731 {
-	R2731 = *:4 R0004;
-	R0004 = R0004 + 4;
+	local addr:4 = R0004;
+	R2731 = *:4 addr;
+	R0004 = addr + 4;
 }
 # LD.W [reg1]-, reg3
 :ld.w [R0004]-, R2731	is op0515=0x13F & R0004 ; op1626=0x378 & R2731 {
-	R2731 = *:4 R0004;
-	R0004 = R0004 - 4;
+	local addr:4 = R0004;
+	R2731 = *:4 addr;
+	R0004 = addr - 4;
 }
 
 # ST.B reg3, [reg1]+
@@ -354,58 +366,56 @@ rXX: r29	is r29 & regNum=29	{ export r29; }
 rXX: ep		is ep & regNum=30	{ export ep; }
 rXX: lp		is lp & regNum=31	{ export lp; }
 
+# POPSP consumes the saved SP word without restoring the register.
+popReg: rXX is rXX & regNum=3 { local discard:4 = 0; export discard; }
+popReg: rXX is rXX { export rXX; }
+
+macro popsp_word(reg) {
+	reg = *:4 (mult_addr & 0xfffffffc);
+	mult_addr = mult_addr + 4;
+}
+
+macro pushsp_word(reg) {
+	mult_addr = mult_addr - 4;
+	local addr:4 = mult_addr & 0xfffffffc;
+	invalidate_link_store(addr, 4);
+	*:4 addr = reg;
+}
+
 
 buildPopSp: is counter=0 { }
-buildPopSp: is counter=1 & rXX [ counter=0; regNum=regNum-1; ]
-{
-	rXX = *mult_addr;
-	mult_addr = mult_addr + 4;
+buildPopSp: is counter=1 & popReg [ counter=0; regNum=regNum-1; ] {
+	popsp_word(popReg);
 }
-buildPopSp: is rXX & buildPopSp [ counter=counter-1; regNum=regNum-1; ]
-{
-	rXX = *mult_addr;
-	mult_addr = mult_addr + 4;
+buildPopSp: is popReg & buildPopSp [ counter=counter-1; regNum=regNum-1; ] {
+	popsp_word(popReg);
 	build buildPopSp;
 }
+# G3M pp.273–274,278: a reversed range is empty. Since rt-rh is in
+# [-31,31], bit 5 of that difference is its sign; suppress the count when
+# negative. Counter holds 0..32, including the full r0–lp range.
 #{ "popsp",	two (0x67e0, 0x0160),	two (0xffe0, 0x07ff),	{R1, R3}, 		0, PROCESSOR_V850E3V5_UP },
 :popsp R0004, R2731		is op0515=0x33F & R0004 & op0004 ; op1626=0x160 & R2731 & op2731 & buildPopSp
-[ counter=op2731-op0004+1; regNum=op2731+1; ] {
-	# popsp rh, rt
-	# Loads general-purpose register rt to rh from the stack in descending order (rt, rt - 1, rt - 2, ..., rh). After all the registers
-	# down to the specified register have been loaded, sp is updated (incremented)
-	# check for illegal syntax, when rh > rt
-	# sp (r3) value not restored
+[ counter=(op2731-op0004+1) * (1 - (((op2731-op0004) >> 5) & 1)); regNum=op2731+1; ] {
 	mult_addr = sp;
-	local tmp = sp + (op2731-op0004+1) * 4;
 	build buildPopSp;
-	sp = tmp;
+	sp = mult_addr;
 }
 
 buildPushSp: is counter=0 { }
-buildPushSp: is counter=1 & rXX [ counter=0; regNum=regNum+1; ]
-{
-	mult_addr = mult_addr - 4;
-	invalidate_link_store(mult_addr, 4);
-	*mult_addr = rXX;
+buildPushSp: is counter=1 & rXX [ counter=0; regNum=regNum+1; ] {
+	pushsp_word(rXX);
 }
-buildPushSp: is rXX & buildPushSp [ counter=counter-1; regNum=regNum+1; ]
-{
-	mult_addr = mult_addr - 4;
-	invalidate_link_store(mult_addr, 4);
-	*mult_addr = rXX;
+buildPushSp: is rXX & buildPushSp [ counter=counter-1; regNum=regNum+1; ] {
+	pushsp_word(rXX);
 	build buildPushSp;
 }
 #{ "pushsp",	two (0x47e0, 0x0160),	two (0xffe0, 0x07ff),	{R1, R3}, 		0, PROCESSOR_V850E3V5_UP },
 :pushsp R0004, R2731	is op0515=0x23F & R0004 & op0004 ; op1626=0x160 & R2731 & op2731 & buildPushSp
-[ counter=op2731-op0004+1; regNum=op0004-1; ] {
-	# pushsp rh, rt
-	# Stores general-purpose register rh to rt in the stack in ascending order (rh, rh +1, rh + 2, ..., rt). After all the specified
-	# registers have been stored, sp is updated (decremented).
-	# check for illegal syntax, when rh > rt
+[ counter=(op2731-op0004+1) * (1 - (((op2731-op0004) >> 5) & 1)); regNum=op0004-1; ] {
 	mult_addr = sp;
-	local tmp = sp - (op2731-op0004+1) * 4;
 	build buildPushSp;
-	sp = tmp;	
+	sp = mult_addr;
 }
 @endif
 

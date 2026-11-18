@@ -7,6 +7,16 @@
 		<register_mapping dwarf="6" ghidra="r6" auto_count="24"/> <!-- r6..r29 -->
 		<register_mapping dwarf="30" ghidra="ep"/>
 		<register_mapping dwarf="31" ghidra="lp"/>
+		<!-- GNU V850 debug register numbers shared across the language profiles. -->
+		<register_mapping dwarf="32" ghidra="EIPC"/>
+		<register_mapping dwarf="33" ghidra="EIPSW"/>
+		<register_mapping dwarf="34" ghidra="FEPC"/>
+		<register_mapping dwarf="35" ghidra="FEPSW"/>
+		<register_mapping dwarf="37" ghidra="PSW"/>
+		<register_mapping dwarf="48" ghidra="CTPC"/>
+		<register_mapping dwarf="49" ghidra="CTPSW"/>
+		<register_mapping dwarf="52" ghidra="CTBP"/>
+		<register_mapping dwarf="64" ghidra="PC"/>
 	</register_mappings>
 	<call_frame_cfa value="0"/>
 </dwarf>

@@ -22,7 +22,7 @@ correctness remain separate; the checks are layered:
 
 | Layer | What it proves | How to run |
 |---|---|---|
-| SLEIGH compile | All four architectural profiles parse and compile | `make verify-sleigh` |
+| SLEIGH compile | All four ISA profiles compile | `make verify-sleigh` |
 | Synthetic fixtures | Selected encodings plus executed register/memory/flag vectors | `make verify-processor` |
 | Function-body decode | No undefined bytes inside recovered functions | `AssertNoUndefinedInFunctions` |
 | System-register naming | Every `ldsr`/`stsr` operand is named | `AssertSystemRegisterNames` |
@@ -80,6 +80,12 @@ The implemented G3M selection-ID table is now:
 - **selID 6/7**: `MPLA0–15`, `MPUA0–15`, `MPAT0–15`.
 - **selID 13**: `CDBCR`.
 
+[GNU DWARF numbering](../../ghidra/ghidra_v850/data/languages/v850.dwarf) is
+shared across language profiles. Slots 0–31 name the GPRs (including SP at
+3); 32–35 map to EIPC/EIPSW/FEPC/FEPSW, 37 to PSW, 48/49/52 to
+CTPC/CTPSW/CTBP, and 64 to PC. This mapping is registered in the language
+definitions and participates in the processor fingerprint.
+
 Reserved register-number slots remain unnamed. G4 guest, virtualization,
 thread-context, TLB, and hypervisor instructions were removed from the G3M
 language rather than left as plausible decodes. The synthetic processor
@@ -101,8 +107,6 @@ The processor fixture embeds the exact 136 bytes of Camry `8965F3307000`
 function `0x3614`. It exercises both modes with an explicit environment-supplied
 completion event, checks the shared return separately from opaque `SYNCI`, and
 requires reachable high-IR command writes, nonconstant ICCTRL polls and return.
-It does not test rendered C wording. The cache correction first shipped with
-G3M registration **0.10**.
 
 **PMR** also uses native `register_data` volatility: its writes change the
 interrupt-priority ceiling even when no subsequent software read consumes the
@@ -111,14 +115,8 @@ those writes from Camry's `0x701C4`/`0x701EA` helpers. The processor fixture now
 embeds their exact 68 bytes, executes eighteen lower/equal/higher-mask,
 signed-comparison and unconditional-restore cases across both incoming ID states,
 and checks reachable high-IR PMR writes, old-mask-dependent branching and return.
-The execution cases seed `FPEC=0`; they do not simulate interrupt timing or prove
-pending-FPI behavior. The existing architecture-level FPI path remains intact.
-No new userop or firmware-specific instruction exception was introduced.
-
-This PMR observability correction increments G3M registration to **0.11**.
-Fresh Camry rebuilds retain both conditional-enter and unconditional-restore PMR
-writes in the rendered functions. Cached instructions in an older working
-project are not post-fix evidence; use a fresh rebuild and regenerated corpus.
+The execution cases seed `FPEC=0`. Fresh Camry decompilations retain the
+conditional-enter and unconditional-restore PMR writes.
 
 `EIC136`/`EIC292`/`EIC293` remain memory-mapped peripheral registers at
 `0xFFFFB110` / `0xFFFFB248` / `0xFFFFB24A`, accessed via `ld.w`/`st.w`.
@@ -126,6 +124,27 @@ They belong to the device profile and are excluded from the `ldsr`/`stsr`
 system-register table.
 
 ## Instruction-decode coverage
+
+Renesas manuals define the ISA and operand forms. The G3M instruction help
+index uses Appendix D of R01US0123EJ0140 Rev. 1.40. Comparison revisions for
+Ghidra, Rizin, radare2 and IDA live in
+[`PROVENANCE.json`](../../ghidra/ghidra_v850/PROVENANCE.json).
+All 184 Rizin ISA mnemonic IDs have counterparts after spelling normalization
+(e.g. `stasub` → `satsub`); the radare2 table contains 403 CPU-masked forms
+and 324 spellings. The G3M manual census found no missing G3M mnemonic.
+Profile acceptance also depends on register and encoding constraints.
+
+The exact G3M profile excludes later or other-family forms such as `SATS`,
+`ROUNDF.*`, `DST`/`EST`, `DB*` trace/debug, `HVCALL`/`HVTRAP`, TLB,
+DSP accumulators, `BINSL` and `DIVN`. It dispatches exceptions through
+RBASE/EBASE. V850E2M separately accepts `MADDF.S`, `MSUBF.S`, `NMADDF.S` and
+`NMSUBF.S` with split `reg4` (R01US0001EJ0100 pp. 374, 380, 386, 388).
+
+`AssertV850LanguageProfiles` checks Format XIV forms on E2M and RH850 and
+their absence on E1F. For `LD.HU`, bit 4 in the second halfword is fixed at
+zero and the signed displacement is even (`a6 07 67 44 00 00` loads at
+`+0x46`; `a6 07 e7 47 ff ff` loads at `-2`). `SST.B/H/W` print the source
+before the EP-relative destination (R01US0123EJ0140 pp. 249–250, 307–309).
 
 Script: `ghidra/scripts/investigate/FindUndefinedInFunctions.java`
 (asserting companion: `ghidra/scripts/verify/AssertNoUndefinedInFunctions.java`).
@@ -135,18 +154,49 @@ The recorded legacy-Sienna checkpoint had **zero undefined bytes** inside its
 Semantic fixtures under `tests/fixtures/processor/` and the asserting scripts
 cover:
 
-- signed `sld.b` / `sld.h` use `sext` (not `zext`);
-- two-operand `divh` uses signed division (`s/`) and sets `OV` without executing
-  an undefined host divide on a zero divisor;
-- saturating arithmetic updates `PSW.SAT` from signed overflow (`OV`), verified
-  with both positive-overflow and carry-without-overflow execution vectors;
+- signed `sld.b` / `sld.h` sign-extend. `TST` derives S/Z from the bitwise
+  AND: disjoint nonzero operands set Z;
+- saturating arithmetic derives S/Z from the clamped result and CY/OV from
+  the unclamped calculation. `SATADD(INT_MAX,1)` clears S and sets sticky SAT
+  (R01US0123EJ0140 pp. 284–288, 332).
 - `ld.w` `disp16` scaling (`field × 2`) is checked by an executed memory load;
 - `prepare`/`dispose` stack/register effects and direct/indirect
   `jarl`/`jmp [lp]` flow types are checked on fixtures;
 - inventory-driven risky ops used by this image: `switch` table walk +
   `BRANCHIND`, `callt` CTBP-relative `CALLIND`, `bins` bitfield insert,
   `set1`/`clr1`/`tst1` bit-memory side effects and Z semantics, `cmovne`
-  taken/not-taken, signed `mulhi`, and arithmetic `sar`.
+  taken/not-taken, signed `mulhi`, and arithmetic `sar`;
+- `PUSHSP`/`POPSP` handle the full 32-register range; reversed ranges leave SP
+  unchanged. The word accesses align down and SP retains its low bits. A
+  push of SP stores its pre-instruction value; a pop through SP consumes the
+  saved word without restoring it (R01US0123EJ0140 pp. 273–274, 278);
+- `CAXI` captures both inputs before returning the old word, including when
+  its compare and exchange registers alias. E2M aligns both the load and
+  store to the same word (R01US0123EJ0140 pp. 210–211;
+  R01US0001EJ0100 pp. 81–82).
+
+Further G3M fixture coverage follows R01US0123EJ0140:
+
+- Decode fixtures pin `DIVQ`, the floating-point spellings `CVTF.DW`,
+  `CVTF.LD`, `CVTF.ULD`, `DIVF.D` and `FLOORF.SW`, compare condition 8 (`SF`),
+  and both true/false operand selections of `CMOVF.S`.
+- `LDL.W` sets the reservation for `STC.W`. `CLL`, exception entry and
+  `EIRET`/`FERET` clear it; `CTRET` preserves it. A conditional store to a
+  different address fails. Local writes invalidate within the same 32-byte unit
+  (Table 5-3), including scalar, short, extended, bit-update, `CAXI`,
+  `PREPARE` and `PUSHSP` stores.
+- Two-operand `DIVH` is signed. Divide on zero sets OV and preserves the
+  undefined result registers without invoking host division. Register shifts
+  and indexed bit operations take the low five and three bits respectively.
+  `ROTL` takes CY from result bit 0, including zero rotation (p. 280).
+- Bit searches return a one-based position or zero on no match. CY marks
+  result 32; Z marks no match; OV/S clear. `BSH`/`HSH` take Z from the lower
+  halfword. `LOOP` stores its decremented count and flags before branching,
+  and indirect `JARL` preserves an aliased target before writing the link.
+- `CALLT`/`CTRET` save and restore only PSW(4:0).
+  `FETRAP`, `TRAP`, `RIE` and `SYSCALL` save the G3M cause registers, clear
+  `PSW.UM`, set the exception-state bits and select masked `RBASE`/`EBASE`
+  through `PSW.EBV`.
 
 Landmark decompiler checks (secrets at `0xBFD8`/`0xBFE8`, ISR calling
 convention, session-control decompilation, SecurityAccess expected-key,
@@ -158,6 +208,35 @@ Every non-thunk function must carry an explicit `__stdcall` or `__interrupt`
 prototype — Ghidra's anonymous `unknown`/`default` is treated as a failure.
 
 ## Device profile and interrupt recovery
+
+P1M-E, P1x-C main CPUs and D1L/D1M share one G3M decoder. Their processor
+specifications mark CPU-side I/O volatile independently of the memory blocks,
+SFR labels and types applied by device scripts:
+
+| G3M profile | I/O volatility and authority |
+|---|---|
+| P1M-E (`v850e3:LE:32:default`) | H-Bus on-chip I/O at `0x10000000..0x1FFFFFFF`, plus the P-Bus and LPB windows (R01UH0585EJ0120 Table 4.1) |
+| P1x-C (`v850e3:LE:32:P1xC`) | Main CPU P-Bus and LPB self windows; the H-Bus aperture can contain external memory (R01UH0517EJ0130 Fig. 4.1) |
+| D1L/D1M (`v850e3:LE:32:D1LD1M`) | CPU PBUS windows at `0xFF400000..0xFFFDFFFF` and `0xFFFEE000..0xFFFFFFFF`; XC1 and DataFlash retain ordinary memory semantics (R01UH0451EJ0220 Fig. 5.1) |
+
+P1M-E leaves flash, including configuration/OTP, and reserved gaps outside
+the volatile ranges. `0xFFFF0000` is reserved on P1M-E and P1x-C, but in
+the upper PBUS window on D1L/D1M. The Venza and
+[R4P meter](../variants/yc-r4p-2024-meter.md#normalization-and-analysis-model)
+use family-compatible profiles; their exact device parts are unidentified.
+Both profiles were exercised on Ghidra 12.2 imports of the original images.
+
+Raw imports use the language in the
+[target registry](../../data/analysis_targets.json). ELF uses machine
+and architecture flags: `EM_V800` selects E2M or broad RH850 under the
+default ABI, and `EM_V850`/legacy `EM_CYGNUS_V850` select those ISA profiles
+under the old-GCC ABI. `AssertV850LanguageProfiles` covers supported flag
+combinations, unassigned combinations, and device volatility boundaries.
+The IAR scalar register list lives in radare2's analysis database.
+
+Restored snapshots retain their import-time language. To select the
+current registered profile, rebuild into a fresh directory:
+`make rebuild-project TARGET=<target> PROJECT_DIR=<fresh build/work directory>`.
 
 `ApplyP1MDeviceProfile.java` maps LocalRAM and verified peripheral windows
 (`SFR_EIC`, `SFR_RSCFD`, `SFR_ICUS`), labels observed SFRs from
@@ -174,11 +253,10 @@ context. `ApplyP1MSfrTypes.java` then overlays structured types:
 | `RSCFD_CommonFifoFrame` | CFID / CFID_CH1 | CFID/CFPTR/CFFDCSTS/CFDF0/CFDF1 |
 | `RSCFD_TxMessageBuffer` | CFDTMID / CFDTMID16 | CFDTMID/PTR/FDCTR/DF0/DF1 |
 
-The full `0xFF600000..0xFFFFFFFF` range stays volatile in `v850.pspec` without
-being mapped as one block (that caused false CodeFlash-as-SFR pointer creation).
-CSV coverage is checked by `tests/firmware/verify_p1m_device_profile.py`; project
-invariants require the windows, a landmark label subset, and the structured
-overlays above.
+The P1M-E script includes `SFR_EIC0_31` at `0xFFFEEA00` (0x40 bytes,
+R01UH0585EJ0120 §6.2.2). CSV coverage is checked by
+`tests/firmware/verify_p1m_device_profile.py`; project invariants require
+these windows, landmark labels and the structured overlays.
 
 `ApplyRamTypes.java` then overlays evidence-backed LocalRAM types at absolute
 addresses (GP/TP register context is already seeded above). Inventory and
@@ -343,16 +421,14 @@ compares it with the committed `data/switch_table_inventory.csv` baseline.
 
 ## Accepted unimplemented ops
 
-Instructions that decode but intentionally use opaque `callother` p-code are
-listed by user-op name in `data/processor_unimpl_allowlist.txt`. The historical
-inventory included an opaque `__nop`; NOP now has its actual empty architectural
-effect and advances PC normally without a user-op or emulator workaround.
+Opaque `callother` operations are tracked in `data/processor_unimpl_allowlist.txt`.
 Interrupt-controller and synchronization effects remain explicit intrinsics.
-The instruction-inventory producer rejects both unapproved used operations and
-stale allowlist entries. `cache`/`pref` do not occur in the legacy-Sienna checkpoint,
-so their named operation user-ops
-(`__chbii`, `__cibii`, `__cfali`, `__cisti`, `__cildi`, `__prefi`) are
-exercised by the synthetic fixture instead of the firmware inventory.
+`CACHE`/`PREF` accept the operation values defined by R01US0123EJ0140
+Tables 7-7/7-8: `chbii`, `cibii`, `cfali`, `cisti`, `cildi`, `prefi` and
+cacheop `1111110`, the CLL alias. The named variants use matching user-ops;
+the alias clears the reservation. Reserved values remain undecoded.
+These forms are exercised by the synthetic fixture; they do not occur in the
+legacy Sienna instruction inventory. `NOP` has no user-op.
 
 ## Isolated install and processor fingerprint
 
@@ -363,9 +439,9 @@ mutated. A conflicting install-tree copy causes an actionable failure, and a
 clean `analyzeHeadless` subprocess proves that the isolated language resolves.
 
 `tools/project/fingerprint_processor.py` hashes language specifications,
-DWARF mappings, pattern XML, extension metadata, the compiled SLA, and Ghidra
-versions.
-Rebuilds write `processor_manifest.json` beside `build/work/project/`.
+DWARF mappings, manual indexes, pattern XML, extension metadata, compiled
+artifacts, and Ghidra versions. Rebuilds write `processor_manifest.json`
+beside `build/work/project/`.
 `make work-project` performs a Ghidra-free source check. Processor audits and
 `make snapshot-project` require source files, compiled SLA hash, Ghidra version,
 and CLI version all to match the project manifest. The committed full baseline is
@@ -393,10 +469,6 @@ resolver also handles constant-index `PTRADD`.
 The current source and compiled-artifact identities are recorded in
 `data/processor_manifest.baseline.json`. Each project snapshot retains the
 processor identity that actually produced it.
-
-The migration regenerated 45,655 function records across all six targets with
-zero decompilation failures. Each target's two clean rebuild inventories agreed,
-and each promoted snapshot was materialized and opened through `tools/gtarget`.
 
 The Camry computed-store resolver handles low-word `SUBPIECE` values emitted
 for combined GP/TP temporaries. Its refreshed censuses and bound checks pass;
@@ -469,41 +541,11 @@ prior 6,376 / 183,240 graph. The 60 targets referenced by `0x27C88..0x27D77`
 are exact functions now, while their missing dispatch consumer remains a
 separate bounded negative.
 
-## 2026-10-08 cross-implementation and G3M-manual audit
+## Target function-start evidence
 
-The vendored language was compared instruction-by-instruction with Ghidra
-`c7bc89dd29ee7f56b753b29a8bbabcb36ad3cae7`, Rizin
-`0ed7bdfdaf186a26ff24eee62f41b10c154b5a99`, and radare2
-`391dc446b5f12000c9588bff162a45689463eff6`. The RH850G3M software manual
-R01US0123EJ0140 Rev.1.40 remains authoritative when those implementations
-disagree. Their broad G3K/G4/debug/hypervisor opcode sets were not copied into
-the exact G3M language.
-
-Useful upstream Ghidra assets are now retained locally:
-
-- `data/languages/v850.dwarf` maps the GCC DWARF register numbers, including
-  `sp`, `gp`, `tp`, `ep`, and `lp`;
-- `data/patterns/v850_patterns.xml` recognizes PREPARE/ADDI function prologues
-  after architectural return boundaries;
-- both assets participate in `processor_manifest.json` source fingerprints.
-
-The graph effect is reproducible rather than a one-project analyzer accident.
-Every registered target has byte-identical normalized inventories from two
-independent four-stage rebuilds:
-
-The “before” columns are the tracked normalized inventories immediately before
-the processor refresh. Camry's separately recovered 6,065-real-function
-checkpoint had not yet been promoted as that baseline; the current 7,178 count
-is +1,113 relative to that byte-audited checkpoint.
-
-| Target | Functions before | Functions after | Δ | Instructions before | Instructions after | Δ |
-|---|---:|---:|---:|---:|---:|---:|
-| Sienna `8965B4512000` | 6,376 | 7,090 | +714 | 183,240 | 197,726 | +14,486 |
-| Camry `8965F3307000` | 6,056 | 7,178 | +1,122 | 187,475 | 205,829 | +18,354 |
-| Crown `8965F3012000` | 5,864 | 6,972 | +1,108 | 184,505 | 198,930 | +14,425 |
-| Corolla `8965F1208000` | 5,811 | 6,934 | +1,123 | 178,237 | 199,413 | +21,176 |
-| Corolla `8965H1202000` | 5,811 | 6,934 | +1,123 | 178,222 | 199,403 | +21,181 |
-| Venza airbag `8917048E30` | 4,006 | 10,391 | +6,385 | 154,859 | 297,293 | +142,434 |
+[`v850_patterns.xml`](../../ghidra/ghidra_v850/data/patterns/v850_patterns.xml)
+recognizes PREPARE/ADDI prologues after architectural return boundaries.
+Independent four-stage rebuilds compare normalized inventories for parity.
 
 In Sienna, the recovered functions expose previously hidden, byte-verified
 readers at `0xC7376`, `0xC746C`, `0xC78E6`, and `0xC7F58`; the SecOC and
@@ -530,142 +572,14 @@ unreferenced library routines remain an explicit static-analysis boundary.
 Exact counts, addresses, and the resulting bounded negative are owned by the
 [Camry report](../variants/camry-2026-live-baseline.md#135-control-transfer-audit-the-missing-primitive).
 
-The corrected G3M register map changes decompiler names and system-state
-interpretation while preserving firmware bytes. No current vehicle or exploit conclusion
-depended on the former `SPID`/`IMSR`/`RDBCR` labels; persisted projects and
-corpora were nevertheless rebuilt so future register dataflow starts from
-`PID`/`PMR`/`CDBCR` rather than carrying the stale aliases forward.
+The Venza profile marks the capture's `0x180000..0x2FFFFF` fill partition
+non-executable and typed as data; this prevents a direct call from creating
+a function in erased space.
 
-The language-semantics change increments the V850E2M registration to
-version `0.4` and the RH850G3M registration to `0.5`; stale compiled languages
-therefore cannot silently satisfy a project fingerprint.
+## Exact binary32 multiply-add execution
 
-The external opcode tables exposed six inherited mnemonic defects:
-`DIVQ`, `CVTF.DW`, `CVTF.LD`, `CVTF.ULD`, `DIVF.D`, and `FLOORF.SW` decoded as
-other instructions. The G3M manual additionally established `SF` (not `SD`) as
-floating compare condition 8 and the `CMOVF` true/false operand order. Fixtures
-now cover every corrected spelling and execute both `CMOVF.S` outcomes.
-
-The same manual audit corrected machine semantics rather than only display:
-
-- `CLL`, `LDL.W`, and `STC.W` carry an explicit load-link address/valid state.
-  A conditional store fails after `CLL`, an address mismatch, exception entry,
-  or `EIRET`/`FERET`. `CTRET` preserves the link. Local writes invalidate links
-  in the same 32-byte unit (G3M Table 5-3), including scalar, short, extended,
-  bit-update, `CAXI`, `PREPARE`, and `PUSHSP` stores; adjacent units do not;
-- all divide forms avoid host division on a zero divisor, preserve the
-  architecturally undefined result registers in that case, and set `OV`;
-- register shifts and register-indexed bit operations use the specified low
-  five and three bits; `ROTL` updates `CY` from result bit 0 even for a zero
-  rotation;
-- bit searches return the architectural one-based position, return zero on no
-  match, set `CY` only for a match at the final searched bit (result 32), set
-  `Z` only for no match, and clear `OV/S`; `BSH`/`HSH` derive `Z` from the lower
-  halfword;
-- `LOOP` always writes the decremented counter and flags before its branch
-  decision, and indirect `JARL` preserves an aliased source before writing the
-  link register;
-- `CALLT`/`CTRET` save and restore only `PSW(4:0)`;
-- `FETRAP`, `TRAP`, `RIE`, and `SYSCALL` save the G3M cause registers, clear
-  `PSW.UM`, set the specified exception-state bits, and select masked
-  `RBASE`/`EBASE` through `PSW.EBV`;
-- `CACHE` and `PREF` now emit named `__cache`/`__prefetch` userops instead of
-  undefined p-code.
-
-Selection-ID 0 no longer gives reserved G3M slots names imported from other
-RH850 variants. The Venza image is bounded to the P1x-C family, whose persisted
-hardware manual specifies RH850G3M cores, so it shares the core decoder and
-system-register semantics. Its exact device remains unknown: no P1M-E
-peripheral-register labels, memory capacities, or SFR claims transfer to it.
-
-Venza additionally required its exact capture boundary in the target profile:
-the `0x180000..0x2FFFFF` fill partition is non-executable and typed as data.
-That removes one direct-call-created function in erased space. Its larger
-pattern-recovery gain is deterministic discovery of previously disconnected
-entry-shaped code.
-
-The post-commit review found and corrected three gaps in the initial refresh:
-the load-link lifetime above was incomplete, the bit-search carry fixture
-endorsed the wrong first-bit result, and the imported DWARF file was not
-registered in either language definition. Both languages now declare
-`DWARF.register.mapping.file`; an installed-Ghidra smoke resolved all 32
-registers and the stack register for each. The processor fixture now contains
-96 instruction cases and executes reservation-lifetime sequences for each local
-write encoding and modeled exception transition, plus first/last/no-match search
-boundaries. A separate instruction-sequence smoke confirms that
-`LDL.W → EIRET → STC.W` fails without writing and that
-`SCH0R(0xFFFFFFFE)` returns 1 with `CY=0`.
-
-## 2026-10-09 cross-implementation re-audit and G3M instruction closure
-
-A second instruction-census pass re-compared the vendored language with the
-same pinned Ghidra, rizin, and radare2 trees recorded in
-`ghidra/ghidra_v850/PROVENANCE.json`, against a mnemonic-level enumeration of
-the G3M software manual. That comparison did not identify a missing G3M
-mnemonic; it does not establish complete operand-form coverage or semantic
-correctness. Architecture masks and primary manuals determine which language
-should accept an instruction.
-
-- `SATS`, `ROUNDF.*`, `DST`, `EST`, `DBRET`/`DBTRAP`/`DBPUSH`/`DBCP`/`DBTAG`,
-  `HVCALL`/`HVTRAP`, TLB, DSP-accumulator, trace, and the `BINSL`/`DIVN`
-  families do not occur anywhere in the G3M manual text; they stay out of the
-  exact-G3M language. rizin's `stasub` spelling is its own typo for `satsub`.
-- Upstream Ghidra's `V850e3.sinc` computes `ROTL` carry as `CY = (shift != 0)`;
-  the G3M manual (Flags table, p. 280) specifies result bit 0 *including* a
-  zero rotation. The vendored ROTL and its fixture were already correct and are
-  retained.
-- Upstream's `default_symbols` (fixed trap handlers at `ram:0x30..0x60`) and
-  `sysreg` default memory block describe V850E1/E2 fixed vectors. G3M selects
-  vectors through RBASE/EBASE, which this language already models and the
-  device-profile scripts recover; the upstream defaults are not adopted.
-
-The re-audit did surface two real defects, both fixed:
-
-1. **Architecture-specific floating support.** The V850E2M software manual,
-   R01US0001EJ0100, explicitly documents `MADDF.S`, `MSUBF.S`, `NMADDF.S`, and
-   `NMSUBF.S` on pp. 374, 380, 386, and 388. The reference radare2 opcode
-   table marks them `V850_CPU_E2V3`. This establishes their V850E2M support
-   outside the `V850_CPU_E3V5_UP` group. An initial deletion from the shared float file
-   incorrectly removed them from the existing V850E2M language too; the four
-   constructors and their split `reg4` operand are restored behind
-   `V850E2M`. They remain excluded from the G3M language because its instruction
-   catalogue does not document them. A missing mnemonic in a firmware
-   inventory does not justify removing support from a different architecture.
-2. **Named `CACHE`/`PREF` operations.** Both instructions previously decoded
-   every operation value into opaque numeric `__cache(op, addr)` /
-   `__prefetch(op, addr)` calls. Per manual Table 7-7/7-8 they now decode only
-   the defined operations with named user-ops — `__chbii`, `__cibii`,
-   `__cfali`, `__cisti`, `__cildi`, `__prefi` — display the manual's operation
-   names (`cache chbii, r6`, `pref prefi, r6`), treat cacheop `1111110` as the
-   CLL alias (clears the load-link monitor), and leave reserved operation
-   values undecoded as they behave in hardware.
-
-The processor fixture grew from 96 to 98 cases (`cache`/`chbii` and the
-`cache`-encoded CLL alias). This round also refreshed
-`data/processor_manifest.baseline.json` and initially bumped V850E2M to `0.5`
-and RH850G3M to `0.6`. Restoring the E2M-only forms increments V850E2M to
-`0.6`; G3M remains `0.6`. The current identities are recorded in the baseline
-manifest. The existing fixture verifier additionally exercises all four E2M
-operations with even and odd destinations, and rejects the same encodings
-under G3M. At that decode-only checkpoint, these vectors established decode
-boundaries and finite arithmetic dataflow.
-The stale claim that the firmware inventory resolved `__cache`/`__prefetch`
-CALLOTHERs was corrected: the image uses only `__nop`, `__disable_irq`,
-`__enable_irq`, and `__synchronize`.
-
-Re-running the legacy-Sienna rebuild exposed an unrelated latent defect from
-commit `15e00abf` (2026-10-08): `ApplyP1MDeviceProfile` gained the
-evidence-backed `SFR_EIC0_31` window (0x40 bytes at `0xFFFEEA00`, P1M-E
-section 6.2.2 INTC1 low-channel bank) without updating
-`tools/testing/processor/verify_ghidra_stats.py`, which still pinned 25
-sections / 1,526,884 bytes. The verifier now expects the 26-section inventory;
-the rebuilt graph itself is unchanged (7,090 functions / 197,726 instructions).
-
-## 2026-10-09 exact binary32 multiply-add execution
-
-Language version `0.7` replaces the separately rounded expressions for
 V850E2M `MADDF.S`/`MSUBF.S`/`NMADDF.S`/`NMSUBF.S` and RH850G3M
-`FMAF.S`/`FMSF.S`/`FNMAF.S`/`FNMSF.S` with an integer-p-code fused core.
+`FMAF.S`/`FMSF.S`/`FNMAF.S`/`FNMSF.S` use an integer-p-code fused core.
 The product retains its full 48 significant bits; alignment uses guard/sticky
 information and there is one final rounding decision. Operands are captured
 before writing the destination, including aliased and architectural `r0`
@@ -699,24 +613,7 @@ oracle, plus 32 exception/control sequences. Coverage includes deep
 cancellation, rounding ties and directed rounding, intermediate overflow,
 flush boundaries, infinities, signaling/quiet NaNs, destination aliases,
 `r0`, precise/imprecise delivery, register views, priority masking and
-interrupt returns. The existing 98-case processor fixture also passes.
-Both languages compile and the isolated G3M language resolves. Processor
-source and compiled identities are recorded in
-`data/processor_manifest.baseline.json`.
-
-The processor gate no longer compares whole-decompilation text hashes or
-literal C spellings. Those incidental checks changed with valid interrupt
-p-code; they were removed rather than repinned. Structured ABI/reference
-checks and exact normalized project/instruction/switch inventories remain.
-
-For Sienna `8965B4512000`, two independent four-stage version-0.7 rebuilds
-exported identical normalized inventories. `make verify-processor` passed,
-including firmware-machine regression and all working-project invariants.
-The 7,090-function canonical decompiler corpus was regenerated against that
-inventory; `tools/test decompiler_corpus` and selected-target project parity
-passed. Function/instruction totals remain 7,090 / 197,726, with zero undefined
-bytes inside recovered functions. Committed project snapshots were not
-promoted; the potentially-mutated live Camry session was left untouched.
+interrupt returns.
 
 The NaN class is modeled, but the manuals do not define payload/sign selection:
 canonical quiet NaN `0x7fc00000` is a documented model convention.
@@ -770,10 +667,19 @@ profile; a current firmware census does not exclude other family functionality.
   destination-suppression transitions.
   Scalar and paired `r0` reads supply zero; pair destinations discard the low word
   without changing `r1`'s high-word result. Native execution checks source,
-  destination and aliased MAC/FP pairs, MODADD, and G3M PUSHSP/POPSP zero boundaries.
+  destination and aliased MAC/FP pairs and MODADD.
 - **Trace/debug:** DBPUSH traces a register range rather than changing SP;
-  DBCP/DBTAG preserve their event inputs. Legacy DBTRAP/DBRET save/restore
-  debug PC/PSW and change DIR.DM using the V850E1 architectural contract.
+  DBCP/DBTAG preserve their event inputs. In broad RH850, the legacy
+  DBTRAP/DBRET model uses a synthetic debug bank and toggles its DM bit
+  (U14559EJ3V0UM pp. 66–67). E1F uses DBPC/DBPSW for the saved context;
+  DBTRAP takes vector `0x60` (PHO3 R01UH0128ED0730 §4.7.2).
+- **E1F decode and flow:** the profile accepts the E1 `BSW`/`BSH`/`HSW`
+  swaps and excludes E2 search opcodes. Its explicit transfers and saved
+  return addresses wrap at 26 bits (PHO3 §3.1.2); implicit Ghidra
+  fallthrough uses the flat address space at 64 MiB. E1F `CALLT`/`CTRET`
+  save and restore the full PSW (U14559EJ3V1UM pp. 61, 65).
+  The original V850 has a 24-bit PC; radare2's `e0` decoder is a legacy
+  approximation.
 
 Undocumented legacy private-context/TLB/DSP compound effects remain typed
 intrinsics with their known inputs and outputs. They are not aliased to unrelated
@@ -783,44 +689,19 @@ TRFF flag mapping and exceptional result rules require the unavailable
 `U16374EJ1V0UM00` instruction manual. Explicit operations preserve those
 boundaries.
 
-Native offline validation compiles all four language profiles and executes each
-fixture script completely:
+Selected verification under `make verify-processor`:
 
 | Fixture | Exercised behavior |
 |---|---|
-| `AssertProcessorFixtureSemantics` | 98 machine cases; 3,922 fused numerical vectors and 32 exception/control sequences |
+| `AssertProcessorFixtureSemantics` | Core machine cases plus fused numerical and exception/control vectors |
+| `AssertV850LanguageProfiles` | Format XIV, short-store operand order, CAXI, ELF selection, DWARF mappings, device volatility and manual prefixes |
 | `AssertV850ExtendedIsa` | 156 decode vectors plus executed DSP/SIMD, conversion, pair-alias, burst-memory and debug transitions |
 | `AssertV850ExtendedRegisters` | 14 register-access fixtures |
 | `AssertV850Virtualization` | Indexed MPU, Host/Guest state and exception transitions |
-| `AssertV850E1f` | 16 legacy fixtures, with the explicit undocumented-effects boundary above |
+| `AssertV850E1f` | Legacy decode, debug and PC transitions, and E1F floating-point behavior |
 | `AssertV850RegisterAnalysis` | Context options, direct/indirect ABI policy and CTBP flow joins |
 | `AssertV850SwitchAnalysis` | All four table idioms, recovered control flow and rejection boundaries |
 | `AssertV850CompilerHelpers` | Stripped recognition, numerical decompilation, independent clobbers, escaping stack effects and execution of real save/remainder bodies |
-
-The firmware-machine regression also passes.
-
-Two fresh four-stage rebuilds of each registered target produced byte-identical
-normalized inventories. The canonical inventories and full decompiler corpora
-were regenerated against the installed processor manifest:
-
-| Target | Complete decompilations |
-|---|---:|
-| Camry `8965F3307000` | 7,178 |
-| Crown `8965F3012000` | 6,971 |
-| Corolla `8965F1208000` | 6,934 |
-| Corolla `8965H1202000` | 6,934 |
-| Sienna `8965B4512000` | 7,090 |
-| Venza `8917048E30` | 10,390 |
-
-All 45,497 records exported without decompiler failures, establishing export
-completeness. Full Sienna working-project invariants,
-instruction/userop coverage and exact live semantic-ledger comparison passed;
-its function entries, bodies and no-return flags were unchanged. The
-`rh850_compiler_abi` and `decompiler_corpus` verification selectors also passed.
-Rebuilds used disposable `build/work/processor-final/` projects. All six were
-promoted through `make snapshot-project` after clean daemon shutdown,
-processor-identity and inventory-parity checks, and packed-snapshot validation.
-Pre-existing user working projects and sessions were not replaced.
 
 Venza's dynamic CTBP path was checked against instructions and references:
 `LDSR r11,CTBP` at `0x17038` installs `0x17060`; CALLT sites
@@ -842,11 +723,11 @@ has bad-instruction pseudocode despite shedding decoded table bytes; its
 
 IDA Professional `9.5.261001.a12ef234` was audited independently at both
 layers: the installed arm64 `nec850.dylib` processor module and
-`hexv850.dylib` decompiler backend. The official, MIT-licensed
-[IDA SDK nec850 source](https://github.com/HexRaysSA/ida-sdk/tree/2a9143f2f4abd7f54fe20d1e40fb68391d19c4cb/src/module/nec850)
-provides the readable processor implementation. The [current comparison pins](../../ghidra/ghidra_v850/PROVENANCE.json)
-identify build `9.5.261026.365f1f33`: `nec850` checks for LP on `DISPOSE` at
-`0x7d0c`; `hexv850` lowers CTRET to an indirect jump through CTPC at `0x6210`.
+`hexv850.dylib` decompiler backend. The MIT-licensed IDA SDK `nec850` source
+provides the readable processor implementation. For the build pinned in
+[`PROVENANCE.json`](../../ghidra/ghidra_v850/PROVENANCE.json), `nec850` checks
+for LP on `DISPOSE` at `0x7d0c`; `hexv850` lowers CTRET to an indirect jump
+through CTPC at `0x6210`.
 
 The bundle inventory also contains `rh850.xml` / `rh850-core.xml` debugger
 register descriptions, `necv850.cmt` instruction comments, and
@@ -914,14 +795,8 @@ overlapping-code recovery are not accepted as target evidence.
 
 ### Live differential check and indexed-store width correction
 
-The reference copies of both dylibs, the debugger XML, instruction comments,
-and function patterns were checked against the installed bundle by SHA-256;
-they match. No second copy or proprietary implementation import was needed.
-The public SDK exposes processor implementation. `hexrays.hpp` exposes only
-the decompiler API.
-
-An isolated ELF wrapper around the existing 98-case synthetic processor
-fixture was decoded by installed IDA 9.5 with the RH850 processor selected.
+An isolated ELF wrapper around the synthetic processor fixture used at that
+checkpoint was decoded by installed IDA 9.5 with the RH850 processor selected.
 All instruction lengths matched. There were 93 exact mnemonic-prefix matches;
 one difference was presentation (`cmovne` versus `cmov nz`), and four were
 substantive decode disagreements:
@@ -936,39 +811,25 @@ substantive decode disagreements:
 The IDA instructions have no post-index operand flags for these four encodings.
 The readable SDK explains the result: `ana.cpp` cases `0x376` and `0x37A`
 do not discriminate the first halfword's `r2` field, unlike byte-store case
-`0x372`. Exact G3M availability remains bounded: R01US0123EJ0140
-describes post-index addressing on pp. 35–36, but its load/store instruction
-entries list only displacement forms. This comparison does not resolve that
-manual inconsistency or change the existing profile acceptance boundary.
+`0x372`. The G3M manual (R01US0123EJ0140 pp. 35–36) describes post-index
+addressing, while its load/store entries list only displacement forms.
 
-Executing the six existing indexed-store forms in Ghidra revealed a separate,
-unambiguous model defect. The byte and halfword constructors assigned a
-four-byte register directly to `*:1` / `*:2`; emitted p-code wrote all four
-bytes. The four constructors now truncate the source to `R2731:1` / `R2731:2`.
-This fixes modeled memory effects without borrowing IDA's conditional-store
-interpretation.
+For post-indexed stores, the fork writes only the access width. Post-indexed
+loads with a shared base and destination also update from the original
+address; base writeback wins (R01US0209EJ0220, post-indexed `LD` cautions).
 
 With `r10=0x12345678`, zeroed destination memory and no valid load-link,
 the actual p-code emulator produced:
 
-| Indexed store, both directions | Before: four destination bytes | After: four destination bytes |
-|---|---|---|
-| `ST.B` | `78 56 34 12` | `78 00 00 00` |
-| `ST.H` | `78 56 34 12` | `78 56 00 00` |
-| `ST.W` control | `78 56 34 12` | `78 56 34 12` |
+| Indexed store, both directions | Four destination bytes |
+|---|---|
+| `ST.B` | `78 00 00 00` |
+| `ST.H` | `78 56 00 00` |
+| `ST.W` | `78 56 34 12` |
 
-The corrected smoke passed under both the G3M and broad RH850 profiles;
-source registers stayed unchanged and base registers advanced or retreated by
-the access width. `AssertProcessorFixtureSemantics` now checks stored values,
-neighboring-byte sentinels, source preservation and address updates for all six
-forms. Its complete run passed all 98 instruction cases, 3,922 fused numerical
-vectors and 32 exception/control sequences. The old reservation-lifetime
-vectors alone could not detect the overwrite because they stored zero into
-zeroed memory.
-
-The changed languages are G3M `0.9` and broad RH850 `1.1`; V850E2M and E1F are
-unchanged. The processor identity baseline was regenerated from the installed
-extension.
+`AssertProcessorFixtureSemantics` checks these values, neighboring-byte
+sentinels, source preservation and address updates for all six store forms
+in the G3M and broad RH850 profiles.
 
 ### SDK-derived switch recovery gaps
 
@@ -998,19 +859,6 @@ MOVHI/MOVEA plus reversed-add dispatch into cases **5, 6 and 7**, returning
 **1, 2 and 3**, with default **15**. The temporary smoke inputs/scripts were
 removed. Existing checks pinned to warning prose were removed; structural
 switch, reference, body and case-value checks remain.
-
-Fresh four-stage rebuilds of all six registered targets with both corrections
-matched their canonical normalized inventories. Camry's final disposable build
-was reused after confirming its processor identity; Crown, Corolla F/H, Sienna
-and Venza were rebuilt into separate `build/work/ida-final-*` directories.
-All 45,497 canonical decompilations were regenerated without failures, and
-`tools/test decompiler_corpus` passed across the registered corpora.
-
-All six projects were promoted through `make finalize-project` after clean
-daemon shutdown, processor-identity and exact inventory-parity checks, and
-packed-snapshot validation. The committed snapshots now carry the final
-processor checkpoint. Pre-existing user working projects were not replaced,
-and no canonical inventory baseline changes were needed.
 
 ## Remaining implementation gaps
 

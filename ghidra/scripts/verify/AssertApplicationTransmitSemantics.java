@@ -116,8 +116,8 @@ public class AssertApplicationTransmitSemantics extends GhidraScript {
                 "0004b9cc:READ", "000bcd96:WRITE", "000be564:WRITE");
         assertExactRefs(0xfebe8094L,
                 "0004b9d0:WRITE", "0004bcf8:READ", "00058182:WRITE");
-        assertInstruction(0xbe02eL, "sst.b", "0x77", "ep", "r0");
-        assertInstruction(0xcb792L, "sst.b", "0x77", "ep", "r0");
+        assertInstruction(0xbe02eL, "sst.b", "r0", "0x77", "ep");
+        assertInstruction(0xcb792L, "sst.b", "r0", "0x77", "ep");
 
         // Signal 1 / B0[4]: composite initialization/validity output is written
         // by 0x4B66C and subsequently consumed by the Tx packer plus two local
@@ -226,8 +226,8 @@ public class AssertApplicationTransmitSemantics extends GhidraScript {
                 "0004b916:WRITE", "0004be72:READ", "000581a0:WRITE");
         assertExactRefs(0xfebe80a0L,
                 "0004b918:WRITE", "0004be78:READ", "000581a2:WRITE");
-        assertInstruction(0x4b90eL, "sst.b", "0x8", "ep", "r0");
-        assertInstruction(0x4b918L, "sst.b", "0xc", "ep", "r0");
+        assertInstruction(0x4b90eL, "sst.b", "r0", "0x8", "ep");
+        assertInstruction(0x4b918L, "sst.b", "r0", "0xc", "ep");
 
         // B1[7:3] is the public five-bit LTA_STATE field. The five staging bits
         // are independent RAM cells and originate in the steering-control state
@@ -267,9 +267,9 @@ public class AssertApplicationTransmitSemantics extends GhidraScript {
                 "0004b7a4:WRITE", "0004bebe:READ", "0005817e:WRITE");
         assertExactRefs(0xfebebfa9L,
                 "000c82fc:WRITE", "000c8306:READ", "000c86a6:WRITE", "000cb798:READ");
-        assertInstruction(0x4b91aL, "sst.b", "0xd", "ep", "r0");
-        assertInstruction(0x4b91cL, "sst.b", "0xe", "ep", "r0");
-        assertInstruction(0x4b7a4L, "sst.b", "0x19", "ep", "r0");
+        assertInstruction(0x4b91aL, "sst.b", "r0", "0xd", "ep");
+        assertInstruction(0x4b91cL, "sst.b", "r0", "0xe", "ep");
+        assertInstruction(0x4b7a4L, "sst.b", "r0", "0x19", "ep");
 
         // B4 is a proprietary steering-control status nibble assembled from two
         // limiter/threshold flags and the C0FE/C0FF transition state.
@@ -296,8 +296,8 @@ public class AssertApplicationTransmitSemantics extends GhidraScript {
         assertExactRefs(0xfebe80b3L,
                 "0004b928:WRITE", "0004be58:READ", "000581ba:WRITE");
         assertInstruction(0x4b920L, "mov", "-0x1", "r1");
-        assertInstruction(0x4b926L, "sst.b", "0x1e", "ep", "r1");
-        assertInstruction(0x4b928L, "sst.b", "0x1f", "ep", "r1");
+        assertInstruction(0x4b926L, "sst.b", "r1", "0x1e", "ep");
+        assertInstruction(0x4b928L, "sst.b", "r1", "0x1f", "ep");
 
         // Remaining normal Tx packets are owned by the same foreground staging
         // orchestrator.  0x351 goes through wrapper 0x4B8A4; 0x394 and 0x4A3

@@ -178,9 +178,9 @@ public class ApplyR4pMeterDeviceProfile extends GhidraScript {
 
     @Override
     public void run() throws Exception {
-        if (!"v850e3:LE:32:default".equals(currentProgram.getLanguageID().toString()) ||
+        if (!"v850e3:LE:32:D1LD1M".equals(currentProgram.getLanguageID().toString()) ||
                 !"default".equals(currentProgram.getCompilerSpec().getCompilerSpecID().toString())) {
-            throw new IllegalStateException("R4P meter requires v850e3:LE:32:default with GHS (not v850e3x)");
+            throw new IllegalStateException("R4P meter requires v850e3:LE:32:D1LD1M with GHS");
         }
         requireImage(0, 0x200000, CODE_SHA);
         requireImage(0x01000000, 0x8000, BOOT_SHA);

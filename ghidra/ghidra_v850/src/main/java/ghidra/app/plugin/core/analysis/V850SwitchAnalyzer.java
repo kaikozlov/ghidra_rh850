@@ -197,9 +197,13 @@ public class V850SwitchAnalyzer extends AbstractAnalyzer {
 		int elementShift = 0;
 		private Address[] decodedTargets;
 
+		private final boolean e1f;
+
 		SwitchCase(Family family, Instruction dispatch) {
 			this.family = family;
 			this.dispatch = dispatch;
+			this.e1f = "v850e1f:LE:32:default".equals(
+					dispatch.getProgram().getLanguageID().getIdAsString());
 		}
 
 		Address[] targets(Memory memory, TaskMonitor monitor) throws CancelledException {
@@ -230,7 +234,8 @@ public class V850SwitchAnalyzer extends AbstractAnalyzer {
 							(family == Family.NATIVE_SWITCH) ? tableAddr.getOffset() : elementBase;
 						targetOffset = (base + (element << elementShift)) & 0xffffffffL;
 					}
-					out[i] = tableAddr.getNewAddress(targetOffset);
+					// Instruction targets use the E1F PC width; data table entries do not.
+					out[i] = tableAddr.getNewAddress(e1f ? targetOffset & 0x03fffffeL : targetOffset);
 				}
 				decodedTargets = out;
 				return decodedTargets;
@@ -309,7 +314,10 @@ public class V850SwitchAnalyzer extends AbstractAnalyzer {
 			return null;
 		}
 		SwitchCase cand = new SwitchCase(Family.NATIVE_SWITCH, dispatch);
-		cand.tableAddr = dispatch.getMaxAddress().add(1);
+		Address last = dispatch.getMaxAddress();
+		cand.tableAddr = cand.e1f
+				? last.getNewAddress((last.getOffset() + 1) & 0x03fffffeL)
+				: last.add(1);
 		cand.elementSize = 2;
 		cand.signedElements = true;
 		cand.elementShift = 1;

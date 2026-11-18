@@ -26,6 +26,7 @@ SOURCE_GROUPS = (
         "*.xml",
     )),
     (PATTERNS, ("*.xml",)),
+    (VENDOR / "data" / "manuals", ("*.idx",)),
     (VENDOR / "data" / "arithmetic", ("*.json",)),
     (VENDOR / "src" / "main" / "java", ("**/*.java",)),
 )
@@ -71,6 +72,7 @@ def collect_compiled(sla: Path) -> dict[str, str]:
     for pattern in ("*.cspec", "*.ldefs", "*.pspec", "*.opinion", "*.dwarf", "*.xml"):
         artifacts.extend(sorted((extension / "data" / "languages").glob(pattern)))
     artifacts.extend(sorted((extension / "data" / "patterns").glob("*.xml")))
+    artifacts.extend(sorted((extension / "data" / "manuals").glob("*.idx")))
     artifacts.extend(sorted((extension / "data" / "arithmetic").glob("*.json")))
     return {
         path.relative_to(extension).as_posix(): sha256_file(path)

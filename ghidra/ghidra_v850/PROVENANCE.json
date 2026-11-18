@@ -1,7 +1,7 @@
 {
   "name": "Renesas_v850",
   "language_id": "v850e3:LE:32:default",
-  "language_version": "0.12",
+  "language_version": "0.13",
   "upstream": {
     "url": "https://github.com/esaulenka/ghidra_v850",
     "baseline_commit": "14c1b5be32b8ec741ee626c8bca9885c58f7a473",
@@ -10,7 +10,7 @@
   "comparisons": {
     "ghidra": {
       "url": "https://github.com/NationalSecurityAgency/ghidra",
-      "commit": "c7bc89dd29ee7f56b753b29a8bbabcb36ad3cae7",
+      "commit": "0b91a7deef7a3c180141b4f806870e4672ef0b9f",
       "imported": [
         "DWARF register mapping",
         "function-start patterns"
@@ -18,11 +18,11 @@
     },
     "rizin": {
       "url": "https://github.com/rizinorg/rizin",
-      "commit": "0ed7bdfdaf186a26ff24eee62f41b10c154b5a99"
+      "commit": "e4f9b7c70afb6879e2a6110c90acd566e9613b1d"
     },
     "radare2": {
       "url": "https://github.com/radareorg/radare2",
-      "commit": "391dc446b5f12000c9588bff162a45689463eff6"
+      "commit": "86b18023cf8f1fe945a0f475e853496636e325b1"
     },
     "ida": {
       "installed_version": "9.5.261026.365f1f33",
@@ -44,6 +44,8 @@
   "authorities": [
     "R01US0123EJ0140 Rev.1.40 RH850G3M User's Manual: Software",
     "R01UH0585EJ0120 Rev.1.20 RH850/P1M-E Group User's Manual: Hardware",
+    "R01UH0517EJ0130 Rev.1.30 RH850/P1x-C User's Manual: Hardware, Fig. 4.1 (main CPU P-Bus and LPB windows)",
+    "R01UH0451EJ0220 Rev.2.20 RH850/D1L/D1M User's Manual: Hardware, Fig. 5.1 (CPU PBUS windows)",
     "R01US0001EJ0100 Rev.1.00 V850E2M User's Manual: Architecture (V850E2M language)",
     "R01US0209EJ0220 Rev.2.20 RH850G4MH User's Manual: Software (broad RH850 language)",
     "R01US0432EJ0110 Rev.1.10 RH850G4MH Virtualization User's Manual: Software (broad RH850 language)",

@@ -19,8 +19,9 @@ mapped non-executable.
 The profile maps BootFlash at `0x01000000` and 64 KiB DataFlash at
 `0xFF200000`, then loads the ten startup relocation rows at their RAM
 destinations. The D1L/D1M manual, **R01UH0451EJ0220**, figures 5.1 and
-52.3, supplies the flash address map. The exact MCU part remains unknown;
-the target imports no P1M-E peripheral map.
+52.3, supplies the flash address map. New imports of `r4p-838004AD91` use the
+[D1L/D1M-compatible G3M profile](../tooling/processor-module-audit.md#device-profile-and-interrupt-recovery),
+`v850e3:LE:32:D1LD1M`. The exact MCU part remains unidentified.
 
 Application and reprogramming startup establish different register contexts:
 

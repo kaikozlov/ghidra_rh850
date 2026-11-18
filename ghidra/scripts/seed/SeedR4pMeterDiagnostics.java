@@ -325,8 +325,8 @@ public class SeedR4pMeterDiagnostics extends GhidraScript {
   }
 
   @Override public void run() throws Exception {
-    if (!"v850e3:LE:32:default".equals(currentProgram.getLanguageID().getIdAsString()))
-      throw new IllegalStateException("meter requires v850e3, not the broad SIMD profile");
+    if (!"v850e3:LE:32:D1LD1M".equals(currentProgram.getLanguageID().getIdAsString()))
+      throw new IllegalStateException("meter requires the D1L/D1M G3M profile");
     pinTables();
     keyData();
     namedFunctions();

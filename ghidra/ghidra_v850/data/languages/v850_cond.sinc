@@ -62,22 +62,26 @@ cc1720: "gt"	is op1720=0xF		{ tmp:1 = !($(PSW_S) ^^ $(PSW_OV) || $(PSW_Z));	expo
 	if (cc1720) goto <true>;
 	# false
 		R2731 = R1115;
-		goto inst_next;
+		goto <done>;
 	<true>
 		R2731 = s0004;
+	<done>
 }
 # CMOV cccc, reg1, reg2, reg3
 :cmov^cc1720 R0004, R1115, R2731 is op0510=0x3F & R0004 & R1115; op2126=0x19 & op1616=0 & cc1720 & R2731 {
 	if (cc1720) goto <true>;
 	# false
 		R2731 = R1115;
-		goto inst_next;
+		goto <done>;
 	<true>
 		R2731 = R0004;
+	<done>
 }
 
+# ADF/SBF are E2 additions. Condition 0xd encodes SATADD/SATSUB.
+@if !(defined(V850E1F))
 # SBF cccc, reg1, reg2, reg3
-:sbf^cc1720 R0004, R1115, R2731 is op0510=0x3F & R0004 & R1115; op2126=0x1C & op1616=0 & cc1720 & R2731 {
+:sbf^cc1720 R0004, R1115, R2731 is op0510=0x3F & R0004 & R1115; op2126=0x1C & op1616=0 & op1720!=0xD & cc1720 & R2731 {
 	local lsb:4 = zext(cc1720);
 	local res:4 = R1115 - R0004 - lsb;
 	set_S_Z (res);
@@ -87,7 +91,7 @@ cc1720: "gt"	is op1720=0xF		{ tmp:1 = !($(PSW_S) ^^ $(PSW_OV) || $(PSW_Z));	expo
 	R2731 = res;
 }
 # ADF cccc, reg1, reg2, reg3
-:adf^cc1720 R0004, R1115, R2731 is op0510=0x3F & R0004 & R1115; op2126=0x1D & op1616=0 & cc1720 & R2731 {
+:adf^cc1720 R0004, R1115, R2731 is op0510=0x3F & R0004 & R1115; op2126=0x1D & op1616=0 & op1720!=0xD & cc1720 & R2731 {
 	local lsb:4 = zext(cc1720);
 	local res:4 = R1115 + R0004 + lsb;
 	set_S_Z (res);
@@ -96,4 +100,5 @@ cc1720: "gt"	is op1720=0xF		{ tmp:1 = !($(PSW_S) ^^ $(PSW_OV) || $(PSW_Z));	expo
 	$(PSW_OV) = (sA == sB) && (sB != sR);
 	R2731 = res;
 }
+@endif
 

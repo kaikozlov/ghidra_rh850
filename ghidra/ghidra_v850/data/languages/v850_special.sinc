@@ -44,7 +44,7 @@ macro enter_fe_exception(return_pc, cause, offset, handler) {
 
 macro enter_ei_exception(return_pc, cause, offset, handler) {
 	clear_link();
-	EIPC = return_pc;
+	EIPC = return_pc & $(V850_PC_MASK);
 	EIPSW = PSW;
 @if defined(V850SIMD)
 	if ((HVCFG & 1) == 0) goto <ei_virtual_saved>;
@@ -57,7 +57,9 @@ macro enter_ei_exception(return_pc, cause, offset, handler) {
 @else
 	EIIC = cause;
 @endif
+@if !(defined(V850E1F))
 	$(PSW_UM) = 0;
+@endif
 	$(PSW_EP) = 1;
 	$(PSW_ID) = 1;
 	handler = 0;
@@ -283,8 +285,9 @@ macro fp_return_priority() {
 
 # SWITCH reg1
 :switch R0004 is op0515=0x002 & R0004 {
-	local lbl:4 = inst_next + (R0004 << 1);
-	local addr:4 = inst_next + (sext(*:2 lbl) << 1);
+	local table:4 = inst_next & $(V850_PC_MASK);
+	local lbl:4 = table + (R0004 << 1);
+	local addr:4 = (table + (sext(*:2 lbl) << 1)) & $(V850_PC_MASK);
 	PC = addr;
 	goto [addr];
 }
@@ -300,10 +303,18 @@ macro fp_return_priority() {
 
 # CALLT imm6
 :callt op0005 is op0615=0x008 & op0005 {
-	CTPC = inst_next;
+	CTPC = inst_next & $(V850_PC_MASK);
+@if defined(V850E1F)
+	# U14559EJ3V1UM pp.61, 65: E1 saves/restores the whole PSW.
+	CTPSW = PSW;
+@else
 	CTPSW = PSW & 0x1f;
+@endif
 	local lbl:4 = CTBP + (op0005 << 1);
 	local addr:4 = CTBP + zext(*:2 lbl);
+@if defined(V850E1F)
+	addr = addr & $(V850_PC_MASK);
+@endif
 	call [addr];
 }
 
@@ -427,13 +438,21 @@ macro fp_return_priority() {
 @if !(defined(V850E1F))
 # CAXI [reg1], reg2, reg3
 :caxi [R0004], R1115, R2731 is op0510=0x3F & R0004 & R1115; op1626=0xEE & R2731 {
-	local token = *:4 R0004;
+@if defined(V850E2M)
+	local addr:4 = R0004 & 0xfffffffc;
+@else
+	local addr:4 = R0004;
+@endif
+	local token = *:4 addr;
 	local result = R1115 - token;
-	invalidate_link_store(R0004, 4);
-	*:4 R0004 = token * zext(result != 0) +
+	invalidate_link_store(addr, 4);
+	*:4 addr = token * zext(result != 0) +
 				R2731 * zext(result == 0);
+	# Flags use the original comparison operand even when reg2 aliases reg3.
+	$(PSW_OV) = sborrow(R1115, token);
+	$(PSW_CY) = (R1115 < token);
+	set_S_Z(result);
 	R2731 = token;
-	flags_sub(R1115, token);
 }
 @endif
 
@@ -450,21 +469,21 @@ macro fp_return_priority() {
 }
 
 # HALT
-:halt is op0515=0x3F; op1631=0x0120 {
+:halt is op0015=0x07E0; op1631=0x0120 {
 	__halt();
 }
 @if defined(V850E2M) || defined(V850E1F)
 # Legacy RETI; RH850G3M uses EIRET/FERET.
 :reti is op0515=0x3F & op1115=0 & op0004=0; op1631=0x0140 & op2731=0 {
 	if ($(PSW_EP) == 0) && $(PSW_NP) goto <fe_exc>;
-		PC = EIPC;
+		PC = EIPC & $(V850_PC_MASK);
 		PSW = EIPSW;
 @if !(defined(V850E1F))
 		fp_acknowledge_pending(PC);
 @endif
 		return [PC];
 	<fe_exc>
-		PC = FEPC;
+		PC = FEPC & $(V850_PC_MASK);
 		PSW = FEPSW;
 @if !(defined(V850E1F))
 		fp_acknowledge_pending(PC);
@@ -474,10 +493,32 @@ macro fp_return_priority() {
 @endif
 # CTRET
 :ctret is op0515=0x3F & op1115=0 & op0004=0; op1631=0x0144 & op2731=0 {
-	PC = CTPC;
+	PC = CTPC & $(V850_PC_MASK);
+@if defined(V850E1F)
+	PSW = CTPSW;
+@else
 	PSW = (PSW & 0xffffffe0) | (CTPSW & 0x1f);
+@endif
 	return [PC];
 }
+
+@if defined(V850E1F)
+# PHO3 hardware manual §§4.7.2(1)–(2); E1 instruction manual pp.66–67.
+:dbtrap is op0015=0xF840 {
+	DBPC = inst_next & $(V850_PC_MASK);
+	DBPSW = PSW;
+	PSW = PSW | 0xe0;
+	PC = 0x60;
+	goto 0x60;
+}
+
+:dbret is op0015=0x07E0; op1631=0x0146 {
+	PC = DBPC & $(V850_PC_MASK);
+	PSW = DBPSW;
+	return [PC];
+}
+@endif
+
 @if !(defined(V850E1F))
 # EIRET
 :eiret is op0515=0x3F & op1115=0 & op0004=0; op1631=0x0148 & op2731=0 {

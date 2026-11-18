@@ -649,6 +649,19 @@ def build() -> tuple[bytes, list[dict]]:
     add("sbfc", enc_xi(0x382, 6, 10, 11), {
         "mnemonic_prefix": "sbfc",
     })
+    for name, encoding in (
+        ("tst", "6651"), ("satadd-imm", "3f52"), ("satsub", "a650"),
+        ("satsubr", "8650"), ("satsubi", "6656ffff"),
+        ("satadd-aliased", "e657ba33"), ("satsub-aliased", "e6579a33"),
+    ):
+        add(name, bytes.fromhex(encoding), {"mnemonic_prefix": name.split("-")[0]})
+    for width, first, last in (
+        ("b", 0x17E7, 0x3B70), ("bu", 0x1FE7, 0x3B70),
+        ("h", 0x17E7, 0x3B74), ("hu", 0x1FE7, 0x3B74), ("w", 0x17E7, 0x3B78),
+    ):
+        for direction, delta in (("inc", 0), ("dec", 0x1000)):
+            add(f"ld.{width}-{direction}-alias", u16(first + delta) + u16(last),
+                {"mnemonic_prefix": f"ld.{width}"})
 
     return bytes(blob), cases
 
@@ -656,21 +669,28 @@ def build() -> tuple[bytes, list[dict]]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out-dir", type=Path, default=OUT_DIR)
+    parser.add_argument("--check", action="store_true", help="Compare outputs without writing them")
     args = parser.parse_args()
-    args.out_dir.mkdir(parents=True, exist_ok=True)
 
     blob, cases = build()
     bin_path = args.out_dir / "rh850_semantic_fixture.bin"
     man_path = args.out_dir / "manifest.json"
-    bin_path.write_bytes(blob)
-    man_path.write_text(json.dumps({
+    manifest = json.dumps({
         "processor": "v850e3:LE:32:default",
         "binary": bin_path.name,
         "size": len(blob),
         "cases": cases,
-    }, indent=2) + "\n")
-    print(f"Wrote {bin_path} ({len(blob)} bytes), {len(cases)} cases")
-    print(f"Wrote {man_path}")
+    }, indent=2) + "\n"
+    outputs = ((bin_path, blob), (man_path, manifest.encode("utf-8")))
+    if args.check:
+        for path, expected in outputs:
+            if not path.is_file() or path.read_bytes() != expected:
+                parser.exit(1, f"Stale processor fixture: {path}. Run make generate-processor-fixture.\n")
+    else:
+        args.out_dir.mkdir(parents=True, exist_ok=True)
+        for path, content in outputs:
+            path.write_bytes(content)
+    print(f"{'Checked' if args.check else 'Wrote'} processor fixture: {len(blob)} bytes, {len(cases)} cases")
     return 0
 
 

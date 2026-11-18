@@ -83,7 +83,7 @@ public class AssertXcpShadowWriteBoundary extends GhidraScript {
         assertInstruction(0x6266eL, "mov 0xfebf7bb0,ep");
         assertInstruction(0x62676L, "add 0x1,r1");
         assertInstruction(0x62678L, "addi -0x40,r1,r0");
-        assertInstruction(0x6267cL, "sst.b 0x0[ep],r19");
+        assertInstruction(0x6267cL, "sst.b r19,0x0[ep]");
         assertInstruction(0x6267eL, "bnc 0x00062664");
 
         // The adjacent XCP DAQ configuration is a separate read-only dynamic

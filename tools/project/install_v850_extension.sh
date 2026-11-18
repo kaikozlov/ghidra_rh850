@@ -58,6 +58,11 @@ fi
 rm -rf "$BUILD_EXT"
 mkdir -p "$BUILD_EXT"
 rsync -a --delete --exclude '.git' --exclude '*.sla' "$VENDOR/" "$BUILD_EXT/"
+for manual in r01us0001ej0100_v850e2m.pdf r01us0123ej0140-rh850g3m.pdf; do
+  if [[ -f "$ROOT/REFERENCE/$manual" ]]; then
+    ln -s "$ROOT/REFERENCE/$manual" "$BUILD_EXT/data/manuals/$manual"
+  fi
+done
 python3 "$ROOT/tools/project/build_compiler_policy_specs.py" "$LANG"
 
 echo "Compiling vendored SLEIGH sources under $LANG"

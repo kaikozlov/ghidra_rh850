@@ -13,9 +13,13 @@
 }
 
 # DIVH reg1, reg2
-:divh r0004, r1115 is op0510=0x02 & r0004 & r1115 {
+:divh R0004, r1115 is op0510=0x02 & R0004 & r1115 & op1115!=0
+@if !(defined(V850E1F))
+	& op0004!=0
+@endif
+{
 	local dividend:4 = r1115;
-	local divisor:4 = sext(r0004:2);
+	local divisor:4 = sext(R0004:2);
 	if (divisor == 0) goto <div_zero>;
 	if (dividend == 0x80000000 && divisor == 0xffffffff) goto <div_overflow>;
 		r1115 = dividend s/ divisor;
@@ -32,36 +36,38 @@
 	<div_done>
 }
 
+# CY describes the unsaturated arithmetic; S and Z describe the clamped result.
 macro saturate(value) {
+	$(PSW_OV) = 1;
 	if (value s>  0x7fffffff) goto <pos_sat>;
 	if (value s< -0x80000000) goto <neg_sat>;
+	clrOV();
 	goto <end>;
 	<pos_sat> value =  0x7fffffff; goto <end>;
 	<neg_sat> value = -0x80000000; goto <end>;
 	<end>
+	$(PSW_SAT) = $(PSW_SAT) || $(PSW_OV);
+	set_S_Z(value);
 }
 
 # SATSUBR reg1, reg2
 :satsubr R0004, r1115 is op0510=0x04 & R0004 & r1115 & op1115!=0 {
 	local res:5 = sext(R0004) - sext(r1115);
-	flags_sub(R0004, r1115);
-	$(PSW_SAT) = $(PSW_SAT) || $(PSW_OV);
+	$(PSW_CY) = (R0004 < r1115);
 	saturate(res);
 	r1115 = res:4;
 }
 # SATSUB reg1, reg2
 :satsub R0004, r1115 is op0510=0x05 & R0004 & r1115 & op1115!=0 {
 	local res:5 = sext(r1115) - sext(R0004);
-	flags_sub(r1115, R0004);
-	$(PSW_SAT) = $(PSW_SAT) || $(PSW_OV);
+	$(PSW_CY) = (r1115 < R0004);
 	saturate(res);
 	r1115 = res:4;
 }
 # SATADD reg1, reg2
 :satadd R0004, r1115 is op0510=0x06 & R0004 & r1115 & op1115!=0 {
 	local res:5 = sext(R0004) + sext(r1115);
-	flags_add(R0004, r1115);
-	$(PSW_SAT) = $(PSW_SAT) || $(PSW_OV);
+	$(PSW_CY) = carry(R0004, r1115);
 	saturate(res);
 	r1115 = res:4;
 }
@@ -104,8 +110,7 @@ macro saturate(value) {
 #SATADD imm5, reg2
 :satadd s0004, r1115 is op0510=0x11 & s0004 & r1115 & op1115!=0 {
 	local res:5 = s0004 + sext(r1115);
-	flags_add(s0004, r1115);
-	$(PSW_SAT) = $(PSW_SAT) || $(PSW_OV);
+	$(PSW_CY) = carry(r1115, s0004);
 	saturate(res);
 	r1115 = res:4;
 }
@@ -123,7 +128,11 @@ macro saturate(value) {
 }
 
 # MULH imm5, reg2
-:mulh s0004, r1115 is op0510=0x17 & s0004 & r1115 {
+:mulh s0004, r1115 is op0510=0x17 & s0004 & r1115
+@if defined(V850E1F)
+	& op1115!=0
+@endif
+{
 	r1115 = sext(r1115:2) * s0004;
 }
 
@@ -152,13 +161,16 @@ macro saturate(value) {
 # SATSUBI imm16, reg1, reg2
 :satsubi s1631, R0004, r1115 is op0510=0x33 & op1115!=0 & R0004 & r1115; s1631 {
 	local res:5 = sext(R0004) - s1631;
-	flags_sub(R0004, s1631);
-	$(PSW_SAT) = $(PSW_SAT) || $(PSW_OV);
+	$(PSW_CY) = (R0004 < s1631);
 	saturate(res);
 	r1115 = res:4;}
 
 # MULHI imm16, reg1, reg2
-:mulhi s1631, R0004, R1115 is op0510=0x37 & R1115 & R0004; s1631 {
+:mulhi s1631, R0004, R1115 is op0510=0x37 & R1115 & R0004
+@if defined(V850E1F)
+	& op1115!=0
+@endif
+	; s1631 {
 	R1115 = sext(R0004:2) * s1631;
 }
 
@@ -252,6 +264,7 @@ macro saturate(value) {
 		$(PSW_OV) = 1;
 	<div_done>
 }
+@if !(defined(V850E1F))
 # DIVQ reg1, reg2, reg3
 :divq R0004, R1115, R2731 is op0510=0x3F & R0004 & R1115; op1626=0x2FC & R2731 {
 	local divisor:4 = R0004;
@@ -276,6 +289,7 @@ macro saturate(value) {
 		$(PSW_OV) = 1;
 	<div_done>
 }
+@endif
 # DIVU reg1, reg2, reg3
 :divu R0004, R1115, R2731 is op0510=0x3F & R0004 & R1115; op1626=0x2C2 & R2731 {
 	local divisor:4 = R0004;
@@ -292,6 +306,7 @@ macro saturate(value) {
 		$(PSW_OV) = 1;
 	<div_done>
 }
+@if !(defined(V850E1F))
 # DIVQU reg1, reg2, reg3
 :divqu R0004, R1115, R2731 is op0510=0x3F & R0004 & R1115; op1626=0x2FE & R2731 {
 	local divisor:4 = R0004;
@@ -312,8 +327,7 @@ macro saturate(value) {
 # SATSUB reg1, reg2, reg3
 :satsub R0004, R1115, R2731 is op0510=0x3F & R0004 & R1115; op1626=0x39A & R2731 {
 	local res:5 = sext(R1115) - sext(R0004);
-	flags_sub(R1115, R0004);
-	$(PSW_SAT) = $(PSW_SAT) || $(PSW_OV);
+	$(PSW_CY) = (R1115 < R0004);
 	saturate(res);
 	R2731 = res:4;
 }
@@ -321,8 +335,7 @@ macro saturate(value) {
 # SATADD reg1, reg2, reg3
 :satadd R0004, R1115, R2731 is op0510=0x3F & R0004 & R1115; op1626=0x3BA & R2731 {
 	local res:5 = sext(R0004) + sext(R1115);
-	flags_add(R0004, R1115);
-	$(PSW_SAT) = $(PSW_SAT) || $(PSW_OV);
+	$(PSW_CY) = carry(R0004, R1115);
 	saturate(res);
 	R2731 = res:4;
 }
@@ -339,4 +352,5 @@ macro saturate(value) {
 :macu R0004, R1115, R2731pair, xR1620pair is op0510=0x3F & R0004 & R1115; op2126=0x1F & op1616=0 & xR1620pair & R2731pair {
 	xR1620pair = R2731pair + zext(R0004) * zext(R1115);
 }
+@endif
 

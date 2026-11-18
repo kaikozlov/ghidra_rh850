@@ -26,7 +26,7 @@ if ! cmp -s "$ROOT/data/processor_manifest.baseline.json" "$PROCESSOR_MANIFEST";
   exit 1
 fi
 
-python3 "$ROOT/tools/testing/processor/build_processor_fixture.py" --out-dir "$FIXTURE_DIR"
+python3 "$ROOT/tools/testing/processor/build_processor_fixture.py" --check --out-dir "$FIXTURE_DIR"
 MANIFEST="$FIXTURE_DIR/manifest.json"
 BINARY="$FIXTURE_DIR/rh850_semantic_fixture.bin"
 
@@ -47,6 +47,7 @@ FIXTURE_LOG="$BUILD_LOGS/verify-processor-fixture.log"
   -loader-baseAddr 0x0 \
   -noanalysis \
   -postScript AssertProcessorFixtureSemantics.java "$MANIFEST" \
+  -postScript AssertV850LanguageProfiles.java \
   -postScript AssertV850ExtendedIsa.java \
   -postScript AssertV850ExtendedRegisters.java \
   -postScript AssertV850Virtualization.java \
@@ -59,7 +60,7 @@ grep -q 'ASSERT processor-fixture: all .* cases passed' "$FIXTURE_LOG" || {
   echo "synthetic fixture did not report success" >&2
   exit 1
 }
-for capability in extended-isa extended-registers virtualization e1f register-analysis switch-analysis compiler-helpers; do
+for capability in language-profiles extended-isa extended-registers virtualization e1f register-analysis switch-analysis compiler-helpers; do
   grep -q "ASSERT v850-$capability: passed" "$FIXTURE_LOG" || {
     echo "processor $capability fixture did not report success" >&2
     exit 1

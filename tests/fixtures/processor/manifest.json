@@ -1,7 +1,7 @@
 {
   "processor": "v850e3:LE:32:default",
   "binary": "rh850_semantic_fixture.bin",
-  "size": 416,
+  "size": 484,
   "cases": [
     {
       "name": "sld.b",
@@ -909,6 +909,125 @@
       "size": 4,
       "bytes": "e657825b",
       "mnemonic_prefix": "sbfc"
+    },
+    {
+      "name": "tst",
+      "addr": 416,
+      "size": 2,
+      "bytes": "6651",
+      "mnemonic_prefix": "tst"
+    },
+    {
+      "name": "satadd-imm",
+      "addr": 420,
+      "size": 2,
+      "bytes": "3f52",
+      "mnemonic_prefix": "satadd"
+    },
+    {
+      "name": "satsub",
+      "addr": 424,
+      "size": 2,
+      "bytes": "a650",
+      "mnemonic_prefix": "satsub"
+    },
+    {
+      "name": "satsubr",
+      "addr": 428,
+      "size": 2,
+      "bytes": "8650",
+      "mnemonic_prefix": "satsubr"
+    },
+    {
+      "name": "satsubi",
+      "addr": 432,
+      "size": 4,
+      "bytes": "6656ffff",
+      "mnemonic_prefix": "satsubi"
+    },
+    {
+      "name": "satadd-aliased",
+      "addr": 436,
+      "size": 4,
+      "bytes": "e657ba33",
+      "mnemonic_prefix": "satadd"
+    },
+    {
+      "name": "satsub-aliased",
+      "addr": 440,
+      "size": 4,
+      "bytes": "e6579a33",
+      "mnemonic_prefix": "satsub"
+    },
+    {
+      "name": "ld.b-inc-alias",
+      "addr": 444,
+      "size": 4,
+      "bytes": "e717703b",
+      "mnemonic_prefix": "ld.b"
+    },
+    {
+      "name": "ld.b-dec-alias",
+      "addr": 448,
+      "size": 4,
+      "bytes": "e727703b",
+      "mnemonic_prefix": "ld.b"
+    },
+    {
+      "name": "ld.bu-inc-alias",
+      "addr": 452,
+      "size": 4,
+      "bytes": "e71f703b",
+      "mnemonic_prefix": "ld.bu"
+    },
+    {
+      "name": "ld.bu-dec-alias",
+      "addr": 456,
+      "size": 4,
+      "bytes": "e72f703b",
+      "mnemonic_prefix": "ld.bu"
+    },
+    {
+      "name": "ld.h-inc-alias",
+      "addr": 460,
+      "size": 4,
+      "bytes": "e717743b",
+      "mnemonic_prefix": "ld.h"
+    },
+    {
+      "name": "ld.h-dec-alias",
+      "addr": 464,
+      "size": 4,
+      "bytes": "e727743b",
+      "mnemonic_prefix": "ld.h"
+    },
+    {
+      "name": "ld.hu-inc-alias",
+      "addr": 468,
+      "size": 4,
+      "bytes": "e71f743b",
+      "mnemonic_prefix": "ld.hu"
+    },
+    {
+      "name": "ld.hu-dec-alias",
+      "addr": 472,
+      "size": 4,
+      "bytes": "e72f743b",
+      "mnemonic_prefix": "ld.hu"
+    },
+    {
+      "name": "ld.w-inc-alias",
+      "addr": 476,
+      "size": 4,
+      "bytes": "e717783b",
+      "mnemonic_prefix": "ld.w"
+    },
+    {
+      "name": "ld.w-dec-alias",
+      "addr": 480,
+      "size": 4,
+      "bytes": "e727783b",
+      "mnemonic_prefix": "ld.w"
     }
   ]
 }
