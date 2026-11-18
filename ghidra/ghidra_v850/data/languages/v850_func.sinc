@@ -93,12 +93,26 @@ DispList: { DispList21 }		is DispList21 & prep27=0				{ }
 }
 
 # DISPOSE imm5, list12, [reg1]
-:dispose prep0105, DispList, [prep1620r] is prep0615=0x19 & prep1620r & prep0105 &  DispList {
+:dispose prep0105, DispList, [prep1620r] is prep0615=0x19 & prep1620=31 & prep1620r & prep0105 & DispList {
 	sp = sp + (prep0105 << 2);
 	build DispList;
 	PC = prep1620r;
 	return [PC];
 }
+:dispose prep0105, DispList, [prep1620r] is prep0615=0x19 & prep1620r & prep0105 & DispList {
+	sp = sp + (prep0105 << 2);
+	build DispList;
+	goto [prep1620r];
+}
+@ifdef V850E3
+# G3M/G4MH sample a branch through sp before committing the frame writeback.
+:dispose prep0105, DispList, [prep1620r] is prep0615=0x19 & prep1620=3 & prep1620r & prep0105 & DispList {
+	local target:4 = prep1620r;
+	sp = sp + (prep0105 << 2);
+	build DispList;
+	goto [target];
+}
+@endif
 
 
 macro push(reg) {

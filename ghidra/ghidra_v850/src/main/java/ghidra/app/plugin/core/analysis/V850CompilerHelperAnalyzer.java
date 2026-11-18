@@ -968,6 +968,7 @@ public class V850CompilerHelperAnalyzer extends AbstractAnalyzer {
 			ins = program.getListing().getInstructionAt(ea);
 		}
 		char flag;
+		Address returnSite = null;
 		if (ins != null && "ctret".equals(ins.getMnemonicString())) {
 			flag = '4';
 			ea = ea.add(ins.getLength());
@@ -995,9 +996,12 @@ public class V850CompilerHelperAnalyzer extends AbstractAnalyzer {
 				return null;
 			}
 			flag = '5';
+			// STSR copied the CALLT continuation from CTPC to r10.
+			returnSite = h;
 		}
 		String name = reglo == -1 ? "___ghssv" + flag + "lp" : "___ghssv" + flag + "r" + reglo;
 		HelperInfo info = new HelperInfo(a, name, HelperKind.GHS_CALLT_SAVE);
+		info.returnSite = returnSite;
 		info.callt = true;
 		info.locals = flag == '5';
 		if (reglo != -1) {

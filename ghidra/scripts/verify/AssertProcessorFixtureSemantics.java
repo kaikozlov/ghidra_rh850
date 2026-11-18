@@ -1546,6 +1546,55 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
         }
     }
 
+    private void verifyDisposeTargets() throws Exception {
+        // DISPOSE 2,{lp,r29},[lp|r29|sp] and the no-target form.
+        byte[] code = java.util.HexFormat.of().parseHex("44067f0044067d004406630044066000");
+        FlowType[] flows = {FlowType.TERMINATOR, FlowType.COMPUTED_JUMP,
+                FlowType.COMPUTED_JUMP, FlowType.FALL_THROUGH};
+        for (String profile : new String[]{"v850", "v850e1f", "v850e3", "v850e3x"}) {
+            Language language = DefaultLanguageService.getLanguageService()
+                    .getLanguage(new LanguageID(profile + ":LE:32:default"));
+            ProgramDB program = new ProgramDB("dispose", language, language.getDefaultCompilerSpec(), this);
+            int transaction = program.startTransaction("dispose targets");
+            try {
+                Address base = program.getAddressFactory().getDefaultAddressSpace().getAddress(0x100);
+                program.getMemory().createInitializedBlock("fixture", base, 0x100, (byte) 0, monitor, false);
+                program.getMemory().setBytes(base, code);
+                // Stack at 0x140, two local words skipped, then saved lp and r29.
+                program.getMemory().setBytes(base.add(0x48), new byte[]{0x20, 1, 0, 0, 0x24, 1, 0, 0});
+                long spTarget = profile.startsWith("v850e3") ? 0x140 : 0x150;
+                long[] targets = {0x120, 0x124, spTarget, 0x110};
+                PseudoDisassembler decoder = new PseudoDisassembler(program);
+                EmulatorHelper emu = new EmulatorHelper(program);
+                try {
+                    for (int i = 0; i < flows.length; ++i) {
+                        Address address = base.add(4 * i);
+                        PseudoInstruction ins = decoder.disassemble(address);
+                        String label = profile + " " + ins;
+                        if (ins.getFlowType() != flows[i]) {
+                            fail(label + ": flow=" + ins.getFlowType() + " expected " + flows[i]);
+                        }
+                        emu.writeRegister("PC", address.getOffset());
+                        emu.writeRegister("sp", 0x140);
+                        emu.writeRegister("lp", 0);
+                        emu.writeRegister("r29", 0);
+                        step(emu, label);
+                        requireRegister(emu, label, "PC", targets[i]);
+                        requireRegister(emu, label, "sp", 0x150);
+                        requireRegister(emu, label, "lp", 0x120);
+                        requireRegister(emu, label, "r29", 0x124);
+                    }
+                } finally {
+                    emu.dispose();
+                }
+            } finally {
+                program.endTransaction(transaction, false);
+                program.release(this);
+            }
+        }
+        println("Checked DISPOSE return, computed jump, SP alias and fallthrough on four profiles");
+    }
+
     private void verifyMaddfLanguageBoundary() throws Exception {
         // R01US0001EJ0100 pp. 374, 380, 386, 388: E2M four-register forms.
         // The low bit of reg4 is instruction bit 23.
@@ -2211,6 +2260,7 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
         }
 
         runExecutionVectors(addrs);
+        verifyDisposeTargets();
         verifyMaddfLanguageBoundary();
         verifyExactFusedArithmetic();
         verifyCacheControl();

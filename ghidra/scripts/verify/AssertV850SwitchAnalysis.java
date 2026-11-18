@@ -510,6 +510,46 @@ public class AssertV850SwitchAnalysis extends GhidraScript {
         }
     }
 
+    private void fixtureGuardFlags() throws Exception {
+        for (boolean preserveFlags : new boolean[] { true, false }) {
+            String label = preserveFlags ? "guard-flags-preserved" : "guard-flags-clobbered";
+            ProgramDB p = newProgram(label);
+            try {
+                long[] targets = { 0x2620, 0x2626, 0x262c };
+                try (var tx = p.openTransaction("bytes")) {
+                    put(p, 0x2600, cmpImm5(2, 18));
+                    // With CMP 0,r7 here, the branch bounds r7, not the index r18.
+                    put(p, 0x2602, preserveFlags ? movImm5(7, 7) : cmpImm5(0, 7));
+                    put(p, 0x2604, bcond(0xB, 0x2640 - 0x2604));
+                    put(p, 0x2606, switchI(18));
+                    for (int i = 0; i < targets.length; i++) {
+                        put(p, 0x2608 + 2L * i, u16((int) ((targets[i] - 0x2608) / 2)));
+                        putCase(p, targets[i], i + 1, 0x2660);
+                    }
+                    putCase(p, 0x2640, 15, 0x2660);
+                    put(p, 0x2660, jmpReg(31));
+                }
+                analyze(p, 0x2600);
+                Data table = p.getListing().getDefinedDataAt(a(p, 0x2608));
+                if (preserveFlags) {
+                    checkCaseChain(p, 0x2606, targets, label);
+                    check(table != null && table.getNumComponents() == targets.length,
+                        label + ": expected a three-element table");
+                }
+                else {
+                    check(p.getListing().getInstructionAt(a(p, 0x2606)) != null,
+                        label + ": dispatch was not decoded");
+                    check(computedJumpTargets(p, 0x2606).isEmpty(),
+                        label + ": unrelated compare must not produce computed targets");
+                    check(table == null, label + ": unrelated compare must not define a table");
+                }
+            }
+            finally {
+                p.release(this);
+            }
+        }
+    }
+
     // Rejects: unbounded switch and a switch whose table decodes off-memory.
     private void fixtureRejects() throws Exception {
         ProgramDB p = newProgram("rejects");
@@ -661,6 +701,7 @@ public class AssertV850SwitchAnalysis extends GhidraScript {
         fixtureLoadedRelative();
         fixtureLoadedAbsolute();
         fixtureMaterializedBases();
+        fixtureGuardFlags();
         fixtureRejects();
         fixtureCuration();
         fixtureVariants();

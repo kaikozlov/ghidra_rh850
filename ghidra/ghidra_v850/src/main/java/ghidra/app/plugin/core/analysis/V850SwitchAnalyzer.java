@@ -617,6 +617,12 @@ public class V850SwitchAnalyzer extends AbstractAnalyzer {
 	 * the cursor past everything matched.
 	 */
 	private boolean matchBound(SwitchCase cand, Cursor cur) {
+		// CY and Z both live in the low byte of PSW in the V850 languages.
+		Register psw = program.getRegister("PSW");
+		if (psw == null) {
+			return false;
+		}
+		Address flagByte = psw.getAddress();
 		int start = skipCopies(cur);
 		int limit = Math.min(cur.slice.size(), start + BOUND_BRANCH_WINDOW);
 		for (int i = start; i < limit; i++) {
@@ -654,6 +660,10 @@ public class V850SwitchAnalyzer extends AbstractAnalyzer {
 			for (int j = i + 1; j < vend; j++) {
 				Long bound = boundValue(cur.slice, j, cur.reg, addOne);
 				if (bound == null) {
+					// An unrelated flag producer makes an older compare unusable.
+					if (writesBoundFlags(cur.slice.get(j), flagByte)) {
+						break;
+					}
 					continue;
 				}
 				// instructions between the dispatch and the bound value must not rewrite
@@ -1163,6 +1173,22 @@ public class V850SwitchAnalyzer extends AbstractAnalyzer {
 			if (ref.getReferenceType().equals(RefType.COMPUTED_JUMP)) {
 				return true;
 			}
+		}
+		return false;
+	}
+
+	/** True if the instruction's p-code may overwrite the PSW byte containing CY and Z. */
+	private static boolean writesBoundFlags(Instruction insn, Address flagByte) {
+		try {
+			for (PcodeOp op : insn.getPcode()) {
+				Varnode out = op.getOutput();
+				if (out != null && out.isRegister() && out.contains(flagByte)) {
+					return true;
+				}
+			}
+		}
+		catch (Exception e) {
+			return true; // without p-code, the flag dependency cannot be established
 		}
 		return false;
 	}

@@ -414,11 +414,19 @@ public class AssertV850CompilerHelpers extends GhidraScript {
 		// 0x11000: callt table (16-bit offsets from table base).
 		put(program, 0x11000, 0x0020); // entry 0 -> 0x11020
 		put(program, 0x11002, 0x0028); // entry 1 -> 0x11028
+		put(program, 0x11004, 0x0040); // entry 2 -> 0x11040
 		// 0x11020: ___ghssv4lp: prepare {lp},0 ; ctret  (8 bytes total)
 		put(program, 0x11020, 0x0780, 0x0021, 0x07e0, 0x0144);
 		// 0x11028: ___ghsld4lp: stsr ctpc,lp; ld.hu 0[lp],r12; add r12,sp;
 		//          dispose 0,{lp},[lp]
 		put(program, 0x11028, 0xfff0, 0x0040, 0x67ff, 0x0001, 0x19cc, 0x0640, 0x003f);
+		// ___ghssv5lp saves LP and allocates the byte count read from
+		// CTPC-4. The matched exit returns through the CTPC copy in r10.
+		put(program, 0x11040, 0x0780, 0x0021, 0x57f0, 0x0040,
+			0x5fea, 0xfffd, 0x19ab, 0x006a);
+		// Same prefix, but r11 holds the locals count, not a return address.
+		put(program, 0x11060, 0x0780, 0x0021, 0x57f0, 0x0040,
+			0x5fea, 0xfffd, 0x19ab, 0x006b);
 		// 0x10500: callt caller with CTBP setup: prepare {lp},0;
 		// movhi 1,r0,r1; movea 0x1000,r1,r1; ldsr r1,ctbp; callt 0; jmp [lp]
 		put(program, 0x10500, 0x0780, 0x0021, 0x0e40, 0x0001, 0x0e21, 0x1000, 0xa7e1, 0x0020,
@@ -428,6 +436,17 @@ public class AssertV850CompilerHelpers extends GhidraScript {
 		// {lp},0; movhi/movea/ldsr ctbp; callt 1; <word>; jmp [lp]
 		put(program, 0x10520, 0x0780, 0x0021, 0x0e40, 0x0001, 0x0e21, 0x1000, 0xa7e1, 0x0020,
 			0x0201, 0x0002, 0x007f);
+		// 0x10540: set CTBP, jump over the word consumed by ___ghssv5lp,
+		// then let the caller observe its adjusted stack and spill slot.
+		put(program, 0x10540, 0x0e40, 0x0001, 0x0e21, 0x1000, 0xa7e1, 0x0020,
+			0x05a5, 0x000c, 0x0202);
+		put(program, 0x10552, stw(3, 0x530, 20));
+		put(program, 0x10556, stw(6, 0, 3));
+		put(program, 0x1055a, ldw(7, 0, 3));
+		put(program, 0x1055e, stw(7, 0x534, 20));
+		put(program, 0x10562, 0x1e03, 0x000c); // addi 12,sp,sp
+		put(program, 0x10566, ldw(31, 0, 3));
+		put(program, 0x1056a, 0x1e03, 0x0004, 0x007f); // pop saved LP slot, return
 		// 0x10600: ABI-clobber CSE-independence witness (52 halfwords): two
 		// IDENTICAL gh_add64 calls with identical finite constants. The
 		// injected payload models the call's killed-register effects with
@@ -1070,7 +1089,8 @@ public class AssertV850CompilerHelpers extends GhidraScript {
 
 		// Disassemble function entries (flows reach the helper bodies).
 		long[] entries = { 0x10000, 0x10020, 0x10100, 0x10120, 0x10200, 0x10230, 0x10400, 0x10500,
-			0x10520, 0x10600, 0x11020, 0x11028, 0x11600, 0x11800, 0x11820, 0x11860, 0x11880,
+			0x10520, 0x10540, 0x10600, 0x11020, 0x11028, 0x11040, 0x11060,
+			0x11600, 0x11800, 0x11820, 0x11860, 0x11880,
 			// stripped arithmetic bodies (no labels: names must stay default)
 			0x11900, 0x11920, 0x11940, 0x11960, 0x119a0, 0x119e0, 0x11a20, 0x11a40, 0x11a60,
 			0x11a80, 0x11b60, 0x11b80, 0x11ba0, 0x11bb0, 0x11be0, 0x11c10,
@@ -1091,7 +1111,7 @@ public class AssertV850CompilerHelpers extends GhidraScript {
 		}
 
 		// Create the caller functions and name the arithmetic contracts.
-		long[] callers = { 0x10000, 0x10020, 0x10400, 0x10500, 0x10520, 0x10600, 0x11600,
+		long[] callers = { 0x10000, 0x10020, 0x10400, 0x10500, 0x10520, 0x10540, 0x10600, 0x11600,
 			0x11880, 0x11c60, 0x11d40, 0x11dc0, 0x12ec0, 0x13e40,
 			0x10230, 0x13f00, 0x13f40, 0x13f80, 0x20000, 0x20500, 0x20600 };
 		for (long c : callers) {
@@ -1130,7 +1150,7 @@ public class AssertV850CompilerHelpers extends GhidraScript {
 			// back out of the existing 0x121c0 function.
 			0x11e80,
 			0x12f60, 0x12fa0, 0x12fc0, 0x12ff0, 0x13d00, 0x13d20, 0x13d40, 0x13d80, 0x13da0,
-			0x13dc0, 0x13e00, 0x20400, 0x20420, 0x20440, 0x20460, 0x20480 };
+			0x13dc0, 0x13e00, 0x11060, 0x20400, 0x20420, 0x20440, 0x20460, 0x20480 };
 		for (long s : stripped) {
 			new CreateFunctionCmd(addr(program, s)).applyTo(program, monitor);
 		}
@@ -1263,6 +1283,23 @@ public class AssertV850CompilerHelpers extends GhidraScript {
 		check(dead != null && dead.getDataType() instanceof WordDataType,
 			"dead word after ghsld4 callt defined as data (got " +
 				(dead == null ? "<none>" : dead.getDataType().getName()) + ")");
+		check(hasReference(program, 0x10550, 0x11040), "callt 2 references ___ghssv5lp");
+		Function sv5 = listing.getFunctionAt(addr(program, 0x11040));
+		check(sv5 != null && sv5.getName().equals("___ghssv5lp") && sv5.isInline() &&
+			listing.getInstructionAt(addr(program, 0x1104e)).getFlowOverride() ==
+				FlowOverride.RETURN,
+			"___ghssv5lp is inline and its proven CTPC-derived r10 exit is a return");
+		check(listing.getInstructionAt(addr(program, 0x1106e)).getFlowOverride() ==
+			FlowOverride.NONE, "jmp [r11] with the locals count is not a helper return");
+		Data calltLocals = listing.getDataAt(addr(program, 0x1054e));
+		check(calltLocals != null && calltLocals.getDataType() instanceof WordDataType &&
+			calltLocals.getValue() instanceof Scalar scalar && scalar.getUnsignedValue() == 12,
+			"flag-5 CALLT locals word is defined and measured in bytes");
+		Function calltCaller = listing.getFunctionAt(addr(program, 0x10540));
+		check(storesConstSpDelta(program, calltCaller, -16),
+			"inlined ___ghssv5lp reaches the caller's store with the 4+12-byte frame");
+		check(execConsumerSp(program, 0x10540, 0x14530, 0x14534, 16, 0x89abcdefL),
+			"machine run: CALLT save allocates locals, spills r6 and returns with restored LP/SP");
 
 		// Named GHS contracts: typed 32-vs-64 ABI (joined register pairs for
 		// 8-byte values, 4-byte int results and shift counts, unsigned
