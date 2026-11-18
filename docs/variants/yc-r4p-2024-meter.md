@@ -7,6 +7,335 @@ Registered target: **`r4p-838004AD91`**, reference role, software identifier
 The [canonical artifacts](../../firmware/r4p-838004AD91/README.md) record
 the hashes, mapped bases, and original `community/yc/r4p/meter/` captures.
 
+Toyota lists assembly **`83800-4AD91`** as component 55 in its
+[12.3-inch combination-meter report](https://static.nhtsa.gov/odi/rcl/2025/RCLRPT-25V595-0339.pdf)
+(RAV4 Prime on p. 3, DENSO on p. 8, part number on p. 15). The dumps cover
+the RH850's CodeFlash, BootFlash and DataFlash.
+
+## How the meter works in normal operation
+
+The RH850 calculates the instrument readings, reads local sensors and
+steering-wheel switches, and plays warning sounds. Over SPI it sends a
+display-side device both processed values (including trip distance in
+tenths) and copies of selected CAN frames. The route and callback counts
+below come from this specimen's flash.
+
+| What was counted | Coverage | What the rows tell us |
+|---|---|---|
+| [Main cyclic callbacks](../../data/targets/r4p-838004AD91/cyclic_callbacks.csv) | 66; 42 confirmed operations, 24 partial | Which work the timer releases: instruments, sound, display exchange, timekeeping, supervision and nested workers. [Reset and scheduling](#from-reset-to-recurring-work) and [shutdown/wake](#run-shutdown-and-wake) explain when that work runs. |
+| [CAN receive routes](../../data/targets/r4p-838004AD91/can_receive_routes.csv) | 171; 97 copied into the raw SPI record | Which controller and buffer own a received frame, and whether the [display link](#the-display-link) also carries a raw copy. |
+| [CAN transmit routes](../../data/targets/r4p-838004AD91/can_transmit_routes.csv) | 54; 51 application, 3 service/diagnostic | Which frames the meter can originate, on which internal controller, and under which [COM group masks](#configured-can-publications). |
+| [Application diagnostic identifiers](../../data/targets/r4p-838004AD91/application_did_inventory.csv) | 74; 34 with an ordinary value callback | Which named diagnostic displays have a value reader, a feature/support reader, or only a catalog label. |
+
+### What a passive openpilot port can use
+
+At the [project's opendbc pin](../architecture/toyota-openpilot-porting-contract.md#upstream-prior-art),
+[`values.py`](https://github.com/commaai/opendbc/blob/c9b31d21bc396e8958891e271936bdbdf1a6ca93/opendbc/car/toyota/values.py#L280-L291)
+lists RAV4 Prime 2021–23 and RAV4 Hybrid 2023–25 separately. For this
+2024 Prime, three comparisons matter:
+
+| openpilot observation | Evidence from this meter | Passive check on the vehicle |
+|---|---|---|
+| Cluster speed | The pinned [Toyota `CarState`](https://github.com/commaai/opendbc/blob/c9b31d21bc396e8958891e271936bdbdf1a6ca93/opendbc/car/toyota/carstate.py#L83-L94) uses four wheel speeds and estimates `vEgoCluster` as `vEgo × 1.015`. Here `0x610` B2 republishes rounded, uncorrected km/h from `0x0D7`; [`0x376`](#speedometer-input-and-display-correction) carries the calibrated speed, unit and unavailable code. | Record wheel speeds and all three frames alongside the dashboard during acceleration and deceleration to capture the meter's filter and hold behavior. |
+| Steering buttons and cruise | The meter [assembles `0x24D`](#0x24d-application-producer) from CXPI switch data and local status; the pinned DBC names the sender `PCM`. [`0x399`](#cruise-lane-and-collision-warning-presentation) supplies displayed set speed. | Correlate button presses, displayed set speed and cruise engagement as separate observations. |
+| Body state and distance | The meter publishes [turn/hazard state](#body-inputs-turn-hazard-doors-and-buckle) and the [selected-unit odometer](#odometer-and-trip-distance). | While parked, compare left, right and hazard separately; change one door or buckle at a time; compare `0x611` before and after changing units. |
+
+For these comparisons, record the physical bus tap and synchronize CAN
+timestamps with a dashboard recording. The registered capture contains flash only.
+
+### Cruise, lane and collision-warning presentation
+
+Scheduled worker `0x4F386` (row `0x157F44`, mask `0x40`) builds the
+processed indications. The raw SPI record also carries the original frames:
+
+| Received on firmware channel 0 | Raw SPI payload start | What the meter computes for the processed record |
+|---|---|---|
+| `0x399`, B3 (`UI_SET_SPEED` in the pinned DBC) | `+0x2B0` | `0x4F49C` reads B3 and a companion flag on a valid receive. `0x4EA70` qualifies the value without unit conversion; `0x13C16..0x13C2E` packs it in `+0x4A0[31:16]`, with the companion in bits 15:8. With presentation mask `0x200` absent the value is `FFFF`. |
+| `0x412`, B0 bits 5:4 and 3:2 (`LEFT_LINE`, `RIGHT_LINE`) | `+0x1D8` | `0x4F688` repacks the two lines and other fields. On initial reception state or timeout the consumer can retain earlier payload bits with updated status. Classifier `0x4E96C` uses the line fields **and** status; the processed record carries resulting flags at `+0x498/+0x49C` and group validity at `+0x4A8[15:8]`. |
+| `0x411`, including B0 bits 7:6 (`PCS_INDICATOR`) | `+0x1D0` | `0x4F944` combines the PCS input and independently qualified `0x3B7` B1 bits 4:3. The selector table at `0x15E5A4` consumes its cached output for the processed SPI record. |
+
+Signal names in parentheses come from the pinned DBC. Monitor group `0x154528`
+combines `0x411`, `0x412` and `0x489` into event 15, DTC row `0x172DFC`,
+**U023A87 — Lost Communication with Image Processing Module “A”**.
+
+DID `0x15A1` reads cached feature-presence flags for LDA, PCS and radar
+cruise (`0x28652`). The catalog labels DID `0x2951` **SET Indicator**;
+its dispatch row at `0x156DE0` has a zero support mask and a null reader.
+
+### Body inputs: turn, hazard, doors and buckle
+
+**The meter publishes `0x614` on controller 0.** COM PDU 6 maps to lower
+TX row `0x1B` (`0x170DDA → 0x170624`). COM PDU `0x1B` is a separate
+CXPI-derived publication: lower row `0x14`, CAN `0x529`.
+
+| Observation | Source → normal application → output |
+|---|---|
+| Directional turn | `0x5BB94` checks receive status and reads two bit pairs in channel-0 `0x2D8` B5[3:0]. `0x5BC36/0x5BD1C` qualify the events; `0x6ABDA` packs `0x614` **B3[5:4]**. Sustained directional events produce codes 1 and 2; the left/right labels come from the pinned DBC. |
+| Hazard | `0x59D46` qualifies local switch `0x7C240(0x13)` and updates a latch. `0x5BA70` combines it with an auxiliary state; `0x6AC28` packs the result in `0x614` **B3[3]**. |
+| Doors | Five getters at `0x6CDE8..0x6CE88` read channel-0 `0x620` B5[5:1]. After checking receive status, `0x5B060` sets one flag if any input is active. `0x1537A` copies B5 to raw SPI `+0xC6`. The older DBC assigns individual door corners to bits 5:2. |
+| Driver buckle | Active-low `PPR17` bit 4 supplies local input `0x7C240(0x0E)`, read by `0x3D944`. It also supplies DID `0x1101` B1 mask `0x40`, **Driver Buckle Switch** (`1` = not fastened). |
+
+`Meter_P5` names both local switches. The `0x1101` reader `0x2849C` uses
+callback rows `0x1576D4` (buckle) and
+`0x1576EC` (hazard, `PPR0` bit 4, DID B3 mask `0x02`). Only callback
+result `1` sets the diagnostic bit; invalid local input also reads as
+zero. In contrast, the catalog's **Parking Brake Switch** entry for
+`0x1401` has a null callback at `0x15785C`. `0x620` B7 bit 4 has an
+active consumer (`0x6CEB0 → 0x52FAA` in dataflow order), but the parking-brake
+meaning comes from the comparison DBC alone.
+
+### Configured CAN publications
+
+`0x9DD00` indexes the six lower TX domains by the pointers at `0x16D0E0`
+and row counts at `0x16D160`. Domain 0 contains all 51 application rows:
+**34 on controller 0, 17 on controller 1**, 44 distinct IDs. Seven IDs are
+used on both controllers (`0x520/521/522/524/525/526/527`), with separate
+COM buffers. The other populated domains contain `0x442` (service) and
+`0x7C8/0x7CA` (diagnostic transport).
+
+The sender `0x9D122` uses `0x16FBF0` for buffer offsets and `0x16F3BC`
+for lengths. `0x9CE26` requires the PDU's configured group mask to overlap
+the active mask. Fifteen rows can match the initial `0x01` bit; the other
+36 require an additional mode bit. This includes indicated speed `0x376`
+and every controller-1 row. On controller 1, `0x500` takes words from the
+alternate SPI peer record (`0x140B2 → 0x154CA`); `0x62FB4` conditionally
+packs record-state fields for `0x520..0x526`.
+
+### Where the text and sound are
+
+The [RAV4 Prime owner's manual, p. 203](https://assets.sia.toyota.com/publications/en/om-s/OM42E79U/pdf/OM42E79U.pdf)
+names distinct screens for information since hybrid-system start and since a
+trip reset. We searched all three images for 15 actual English labels:
+`Drive Info Items`, `TRIP A Items`, `TRIP B Items`, `Total Time`, `Eco Score`,
+`Energy monitor`, `Language`, `Units`, `Brightness`, `Charging Schedule`,
+`Fuel Economy`, `Power Consumption`, `Trip Average`, `Closing Display` and
+`Refuel`. **Zero matches**, case-insensitive, at any byte offset in ASCII
+or UTF-16/32, either byte order, without requiring a terminator.
+
+CodeFlash nevertheless has **704** printable ASCII runs of eight or more
+characters (`[ -~]{8,}`); BootFlash and DataFlash have none at that threshold.
+Most long text is audio middleware: of 171 runs of at least 24 characters,
+160 start in `0x166000..0x16CFFF` and five in the audio assets below.
+All 14 case-insensitive `READY` hits occur inside `already`. `Unknown Warning`
+at `0x16B6C6` goes to an audio error reporter. The 892-character apparent
+UTF-16LE string at `0x16E76A` is part of a numeric CAN lookup table: `0x9C67C`
+indexes it by signal ID. The real ASCII `838004AD9110` at `0x156898` is copied
+into an identity record by `0x27174`.
+
+Audio initializer `0x17172` passes three adjacent regions and their lengths to the playback library
+(`0x1726E..0x172C0`; ends exclusive):
+
+| CodeFlash range | Asset | How the firmware uses it |
+|---|---|---|
+| `0xE7824..0xE8C64` | CRI Atom Automotive configuration | `0x8832E` checks `@UTF`; the tables name DSP settings and controls. |
+| `0xE8C64..0x14B288` | `AFS2` wave bank | `0x890AE` opens it. Its directory has eight slots, IDs 0–7, with 32-byte alignment. |
+| `0x14B288..0x14F184` | `CACB` cue data | `0x88D9E` associates it with the bank. `0x17480` supplies the handle and numeric cue ID; `0x87C42` checks the ID and starts playback. |
+
+The image search found no PNG signature, valid BMP header or JPEG
+start-of-frame header. The location of display assets remains open.
+
+### Who chooses the sound
+
+There are two playback paths. For general reminders, `0x790A4` polls
+the non-null callbacks in a 137-row request table at `0x164CC4`.
+`0x7A050` finds the lowest eligible request bit; the current request,
+age and playback state also enter the selection (`0x7A0A2/0x7A14E`).
+`0x174AC` maps the selected request through `0xE73D0` to a cue and gain
+on player 0. For example, a seatbelt-family reminder predicate at
+`0x3069E` maps through row `0x164D9C` to request `0x1B`, then through
+`0xE74A8` to cue `0x08`.
+
+The flasher uses **player 1**. Worker `0x5A580` maintains its own
+phase. `0x30966/0x30A3C` distinguish onset from finish; the calls at
+`0x175EA/0x17600` start cues `0x38/0x39`. Saved **Flasher Sound Volume
+Adjust** sets the gain. The driver writes audio samples
+to `PCMP0AUSA` at `0xFFF10018` (`0x17160/0x17162`; D1L/D1M manual,
+pp. 2585–2586). In parallel the flasher worker feeds local port handling
+and a two-side state in processed SPI word `+0x3B0`, bits 5:4.
+
+### From reset to recurring work
+
+On the application path the reset jump at `0x0 → 0xEE8` eventually reaches
+`0xBA0`, which reads the entry pointer `0x1FFFE0 = 0x10634`. `0xF9C` jumps
+to that entry. Application reset installs its own stack and vector table,
+then transfers through `0x10B28` to `0x83E88`. The stage walker `0x83E2A`
+reads 54 action/selector pairs at `0x16607C`. Stage 10 initializes application
+RAM as [described below](#normalization-and-analysis-model); stage `0x21`
+enters the foreground loop via `0x84EDC → 0x842A8`.
+
+OSTM0 releases one timer interrupt per 150,000 timer clocks
+(descriptor `0x157D74`, compare store `0x7D6F4`).
+IRQ `0x7D` advances a 20-slot schedule at `0x157D94`, ORs the slot's mask
+into a pending word, and requests IRQ `0xA8`. Handler `0x8424A` switches
+pending banks and calls matching rows of `0x157DE4` in order. That table
+releases SPI service `0x15BA2` and packet builder `0x15BD2` every **two**
+intervals, and speed processing `0x57D20` every **four**. Pending bits can
+coalesce; converting these intervals to elapsed time requires the board clock.
+
+The main callback table ends at the first null pointer (`0x157FF4`;
+dispatcher `0x84278..0x8429C`, eight-byte stride). It includes an immediate
+return (`0x56E34`) and a worker with an empty list (`0x83720`). Nested
+workers have their own tables: `0x770DE` dispatches another 13 rows using
+the same pending mask. Foreground, receive and DMA handlers run separately.
+
+### Run, shutdown and wake
+
+Bit `0x40` of the operating-state word represents the qualified local
+supply voltage. `0x17C42` accepts ADC sample 0 at **357–1,023** counts;
+`0x7C1B4` qualifies input 0, `0x167A2` sets the bit as part of the
+`0x16874` update, and `0x168AA` tests the cached word. The same ADC sample
+feeds DID `0x1021` **+B Voltage** (`0x27F9A`).
+
+Stage `0x21` rotates three foreground callbacks independently of timer
+releases. Its exit qualifier `0x83C98` combines eight predicates, pending
+wake state and a 3,000-call threshold. Audio playback and pending storage
+work participate; `0x83D06` checks for wake again before exiting. Subsequent
+stages stop ADC and OSTM, configure wake sources and request hardware
+**DEEPSTOP** (`0x7E6EC`, descriptor `0x165CEC`). Hardware wake restarts
+at the reset vector. Ordinary RAM is reinitialized; wake scratch and
+trip baselines have separate retention-RAM storage. The power-on-clear
+test at `0x1077A` and the retained marker checks at `0x83C0A` distinguish
+retention through standby from durability through complete power loss.
+
+### Odometer and trip distance
+
+CAN `0x0D7` bytes 1–2 carry the speed used by the
+[speedometer](#speedometer-input-and-display-correction). Byte 0 bits 5:0
+carry a rolling distance count (`0x734DC`, signal `0x542`). `0x55BBC`
+synchronizes on the first fresh sample; on the regular active path it
+takes the difference modulo 64, gated by receive status, operating state
+and uncorrected speed of at least 1.76 km/h. It also checks the sum over
+50 samples.
+
+`0x55E18` adds five units of remainder per accepted count. At 25,480
+remainder units it advances the whole kilometre: **5,096 counts/km**;
+`0x55904` converts with **8,200 counts/mile**. The normal output contains
+both unit systems, irrespective of which one the driver has selected.
+`0x5616E` subtracts two independent trip baselines from the total, accounting
+for a borrow in the remainder. Trip tenths are truncated, not rounded.
+The packet builder converts packed BCD digits to ordinary 32-bit integers
+(`0x79196`; six stores at `0x13586..0x135BA`):
+
+| Quantity | Metric packet offset | Imperial packet offset | Resolution |
+|---|---|---|---|
+| Total distance | `0xF0` | `0x634` | Whole km / mile |
+| Trip slot 1 | `0xF8` | `0x638` | 0.1 km / mile |
+| Trip slot 2 | `0x100` | `0x63C` | 0.1 km / mile |
+
+GTS `Meter_P5` names DID `0x0103`
+(`0x0403` snapshot) **Total Distance Traveled**: one unit byte (`1` km,
+`2` mile) and a three-byte big-endian integer. `0x5521E` publishes the
+selected total, bounded to 999,999; `0x22904` caches its unit and value for
+these readers. DID `0x12A1` **Integrated value for Maintenance** subtracts a
+different baseline (`0x548AE`). A screen observation can match the two
+SPI trip slots to their A/B labels.
+
+The normal CAN publication is **`0x611`**. COM PDU 3 starts at offset
+`0x18`; `0x66B5C` packs the selected total at `0x1C`, so B4..B7 are the
+32-bit big-endian value. `0x66B18` packs the **unit in B3[5:4]** at
+`0x1B`, width 2, shift 4 (`1` km, `2` mile). COM 3 maps to lower row
+`0x19` via `0x170DDA`, then to CAN ID `0x611` at `0x170614`. The pinned
+[`UI_SETTING` DBC](https://github.com/commaai/opendbc/blob/c9b31d21bc396e8958891e271936bdbdf1a6ca93/opendbc/dbc/generator/toyota/_toyota_2017.dbc#L395-L397)
+places `ODOMETER` in those same four bytes but `UNITS` in **B3[2:1]**.
+
+The same producer `0x5521E` puts the two trip slots, in selected-unit
+tenths, in `0x614` and `0x615` B4..B7. `0x30D` B4..B7 carries total
+distance in tenths.
+
+### Engine speed and hybrid instrumentation
+
+**Engine RPM and indicated tachometer value have different readers.** On
+channel 0, `0x115` B0:B1 is a signed big-endian input. On fresh data,
+`0x5891A` zeros inputs below `0x100`; `0x58862` otherwise computes
+`q = floor((50 × raw + 64) / 128)`. After the sample/hold logic, GTS DID
+`0x1042` **Engine RPM** reports in 50-r/min units (`0x28086`): healthy
+raw `0x1000` yields `0x40` or 3,200 r/min; `FF` means unavailable.
+The display path can also select seven-byte CAN `0x247` **B5:B6**, signed
+big-endian: `0x6F348` reads two bytes at COM `0x2F5`, five bytes past the
+PDU base `0x2F0`. The selector (`0x58870`) and the subsequent processing
+feed SPI word `+0x94` (`0x58E8A → 0x133AA`).
+
+**The HV/EV System Indicator is a signed gauge.**
+`0x5472C` takes channel 0 `0x247` B0 bits 1:0 followed by B1 and
+sign-extends bit 9. Raw `0x201` is unavailable; zero is a valid neutral
+sample. DID `0x1641` (`0x286CA`) writes only the low ten bits in a
+two-byte big-endian container. For example, `03 E7` decodes as **−25%**
+when sign-extended from bit 9; GTS lists the field width as 16. Two 64-entry
+filters (`0x5442C/0x545FA`) feed SPI words `+0xA0/+0x9C`; the latter
+biases its signed value by 512, so neutral is `0x200`. The raw SPI slot
+for `0x247` is 56, with its own receive-status bits.
+
+GTS labels `0x10A8` bit 33 **EV Drive Indicator**; this DID is absent
+from the normal read/support tables. The catalog lists **Ready Indicator**
+and **EV Mode Indicator** under `0x2961`, whose value reader is null
+(`0x156E08`).
+
+### The display link
+
+There are two outgoing records, each **2,048 bytes**. `0x15BD2 → 0x129E8`
+selects the builder; `0x15734` drives the full-duplex CSIG2/DMA transfer.
+Descriptor rows `0xE6290/0xE62B8` specify `0x200` 32-bit words each. CSIG2
+exchanges 1,024 halfwords in each direction. Offsets below refer to the
+little-endian RAM record.
+
+| Direction | Selector at `+0x7F6` | Payload |
+|---|---|---|
+| RH850 → peer | `00` | Processed values (`0x12F08`) and mailboxes (`0x162DE`): speed, distance, temperature, dimmer and display control. |
+| RH850 → peer | `0F` | Raw CAN mirror (`0x1537A`): receive status at `+0x08..+0x47`; 226 eight-byte slots from `+0x48`, of which 97 are mapped by `0xE66B0`. Each four CAN bytes are packed most-significant byte first into a word. |
+| Peer → RH850 | `F0` | Settings and selections (`0x12AB2/0x16212`). Four selectors at `+0x240..+0x243` choose records for a subsequent processed reply (`0x6310A`); two identity fields are described below. |
+| Peer → RH850 | `FF` | Alternate control record: `0x140B2` extracts bounded bitfields at `+0x18..+0x44` and forwards changed values. |
+
+`0x15D70` writes header word `0x53ACB269` and an exchange counter at `+0x7F7`.
+The last word at `+0x7FC` is the sum of the first 511 words modulo $2^{32}$,
+XOR `0x53ACB269` (`0x1285A`). `0x159A6` checks the header, checkword and
+peer status; `0x15B00..0x15B32` dispatches a valid reply by its selector.
+
+**Outside temperature illustrates the encoding.** On channel 0, CAN `0x3B0`
+B3 and B5 bit 4 feed `0x56CAE → 0x56C00`. The Celsius branch subtracts 48
+from B3; the Fahrenheit branch also uses the half-degree bit. `0x56D6E`
+supplies the processed builder, which writes `(signed temperature + 40) ×
+100` in the low 16 bits at `+0xB4` and a remapped sample status in bits
+31:30 (`0x13406..0x1345C`). For valid B3=`0x44`, half-degree bit clear,
+the normal word is `0x1770` for 20 °C or `0x2A30` for 68 °F. GTS DID
+`0x1141` names Celsius and Fahrenheit and reads the same cached sample.
+
+**Driver's dimmer.** Captured
+variant 1 selects the analog rheostat. `0x42BF2` reads ADCE0 slot 2, shifts
+the 10-bit sample right by two, and feeds the filter at `0x42B3E/0x42B90`.
+After four equal samples of `0x200` from cleared state, the filtered count
+is `0x80`. The `st.w` at `0x134FE` puts that count at `+0xDC`, while DID
+`0x1024` **Rheostat value** returns `floor(128 × 254 / 255) = 127`, or
+50% on the GTS scale. Before readiness the DID returns `FF`. The catalog's
+lux DIDs `0x1026/0x1142` and backlight DID `0x280B` are absent from this
+image's dispatch, fallback and length tables (`0x1568B8/0x1565AC/0x1556FC`).
+
+**Fuel level.** Cyclic worker `0x51DD8`
+uses a local ADC snapshot. ROM selectors `0xE626E` and `0x15F472` route
+the main sender to ADCE0I4; two readings of ADCE0I3 provide a reference.
+`0x51F3C` checks both reference samples and normalizes the sender before
+filtering. GTS DID `0x1022` **Fuel Input** reports the calibrated result
+in 0.01 L (`0x53958 →` conversion in `0x52D00`). The second sender is
+disabled in all nine variant tables; `0x1023` returns unavailable (`FFFF`).
+
+The gauge uses a held, rate-limited quantity.
+`0x51504` updates that state; one branch subtracts an adjustment accumulated
+from CAN `0x3D3` B0:B1. `0x5182E` applies a separate gauge curve. On the
+captured profile, one sender calibration knot corresponds to **27.50 L**;
+the same internal quantity (18,022) maps to **50** on the 0–100 gauge curve
+at `0x15F0CE`. `0x133C2..0x133DA` writes the gauge result and a status
+bit at processed packet offset `+0xA4`.
+
+### What would identify the renderer?
+
+In an `F0` reply,
+`0x16126` accepts 12-byte fields at `+0x60C` and `+0x618` when the low two
+bits of their respective status words (`+0x604`, `+0x608`) are clear.
+Identity builder `0x27174` reads those fields via `0x1643E` for entries
+1 and 2; entry 0 is the local `838004AD9110`. Board package markings and
+the two remote identifiers would narrow the search for the peer firmware
+and its fonts and translations. A synchronized SPI trace and screen recording
+while switching trips, units and language would tie record fields to screens.
+
 ## Normalization and analysis model
 
 CodeFlash is **2 MiB, already based at zero**. Its reset vector branches
@@ -37,8 +366,8 @@ from writable memory; application initialization is not overlaid onto it.
 
 ```sh
 tools/gtarget show r4p-838004AD91
-tools/gtarget r4p-838004AD91 decompile 0x7AA30
-tools/pseudo --target r4p-838004AD91 0xFEDC6D56
+tools/pseudo --target r4p-838004AD91 0x58406          # digital speed calculation
+tools/gtarget r4p-838004AD91 disasm 0x13386 -n 8      # four speed fields in SPI packet
 ```
 
 Two independent rebuilds produced byte-identical inventories. The promoted
@@ -577,6 +906,12 @@ The digital-speed path is `0x58406`:
    signal `0xA5` through `0x64D44/0x688B4`: **CAN `0x376` B0 bit 0
    followed by B1**, with value `((B0 & 1) << 8) | B1`. This is PDU
    `0x12`, lower TX index 4, transmit row `0x17056C`.
+   **B0 bit 7 selects units: `1` mph, `0` km/h.** `0x58406` saves its unit
+   selector in item `0x41F`; the zero case selects the imperial result.
+   `0x5838A` tests the saved item for zero and `0x64D22/0x6888E` pack the
+   boolean as signal `0xA4` at bit 7 of the same byte. On the invalid-status
+   branch `0x583AE..0x583BA`, the nine-bit speed is `0x1FF` (unavailable).
+   A passive decoder must exclude that value before converting to m/s.
 
 There are **six selector slots (`0..5`): five calibration IDs and a zero
 fallback**. Selector `0x58788` uses the low byte of saved item `0x131`
@@ -739,7 +1074,8 @@ caller of `0x768B4` has been identified.
 The active raw-frame path `0x1537A` forwards B2 mask `04` unchanged as
 SPI packet byte `0x451`, mask `04`, with a separate initial/timeout status.
 
-`0x15BD2 → 0x15A8E/0x15D70 → 0x15734` sends the complete `0x800`-byte packet.
+`0x15BD2` builds the record. A separate scheduled callback at `0x15BA2`
+services the exchange: `0x15A8E → 0x15D70 → 0x15734` sends the `0x800` bytes.
 The first halfword is written to `0xFFDA5004`; DMA sends the remaining
 `0x3FF` halfwords to `0xFFDA5008`. The D1L/D1M hardware manual
 **R01UH0451EJ0220**, pp. 1007/1012/1024–1025, identifies these as
@@ -753,9 +1089,24 @@ Return-control handler `0x1F8BE` sends zero through that mailbox.
 GTS names `0x2831`'s controls **Multi Display All (White)** and
 **Multi Display Default Screen**.
 
-Diagnostic dispatch table `0x1568B8` has 20-byte rows with the DID at
-offset `+18` (`0x2389A` disassembly). The `0x1101` and `0x2041` read
-callbacks are `0x2849C` and `0x2881C`, respectively.
+The [application DID inventory](../../data/targets/r4p-838004AD91/application_did_inventory.csv)
+covers all 74 rows of `0x1568B8`. `0x2389A` reads the DID at `+18` and
+calls the support function at `+0`; `0x23C36` checks the value callback at
+`+4` before calling it. **34 have a value callback, 40 do not.** Sixty-three
+rows have an exact `Meter_P5` monitor label. The CSV distinguishes numerical
+readings, switches, feature presence, stored settings, internal data and
+catalog-only entries. A separate 19-ID support list and other
+dispatch paths account for services such as the total-distance read.
+Readers for `0x1101/0x2041` are `0x2849C/0x2881C`.
+
+**The meter also diagnoses other nodes.** For CAN `0x247`, receive
+notification `0x1140E → 0x86364` refreshes logical record `0x16`.
+The scheduled diagnostic worker `0x19BAA` evaluates it via group
+`0x154534` and row `0x154430`; that group requires the relevant presence
+state as well as the receive-history, age and operating-state checks.
+Its event 16 resolves through `0x172F88` to `0x172E08 = 0x00C29387`:
+GTS **U029387, Lost Communication with Hybrid/EV Powertrain Control
+Module — Missing Message**.
 
 GTS diagnostic bit positions are MSB-first (`extract_msb0` in
 `tools/techstream/ddb_semantics.py`). **Stop Lamp Switch Function**, DID
@@ -768,19 +1119,24 @@ Its callback at `0x157734` is null. The `0x5EA16 → 0x3D812` configuration
 path belongs to seatbelt warnings; its bit-14 input is the **3rd Left
 Seatbelt Warning Buzzer Function**.
 
-The receive channels must be distinguished. Dispatcher `0xA7CD4` uses
-`0x16D0A0 = {0, 98, 171}` to select separate ranges of the receive table
-at `0x1706E4`. Channel 0 contains `0x3B7` (PDU `0x91`, buffer
-`0xFEDDB831`); its range contains none of `0x1B2/0x251/0x252`.
+The [complete RX route inventory](../../data/targets/r4p-838004AD91/can_receive_routes.csv)
+joins each CAN row to its router destination and, where present, its raw SPI
+slot and status bits. `0xA7CD4` uses the boundaries at `0x16D0A0`
+(`0, 98, 171`) to search `0x1706E4`. Channel 0 has 98 rows, 46 mirrored;
+channel 1 has 73 rows, 51 mirrored. Of the 171 routes, 170 lead to the COM
+receive copier at `0xA4502`; channel 0 `0x00F` takes the synchronization path.
+Only `0x682` occurs on both channels: different COM buffers, neither mirrored.
+Channel numbers are the controller indices in this firmware.
+
+The 97 mirror entries join by **COM PDU**. For
+example, `0x3B7` is channel 0, COM `0x91`, buffer `0xFEDDB831`; mirror
+row `0xE68B4` selects slot 129, payload `+0x450`, status word `+0x28`
+bits 3:2. The channel 0 range contains none of `0x1B2/0x251/0x252`.
 Channel 1 contains `0x230` and `0x251`, in the `0xA6..0xBC` PDU range
 handled by the multi-frame record assembler `0x6230E → 0x62FB4`.
 `0x62F80` selects samples with `B1 == selector && B0 != 0`;
 `0x62E9C/0x62E66` assemble 30-halfword records. `0x6310A → 0x12F08`
 publishes records selected by incoming SPI packet offset `0x240`.
-
-Consumer `0x4F944` combines `0x411` fields with `0x3B7` B1 bits 4:3.
-Its cached output is consumed by the selector table at `0x15E5A4` and
-serialized into the processed SPI packet.
 
 Receive status from `0x9C618` distinguishes initial/not-received (`01`)
 and timeout (`02`). Reception clears both; `0xA4280` sets timeout on expiry.
