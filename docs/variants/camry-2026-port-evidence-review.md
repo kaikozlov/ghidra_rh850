@@ -46,6 +46,123 @@ rather than overwriting repeated counter values: 30,532 / 35,994 complete
 four-record bank bursts. Its kinematic agreement corroborates the independent
 unit anchors above.
 
+### Additional fields in the 24 primary slots
+
+In each seven-byte slot record let **G/M/C/D** denote the four families
+starting at `0x180/183/186/189`, respectively; byte indices here are
+zero-based within the slot. Cross-checks use the November drives below.
+All 3,133,280 `0x180..0x18B` frames had zero trailer bytes and B3 equal to
+B2+6 modulo 256 on these drives. In joined banks, the seven-byte C and D
+records are all zero exactly when G has its empty sentinel; M can still
+carry lifecycle bits for an empty slot.
+
+- **Ground-referenced longitudinal speed:** `signed13(be16(D[4:6]) >> 3)`
+  × **0.025 m/s**. Compared to `carState.vEgo + M-relative-speed` on
+  occupied nonzero-state slots with all four records present, keeping
+  counters divisible by seven, correlations are **0.9988 / 0.9990 / 0.9908**
+  (`13a / 13c / 13e`); median absolute errors **0.039 / 0.025 / 0.069 m/s**.
+  Narrowing to signed12 wraps real samples. Independent matched vision
+  lead speeds also track this field. It is a useful check on time alignment
+  and velocity, not an alternative value for `RadarPoint.vRel`.
+- **Lateral rate candidate:** signed12 `((G[3] & 15) << 8) | G[4]`.
+  For stationary-candidate points (`|vEgo + vRel| < 0.5 m/s`, `vEgo > 3 m/s`)
+  in turns (`|range × yawRate| > 0.35 m/s`), the raw field tracks
+  `−range × yawRate` at `r=0.962–0.971`. Fitted scale is
+  `0.0173–0.0177 m/s/count`; an exact OEM scale is unresolved. Across the
+  three drives the same-slot lateral-position derivative gives `r=0.765–0.928`.
+  D's lower eleven bits have a weaker association with yaw-compensated lateral
+  motion; M byte 3 did not give a transferable acceleration scale.
+- **Lead-associated metadata:** `D[0]` spans 0–100. It is nonzero on
+  16,675/16,781, 20,511/20,604 and 1,217/1,246 vision-matched primary
+  observations respectively, but some matched leads have zero and several
+  simultaneous slots can read 100. Near-center, low-relative-speed tracks
+  also score nonzero 95–100% of the time. With an observed middle cycle
+  hidden, `C[6]` changed on 67.7–80.1% of flagged replacements **and**
+  6.8–7.8% of steady continuations. Neither is a durable object ID.
+  Do not use `D[0]` as a confidence percentage, unique lead selector or
+  required validity flag.
+
+**GTS+ cross-check:** `tools/gts did FRC_P5 0x190A --json` gives selected-target
+limits of 327.64 m and −51.200…+51.175 m/s; `0x1909` gives
+−40.96…+40.92 m lateral. The endpoints corroborate the engineering scales.
+Narrowing the CAN fields to those diagnostic limits would corrupt 25,991
+speed and 28,282 lateral samples among 2,514,832 occupied nonzero-state bank
+observations. `tools/gts recorder 0x590C` describes the **selected** ACC target;
+`0x573E/573F/5742` describe object number/type/reliability in recorder
+coordinates. The three routes contain radar and FRC software identity replies
+but no paired selected-target or recorder values. Object class, reliability
+enums and transmitter identity remain unmapped on this bus.
+
+### Five near-range entries on 0x18C
+
+The following drives recorded `TOYOTA_CAMRY_TSS3` with radar enabled. On
+Panda bus 1 they have **3,394,387 CRC-valid `0x180..0x18C` frames**, zero
+bad CRCs, and 261,105 complete 13-message cycles. Join by both header
+bytes in capture order within 50 ms, not by the repeating counter alone.
+
+| Route | rlogs | Complete cycles | Populated `0x18C` entries | Entries near a primary track |
+|---|---:|---:|---:|---:|
+| `0000013a--8201802acc` | 83 | 98,346 | 15,503 | 6,962 |
+| `0000013c--0a6b872c87` | 104 | 124,360 | 22,171 | 12,718 |
+| `0000013e--27d453251c` | 33 | 38,399 | 7,126 | 2,944 |
+
+`0x18C/48` is a separate near-range list. After its four-byte header, count
+bits MSB-first from zero. Each of five entries has a 47-bit record at `47*i`
+and a 14-bit word at `235+14*i`. A record whose leading 13 bits are all ones
+is empty, even when a flag elsewhere in the record is set. No corresponding
+tail word was nonzero for an empty entry. Bits 305–351 were zero throughout.
+
+A working metric decode at record offset `k=47*i` is unsigned `[k:k+15]`
+× 0.01 m forward, signed `[k+15:k+26]` × 0.04 m left, and the signed tail
+word × 0.025 m/s relative speed (half-open slices). Observed forward values
+span **0.32–11.89 m**. Signed 12-, 13- and 14-bit interpretations of the
+tail agree throughout the populated sample. The other 21 record bits have
+no assigned physical meaning here.
+
+Two checks constrain the interpretation:
+
+- Match to the 24 primary slots by forward range and relative speed **only**:
+  require differences under 0.5 m and 0.5 m/s; require a gap over 0.8 to
+  the runner-up in `|Δx| + 2|Δv|`. The held-out lateral coordinate correlates
+  at **0.814 / 0.964 / 0.816** in route order above. In the newest drive the
+  median lateral error is 0.16 m, versus 6.20 m with the sign reversed.
+- On four-cycle intervals near 200 ms, keep the same populated slot throughout
+  and exclude adjacent steps ≥3 m forward, ≥10 lateral counts, or ≥3 m/s in
+  rate. For ego speed >3 m/s and absolute mean endpoint rate >1 m/s, the
+  median difference between forward range derivative and decoded rate is
+  **0.51 / 0.53 / 0.41 m/s**. For stationary-candidate windows selected by
+  `|dx/dt + vEgo| < 2 m/s` at ego speed >3 m/s, decoded rate versus `-vEgo`
+  has slope **1.000 / 1.004 / 1.031**.
+
+**Port decision:** do not append five `RadarPoint`s to the existing 24.
+22,624 of 44,800 entry observations already have a primary point within
+1 m on both axes and 1 m/s in rate. Conversely, no neighbor within those
+tolerances does not identify a distinct vehicle. Match the nearest primary
+`modelV2.leadsV3[0]` observation within 35 ms, probability ≥0.9, using the
+standard camera-to-radar offset, lateral sign and relative speed. At 1 m /
+1 m / 1.5 m/s tolerance, **15 / 0 / 0** cycles match the camera lead via
+`0x18C` alone; the longest such run spans 0.10 s. This measures incremental
+agreement with the recorded model, not independent object truth. At that
+probability threshold there were only 1,038 / 21 / 0 cycles with a camera
+lead in `(0,12]` m.
+
+**Other periodic bus-1 traffic:** the [bus inventory](camry-2026-live-baseline.md#42-bus-1-cameraradar-inventory)
+also includes `0x020/160/1A0/200/201/230/440/450`. On each November route,
+`0x020` and `0x450` were constant after B3; `0x440` varied in at most four
+bytes after B3. `0x200/201` contain repeated packed 12-bit `0x800` values.
+For every seventh frame of each of these eight IDs, the closest complete
+object cycle within 30 ms contained no occupied seven-byte geometry record
+copied verbatim anywhere after B3 in the sampled frame. Their physical field
+meanings and transmitting nodes cannot be assigned from that comparison.
+
+Replay from this repository with the openpilot Python environment:
+
+```sh
+uv run --offline --no-project --python ../kai-openpilot/.venv/bin/python \
+  python -m tools.targets.camry.analysis.analyze_camry_2026_radar_near_returns \
+  ~/dev/inspect/logs/{0000013a--8201802acc,0000013c--0a6b872c87,0000013e--27d453251c}
+```
+
 ### TSS3 0x123/16 is a new Profile-5 radar-status PDU
 
 The old Toyota radar parser's STATUS_MSG is also CAN ID 0x123, but its
@@ -62,19 +179,24 @@ and finds only two application payloads: the baseline above on 538,079 frames
 and 01 0c 08 00 a0 10 00 00 00 00 00 00 00 on 219 frames across five
 segments.
 
-Current GTS+ Fr_RadSen_P5.ddb gives a direct semantic join for B7:B8.
-Front Radar Sensor DID 0x100F is a Data Monitor bitfield whose MSB0 bits
-8..13 are, in order, **Dirt Detection for Radar Cruise**, **Dirt Detection for
-PCS**, **Partially Dirt Detection**, **Foreign Matter Detection**, **Dirt
-Detection**, and **Blockage Detection**. Mapping those six bits onto the
-observed two-byte B7:B8 word places them exactly at B8[7:2]. The only dynamic
-CAN bit seen in the archive is B8[4], which therefore lands exactly on GTS+
-bit11 **Foreign Matter Detection**. At opendbc `8e1dd8e6`, the TSS3 radar
-DBC generator and `RadarInterface` omit `0x123`; its status fields have no
-runtime projection. GTS+ separately names
-temporary optical-axis unavailability in DID 0x1012 and function restriction
-in DID 0x2093; their CAN carriers remain unassigned and should not be invented
-from the constant bytes of 0x123.
+All **130,553** bus-1 `0x123` frames in the three November drives above have
+the baseline application payload and valid CRC. During the 219 archived
+assertions, `0x180..0x18C` continued: **5,694** CRC-valid frames, the same
+count as in equal-duration immediately preceding and following controls. On
+`00000175--6c2758b35b/2`, all 162 `radarTracks` publications during the
+assertion contained points (median five); 162/162 were populated on either
+side. On `0000003e--1a2f20417d` segments 13/19/20/27, stock cruise stayed
+latched on 552/552 `0x08A` frames during the assertions.
+
+`tools/gts did Fr_RadSen_P5 0x100F` identifies MSB0 bits 8–13 of the **DID
+value** as dirt detection for radar cruise, dirt detection for PCS, partial
+dirt, foreign matter, dirt, and blockage. If CAN bytes B7:B8 carry that
+two-byte value, B8[4] corresponds to **Foreign Matter Detection**. The
+November radar diagnostic response identifies software `8821F4801200`; there
+is no paired `0x100F` read in either these drives or the positive windows.
+GTS+ defines temporary optical-axis unavailability separately in `0x1012`
+and function restriction in `0x2093`. Do not map B8[4] to
+`radarUnavailableTemporary`: points and cruise can continue while it is set.
 
 ### Source-driven object lifecycle
 
@@ -95,26 +217,34 @@ zero and sentinel/zero ranges. Nonzero states 1/2/3 remain structurally named;
 no unsupported confidence percentage or sensor-source enum is assigned.
 Both cycle bytes increment independently modulo256.
 
-The September-15 implementation `b579c04d` (identical radar source in rebased
-`a39ec1bb`) consumed every source cycle in a host publication and retired track
-identity across missing cycles. Its retained replay of 60,969 held-out bank
-pairs produced **20,323 complete updates**, **308,111 qualified point
-observations**, **17,868 observed identity replacements**, and **zero reported
-CAN errors**. These are historical implementation results.
+opendbc `809cb9a6` processes each accepted `0x185` trigger in order. This
+preserves intermediate lifecycle flags when two received cycles share a host
+call. A **missing motion update** is a distinct, observed failure:
 
-Cleanup `9145977b` replaced that per-source-cycle path. Current opendbc
-`8e1dd8e6` uses the latest CAN-parser values and checks which banks arrived
-since the trigger. Profile-5 CRC and ordinary slot lifecycle checks remain.
-
-**Software reproduction, 2026-11-17:** using the existing
-`TestToyotaTSS3RadarInterface` helpers in `car/toyota/tests/test_toyota.py`,
-initialize occupied slot 0 with `TRACK | {'new': 1}` (track ID 0). Build all
-three geometry/motion banks for a 45-m occupied replacement (`new=1, ended=1`),
-then for a 44-m ordinary update, 50 ms later. Pass both timestamped cycles to
-one `RadarInterface.update()` call: the result retains **track ID 0**, range
-**44 m**, and `canError=False`. Delivering the same cycles in separate calls
-produces **track ID 1** at 44 m. The batched path loses the intermediate
-replacement flag. Its frequency in vehicle logs has not been measured.
+- Route `0000013e--27d453251c/0`, bus 1: counter delta 2 from
+  `696875405973` to `696972838480` ns. Slot 14 has neither lifecycle flag
+  at the second trigger. In the intervening cycle (`B2:B3 = D9:DF`), only
+  `0x180/18A/18B` were captured from this family, not slot 14's motion
+  message `0x184` or the trigger `0x185`. The **recorded** valid `radarTracks` messages at
+  `696878276034` and `696975570419` ns keep ID **29** as `(dRel,yRel,vRel)`
+  changes from `(34.985,-2.56,0)` to `(97.145,-8.24,0)`. Offline replay of
+  `809cb9a6` retains the same local identity across that jump too. There
+  was also a 15-cycle gap earlier in startup, before logged `radarTracks`.
+  Recorded `leadOne` stayed on ID 8 across the second gap; ID 29 was not
+  the selected lead.
+- The other two November drives have no skipped `0x185` counter values.
+  Drop-one sensitivity check: for every consecutive three complete cycles
+  with adjacent timestamps under 80 ms, hide the middle cycle. Among slots
+  occupied at both ends with no final lifecycle flag, **139,511** retained-ID
+  decisions would hide an intervening retirement; **2,102,110** would retain
+  the correct ID. These are overlapping hypothetical trials, not on-road
+  failure counts. Restarting IDs on a confirmed source gap trades track
+  history for avoiding false continuity. A split host packet alone is no
+  reason to restart a track.
+  In an offline `13e/0` comparison, clearing points only when the accepted
+  `0x185` counter advanced by more than one modulo 256 changed continuity on
+  **2 of 1,206** updates (17 and 18 slots). It retired the incorrect slot-14
+  identity, with identical slot membership, coordinates, rates and errors.
 
 Reproducible source reduction:
 `tools/targets/camry/analysis/analyze_camry_2026_radar_lifecycle.py`,

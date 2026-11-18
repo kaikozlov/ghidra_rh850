@@ -12,13 +12,14 @@ Read-only analysis against tracked raw captures:
     lead/lag vs 0x025 angle, and the retirement of the prior synthetic B12/B13
     exploratory composite (outside the firmware-defined receive surface);
   * bus1 upstream-family census and Class-L-conditioned 0x18A activity, 0x18C
-    staircase record count, and the 0x181 bytes[35:37] steering-lag field.
+    populated near entries, and the 0x181 bytes[35:37] steering-lag field.
 
 The output is review evidence only; production output stays disabled.
 """
 from __future__ import annotations
 from tools.toyota_support.toyota_route_opendbc_common import decode_wheel_speed_kph
 
+from tools.targets.camry.analysis.analyze_camry_2026_bus1_camera_output import near_returns_18c
 from tools.targets.camry.support import camry_f33_corpus as f33
 from tools import REPO_ROOT
 import argparse
@@ -46,7 +47,6 @@ DRIVES = {
 #   0x025 STEER_ANGLE                   3|12 (1.5,0)   -> signed12(((B0&0x0F)<<8)|B1) * 1.5
 #   0x025 STEER_FRACTION               39|4  (0.1,0)   -> signed4(B4>>4) * 0.1   (B4 high nibble)
 #   0x025 STEER_RATE                   35|12 (1.0,0)   -> signed12(((B4&0x0F)<<8)|B5) * 1.0 (B4 low nibble + B5)
-ANCHOR = bytes.fromhex("ffe00007")
 
 
 def sha256(path: Path) -> str:
@@ -408,7 +408,6 @@ def analyze_drive(label: str, path: Path, accepted: set[int], census_intervals: 
                         "pre_frames": len(pre), "post_frames": len(post),
                         "persistent_flips": flips, "class_l_step_detected": bool(flips)})
 
-    # 0x18C record count via literal staircase anchor ff e0 00 07 at (off-4)%4==0.
     rec = []
     for _start_seg, a, _end_seg, b in ints:
         for edge, which in ((a, "rise"), (b, "fall")):
@@ -416,14 +415,9 @@ def analyze_drive(label: str, path: Path, accepted: set[int], census_intervals: 
                    [d for _s, t, d in bus1.get(0x18C, []) if edge + 1_000_000_000 < t <= edge + 10_000_000_000]
             counts = Counter()
             for d in rows:
-                c = None
-                for off in range(4, len(d) - 3):
-                    if d[off:off + 4] == ANCHOR and (off - 4) % 4 == 0:
-                        c = (off - 4) // 4
-                        break
-                counts[c] += 1
+                counts[sum(1 for _ in near_returns_18c(d))] += 1
             rec.append({"edge": which, "frames": len(rows),
-                        "record_counts": {str(k): v for k, v in sorted(counts.items(), key=lambda x: (x[0] is None, x[0]))}})
+                        "record_counts": dict(sorted(counts.items()))})
 
     # 0x181 bytes[35:37] signed LE i16: corr(field(t), angle(t+dt)) over first 10 s.
     lag_field = None
@@ -516,7 +510,7 @@ def main() -> int:
         },
         "interpretation": {
             "class_l_eps_negative": "observed/deterministic: across both drives no exact-F33-accepted bus0 field shows a common majority-bit step at Class-L rise, and EPS 0x030 shows zero persistent bit flips at rise/fall; inside Class-L the driver-style torque/rate observables stay bounded, consistent with Class-L being an upstream/display/availability state.",
-            "upstream_18x": "bounded: bus1 0x180..0x18C is not exact-F33 accepted and can only be upstream transformation input. 0x18A has no persistent rise flip reproduced across both matched Class-L windows; one isolated drive-B B27 high-nibble flip is retained in the per-edge evidence. 0x18C record count is 3 on both sides of every edge; 0x181 bytes[35:37] signed little-endian lags measured steering by 200/240 ms in the two drives and is steering-derived.",
+            "upstream_18x": "Bus1 0x180..0x18C is outside exact-F33 acceptance. See the per-edge 0x18A activity and 0x18C populated-entry histograms. 0x181 bytes[35:37] signed little-endian lags measured steering by 200/240 ms in the two drives.",
             "exploratory_0x090_resolution": "verified/recovered: the exact-F33 PDU40 (CAN 0x090) receive surface is sig229 B0[1:0]+B1, sig232 B2[1:0]+B3, sig235 B4[1:0]+B5 (10-bit unsigned, recentered by FUN_0004afcc v-512 into FEBE808A/8C/8E), six flag bits B0/B2/B4.7/.6 into FEBE8090..95, and sig241 B28[7:4] into FEBE8096; B6..B27 are never read by the PDU40 unpacker and B29..B31 are fetched only inside sig241's four-byte window then masked away. sig235 is the strongest angle-like exact field (~1 count/deg about 512) and lags 0x025 steering angle by 60/70 ms across the two drives (r=0.9924/0.7428); no exact 0x090 signal reproducibly leads the motor proxy. FUN_00058074 routes the recentered cells (FEBE808A->FEBEF1C6, FEBE808C->FEBEF1C8, FEBE808E->FEBEF1CA) and FUN_000be846's combination reduces, under the pinned runtime constants FEBEF098=FEBEF099=0/FEBEF09C=1/FEBEF0AA=0, to the sig232-derived FEBEBE96 branch, copied by FUN_000bcd66 to FEBEAE0C and integrated by FUN_000c310e (leaky, x0x400/8672, gated FEBEBFB1=='Z'). The prior exploratory best field B12[3:0]+B13 (r=0.9931/-60 ms, drive A) is a synthetic cross-signal composite over wire bytes the EPS never unpacks from 0x090: bytes 12..15 carry a byte-duplicated fine-scale angle-correlated copy (B12:B13 == B14:B15 in every inside-Class-L frame) that merely observes the same underlying steering; the synthetic B4[3:0]+B5 candidate coincides numerically with exact sig235 whenever B4<=3.",
         },
     }

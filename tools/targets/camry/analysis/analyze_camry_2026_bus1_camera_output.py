@@ -91,6 +91,23 @@ def decode_object_relative_speed(slot: bytes) -> float:
     return signed(raw, 14) * REL_SPEED_LSB_M_S
 
 
+def near_returns_18c(payload: bytes):
+    """Observed five-entry packing; see the Camry radar report for scale evidence."""
+    if len(payload) != 48:
+        raise ValueError("0x18C requires 48 bytes")
+    body = int.from_bytes(payload[4:], "big")
+    for i in range(5):
+        # MSB-first, after the four-byte P05 header: five 47-bit records,
+        # then five corresponding 14-bit rate words starting at bit 235.
+        record = (body >> (352 - (i + 1) * 47)) & ((1 << 47) - 1)
+        if record >> 34 == 0x1FFF:
+            continue
+        x = record >> 32
+        y = signed((record >> 21) & 0x7FF, 11)
+        rate = signed((body >> (352 - 235 - (i + 1) * 14)) & 0x3FFF, 14)
+        yield i, x * .01, y * .04, rate * .025
+
+
 def pearson(xs: list[float], ys: list[float]) -> float:
     if len(xs) != len(ys) or len(xs) < 2:
         return float("nan")
@@ -359,6 +376,7 @@ def collect_drive(path: Path) -> dict:
     object_cycle: tuple[int, int, int] | None = None
     object_epoch = 0
     object_crc_valid = object_crc_invalid = 0
+    near_counts: Counter[int] = Counter()
     pending_bursts = {}
     burst_serial = 0
     expired_bursts = 0
@@ -379,6 +397,8 @@ def collect_drive(path: Path) -> dict:
                 n_00f += 1
             if addr in FAMILY and len(d) >= 4:
                 last4[addr].add(d[-4:])
+            if addr == 0x18C and len(d) == 48 and int.from_bytes(d[:2], "little") == binascii.crc_hqx(d[2:] + b"\x8c\x01", 0xFFFF):
+                near_counts[sum(1 for _ in near_returns_18c(d))] += 1
             if 0x180 <= addr <= 0x18B and len(d) == 64:
                 bank = (addr - 0x180) % 3
                 record_group = (addr - 0x180) // 3
@@ -488,6 +508,7 @@ def collect_drive(path: Path) -> dict:
         },
         "family_first_samples": {k: family_samples[k] for k in sorted(family_samples)},
         "joined_object_family_0x180_0x18B": joined_object_family(object_bursts),
+        "0x18C_populated_entries_per_crc_valid_frame": dict(sorted(near_counts.items())),
         "request_object_on_bus1": join_5282_on_bus1(path, id11),
     }
 
@@ -502,7 +523,7 @@ def main() -> int:
     args = parser.parse_args()
     drives = {name: collect_drive(path) for name, path in DRIVES.items()}
     artifact = {
-        "schema": "camry-2026-bus1-camera-output-v5",
+        "schema": "camry-2026-bus1-camera-output-v6",
         "gts_vocabulary": gts_vocabulary(),
         "drives": drives,
         "classification": {
@@ -554,13 +575,11 @@ def main() -> int:
                 "In record1, B1[5:0]||B2 is a signed14 velocity word *0.025 m/s. "
                 "Independent vision, ego-speed, and gyro anchors supersede the former "
                 "direct FFD 57BA/573C scale transfer. Range-rate agreement by itself "
-                "cannot identify a common scale. 0x18C/48 remains the VAR-068 status PDU."
+                "cannot identify a common scale. 0x18C/48 has a separate five-entry near-range list."
             ),
             "remainder": (
-                "The three core RadarPoint quantities (range, lateral position, relative "
-                "speed) are recovered. Remaining companion bits include object identity/type/"
-                "reliability/classification metadata; GTS provides matching u5/u3 vocabulary "
-                "but exact CAN packing is not yet assigned. Which Bus-1 node transmits the "
+                "Companion field identities require a diagnostic-to-wire or independent physical anchor. "
+                "Which Bus-1 node transmits the "
                 "family (FRC vs Front Radar vs fusion) is likewise not named by GTS+ CAN-ID."
             ),
         },

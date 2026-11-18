@@ -9,6 +9,7 @@ import tempfile
 from pathlib import Path
 
 from tools import REPO_ROOT
+from tools.targets.camry.analysis.analyze_camry_2026_bus1_camera_output import near_returns_18c
 REPO = REPO_ROOT
 ART = REPO / "data/generated/camry_2026_bus1_camera_output.json"
 BUILD = REPO / "tools/targets/camry/analysis/analyze_camry_2026_bus1_camera_output.py"
@@ -44,6 +45,13 @@ with tempfile.TemporaryDirectory() as td:
 
 gts = art["gts_vocabulary"]
 check("independently anchored CAN distance LSB is 0.005 m", gts["joined_distance_scale"]["lsb_m"] == 0.005)
+
+# 13e/0, t=710182555474: empty first record with a flag set; the final rate
+# belongs to slot 4, not the fourth entry after filtering out empty records.
+wire = bytes.fromhex("d443e2e8fff80001fe2004480db030001a47bc07f9001b400602a0004affb482a000007f6dfe27fc1fe8000000000000")
+check("0x18C sparse slots preserve both packed strides", [
+    (slot, round(x, 2), round(y, 2), round(v, 3)) for slot, x, y, v in near_returns_18c(wire)
+] == [(1, 2.74, 1.08, -1.85), (2, 8.4, -2.72, -1.5), (3, 4.36, .12, -.8), (4, 5.99, -.76, -1.2)])
 
 print("== both drives ==")
 for drive in ("drive_a", "drive_b"):

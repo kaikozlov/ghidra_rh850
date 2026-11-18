@@ -2345,8 +2345,9 @@ The decoder preserves the exact DBC formulas: torque is
 
 The upstream `0x180..0x18C` family remains outside F33's acceptance rules. `0x18A` has no
 rise flip reproduced across both matched intervals; an isolated drive-B B27 high-nibble
-flip remains visible in the artifact and is not promoted. Literal `0x18C` staircase
-parsing yields record count **3 in every frame on both sides of all four edges**.
+flip remains visible in the artifact. Across the 360 frames at each edge, the
+five-entry `0x18C` list has 0–2 populated entries on drive A, zero at the
+drive-B rise, and 0–1 at its fall. [Wire layout and matching evidence](camry-2026-port-evidence-review.md#five-near-range-entries-on-0x18c).
 The broader `0x181` comparison is in §26.
 The exploratory `0x090` correlation is now closed and retired in
 §28: its best field was a synthetic composite outside the exact-F33 receive surface.
