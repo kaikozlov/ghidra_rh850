@@ -5,8 +5,9 @@ use serde::{Deserialize, Serialize};
 #[command(name = "ghidra")]
 #[command(
     version,
-    about = "Rust CLI for Ghidra reverse engineering",
-    long_about = "Ghidra reverse engineering with compact text output. Use --json or --pretty for structured output. List queries default to 50 results; --limit 0 returns all."
+    about = "Inspect functions, list program data, and navigate cross-references",
+    long_about = "Inspect functions, list program data, and navigate cross-references.\n\nUse --json for machine-readable output or --pretty for indented JSON. List commands show 50 rows by default. Set --limit 0 to show every row.",
+    after_help = "Examples:\n  ghidra inspect main\n  ghidra function list --filter 'name^init' --fields address,name\n  ghidra disasm main -n 20\n  ghidra query imports --json"
 )]
 pub struct Cli {
     #[command(subcommand)]
@@ -20,11 +21,11 @@ pub struct Cli {
     #[arg(short, long, global = true)]
     pub quiet: bool,
 
-    /// Output as JSON
+    /// Print compact JSON
     #[arg(long, global = true)]
     pub json: bool,
 
-    /// Output JSON with pretty formatting
+    /// Print indented JSON
     #[arg(long, global = true)]
     pub pretty: bool,
 
@@ -50,35 +51,47 @@ pub struct Cli {
 
 #[derive(Subcommand, Clone, Serialize, Deserialize, Debug)]
 pub enum Commands {
-    /// Universal query command for any data type
+    /// List functions, strings, imports, exports, or memory blocks
+    #[command(
+        display_order = 4,
+        after_help = "Examples:\n  ghidra query functions --count\n  ghidra query strings --filter 'value~error' --fields address,value\n  ghidra query imports --json"
+    )]
     Query(QueryArgs),
 
     /// Project management commands
+    #[command(display_order = 70)]
     Project(ProjectArgs),
 
     /// Program/binary management commands
-    #[command(subcommand, alias = "prog", alias = "programs")]
+    #[command(subcommand, display_order = 71, alias = "prog", alias = "programs")]
     Program(ProgramCommands),
 
-    /// Function operations
-    #[command(subcommand, alias = "fn", alias = "func", alias = "functions")]
-    Function(FunctionCommands),
-
-    /// String operations
-    #[command(subcommand, alias = "string", alias = "str")]
-    Strings(StringsCommands),
-
-    /// Symbol operations
-    #[command(subcommand, alias = "sym", alias = "symbols")]
-    Symbol(SymbolCommands),
-
-    /// Memory operations
-    #[command(subcommand, alias = "mem")]
-    Memory(MemoryCommands),
-
-    /// Cross-reference operations
+    /// List, inspect, or edit functions
     #[command(
         subcommand,
+        display_order = 3,
+        alias = "fn",
+        alias = "func",
+        alias = "functions"
+    )]
+    Function(FunctionCommands),
+
+    /// List defined strings or show references to a string
+    #[command(subcommand, display_order = 6, alias = "string", alias = "str")]
+    Strings(StringsCommands),
+
+    /// List, inspect, or edit symbols
+    #[command(subcommand, display_order = 12, alias = "sym", alias = "symbols")]
+    Symbol(SymbolCommands),
+
+    /// Show memory blocks, read bytes, or search for a byte pattern
+    #[command(subcommand, display_order = 11, alias = "mem")]
+    Memory(MemoryCommands),
+
+    /// List references to or from an address or symbol
+    #[command(
+        subcommand,
+        display_order = 7,
         alias = "xrefs",
         alias = "xref",
         alias = "crossref",
@@ -87,27 +100,37 @@ pub enum Commands {
     XRef(XRefCommands),
 
     /// Type operations
-    #[command(subcommand, alias = "types")]
+    #[command(subcommand, display_order = 13, alias = "types")]
     Type(TypeCommands),
 
     /// Comment operations
-    #[command(subcommand, alias = "comments")]
+    #[command(subcommand, display_order = 14, alias = "comments")]
     Comment(CommentCommands),
 
-    /// Search operations
-    #[command(subcommand, alias = "search")]
+    /// Search for functions, strings, byte patterns, or calls
+    #[command(subcommand, display_order = 8, alias = "search")]
     Find(FindCommands),
 
     /// Graph operations
     #[command(subcommand, alias = "callgraph", alias = "cg")]
     Graph(GraphCommands),
 
-    /// Decompile function
-    #[command(alias = "decomp", alias = "dec")]
+    /// Decompile the function at a name or address
+    #[command(
+        alias = "decomp",
+        alias = "dec",
+        display_order = 1,
+        after_help = "Examples:\n  ghidra decompile main -o c\n  ghidra decompile main --with-vars --with-params --pretty"
+    )]
     Decompile(DecompileArgs),
 
-    /// Disassemble code
-    #[command(alias = "disassemble", alias = "dis")]
+    /// Show instructions starting at a name or address
+    #[command(
+        alias = "disassemble",
+        alias = "dis",
+        display_order = 2,
+        after_help = "Examples:\n  ghidra disasm main -n 20\n  ghidra disasm 0x401000 -n 40 -o asm\n  ghidra disasm main --json"
+    )]
     Disasm(DisasmArgs),
 
     /// Diff operations
@@ -126,7 +149,8 @@ pub enum Commands {
     #[command(subcommand, alias = "scripts")]
     Script(ScriptCommands),
 
-    /// Batch operations
+    /// Execute commands from a file or stdin
+    #[command(display_order = 9)]
     Batch(BatchArgs),
 
     /// Configuration management
@@ -136,11 +160,12 @@ pub enum Commands {
     /// Set default values
     SetDefault(SetDefaultArgs),
 
-    /// Program summary
-    #[command(alias = "info")]
+    /// Show program metadata, address range, and function count
+    #[command(alias = "info", display_order = 5)]
     Summary(SummaryArgs),
 
-    /// Program statistics
+    /// Count functions, symbols, instructions, and other program data
+    #[command(display_order = 10)]
     Stats(StatsArgs),
 
     /// Show version information
@@ -228,7 +253,12 @@ pub enum Commands {
     #[command(alias = "mv")]
     Rename(RenameArgs),
 
-    /// Compound inspection of a function (decompile + xrefs + callers + callees + disasm + metadata)
+    /// Show a function overview or selected detail sections
+    #[command(
+        display_order = 0,
+        long_about = "Inspect one or more functions. Compact output defaults to function metadata, callers, and callees. Non-compact formats, batch, and queries with --fields, --filter, or --sort default to every section.\n\nSelect sections explicitly or use --all. Use --disasm N to set the instruction count and --limit N to cap each call or reference list.",
+        after_help = "Examples:\n  ghidra inspect main init\n  ghidra inspect main --decompile --xrefs\n  ghidra inspect main --all --disasm 20"
+    )]
     Inspect(InspectArgs),
 }
 
@@ -242,20 +272,29 @@ pub struct InspectArgs {
         conflicts_with = "target"
     )]
     pub positional_targets: Vec<String>,
-    /// Single-target compatibility form
+    /// Alternate form for a single target
     #[arg(long = "target", value_name = "TARGET")]
     pub target: Option<String>,
+    /// Include every section (40 instructions unless --disasm sets the count)
+    #[arg(long)]
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub all: bool,
+    /// Include decompiled C (JSON also includes parameter and local storage)
     #[arg(long)]
     pub decompile: bool,
+    /// Include direct callers
     #[arg(long)]
     pub callers: bool,
+    /// Include direct callees
     #[arg(long)]
     pub callees: bool,
+    /// Include references to the function entry and references from its body
     #[arg(long)]
-    pub xrefs: bool, // includes both xrefs_to and xrefs_from
-    #[arg(long)]
-    pub disasm: Option<usize>, // number of instructions (None = skip)
-    /// Refuse larger target sets unless the analyst explicitly raises the bound
+    pub xrefs: bool,
+    /// Include up to N instructions from the function entry
+    #[arg(long, value_name = "N")]
+    pub disasm: Option<usize>,
+    /// Maximum number of targets per request (at least 1)
     #[arg(long, default_value_t = 20)]
     pub max_targets: usize,
     #[command(flatten)]
@@ -272,9 +311,12 @@ impl InspectArgs {
     }
 }
 
+const FIELDS_LONG_HELP: &str = "Select comma-separated fields (for example, --fields address,name).\nIn compact lists, use one field for one value per row or several fields for columns in that order.\nUse --fields=-comment,signature to exclude fields instead.";
+const FORMAT_LONG_HELP: &str = "Text: compact, full, minimal, table, ids, count.\nStructured: json (indented), json-compact, ndjson (json-stream), csv, tsv.\nUse c with decompile, asm with disasm, or hex with memory read.\nAn explicit format takes precedence over --json and --pretty.";
+
 #[derive(Args, Clone, Serialize, Deserialize, Debug)]
 pub struct QueryArgs {
-    /// Data type to query (functions, strings, imports, etc.)
+    /// Data set: functions, strings, imports, exports, or memory
     pub data_type: String,
 
     /// Target program
@@ -291,12 +333,12 @@ pub struct QueryArgs {
     #[arg(short, long)]
     pub filter: Option<String>,
 
-    /// Field selection (comma-separated)
-    #[arg(long)]
+    /// Select comma-separated fields (use --fields=-FIELD to exclude)
+    #[arg(long, long_help = FIELDS_LONG_HELP)]
     pub fields: Option<String>,
 
-    /// Output format: compact, full, json, json-compact, ndjson, csv, tsv, table, ids, count, c, asm, hex
-    #[arg(long, short = 'o')]
+    /// Output format, e.g. compact, json, ndjson, csv, tsv, or table
+    #[arg(long, short = 'o', long_help = FORMAT_LONG_HELP)]
     pub format: Option<String>,
 
     /// Maximum number of results (0 = unlimited; default 50)
@@ -311,11 +353,11 @@ pub struct QueryArgs {
     #[arg(long, allow_hyphen_values = true)]
     pub sort: Option<String>,
 
-    /// Only return count
+    /// Print only the count, with any explicit --limit and --offset
     #[arg(long)]
     pub count: bool,
 
-    /// Output as compact JSON (shorthand for --format=json-compact)
+    /// Print compact JSON (use --pretty for indented JSON)
     #[arg(long)]
     pub json: bool,
 }
@@ -391,8 +433,11 @@ pub struct ExportArgs {
 
 #[derive(Subcommand, Clone, Serialize, Deserialize, Debug)]
 pub enum FunctionCommands {
-    /// List all functions
-    #[command(alias = "ls")]
+    /// List functions with optional filters, sorting, and field selection
+    #[command(
+        alias = "ls",
+        after_help = "Examples:\n  ghidra function list --filter 'name^init' --fields address,name\n  ghidra function list --sort=-size --limit 10\n  ghidra function list --fields name --limit 0"
+    )]
     List(QueryOptions),
     /// Get function details
     #[command(alias = "show", alias = "detail")]
@@ -400,7 +445,7 @@ pub enum FunctionCommands {
     /// Decompile function
     #[command(alias = "decomp")]
     Decompile(FunctionDecompileArgs),
-    /// Disassemble function
+    /// Show instructions at the function target (use `disasm -n N` to set the count)
     #[command(alias = "disassemble", alias = "dis")]
     Disasm(FunctionGetArgs),
     /// Get function calls
@@ -601,8 +646,11 @@ impl SetVarTypeArgs {
 
 #[derive(Subcommand, Clone, Serialize, Deserialize, Debug)]
 pub enum StringsCommands {
-    /// List all strings
-    #[command(alias = "ls")]
+    /// List strings already defined in the program
+    #[command(
+        alias = "ls",
+        after_help = "Example:\n  ghidra strings list --filter 'value~error' --fields address,value"
+    )]
     List(QueryOptions),
     /// Get references to a string
     #[command(alias = "references", alias = "xrefs")]
@@ -618,8 +666,11 @@ pub struct StringRefsArgs {
 
 #[derive(Subcommand, Clone, Serialize, Deserialize, Debug)]
 pub enum SymbolCommands {
-    /// List all symbols
-    #[command(alias = "ls")]
+    /// List symbols with optional filters and field selection
+    #[command(
+        alias = "ls",
+        after_help = "Example:\n  ghidra symbol list --filter 'name^init' --fields address,name"
+    )]
     List(QueryOptions),
     /// Get symbol details
     Get(SymbolGetArgs),
@@ -1062,14 +1113,14 @@ impl DecompileArgs {
 
 #[derive(Args, Clone, Serialize, Deserialize, Debug)]
 pub struct DisasmArgs {
-    /// Disassembly target (name | 0xaddr | FUN_<hex>)
+    /// Start address or symbol (for example, 0x401000, main, or FUN_00401000)
     #[arg(value_name = "TARGET", required_unless_present = "target")]
     pub positional_target: Option<String>,
-    /// Disassembly target (name | 0xaddr | FUN_<hex>)
+    /// Alternate form for the start address or symbol
     #[arg(long = "target", value_name = "TARGET")]
     pub target: Option<String>,
-    /// Number of instructions to disassemble
-    #[arg(long = "instructions", short = 'n')]
+    /// Maximum instructions to read (default: 10)
+    #[arg(long = "instructions", short = 'n', value_name = "N")]
     pub num_instructions: Option<usize>,
     #[command(flatten)]
     pub options: QueryOptions,
@@ -1307,9 +1358,11 @@ pub struct AnalyzeArgs {
 /// Common query options used across commands
 #[derive(Args, Clone, Serialize, Deserialize, Debug)]
 pub struct QueryOptions {
+    /// Program within the selected project
     #[arg(long)]
     pub program: Option<String>,
 
+    /// Project name or path
     #[arg(long)]
     pub project: Option<String>,
 
@@ -1319,12 +1372,12 @@ pub struct QueryOptions {
     #[arg(short, long)]
     pub filter: Option<String>,
 
-    /// Select comma-separated fields; prefix the list with '-' to exclude (e.g. --fields=-comment,signature)
-    #[arg(long)]
+    /// Select comma-separated fields (use --fields=-FIELD to exclude)
+    #[arg(long, long_help = FIELDS_LONG_HELP)]
     pub fields: Option<String>,
 
-    /// Output format: compact, full, json, json-compact, ndjson, csv, tsv, table, ids, count, c, asm, hex
-    #[arg(long, short = 'o')]
+    /// Output format, e.g. compact, json, ndjson, csv, tsv, or table
+    #[arg(long, short = 'o', long_help = FORMAT_LONG_HELP)]
     pub format: Option<String>,
 
     /// Maximum number of results (0 = unlimited; default 50)
@@ -1339,11 +1392,11 @@ pub struct QueryOptions {
     #[arg(long, allow_hyphen_values = true)]
     pub sort: Option<String>,
 
-    /// Print only the count; ignores the default limit, respects explicit --limit and --offset
+    /// Print only the count, with any explicit --limit and --offset
     #[arg(long)]
     pub count: bool,
 
-    /// Output as compact JSON
+    /// Print compact JSON (use --pretty for indented JSON)
     #[arg(long)]
     pub json: bool,
 }

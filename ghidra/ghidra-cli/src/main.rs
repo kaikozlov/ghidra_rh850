@@ -874,7 +874,13 @@ fn run_with_bridge(cli: Cli) -> anyhow::Result<()> {
                 }
             }
 
-            match execute_via_bridge(&client, &cli.command, cli.quiet, config.default_limit) {
+            match execute_via_bridge(
+                &client,
+                &cli.command,
+                cli.quiet,
+                config.default_limit,
+                format,
+            ) {
                 Ok(value) => value,
                 Err(err) if is_unknown_command_error(&err) => {
                     if !cli.quiet {
@@ -918,6 +924,7 @@ fn run_with_bridge(cli: Cli) -> anyhow::Result<()> {
                         &cli.command,
                         cli.quiet,
                         config.default_limit,
+                        format,
                     )?
                 }
                 Err(err) => return Err(err),
@@ -977,7 +984,15 @@ fn run_with_bridge(cli: Cli) -> anyhow::Result<()> {
             emit_output(&processed.displayed.to_string())?;
             return Ok(());
         }
-        emit_output(&DefaultFormatter.format(&processed.values, format)?)?;
+        // Multi-target inspect is an ordered list of sectioned reports, not a row table.
+        let row_output = flat_collection && !matches!(cli.command, Commands::Inspect(_));
+        let output = match &query.fields {
+            Some(fields) if row_output && format == OutputFormat::Compact => {
+                format::projected::rows(&processed.values, fields.include.as_deref())
+            }
+            _ => DefaultFormatter.format(&processed.values, format)?,
+        };
+        emit_output(&output)?;
         for value in &processed.values {
             emit_nested_truncation_notices(value, "");
         }
@@ -1099,6 +1114,7 @@ fn execute_via_bridge(
     command: &Commands,
     quiet: bool,
     default_limit: Option<usize>,
+    format: OutputFormat,
 ) -> anyhow::Result<serde_json::Value> {
     use serde_json::json;
 
@@ -1688,8 +1704,14 @@ fn execute_via_bridge(
 
             let mut results = Vec::new();
             for (cmd, sub_cli) in commands.iter().zip(parsed.iter()) {
-                let sub_result = execute_via_bridge(client, &sub_cli.command, true, default_limit)
-                    .and_then(|value| process_batch_result(&sub_cli.command, value, default_limit));
+                let sub_result = execute_via_bridge(
+                    client,
+                    &sub_cli.command,
+                    true,
+                    default_limit,
+                    OutputFormat::JsonCompact, // batch returns structured records
+                )
+                .and_then(|value| process_batch_result(&sub_cli.command, value, default_limit));
                 match &sub_result {
                     Ok(val) => results.push(json!({"command": cmd.display, "result": val})),
                     Err(e) => {
@@ -1721,17 +1743,24 @@ fn execute_via_bridge(
                     args.max_targets
                 );
             }
-            let want_all = !args.decompile
+            let implicit = !args.decompile
                 && !args.callers
                 && !args.callees
                 && !args.xrefs
                 && args.disasm.is_none();
+            // Field selection, filtering and sorting may depend on sections the
+            // overview omits. Use the same complete record as structured output.
+            let overview = format == OutputFormat::Compact
+                && args.options.fields.is_none()
+                && args.options.filter.is_none()
+                && args.options.sort.is_none();
+            let want_all = args.all || (implicit && !overview);
             let payload = json!({
                 "decompile": args.decompile || want_all,
-                "callers": args.callers || want_all,
-                "callees": args.callees || want_all,
+                "callers": args.callers || implicit || want_all,
+                "callees": args.callees || implicit || want_all,
                 "xrefs": args.xrefs || want_all,
-                "disasm": if want_all { Some(40) } else { args.disasm },
+                "disasm": args.disasm.or(want_all.then_some(40)),
                 // Nested inspect collections cannot be paginated by the outer
                 // Rust query layer. The bridge performs its own one-row lookahead
                 // and returns exactly this many visible rows in every format.

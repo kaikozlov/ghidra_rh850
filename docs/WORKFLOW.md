@@ -361,7 +361,8 @@ tools/g stats --json
 [Output and query options](../ghidra/ghidra-cli/docs/output-format.md) covers
 formats, pagination, field selection, and configuration.
 
-For the common multi-command read paths, prefer the compound CLI operations:
+Use `tools/g inspect ADDR` for the function and its call sites. Select other
+sections explicitly, or request every section with `--all`.
 
 ```bash
 # Both addresses are Camry F33 functions in the default working project; two or

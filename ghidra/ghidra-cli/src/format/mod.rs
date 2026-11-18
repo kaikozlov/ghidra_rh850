@@ -1,7 +1,11 @@
+pub(crate) mod projected;
+
 use crate::error::{GhidraError, Result};
 use comfy_table::{presets::UTF8_FULL, Table};
 use serde::Serialize;
 use serde_json::Value as JsonValue;
+use std::collections::HashMap;
+use std::fmt::Write as _;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum OutputFormat {
@@ -82,12 +86,12 @@ fn table_columns(data: &[JsonValue]) -> Vec<String> {
     let mut columns = std::collections::BTreeSet::new();
     for item in data {
         if let JsonValue::Object(map) = item {
-            columns.extend(map.keys().cloned());
+            columns.extend(map.keys().map(String::as_str));
         } else {
-            columns.insert("value".into());
+            columns.insert("value");
         }
     }
-    columns.into_iter().collect()
+    columns.into_iter().map(str::to_owned).collect()
 }
 
 fn table_cell(item: &JsonValue, key: &str) -> String {
@@ -231,8 +235,7 @@ fn format_compact<T: Serialize>(data: &[T]) -> Result<String> {
                 return Ok(out.trim_end().to_string());
             }
 
-            if map.len() == 2 && map.contains_key("inspection") && map.contains_key("target") {
-                render_compact_item(map, &mut out);
+            if render_inspection_item(map, &mut out) {
                 return Ok(out.trim_end().to_string());
             }
 
@@ -348,18 +351,8 @@ fn entity_kind(map: &serde_json::Map<String, JsonValue>) -> Option<&'static str>
 }
 
 fn render_compact_item(map: &serde_json::Map<String, JsonValue>, out: &mut String) {
-    // Multi-target inspection wrapper: exactly {"inspection": {...}, "target": "..."}
-    if map.len() == 2
-        && map.contains_key("inspection")
-        && map.get("inspection").is_some_and(|v| v.is_object())
-    {
-        if let Some(inner) = map.get("inspection").and_then(|v| v.as_object()) {
-            if let Some(target) = get_str(map, "target") {
-                out.push_str(&format!("# {}\n", target));
-            }
-            render_sections(inner, out);
-            return;
-        }
+    if render_inspection_item(map, out) {
+        return;
     }
     match entity_kind(map) {
         Some("comment") => {
@@ -439,7 +432,7 @@ fn render_compact_item(map: &serde_json::Map<String, JsonValue>, out: &mut Strin
         Some("symbol") => render_symbol(map, out),
         Some("variable") => render_variable(map, out),
         _ => {
-            // Compound report (e.g. inspect): sections of entities.
+            // Generic compound report.
             if map.values().any(|v| v.is_object() || v.is_array()) {
                 render_sections(map, out);
             } else {
@@ -869,6 +862,209 @@ fn render_memory(map: &serde_json::Map<String, JsonValue>, out: &mut String) {
     }
 }
 
+const INSPECTION_SECTIONS: [(&str, Option<&str>); 6] = [
+    ("decompilation", None),
+    ("disassembly", Some("instructions")),
+    ("callers", Some("callers")),
+    ("callees", Some("callees")),
+    ("xrefs_to", Some("xrefs")),
+    ("xrefs_from", Some("xrefs")),
+];
+
+fn inspection_function(
+    map: &serde_json::Map<String, JsonValue>,
+) -> Option<&serde_json::Map<String, JsonValue>> {
+    let function = map.get("function")?.as_object()?;
+    ((entity_kind(function) == Some("function") || function.contains_key("error"))
+        && map.keys().all(|key| {
+            key == "function"
+                || INSPECTION_SECTIONS
+                    .iter()
+                    .any(|(section, _)| key.as_str() == *section)
+        }))
+    .then_some(function)
+}
+
+fn render_inspection_item(map: &serde_json::Map<String, JsonValue>, out: &mut String) -> bool {
+    if let Some(function) = inspection_function(map) {
+        render_inspection(map, function, None, None, out);
+        return true;
+    }
+    // The CLI flattens inspect_many to these wrappers in target order.
+    if map.len() == 2 {
+        if let (Some(target), Some(inspection)) = (
+            get_str(map, "target"),
+            map.get("inspection").and_then(JsonValue::as_object),
+        ) {
+            if let Some(function) = inspection_function(inspection) {
+                if !out.is_empty() {
+                    out.push('\n');
+                }
+                render_inspection(inspection, function, Some(target), None, out);
+                return true;
+            }
+        }
+    }
+    false
+}
+
+fn same_address(left: &str, right: &str) -> bool {
+    fn digits(address: &str) -> Option<&str> {
+        let digits = address
+            .strip_prefix("0x")
+            .or_else(|| address.strip_prefix("0X"))
+            .unwrap_or(address);
+        (!digits.is_empty() && digits.bytes().all(|byte| byte.is_ascii_hexdigit()))
+            .then(|| digits.trim_start_matches('0'))
+    }
+    left == right
+        || matches!((digits(left), digits(right)), (Some(a), Some(b)) if a.eq_ignore_ascii_case(b))
+}
+
+fn render_inspection(
+    map: &serde_json::Map<String, JsonValue>,
+    function: &serde_json::Map<String, JsonValue>,
+    target: Option<&str>,
+    sites: Option<&[JsonValue]>,
+    out: &mut String,
+) {
+    let owner = get_str(function, "address").zip(get_str(function, "name"));
+    let has_code = map
+        .get("decompilation")
+        .and_then(|value| value.get("code"))
+        .and_then(JsonValue::as_str)
+        .is_some_and(|code| !code.trim().is_empty());
+    if let Some((address, name)) = owner {
+        if has_code {
+            render_function(function, out);
+        } else {
+            render_function_detail(function, out);
+        }
+        if let Some(target) =
+            target.filter(|target| *target != name && !same_address(target, address))
+        {
+            writeln!(out, "  target: {target}").unwrap();
+        }
+    } else {
+        if let Some(target) = target {
+            writeln!(out, "# {target}").unwrap();
+        }
+        out.push_str("## function\n");
+        render_kv_block(function, out);
+    }
+    if let Some(sites) = sites {
+        render_reference_sites(sites, "  ", out);
+    }
+
+    for (key, collection) in INSPECTION_SECTIONS {
+        let Some(value) = map.get(key) else { continue };
+        let Some(section) = value.as_object() else {
+            writeln!(out, "## {key}\n{}", format_json_value(value)).unwrap();
+            continue;
+        };
+        if let Some(rows) = collection
+            .and_then(|key| section.get(key))
+            .and_then(JsonValue::as_array)
+        {
+            // The bridge's count is the page length when truncated, not a total.
+            // The command owns the truncation notice on stderr.
+            let suffix = if section.get("truncated").and_then(JsonValue::as_bool) == Some(true) {
+                " shown"
+            } else {
+                ""
+            };
+            writeln!(out, "## {key} ({}{suffix})", rows.len()).unwrap();
+            if rows.is_empty() {
+                out.push_str("No results\n");
+            } else {
+                match key {
+                    "callers" | "callees" => render_inspection_calls(rows, owner, out),
+                    "xrefs_to" | "xrefs_from" => {
+                        render_inspection_xrefs(rows, key == "xrefs_to", owner, out);
+                    }
+                    _ => render_array(rows, out),
+                }
+            }
+        } else {
+            writeln!(out, "## {key}").unwrap();
+            if key == "decompilation" && has_code {
+                render_decompile(section, false, out);
+            } else if key == "decompilation" && section.contains_key("code") {
+                out.push_str("No results\n");
+            } else {
+                render_kv_block(section, out);
+            }
+        }
+    }
+}
+
+fn render_inspection_calls(rows: &[JsonValue], owner: Option<(&str, &str)>, out: &mut String) {
+    let mut seen = HashMap::new();
+    for row in rows {
+        let Some(map) = row.as_object() else {
+            writeln!(out, "{}", format_json_value(row)).unwrap();
+            continue;
+        };
+        let address = get_str(map, "address").unwrap_or("");
+        let name = get_str(map, "name").unwrap_or("");
+        let site = norm_addr(get_str(map, "call_site").unwrap_or(""));
+        if owner == Some((address, name)) {
+            out.push_str("self");
+        } else {
+            out.push_str(&norm_addr(address));
+            // Only elide a known label; keep one row per call site in bridge order.
+            if !name.is_empty() && (rows.len() == 1 || seen.insert(address, name) != Some(name)) {
+                write!(out, "  {name}").unwrap();
+            }
+        }
+        write!(out, " @ {site}").unwrap();
+        if let Some(depth) = map
+            .get("depth")
+            .and_then(JsonValue::as_u64)
+            .filter(|&depth| depth > 0)
+        {
+            write!(out, "  depth={depth}").unwrap();
+        }
+        out.push('\n');
+    }
+}
+
+fn render_inspection_xrefs(
+    rows: &[JsonValue],
+    incoming: bool,
+    owner: Option<(&str, &str)>,
+    out: &mut String,
+) {
+    for row in rows {
+        let Some(map) = row.as_object() else {
+            writeln!(out, "{}", format_json_value(row)).unwrap();
+            continue;
+        };
+        let from = get_str(map, "from").unwrap_or("");
+        let to = get_str(map, "to").unwrap_or("");
+        let from_function = get_str(map, "from_function").unwrap_or("");
+        let to_function = get_str(map, "to_function").unwrap_or("");
+        let reference_type = get_str(map, "ref_type").unwrap_or("");
+        write!(out, "{:<10}", norm_addr(from)).unwrap();
+        // Outgoing references are scanned from every address in the owner.
+        if !from_function.is_empty()
+            && (incoming || owner.is_none_or(|(_, name)| name != from_function))
+        {
+            write!(out, "  {from_function}").unwrap();
+        }
+        write!(out, "  {reference_type}").unwrap();
+        // All incoming references end at the inspected entry. The source site
+        // and every outgoing destination remain visible, including self refs.
+        if !incoming || owner != Some((to, to_function)) {
+            write!(out, " → {}", norm_addr(to)).unwrap();
+            if !to_function.is_empty() && owner != Some((to, to_function)) {
+                write!(out, "  {to_function}").unwrap();
+            }
+        }
+        out.push('\n');
+    }
+}
+
 fn render_trace_report(map: &serde_json::Map<String, JsonValue>, out: &mut String) {
     let target = norm_addr(get_str(map, "target").unwrap_or(""));
     let reference_count = map
@@ -892,20 +1088,31 @@ fn render_trace_report(map: &serde_json::Map<String, JsonValue>, out: &mut Strin
         .map(|rows| rows.len())
         .unwrap_or(0);
 
-    out.push_str(&format!(
-        "{}  {} refs  {} source functions",
-        target, reference_count, source_count
-    ));
-    if unowned_count > 0 {
-        out.push_str(&format!("  {} unowned", unowned_count));
-    }
-    out.push('\n');
+    writeln!(
+        out,
+        "{target}  {reference_count} refs  {source_count} source functions  {unowned_count} unowned"
+    )
+    .unwrap();
 
     if let Some(JsonValue::Array(sources)) = map.get("source_functions") {
         if !sources.is_empty() {
             out.push_str("## source_functions\n");
-            for source in sources {
-                if let JsonValue::Object(source) = source {
+            for (index, source) in sources.iter().filter_map(JsonValue::as_object).enumerate() {
+                if index > 0 {
+                    out.push('\n');
+                }
+                if let Some((inspection, function)) = source
+                    .get("inspection")
+                    .and_then(JsonValue::as_object)
+                    .and_then(|inspection| Some((inspection, inspection_function(inspection)?)))
+                {
+                    let sites = source
+                        .get("reference_sites")
+                        .and_then(JsonValue::as_array)
+                        .map(Vec::as_slice);
+                    // The inspection metadata is also the owner header.
+                    render_inspection(inspection, function, None, sites, out);
+                } else {
                     render_compact_item(source, out);
                 }
             }
@@ -921,25 +1128,25 @@ fn render_trace_report(map: &serde_json::Map<String, JsonValue>, out: &mut Strin
 }
 
 fn render_reference_sites(sites: &[JsonValue], indent: &str, out: &mut String) {
-    let mut by_type: std::collections::BTreeMap<String, Vec<String>> =
-        std::collections::BTreeMap::new();
+    let mut by_type = std::collections::BTreeMap::<&str, Vec<&str>>::new();
     for site in sites {
         let JsonValue::Object(site) = site else {
             continue;
         };
-        let from = norm_addr(get_str(site, "from").unwrap_or(""));
-        let ref_type = get_str(site, "ref_type").unwrap_or("ref").to_string();
+        let from = get_str(site, "from").unwrap_or("");
+        let ref_type = get_str(site, "ref_type").unwrap_or("ref");
         by_type.entry(ref_type).or_default().push(from);
     }
 
     for (ref_type, addresses) in by_type {
-        out.push_str(&format!(
-            "{}{} ({}): {}\n",
-            indent,
-            ref_type,
-            addresses.len(),
-            addresses.join(", ")
-        ));
+        write!(out, "{indent}{ref_type} ({}): ", addresses.len()).unwrap();
+        for (index, address) in addresses.into_iter().enumerate() {
+            if index > 0 {
+                out.push_str(", ");
+            }
+            out.push_str(&norm_addr(address));
+        }
+        out.push('\n');
     }
 }
 
@@ -1596,11 +1803,29 @@ mod tests {
         );
         assert!(out.contains("DATA (2): 0x00001010, 0x00001020"), "{out}");
         assert!(out.contains("READ (1): 0x00002010"), "{out}");
+        assert_eq!(out.matches("0x00008ff1").count(), 1, "{out}");
+        assert_eq!(out.matches("0x00001000").count(), 1, "{out}");
+        assert!(!out.contains("## function"), "{out}");
         assert_eq!(out.matches("0x00001010").count(), 1, "{out}");
         assert!(
             out.contains("void uses_table(void)\n{\n  return;\n}"),
             "{out}"
         );
+    }
+
+    #[test]
+    fn test_empty_trace_reports_zero_refs_owners_and_unowned_sites() {
+        let data = [json!({
+            "target": "0010",
+            "references": {"count": 0, "xrefs": []},
+            "source_function_count": 0,
+            "source_functions": [],
+            "unowned_reference_sites": []
+        })];
+        let out = DefaultFormatter
+            .format(&data, OutputFormat::Compact)
+            .unwrap();
+        assert_eq!(out, "0x0010  0 refs  0 source functions  0 unowned");
     }
 
     #[test]
@@ -1697,13 +1922,143 @@ mod tests {
         let nested = DefaultFormatter
             .format(&[inspection], OutputFormat::Compact)
             .unwrap();
-        assert!(nested.starts_with("## function\n"), "{nested}");
+        assert!(nested.starts_with("0x0010"), "{nested}");
         assert_eq!(nested.matches("int f(int x)").count(), 1, "{nested}");
         assert!(
             !nested.contains("r6:4") && !nested.contains("Stack[-4]:4"),
             "{nested}"
         );
-        assert!(nested.contains("## callers\nNo results"), "{nested}");
+        assert!(nested.contains("## callers (0)\nNo results"), "{nested}");
+    }
+
+    #[test]
+    fn test_inspection_keeps_each_call_site_in_order_and_elides_repeated_labels() {
+        let long = "a_very_long_function_name_often_repeated_in_bridge_call_rows";
+        let calls = json!([
+            {"address": "0400", "name": long, "call_site": "0404", "depth": 0},
+            {"address": "0600", "name": "other_caller", "call_site": "0602", "depth": 0},
+            {"address": "0400", "name": long, "call_site": "0406", "depth": 0},
+            {"address": "0700", "name": long, "call_site": "0702", "depth": 0}
+        ]);
+        let data = [json!({
+            "function": {"address": "1000", "name": "owner", "size": 32},
+            "callers": {"function": "1000", "count": 4, "callers": calls, "truncated": true},
+            "callees": {"function": "1000", "count": 3, "callees": [
+                {"address": "2000", "name": long, "call_site": "1004", "depth": 0},
+                {"address": "1000", "name": "owner", "call_site": "1006", "depth": 0},
+                {"address": "2000", "name": long, "call_site": "1008", "depth": 0}
+            ]}
+        })];
+        let out = DefaultFormatter
+            .format(&data, OutputFormat::Compact)
+            .unwrap();
+        assert_eq!(
+            out.lines().skip(1).collect::<Vec<_>>(),
+            [
+                "## callers (4 shown)",
+                &format!("0x0400  {long} @ 0x0404"),
+                "0x0600  other_caller @ 0x0602",
+                "0x0400 @ 0x0406",
+                &format!("0x0700  {long} @ 0x0702"),
+                "## callees (3)",
+                &format!("0x2000  {long} @ 0x1004"),
+                "self @ 0x1006",
+                "0x2000 @ 0x1008"
+            ]
+        );
+        assert!(
+            !out.contains("function:") && !out.contains("truncated"),
+            "{out}"
+        );
+
+        let standalone = DefaultFormatter
+            .format(calls.as_array().unwrap(), OutputFormat::Compact)
+            .unwrap();
+        for site in ["0x0404", "0x0406"] {
+            assert!(
+                standalone.contains(&format!("{long} @ {site}")),
+                "{standalone}"
+            );
+        }
+    }
+
+    #[test]
+    fn test_inspection_xrefs_keep_sites_directions_and_other_endpoint_evidence() {
+        let data = [json!({
+            "function": {"address": "0010", "name": "owner_name", "size": 32},
+            "xrefs_to": {"count": 2, "xrefs": [
+                {"from": "0054", "from_function": "other", "to": "0010", "to_function": "owner_name", "ref_type": "CALL"},
+                {"from": "0058", "from_function": null, "to": "0010", "to_function": "owner_name", "ref_type": "DATA"}
+            ]},
+            "xrefs_from": {"count": 2, "xrefs": [
+                {"from": "0010", "from_function": "owner_name", "to": "0090", "to_function": "target_fn", "ref_type": "CALL"},
+                {"from": "001c", "from_function": "owner_name", "to": "0010", "to_function": "owner_name", "ref_type": "JUMP"}
+            ]}
+        })];
+        let out = DefaultFormatter
+            .format(&data, OutputFormat::Compact)
+            .unwrap();
+        assert_eq!(out.matches("owner_name").count(), 1, "{out}");
+        let rows: Vec<_> = out
+            .lines()
+            .filter(|line| line.starts_with("0x"))
+            .skip(1)
+            .map(|line| line.split_whitespace().collect::<Vec<_>>())
+            .collect();
+        assert_eq!(rows.len(), 4, "{out}");
+        assert_eq!(rows[0], ["0x0054", "other", "CALL"]);
+        assert_eq!(rows[1], ["0x0058", "DATA"]);
+        assert_eq!(rows[2], ["0x0010", "CALL", "→", "0x0090", "target_fn"]);
+        assert_eq!(rows[3], ["0x001c", "JUMP", "→", "0x0010"]);
+    }
+
+    #[test]
+    fn test_inspection_many_leads_with_each_resolved_function_and_keeps_aliases() {
+        let data = [
+            json!({"target": "0X40", "inspection": {
+                "function": {"address": "0040", "name": "first", "size": 12},
+                "callers": {"function": "0040", "count": 0, "callers": []}
+            }}),
+            json!({"target": "second_alias", "inspection": {
+                "function": {"address": "0010", "name": "second", "size": 8},
+                "disassembly": {"count": 1, "instructions": [
+                    {"address": "0010", "bytes": "90", "mnemonic": "nop", "operands": []}
+                ]}
+            }}),
+        ];
+        let out = DefaultFormatter
+            .format(&data, OutputFormat::Compact)
+            .unwrap();
+        let (first, second) = out.split_once("\n\n").unwrap();
+        assert!(first.starts_with("0x0040"), "{first}");
+        assert!(first.contains("first"), "{first}");
+        assert!(second.starts_with("0x0010"), "{second}");
+        assert!(second.contains("second_alias"), "{second}");
+        assert!(out.contains("nop"), "{out}");
+        assert_eq!(out.matches("target:").count(), 1, "{out}");
+    }
+
+    #[test]
+    fn test_inspection_preserves_signature_and_section_errors_when_code_is_unavailable() {
+        let data = [json!({
+            "function": {
+                "address": "0010", "name": "f", "size": 10, "signature": "void f(void)",
+                "comment": "entry comment"
+            },
+            "decompilation": {"error": "no code"},
+            "disassembly": {"error": "no instructions"}
+        })];
+        let out = DefaultFormatter
+            .format(&data, OutputFormat::Compact)
+            .unwrap();
+        for expected in [
+            "entry comment",
+            "void f(void)",
+            "no code",
+            "no instructions",
+        ] {
+            assert!(out.contains(expected), "{out}");
+        }
     }
 
     #[test]

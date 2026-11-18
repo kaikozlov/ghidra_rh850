@@ -2,10 +2,13 @@
 
 Analysis commands default to compact text on terminals and through pipes. Use
 `--json` for scripts that parse results, or `--pretty` for indented JSON.
+Run `tools/g` for commands or `tools/g help inspect` for examples; neither
+opens a project or starts Java.
 
 ```bash
-tools/g decompile 0x4e848
-tools/g function list --filter 'name~secoc' --sort=-size --fields address,name --limit 20
+tools/g inspect 0x4e848                           # function and call sites
+tools/g inspect 0x4e848 --decompile --disasm 8    # C and eight instructions
+tools/g function list --fields size,name --sort=-size --limit 5
 tools/g function list --json --limit 50 --offset 50
 tools/g query functions --count
 ```
@@ -35,10 +38,22 @@ require the corresponding command; incompatible combinations fail before executi
 reports or `graph export dot`, which prints redirectable DOT source.
 
 Compact decompilation prints Ghidra's C once. Add `--with-params` or
-`--with-vars` for parameter/local storage details. Compound `inspect` reports
-show code with its callers, callees, references, and disassembly in separate
-sections; their automatically collected parameter/local metadata remains
-available in JSON. Requested empty sections say `No results`.
+`--with-vars` for parameter/local storage details.
+
+### Inspect a function
+
+Bare `inspect TARGET` in compact mode shows function metadata, callers, and
+callees. Select other sections with `--decompile`, `--disasm N`, `--callers`,
+`--callees`, or `--xrefs` (references to the entry and from the function body).
+`--all` selects every section. `--disasm N` overrides its 40-instruction default;
+`--limit` still caps call and reference lists.
+
+The resolved function comes first. Repeated call sites retain their addresses
+without repeating the function name. An empty section says `No results`;
+`(N shown)` identifies a partial list. With no section flags, non-compact
+formats, batch, and inspections with `--fields`, `--filter`, or `--sort` request
+every section. JSON includes parameter and local storage when the decompiler
+provides it.
 
 String previews preserve Unicode, escape control characters, and mark clipped
 text with an ellipsis. JSON preserves full string values and parameter/local
@@ -60,6 +75,12 @@ Set a persistent preference with `tools/g config set default_limit 50`, or use
 
 `--filter`, `--sort`, `--offset`, and `--limit` select rows before `--fields`
 projects their columns, so a sort key can be omitted from the displayed fields.
+On compact lists, `--fields name` prints one value per line. Multiple fields
+give one tab-separated header in the requested order, even for a one-row page.
+A missing field is `—`; empty strings and strings with control characters are
+quoted. To omit columns, use `--fields=-comment,signature`. Compound reports
+keep their section layout.
+
 Filters require a field and operator, such as `name~secoc`, `size>100`, or
 `name=~"^SecOc"`. Use `AND`, `OR`, and `NOT`, with parentheses to group mixed
 conditions.

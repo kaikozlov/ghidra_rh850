@@ -28,6 +28,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   their sections. `--json` and `--pretty` select structured output. Explicit
   output flags override saved `default_output_format`; `auto` means compact.
   See [Output and query options](docs/output-format.md).
+- Bare compact `inspect` fetches the function and call sites. Request individual
+  sections or `--all` for every section; JSON and batch defaults are unchanged.
+  Compact list projections print `--fields` columns once in the requested order.
+- `tools/g help` and subcommand help no longer require Java or a working
+  project. Start with `tools/g help inspect` for examples.
 - Query-capable commands share a built-in 50-row page size. Saved limits remain
   effective; `GHIDRA_CLI_DEFAULT_LIMIT` and command `--limit` override them.
   `--limit 0` returns all rows. Bridge limits are actual response caps, with an

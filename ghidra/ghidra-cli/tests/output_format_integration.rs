@@ -139,6 +139,19 @@ fn output_contract_with_live_bridge() {
     ]);
     let fields: Vec<Value> = selected.json();
     assert!(fields.iter().all(|row| row.as_object().unwrap().len() == 2));
+    let columns = run(&["function", "list", "--fields", "size,name", "--limit", "2"]);
+    let mut lines = columns.stdout.lines();
+    assert_eq!(lines.next(), Some("size\tname"));
+    for row in &all[..2] {
+        let expected = format!("{}\t{}", row["size"], row["name"].as_str().unwrap());
+        assert_eq!(lines.next(), Some(expected.as_str()));
+    }
+    assert!(lines.next().is_none());
+    let names = run(&["function", "list", "--fields", "name", "--limit", "1"]);
+    assert_eq!(
+        names.stdout.lines().collect::<Vec<_>>(),
+        [all[0]["name"].as_str().unwrap()]
+    );
     let csv = run(&[
         "function",
         "list",
@@ -217,6 +230,24 @@ fn output_contract_with_live_bridge() {
         memory.stdout
     );
 
+    let overview = run(&["inspect", address]);
+    assert_eq!(
+        overview.stdout,
+        run(&["inspect", address, "--callers", "--callees"]).stdout
+    );
+    let complete: Vec<Value> = run(&["--json", "inspect", address]).json();
+    assert_eq!(complete[0]["decompilation"]["code"], code);
+    assert!(complete[0].get("xrefs_to").is_some());
+    let expanded = run(&["inspect", address, "--all", "--disasm", "1"]);
+    let (_, disassembly) = expanded
+        .stdout
+        .split_once("\n## disassembly (1)\n")
+        .unwrap();
+    let body = disassembly.split("\n## ").next().unwrap().trim_end();
+    assert_eq!(body, run(&["disasm", address, "-n", "1"]).stdout.trim_end());
+    assert!(expanded.stdout.contains(code.trim()));
+    assert!(!overview.stdout.contains(code.trim()));
+
     let inspect_args = [
         "inspect",
         address,
@@ -235,26 +266,52 @@ fn output_contract_with_live_bridge() {
     let inspection: Vec<Value> = inspect_json.json();
     let inspection = &inspection[0];
     let inspect = run(&inspect_args);
+    let function = &inspection["function"];
+    let entry = format!("0x{}", function["address"].as_str().unwrap());
+    let name = function["name"].as_str().unwrap();
+    let header = inspect.stdout.lines().next().unwrap();
     assert!(
-        inspect.stdout.starts_with("## function\n"),
-        "{}",
-        inspect.stdout
+        header.starts_with(&entry) && header.contains(name),
+        "{header}"
     );
-    for section in [
-        "function",
-        "decompilation",
-        "disassembly",
-        "callers",
-        "callees",
-        "xrefs_to",
-        "xrefs_from",
+
+    let report = inspect.stdout.trim_end();
+    assert!(report.contains("## decompilation\n"), "{report}");
+    for (section, key) in [
+        ("disassembly", "instructions"),
+        ("callers", "callers"),
+        ("callees", "callees"),
+        ("xrefs_to", "xrefs"),
+        ("xrefs_from", "xrefs"),
     ] {
-        assert!(inspection.get(section).is_some(), "{inspection}");
-        assert!(
-            inspect.stdout.contains(&format!("## {section}\n")),
-            "{}",
-            inspect.stdout
-        );
+        let records = inspection[section][key].as_array().unwrap();
+        let heading = format!("\n## {section}");
+        let (_, tail) = report
+            .split_once(heading.as_str())
+            .unwrap_or_else(|| panic!("{report}"));
+        let (_, body) = tail.split_once('\n').unwrap();
+        let body = body.split("\n## ").next().unwrap();
+        if records.is_empty() {
+            assert_eq!(body, "No results");
+            continue;
+        }
+        assert_eq!(body.lines().count(), records.len(), "{section}: {body}");
+        for (record, line) in records.iter().zip(body.lines()) {
+            let fields: &[&str] = match section {
+                "disassembly" => &["address", "bytes", "mnemonic"],
+                "callers" | "callees" => &["call_site"],
+                "xrefs_to" => &["from", "ref_type"],
+                "xrefs_from" => &["from", "to", "ref_type"],
+                _ => unreachable!(),
+            };
+            for field in fields {
+                let evidence = record[*field].as_str().unwrap();
+                assert!(
+                    line.contains(evidence),
+                    "missing {field} from {line:?}: {record}"
+                );
+            }
+        }
     }
     assert!(
         inspection["decompilation"].get("params").is_some(),

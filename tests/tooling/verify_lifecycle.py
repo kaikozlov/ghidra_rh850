@@ -5,7 +5,6 @@ Uses a fixture CLI and dry-run finalization; no project is opened or promoted.
 """
 from __future__ import annotations
 
-import atexit
 import hashlib
 import json
 import os
@@ -17,13 +16,13 @@ from pathlib import Path
 from tools import REPO_ROOT
 REPO = REPO_ROOT
 
-# Core lifecycle tests must not depend on or build ignored toolchain state. A
-# tiny fake CLI is used only for wrapper-policy tests that end in --help.
+# Keep CLI and mutation marker fixtures outside the active workspace.
 _FAKE_CLI_TMP = tempfile.TemporaryDirectory(prefix="ghidra-lifecycle-cli-")
 _FAKE_CACHE = Path(_FAKE_CLI_TMP.name) / "cache"
+_FIXTURE_WORK = Path(_FAKE_CLI_TMP.name) / "work"
 _FAKE_CLI = _FAKE_CACHE / "ghidra-cli" / "ghidra"
 _FAKE_CLI.parent.mkdir(parents=True)
-_FAKE_CLI.write_text("#!/bin/sh\nexit 0\n")
+_FAKE_CLI.write_text('#!/bin/sh\nprintf "%s\\n" "${GHIDRA_PROJECT_DIR-unset}"\n')
 _FAKE_CLI.chmod(0o755)
 os.utime(_FAKE_CLI, (2_000_000_000, 2_000_000_000))
 
@@ -47,10 +46,8 @@ def run(cmd: list[str], env: dict | None = None, timeout: int = 30) -> subproces
     merged_env = dict(os.environ)
     if env:
         merged_env.update(env)
-    if str(REPO / "tools" / "g") in cmd and merged_env.get("GHIDRA_NO_BOOTSTRAP") == "1":
-        # Make exports BUILD_CACHE for every verification child. Override it
-        # deliberately so policy-only lifecycle tests cannot see or build the
-        # real vendored CLI cache in a clean clone.
+    if str(REPO / "tools" / "g") in cmd:
+        merged_env["BUILD_WORK"] = str(_FIXTURE_WORK)
         merged_env["BUILD_CACHE"] = str(_FAKE_CACHE)
     return subprocess.run(
         cmd,
@@ -63,7 +60,6 @@ def run(cmd: list[str], env: dict | None = None, timeout: int = 30) -> subproces
 
 
 BUILD_WORK = (REPO / "build" / "work").resolve()
-BUILD_TMP = (REPO / "build" / "tmp").resolve()
 _REGISTRY = json.loads((REPO / "data" / "analysis_targets.json").read_text())
 _DEFAULT_TARGET = _REGISTRY["default_target"]
 _DEFAULT_ROW = _REGISTRY["targets"][_DEFAULT_TARGET]
@@ -73,43 +69,12 @@ DEFAULT_PROJECT_NAME = _DEFAULT_ROW["project_name"]
 
 def marker_for(project: Path) -> Path:
     key = hashlib.sha256(str(project.resolve()).encode()).hexdigest()
-    return BUILD_WORK / "ghidra-session-dirty" / f"{key}.marker"
-
-
-MARKER = marker_for(DEFAULT_PROJECT)
-ORIGINAL_MARKER = MARKER.read_bytes() if MARKER.is_file() else None
-
-
-def restore_original_marker() -> None:
-    if ORIGINAL_MARKER is None:
-        MARKER.unlink(missing_ok=True)
-    else:
-        MARKER.parent.mkdir(parents=True, exist_ok=True)
-        MARKER.write_bytes(ORIGINAL_MARKER)
-
-
-atexit.register(restore_original_marker)
-
-
-def marker_exists() -> bool:
-    return MARKER.exists()
-
-
-def write_marker() -> None:
-    MARKER.parent.mkdir(parents=True, exist_ok=True)
-    MARKER.write_text(f"project={DEFAULT_PROJECT}\ntimestamp=2026-01-01T00:00:00Z\n")
-
-
-def remove_marker() -> None:
-    MARKER.unlink(missing_ok=True)
+    return _FIXTURE_WORK / "ghidra-session-dirty" / f"{key}.marker"
 
 
 print("== tools/g lifecycle tests ==")
 
 # --- Test 1: session-status is environment-independent ------------------------
-# We need GHIDRA_NO_BOOTSTRAP=1 to skip the processor env bootstrap (which needs
-# Ghidra). session-status should work without the full env.
-remove_marker()
 result = run(
     ["bash", str(REPO / "tools" / "g"), "session-status"],
     env={"GHIDRA_NO_BOOTSTRAP": "1", "GHIDRA_AGENT": "1"},
@@ -124,11 +89,37 @@ if result.returncode == 0:
     except json.JSONDecodeError:
         check("session-status JSON parse", False, result.stdout[:200])
 
+# Help must bypass Java and project setup even when the command can mutate.
+with tempfile.TemporaryDirectory() as td:
+    project = Path(td) / "missing"
+    help_env = {
+        "GHIDRA_AGENT": "0",
+        "GHIDRA_PROJECT": str(project),
+        "GHIDRA_NO_BOOTSTRAP": "0",
+        "GHIDRA_ENV_FORCE_REBUILD": "1",
+        "GHIDRA_INSTALL_SCRIPT": str(Path(td) / "missing-installer"),
+    }
+    for args in (
+        [],
+        ["help"],
+        ["--help"],
+        ["-h"],
+        ["help", "function", "rename"],
+        ["fn", "rename", "--help"],
+        ["batch", "-h"],
+        ["help", "session-status"],
+        ["session-status", "--help"],
+    ):
+        result = run(["bash", str(REPO / "tools" / "g"), *args], env=help_env, timeout=10)
+        check(
+            f"tools/g {' '.join(args)} works without Java or a working project",
+            result.returncode == 0 and not project.exists() and not _FIXTURE_WORK.exists(),
+            result.stderr,
+        )
+
 # Project paths are data, never Python source. This payload executed before the
 # argv-based canonicalization regression fix.
-BUILD_TMP.mkdir(parents=True, exist_ok=True)
-injection_marker = BUILD_TMP / ".ghidra_path_injection"
-injection_marker.unlink(missing_ok=True)
+injection_marker = Path(_FAKE_CLI_TMP.name) / "path-injection"
 payload = (
     "x')); __import__('pathlib').Path(" + repr(str(injection_marker)) +
     ").write_text('owned'); #"
@@ -143,7 +134,6 @@ check(
     result.returncode == 0 and not injection_marker.exists(),
     result.stderr,
 )
-injection_marker.unlink(missing_ok=True)
 
 # tools/g must never recursively delete an arbitrary override merely because it
 # does not contain this project's .rep directory.
@@ -220,7 +210,7 @@ with tempfile.TemporaryDirectory() as td:
     output = result.stdout + result.stderr
     check(
         "inherited GHIDRA_PROJECT_DIR cannot redirect tools/g",
-        str(inherited_override) not in output,
+        result.returncode == 0 and result.stdout.strip() == "unset",
         output,
     )
 
@@ -251,91 +241,51 @@ check(
     result.stderr,
 )
 
-mutation_marker = MARKER
-saved_marker = mutation_marker.read_bytes() if mutation_marker.is_file() else None
-mutation_marker.unlink(missing_ok=True)
-result = run(
-    ["bash", str(REPO / "tools" / "g"), "function", "rename", "--help"],
-    env={"GHIDRA_NO_BOOTSTRAP": "1"},
-    timeout=10,
-)
-check(
-    "function mutation subcommands write the session marker",
-    result.returncode == 0 and mutation_marker.is_file(),
-    result.stderr,
-)
-mutation_marker.unlink(missing_ok=True)
-result = run(
-    ["bash", str(REPO / "tools" / "g"), "batch", "--read-only", "--help"],
-    env={"GHIDRA_NO_BOOTSTRAP": "1"},
-    timeout=10,
-)
-check(
-    "preflight-enforced read-only batch does not write the session marker",
-    result.returncode == 0 and not mutation_marker.exists(),
-    result.stderr,
-)
-result = run(
-    ["bash", str(REPO / "tools" / "g"), "batch", "--help"],
-    env={"GHIDRA_NO_BOOTSTRAP": "1"},
-    timeout=10,
-)
-check(
-    "ordinary batch remains conservatively mutation-marked",
-    result.returncode == 0 and mutation_marker.is_file(),
-    result.stderr,
-)
-mutation_marker.unlink(missing_ok=True)
-result = run(
-    ["bash", str(REPO / "tools" / "g"), "batch", "--", "--read-only", "--help"],
-    env={"GHIDRA_NO_BOOTSTRAP": "1"},
-    timeout=10,
-)
-check(
-    "batch filename cannot spoof the read-only marker exemption",
-    result.returncode == 0 and mutation_marker.is_file(),
-    result.stderr,
-)
-mutation_marker.unlink(missing_ok=True)
-for alias_args in (
-    ["fn", "rename", "--help"], ["types", "rm", "--help"],
-    ["analysis", "--help"], ["mv", "--help"],
-    ["script", "python", "--help"], ["scripts", "java", "--help"],
-):
-    result = run(
-        ["bash", str(REPO / "tools" / "g"), *alias_args],
-        env={"GHIDRA_NO_BOOTSTRAP": "1"},
-        timeout=10,
-    )
-    check(
-        f"mutation alias {' '.join(alias_args[:-1])} writes the session marker",
-        result.returncode == 0 and mutation_marker.is_file(),
-        result.stderr,
-    )
-    mutation_marker.unlink(missing_ok=True)
-if saved_marker is not None:
-    mutation_marker.write_bytes(saved_marker)
-
-BUILD_TMP.mkdir(parents=True, exist_ok=True)
-with tempfile.TemporaryDirectory(dir=BUILD_TMP, prefix="lifecycle-alt-project-") as td:
+with tempfile.TemporaryDirectory() as td:
     alternate_project = Path(td).resolve()
+    (alternate_project / f"{DEFAULT_PROJECT_NAME}.rep").mkdir()
     alternate_marker = marker_for(alternate_project)
     alternate_marker.unlink(missing_ok=True)
-    default_before = mutation_marker.read_bytes() if mutation_marker.is_file() else None
-    result = run(
-        ["bash", str(REPO / "tools" / "g"), "function", "rename", "--help"],
-        env={"GHIDRA_NO_BOOTSTRAP": "1", "GHIDRA_PROJECT": str(alternate_project)},
-        timeout=10,
-    )
-    check(
-        "alternate-project mutation writes only its project-affine marker",
-        result.returncode == 0 and alternate_marker.is_file()
-        and f"project={alternate_project}" in alternate_marker.read_text()
-        and ((default_before is None and not mutation_marker.exists())
-             or (default_before is not None and mutation_marker.read_bytes() == default_before)),
-        result.stderr,
-    )
-    alternate_marker.unlink(missing_ok=True)
+    default_marker = marker_for(DEFAULT_PROJECT)
+    mutation_env = {
+        "GHIDRA_ANALYSIS_TARGET": _DEFAULT_TARGET,
+        "GHIDRA_NO_BOOTSTRAP": "1",
+        "GHIDRA_PROJECT": str(alternate_project),
+    }
+    for args, mutates in (
+        (["function", "rename", "old", "new"], True),
+        (["batch", "--read-only", "commands.txt"], False),
+        (["batch", "commands.txt"], True),
+        (["batch", "--", "--read-only"], True),
+        (["batch", "--", "--help"], True),
+        (["fn", "rename", "old", "new"], True),
+        (["types", "rm", "old"], True),
+        (["analysis"], True),
+        (["mv", "old", "new"], True),
+        (["script", "python", "pass"], True),
+        (["scripts", "java", "return;"], True),
+    ):
+        result = run(
+            ["bash", str(REPO / "tools" / "g"), *args],
+            env=mutation_env,
+            timeout=10,
+        )
+        if mutates:
+            check(
+                f"{' '.join(args)} writes a project-affine mutation marker",
+                result.returncode == 0 and alternate_marker.is_file()
+                and f"project={alternate_project}" in alternate_marker.read_text(),
+                result.stderr,
+            )
+        else:
+            check(
+                f"{' '.join(args)} does not write a mutation marker",
+                result.returncode == 0 and not alternate_marker.exists(),
+                result.stderr,
+            )
+        alternate_marker.unlink(missing_ok=True)
+    check("alternate-project commands leave the default project marker unchanged",
+          not default_marker.exists())
 
 # --- Test 5: Refuses committed projects/ via GHIDRA_PROJECT --------------------
 result = run(
@@ -362,7 +312,6 @@ check(
 )
 
 # --- Test 6: explicit finalization cannot skip a marker-free rebuild ----------
-remove_marker()
 divergent_project = (BUILD_WORK / "phase-i-rebuild-a").resolve()
 result = run(
     ["bash", str(REPO / "tools" / "project" / "finalize_project.sh"), "--dry-run"],
@@ -388,10 +337,6 @@ check(
     rebuild_unsafe.returncode != 0 and "outside" in rebuild_unsafe.stderr,
     rebuild_unsafe.stderr,
 )
-
-
-# Cleanup
-remove_marker()
 
 print()
 if failed:

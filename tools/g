@@ -9,15 +9,7 @@
 #
 # You never need to `source build/cache/ghidra-processor.env` before running this.
 #
-# Usage (address examples refer to the default Camry F33 target):
-#   tools/g decompile 0x4e848
-#   tools/g x-ref to 0x4e848
-#   tools/g inspect 0x4e848 --decompile --callers --callees --xrefs --disasm 40
-#   tools/g inspect 0x4e848 0x8549e
-#   tools/gtarget sienna-8965B4512000 decompile 0x8db22
-#   printf 'stats\nquery functions --count\n' | tools/g batch --read-only -
-#   tools/g session-status
-#   tools/g stop
+# Help: tools/g --help or tools/g help <command>.
 #
 # Environment:
 #   GHIDRA_AGENT=1            Force JSON output for scripted callers.
@@ -31,6 +23,86 @@ set -euo pipefail
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 # shellcheck disable=SC1091
 source "$ROOT/tools/lib/build_paths.sh"
+
+# Project/program selection and Java location are owned by this wrapper. The
+# CLI accepts global options after subcommands, so appending one later would
+# otherwise bypass the committed-snapshot guard below.
+for arg in "$@"; do
+  case "$arg" in
+    --projects-dir|--projects-dir=*|--project|--project=*|--program|--program=*|--java-home|--java-home=*)
+      echo "REFUSING: $arg is a tools/g-managed option; use GHIDRA_PROJECT for a safe working-copy override." >&2
+      exit 2
+      ;;
+  esac
+done
+
+# A bare invocation is discovery, not a request to open the default project.
+if (($# == 0)); then set -- -h; fi
+
+# Locate the command independent of leading/interspersed global flags.
+# Stop at -- so literal operands do not count as help flags.
+CLI_POSITIONALS=()
+POSITIONAL_COUNT=0
+WANTS_HELP=0
+SORT_VALUE=0
+for arg in "$@"; do
+  if [[ "$arg" == "--" ]]; then break; fi
+  if ((SORT_VALUE)); then
+    # --sort accepts hyphenated values, including a literal --help.
+    SORT_VALUE=0
+  else
+    case "$arg" in
+      --sort) SORT_VALUE=1 ;;
+      --help|-h) WANTS_HELP=1 ;;
+    esac
+  fi
+  if [[ "$arg" != -* ]] && ((POSITIONAL_COUNT < 2)); then
+    CLI_POSITIONALS+=("$arg")
+    POSITIONAL_COUNT=$((POSITIONAL_COUNT + 1))
+  fi
+done
+USER_SUBCMD="${CLI_POSITIONALS[0]:-}"
+USER_ACTION="${CLI_POSITIONALS[1]:-}"
+
+resolve_ghidra_cli() {
+  local args=(--ensure-vendored)
+  if [[ "${GHIDRA_ALLOW_SYSTEM_CLI:-0}" == "1" ]]; then
+    args+=(--allow-system)
+  fi
+  "$ROOT/tools/project/resolve_ghidra_cli.sh" "${args[@]}"
+}
+
+# Help can resolve/build the Rust CLI, but does not need a target, project, or Java.
+if ((WANTS_HELP)) || [[ "$USER_SUBCMD" == "help" ]]; then
+  if [[ "$USER_SUBCMD" == "session-status" || ( "$USER_SUBCMD" == "help" && "$USER_ACTION" == "session-status" ) ]]; then
+    cat <<'EOF'
+Usage: tools/g session-status [--json | --pretty]
+
+Report the daemon, working project, processor fingerprint, mutation marker,
+and committed snapshot status. Does not start the daemon or build the CLI.
+EOF
+    exit 0
+  fi
+
+  GHIDRA_CLI=$(resolve_ghidra_cli)
+  if [[ -z "$USER_SUBCMD" || ( "$USER_SUBCMD" == "help" && -z "$USER_ACTION" ) ]]; then
+    cat <<'EOF'
+Use tools/g in place of ghidra below. `tools/g session-status` checks the working copy offline.
+Select a target with GHIDRA_ANALYSIS_TARGET or a working project with GHIDRA_PROJECT.
+tools/g manages --projects-dir, --project, --program and --java-home; use the standalone CLI for project management.
+
+EOF
+  fi
+  exec "$GHIDRA_CLI" "$@"
+fi
+
+# Project create/delete operates outside the one fixed working project and does
+# not belong in this safety wrapper.
+if [[ "$USER_SUBCMD" == "project" ]]; then
+  echo "REFUSING: project management is not supported through tools/g." >&2
+  exit 2
+fi
+
 ANALYSIS_TARGET="${GHIDRA_ANALYSIS_TARGET:-$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["default_target"])' "$ROOT/data/analysis_targets.json")}"
 TARGET_FIELD() { python3 "$ROOT/tools/project/analysis_target.py" "$ANALYSIS_TARGET" --field "$1"; }
 PROJECT_NAME=$(TARGET_FIELD project_name)
@@ -76,52 +148,10 @@ case "$ABS_PROJECT_DIR" in
     ;;
 esac
 
-# Project/program selection and Java location are owned by this wrapper. The
-# CLI accepts global options after subcommands, so appending one later would
-# otherwise bypass the committed-snapshot guard above.
-for arg in "$@"; do
-  case "$arg" in
-    --projects-dir|--projects-dir=*|--project|--project=*|--program|--program=*|--java-home|--java-home=*)
-      echo "REFUSING: $arg is a tools/g-managed option; use GHIDRA_PROJECT for a safe working-copy override." >&2
-      exit 2
-      ;;
-  esac
-done
-
-# Locate the command and action independent of leading/interspersed global
-# flags (`--json`, `--pretty`, `-v`, ...). clap accepts those flags globally,
-# so raw `$1`/`$2` checks are not a security boundary.
-CLI_POSITIONALS=()
-for arg in "$@"; do
-  case "$arg" in
-    --) break ;;
-    -*) continue ;;
-    *)
-      CLI_POSITIONALS+=("$arg")
-      if ((${#CLI_POSITIONALS[@]} == 2)); then break; fi
-      ;;
-  esac
-done
-USER_SUBCMD="${CLI_POSITIONALS[0]:-}"
-USER_ACTION="${CLI_POSITIONALS[1]:-}"
-
-# Project create/delete operates outside the one fixed working project and does
-# not belong in this safety wrapper.
-if [[ "$USER_SUBCMD" == "project" ]]; then
-  echo "REFUSING: project management is not supported through tools/g." >&2
-  exit 2
-fi
-
 # Determine project need before any cache/toolchain setup. Safety failures for a
 # user-supplied working directory must be side-effect-free and must not trigger a
 # Rust build or Ghidra bootstrap first.
 NEEDS_PROJECT=1
-for arg in "$@"; do
-  if [[ "$arg" == "--help" || "$arg" == "-h" ]]; then
-    NEEDS_PROJECT=0
-    break
-  fi
-done
 case "$USER_SUBCMD" in
   session-status) NEEDS_PROJECT=0 ;;
   stop|status|ping|jobs|cancel|version|doctor|setup|init|config)
@@ -148,11 +178,7 @@ fi
 # --- Resolve and build the ghidra CLI binary ----------------------------------
 if ((STATUS_ONLY == 0)); then
 
-RESOLVE_ARGS=(--ensure-vendored)
-if [[ "${GHIDRA_ALLOW_SYSTEM_CLI:-0}" == "1" ]]; then
-  RESOLVE_ARGS+=(--allow-system)
-fi
-GHIDRA_CLI=$("$ROOT/tools/project/resolve_ghidra_cli.sh" "${RESOLVE_ARGS[@]}")
+GHIDRA_CLI=$(resolve_ghidra_cli)
 
 # --- Bootstrap the isolated Ghidra environment --------------------------------
 #
