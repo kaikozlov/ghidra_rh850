@@ -277,7 +277,7 @@ protocol dispatch (`821D6 → 830C0 → 98E80`). Receiving bytes through `8312E 
 also lies after the corrupted foreground call. It is not a recovery writer in
 this state.
 
-## 7. Pre-fault memory-safety audit: one real stale-DLC defect, no recovered write primitive
+## 7. Pre-fault memory-safety audit: stale-DLC disclosure, no recovered write primitive
 
 The recovery-specific memory-safety pass widened the executable surface beyond the
 foreground `79EDE` drain.  Exact F33 has a real RSCFD interrupt path that can run
@@ -304,15 +304,16 @@ This composes badly with Toyota's receive helpers:
 - the diagnostic CFIFO reader `83D40` initializes only two 32-bit payload words,
   or 8 physical bytes, while likewise propagating logical DLC 64.
 
-A DLC64 frame can therefore cause the software queue producer to read stale,
-uninitialized bytes from the ISR's 64-byte local payload object: up to 32 bytes on
-RFIFO1 and up to 56 bytes on the diagnostic CFIFO.  This is a **verified stale
-ISR-stack ingestion/source-over-read condition**.  The present evidence does not
-prove tester control of those stale bytes; RFIFO and CFIFO reach their leaf readers
-through different call depths, so equal local layouts do not establish a reusable
-physical stack slot.
+A DLC64 frame therefore makes the software queue producer copy stale,
+uninitialized bytes from the ISR's 64-byte local payload object: up to 32 bytes
+on RFIFO1 and up to 56 bytes on the diagnostic CFIFO. Exact original-CodeFlash
+execution verifies both the source over-read and propagation into the software
+RX ring. The ring lies outside application SID `0x23`'s protected LocalRAM
+intervals, so extended-session ALFID `0x15`, memory ID 1 reads expose the stale
+payload.
 
-The defect does **not** currently cross a recovery-relevant consumer boundary:
+The disclosure does not currently supply a write or additional diagnostic
+authority:
 
 - the exact 48-entry class-0 COM table has maximum configured PDU length 32, and
   `7D72C` copies `min(received_len, configured_len)`;
@@ -332,6 +333,49 @@ uses 16-bit word indices and its mutation is wrapped by
 `7A2DA -> 98B8A -> 6A45E`, which saves G3M `PMR` and installs mask `0xFF00`,
 with `7A2E8 -> 6A4C4` restoring the prior mask. The outer RSCFD ISR may enable
 nested interrupts, but these queue updates are explicitly serialized.
+
+### Nested timer frames expose live foreground registers
+
+The outer controller-1 receive interrupt makes the CFIFO disclosure
+data-dependent on interrupted foreground computation. IRQ187 enters at `66100`,
+executes `EI` at `66118`, saves foreground registers through `712CE`, then calls
+the MPU-save helper at `65AC0`. While that helper holds SP `0x40` bytes below
+the IRQ187 frame, higher-priority IRQ134 can enter through `7145A`. Its
+`pushsp r1,lp` frame occupies the bytes later reused by `83D40` as the unwritten
+tail of the 64-byte CFIFO payload.
+
+The resulting payload mapping is:
+
+| Payload bytes | Interrupted foreground value |
+|---:|---|
+| `8..11` | `r20` |
+| `12..47` | `r19..r11`, descending |
+| `48..51` | nested-wrapper `CTPSW`, not foreground `r10` |
+| `52..63` | `r9..r7`, descending |
+
+`r6` is immediately outside the copied payload. The exact machine execution
+nests IRQ134 at return PC `65B28`, returns through both original wrappers, and
+copies the 64-byte payload to `FEBE4618`. Paired application SecurityAccess
+inputs changed 29 bytes during challenge encryption, 20 during decryption, and
+24 during derived-key expansion. The selected decrypt-key-expansion boundary
+was invariant.
+
+These AES values add no authority on F33: startup already mirrors the
+application SecurityAccess root at SID23-readable `FEBF7B80`, and the challenge
+and client material are protocol-visible or tester-selected. Production
+command-5's aligned result copy carries its generated words in `r1`, outside
+the exposed register set. The audited command-7/8, SecOC, programming-admission
+and guarded-callback boundaries expose intended results, public state, or
+addresses without a corresponding write. No attacker-indexed CodeFlash load
+feeds the exposed registers.
+
+Reproduce all eight exact-image cases:
+
+```sh
+uv run tools/targets/camry/research/explore_camry_f33_nested_register_disclosure.py
+```
+
+The output schema is `camry-f33-nested-register-disclosure-v1`.
 
 Two additional write/pivot-looking cases also close under exact configuration:
 

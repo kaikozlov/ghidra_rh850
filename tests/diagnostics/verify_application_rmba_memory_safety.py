@@ -273,6 +273,8 @@ expect("RAM addr FEBE37FF size 1 -> NRC 0x31 (exclusion 1 high edge)",
        req(1, 0xFEBE37FF, 1), ("NRC", 0x31))
 expect("RAM addr FEBE37FE size 2 -> NRC 0x31 (crossing into exclusion 1)",
        req(1, 0xFEBE37FE, 2), ("NRC", 0x31))
+expect("RAM addr FEBE4618 size 64 -> OK (diagnostic ring payload is readable)",
+       req(1, 0xFEBE4618, 64), ("OK", (1, 0xFEBE4618, 64)))
 expect("RAM addr FEBE502F size 1 -> OK (exclusion 2 low edge minus one)",
        req(1, 0xFEBE502F, 1), ("OK", (1, 0xFEBE502F, 1)))
 expect("RAM addr FEBE529C size 1 -> OK (exclusion 2 high edge plus one)",
@@ -281,6 +283,8 @@ expect("RAM addr FEBF6B01 size 255 -> OK (largest read ending at exclusion 5 low
        req(1, 0xFEBF6B01, 0xFF), ("OK", (1, 0xFEBF6B01, 0xFF)))
 expect("RAM addr FEBF6B02 size 255 -> NRC 0x31 (overlap formula lo+1-size <= addr)",
        req(1, 0xFEBF6B02, 0xFF), ("NRC", 0x31))
+expect("RAM addr FEBF7B80 size 16 -> OK (application SA root mirror is readable)",
+       req(1, 0xFEBF7B80, 16), ("OK", (1, 0xFEBF7B80, 16)))
 expect("RAM addr FEBFFFFF size 1 -> OK (range high inclusive; end-fit 0>=0; window equals range)",
        req(1, 0xFEBFFFFF, 1), ("OK", (1, 0xFEBFFFFF, 1)))
 expect("RAM addr FEBFFFFF size 2 -> NRC 0x31 (end-fit: high-addr < size-1)",

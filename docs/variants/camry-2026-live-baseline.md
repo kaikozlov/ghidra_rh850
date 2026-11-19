@@ -1023,6 +1023,8 @@ logical CAN-FD DLC exceeds physical FIFO storage, but the recovered consumers tr
 or reject before a write escapes their configured destinations. The exact pre-fault
 STORE audit finds no ranged write into saved-PC/context RAM. The recovered primitive
 provides information leakage and stale input.
+The [recovery-path audit](camry-f33-eps-recovery-2026-09-11.md#nested-timer-frames-expose-live-foreground-registers)
+owns the exact nested-interrupt register composition and reproducer.
 
 **Disposition:** no stock uninterrupted-READY arbitrary-code path is recovered on exact
 F33. A new path would now have to come from one of the deliberately residual classes:
