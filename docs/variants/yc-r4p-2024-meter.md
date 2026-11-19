@@ -202,17 +202,23 @@ retention through standby from durability through complete power loss.
 CAN `0x0D7` bytes 1–2 carry the speed used by the
 [speedometer](#speedometer-input-and-display-correction). Byte 0 bits 5:0
 carry a rolling distance count (`0x734DC`, signal `0x542`). `0x55BBC`
-synchronizes on the first fresh sample; on the regular active path it
-takes the difference modulo 64, gated by receive status, operating state
-and uncorrected speed of at least 1.76 km/h. It also checks the sum over
-50 samples.
+synchronizes on the first fresh sample. Normal accumulation uses the
+modulo-64 delta and checks receive status, operating state, uncorrected
+speed ≥1.76 km/h and the sum over 50 samples. Below 1.76 km/h,
+`0x55C48..0x55C58` updates the reference on a fresh receive and discards
+the delta.
 
-`0x55E18` adds five units of remainder per accepted count. At 25,480
-remainder units it advances the whole kilometre: **5,096 counts/km**;
-`0x55904` converts with **8,200 counts/mile**. The normal output contains
-both unit systems, irrespective of which one the driver has selected.
-`0x5616E` subtracts two independent trip baselines from the total, accounting
-for a borrow in the remainder. Trip tenths are truncated, not rounded.
+`0x55E18` adds five remainder units per accepted count. At 25,480
+remainder units it advances the whole kilometre: **5,096 counts/km**.
+`0x55904` converts at **8,200 counts/mile**. The processed SPI record
+carries both unit systems.
+
+`0x5616E` subtracts the trip baselines, including any borrow from the
+remainder. For imperial trip tenths, `0x55986` subtracts the baseline
+and `0x5593E` truncates the residual counts modulo 8,200 by dividing by
+`0x334` (820). The metric and imperial getters (`0x56270/0x56298`,
+`0x562DA/0x562F0`) each keep five BCD digits and roll independently from
+9,999.9 to 0.0.
 The packet builder converts packed BCD digits to ordinary 32-bit integers
 (`0x79196`; six stores at `0x13586..0x135BA`):
 
@@ -221,6 +227,15 @@ The packet builder converts packed BCD digits to ordinary 32-bit integers
 | Total distance | `0xF0` | `0x634` | Whole km / mile |
 | Trip slot 1 | `0xF8` | `0x638` | 0.1 km / mile |
 | Trip slot 2 | `0x100` | `0x63C` | 0.1 km / mile |
+
+The incoming SPI `F0` handler (`0x12C16..0x12C7E`) reads the peer's
+reset requests at `+0xA0` (slot 1) and `+0xA8` (slot 2). During normal
+accumulation, a zero latches the corresponding request. `0x55E98` copies
+both whole kilometres and the remainder to that slot's baseline. The
+first nonzero word after the request finalizes the reset. Metric and
+imperial values share this baseline. The total and the other trip continue
+accumulating. The GTS `Meter_P5` catalog lists **ODO/TRIP Change Switch**
+and **Trip Reset Switch** under DID `0x1001`.
 
 GTS `Meter_P5` names DID `0x0103`
 (`0x0403` snapshot) **Total Distance Traveled**: one unit byte (`1` km,
@@ -241,6 +256,9 @@ places `ODOMETER` in those same four bytes but `UNITS` in **B3[2:1]**.
 The same producer `0x5521E` puts the two trip slots, in selected-unit
 tenths, in `0x614` and `0x615` B4..B7. `0x30D` B4..B7 carries total
 distance in tenths.
+
+See the [Camry capture analysis](camry-2026-live-baseline.md#separating-distance-on-the-wire-from-distance-credited-by-the-meter)
+for observed distance increments and low-speed counts on that vehicle.
 
 ### Engine speed and hybrid instrumentation
 
@@ -269,6 +287,31 @@ GTS labels `0x10A8` bit 33 **EV Drive Indicator**; this DID is absent
 from the normal read/support tables. The catalog lists **Ready Indicator**
 and **EV Mode Indicator** under `0x2961`, whose value reader is null
 (`0x156E08`).
+
+### Coolant temperature: the diagnostic and the display update differently
+
+On controller 0, `0x3C6` carries signal `0x3DD` (`0x1708B4`, extractor
+`0x703E6`). For `n = ((B0 & 1) << 8) | B1`, the sample is `n / 2 − 80`
+°C. The filter requires a qualified supply and fresh receive status.
+Codes 0 and 3 leave an existing filter unchanged (`0x593CC`, bitmap
+`0x16026C`).
+
+Worker `0x59052` seeds a four-sample ring with the first accepted value.
+It then replaces one sample every ten calls (`0x59428`).
+
+| Reader | Value |
+|---|---|
+| GTS `Meter_P5` DID `0x1241` **Coolant Temperature** | `0x28574` reads the latest sample inserted in the ring. It reports 0.5 °C/count, clamps to 0–127 °C and returns `FF` on the invalid-status branch. |
+| Processed SPI record `00`, word `+0xAC` | `0x591B8` moves toward the four-sample mean in steps. `0x5929E → 0x133E8` stores a little-endian 32-bit value in the input coding. The raw SPI mirror omits `0x3C6`. |
+
+In an offline replay of the ROM tables for an 80 → 100 °C step, the
+diagnostic reaches 100 °C on worker call 10. The SPI word is then
+322 (81 °C) and reaches 360 (100 °C) on call 48.
+
+The separate high-temperature logic at `0x3961E` trips on a qualified
+mean at **120 °C** and rearms at **115 °C**. Toyota's
+[2024 Prime instrument guide](https://assets.sia.toyota.com/publications/en/om-s/OM24V5QRG/pdf/OM24V5QRG.pdf)
+lists a high coolant temperature warning.
 
 ### The display link
 

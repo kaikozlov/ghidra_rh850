@@ -1,0 +1,267 @@
+[
+  {
+    "capture": "raw-20260826/camry_nrtd_cruise_can_sync_20260826.json.gz",
+    "sha256": "083435105745d928ceea5dea2a614b7a1fbd32341ba4c94987c73ef6287e87fa",
+    "native_bus": 1,
+    "frames": 1475,
+    "highs": 625,
+    "highs_by_selector": {
+      "P": 625
+    },
+    "highs_by_independent_report": {
+      "ready": {
+        "unobserved": 7,
+        "0": 618
+      },
+      "all_four_wheels_raw_zero": {
+        "1": 625
+      },
+      "door_open": {
+        "0": 625
+      },
+      "epb": {
+        "1": 625
+      },
+      "foot_brake": {
+        "0": 625
+      },
+      "accelerator_raw": {
+        "0": 625
+      },
+      "brake_hold": {
+        "0": 625
+      },
+      "vmc_result_id": {
+        "63": 625
+      }
+    },
+    "rises": 59,
+    "falls": 59,
+    "contiguous_edge_counts_by_sequence_parity": [
+      0,
+      118
+    ],
+    "edges_across_missing_publications": 0,
+    "pcs_close_lateral_bin_crossings": {
+      "inward": {
+        "0_to_1": 25,
+        "0_to_0": 2
+      },
+      "outward": {
+        "1_to_0": 25,
+        "0_to_0": 2
+      }
+    },
+    "pcs_lateral_code_eq_2": {
+      "true_high": 72,
+      "missed_high": 0,
+      "false_high": 3,
+      "true_low": 95
+    }
+  },
+  {
+    "capture": "raw-20260826/camry_ready_gear_20260826.json.gz",
+    "sha256": "379ec28fba65191d2898ebb156fe83e2e8e59c38bbf5fcfb7166ec9ff32c3889",
+    "native_bus": 1,
+    "frames": 2475,
+    "highs": 495,
+    "highs_by_selector": {
+      "D": 22,
+      "N": 78,
+      "P": 395
+    },
+    "highs_by_independent_report": {
+      "ready": {
+        "0": 47,
+        "1": 448
+      },
+      "all_four_wheels_raw_zero": {
+        "1": 495
+      },
+      "door_open": {
+        "0": 495
+      },
+      "epb": {
+        "1": 387,
+        "0": 108
+      },
+      "foot_brake": {
+        "0": 359,
+        "1": 136
+      },
+      "accelerator_raw": {
+        "0": 495
+      },
+      "brake_hold": {
+        "0": 495
+      },
+      "vmc_result_id": {
+        "63": 495
+      }
+    },
+    "rises": 57,
+    "falls": 57,
+    "contiguous_edge_counts_by_sequence_parity": [
+      0,
+      113
+    ],
+    "edges_across_missing_publications": 1,
+    "pcs_close_lateral_bin_crossings": {
+      "inward": {
+        "0_to_1": 33,
+        "0_to_0": 6
+      },
+      "outward": {
+        "1_to_0": 32,
+        "0_to_0": 7
+      }
+    },
+    "pcs_lateral_code_eq_2": {
+      "true_high": 57,
+      "missed_high": 1,
+      "false_high": 8,
+      "true_low": 232
+    }
+  },
+  {
+    "capture": "raw-20260826/camry_ready_b_20260826.json.gz",
+    "sha256": "7bae994dea1caff06d8f31f58558f67d646da38bd9531557875858eb33fa4db3",
+    "native_bus": 1,
+    "frames": 1070,
+    "highs": 206,
+    "highs_by_selector": {
+      "B": 98,
+      "D": 64,
+      "P": 44
+    },
+    "highs_by_independent_report": {
+      "ready": {
+        "1": 206
+      },
+      "all_four_wheels_raw_zero": {
+        "1": 206
+      },
+      "door_open": {
+        "0": 206
+      },
+      "epb": {
+        "1": 44,
+        "0": 162
+      },
+      "foot_brake": {
+        "0": 40,
+        "1": 166
+      },
+      "accelerator_raw": {
+        "0": 206
+      },
+      "brake_hold": {
+        "0": 206
+      },
+      "vmc_result_id": {
+        "63": 206
+      }
+    },
+    "rises": 26,
+    "falls": 26,
+    "contiguous_edge_counts_by_sequence_parity": [
+      0,
+      52
+    ],
+    "edges_across_missing_publications": 0,
+    "pcs_close_lateral_bin_crossings": {
+      "inward": {
+        "0_to_1": 10
+      },
+      "outward": {
+        "1_to_0": 10
+      }
+    },
+    "pcs_lateral_code_eq_2": {
+      "true_high": 17,
+      "missed_high": 0,
+      "false_high": 1,
+      "true_low": 103
+    }
+  },
+  {
+    "capture": "raw-20260827/camry_post_repin_nrtd_20260827.json.gz",
+    "sha256": "4e061d5ec06b0dee0b208e7bc34d5f8050af565978ef3254ce221ad329b4f74d",
+    "native_bus": 2,
+    "frames": 400,
+    "highs": 400,
+    "highs_by_selector": {
+      "P": 399,
+      "unobserved": 1
+    },
+    "highs_by_independent_report": {
+      "ready": {
+        "unobserved": 10,
+        "1": 390
+      },
+      "all_four_wheels_raw_zero": {
+        "1": 400
+      },
+      "door_open": {
+        "unobserved": 5,
+        "1": 395
+      },
+      "epb": {
+        "unobserved": 5,
+        "1": 395
+      },
+      "foot_brake": {
+        "unobserved": 1,
+        "0": 399
+      },
+      "accelerator_raw": {
+        "0": 400
+      },
+      "brake_hold": {
+        "unobserved": 3,
+        "0": 397
+      },
+      "vmc_result_id": {
+        "unobserved": 1,
+        "63": 399
+      }
+    },
+    "rises": 0,
+    "falls": 0,
+    "contiguous_edge_counts_by_sequence_parity": [
+      0,
+      0
+    ],
+    "edges_across_missing_publications": 0,
+    "pcs_close_lateral_bin_crossings": {},
+    "pcs_lateral_code_eq_2": {
+      "true_high": 0,
+      "missed_high": 45,
+      "false_high": 0,
+      "true_low": 0
+    }
+  },
+  {
+    "capture": "raw-20260827/camry_post_repin_ready_20260827.json.gz",
+    "sha256": "32e9ac52c53ac05248b45c2f0eb6a6d50c59c11a9db4fafb31e145919078a58d",
+    "native_bus": 2,
+    "frames": 428,
+    "highs": 0,
+    "highs_by_selector": {},
+    "highs_by_independent_report": {},
+    "rises": 0,
+    "falls": 0,
+    "contiguous_edge_counts_by_sequence_parity": [
+      0,
+      0
+    ],
+    "edges_across_missing_publications": 0,
+    "pcs_close_lateral_bin_crossings": {},
+    "pcs_lateral_code_eq_2": {
+      "true_high": 0,
+      "missed_high": 0,
+      "false_high": 0,
+      "true_low": 49
+    }
+  }
+]

@@ -1,0 +1,257 @@
+byte,bit,frames,ones,zeros,within_segment_pairs,flips,routes_varying,field,field_part,interpretation,evidence
+0,0,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+0,1,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+0,2,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+0,3,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+0,4,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+0,5,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+0,6,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+0,7,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+1,0,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+1,1,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+1,2,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+1,3,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+1,4,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+1,5,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+1,6,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+1,7,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+2,0,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+2,1,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+2,2,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+2,3,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+2,4,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+2,5,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+2,6,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+2,7,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+3,0,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+3,1,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+3,2,3214376,9,3214367,3213007,2,1,pcs_opening,flag,short PCS-associated phase,one recorded episode
+3,3,3214376,1357966,1856410,3213007,731,64,cruise_operating,flag,adaptive or conventional cruise operating,cross-stream
+3,4,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+3,5,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+3,6,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+3,7,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+4,0,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+4,1,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+4,2,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+4,3,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+4,4,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+4,5,3214376,458,3213918,3213007,16,5,hold,flag,delayed camera hold state,cross-stream
+4,6,3214376,21,3214355,3213007,2,1,pcs_extended,flag,extended PCS-associated phase,one recorded episode
+4,7,3214376,3214038,338,3213007,10,10,startup_complete,flag,request/display startup complete,cross-stream
+5,0,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+5,1,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+5,2,3214376,2802,3211574,3213007,58,4,nonordinary_long,flag,longitudinal ID 13 or 17 in observed traffic,exact association
+5,3,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+5,4,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+5,5,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+5,6,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+5,7,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+6,0,3214376,1255808,1958568,3213007,1524,64,allocation,bit 0,"allocation code: 0, 1, 3 observed",recorder and pedal comparison
+6,1,3214376,2622,3211754,3213007,54,2,allocation,bit 1,"allocation code: 0, 1, 3 observed",recorder and pedal comparison
+6,2,3214376,1360582,1853794,3213007,779,64,longitudinal_id,bit 0,"application code: 0, 11, 13, 17 observed",recorder and chassis result
+6,3,3214376,1357780,1856596,3213007,733,64,longitudinal_id,bit 1,"application code: 0, 11, 13, 17 observed",recorder and chassis result
+6,4,3214376,180,3214196,3213007,4,2,longitudinal_id,bit 2,"application code: 0, 11, 13, 17 observed",recorder and chassis result
+6,5,3214376,1357960,1856416,3213007,731,64,longitudinal_id,bit 3,"application code: 0, 11, 13, 17 observed",recorder and chassis result
+6,6,3214376,2622,3211754,3213007,54,2,longitudinal_id,bit 4,"application code: 0, 11, 13, 17 observed",recorder and chassis result
+6,7,3214376,0,3214376,3213007,0,0,longitudinal_id,bit 5,"application code: 0, 11, 13, 17 observed",recorder and chassis result
+7,0,3214376,1255808,1958568,3213007,1524,64,prefix_checksum,bit 0,prefix integrity field,integrity
+7,1,3214376,3211754,2622,3213007,54,2,prefix_checksum,bit 1,prefix integrity field,integrity
+7,2,3214376,1360393,1853983,3213007,783,64,prefix_checksum,bit 2,prefix integrity field,integrity
+7,3,3214376,2625,3211751,3213007,56,3,prefix_checksum,bit 3,prefix integrity field,integrity
+7,4,3214376,1856590,1357786,3213007,733,64,prefix_checksum,bit 4,prefix integrity field,integrity
+7,5,3214376,464,3213912,3213007,20,5,prefix_checksum,bit 5,prefix integrity field,integrity
+7,6,3214376,1360561,1853815,3213007,781,64,prefix_checksum,bit 6,prefix integrity field,integrity
+7,7,3214376,359,3214017,3213007,12,11,prefix_checksum,bit 7,prefix integrity field,integrity
+8,0,3214376,1423477,1790899,3213007,19170,73,acceleration_1,bit 8,upper acceleration slot in ordinary DRCC; nominal 0.001 m/s^2/count,recorder and cross-stream
+8,1,3214376,1785677,1428699,3213007,13078,74,acceleration_1,bit 9,upper acceleration slot in ordinary DRCC; nominal 0.001 m/s^2/count,recorder and cross-stream
+8,2,3214376,2125564,1088812,3213007,9750,74,acceleration_1,bit 10,upper acceleration slot in ordinary DRCC; nominal 0.001 m/s^2/count,recorder and cross-stream
+8,3,3214376,2139901,1074475,3213007,9420,74,acceleration_1,bit 11,upper acceleration slot in ordinary DRCC; nominal 0.001 m/s^2/count,recorder and cross-stream
+8,4,3214376,2140688,1073688,3213007,9404,74,acceleration_1,bit 12,upper acceleration slot in ordinary DRCC; nominal 0.001 m/s^2/count,recorder and cross-stream
+8,5,3214376,2140688,1073688,3213007,9404,74,acceleration_1,bit 13,upper acceleration slot in ordinary DRCC; nominal 0.001 m/s^2/count,recorder and cross-stream
+8,6,3214376,2140688,1073688,3213007,9404,74,acceleration_1,bit 14,upper acceleration slot in ordinary DRCC; nominal 0.001 m/s^2/count,recorder and cross-stream
+8,7,3214376,2140688,1073688,3213007,9404,74,acceleration_1,sign,upper acceleration slot in ordinary DRCC; nominal 0.001 m/s^2/count,recorder and cross-stream
+9,0,3214376,1516231,1698145,3213007,710532,72,acceleration_1,bit 0,upper acceleration slot in ordinary DRCC; nominal 0.001 m/s^2/count,recorder and cross-stream
+9,1,3214376,1563441,1650935,3213007,624426,74,acceleration_1,bit 1,upper acceleration slot in ordinary DRCC; nominal 0.001 m/s^2/count,recorder and cross-stream
+9,2,3214376,1725406,1488970,3213007,492079,74,acceleration_1,bit 2,upper acceleration slot in ordinary DRCC; nominal 0.001 m/s^2/count,recorder and cross-stream
+9,3,3214376,1731490,1482886,3213007,322157,74,acceleration_1,bit 3,upper acceleration slot in ordinary DRCC; nominal 0.001 m/s^2/count,recorder and cross-stream
+9,4,3214376,1551339,1663037,3213007,194152,72,acceleration_1,bit 4,upper acceleration slot in ordinary DRCC; nominal 0.001 m/s^2/count,recorder and cross-stream
+9,5,3214376,1562912,1651464,3213007,108835,74,acceleration_1,bit 5,upper acceleration slot in ordinary DRCC; nominal 0.001 m/s^2/count,recorder and cross-stream
+9,6,3214376,1591914,1622462,3213007,58525,73,acceleration_1,bit 6,upper acceleration slot in ordinary DRCC; nominal 0.001 m/s^2/count,recorder and cross-stream
+9,7,3214376,1477353,1737023,3213007,32368,73,acceleration_1,bit 7,upper acceleration slot in ordinary DRCC; nominal 0.001 m/s^2/count,recorder and cross-stream
+10,0,3214376,658448,2555928,3213007,918,63,cruise_setpoint,bit 0,internal cruise speed in km/h,cross-stream
+10,1,3214376,594792,2619584,3213007,1219,56,cruise_setpoint,bit 1,internal cruise speed in km/h,cross-stream
+10,2,3214376,713025,2501351,3213007,920,64,cruise_setpoint,bit 2,internal cruise speed in km/h,cross-stream
+10,3,3214376,410749,2803627,3213007,599,62,cruise_setpoint,bit 3,internal cruise speed in km/h,cross-stream
+10,4,3214376,942367,2272009,3213007,486,60,cruise_setpoint,bit 4,internal cruise speed in km/h,cross-stream
+10,5,3214376,996374,2218002,3213007,390,56,cruise_setpoint,bit 5,internal cruise speed in km/h,cross-stream
+10,6,3214376,1074232,2140144,3213007,329,36,cruise_setpoint,bit 6,internal cruise speed in km/h,cross-stream
+10,7,3214376,0,3214376,3213007,0,0,cruise_setpoint,bit 7,internal cruise speed in km/h,cross-stream
+11,0,3214376,1423481,1790895,3213007,19156,73,acceleration_2,bit 8,lower acceleration slot in ordinary DRCC; nominal 0.001 m/s^2/count,recorder and cross-stream
+11,1,3214376,1785493,1428883,3213007,13072,74,acceleration_2,bit 9,lower acceleration slot in ordinary DRCC; nominal 0.001 m/s^2/count,recorder and cross-stream
+11,2,3214376,2125414,1088962,3213007,9748,74,acceleration_2,bit 10,lower acceleration slot in ordinary DRCC; nominal 0.001 m/s^2/count,recorder and cross-stream
+11,3,3214376,2139751,1074625,3213007,9418,74,acceleration_2,bit 11,lower acceleration slot in ordinary DRCC; nominal 0.001 m/s^2/count,recorder and cross-stream
+11,4,3214376,2140538,1073838,3213007,9402,74,acceleration_2,bit 12,lower acceleration slot in ordinary DRCC; nominal 0.001 m/s^2/count,recorder and cross-stream
+11,5,3214376,2140538,1073838,3213007,9402,74,acceleration_2,bit 13,lower acceleration slot in ordinary DRCC; nominal 0.001 m/s^2/count,recorder and cross-stream
+11,6,3214376,2140538,1073838,3213007,9402,74,acceleration_2,bit 14,lower acceleration slot in ordinary DRCC; nominal 0.001 m/s^2/count,recorder and cross-stream
+11,7,3214376,2140538,1073838,3213007,9402,74,acceleration_2,sign,lower acceleration slot in ordinary DRCC; nominal 0.001 m/s^2/count,recorder and cross-stream
+12,0,3214376,1516221,1698155,3213007,710530,72,acceleration_2,bit 0,lower acceleration slot in ordinary DRCC; nominal 0.001 m/s^2/count,recorder and cross-stream
+12,1,3214376,1563441,1650935,3213007,624426,74,acceleration_2,bit 1,lower acceleration slot in ordinary DRCC; nominal 0.001 m/s^2/count,recorder and cross-stream
+12,2,3214376,1725238,1489138,3213007,492079,74,acceleration_2,bit 2,lower acceleration slot in ordinary DRCC; nominal 0.001 m/s^2/count,recorder and cross-stream
+12,3,3214376,1731320,1483056,3213007,322161,74,acceleration_2,bit 3,lower acceleration slot in ordinary DRCC; nominal 0.001 m/s^2/count,recorder and cross-stream
+12,4,3214376,1551323,1663053,3213007,194148,72,acceleration_2,bit 4,lower acceleration slot in ordinary DRCC; nominal 0.001 m/s^2/count,recorder and cross-stream
+12,5,3214376,1562894,1651482,3213007,108823,74,acceleration_2,bit 5,lower acceleration slot in ordinary DRCC; nominal 0.001 m/s^2/count,recorder and cross-stream
+12,6,3214376,1591918,1622458,3213007,58521,73,acceleration_2,bit 6,lower acceleration slot in ordinary DRCC; nominal 0.001 m/s^2/count,recorder and cross-stream
+12,7,3214376,1477333,1737043,3213007,32366,73,acceleration_2,bit 7,lower acceleration slot in ordinary DRCC; nominal 0.001 m/s^2/count,recorder and cross-stream
+13,0,3214376,3214376,0,3213007,0,0,fixed_word_1,bit 8,observed 0x7fff; physical function unknown,constant word
+13,1,3214376,3214376,0,3213007,0,0,fixed_word_1,bit 9,observed 0x7fff; physical function unknown,constant word
+13,2,3214376,3214376,0,3213007,0,0,fixed_word_1,bit 10,observed 0x7fff; physical function unknown,constant word
+13,3,3214376,3214376,0,3213007,0,0,fixed_word_1,bit 11,observed 0x7fff; physical function unknown,constant word
+13,4,3214376,3214376,0,3213007,0,0,fixed_word_1,bit 12,observed 0x7fff; physical function unknown,constant word
+13,5,3214376,3214376,0,3213007,0,0,fixed_word_1,bit 13,observed 0x7fff; physical function unknown,constant word
+13,6,3214376,3214376,0,3213007,0,0,fixed_word_1,bit 14,observed 0x7fff; physical function unknown,constant word
+13,7,3214376,0,3214376,3213007,0,0,fixed_word_1,bit 15,observed 0x7fff; physical function unknown,constant word
+14,0,3214376,3214376,0,3213007,0,0,fixed_word_1,bit 0,observed 0x7fff; physical function unknown,constant word
+14,1,3214376,3214376,0,3213007,0,0,fixed_word_1,bit 1,observed 0x7fff; physical function unknown,constant word
+14,2,3214376,3214376,0,3213007,0,0,fixed_word_1,bit 2,observed 0x7fff; physical function unknown,constant word
+14,3,3214376,3214376,0,3213007,0,0,fixed_word_1,bit 3,observed 0x7fff; physical function unknown,constant word
+14,4,3214376,3214376,0,3213007,0,0,fixed_word_1,bit 4,observed 0x7fff; physical function unknown,constant word
+14,5,3214376,3214376,0,3213007,0,0,fixed_word_1,bit 5,observed 0x7fff; physical function unknown,constant word
+14,6,3214376,3214376,0,3213007,0,0,fixed_word_1,bit 6,observed 0x7fff; physical function unknown,constant word
+14,7,3214376,3214376,0,3213007,0,0,fixed_word_1,bit 7,observed 0x7fff; physical function unknown,constant word
+15,0,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+15,1,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+15,2,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+15,3,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+15,4,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+15,5,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+15,6,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+15,7,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+16,0,3214376,3214376,0,3213007,0,0,fixed_word_2,bit 8,observed 0x7fff; physical function unknown,constant word
+16,1,3214376,3214376,0,3213007,0,0,fixed_word_2,bit 9,observed 0x7fff; physical function unknown,constant word
+16,2,3214376,3214376,0,3213007,0,0,fixed_word_2,bit 10,observed 0x7fff; physical function unknown,constant word
+16,3,3214376,3214376,0,3213007,0,0,fixed_word_2,bit 11,observed 0x7fff; physical function unknown,constant word
+16,4,3214376,3214376,0,3213007,0,0,fixed_word_2,bit 12,observed 0x7fff; physical function unknown,constant word
+16,5,3214376,3214376,0,3213007,0,0,fixed_word_2,bit 13,observed 0x7fff; physical function unknown,constant word
+16,6,3214376,3214376,0,3213007,0,0,fixed_word_2,bit 14,observed 0x7fff; physical function unknown,constant word
+16,7,3214376,0,3214376,3213007,0,0,fixed_word_2,bit 15,observed 0x7fff; physical function unknown,constant word
+17,0,3214376,3214376,0,3213007,0,0,fixed_word_2,bit 0,observed 0x7fff; physical function unknown,constant word
+17,1,3214376,3214376,0,3213007,0,0,fixed_word_2,bit 1,observed 0x7fff; physical function unknown,constant word
+17,2,3214376,3214376,0,3213007,0,0,fixed_word_2,bit 2,observed 0x7fff; physical function unknown,constant word
+17,3,3214376,3214376,0,3213007,0,0,fixed_word_2,bit 3,observed 0x7fff; physical function unknown,constant word
+17,4,3214376,3214376,0,3213007,0,0,fixed_word_2,bit 4,observed 0x7fff; physical function unknown,constant word
+17,5,3214376,3214376,0,3213007,0,0,fixed_word_2,bit 5,observed 0x7fff; physical function unknown,constant word
+17,6,3214376,3214376,0,3213007,0,0,fixed_word_2,bit 6,observed 0x7fff; physical function unknown,constant word
+17,7,3214376,3214376,0,3213007,0,0,fixed_word_2,bit 7,observed 0x7fff; physical function unknown,constant word
+18,0,3214376,775908,2438468,3213007,46855,68,pinion_reference,bit 8,requested pinion angle; 0.00100012 rad/count,controller and feedback
+18,1,3214376,783340,2431036,3213007,28426,68,pinion_reference,bit 9,requested pinion angle; 0.00100012 rad/count,controller and feedback
+18,2,3214376,788403,2425973,3213007,19721,68,pinion_reference,bit 10,requested pinion angle; 0.00100012 rad/count,controller and feedback
+18,3,3214376,792675,2421701,3213007,15707,68,pinion_reference,bit 11,requested pinion angle; 0.00100012 rad/count,controller and feedback
+18,4,3214376,789942,2424434,3213007,13758,68,pinion_reference,bit 12,requested pinion angle; 0.00100012 rad/count,controller and feedback
+18,5,3214376,774206,2440170,3213007,12812,68,pinion_reference,bit 13,requested pinion angle; 0.00100012 rad/count,controller and feedback
+18,6,3214376,778189,2436187,3213007,12710,68,pinion_reference,bit 14,requested pinion angle; 0.00100012 rad/count,controller and feedback
+18,7,3214376,778189,2436187,3213007,12710,68,pinion_reference,sign,requested pinion angle; 0.00100012 rad/count,controller and feedback
+19,0,3214376,1538652,1675724,3213007,770912,69,pinion_reference,bit 0,requested pinion angle; 0.00100012 rad/count,controller and feedback
+19,1,3214376,1565541,1648835,3213007,611647,69,pinion_reference,bit 1,requested pinion angle; 0.00100012 rad/count,controller and feedback
+19,2,3214376,1586945,1627431,3213007,448734,67,pinion_reference,bit 2,requested pinion angle; 0.00100012 rad/count,controller and feedback
+19,3,3214376,1606806,1607570,3213007,323566,68,pinion_reference,bit 3,requested pinion angle; 0.00100012 rad/count,controller and feedback
+19,4,3214376,1410139,1804237,3213007,233353,68,pinion_reference,bit 4,requested pinion angle; 0.00100012 rad/count,controller and feedback
+19,5,3214376,1209717,2004659,3213007,163079,68,pinion_reference,bit 5,requested pinion angle; 0.00100012 rad/count,controller and feedback
+19,6,3214376,988203,2226173,3213007,116971,68,pinion_reference,bit 6,requested pinion angle; 0.00100012 rad/count,controller and feedback
+19,7,3214376,848636,2365740,3213007,77989,68,pinion_reference,bit 7,requested pinion angle; 0.00100012 rad/count,controller and feedback
+20,0,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+20,1,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+20,2,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+20,3,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+20,4,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+20,5,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+20,6,3214376,1357780,1856596,3213007,733,64,cruise_policy,bit 0,"policy code: 0, 1, 3 observed",cross-stream association
+20,7,3214376,689676,2524700,3213007,2783,64,cruise_policy,bit 1,"policy code: 0, 1, 3 observed",cross-stream association
+21,0,3214376,696977,2517399,3213007,456,21,lateral_id,bit 0,"application code: 0, 4, 11, 18 observed",recorder and chassis result
+21,1,3214376,749534,2464842,3213007,560,22,lateral_id,bit 1,"application code: 0, 4, 11, 18 observed",recorder and chassis result
+21,2,3214376,2124,3212252,3213007,54,15,lateral_id,bit 2,"application code: 0, 4, 11, 18 observed",recorder and chassis result
+21,3,3214376,696977,2517399,3213007,456,21,lateral_id,bit 3,"application code: 0, 4, 11, 18 observed",recorder and chassis result
+21,4,3214376,52557,3161819,3213007,160,6,lateral_id,bit 4,"application code: 0, 4, 11, 18 observed",recorder and chassis result
+21,5,3214376,0,3214376,3213007,0,0,lateral_id,bit 5,"application code: 0, 4, 11, 18 observed",recorder and chassis result
+21,6,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+21,7,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+22,0,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+22,1,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+22,2,3214376,12023,3202353,3213007,31,7,in_path_target_at_rest,flag,near frontal target selected while the vehicle is stopped (inferred); 20 Hz,stationary selector trials and radar crossing
+22,3,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+22,4,3214376,1360582,1853794,3213007,779,64,long_app_present,flag,nonzero longitudinal application ID,exact association
+22,5,3214376,544,3213832,3213007,62,19,delayed_release,flag,delayed longitudinal release after cruise exits,cross-stream
+22,6,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+22,7,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+23,0,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+23,1,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+23,2,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+23,3,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+23,4,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+23,5,3214376,149387,3064989,3213007,1379,25,application_effort,flag,lateral-ID-dependent steering effort or fixed state,cross-stream
+23,6,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+23,7,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+24,0,3214376,57466,3156910,3213007,49,1,assist_gain,bit 0,retained lateral assist gain; 0.01/count,recorder and cross-stream
+24,1,3214376,69425,3144951,3213007,32,6,assist_gain,bit 1,retained lateral assist gain; 0.01/count,recorder and cross-stream
+24,2,3214376,1584504,1629872,3213007,95,26,assist_gain,bit 2,retained lateral assist gain; 0.01/count,recorder and cross-stream
+24,3,3214376,57466,3156910,3213007,49,1,assist_gain,bit 3,retained lateral assist gain; 0.01/count,recorder and cross-stream
+24,4,3214376,126891,3087485,3213007,79,6,assist_gain,bit 4,retained lateral assist gain; 0.01/count,recorder and cross-stream
+24,5,3214376,1653929,1560447,3213007,77,27,assist_gain,bit 5,retained lateral assist gain; 0.01/count,recorder and cross-stream
+24,6,3214376,1584504,1629872,3213007,95,26,assist_gain,bit 6,retained lateral assist gain; 0.01/count,recorder and cross-stream
+24,7,3214376,0,3214376,3213007,0,0,assist_gain,bit 7,retained lateral assist gain; 0.01/count,recorder and cross-stream
+25,0,3214376,220,3214156,3213007,10,4,warning_gain,bit 0,lane-departure vibration phase; damping gain at 0.01/count is a candidate,warning observed; gain inferred
+25,1,3214376,0,3214376,3213007,0,0,warning_gain,bit 1,lane-departure vibration phase; damping gain at 0.01/count is a candidate,warning observed; gain inferred
+25,2,3214376,0,3214376,3213007,0,0,warning_gain,bit 2,lane-departure vibration phase; damping gain at 0.01/count is a candidate,warning observed; gain inferred
+25,3,3214376,0,3214376,3213007,0,0,warning_gain,bit 3,lane-departure vibration phase; damping gain at 0.01/count is a candidate,warning observed; gain inferred
+25,4,3214376,0,3214376,3213007,0,0,warning_gain,bit 4,lane-departure vibration phase; damping gain at 0.01/count is a candidate,warning observed; gain inferred
+25,5,3214376,0,3214376,3213007,0,0,warning_gain,bit 5,lane-departure vibration phase; damping gain at 0.01/count is a candidate,warning observed; gain inferred
+25,6,3214376,0,3214376,3213007,0,0,warning_gain,bit 6,lane-departure vibration phase; damping gain at 0.01/count is a candidate,warning observed; gain inferred
+25,7,3214376,0,3214376,3213007,0,0,warning_gain,bit 7,lane-departure vibration phase; damping gain at 0.01/count is a candidate,warning observed; gain inferred
+26,0,3214376,1607028,1607348,3213007,3212573,75,request_sequence,bit 0,request sequence field,transport
+26,1,3214376,1607022,1607354,3213007,1606336,75,request_sequence,bit 1,request sequence field,transport
+26,2,3214376,1607009,1607367,3213007,803173,75,request_sequence,bit 2,request sequence field,transport
+26,3,3214376,1607001,1607375,3213007,401612,75,request_sequence,bit 3,request sequence field,transport
+26,4,3214376,1606961,1607415,3213007,200827,75,request_sequence,bit 4,request sequence field,transport
+26,5,3214376,1606961,1607415,3213007,100437,75,request_sequence,bit 5,request sequence field,transport
+26,6,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+26,7,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+27,0,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+27,1,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+27,2,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+27,3,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+27,4,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+27,5,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+27,6,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+27,7,3214376,0,3214376,3213007,0,0,unassigned,,no established field assignment,unknown
+28,0,3214376,1605804,1608572,3213007,1607055,75,authentication_trailer,opaque,opaque transport bytes; no per-bit vehicle quantity,transport
+28,1,3214376,1605255,1609121,3213007,1604796,75,authentication_trailer,opaque,opaque transport bytes; no per-bit vehicle quantity,transport
+28,2,3214376,1605517,1608859,3213007,1604883,75,authentication_trailer,opaque,opaque transport bytes; no per-bit vehicle quantity,transport
+28,3,3214376,1608190,1606186,3213007,1605663,75,authentication_trailer,opaque,opaque transport bytes; no per-bit vehicle quantity,transport
+28,4,3214376,1604857,1609519,3213007,266355,75,authentication_trailer,opaque,opaque transport bytes; no per-bit vehicle quantity,transport
+28,5,3214376,1598681,1615695,3213007,133191,75,authentication_trailer,opaque,opaque transport bytes; no per-bit vehicle quantity,transport
+28,6,3214376,1616661,1597715,3213007,3193992,75,authentication_trailer,opaque,opaque transport bytes; no per-bit vehicle quantity,transport
+28,7,3214376,1615639,1598737,3213007,1598457,75,authentication_trailer,opaque,opaque transport bytes; no per-bit vehicle quantity,transport
+29,0,3214376,1608091,1606285,3213007,1607419,75,authentication_trailer,opaque,opaque transport bytes; no per-bit vehicle quantity,transport
+29,1,3214376,1605371,1609005,3213007,1603690,75,authentication_trailer,opaque,opaque transport bytes; no per-bit vehicle quantity,transport
+29,2,3214376,1606776,1607600,3213007,1606829,75,authentication_trailer,opaque,opaque transport bytes; no per-bit vehicle quantity,transport
+29,3,3214376,1608716,1605660,3213007,1608509,75,authentication_trailer,opaque,opaque transport bytes; no per-bit vehicle quantity,transport
+29,4,3214376,1609530,1604846,3213007,1606047,75,authentication_trailer,opaque,opaque transport bytes; no per-bit vehicle quantity,transport
+29,5,3214376,1607819,1606557,3213007,1606305,75,authentication_trailer,opaque,opaque transport bytes; no per-bit vehicle quantity,transport
+29,6,3214376,1606216,1608160,3213007,1607132,75,authentication_trailer,opaque,opaque transport bytes; no per-bit vehicle quantity,transport
+29,7,3214376,1604351,1610025,3213007,1608045,75,authentication_trailer,opaque,opaque transport bytes; no per-bit vehicle quantity,transport
+30,0,3214376,1608982,1605394,3213007,1608525,75,authentication_trailer,opaque,opaque transport bytes; no per-bit vehicle quantity,transport
+30,1,3214376,1606906,1607470,3213007,1606170,75,authentication_trailer,opaque,opaque transport bytes; no per-bit vehicle quantity,transport
+30,2,3214376,1606236,1608140,3213007,1606628,75,authentication_trailer,opaque,opaque transport bytes; no per-bit vehicle quantity,transport
+30,3,3214376,1608240,1606136,3213007,1608132,75,authentication_trailer,opaque,opaque transport bytes; no per-bit vehicle quantity,transport
+30,4,3214376,1605190,1609186,3213007,1608522,75,authentication_trailer,opaque,opaque transport bytes; no per-bit vehicle quantity,transport
+30,5,3214376,1607965,1606411,3213007,1607089,75,authentication_trailer,opaque,opaque transport bytes; no per-bit vehicle quantity,transport
+30,6,3214376,1607212,1607164,3213007,1606250,75,authentication_trailer,opaque,opaque transport bytes; no per-bit vehicle quantity,transport
+30,7,3214376,1609670,1604706,3213007,1607556,75,authentication_trailer,opaque,opaque transport bytes; no per-bit vehicle quantity,transport
+31,0,3214376,1607082,1607294,3213007,1606296,75,authentication_trailer,opaque,opaque transport bytes; no per-bit vehicle quantity,transport
+31,1,3214376,1605665,1608711,3213007,1607103,75,authentication_trailer,opaque,opaque transport bytes; no per-bit vehicle quantity,transport
+31,2,3214376,1605564,1608812,3213007,1606945,75,authentication_trailer,opaque,opaque transport bytes; no per-bit vehicle quantity,transport
+31,3,3214376,1606056,1608320,3213007,1605746,75,authentication_trailer,opaque,opaque transport bytes; no per-bit vehicle quantity,transport
+31,4,3214376,1607546,1606830,3213007,1605910,75,authentication_trailer,opaque,opaque transport bytes; no per-bit vehicle quantity,transport
+31,5,3214376,1606890,1607486,3213007,1606805,75,authentication_trailer,opaque,opaque transport bytes; no per-bit vehicle quantity,transport
+31,6,3214376,1605894,1608482,3213007,1605820,75,authentication_trailer,opaque,opaque transport bytes; no per-bit vehicle quantity,transport
+31,7,3214376,1608320,1606056,3213007,1605646,75,authentication_trailer,opaque,opaque transport bytes; no per-bit vehicle quantity,transport

@@ -90,15 +90,8 @@ stand-still-control fail-class bytes. This is recorder-domain state rather than 
 CAN byte mapping, but it is the most direct current Toyota vocabulary for the
 failure class that must be joined to the live Brake->FRC traffic.
 
-The same recorder exposes the arbitration outputs themselves:
-
-- `57DB` = `Arbitration result Acceleration`
-- `57DE` = `Arbitration result Pinion angle`
-- `57D3` = `Arbitration result_Acceleration valid flag`
-
-This does **not** identify a CAN arbitration ID or prove which ECU performs the
-arbitration. It identifies Toyota's software/control abstraction and the values
-its diagnostic recorder preserves.
+The recorder also exposes `57DE` **Arbitration result Pinion angle** and
+[the acceleration result and its validity flag](#arbitration-result-acceleration-export).
 
 ## 3. Feature clients use the same lateral contract
 
@@ -287,10 +280,8 @@ event numbering merges raw states 2 and 3, while the recorded two-bit value
 remains distinct. This is not a vehicle-side PBA arbitration rule.
 The executable identity is recorded in the [ADS inspection](#62-ads-recorder-schema).
 
-The existing shared decoder was exercised with synthetic bytes `A0..A3`:
-it returned raw/physical PBA states `0..3`. Additional synthetic checks
-decoded `57DB: F8C0` as `-1.856` and `5261: BF000000` as `-0.500`.
-These checks exercise the decoder.
+Synthetic bytes `A0..A3` decode to raw/physical PBA states `0..3`;
+synthetic `5261: BF000000` decodes to `-0.500`.
 
 ### Shared Operation-FFD decoder
 
@@ -311,10 +302,8 @@ neither command maintains a separate parser or value decoder.
   IEEE fields. `physical` is a fixed-point string. Invalid sentinels and IEEE
   NaNs set `invalid=true` and `physical=null`; infinities use JSON-safe strings.
   Negative values use floor rounding toward negative infinity.
-- **Time:** `0507` contains BCD components. The decoder
-  applies the recovered component bounds and returns the stored date/time,
-  without the viewer's PC-local timezone conversion. Download time does not
-  establish the original event time.
+- **Time:** the decoder checks `0507` BCD component bounds and returns the
+  stored components without applying the viewer's PC-local time conversion.
 - **Retention:** unknown IDs, repeated IDs and raw block bytes are preserved.
   Field-level errors appear as `decode_error` without discarding other fields.
   Acquisition decodes every known returned field; `FOCUS_DIDS` only annotates
@@ -342,6 +331,59 @@ provide the conversion rules. Regression coverage exercises framing/counts,
 echoes, support, signed/packed integers, floats/doubles, invalid values,
 timestamp bounds, raw retention and CLI filtering. Offline command and
 synthetic ISO-TP acquisition smoke checks agree on decoded blocks.
+
+### Arbitration result acceleration export
+
+The [current GTS+ master table](../../data/generated/gtsplus_2026/tss3_control_ownership_surface.json#L1401-L1426)
+binds Operation FFD (role `0xEA`) only to category 498 `FRC_P5` (Front
+Recognition Camera 2) in NA, EU and JP. The
+[2026 Camry Hybrid profile](../../data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json.gz)
+lists that category; the [retained diagnostic capture](../../targets/camry-2026/raw-20260826/camry_nrtd_module_identity_20260826.json#L6-L35)
+identifies the camera at `0x792 → 0x79A` as F181 `8646F3315000`.
+The OEM viewer defines these [Operation FFD `EB13` blocks](../../data/generated/gtsplus_2026/tss3_native_recorder_protocol.json#L316):
+
+| Recorder ID | Managed row | Field and encoding |
+|---|---:|---|
+| `57DB` | [682](../../data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json#L318465-L318479) | **Arbitration result Acceleration**: big-endian signed 16-bit × `0.001` (nominal m/s²), zero offset, three decimals, no sentinel or support bit. |
+| `57D3` | [675](../../data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json#L318360-L318374) | **Arbitration result_Acceleration valid flag**: byte 2 bit 7; byte 1 bit 7 gates support. A missing or unsupported flag leaves validity unknown. |
+| `5284` | [145](../../data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json#L310410-L310424) | **Arbitration result_longitudinal ID**: unsigned byte. |
+
+**Export.** The [.vdas bindings](../../data/generated/gtsplus_2026/vdas_semantics.json#L123-L167)
+store the full `TSS3OperationFFD.log` and optional `AbsoluteTimeStamp.log` as
+`Gts.Tss3Ffd.Data` and `Gts.AbsoluteTime.Data` in the ZIP's UTF-8 `json.log`.
+`tools/gts vdas` extracts those text fields. The
+[offline decoder](#shared-operation-ffd-decoder) reads one reassembled `EB13`
+PDU (bytes or ASCII hex) and returns `physical` with its record and field IDs.
+The viewer also exports present values in its RoB detail CSV.
+For example, synthetic `57DB: F8C0` decodes to `-1.856`.
+
+**Timing.** `0501` stores trip/key cycle and an elapsed counter in 1 ms ticks;
+`0511` stores a 0.1 s counter; `0507` stores BCD calendar time to the second.
+The viewer uses valid `0507` or adds the counter delta to a matching key-cycle
+clock base ([`AbsTimeCalculation`](../../data/generated/gtsplus_2026/lifecycle_persistence.json#L39421)).
+With neither anchor, only relative time is available. RoB cadence is configured
+(e.g. `2294`: 0.2 s); CSV milliseconds are display precision, and the archive
+download time is separate from record time. A CAN join requires a common
+clock or event marker from the same drive/key cycle and enough resolution to
+distinguish the candidate values. See the
+[Camry longitudinal report](../variants/camry-2026-longitudinal-evidence.md#message-structure-and-drivebrake-decomposition)
+for the missing paired `57DB` sample.
+
+**Ordinary Data List.** The
+[P5 catalog census](../../data/generated/gtsplus_2026/tss3_control_ownership_surface.json#L1285-L1286)
+found no ordinary arbitration-result field on this profile:
+
+- [`FRC_P5`](../../data/generated/gtsplus_2026/toyota_diag_bundle_current/manifest.json#L1635)
+  `1B08` (snapshot `3B08`) is **Acceleration for Output** (signed 8-bit × `0.1`).
+- [`ABS_P5`](../../data/generated/gtsplus_2026/toyota_diag_bundle_current/manifest.json#L1395)
+  `10A1/10A2` are TSS upper/lower requests (signed 16-bit × `0.001`, IDs
+  `10A3/10A4`); `10A5/10A6` are Vehicle Motion Control upper/lower targets
+  (signed 16-bit × `0.04` m/s², IDs `10A7/10A8`).
+- SID-22 `1E16`, **Acceleration Of Arbitrated Result** (32-bit, mode 28), is
+  defined by the successor
+  [`ADCU_P6` (6037)](../../data/generated/gtsplus_2026/toyota_diag_bundle_current/manifest.json#L2340)
+  and [`ADCU_P6F` (6537)](../../data/generated/gtsplus_2026/toyota_diag_bundle_current/manifest.json#L2510)
+  catalogs. Both categories are absent from this profile.
 
 ### 6.1 ADU longitudinal arbitration, PDA split, PCS, and resume observables
 

@@ -1,15 +1,19 @@
 # TSS3 front-recognition-camera firmware and arbitration acquisition
 
-This report tracks the remaining camera-side question behind the current TSS3
-control model: **what does the FRC itself compute, select, and hand to the
-vehicle-movement arbitration layer?** It separates what is already recovered
-from GTS+/CUWs from the still-encrypted camera application.
+The open question is what the FRC computes and hands to the vehicle-movement
+arbitration layer. The GTS+ recorder definitions and local CUW inventory bound
+what can be assigned to the exact Camry FRC application.
 
-The exact maintainer-Camry diagnostic identity is `0x792 -> 0x79A`, F181
-`8646F3315000`, DID0105 `8646C06091`. No exact `8646F3315000` application
-image is currently decoded in this repository. The system-level placement is
-documented separately in
-[toyota-tss3-vehicle-movement-arbitration.md](../architecture/toyota-tss3-vehicle-movement-arbitration.md).
+The [maintainer's 2026 Camry Hybrid diagnostic capture](../../targets/camry-2026/raw-20260826/camry_nrtd_module_identity_20260826.json)
+identifies both modules on bus 1:
+
+| ECU | Request → reply | F181 software | 0105 assembly |
+|---|---|---|---|
+| FRC P5 | `0x792 → 0x79A` | `8646F3315000` | `8646C06091` |
+| Brake/EPB (`ABS_P5`) | `0x7B0 → 0x7B8` | `F152633K0000` | `8954147040` |
+
+The inspected materials contain no readable application for either exact ECU.
+See the [system architecture](../architecture/toyota-tss3-vehicle-movement-arbitration.md).
 
 ## 1. The FRC recorder already exposes the implementation stages
 
@@ -127,10 +131,18 @@ final protected EPS command path.
 
 ## 3. What the FRC CUWs actually contain
 
-The local true-TSS3 `0x0792` corpus contains six Corolla FRC packages
-(`T-0058/0060/0061/0062-23`, `T-0149/0150-24`). They are
-`P5-Unified`, RequiredSpecReproVer `04`, ReproMethod `07`, and share one FRC
-family `ServiceAuthKey` and descriptor `Nonce`.
+The [local CUW inventory](../../data/generated/gtsplus_2026/camry_f152633k0000_brake_acquisition.json#L62)
+covers 26 packages in `software/Techstream/cuw/`. The supplied `cuw.zip`
+contains the same 26 CUW files byte for byte. No descriptor matches the Camry
+FRC or Brake F181/0105 identities above, and none declares Brake address `07B0`.
+The AXVH85 Camry package `T-0051-26.cuw` targets Engine/MG (`0724`).
+
+The [FRC corpus manifest](../../data/generated/techstream_v18/cuw_frc_corpus.json)
+lists six packages at diagnostic address `0792`: the descriptors name Corolla
+for `T-0058-23` and `T-0060-23`, bZ4X for `T-0149-24`, and no vehicle for
+`T-0061-23`, `T-0062-23` and `T-0150-24`. All six declare `P5-Unified`,
+`RequiredSpecReproVer=04` and `ReproMethod=07`, and share the same descriptor
+`ServiceAuthKey` and `Nonce` values.
 
 Their whole `.xx` member is Motorola S-record framing around an **encrypted**
 target region:

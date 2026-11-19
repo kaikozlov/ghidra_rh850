@@ -52,9 +52,9 @@ byte-level audit maps `0x08A B8:B9` to the ordinary-DRCC upper bound and
 `B11:B12` to the lower bound at signed16 x0.001, and maps `0x081 B6[5:0]` as
 the strongest `5284` employed-source-ID candidate. In the
 [2026-09-30 VMC status corpus](#2026-09-30-vmc-status-corpus),
-`B20:B21` is a closed-accelerator reference; `B4:B5` and `B18:B19` are candidate
-combined and drive-side quantities, respectively. Their exact OEM labels remain
-unresolved.
+`B20:B21` is the closed-accelerator reference. The [stock braking comparison](#message-structure-and-drivebrake-decomposition)
+supports `B4:B5` as the combined-result word and `B18:B19` as the drive-side
+component. **`B4:B5` is the leading candidate for recorder `57DB`.**
 The [braking-ceiling comparison](#repeated-braking-ceiling-and-request-policy-candidate)
 narrows the weak-braking behavior; the subsequent
 [stock scene comparison](#stock-following-versus-free-cruise-association) makes a
@@ -450,12 +450,10 @@ B6 drops to zero; the sixth occurs on an idle-to-active transition. This support
 ordinary DRCC **B8:B9 as the upper acceleration bound and B11:B12 as the lower**.
 The checksum supplies no lower-bound requester identity.
 
-The other 36 unequal observations are one distinct route-45 intervention family with
-B6=`0x35`, B5=`0x04`, B8:B9 sweeping `-0.175..-0.500 m/s²`, and B11:B12
-held at zero. This header state differs from ordinary DRCC and must not be
-used to invert its bound ordering; the intervention's application semantics remain unnamed.
-This still stops short of a synchronized literal DID-to-byte proof for `0x10A1..0x10A4`,
-but the ordinary-DRCC A/B upper/lower ordering is no longer open.
+The other 36 unequal frames carry ID13 (`B6=0x35`, `B5=0x04`): the first
+slot sweeps −0.175 to −0.500 m/s² and the second stays zero. The
+[warning and chassis comparison](#two-rare-longitudinal-applications)
+separates this application from ordinary DRCC.
 
 The alternatives now rank as follows:
 
@@ -542,11 +540,11 @@ synchronized diagnostic/FFD value directly names that wire field.
 | `5282` lateral request ID | `0x08A B21[5:0]` | recovered |
 | `5282` requested pinion angle | `0x08A B18:B19` | recovered; controller scale is 0.00100012 rad/count versus recorder 0.001 |
 | `5282` steering assist gain | `0x08A B24` x0.01 | strong structural join |
-| `5282` damping gain | `0x08A B25` x0.01 | bounded; zero in both complete drives |
+| `5282` damping gain | `0x08A B25` x0.01 candidate | All nonzero observations coincided with [native lane-departure warnings](#every-bit-of-native-0x08a). |
 | `5284` arbitration-result longitudinal ID | `0x081 B6[5:0]` | strong candidate; observed values 11 and 63 |
 | `5285` arbitration-result lateral ID | `0x081 B13[5:0]` | recovered |
 | `57D3` acceleration-valid flag | unresolved | `0x081 B11[4]` is proven request-loss supervision, but is not OEM-joined to `57D3` |
-| `57DB` arbitration-result acceleration | no confirmed wire join | `B20:B21` is a closed-accelerator reference candidate; `B4:B5` and `B18:B19` are candidate combined and drive-side quantities. Their distinction matters under braking; neither has a synchronized diagnostic join to `57DB` ([status reconstruction](#message-structure-and-drivebrake-decomposition)) |
+| `57DB` arbitration-result acceleration | `0x081 B4:B5` leading candidate | [Independent wheel deceleration](#message-structure-and-drivebrake-decomposition) favors this word over the drive-side `B18:B19`. |
 | `57DE` arbitration-result pinion angle | `0x081 B16:B17` | recovered |
 
 The B6 candidate has an independent arbitration check. Selected `0x081`
@@ -586,7 +584,8 @@ The working namespace is:
 | **0** | P5 FRC ISA Vertical ID names `No Request`; Camry request A uses 0 while idle | `No Request (Manual Operation)` | common no-request anchor |
 | **9** | P6 Speed Limiter Requesting Vertical ID explicitly names `ISA` | no generation-20 lateral label | named cross-generation longitudinal/vertical anchor; not observed on Camry `0x08A` |
 | **11** | Camry request A during ordinary DRCC; `0x081` result ID11 when that application request is employed | LTA/LCA | **strong shared-TSS-application-ID hypothesis** |
-| **17** | retained 2025 Corolla active B6 candidate | no lateral label | observed B6 requester candidate; OEM name unknown |
+| **13** | brief deceleration request following late driver-nonresponse warnings on two Camry routes | — | likely emergency driving stop assistance; [episode evidence](#two-rare-longitudinal-applications) |
+| **17** | Camry cruise-independent deceleration, also observed in the retained Corolla | — | PDA deceleration assist is the leading Camry hypothesis; [matched-scene comparison](#two-rare-longitudinal-applications) |
 | **18** | not observed in Camry B6 in the two complete drives | SDG; P6 PDA-SA lateral request also uses 18 | lateral-only named anchor; no longitudinal transfer |
 | **41** | P6 MaaS lower-limit longitudinal ID = `Request 1 of MaaS Autonomous Driving System` | AD (Lv.4) | plausible shared automated-driving application identity |
 | **45** | P6 MaaS lower-limit longitudinal ID = `Request 2 of MaaS Autonomous Driving System` | DES (Lv.4) | plausible shared automated-driving application identity |
@@ -647,24 +646,15 @@ not decrypt/decompress that application payload. Until that transform is
 recovered, the FRC application image cannot be searched as plaintext for an ID
 table, and **absence of a firmware enum has not been established**.
 
-The tracked Corolla reducer observes B6 ID0 while idle and ID17 during
-active ACC; `0x081` remains result ID63 across all 2,000 retained result
-frames. B7 validates as a checksum, withdrawing the former lower IDs4/23.
+The tracked Corolla reducer observes B6 IDs 0 and 17; `0x081` reports
+ID63 across all 2,000 retained result frames. The [independent Corolla
+onsets](#two-rare-longitudinal-applications) place ID17 outside cruise.
 
-Across 17,073 / 19,999 request-result pairs in the complete A/B drives,
-`0x081 B20:B21` correlates with the request at r=0.941674 / 0.836884. The more
-discriminating result-ID split is stronger: for selected ID63 the median
-result-minus-request is **0.000 m/s²** in both drives (p10/p90 only a few
-0.001 m/s² counts apart), while selected ID11 gives median deltas
-**-0.181 / -0.435 m/s²**. That is the behavior expected of an employed-source/result publication rather
-than a second request echo. In Toyota's documented architecture, the selected
-application upper/lower request may still be constrained or superseded by the
-driver request in the powertrain/brake execution layer. The
-[2026-09-30 VMC status corpus](#2026-09-30-vmc-status-corpus) later narrowed
-which word carries that result-like behavior: these two-drive observations
-remain valid history, but `B20:B21` itself is a closed-accelerator reference
-while `B4:B5` and `B18:B19` are candidate combined and drive-side quantities.
-Neither correspondence establishes the exact `57DB` wire location.
+Across 17,073 / 19,999 request-result pairs in the A/B drives, closed-accelerator
+reference `0x081 B20:B21` correlates with the request at r=0.941674 / 0.836884.
+The median reference-minus-request delta is 0.000 m/s² in both drives for
+result ID63 and −0.181 / −0.435 m/s² for ID11. This is consistent with the
+[inactive camera using the earlier chassis reference](#where-the-inactive-acceleration-values-come-from).
 
 `0x08A` is the observed continuous TSS3 request envelope for the recovered
 lateral tuple and longitudinal acceleration slots. B6 metadata remains a
@@ -692,18 +682,12 @@ all re-extraction workspace files under `build/` remain ignored/untracked.
 
 ## 2026-09-30 VMC status corpus
 
-An archive-wide reduction of Brake-owned `0x081` status traffic **retracts the
-present-tense reading of `B20:B21` as the `57DB` result-acceleration candidate**.
-Across 1,232,664 native status frames `B20` behaves as a closed-accelerator
-reference. The subsequent decomposition strengthens **`B4:B5` as a combined
-longitudinal control/force-equivalent quantity and `B18:B19` as a drive-side
-result/reference**, both still inferred roles rather than OEM names.
-`B4/B18/B20/B22/B24` are signed16BE words read at nominal
-**0.001 m/s²/count**; `B26:B27` is a separate signed low-13-bit quantity
-whose physical scale remains unresolved. Nothing below is in milli-g.
-OEM diagnostic names (`5280/5281`, `5284`, `57D3`, `57DB`) remain
-**unjoined hypotheses**: no synchronized diagnostic/Operation-FFD capture
-names these words, and this corpus does not change that.
+Across 1,232,664 native Brake status frames, `B20:B21` behaves as the
+closed-accelerator reference. The [braking comparison](#message-structure-and-drivebrake-decomposition)
+separates the inferred combined `B4:B5` result from the drive-side `B18:B19`
+component. `B4/B18/B20/B22/B24` are signed16BE words at nominal
+0.001 m/s²/count. `B26:B27` has a separate signed low-13-bit driver-brake
+quantity with an unresolved scale.
 
 ### Scope and source artifacts
 
@@ -768,7 +752,7 @@ scope, 126 stock epochs, and four plotted moving-drive fits are unchanged.
 |---|---|---|
 | `B4:B5` | inferred combined longitudinal control/force-equivalent quantity; normally request-following | in every one of 126 excited no-pedal moving stock windows the direct `B4−request` RMS beats the direct `B4−wheel CarState` RMS (medians 0.00921 vs 0.09756 m/s²); `B4−B18` follows the separate driver-brake word during manual braking; −2.458 at held-brake standstill |
 | `B18:B19` | inferred drive-side result/reference; empirically `max(B4,B24)` | exact in 1,232,419/1,232,664 frames; `B22 ≥ B18` in all frames; distinct from the combined quantity during braking |
-| `B20:B21` | **closed-accelerator reference** | equals `B24` in 1,005,245/1,010,206 fresh closed-pedal frames (~99.5%); mirrors native request words in the fresh B6=0 population |
+| `B20:B21` | **closed-accelerator reference** | equals `B24` in 1,005,245/1,010,206 fresh closed-pedal frames (~99.5%); [precedes the inactive camera acceleration slots](#where-the-inactive-acceleration-values-come-from) |
 | `B22:B23` | upper/open-accelerator envelope | `B22 ≥ B18` with zero violations in 1,232,664 frames; `B24` itself exceeds `B22` in 11 frames; exact quantity and speed/gear/grade dependence unresolved |
 | `B24:B25` | driver-accelerator demand/reference | rises from `B20` toward `B22` with physical accelerator fraction |
 | `B26:B27` low 13 bits | driver-brake-linked signed quantity | nonzero on 121,174/121,175 brake-on frames and negative whenever nonzero (135,686/135,686); remains zero in the route-86 automatic-braking example; physical scale unresolved |
@@ -840,36 +824,405 @@ below explains the numerical shape of this gap; its exact policy cause remains o
 
 ![Four current drives: B18=max(B4,B24), inactive request words vs B20, B4 vs wheel aEgo, and (B24−B20)/(B22−B20) versus accelerator fraction](../../data/generated/camry_20260930_vmc_status/cross_state_relationships.png)
 
+## Every bit of native `0x08A`
+
+The [bit census](../../data/generated/camry_2026_08a_bit_census/bits.csv)
+covers **3,214,376 native camera frames** across 75 routes and 1,369
+segments: 133 bits varied, 93 stayed zero and 30 stayed one. It indexes
+each bit by field and evidence and counts changes over 3,213,007
+within-segment pairs. Of 98 application bits, 87 varied. The other 158
+positions comprise 46 checksum, sequence and trailer bits; two fixed
+`0x7FFF` words; and 80 unassigned zeros. The same fixed positions held
+in [119,173 Crown frames and three Corolla samples](../../data/generated/camry_2026_08a_bit_census/cross_variant_fixed_slots.csv)
+(2,400, 596 and 2,355 frames). A separate [Camry holdout](../../data/generated/camry_2026_08a_bit_census/auxiliary_capture_check.csv)
+replicated the observed tuples and fixed application bits in 55,735 frames
+on `08`/`2d` and 238 on `2e` (calibration unavailable on `2e`).
+
+The [61 observed application-state tuples](../../data/generated/camry_2026_08a_bit_census/application_states.csv)
+give counts and logger timestamps. They contain eight combinations of
+cruise operation, longitudinal ID, allocation and policy, and 13
+combinations of lateral ID, effort and the two gains. B5[2] is set exactly
+for IDs 13/17, B6[1] for ID17, B20[6] for ID11 and B22[4] for a nonzero
+longitudinal ID. Older routes supply eight varying positions absent from
+the 634-segment corpus: B6[1,6], B7[1], B21[4] and B24[0,1,3,4]. The three
+November 16–17 drives supply 522,244 native frames; their 220 companion
+qlogs cover the same driving time.
+
+**B4[7] follows cruise-display startup.** All 338 lows occurred in the first
+33–35 camera publications of ten recordings. It rose 0.821–0.884 s after the
+first request and 8.8–19.7 ms after the `0x251` display left its initial
+state. The preceding `0x251 B0[7]` agreed in 3,186,516/3,186,516 same-side
+pairs within 1.125 s, including 147 lows. On `48` the marker rose 682 ms
+before hybrid READY; in the [stationary READY capture](../../targets/camry-2026/raw-20260826/camry_ready_gear_20260826.json.gz)
+it was high on all 2,475 requests, including before `0x51E` indicated READY
+at 5.213 s.
+
+The stock longitudinal comparisons use 606 original segments on 24 routes.
+
+| Position | Interpretation | Discriminating observation |
+|---|---|---|
+| B3[3] | Cruise operating in adaptive or conventional mode | `0x251` and `0x27C` agreed in 103,580/103,590 held-out 10 Hz comparisons on 19 routes, including 68,524 available-but-inactive observations. |
+| B4[5] | Camera-side delayed hold | `0x251` hold rose at the same time or ≤11 ms earlier at seven of eight onsets. Wheels were stopped on 366/458 highs. On host-longitudinal `171`, all 64 highs in segment 7 occurred while rolling (0.37–1.14 m/s); the display stayed clear during a 12-frame pulse in segment 4. |
+| B22[4] | Longitudinal application present | Exactly followed nonzero B6 application ID. On older routes `27` and `3b` it was set on 2,616 cruise-clear frames. |
+| B22[5] | Delayed longitudinal release | In [365 cruise exits](../../data/generated/camry_2026_08a_bit_census/cruise_exits.csv) the display was inactive by the last still-active request in 31/31 marked versus 2/332 resolvable unmarked exits (two ambiguous). Held out: 14/14 versus 0/113. All 30 moving marked exits retained chassis result ID11 until request release. Brake, CANCEL and MAIN each occurred with and without the marker. |
+| B22[2] | [Near frontal target judged relevant at rest (inferred)](#what-triggers-b222) | Target crossings and matched replay pairs separate selection from proximity. |
+| B6[0] in ID11 | Allocation changes with accelerator override | Override-associated allocation on 1,764/1,790 pedal-open and 0/24,027 pedal-closed anchors in stable cruise with brake released. Brake selected ID63 on 1,762/1,764 overrides. |
+| B8:B9 and B11:B12 | Acceleration requests | Equal on 3,214,154/3,214,376 frames. In [20 unequal runs](../../data/generated/camry_2026_08a_bit_census/slot_divergences.csv), the first slot was higher on all 42 ID11 frames (32 marked for delayed release) and lower on all 180 ID13 frames. At 1,094/2,183 held-out moving accelerator-open anchors, wheels accelerated above +0.1 m/s² while the request was below −0.3 m/s². |
+| B10 | Active internal cruise setpoint in km/h | [Cruise-entry and adjustment evidence](#how-b10-gets-its-value) distinguishes current-speed capture, restore and step changes. |
+| B20[7:6] | Cruise policy | [Native display and radar comparison](#native-radar-separates-policy-display-state-and-headway) distinguishes policy from target detection. |
+| B18:B19 in lateral ID0 | Angle reference follows earlier EPS feedback | A 35 ms lag fitted on `3b` improved agreement on all four holdouts. On `13e`, exact matches during steering movement rose from 666 to 4,427 of 8,066; 495 still differed by ≥1°. |
+| B21[5:0] | Native lateral application | Native ID11 changed to ID0 21–83 ms after 45/45 held-out turn-indicator onsets with cruise and host lateral operating. During two native ID4 episodes on `13e`, the chassis selected host ID11 on all 98 fresh pairs. |
+| B23[5] | Application-specific steering effort | [Torque timing differs in ID4 and ID11](#b235-steering-effort-depends-on-the-lateral-application). ID0 was always low; all 52,557 ID18 frames were high. |
+| B24 | Retained lateral assist gain | ID4/11 used 100, ID18 used 25 or 50, and gain persisted into ID0 and park. The sole direct 50→25 change was stationary in ID0 (`3b` / 5, logger `371630682774` ns). Matched moving ID18 samples had identical median absolute EPS motor feedback at the two gains. |
+| B25 | Lane-departure steering-vibration warning phase | All [five pulses](../../data/generated/camry_2026_08a_bit_census/lane_warning_episodes.csv) matched native warning-display onsets: 54 high frames in ID4 and 166 in ID0; another 2,070 ID4 frames were low. EPS feedback oscillated at ~25 Hz in three episodes. In both `13a` episodes the chassis selected host ID11 and the oscillations were absent. |
+
+The [full-rate manifest](../../data/generated/camry_2026_08a_bit_census/captures.csv)
+pins each segment's original path, native bus and SHA-256. The inventory
+deduplicated 227 archive members against loose copies. It counts attributable
+32-byte receive frames, excluding host sends, transport flags and forwarded
+copies. For example, all 74,834 bare bus-0 rows on `27` have exact bus-2
+peers at or before their timestamp. Truncated files contribute only readable
+events. The [qlog-only census](../../data/generated/camry_2026_08a_bit_census/qlog_bits.csv)
+keeps 37 observations and 13 adjacent pairs from [24 additional segments](../../data/generated/camry_2026_08a_bit_census/qlog_captures.csv)
+outside the full-rate totals.
+
+Replay in the [external log-reader environment](../WORKFLOW.md#external-openpilot-rlog-reducers):
+
+```sh
+uv run --no-sync --project "$OPENPILOT_ROOT" python -m tools.targets.camry.analysis.analyze_camry_2026_08a_bit_census \
+  data/generated/camry_2026_08a_bit_census/captures.csv \
+  --openpilot-root "$OPENPILOT_ROOT" --logs-root "$HOME/dev/inspect/logs"
+```
+
+### What triggers B22[2]?
+
+**Inference: the camera marks a near frontal target as relevant at rest.**
+Target qualification for *Acceleration Suppression at Low Speed* is a
+plausible application. The [Camry owner's manual](https://assets.sia.toyota.com/publications/en/om-s/OM06266U/pdf/OM06266U.pdf)
+(pp. 224–229) describes a PCS function for stopped vehicles, people,
+bicycles and walls at roughly 0–15 km/h, with strong accelerator input
+required for intervention. The recorded changes were target-state observations:
+in the controlled trials, B22[2] alone changed in request B0:B25 at all 284
+edges and Brake/VMM reported driver result ID63.
+
+**Side, range and state.** In the [stationary road crossing](../../data/generated/camry_2026_08a_bit_census/stationary_target_crossing.csv)
+(`140` / 4), B22[2] rose at 949.194 s as the reported target moved inward
+from the right (PCS lateral code +3→+2, radar 1.36 m ahead and 0.80 m
+right at entry). It stayed high through center and cleared at 950.698 s
+as the code changed −2→−3. The wheels stayed stopped and both pedals were
+released. Matching primary radar by range and relative speed alone gave
+a median lateral error of 0.14 m across 272 held-out `0x5AE` publications
+using signed `B6[7:3]` at about 0.30 m/count, right positive. The adjacent
+speed field agreed within 2 km/h with radar relative speed on 107/112
+moving-target samples and with negative ego speed on 2/112.
+
+The [August 26 replay](../../data/generated/camry_2026_08a_bit_census/stationary_trials.json)
+contains 142 rises and 142 falls in three stationary recordings: a
+[cruise-button trial](../../targets/camry-2026/raw-20260826/NRTD_MANIFEST.txt)
+and [two selector sweeps](../../targets/camry-2026/raw-20260826/READY_GEAR_MANIFEST.txt).
+All 1,326 highs had zero wheel speed and accelerator, closed doors and
+Brake Hold clear. The foot brake was on/off in 302/1,024 highs and the
+EPB in 1,056/270.
+
+| Recorded trial | Highs / frames | Separating observation |
+|---|---:|---|
+| Not READY, P | 625 / 1,475 | 22 rises preceded the first button action. |
+| P/R/N/D/N/R/P | 495 / 2,475 | 395 highs in P, 78 in N and 22 in D; a pulse began 1.58 s after entering N. |
+| P/D/B/D | 206 / 1,070 | 44 highs in P, 64 in D and 98 in B; rises began 3.27 s after entering B and 9.78 s after entering D. |
+
+At 5 Hz PCS samples paired to a request ≤50 ms old, predicting high on
+lateral code +2 rather than +3 classified 72/72 highs and 95/98 lows in
+the first trial, then 74/75 highs and 335/344 lows in the selector sweeps.
+Across all three trials, 68/76 inward crossings coincided with a rise
+and 67/76 outward crossings with a fall; the other pairs stayed low.
+Among PCS IDs matched to a unique bicycle-sized private outline at +2,
+in P/N/D/B all 138 observations below 2.80 m were high, eight of 13 at
+2.80 m were high, and the sole 2.85 m sample was low. All six +2 samples in
+R were low; +3 in P/N/D/B gave one high and 415 lows. This is a transition
+band for the recorded target.
+
+**Object reports distinguish candidate types and track history.** The private
+20 Hz `0x230` message has four 14-byte cells at B4, B18, B32 and B46. With
+`R` denoting each cell after its two-byte prefix, `R3:R9` packs four
+MSB-first pairs of unsigned 7-bit forward and signed 7-bit leftward
+coordinates in 0.05 m counts. `R2[2:0]` distinguishes measured footprints:
+1 (median 1.80 × 4.00 m), 2 (0.60 × 0.60 m), 3 (0.60 × 1.80 m) and
+4 (point). `R0[3:0]` is a separate status; the high nibble minus one
+modulo 16 agreed with `0x5AE B5[7:3]` in 15/17 held-out radar-matched targets.
+
+In the [75-route road replay](../../data/generated/camry_2026_08a_bit_census/target_admission_routes.csv),
+an object center in the first 3 m ahead and within ±0.80 m was present on
+all 5,875 P/rest high epochs and 223,868 of 292,532 lows. Excluding status
+`A` retained all highs and 96,412 lows. All [15 road rises](../../data/generated/camry_2026_08a_bit_census/target_admission_rises.csv)
+had an in-window candidate on the next private report: nine status-1
+squares and six point-only. The [per-route cohorts](../../data/generated/camry_2026_08a_bit_census/target_candidate_cohorts.csv)
+divide the remaining candidates by whether all wheels had reached 1 km/h
+earlier in that recording:
+
+| In-window non-`A` candidates | Before motion: high / low | After motion: high / low |
+|---|---:|---:|
+| Points only | 5,638 / 26,655 | 0 / 67,735 |
+| Laterally moving status-1 square | 187 / 41 | 15 / 22 |
+| Other reports with an outline | 35 / 1,859 | 0 / 100 |
+
+Signed `R11` agreed with lateral displacement in 237/245 continuous
+square observations over 200 ms. Status-1 squares with `|R11| ≥ 6` and
+`R1=0x3C` occurred on 79 highs and four lows; all four lows were outward
+crossings at +0.75 or +0.80 m. Within ±0.60 m all 54 were high across
+five routes. On `142` / 5 a square crossed the center at 2.30–2.35 m with
+`R1` changing `0x14→0x34` and the bit stayed low.
+
+Of 5,638 point-only high epochs, 2,775 were on `144`, whose recording began
+high. Of the other 2,863, 2,766 followed an in-window moving square in
+the same high interval. In the [same-ID handoff replay](../../data/generated/camry_2026_08a_bit_census/target_point_handoffs.csv),
+two moving outlines became in-window points while high (`135` and `13c`),
+accounting for 1,610 subsequent point-only highs and no lows before the next
+track or timing break. One moving outline first became a point outside
+the window and later accounted for 2,073 in-window lows; 13 slow outlines
+that became in-window points accounted for another 4,101 lows. On `135` the
+moving return converged on an existing stationary return as the older track
+moved away. The private ID links reports, not necessarily the physical object.
+
+A centered (within ±0.15 m) status-0 point occurred on 3,514 point-only
+highs and 974 lows. On `3c` before driving, eight road thumbnails show a
+parked vehicle roughly 1.35–1.40 m ahead, where the point and radar agreed
+and the bit stayed low.
+
+**Limits of the published signals.** On `142` / 5 (low) and `144` / 2
+(high), both selected stationary points had the same status, footprint,
+center (2.40 m ahead, 0.05 m right), velocity and primary radar coordinates.
+The PCS payload B0:B25 differed only in track ID. On `13c` / 0, a falling
+edge and the preceding high had identical private object and PCS bytes; the
+persistent radar return's range increased from 2.495 to 2.545 m at the next
+rise. In the controlled trials, 103/111 P/rest rises had a nearby low within
+750 ms with the same preceding near-radar packet.
+
+The [August 27 high capture](../../targets/camry-2026/raw-20260827/camry_post_repin_nrtd_20260827.json.gz)
+(400/400) and [low capture](../../targets/camry-2026/raw-20260827/camry_post_repin_ready_20260827.json.gz)
+(0/428) had the same closest near-radar position in P/rest with READY
+observed in both. The matched PCS points were status `4` in 32 high reports
+and `A` in 21 low reports; both recordings began at a stable level.
+Ambient light changed at 28/28 road edges and 106/111 parked-low controls.
+The [IMU and camera comparisons](../../data/generated/camry_2026_08a_bit_census/parked_motion_controls.csv)
+found no vehicle jolt at those edges.
+
+The [controlled matched pairs](../../data/generated/camry_2026_08a_bit_census/target_admission_trials.json)
+give opposite bit values with identical preceding `0x230 B3:B63`, PCS
+`0x5AE B0:B25` and selector in each of the three August 26 captures. The
+next PCS lateral code separated the pair in both selector sweeps but not
+in the not-READY trial. A second comparison in that trial matched seven
+updates of the selected object, PCS and chassis signals, including prior
+bit state and an 11-update high dwell; one high persisted and the other
+cleared. In the gear sweep, matching three-update low histories preceded
+either a rise or continued low. The capture evidence does not distinguish
+shared PCS target selection from function-specific eligibility: GTS+
+lists separate target (`1806`/`3806`, `5725`/`5727`/`572A`) and eligibility
+(`57E5`/`57E6`) fields, and the [exact camera application](tss3-frc-firmware-acquisition.md)
+is unavailable. The [recorded installation response](../../targets/camry-2026/raw-20260826/camry_nrtd_p5_oracles_extra_20260826.json)
+identifies PCS as installed and Traffic Movement Notification as absent.
+
+**Timing and release.** All 283 sequence-contiguous controlled edges took
+the same phase of alternate 25 ms request publications. The [31 road edges](../../data/generated/camry_2026_08a_bit_census/stationary_road_edges.csv)
+also kept one phase per route. All 28 P/rest edges followed the preceding
+`0x180` cycle by 8.95–11.22 ms with zero camera-side ego speed and
+unchanged `0x081 B0:B27` for ±1.25 s. The [12 complete P/rest pulses](../../data/generated/camry_2026_08a_bit_census/parked_pulses.csv)
+lasted 49.6 ms–1.545 s. Three other highs persisted 1.17–1.37 s after
+entering R and cleared within 29.85 ms of the first negative ego-speed
+report. The bit stayed clear during three stock DRCC lead departures
+(198 stopped hold frames) and during the `43` / 12 PCS escalation.
+
+**Offline replay.** Run `uv run python -m tools.targets.camry.analysis.analyze_camry_2026_stationary_state`
+for the checked-in recordings or add `--road-logs "$HOME/dev/inspect/logs" --openpilot-root "$OPENPILOT_ROOT"`
+in the external log-reader environment for road edges (`--crossing` emits
+the `140` / 4 comparison). The companion module
+`tools.targets.camry.analysis.analyze_camry_2026_target_admission` uses the
+same road arguments for filter counts; `--cohorts`, `--point-handoffs` and
+`--rises` select individual evidence tables. With no road arguments it
+prints the controlled same-input comparisons.
+
+### B23[5]: steering effort depends on the lateral application
+
+**ID11 responds to sustained effort.** On five held-out stock routes, the
+[timestamped excursions](../../data/generated/camry_2026_08a_bit_census/driver_effort_excursions.csv)
+show 0/50 short versus 150/150 sustained onsets, including the same split in
+23/23 pairs matched by route and peak torque within 0.05 N·m. Release was
+0/18 short versus 161/164 sustained. Median onset and release were 225 and
+575 ms. On the 25 ms grid, short means 1–3 samples; sustained means at
+least nine for onset and 23 for release.
+
+The empirical ID11 fit on `3b/3c` used the magnitude of the five-sample
+signed mean of EPS driver torque (`0x030`). Seven consecutive values
+≥1.16 N·m predicted a rise three grid points later; 21 at ≤0.50 N·m
+predicted a fall four points later. It held its prediction between these
+conditions. On 17 held-out routes, the fit recovered 225/241 rises and
+233/253 falls within ±75 ms (255 rises and 266 falls predicted). It
+classified 40,340/41,646 highs and 353,382/355,505 lows. The same filter
+without a duration requirement recovered 1/241 rises and 0/253 falls.
+The [per-route counts](../../data/generated/camry_2026_08a_bit_census/driver_effort_routes.csv)
+include unmatched predictions. ID11 B23[5] disagreed with the separate
+`0x371` steering detector in 49,570/259,759 pairs.
+
+**ID4 responds to shorter effort.** The bit was high on 236/2,124 native
+publications, with and without the B25 warning. Across [27 episodes with
+EPS coverage](../../data/generated/camry_2026_08a_bit_census/lane_departure_effort.csv),
+2,064/2,088 publications had fresh 30 ms torque samples throughout the
+comparison window. On `3b`–`3f`, the fitted high condition was a signed-mean
+magnitude ≥1.20 N·m from 170 to 30 ms before publication on a 10 ms grid.
+It classified 135/136 highs and 1,617/1,630 lows on ten held-out routes,
+matching 7/9 rises and 9/9 falls wholly inside covered episodes within 75 ms.
+
+### Where the inactive acceleration values come from
+
+With B6 zero, both camera acceleration slots follow the earlier
+`0x081 B20:B21` closed-accelerator reference. For consecutive native ID0
+frames ≤100 ms apart with a change ≥3 counts, using the latest chassis
+sample within 50 ms at a −25 ms offset matched **9,334/9,904** changes on
+`3b`, versus 1,102 at zero offset. The same offset matched
+**146,805/155,359** changes on [66 held-out routes](../../data/generated/camry_2026_08a_bit_census/neutral_acceleration_routes.csv)
+versus 18,442 at zero. In the 121,334 holdout cases where the two chassis
+words differed by ≥100 counts at publication, the earlier reference
+matched 114,596 times and the earlier `B4:B5` combined result matched five.
+
+### How B10 gets its value
+
+**From inactive, MAIN captures current speed and RES restores the prior
+target.** The [134 single-button stock entries](../../data/generated/camry_2026_08a_bit_census/cruise_entries.csv)
+include 119 MAIN and 15 RES entries on 24 routes.
+
+| Outcome | Five discovery routes | 19 held-out routes |
+|---|---:|---:|
+| MAIN: B10 within 1 km/h of four-wheel speed at press, floored to 29 km/h | 42/42 | 76/77 |
+| MAIN below 29 km/h: B10 = 29, cluster setpoint = 19 mph | 3/3 | 26/26 |
+| RES: B10 equals last recorded exit target | 3/3 | 10/10 (two exits unavailable) |
+| RES: B10 within 2 km/h of current wheel speed with the same floor | 0/3 | 0/12 |
+
+For 35 held-out MAIN entries with the retained `0x1B2 B1` and floored wheel
+speed separated by ≥8 km/h, all new targets were within 2 km/h of wheel
+speed and none within 1 km/h of the retained value. At `66` / 5, RES
+restored 70 km/h with wheels at 34.90 and B1 at 71; a later MAIN captured
+60 km/h with B1 still at 71. Across all 15 RES entries, B1 equaled B10
+three times and was one count higher twelve times.
+
+In the [270-entry timing replay](../../data/generated/camry_2026_08a_bit_census/main_capture_clocks.csv),
+MAIN first published the new B10 27–85 ms after release. Using the integer
+part of press-time SP1 (`0x0D7 B1:B2`, km/h), floored to 29 km/h, matched
+40/40 discovery entries, 98/111 held-out stock entries and 112/119
+host-longitudinal entries. Of 60 held-out cases where press and publication
+predicted different integers, 53 matched press, four publication and
+three neither. On `45` / 6, SP1 was 44.92 at press and 46.07 km/h at
+publication; B10 became 44 and B1 became 45.
+
+**While operating, `+` captures higher wheel speed with the accelerator
+depressed.** Of [34 taps at ≥5 km/h overspeed](../../data/generated/camry_2026_08a_bit_census/cruise_overspeed_taps.csv)
+(40–<400 ms, fresh pedal and wheel data), B10 captured within 0.58 km/h
+on all 19 accelerator-open observations (5 stock, 14 native camera on
+host-longitudinal drives). All 15 pedal-released taps changed the display
+by one mph (2 stock, 13 host-longitudinal).
+
+**Ordinary one-mph edits follow an empirical internal grid.** On
+[395 single-step edits](../../data/generated/camry_2026_08a_bit_census/cruise_adjustment_grid.csv)
+with released accelerator and settled B1, the fit
+`H = round_to_half(1.571585 × displayed_mph − 0.436646)` km/h predicted
+B10 as `floor(H)` and B1 as `ceil(H)`. Fit on 132 stock taps (35 display
+settings), it predicted both bytes in all 67 stock and 196 native-camera
+host-longitudinal holdouts, including 149 taps ending on settings absent
+from the fit. The observed range was 19–78 mph. MAIN landed off-grid on
+35/119 entries; all 12 ordinary edits from off-grid B10 ended on-grid.
+At a steady 46 mph display on `45`, B10 could be 71 or 72 km/h. When
+inactive, B10 was zero on 66,416 held-out observations with a retained
+display setting.
+
+**Long presses can repeat one mph at a time.** The
+[20 recorded strokes of at least 400 ms](../../data/generated/camry_2026_08a_bit_census/cruise_hold_witnesses.csv)
+include 14 inactive and one already at the minimum with no changes.
+The other five produced [15 steps](../../data/generated/camry_2026_08a_bit_census/cruise_hold_steps.csv)
+on the same grid. On stock `3b` / 67 and native camera `175` / 2, repeating
+holds first stepped 632 and 643 ms after press, then every 292–303 ms
+(ten intervals). On `13c` / 93, a 540 ms press stepped after release
+and a 692 ms press stepped before release. In 89/90 held-out stock
+pedal-free taps B10 stepped 30–80 ms after release. The other (`27` / 3,
+`291965512542` ns) advanced `0x251 B2` 41→42 mph while B10 stayed at 65 km/h.
+
+### Two rare longitudinal applications
+
+B5[2] marks 2,802 frames across [29 episodes on four routes](../../data/generated/camry_2026_08a_bit_census/b5_episodes.csv).
+The index includes exact logger timestamps, chassis/pedal pairs ≤75 ms old,
+lead estimates ≤100 ms old and centered one-second wheel acceleration.
+
+**ID13: driver-nonresponse deceleration.** Both episodes followed the same
+native `0x371` warning progression with cruise operating, pedals released
+and no reported lead. Of 3,209,179 requests paired to `0x371` within
+260 ms, B19=`0x84` appeared only in those two segments (172/175 such
+pairs carried ID13). The [owner's manual](https://www.toyota.com/content/dam/toyotaowners/dom/add-driver-pdfs/2026/camry-hv/MY26_Camry_OM_Excerpt_for_Driving_Support_Systems_D2_ML_0801.pdf)
+and FRC P5 monitor `2181` (“Driver Emergency Stop Assist Function”)
+support the inference that this is the deceleration phase of that function.
+
+| Original | ID13 samples | Chassis result | Independent wheel motion during the request |
+|---|---:|---|---|
+| `45--805b7ca6ab` / 4, stock longitudinal | 36 | ID13 on 34; ID11 on the first two | median −0.37 m/s² |
+| `91--4bfd0e2224` / 5, host longitudinal enabled | 144 | ID11 on all 144 | median **+0.19 m/s²** |
+
+From 250 ms into each episode, at a first-slot request of −500 counts
+and second slot zero, all 22 preceding results (<30 ms old) on `45`
+were ID13 at −502 to −496 counts; all 133 on `91` were ID11 at +59 to
++75 counts.
+
+**ID17: deceleration relative to the coast reference, usually outside
+cruise.** Both slots were 2–934 counts below the earlier closed-accelerator
+reference on all 2,622 frames in [27 Camry episodes](../../data/generated/camry_2026_08a_bit_census/id17_reference.csv)
+using the ID0 lag. On the [independent Corolla capture](../../community/spanconstant/README.md#separate-july-29-driving-rlog),
+36/37 were below and one equal; six absolute requests were positive.
+The leading application inference is [Toyota PDA assistance behind a
+preceding vehicle](https://pressroom.toyota.com/the-evolution-of-safety-at-toyota-part-3-the-future-of-safety/).
+
+On `3b`, 2,612/2,618 frames had cruise clear, 2,110 accompanied lateral
+ID18 and 2,241 paired with chassis result ID17. All 26 onsets followed
+ID0 and had a model lead; 23 were closing faster than 0.5 m/s. In nine
+same-segment ID0 controls matched for pedals, speed and lateral state,
+all had a lead, but the >0.5 m/s closing criterion held for eight onsets
+versus two controls. Native radar saw a persistent return within 120 m
+and ±2.25 m closing >0.5 m/s on 25/26 onsets (eight onsets versus six
+controls in the nine pairs). With the nearest persistent track within
+±1.5 m and native range also matched, it was closing at 5/6 onsets versus
+2/6 controls, with median relative speeds −1.21 versus −0.025 m/s. All
+matched comparisons are from one drive.
+
+The four frames on `27` / 7 had no model lead. Native radar tracked a
+return 90.56→88.72 m ahead in 100 ms, about 2 m left of center, with
+closure of 18.2–18.3 m/s against 18.47 m/s wheel speed. The brake pedal
+was already pressed and the chassis selected ID63. At the [three Corolla
+onsets](../../data/generated/camry_2026_08a_bit_census/corolla_id17.csv),
+cruise was off, allocation was 3 and lateral ID was 0. The nearest
+persistent central returns were 11.02, 11.58 and 11.33 m ahead, closing
+at 1.00, 0.55 and 0.35 m/s respectively. The wheels showed 5.89–6.39 m/s
+while `MOCK` CarState showed zero; all 37 fresh chassis results were ID63.
+
+## Longitudinal request and result comparisons
+
 ### Message structure and drive/brake decomposition
 
-The same 46-route cache supplies an exact additional structural result:
-`0x081 B7 = (0x81 + 8 + sum(B0..B6)) & 255` in
-**1,232,664/1,232,664 frames**. This is an embedded classic Toyota checksum over
-the first seven bytes, inside the 32-byte publication. It is not a rolling
-counter or an independent acceleration word. `B0:B3` is always `00000018`
-in this population; that constant alone does not identify a length or flag.
+Across all 1,232,664 native `0x081` frames, `B0:B3` was `00000018` and
+the embedded Toyota prefix checksum satisfied
+`B7 = (0x81 + 8 + sum(B0..B6)) & 255`.
 
 The current byte-level reconstruction is:
 
 | Message | Location | Supported interpretation |
 |---|---|---|
-| `0x08A` | `B3[3]`, `B4[5]` | cruise-operating latch; delayed-hold-associated request state |
-| `0x08A` | `B6[7:2]` / `B6[1:0]`, `B8:B9` | upper application ID / allocation / signed16BE acceleration |
+| `0x08A` | `B0:B2`, `B15`, `B27` | Always zero in the 75-route census |
+| `0x08A` | `B3[3]`, `B4[5]`, `B4[7]` | Cruise operation, delayed hold, startup-stage marker respectively |
+| `0x08A` | `B3[2]`, `B4[6]`, `B5[2]` | [PCS-associated](#pcs-escalation-leaves-the-policy-field-unchanged) phases and [IDs 13/17](#two-rare-longitudinal-applications) marker |
+| `0x08A` | `B6[7:2]` / `B6[1:0]`, `B8:B9` | Application ID / allocation / signed16BE first acceleration slot (upper DRCC bound) |
 | `0x08A` | `B7`; `B11:B12` | eight-byte-prefix Toyota checksum; signed16BE lower acceleration slot (requester/allocation unmapped) |
-| `0x08A` | `B10` | requested/set speed, km/h |
-| `0x08A` | `B13:B14`, `B16:B17` | unidentified `0x7FFF` slots, constant in all 1,479,225 native request frames examined |
-| `0x08A` | `B18:B19`, `B21[5:0]`, `B24`, `B25` | lateral pinion request, application ID, assistance and damping gains |
-| `0x08A` | `B20`, `B22`, `B23` | partially understood control-state/policy fields; `B20[7]` needs the distinction below |
+| `0x08A` | `B10` | Internal cruise setpoint in km/h |
+| `0x08A` | `B13:B14`, `B16:B17` | Invariant `0x7FFF` across the Camry, Crown and Corolla samples; field assignments open |
+| `0x08A` | `B18:B19`, `B21[5:0]`, `B24`, `B25` | Lateral pinion reference; application IDs 0/4/11/18; assist gain; candidate damping gain with a measured lane-departure warning association |
+| `0x08A` | `B20[7:6]`, `B22[2,4,5]`, `B23[5]` | Policy, longitudinal states, and steering association respectively; [driving-state tests above](#every-bit-of-native-0x08a) |
 | `0x08A` | `B26[5:0]` | request sequence |
 | `0x081` | `B4:B5`, `B6[5:0]`, `B6[7]`, `B7` | inferred combined quantity, result-source ID, standstill-associated state, verified checksum |
 | `0x081` | `B11[4]`, `B13`, `B16:B17` | request-loss supervision; lateral result ID/status; pinion result/reference |
 | `0x081` | `B18:B19`, `B20:B21`, `B22:B23`, `B24:B25`, `B26:B27` | inferred drive-side, closed/open capability, accelerator demand, and driver-brake quantities as bounded above |
 | both | `B28:B31` | security trailer |
-
-The request census selects each route's native source from saved `*.joined.json`
-metadata. It excludes host requests and forwarded copies.
-`0x08A B15/B27` are also zero throughout. No variation identifies the constant
-`0x7FFF` words as jerk quantities rather than other unused slots.
 
 Manual-braking observations independently distinguish the two result-like words.
 On primary-drive rows with result ID63, no accelerator, and signed13 brake word
@@ -893,12 +1246,43 @@ The empirical `B18=min(max(B4,B24),B22)` relation uses the capability candidate
 `B22`. The first patent's clamp instead uses the application-request upper bound,
 so these formulas describe distinct bounds.
 
-GTS recorder records `5252/5253/5261/5262` name brake-pedal demand, body
-acceleration/status, fully closed ground acceleration, and accelerator demand.
-They use float32, while `57DB` uses signed16 × 0.001. Re-encoding permits
-semantic correspondence; neither matching nor differing representation proves
-a wire join. The retained Operation-FFD examples do not contain the longitudinal
-result records needed to decide `57DB=B4` versus `57DB=B18`.
+The recorder's float32 fields `5252/5253/5261/5262` describe brake-pedal
+demand, body acceleration, fully closed ground acceleration and accelerator
+demand. The [Operation-FFD guide](../tooling/pcs-data-viewer-tss3-dictionary.md#arbitration-result-acceleration-export)
+documents Toyota's separate `57DB` **Arbitration result Acceleration**
+field (signed16BE × 0.001).
+
+**`B4:B5` is the leading `57DB` candidate.** Two [manifest-pinned stock
+rlogs](../../data/generated/camry_20260930_vmc_status/input_manifest.json)
+separate it from `B18:B19` during moving cruise deceleration (neither
+pedal, ID11, native bus-0 `0x081`). The gap compares the lowest B18 with
+the highest B4 in a ±150 ms window around each anchor.
+
+| Original route / segment | Route time (s) | Frames | Median B18−B4 (m/s²) | Example raw B4 / B18 (logger ns) | Min gap at ±150 ms (m/s²) |
+|---|---:|---:|---:|---|---:|
+| `0000003f--36e72f5fdc` / 21 | 1319.043519–1321.019239 | 67 | 1.199 | `F9DD` / `FEFB` (`6212699916507`) | 0.209 |
+| `00000165--97064ab212` / 2 | 161.154110–162.018722 | 30 | 0.533 | `FBE9` / `FE7A` (`314641639067`) | 0.326 |
+
+All 97 anchors remain separated even with ±0.050 m/s² slack per word.
+Route time is relative to the first `logMonoTime` in segment 0.
+
+Independent wheel deceleration (`0x0AA`) favors the combined B4 result.
+Each sampled second uses fault-free four-wheel means at ±0.5 s, with
+endpoints ≤100 ms old, valid CarState/sensors, speed >5 m/s, gas released
+and B18−B4 ≥0.5 m/s².
+The driver-braking observations are partitioned by route SHA-256 parity:
+
+| Braking population | Routes | One-second observations | Median absolute error B4 / B18 (m/s²) | B4 closer |
+|---|---:|---:|---:|---:|
+| Driver brake, result ID63; even partition | 6 | 176 | 0.154 / 1.147 | 171 |
+| Driver brake, result ID63; odd partition | 15 | 284 | 0.188 / 1.164 | 278 |
+| Stock cruise, neither pedal, result ID11; both partitions | 2 | 7 | 0.056 / 1.008 | 6 |
+
+B4 had lower median error on all 21 manual-braking routes. The seven
+automatic-braking observations favor the same assignment. A synchronized
+`57DB` export would directly test the recorder-name join; the
+[August 26 synchronized capture](../../targets/camry-2026/raw-20260826/camry_nrtd_cruise_can_sync_20260826.json.gz)
+has 90,932 CAN frames and 1,742 diagnostic rows, with FRC DIDs `1906`/`1912`.
 
 ### Repeated braking ceiling and request-policy candidate
 
@@ -994,6 +1378,50 @@ The native field changes while cruise remains active. Thus the observed
 cruise latch. Following/free-cruise describe scene associations; the button-driven
 transitions below also occur without a lead-presence change.
 
+#### Native radar separates policy, display state and headway
+
+The native-radar comparison covers 160,625 complete cycles in 134 segments
+on 22 stock routes. The moving central-track proxy is the nearest 2–120 m
+return within ±1.5 m, tracked for ≥250 ms and moving above 2 m/s over ground.
+On `3b`–`3f` it was more common under policy 1 than 3 at matched speed
+and setpoint error, with stable settings and pedals released in adaptive cruise.
+
+**B20 policy tracks the following display more often than radar or model
+lead presence.** Of 128 sustained policy changes away from button/setpoint
+events, 83 matched a direction-consistent `0x251 B3[1]` edge within 600 ms,
+versus 14 changes in moving central-track presence and 17 in openpilot lead
+presence. On `3b` / 42 the display bit cleared 9.8 ms before policy 1→3
+while the same track remained at 64.4–64.6 m. Display matches varied by
+route (81/102 on `3b`–`3f`, 2/26 later); the samples also differed in speed
+(90/102 early changes above 29 m/s, all 26 later below 22 m/s, both later
+matches near 10.7 m/s). Only 6/204 button/setpoint-associated policy changes
+matched a display-bit edge; none coincided with a change in the distance
+bin or selected interval.
+
+**`0x251 B4[7:5]` gives five speed-dependent following-distance bins.**
+The driver-selected interval is in B5[7:5]. Highway time-gap boundaries
+fitted on `3b` (0.88, 1.08, 1.51 and 2.00 s) matched 4,462/4,657 bins
+on `3c/3d` and 4,469/4,688 on `3e/3f`, versus 3,522 and 4,012 using range
+alone. Of [80 display steps](../../data/generated/camry_2026_08a_bit_census/headway_steps.csv)
+with a continuous track and unchanged settings, all 51 holdouts moved in
+the direction of both native range change and relative speed (48 up, three
+down). Bin 4 also occurred with B3[1] clear and under both policies.
+
+The same `2→3` step on `3c` occurred at 11.23 m and 2.84 m/s (3.95 s)
+in segment 22, versus 43.36 m and 29.07 m/s (1.49 s) in segment 45. In
+segment 24 a `3→4` step accompanied increasing range (12.52→13.85 m)
+but decreasing time gap (4.34→4.13 s).
+
+In [316 adjacent-bin transitions](../../data/generated/camry_2026_08a_bit_census/headway_edge_observations.csv)
+with the same track, display state, policy and settings, fitting
+`range = offset + slope × speed` on 114 `3b` transitions gave
+4.5–7.7 m offsets. On the other 202 transitions, mean absolute range
+error was 1.50 m versus 2.86 m for a fixed time gap. Below 15 m/s (49
+transitions), it was 1.03 versus 4.96 m; adding direction and delay to
+the time-gap fit improved it to 3.86 m. The offsets describe the
+observed boundaries, with individual misses such as `3d` / 37
+(crossing at 66.15 m, about 14 m above the fit).
+
 ### Native policy transitions and cruise-speed buttons
 
 The follow-on census retains camera-origin requests separately from host
@@ -1066,24 +1494,32 @@ ID11/allocation1 and both acceleration slots remain equal:
 | +486.045 | `0x87` | −3.800 | 0 | 1 | `0x40` |
 | +518.686 | `0x47` | −3.800 | 0 | 0 | `0x40` |
 
-B22 changes `0x10 → 0x30` on the third flagged frame, after driver
-braking begins; its meaning is unassigned. Lateral ID and both lateral
-gains remain zero; both `0x7FFF` slots remain unchanged. The first two
-flagged frames have identical application bytes and sequence but different
-trailers. B3[2] is set for nine frames and B4[6] for all 21.
+B3[2] marked the first nine flagged frames and B4[6] all 21.
+At the third flagged frame, after driver braking began, B22[5] marked
+[delayed release](#every-bit-of-native-0x08a). Native radar tracked the
+same return from 14.37 m at −7.05 m/s just before onset, to 12.12 m
+before B3[2] cleared and 10.13 m before B4[6] cleared.
 
-The first two flagged native packets have no vehicle-side TX confirmation.
-Driver braking begins at +16.733 ms; forwarding resumes at +33.508 ms,
-after the pedal disable. The host was still publishing about −1.5 m/s² with
-policy `3` versus the native −4.0 with policy `1`. This records replacement
-of the stronger factory request through the beginning of the event.
+The [bracketing CAN observations](../../data/generated/camry_2026_08a_bit_census/pcs_phase_edges.csv)
+show changes on `0x411`, `0x5AE`, `0x1D9` and `0x608` in the same receive
+batch. All four patterns occurred only in this episode across the 75-route
+census. `0x1D9 B5[7]` cleared by +324 ms; `0x5AE B2[2]` was still high at
++486 ms. On `43` / 9, a similar closing return (14.28 m, −6.30 m/s) with
+the brake pressed had none of those patterns. On `0x411`, B0[5:4] and
+B3[1:0] both changed 0→3 while the older status-icon field B0[7:6] stayed
+zero. On `1c` / 0 that icon field changed without either `0x08A` phase bit.
+An audible cue remains unattributed: the host requested a disengagement
+sound, and 2/19 matched non-PCS disengagement controls had an equal or
+larger sound-pressure rise.
 
-All **2,401 native request packets** in the event segment were independently
-matched to the retained raw cache. The
-[existing PCS artifact](../../data/generated/camry_20260921_pcs_alert.json)
+The raw brake switch reported pressed at +14.464 ms (`carState` at
++16.733 ms), and native forwarding resumed at +33.508 ms. The first two
+flagged native packets lack vehicle-side TX confirmation; the host was
+still publishing about −1.5 m/s² under policy 3 versus the native −4.0
+under policy 1. The [PCS artifact](../../data/generated/camry_20260921_pcs_alert.json)
 and [relay analysis](camry-2026-tss3-opendbc-port.md#pcs-recorder-semantics)
-provide the original source and publication boundary. Policy transitions
-and PCS escalation are separate observable changes.
+retain the publication boundary and source for the 2,401 native packets
+matched to the raw cache.
 
 ### Policy-one encoder cutover
 
@@ -1200,16 +1636,9 @@ The later policy-one cutover above changes the encoder and safety contract.
 
 ### What this changes and what stays open
 
-- The earlier `0x081 B20:B21 → 57DB` interpretation is withdrawn. `B20` is a
-  closed-accelerator reference candidate; B4 and B18 have distinct combined
-  and drive-side candidate roles. Neither is conclusively joined to `57DB`.
-  The earlier request correlations and ID63/ID11 deltas remain observations.
-- `0x08A` B6 candidate metadata, the ID63/ID11 result observations, and
-  `0x081 B11[4]` request-loss supervision remain. B7 is the eight-byte-prefix
-  checksum; its former lower-ID/allocation interpretation is withdrawn.
-- The route-86 discrepancy now belongs to a repeated approximately 1 m/s²
-  additional-braking regime. The stock scene comparison strengthens the
-  companion request-policy hypothesis.
+The open comparisons are the direct [recorder `57DB` join](#message-structure-and-drivebrake-decomposition),
+the [specific application behind stationary B22[2]](#what-triggers-b222),
+and the [braking ceiling under policy 1](#november-17-post-policy-one-capture-check).
 
 Reproduce from an external logs root (see
 [WORKFLOW.md](../WORKFLOW.md#external-openpilot-rlog-reducers) for the full

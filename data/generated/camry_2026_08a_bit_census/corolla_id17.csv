@@ -1,0 +1,4 @@
+first_logger_ns,last_logger_ns,native_frames,equal_accel_slots,min_accel_counts,max_accel_counts,chassis_result_63_fresh_pairs,chassis_result_pairs,speed_mps_min,speed_mps_max,brake_at_onset,gas_raw_at_onset,model_range_m,model_vrel_mps,native_radar_slot,persistent_cycles,native_range_m,native_lateral_m,native_vrel_mps
+245682378326328,245682598832524,10,10,0,82,10,10,6.188,6.387,1,0,9.27,-1.0,4,5,11.015,-0.32,-1.0
+245685878841426,245686398714669,22,22,-387,-125,22,22,5.954,6.16,0,0,10.77,-0.76,4,5,11.575,-0.44,-0.55
+245686478419091,245686578856350,5,5,-330,-255,5,5,5.891,5.921,0,0,10.16,-0.13,4,5,11.325,-0.32,-0.35

@@ -198,16 +198,18 @@ def build() -> dict[str, Any]:
         raise ValueError(f"retained AutoSave census drift: {runtime_state['autosave_files']}")
 
     category = gts_json("category", "435")["category"]
-    if category != {
+    expected_identity = {
         "category_id": 435,
         "database": "ABS_P5.ddb",
         "generation": 20,
         "name": "Brake/EPB",
         "short_name": "",
-    }:
-        raise ValueError(f"current GTS+ category-435 identity drift: {category}")
+    }
+    identity = {key: category[key] for key in expected_identity}
+    if identity != expected_identity:
+        raise ValueError(f"current GTS+ category-435 identity drift: {identity}")
     routes = gts_json("route", "P5-Unified", "--limit", "50")
-    exact_routes = [route for route in routes if route["contact_type"] == "P5-Unified"]
+    exact_routes = [route for route in routes if route["selector"] == "P5-Unified"]
     if len(exact_routes) != 1:
         raise ValueError(f"current GTS+ P5-Unified route cardinality drift: {len(exact_routes)}")
     route = exact_routes[0]
@@ -305,7 +307,7 @@ def build() -> dict[str, Any]:
                 "decoded representation is executable firmware before Ghidra target registration",
             ],
             "current_gtsplus_writer_route": {
-                "contact_type": route["contact_type"],
+                "contact_type": route["selector"],
                 "parameter_file": route["parameter_file"],
                 "cid_getter": route["cid_getter"],
                 "prepare_writer": route["prepare_writer"],

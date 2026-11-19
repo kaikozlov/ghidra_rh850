@@ -216,25 +216,40 @@ transition. The asserted operational consequences of B6[2]/B6[0] remain firmware
 
 ### 6.4 Ready Status is wire-visible on incoming `0x51E B0[7]`
 
-Techstream DID `0x1033` is exactly **Ready Status**. The target-native H receive
-path is now closed one step farther upstream than the earlier diagnostic-only
-result. H Rx descriptor index 24 is classic `0x51E/8` (PDU29); its generated
-COM signal154 is unpacked at `0x46144` from **`B0[7]` directly into
-`FEBE7D1B`**. The downstream chain is exact:
+The [Techstream `EMPS_P5` catalog](../../data/generated/corolla_8965H1202000_techstream_correlations.json#L9032-L9062)
+defines DID `0x1033` **Ready Status** as an unsigned byte with values `0/1`.
+In the [`8965H1202000` application](../../data/generated/corolla_hf_nonsteering_engagement_state.json#L953-L1002),
+Rx descriptor 24 is classic `0x51E/8` (PDU29). The COM unpacker at `0x46144`
+copies signal 154 (`B0[7]`) into `FEBE7D1B`:
 
-`0x51E B0[7] -> FEBE7D1B -> FEBEF052 -> FEBEB5A8 -> FEBEE811 -> DID 0x1033 Ready Status`.
+`0x51E B0[7] → FEBE7D1B → FEBEF052 → FEBEB5A8 → FEBEE811 → DID 0x1033 Ready Status`
 
-H `0xBAB58` and `0xBAC16` perform the operational
-`FEBEF052 -> FEBEB5A8` copy. The RAM nodes also have initialization/reset writers.
+The application copies `FEBEF052` to `FEBEB5A8` at `0xBAB58` and `0xBAC16`;
+the RAM nodes also have initialization and reset writers.
 
-The same field is observable in both retained TSS3 Corolla driving routes. The
-public 2023 segment carries 59 `0x51E/8` frames and Span's 2025 moving segment
-carries 60; **B0[7]=1 in every one**.
+**Observed.** Every `0x51E/8` frame on stock-harness logical bus 1 had `B0[7]=1`
+in the [public 2023 segment](corolla-2023-us-public-route.md)
+`a74eba85c97eaf67|00000004--555953f500/0` (59/59) and
+[Span's July segment](../../community/spanconstant/README.md#separate-july-29-driving-rlog)
+`67fd5b833889fedf|00000010--17084916da/3` (60/60).
 
-The maintained Toyota-B physical repin places chassis/state traffic (including
-`0x51E`) on Panda bus 0, FRC/source traffic on bus 2, and the unsplit auxiliary/radar
-path on bus 1. The historical Corolla routes below record the target network on
-stock-harness logical bus 1.
+Span's supplied `logs-20261117T203949Z-1-001.zip` records both values on dongle
+`67fd5b833889fedf` (SHA-256
+`7f14b07b3ecb9ccdd03eeaab1356a6a6b2e0fbeacf70565d0721e98f3624e8c2`).
+All three rlogs list EPS F181 records `8965F1208000 / 8A3111213000` in
+`CarParams.carFw`. The counts below treat identical incoming bus 0 and 2
+payloads in one CAN batch as one publication. Times are relative to the first
+CAN event in each rlog.
+
+| ZIP member under `logs/` | Incoming `0x51E/8` | Recorded conditions |
+|---|---|---|
+| `00000006--f12ffba982--0/rlog.zst` | One `0`: `06001f0000000000` at +1.256631 s | Park, stationary, both Panda ignition flags clear; ELM327 param 1, controls disallowed. EPS diagnostic traffic; no `0x030/32` or logger `sendcan`. |
+| `00000014--97638de227--0/rlog.zst` | Seven `1`s: `8600200000000000` from +0.238714 to +6.239683 s | Stationary with `0x030/32`; ELM327 param 1, controls disallowed. No `sendcan` or diagnostic-range CAN. `ignitionLine` falls at +7.047511 s; the remaining CAN has no low. |
+| `00000011--3e5edf0176--0/rlog.zst` | Six `1`s: `86006a0000000000` from +0.207754 to +5.216200 s | An incoming EPS `0x7A9` reply (`62 F1 81`) reassembles to both listed F181 records. |
+
+**Validation gap.** These rlogs contain no positive `62 10 33` reply. Live
+validation needs a continuous stock `1→0→1` sequence with independent
+READY/Not Ready markers and time-matched EPS DID `0x1033` replies.
 
 The consolidated gear/READY audit is
 [below](#gear-and-ready-audit--2026-10-07); the Crown static path is in
@@ -601,10 +616,7 @@ Driver torque is no longer an evidence hole: live `0x030` supplies the exact phy
 quantity, and `0x4A3` B5 is an independently closed alternate carrier. The efficient
 next state work is now:
 
-1. capture a firmware-identified, relay-correct H/F vehicle that actually carries
-   `0x4A3/0x351/0x394` while exercising the now-wire-identified `0x51E B0[7]`
-   Ready Status through a `1->0->1` transition and recording DID `0x1033` as an
-   independent diagnostic oracle;
+1. capture `0x4A3/0x351/0x394` on a firmware-identified, relay-correct H/F vehicle;
 2. exercise stock LTA off→active→off and deliberate safe fault/message-loss
    transitions to map the `0x394` projection and both `0x351` paths (the
    C159B49-linked base status plus separate force-7 override) to operational
@@ -1181,14 +1193,13 @@ decoding, so their software adds no READY-semantic evidence.
 corrects the earlier investigation's claim that no matching enum was found:
 the enum was indexed under indicator operation.
 
-READY remains grounded in the exact H/F application path (§6.4), with bit 1
-observed throughout both retained Corolla captures. Neither exercises ICE
-startup or bit 0; Camry's controlled transition is separate vehicle evidence.
-On the stock Toyota-B harness, the observed state network is on logical bus1.
-The maintained physical repin places chassis/state traffic on bus0/2's relay
-path; `harnessStatus=flipped` alone does not establish that repin. See the
-[physical harness routing](../tooling/panda-toyota-routing.md#7-official-toyota-b--harness-box-topology)
-and [porting contract](../architecture/toyota-openpilot-porting-contract.md).
+See [§6.4](#64-ready-status-is-wire-visible-on-incoming-0x51e-b07) for Corolla
+READY and the [controlled Camry run](../../targets/camry-2026/raw-20260826/camry_ready_gear_20260826.json.gz)
+for comparison. The Toyota-B physical repin places chassis/state on bus 0,
+FRC/source on bus 2, and the unsplit auxiliary/radar path on bus 1. Panda
+`harnessStatus` reports orientation; the [physical harness routing](../tooling/panda-toyota-routing.md#7-official-toyota-b--harness-box-topology)
+and [porting contract](../architecture/toyota-openpilot-porting-contract.md)
+describe the wiring.
 The reproducible `--gear-audit` commands are in the
 [workflow](../WORKFLOW.md#gear-and-ready-evidence). They leave the historical
 route artifacts unchanged; this section owns the corrected interpretation.
@@ -1247,9 +1258,8 @@ actuation. Before a real H/F openpilot port, recover and validate:
 
 - a deliberately chosen conservative **Panda/openpilot driver-override policy** for the now-closed `0x030` physical torque signal. The expanded exact-H static census found no physical driver-torque comparator in the recovered target-to-motor control cone; this is no longer an OEM-threshold-recovery blocker;
 - a deliberate Panda/sender Q-current actuator-response policy validated against relay-correct dynamics, plus extended fault-policy mapping (the cooperative EPS supervisor exposes no recovered measured-Q-current comparator);
-- dynamic validation of the now-closed incoming `0x51E B0[7]` Ready Status through
-  value `0`, plus temporary/permanent steering-fault semantics; no EPS-Tx Ready
-  duplicate is required for basic observation;
+- the [stock READY transition](#64-ready-status-is-wire-visible-on-incoming-0x51e-b07)
+  and separate validation of temporary/permanent steering-fault semantics;
 - live confirmation that an EPS-local native B6 reaches the inline hook, plus
   its wall-clock cadence and persistent secondary-field tuple. The helper
   retains native signal261 and secondary fields. `awaiting-native-b6` marks a

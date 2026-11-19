@@ -962,14 +962,10 @@ reports whichever source was actually employed.
 
 Consequences for the Camry work:
 
-- `0x08A` B8:B9/B11:B12 are not conceptually “two copies of one acceleration
-  command”; they occupy two **bound-package slots**. The original selected DRCC corpus
-  happened to have equal values, but a Sep-22 archive-wide census finds six independent
-  ordinary-DRCC divergence episodes (12 frames) with B8:B9 > B11:B12 in every
-  case. That strongly resolves the ordinary-DRCC ordering as B8:B9=upper and
-  B11:B12=lower, independently of the disproved B7 ID interpretation. A separate
-  intervention family with candidate B6 ID13 has different unequal geometry and
-  remains semantically unresolved.
+- In ordinary DRCC, B8:B9 is the upper acceleration slot and B11:B12 the lower.
+  The [Camry request census](../variants/camry-2026-longitudinal-evidence.md#every-bit-of-native-0x08a)
+  found B8:B9 above B11:B12 on every unequal ID11 request. The ordering reverses
+  in the [ID13 deceleration episodes](../variants/camry-2026-longitudinal-evidence.md#two-rare-longitudinal-applications).
 - A result ID of 63 while application bounds are present is expected when driver demand
   is the employed value inside the allowed range.
 - The request-policy fields are not all OEM-mapped. Their semantic boundaries
@@ -1048,7 +1044,7 @@ FRC / TSS3 applications
 - which internal node owns each SecOC freshness/signing operation and the clean external
   replacement/suppression boundary;
 - B6 secondary-field OEM names;
-- longitudinal remaining policy bits, lower-request ID/allocation locations, and the distinct candidate-B6-ID13 intervention semantics; ordinary-DRCC acceleration-slot ordering is strongly resolved as upper/lower.
+- longitudinal policy fields that lack an OEM name, and the locations of the lower-request ID and allocation.
 
 ## 11. Openpilot design consequence
 

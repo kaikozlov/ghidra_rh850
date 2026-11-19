@@ -3986,6 +3986,24 @@ signal247 remains within a few thousandths of a mph of the wheel mean. With each
 wheel speed is therefore explained by the SP1 bias followed by whole-km/h
 rounding, not by a demonstrated `ceil(wheel_speed)` operation.
 
+**At highway speeds, the Camry's median SP1 and four-wheel mean were below
+GNSS speed.** The [route medians and timestamped examples](../../data/generated/camry_2026_08a_bit_census/gnss_speed_routes.csv)
+come from original u-blox fixes across 1,300 segments. Valid fixes had
+reported speed uncertainty ≤0.25 m/s and were at least 1 s apart. Within
+±1 s of each fix, the four-wheel mean spanned ≤0.75 km/h and
+wheel-to-wheel spread was ≤2 km/h.
+
+| GNSS speed | Five `3b`–`3f` drives: median SP1 / wheel minus GNSS | Other drives: median SP1 / wheel minus GNSS |
+|---|---:|---:|
+| 25–<60 km/h | −0.17 / −0.35 km/h (333 fixes) | −0.06 / −0.23 km/h (3,272 fixes) |
+| 60–<90 km/h | −0.35 / −0.72 km/h (550) | −0.21 / −0.57 km/h (3,291) |
+| 90–<130 km/h | −0.68 / −1.23 km/h (8,176) | −0.57 / −1.10 km/h (7,188) |
+
+All 12 other drives with at least five highway fixes had a negative
+median SP1−GNSS difference, smaller in magnitude than wheel mean−GNSS.
+The adjacent `0x0D7` speed word tracked the wheel mean within 0.01 km/h
+in each pooled median.
+
 GTS supplies the meter-domain name and shape independently. `Meter_P5` DIDs
 `0x1041` and `0x1081` are both Toyota **`Vehicle Speed Meter`**, unsigned 8-bit at
 1 km/h/count. Across every native bus0 byte in the complete route-3e highway
@@ -4015,6 +4033,77 @@ The observations establish separate internal and cluster cruise-set-speed
 carriers and now separate the high-resolution SP1 speed from the whole-km/h meter
 carrier. The metric unit branch follows upstream Toyota's contract; these
 captures use the imperial setting.
+
+The Camry census found no incoming `0x376` on the three physical Panda
+buses across 1,369 segments on 75 routes. That ID carries the
+[calibrated indicated speed on the RAV4 Prime](yc-r4p-2024-meter.md#speedometer-input-and-display-correction).
+
+<a name="rolling-distance-the-rav4-prime-meter-predicts-the-camry-odometer"></a>
+
+#### Rolling distance: Camry counter and published distance
+
+Camry captures identify `0x0D7 B0[5:0]` as a modulo-64 distance count.
+Across 606 original segments on 24 stock-longitudinal routes,
+3,011,097 counts over 590.744 km integrated from SP1 give
+**5,097.1 counts/km**. Integration from the four-wheel mean in 26,176
+moving one-second windows gives 5,121.6 counts/km, consistent with
+the SP1–wheel speed offset. The count stayed unchanged in 7,632 of 7,633
+windows where the four-wheel mean stayed within 0.02 km/h of zero.
+
+The [timestamped spans](../../data/generated/camry_2026_08a_bit_census/meter_distance_spans.csv)
+measure counts between consecutive unit increments in each reference field.
+Each span covers at least one published mile with no `0x0D7` gap over 100 ms.
+The three rows cover overlapping stretches of the same drives.
+
+| Bus-0 reference, B4:B7 big-endian | Routes with qualifying spans | Published distance | `0x0D7` counts per published mile |
+|---|---:|---:|---:|
+| `0x611` whole miles, unit `2` | 14 | 344.0 mi | 8,199.88 |
+| `0x614` tenths of a mile | 18 | 362.9 mi | 8,199.99 |
+| `0x615` tenths of a mile | 18 | 362.8 mi | 8,199.97 |
+
+Outside routes `3b`–`3f`, the rates were 8,200.46, 8,200.40 and
+8,200.30 counts/mile, respectively. For comparison, the
+[2024 RAV4 Prime meter firmware](yc-r4p-2024-meter.md#odometer-and-trip-distance)
+uses 5,096 counts/km and 8,200 counts/mile. It publishes its two independent
+resettable trip values at `0x614` and `0x615`.
+
+#### Separating distance on the wire from distance credited by the meter
+
+**Camry captures support a low-speed gate near 2 km/h for distance
+credited to `0x614`.** The wire count advanced by 618 across 623
+within-segment runs of at least 1 s with both `0x0D7` speed words and
+all four wheel speeds ≤1.75 km/h.
+
+The [pinned `0x614` spans](../../data/generated/camry_2026_08a_bit_census/trip_gate_spans.csv)
+define a low-speed count as a delta between two SP1 samples ≤1.75 km/h.
+The longest continuous span per route with zero low-speed counts, at
+least 10 published miles and endpoint SP1 within 2.5 km/h yields
+**8,199.45 counts/mile** across five discovery routes (285.6 mi) and
+**8,199.49** across three other routes (198.1 mi).
+
+The creep comparison uses one span per continuous recording stretch,
+with at least four low-speed counts and endpoint SP1 within 5 km/h.
+Selection maximizes low-speed counts, and every span excludes `0x0D7`
+gaps over 100 ms. At the discovery scale, the five discovery spans
+contained 141 more wire counts than predicted and 134 low-speed counts.
+Subtracting low-speed counts improved 10 of 11 held-out spans, reducing
+mean absolute error from **7.3 to 2.2 counts**. Route `92` fit better with
+all counts.
+
+On the same 11 spans, the [cutoff comparison](../../data/generated/camry_2026_08a_bit_census/trip_thresholds.csv)
+gives mean absolute errors of 3.7 counts for a zero-speed cutoff, about
+2.0 for cutoffs of 1.85 or 2.00 km/h, and 9.1 for 3.00 km/h. The
+[Prime meter firmware](yc-r4p-2024-meter.md#odometer-and-trip-distance)
+uses 1.76 km/h as its acceptance threshold.
+The [offline replay](../../tools/targets/camry/analysis/replay_camry_trip_spans.py)
+uses the [capture manifest](../../data/generated/camry_2026_08a_bit_census/captures.csv)
+and pinned spans.
+
+In 6,695 within-segment comparisons where `0x614` and `0x615` advanced
+to the same tenth of a mile, `0x614` arrived first or in the same receive
+batch (868 ties, maximum lead 24.2 ms). Different publication times
+can leave unaligned values a tenth apart. Neither field showed a
+within-segment reset.
 
 ### 49.5 SecOC-shaped `0x0FE` carries stock cruise set-speed commands (VAR-127)
 

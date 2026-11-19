@@ -999,10 +999,10 @@ changes. The eight-byte frame has no observed rolling counter.
 | B0 top bits | Normal `A0`/`C0` scenes broadly follow native inactive/operating state. `80` occurs during initialization; `E0` is a separate short scene on route 67. |
 | B1 mask `10` | Persistent availability/latch, retained across cancellation; its established switch lifecycle is in [baseline §49.4](camry-2026-live-baseline.md#494-tss3-preserves-toyotas-separate-internal-and-cluster-cruise-set-speeds). |
 | B1 mask `04` | SET-decrement-associated transient: 44 frames in 13 episodes. Every onset follows raw SET by 90–221 ms and accompanies a one-unit B2 decrement. |
-| B2 | Retained cluster-domain cruise set speed, mph in these captures. |
+| B2 | Retained cluster-domain cruise set speed, mph in these captures. [Stock MAIN and RES entries](camry-2026-longitudinal-evidence.md#how-b10-gets-its-value) distinguish capture at current speed from restoration of the previous target. |
 | B3 `[7:6]`, B3 `[5:3]`, B5 `[4:3]` | Three fields take identical values 0/1/2 across the census. Values 1 and 2 produce B3 bases `48` and `90`. Scene 1 includes inactive, accelerator-override and stopped-hold contexts. |
 | B3 mask `02`; B4 `[4:3]` | Coupled scene fields: B4 is `10` in scene 1 and `08` in scene 2 when B3 mask `02` is set. One transition exception. |
-| B4 `[7:5]` | Values 0–4. Model-lead-distance distributions overlap, including a nonmonotonic bin 0. |
+| B4 `[7:5]` | Five observed headway levels in the following display state. [Native radar and wheel-speed comparison](camry-2026-longitudinal-evidence.md#native-radar-separates-policy-display-state-and-headway) distinguishes time headway from absolute range and the selected interval. Outside that state, bin 4 is ambiguous. |
 | B4 mask `02` | Delayed stopped-hold-associated indication: eight set frames in three episodes. Its rising and falling edges coincide with `0x252 B2` mask `10`; see the cross-message join below. |
 | B5 `[7:5]` | Vehicle-interval selector. This corpus exercises normal native value 1; the independent GTS/251 selector join is recorded in the baseline report. |
 | B6 low bits and B7 | 197 coupled transient frames on stock routes; none in the two PCM-enabled OP-long routes. |

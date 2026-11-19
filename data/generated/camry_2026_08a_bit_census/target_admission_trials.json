@@ -1,0 +1,298 @@
+[
+  {
+    "capture": "raw-20260826/camry_nrtd_cruise_can_sync_20260826.json.gz",
+    "update_parity": [
+      1
+    ],
+    "nearest_opposite_pair": {
+      "separation_ns": 400547772,
+      "gear": 0,
+      "object_B3_through_B63": "00000000000000000000000000000000000000000000000000000000000000613cfb6179e5e6009e0200ff00004914028faa3f677a9df6000000000000",
+      "pcs_B0_through_B25": "0400004d83281000000000000003000007ff8ec0000f80000000",
+      "observations": [
+        {
+          "request_ns": 11218163941,
+          "b22_bit2": 1,
+          "object_age_ns": 12641408,
+          "pcs_age_ns": 141701134,
+          "next_pcs_ns": 11276205299,
+          "next_pcs_lateral_code_right": 2
+        },
+        {
+          "request_ns": 11618711713,
+          "b22_bit2": 0,
+          "object_age_ns": 12908056,
+          "pcs_age_ns": 142074128,
+          "next_pcs_ns": 11676634381,
+          "next_pcs_lateral_code_right": 2
+        }
+      ]
+    },
+    "selected_shape3_at_pcs_publication": [
+      {
+        "reverse": false,
+        "pcs_lateral_code": 2,
+        "forward_m": "<2.80",
+        "low": 0,
+        "high": 66
+      },
+      {
+        "reverse": false,
+        "pcs_lateral_code": 2,
+        "forward_m": "=2.80",
+        "low": 3,
+        "high": 6
+      },
+      {
+        "reverse": false,
+        "pcs_lateral_code": 3,
+        "forward_m": "<2.80",
+        "low": 72,
+        "high": 0
+      },
+      {
+        "reverse": false,
+        "pcs_lateral_code": 3,
+        "forward_m": "=2.80",
+        "low": 17,
+        "high": 0
+      },
+      {
+        "reverse": false,
+        "pcs_lateral_code": 3,
+        "forward_m": ">2.80",
+        "low": 6,
+        "high": 0
+      }
+    ],
+    "selected_history_fork": {
+      "matching_decisions": 7,
+      "prior_state_updates": 11,
+      "selected_record_hex": "613cfb6179e5e6009e020000",
+      "pcs_B0_through_B25": "0400004d83281000000000000003000007ff8ec0000f80000000",
+      "previous_request_B0_through_B25": "0000000080000012feec00feec7fff007fff0000000004000000",
+      "observations": [
+        {
+          "first_matching_ns": 17168591758,
+          "decision_ns": 17468448187,
+          "b22_bit2": 1
+        },
+        {
+          "first_matching_ns": 22468707714,
+          "decision_ns": 22768639737,
+          "b22_bit2": 0
+        }
+      ]
+    }
+  },
+  {
+    "capture": "raw-20260826/camry_ready_gear_20260826.json.gz",
+    "update_parity": [
+      1
+    ],
+    "nearest_opposite_pair": {
+      "separation_ns": 1600173643,
+      "gear": 0,
+      "object_B3_through_B63": "c0000000000000000000000000000000000000000000000000000000000000113cfb6379ede6209e820001000029140283ae0f76badaf7ff0000000000",
+      "pcs_B0_through_B25": "0400004d83001800000000000003000007ff8ec0000f80000000",
+      "observations": [
+        {
+          "request_ns": 35179685292,
+          "b22_bit2": 1,
+          "object_age_ns": 9300991,
+          "pcs_age_ns": 187958055,
+          "next_pcs_ns": 35191472777,
+          "next_pcs_lateral_code_right": 2
+        },
+        {
+          "request_ns": 36779858935,
+          "b22_bit2": 0,
+          "object_age_ns": 9585099,
+          "pcs_age_ns": 188856418,
+          "next_pcs_ns": 36791123622,
+          "next_pcs_lateral_code_right": 3
+        }
+      ]
+    },
+    "selected_shape3_at_pcs_publication": [
+      {
+        "reverse": false,
+        "pcs_lateral_code": 2,
+        "forward_m": "<2.80",
+        "low": 0,
+        "high": 55
+      },
+      {
+        "reverse": false,
+        "pcs_lateral_code": 2,
+        "forward_m": "=2.80",
+        "low": 1,
+        "high": 2
+      },
+      {
+        "reverse": false,
+        "pcs_lateral_code": 2,
+        "forward_m": ">2.80",
+        "low": 1,
+        "high": 0
+      },
+      {
+        "reverse": false,
+        "pcs_lateral_code": 3,
+        "forward_m": "<2.80",
+        "low": 129,
+        "high": 1
+      },
+      {
+        "reverse": false,
+        "pcs_lateral_code": 3,
+        "forward_m": "=2.80",
+        "low": 45,
+        "high": 0
+      },
+      {
+        "reverse": false,
+        "pcs_lateral_code": 3,
+        "forward_m": ">2.80",
+        "low": 43,
+        "high": 0
+      },
+      {
+        "reverse": true,
+        "pcs_lateral_code": 2,
+        "forward_m": "<2.80",
+        "low": 5,
+        "high": 0
+      },
+      {
+        "reverse": true,
+        "pcs_lateral_code": 2,
+        "forward_m": "=2.80",
+        "low": 1,
+        "high": 0
+      },
+      {
+        "reverse": true,
+        "pcs_lateral_code": 3,
+        "forward_m": "<2.80",
+        "low": 9,
+        "high": 0
+      },
+      {
+        "reverse": true,
+        "pcs_lateral_code": 3,
+        "forward_m": "=2.80",
+        "low": 4,
+        "high": 0
+      },
+      {
+        "reverse": true,
+        "pcs_lateral_code": 3,
+        "forward_m": ">2.80",
+        "low": 2,
+        "high": 0
+      }
+    ],
+    "selected_history_fork": {
+      "matching_decisions": 3,
+      "prior_state_updates": 3,
+      "selected_record_hex": "113cfb6379ede6209e820000",
+      "pcs_B0_through_B25": "0400004d83001800000000000003000007ff8ec0000f80000000",
+      "previous_request_B0_through_B25": "0000000080000012feec00feec7fff007fff0036000000000000",
+      "observations": [
+        {
+          "first_matching_ns": 30978884901,
+          "decision_ns": 31079946099,
+          "b22_bit2": 1
+        },
+        {
+          "first_matching_ns": 41029376504,
+          "decision_ns": 41129577419,
+          "b22_bit2": 0
+        }
+      ]
+    }
+  },
+  {
+    "capture": "raw-20260826/camry_ready_b_20260826.json.gz",
+    "update_parity": [
+      1
+    ],
+    "nearest_opposite_pair": {
+      "separation_ns": 400341947,
+      "gear": 3,
+      "object_B3_through_B63": "80000000000000000000000000000000000000000000000000000000000000113cfb6179e5e6009e020000000000000000000000000000000000000000",
+      "pcs_B0_through_B25": "2400004d83001000000000001003000c07ff8ec0000f80000000",
+      "observations": [
+        {
+          "request_ns": 8602545327,
+          "b22_bit2": 0,
+          "object_age_ns": 9873429,
+          "pcs_age_ns": 89610733,
+          "next_pcs_ns": 8712929035,
+          "next_pcs_lateral_code_right": 3
+        },
+        {
+          "request_ns": 9002887274,
+          "b22_bit2": 1,
+          "object_age_ns": 11131572,
+          "pcs_age_ns": 89663857,
+          "next_pcs_ns": 9113071613,
+          "next_pcs_lateral_code_right": 2
+        }
+      ]
+    },
+    "selected_shape3_at_pcs_publication": [
+      {
+        "reverse": false,
+        "pcs_lateral_code": 2,
+        "forward_m": "<2.80",
+        "low": 0,
+        "high": 17
+      },
+      {
+        "reverse": false,
+        "pcs_lateral_code": 2,
+        "forward_m": "=2.80",
+        "low": 1,
+        "high": 0
+      },
+      {
+        "reverse": false,
+        "pcs_lateral_code": 3,
+        "forward_m": "<2.80",
+        "low": 70,
+        "high": 0
+      },
+      {
+        "reverse": false,
+        "pcs_lateral_code": 3,
+        "forward_m": "=2.80",
+        "low": 25,
+        "high": 0
+      },
+      {
+        "reverse": false,
+        "pcs_lateral_code": 3,
+        "forward_m": ">2.80",
+        "low": 8,
+        "high": 0
+      }
+    ],
+    "selected_history_fork": null
+  },
+  {
+    "capture": "raw-20260827/camry_post_repin_nrtd_20260827.json.gz",
+    "update_parity": [],
+    "nearest_opposite_pair": null,
+    "selected_shape3_at_pcs_publication": [],
+    "selected_history_fork": null
+  },
+  {
+    "capture": "raw-20260827/camry_post_repin_ready_20260827.json.gz",
+    "update_parity": [],
+    "nearest_opposite_pair": null,
+    "selected_shape3_at_pcs_publication": [],
+    "selected_history_fork": null
+  }
+]

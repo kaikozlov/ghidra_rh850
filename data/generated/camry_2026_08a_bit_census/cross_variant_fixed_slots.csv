@@ -1,0 +1,10 @@
+dataset,state_selector,original_path,sha256,incoming_bus,logMonoTime,B3-B6,B0-B2,B13-B17,B27
+Crown2024-Mruno,idle,community/mruno/odd_buses/00000004--2dde5a112c--0/rlog.zst,ef17de463020d54c4fbe696be3fe193540126ab9cb4340a59b987e5f4610e089,2,39966236182,00800000,000000,7fff007fff,00
+Crown2024-Mruno,cruise-operating,community/mruno/odd_buses/00000004--2dde5a112c--10/rlog.zst,bda843470ccb7cf238933b92ba379e1b1e0899758ab50fc68e71df8fa0c41b01,2,641719033104,0880002d,000000,7fff007fff,00
+Corolla2025-SpanJuly,idle,community/spanconstant/span_67fd5b833889fedf_00000010--17084916da--3--rlog.zst,f1ae7c40ad8e9ff8c462a3f5367d914873e93575d902ccb82f2c74984acd439f,1,245626599055643,00800000,000000,7fff007fff,00
+Corolla2025-SpanJuly,long-request-other,community/spanconstant/span_67fd5b833889fedf_00000010--17084916da--3--rlog.zst,f1ae7c40ad8e9ff8c462a3f5367d914873e93575d902ccb82f2c74984acd439f,1,245682378326328,00800447,000000,7fff007fff,00
+Corolla2025-SpanLaterFull,startup,community/spanconstant/00000006--f12ffba982--0/rlog.zst,fa93c666fb24c29f90e3964d4e460199d8b42f4e243fdadc3a785da63e01c6c0,2,1025962063493,00000000,000000,7fff007fff,00
+Corolla2025-SpanLaterFull,idle,community/spanconstant/00000009--893b4771f9--8/rlog.zst,468e1c98d23de5cc4b2456e639a65730d1f0493a15f5c5ed79627e60091c1b6c,2,510642611844,00800000,000000,7fff007fff,00
+Corolla2025-SpanLaterQlog,idle,community/spanconstant/00000002--57807c6a2c--0/qlog.zst,aabcc7e9cf176c5e93d2f3226a3d1772e103cdc1411ca22d41f400fd4f5a8019,2,103599430307,00800000,000000,7fff007fff,00
+Corolla2025-SpanLaterQlog,cruise-operating,community/spanconstant/00000003--486e8f6fbf--13/qlog.zst,0fa4c2efe306fa259a03d0d01a8f44260f7a080322f0fb93d3cca5f027663bed,2,937573979101,0880002d,000000,7fff007fff,00
+Corolla2023-Public,idle,REFERENCE/public_route_corolla_2023_segment0_rlog.zst,d246a55988889253c8d155f04b132b1bb443fdd74f1e6bad68eef8879a5c477b,1,22343455667,00800000,000000,7fff007fff,00
