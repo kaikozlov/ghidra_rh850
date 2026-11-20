@@ -616,8 +616,17 @@ three times, and functional `28 81 01`. `22 F181` still returned the same three
 software-ID slots afterward. A raw ISO-TP `10 02` then produced **no CAN/UDS
 response at all** during the observation window, followed by `27 01 || zero16`
 returning `7F 27 12`. Because the target request was observed with raw ISO-TP,
-this `10 02` result is true silence rather than a hidden `7F 10 78`. The test
-did not include the Phase-6 29-bit functional traffic or gateway-specific
+this `10 02` result is true silence rather than a hidden `7F 10 78`.
+
+The same experiment was repeated in NRTD (`0x51E B0[7]=0`). A bare target
+`10 02` briefly changed the application's SecurityAccess response from
+`7F 27 12` to `7F 27 7F`, but `22 F181` still returned the same three-slot
+application CID payload; after `10 03`, `27 01 || zero16` again returned
+`7F 27 12`. Repeating the partial P5-Unified preamble in NRTD produced the same
+result: `22 F181` returned the application CID both before and after the silent
+`10 02`, and `27 01 || zero16` returned `7F 27 12`. The partial preamble and
+NRTD therefore do not complete the application-to-bootloader transition. The
+test did not include the Phase-6 29-bit functional traffic or gateway-specific
 reprogramming sequence from the full GTS flow.
 
 ### Application SecurityAccess
