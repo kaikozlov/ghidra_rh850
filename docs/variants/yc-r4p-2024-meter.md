@@ -664,7 +664,8 @@ READY testing also removed an application-session ambiguity. `27 03` returns
 not a programming-handoff discriminator on this Camry. Sending physical
 `10 02` from that confirmed extended session was still completely silent for
 10 seconds; `F181` remained the same application identity and `F186` returned
-to session `1`.
+to session `1`. The legacy meter session request `0x7C0:10 85` is explicitly
+rejected with `7F 10 12`.
 
 The current 2026 Camry combination-meter campaign provides a stronger lead:
 the dealer procedure lists GTS+'s **Diag message input** advanced function among
