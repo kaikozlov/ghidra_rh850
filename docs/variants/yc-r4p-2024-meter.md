@@ -583,7 +583,11 @@ SHA-256
 identical to the registered specimen. The simulator does not model D1L RSCAN,
 the RTOS scheduler, physical CAN, or reset side effects. No vehicle traffic was
 sent. A Camry combination meter still requires its own firmware and boot
-contract.
+contract. `tools/targets/camry/live/camry_meter_boot_sa_probe.py` is the narrow
+live compatibility probe: it sends only `10 01`, `10 02`, `27 01 || zero16`, and
+`27 02 || derived_key` to `0x7C0/0x7C8`, using the recovered meter boot root. It
+stops after SecurityAccess and performs no upload, DID write, RoutineControl, or
+ECU reset.
 
 ### Application SecurityAccess
 
