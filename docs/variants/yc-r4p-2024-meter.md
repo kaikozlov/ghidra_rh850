@@ -586,14 +586,12 @@ sent. A Camry combination meter still requires its own firmware and boot
 contract. `tools/targets/camry/live/camry_meter_boot_sa_probe.py` is the narrow
 live compatibility probe. The Camry meter was observed on Panda bus 1 through
 ELM327 parameter 0 (OBD mux), `0x7C0 -> 0x7C8`. While the vehicle was READY
-(`0x51E B0[7]=1`), `10 01` and `10 03` returned positive responses, `10 02`
-timed out, and a following boot-shaped `27 01 || zero16` returned NRC `0x12`.
-On 2026-11-20 the probe repeated `27 01 || zero16` for 15 seconds after the
-`10 02` timeout; no seed arrived, and its final response remained NRC `0x12`.
-The application was therefore still serving the meter endpoint rather than
-handing it to the bootloader. The probe uses the recovered meter boot root and
-stops after SecurityAccess. It performs no upload, DID write, RoutineControl,
-or ECU reset.
+(`0x51E B0[7]=1`), `10 01` and `10 03` returned positive responses, direct
+`10 02` was silent, and a following boot-shaped `27 01 || zero16` returned
+`7F 27 12`. The maintained probe now sends `10 02` once and leaves that request
+undisturbed while listening for `7F 10 78` and the final `50 02`; only an actual
+`50 02` permits the subsequent SecurityAccess attempt. It uses the recovered
+meter boot root and performs no upload, DID write, RoutineControl, or ECU reset.
 
 Current GTS+ narrows the expected reprogramming family. The live Camry meter's
 `F181` payload is `03` followed by three 16-byte slots: `8381GAQ02100`, an empty
@@ -618,16 +616,54 @@ response at all** during the observation window, followed by `27 01 || zero16`
 returning `7F 27 12`. Because the target request was observed with raw ISO-TP,
 this `10 02` result is true silence rather than a hidden `7F 10 78`.
 
-The same experiment was repeated in NRTD (`0x51E B0[7]=0`). A bare target
-`10 02` briefly changed the application's SecurityAccess response from
-`7F 27 12` to `7F 27 7F`, but `22 F181` still returned the same three-slot
-application CID payload; after `10 03`, `27 01 || zero16` again returned
-`7F 27 12`. Repeating the partial P5-Unified preamble in NRTD produced the same
-result: `22 F181` returned the application CID both before and after the silent
-`10 02`, and `27 01 || zero16` returned `7F 27 12`. The partial preamble and
-NRTD therefore do not complete the application-to-bootloader transition. The
-test did not include the Phase-6 29-bit functional traffic or gateway-specific
-reprogramming sequence from the full GTS flow.
+The same experiment was repeated in NRTD (`0x51E B0[7]=0`). A direct target
+`10 02` was silent and changed the next application SecurityAccess response from
+READY's `7F 27 12` to `7F 27 7F`. Sending `10 03` afterward restored the
+ordinary application behavior and `27 01 || zero16` again returned `7F 27 12`.
+That NRTD difference is significant in light of the application's asynchronous
+programming-session state machine below. The earlier probes sent new diagnostic
+requests after the silent `10 02`; they therefore did not preserve the pending
+session request long enough to observe its final completion path cleanly.
+
+### Application programming-session handoff
+
+The RAV4 meter application enters programming asynchronously. Its diagnostic
+worker `0x19BAA` runs callback `0x19AFC`, which qualifies the normal vehicle
+speed input (`0x19650`: signal `0x543`, CAN `0x0D7` B1:B2, 0.01 km/h/count).
+The qualifier requires valid speed at or below **3.00 km/h** for 20 successive
+diagnostic updates. State byte `FEDD1973` initializes to `2`; accepted target
+`10 02` reaches `0xAE682 -> 0x19ECE`, which changes `2 -> 1`. The next qualified
+update maps `1 -> 0` through ROM table `0x154FD1 = {0,0,2,2}` and starts the
+handoff counter at `FEDD1970`.
+
+`0x19EEE` is the asynchronous completion gate. State above `1` reports failure,
+state `0/1` with counter below `100` reports pending, and counter `>=100` reports
+ready. DCM `0xADF2A/0xAE05A` keeps the same `10 02` operation pending and owns
+its `0x78`/completion lifecycle; final event `6` reaches `0x19F14`. Consequently
+a live probe must leave the `10 02` request undisturbed until its final response
+instead of replacing it with repeated `27 01` probes.
+
+The final action `0x19636` copies a 64-byte programming-handoff template from
+ROM `0x10AE0` to retention RAM `0xFEDFFFC0`; the template contains physical
+address `0x7C0` and session-2 request context. It then enters the non-returning
+stage-3 shutdown/reset path. Early boot classifies the retained reset context in
+`0x5B6`: the programming class is `0xE9`, which remains in boot and is passed to
+`0x798 -> 0xFEDC59C2`, setting boot-local `FEDD3209 = 1`. The boot initializers
+consume that flag to establish programming session state.
+
+The diagnostics callback is released on scheduler mask `0x4`, every other
+OSTM0 interval; this image configures OSTM0 compare `150000`. The exact gate is
+therefore **20 + 100 callback invocations**, independent of wall-clock
+assumptions. At the nominal 80 MHz P1M-E PCLK used by this family, the 100-update
+pending interval is about 0.375 s. Retained Camry NRTD traffic confirms that
+`0x0D7` remains present at about 50 Hz with zero speed, so NRTD does not remove
+the speed source required by this RAV4-side handoff model.
+
+The RAV4 bootloader's `F181` response is also distinct from its application:
+boot builds `01 || 16*0x21`, whereas the live Camry application returns the
+three-slot `03 || 8381GAQ02100 || empty || 8381FAQ01200` payload. This remains a
+useful post-transition discriminator, but it should be queried only after the
+pending `10 02` operation has completed or expired.
 
 ### Application SecurityAccess
 
