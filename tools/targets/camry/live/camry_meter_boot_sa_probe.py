@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
 """Probe the Camry combination meter bootloader SecurityAccess path.
 
-This is intentionally narrow. It:
-  1. finds 0x7C0/0x7C8 with UDS 10 01 on the current Panda routing,
-  2. requests programming session with 10 02,
-  3. requests a boot seed with 27 01 || 16 zero bytes,
-  4. derives the response with the recovered RAV4 Prime meter boot root,
-  5. sends 27 02 || key and exits.
+Run this while holding the cooperative direct-Panda lease. The probe uses the
+confirmed meter diagnostic route: Panda bus 1 with ELM327 parameter 0 (OBD mux),
+0x7C0 -> 0x7C8.
 
-It does not write DIDs, request a download, transfer data, invoke a routine,
-or reset the ECU.
+Sequence:
+  10 01
+  10 03
+  10 02
+  27 01 || zero16
+  27 02 || derived_key
+
+It performs no DID writes, download, transfer, RoutineControl, or ECU reset.
 """
 from __future__ import annotations
 
@@ -22,7 +25,7 @@ from Crypto.Cipher import AES
 
 TX_ADDR = 0x7C0
 RX_ADDR = 0x7C8
-BUSES = (1, 0, 2)
+BUS = 1
 ZERO16 = bytes(16)
 
 # Recovered from the 2024 RAV4 Prime RH850 meter specimen.
@@ -31,24 +34,34 @@ METER_BOOT_SA_ROOT = bytes.fromhex("f579ca07326b246812a31464b123cbc6")
 
 def load_openpilot():
   try:
-    import openpilot.cereal.messaging as messaging  # type: ignore
-    from openpilot.selfdrive.car.card import can_comm_callbacks  # type: ignore
-    from opendbc.car.can_definitions import CanData  # type: ignore
-    from opendbc.car.uds import CanClient, IsoTpMessage, MessageTimeoutError  # type: ignore
-    return messaging, can_comm_callbacks, CanData, CanClient, IsoTpMessage, MessageTimeoutError
+    from panda import Panda  # type: ignore
+    from opendbc.car.structs import CarParams  # type: ignore
+    from opendbc.car.uds import (  # type: ignore
+      ACCESS_TYPE,
+      MessageTimeoutError,
+      NegativeResponseError,
+      SESSION_TYPE,
+      UdsClient,
+    )
+    return Panda, CarParams, UdsClient, SESSION_TYPE, ACCESS_TYPE, MessageTimeoutError, NegativeResponseError
   except ModuleNotFoundError:
     for root in (Path("/data/openpilot"), Path("/data/openpilot/current")):
       if root.is_dir():
         sys.path.insert(0, str(root))
         try:
-          import openpilot.cereal.messaging as messaging  # type: ignore
-          from openpilot.selfdrive.car.card import can_comm_callbacks  # type: ignore
-          from opendbc.car.can_definitions import CanData  # type: ignore
-          from opendbc.car.uds import CanClient, IsoTpMessage, MessageTimeoutError  # type: ignore
-          return messaging, can_comm_callbacks, CanData, CanClient, IsoTpMessage, MessageTimeoutError
+          from panda import Panda  # type: ignore
+          from opendbc.car.structs import CarParams  # type: ignore
+          from opendbc.car.uds import (  # type: ignore
+            ACCESS_TYPE,
+            MessageTimeoutError,
+            NegativeResponseError,
+            SESSION_TYPE,
+            UdsClient,
+          )
+          return Panda, CarParams, UdsClient, SESSION_TYPE, ACCESS_TYPE, MessageTimeoutError, NegativeResponseError
         except ModuleNotFoundError:
           pass
-  raise SystemExit("cannot import openpilot/opendbc; run this on the comma in its openpilot environment")
+  raise SystemExit("cannot import panda/opendbc; run this on the comma in its openpilot environment")
 
 
 def derive_key(seed: bytes) -> bytes:
@@ -58,109 +71,99 @@ def derive_key(seed: bytes) -> bytes:
   return AES.new(working_key, AES.MODE_ECB).encrypt(seed)
 
 
-def describe_response(pdu: bytes | None) -> str:
-  if pdu is None:
-    return "timeout"
-  if len(pdu) >= 3 and pdu[0] == 0x7F:
-    return f"{pdu.hex()}  (NRC 0x{pdu[2]:02X})"
-  return pdu.hex()
-
-
 def main() -> int:
   parser = argparse.ArgumentParser(description=__doc__)
-  parser.add_argument("--timeout", type=float, default=0.75,
-                      help="per-response ISO-TP timeout in seconds")
+  parser.add_argument("--timeout", type=float, default=0.75)
   args = parser.parse_args()
 
   (
-    messaging, can_comm_callbacks, CanData, CanClient, IsoTpMessage, MessageTimeoutError,
+    Panda, CarParams, UdsClient, SESSION_TYPE, ACCESS_TYPE,
+    MessageTimeoutError, NegativeResponseError,
   ) = load_openpilot()
 
-  logcan = messaging.sub_sock("can")
-  sendcan = messaging.pub_sock("sendcan")
-  can_recv_packets, can_send_msgs = can_comm_callbacks(logcan, sendcan)
+  serials = Panda.list()
+  if len(serials) != 1:
+    raise RuntimeError(f"expected one Panda, got {serials}")
 
-  def can_tx(addr: int, dat: bytes, bus: int) -> None:
-    can_send_msgs([CanData(addr, dat, bus)])
+  panda = Panda(serials[0], cli=False, disable_checks=False)
+  try:
+    panda.set_heartbeat_disabled()
+    panda.set_safety_mode(CarParams.SafetyModel.elm327, 0)
 
-  def can_rx() -> list[tuple[int, bytes, int]]:
-    packets = can_recv_packets(wait_for_one=True)
-    return [
-      (int(msg.address), bytes(msg.dat), int(msg.src))
-      for packet in packets
-      for msg in packet
-    ]
+    def client() -> object:
+      return UdsClient(
+        panda, TX_ADDR, RX_ADDR, BUS,
+        timeout=args.timeout, response_pending_timeout=2.0,
+      )
 
-  def request(bus: int, pdu: bytes, timeout: float | None = None) -> bytes | None:
-    client = CanClient(can_tx, can_rx, TX_ADDR, RX_ADDR, bus)
-    isotp = IsoTpMessage(client, timeout=args.timeout)
-    isotp.send(pdu)
-    deadline = time.monotonic() + (args.timeout if timeout is None else timeout)
-    while True:
-      remaining = deadline - time.monotonic()
-      if remaining <= 0:
-        return None
+    c = client()
+    try:
+      c.diagnostic_session_control(SESSION_TYPE.DEFAULT)
+      print("10 01 -> 50 01", flush=True)
+    except NegativeResponseError as e:
+      print(f"10 01 -> NRC 0x{int(e.error_code):02X}", flush=True)
+      return 2
+    except MessageTimeoutError:
+      print("10 01 -> timeout", flush=True)
+      return 2
+
+    try:
+      c.diagnostic_session_control(SESSION_TYPE.EXTENDED_DIAGNOSTIC)
+      print("10 03 -> 50 03", flush=True)
+    except NegativeResponseError as e:
+      print(f"10 03 -> NRC 0x{int(e.error_code):02X}", flush=True)
+      return 3
+    except MessageTimeoutError:
+      print("10 03 -> timeout", flush=True)
+      return 3
+
+    try:
+      c.diagnostic_session_control(SESSION_TYPE.PROGRAMMING)
+      print("10 02 -> 50 02", flush=True)
+    except NegativeResponseError as e:
+      print(f"10 02 -> NRC 0x{int(e.error_code):02X}", flush=True)
+      return 4
+    except MessageTimeoutError:
+      print("10 02 -> timeout; trying boot SecurityAccess", flush=True)
+
+    seed = None
+    for _ in range(20):
+      c = client()
       try:
-        response, _ = isotp.recv(timeout=remaining)
+        seed = bytes(c.security_access(ACCESS_TYPE.REQUEST_SEED, data_record=ZERO16))
+        break
       except MessageTimeoutError:
-        return None
-      if response is None:
-        continue
-      response = bytes(response)
-      if len(response) >= 3 and response[:2] == bytes((0x7F, pdu[0])) and response[2] == 0x78:
-        print(f"  <- {response.hex()}  (response pending)", flush=True)
-        continue
-      return response
+        time.sleep(0.1)
+      except NegativeResponseError as e:
+        print(f"27 01 + zero16 -> NRC 0x{int(e.error_code):02X}", flush=True)
+        return 5
 
-  bus = None
-  print(f"probing 0x{TX_ADDR:03X}/0x{RX_ADDR:03X} with 10 01", flush=True)
-  for candidate in BUSES:
-    response = request(candidate, bytes.fromhex("1001"))
-    print(f"  bus {candidate}: {describe_response(response)}", flush=True)
-    if response is not None and response[:2] == bytes.fromhex("5001"):
-      bus = candidate
-      break
+    if seed is None:
+      print("27 01 + zero16 -> timeout", flush=True)
+      return 5
+    if len(seed) != 16:
+      print(f"27 01 + zero16 -> unexpected {len(seed)}-byte seed: {seed.hex()}", flush=True)
+      return 6
 
-  if bus is None:
-    print("no 50 01 response", flush=True)
-    return 2
+    print(f"27 01 + zero16 -> 67 01 {seed.hex()}", flush=True)
+    key = derive_key(seed)
+    print(f"derived key = {key.hex()}", flush=True)
 
-  print(f"using bus {bus}", flush=True)
+    c = client()
+    try:
+      c.security_access(ACCESS_TYPE.SEND_KEY, security_key=key)
+    except NegativeResponseError as e:
+      print(f"27 02 + key -> NRC 0x{int(e.error_code):02X}", flush=True)
+      return 7
+    except MessageTimeoutError:
+      print("27 02 + key -> timeout", flush=True)
+      return 7
 
-  programming = request(bus, bytes.fromhex("1002"), timeout=max(args.timeout, 1.5))
-  print(f"10 02 -> {describe_response(programming)}", flush=True)
-  if programming is not None and not programming.startswith(bytes.fromhex("5002")):
-    return 3
-
-  # A programming-session transition can briefly make the endpoint disappear.
-  # Retry only the seed request; there is no additional setup or probing here.
-  seed_response = None
-  for _ in range(20):
-    seed_response = request(bus, bytes.fromhex("2701") + ZERO16)
-    if seed_response is not None:
-      break
-    time.sleep(0.1)
-
-  print(f"27 01 + zero16 -> {describe_response(seed_response)}", flush=True)
-  if seed_response is None or not seed_response.startswith(bytes.fromhex("6701")):
-    return 4
-
-  seed = seed_response[2:]
-  if len(seed) != 16:
-    print(f"unexpected seed length: {len(seed)}", flush=True)
-    return 5
-
-  key = derive_key(seed)
-  print(f"seed = {seed.hex()}", flush=True)
-  print(f"key  = {key.hex()}", flush=True)
-
-  key_response = request(bus, bytes.fromhex("2702") + key)
-  print(f"27 02 + key -> {describe_response(key_response)}", flush=True)
-  if key_response is None or not key_response.startswith(bytes.fromhex("6702")):
-    return 6
-
-  print("SUCCESS: bootloader SecurityAccess 01/02 accepted", flush=True)
-  return 0
+    print("27 02 + key -> 67 02", flush=True)
+    print("SUCCESS: meter boot SecurityAccess accepted", flush=True)
+    return 0
+  finally:
+    panda.close()
 
 
 if __name__ == "__main__":

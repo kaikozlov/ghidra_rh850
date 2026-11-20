@@ -584,10 +584,13 @@ identical to the registered specimen. The simulator does not model D1L RSCAN,
 the RTOS scheduler, physical CAN, or reset side effects. No vehicle traffic was
 sent. A Camry combination meter still requires its own firmware and boot
 contract. `tools/targets/camry/live/camry_meter_boot_sa_probe.py` is the narrow
-live compatibility probe: it sends only `10 01`, `10 02`, `27 01 || zero16`, and
-`27 02 || derived_key` to `0x7C0/0x7C8`, using the recovered meter boot root. It
-stops after SecurityAccess and performs no upload, DID write, RoutineControl, or
-ECU reset.
+live compatibility probe. The Camry meter was observed on Panda bus 1 through
+ELM327 parameter 0 (OBD mux), `0x7C0 -> 0x7C8`. While the vehicle was READY
+(`0x51E B0[7]=1`), `10 01` and `10 03` returned positive responses, `10 02`
+timed out, and a following boot-shaped `27 01 || zero16` returned NRC `0x12`.
+The probe therefore tests `10 01 -> 10 03 -> 10 02 -> 27 01/02`, using the
+recovered meter boot root, and stops after SecurityAccess. It performs no upload,
+DID write, RoutineControl, or ECU reset.
 
 ### Application SecurityAccess
 
