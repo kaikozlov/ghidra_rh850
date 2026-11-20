@@ -7,7 +7,6 @@ confirmed meter diagnostic route: Panda bus 1 with ELM327 parameter 0 (OBD mux),
 
 Sequence:
   10 01
-  10 03
   10 02
   27 01 || zero16
   27 02 || derived_key
@@ -74,6 +73,12 @@ def derive_key(seed: bytes) -> bytes:
 def main() -> int:
   parser = argparse.ArgumentParser(description=__doc__)
   parser.add_argument("--timeout", type=float, default=0.75)
+  parser.add_argument(
+    "--boot-wait",
+    type=float,
+    default=15.0,
+    help="seconds to wait for the application-to-bootloader handoff",
+  )
   args = parser.parse_args()
 
   (
@@ -108,16 +113,6 @@ def main() -> int:
       return 2
 
     try:
-      c.diagnostic_session_control(SESSION_TYPE.EXTENDED_DIAGNOSTIC)
-      print("10 03 -> 50 03", flush=True)
-    except NegativeResponseError as e:
-      print(f"10 03 -> NRC 0x{int(e.error_code):02X}", flush=True)
-      return 3
-    except MessageTimeoutError:
-      print("10 03 -> timeout", flush=True)
-      return 3
-
-    try:
       c.diagnostic_session_control(SESSION_TYPE.PROGRAMMING)
       print("10 02 -> 50 02", flush=True)
     except NegativeResponseError as e:
@@ -127,19 +122,31 @@ def main() -> int:
       print("10 02 -> timeout; trying boot SecurityAccess", flush=True)
 
     seed = None
-    for _ in range(20):
+    last_seed_result = "no response"
+    deadline = time.monotonic() + args.boot_wait
+    while time.monotonic() < deadline:
       c = client()
       try:
         seed = bytes(c.security_access(ACCESS_TYPE.REQUEST_SEED, data_record=ZERO16))
         break
       except MessageTimeoutError:
-        time.sleep(0.1)
+        last_seed_result = "timeout"
       except NegativeResponseError as e:
-        print(f"27 01 + zero16 -> NRC 0x{int(e.error_code):02X}", flush=True)
-        return 5
+        error_code = int(e.error_code)
+        if error_code == 0x12:
+          last_seed_result = "NRC 0x12 (application still responding)"
+        elif error_code == 0x37:
+          last_seed_result = "NRC 0x37 (bootloader delay active)"
+        else:
+          print(f"27 01 + zero16 -> NRC 0x{error_code:02X}", flush=True)
+          return 5
+      time.sleep(0.1)
 
     if seed is None:
-      print("27 01 + zero16 -> timeout", flush=True)
+      print(
+        f"27 01 + zero16 -> no seed after {args.boot_wait:g}s; last result: {last_seed_result}",
+        flush=True,
+      )
       return 5
     if len(seed) != 16:
       print(f"27 01 + zero16 -> unexpected {len(seed)}-byte seed: {seed.hex()}", flush=True)

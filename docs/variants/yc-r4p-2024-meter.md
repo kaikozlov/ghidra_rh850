@@ -588,9 +588,26 @@ live compatibility probe. The Camry meter was observed on Panda bus 1 through
 ELM327 parameter 0 (OBD mux), `0x7C0 -> 0x7C8`. While the vehicle was READY
 (`0x51E B0[7]=1`), `10 01` and `10 03` returned positive responses, `10 02`
 timed out, and a following boot-shaped `27 01 || zero16` returned NRC `0x12`.
-The probe therefore tests `10 01 -> 10 03 -> 10 02 -> 27 01/02`, using the
-recovered meter boot root, and stops after SecurityAccess. It performs no upload,
-DID write, RoutineControl, or ECU reset.
+On 2026-11-20 the probe repeated `27 01 || zero16` for 15 seconds after the
+`10 02` timeout; no seed arrived, and its final response remained NRC `0x12`.
+The application was therefore still serving the meter endpoint rather than
+handing it to the bootloader. The probe uses the recovered meter boot root and
+stops after SecurityAccess. It performs no upload, DID write, RoutineControl,
+or ECU reset.
+
+Current GTS+ narrows the expected reprogramming family. The live Camry meter's
+`F181` payload is `03` followed by three 16-byte slots: `8381GAQ02100`, an empty
+slot, and `8381FAQ01200`. That is the exact record shape consumed by
+`TCUWCanUnifiedCIDGetter.dll`. Conversely, the DH/SU-regulation getter's
+`1A 88 00` request returns `7F 1A 11` on the Camry meter. The P5-Unified prepare
+writer performs network-wide session/communication preparation and then sends
+the target **directly** `10 02 -> 50 02`; it does not first put the target into
+`10 03`. It then sends `27 01 || ECUAuthKey[16]`, receives a 16-byte seed, and
+sends a 16-byte derived key. Its base/spec-02 flash writer subsequently uses
+`2E 0203/0201/0202`, `34/36/37`, `10F0`, and `FF00`, matching the recovered RAV4
+meter boot/package grammar. No retained CUW in the local corpus targets this
+Camry meter, so its exact package metadata and RequiredSpecReproVer are not yet
+available.
 
 ### Application SecurityAccess
 
