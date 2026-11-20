@@ -628,21 +628,23 @@ continues reading after NRC `0x78` up to the CUW's `P4ServerMaxTime`, then sends
 one physical `3E 00` and throws. The GTS sequence therefore agrees with the
 firmware model: `10 02` must eventually produce a final positive response.
 
-The READY partial-preamble test covered the standard/extended functional
-session, DTC mask, raw diagnostic mask, and CommunicationControl frames. Its
-target `10 02` was still silent. In NRTD the complete non-gateway P5-Unified
-preamble was also reproduced, including the Phase-6 functional `10 83` and
-`28 83 01` traffic plus the extended `0x740/FE:A0 27` mask. The target `10 02`
-again produced no diagnostic response for 10 seconds and `F186` remained `1`.
-That is exactly where GTS would abort; it would not proceed to SecurityAccess.
-The generic network preparation is therefore not the missing meter-local entry
-step on this splice.
+Two GTS-close runs at the F-CAM splice reproduced every non-gateway
+preparation frame above while intentionally omitting central-gateway discovery,
+automatic-IG-off handling, gateway SecurityAccess, and gateway routines. The
+first run was user-confirmed READY after completion; the immediate repeat was
+user-confirmed NRTD. Each trace contained the standard, extended-address, and
+Phase-6 functional traffic; three raw `0x720:A0 27` frames; the best-effort
+physical `22 F181`; and the 2-second/100-millisecond periodic TesterPresent
+schedule.
 
-An earlier NRTD run followed a silent `10 02` with more diagnostic traffic and
-observed `7F 27 7F`; sending `10 03` later restored `7F 27 12`. The clean run
-above left the target alone for 10 seconds and then read `F186 = 1`. The earlier
-SecurityAccess difference is therefore not evidence that `10 02` entered or
-left a pending programming session.
+Both runs produced the same diagnostic result. The pre-session `F181` response
+was the known three-slot application CID. Physical target `10 02` remained
+silent for 10 seconds while the network TesterPresent group continued. After
+stopping the periodic sender, `F181` returned the same CID and `F186` returned
+`62 F1 86 03`. The application therefore remained active in extended session;
+the `0x03` state is consistent with the functional `10 83` preparation and is
+not evidence of a programming handoff. GTS would abort at the missing final
+`50 02` and would not send SecurityAccess.
 
 Toyota also has a distinct historical Combination Meter reprogramming family:
 `108CAN349..383` and later rows identify the meter at `0x7C0/0x7C8` but prepare
