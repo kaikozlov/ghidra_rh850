@@ -609,6 +609,17 @@ meter boot/package grammar. No retained CUW in the local corpus targets this
 Camry meter, so its exact package metadata and RequiredSpecReproVer are not yet
 available.
 
+A READY live test then reproduced the subset of P5-Unified network preparation
+that Panda ELM327 mode can transmit on the meter route: functional `10 83` on
+`0x777` and `0x77F/FE`, functional `85 82`, raw diagnostic mask `0x720:A0 27`
+three times, and functional `28 81 01`. `22 F181` still returned the same three
+software-ID slots afterward. A raw ISO-TP `10 02` then produced **no CAN/UDS
+response at all** during the observation window, followed by `27 01 || zero16`
+returning `7F 27 12`. Because the target request was observed with raw ISO-TP,
+this `10 02` result is true silence rather than a hidden `7F 10 78`. The test
+did not include the Phase-6 29-bit functional traffic or gateway-specific
+reprogramming sequence from the full GTS flow.
+
 ### Application SecurityAccess
 
 The application's SID `0x27` table at `0x172414` selects **`03/04`**,
