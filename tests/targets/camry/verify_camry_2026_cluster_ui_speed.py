@@ -86,9 +86,16 @@ check('FRC 0x1B2 B2 mirrors the whole-km/h meter carrier',
           r['frc_integer_mirror']['difference_p10'] == 0 and
           r['frc_integer_mirror']['difference_p50'] == 0 and
           r['frc_integer_mirror']['difference_p90'] == 0 for r in highway.values()))
-check('artifact preserves the missing live-meter boundary',
+check('0x615 carries one stable reference-DBC speedometer calibration on both highway routes',
+      highway['0000003e--1a2f20417d']['native_counts']['0x615_bus0'] == 1236 and
+      highway['0000003f--36e72f5fdc']['native_counts']['0x615_bus0'] == 1266 and
+      all(r['meter_calibration_0x615']['observed'] == [{
+        'b0_b3_hex': '00 00 a7 81', 'samples': r['native_counts']['0x615_bus0'],
+        'toler_a': 1.018, 'toler_b_kph': 0.2,
+      }] for r in highway.values()))
+check('artifact preserves the current meter-calibration boundary',
       'no Combination Meter 0x7C0 diagnostic read' in d['semantic_boundary'] and
-      'physical dashboard number is not logged' in d['semantic_boundary'])
+      'TOLER_A/TOLER_B values 1.018/+0.2 km/h' in d['semantic_boundary'])
 
 rows = pcs['operation_ffd']['detail_rows']
 vehicle_speed = [r for r in rows if r['DataID'] in ('5235', '5236')]

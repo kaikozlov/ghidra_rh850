@@ -4023,13 +4023,32 @@ Toyota also exposes two distinct Combination Meter active-test stages:
 `0x2801 Speedometer Operation` and `0x2A01 Speed Signal Input`. These are IOControl
 active-test/status surfaces, not passive numeric speed DIDs. Their separation is
 consistent with an input stage and a later speedometer-output stage inside the
-meter. The physical dashboard number itself is not logged, so the additional
-1-2 mph optimism observed by the driver remains downstream of the recovered
-whole-km/h carrier or otherwise internal to the meter. The inherited
-`_toyota_2017.dbc` warning that `UI_SPEED` "Does not appear to match dash" is
-therefore still material. FRC Operation-FFD `5235 Vehicle speed meter` and `5236
-Vehicle speed meter status` remain an additional synchronized oracle for a future
-live capture.
+meter.
+
+Toyota reference-DBC prior art now identifies two calibration fields in native
+`0x615` (`MET1S11`): `TOLER_A` is a six-bit value with scale `0.002` and offset
+`0.94`, and `TOLER_B` is a signed six-bit value at `0.2 km/h/count`
+([opendbc PR #4060](https://github.com/commaai/opendbc/pull/4060)). All **2,502**
+bus0 `0x615` frames across the 162 segments of routes 3e/3f have
+`B0:B3 = 00 00 A7 81`, which decodes to **`TOLER_A = 1.018` and
+`TOLER_B = +0.2 km/h`**.
+The PR's proposed indicated-speed model is therefore `input * 1.018 + 0.2 km/h`
+for this Camry: a 70 mph input becomes about **71.38 mph** before whole-unit
+presentation behavior.
+
+The cross-target meter firmware independently supplies that presentation behavior.
+The [RAV4 Prime meter](yc-r4p-2024-meter.md#speedometer-input-and-display-correction)
+filters its speed input, applies a positive calibration curve, quantizes to
+half-unit steps, and only rewrites the held half-unit state after crossing its
+hysteresis threshold. Its saved profile 1 maps 100 mph to 101.70 mph; PR #4060
+reports `1.016 / +0.2 km/h` for the RAV4 Prime, whose linear form gives 101.724 mph
+at a 100 mph input. The on-wire calibration therefore accounts for the systematic
+upward speed correction, while the meter's internal quantization and hysteresis
+account for when the visible integer changes. The inherited `_toyota_2017.dbc`
+warning that `UI_SPEED` "Does not appear to match dash" remains material because
+`0x610 B2` is the uncorrected whole-km/h carrier, not the final indicated speed.
+FRC Operation-FFD `5235 Vehicle speed meter` and `5236 Vehicle speed meter status`
+remain an additional synchronized oracle for a future live capture.
 
 The observations establish separate internal and cluster cruise-set-speed
 carriers and now separate the high-resolution SP1 speed from the whole-km/h meter

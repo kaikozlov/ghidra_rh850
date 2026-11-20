@@ -340,11 +340,26 @@
         "sp1_minus_wheel_mph_p50": 0.340201
       },
       "joined_samples": 16230,
+      "meter_calibration_0x615": {
+        "observed": [
+          {
+            "b0_b3_hex": "00 00 a7 81",
+            "samples": 1236,
+            "toler_a": 1.018,
+            "toler_b_kph": 0.2
+          }
+        ],
+        "reference_dbc_decode": {
+          "TOLER_A": "B2 low 6 bits, factor 0.002, offset 0.94",
+          "TOLER_B": "B3 low 6 bits signed, factor 0.2 km/h"
+        }
+      },
       "native_counts": {
         "0x0AA_bus0": 468057,
         "0x0D7_bus0": 234030,
         "0x1B2_bus2": 23401,
-        "0x610_bus0": 16230
+        "0x610_bus0": 16230,
+        "0x615_bus0": 1236
       },
       "route": "0000003e--1a2f20417d",
       "segments": 78,
@@ -540,11 +555,26 @@
         "sp1_minus_wheel_mph_p50": 0.343308
       },
       "joined_samples": 16657,
+      "meter_calibration_0x615": {
+        "observed": [
+          {
+            "b0_b3_hex": "00 00 a7 81",
+            "samples": 1266,
+            "toler_a": 1.018,
+            "toler_b_kph": 0.2
+          }
+        ],
+        "reference_dbc_decode": {
+          "TOLER_A": "B2 low 6 bits, factor 0.002, offset 0.94",
+          "TOLER_B": "B3 low 6 bits signed, factor 0.2 km/h"
+        }
+      },
       "native_counts": {
         "0x0AA_bus0": 501425,
         "0x0D7_bus0": 250713,
         "0x1B2_bus2": 25069,
-        "0x610_bus0": 16658
+        "0x610_bus0": 16658,
+        "0x615_bus0": 1266
       },
       "route": "0000003f--36e72f5fdc",
       "segments": 84,
@@ -578,7 +608,7 @@
   "route": "0000002c--c784367b7e",
   "schema_version": 2,
   "segments": 26,
-  "semantic_boundary": "Exact F33 directly binds 0x0D7 B1:B2 to Toyota CAN Vehicle Speed (SP1). SP1 runs about 0.5% above the wheel-equivalent 0x0D7 signal247 on highway captures, and 0x610 B2 most closely matches SP1 rounded to the nearest whole km/h. 0x610 B2 is also the unique whole-km/h bus0 carrier matching Meter_P5 Vehicle Speed Meter geometry, but the retained logs contain no Combination Meter 0x7C0 diagnostic read to make that second join direct. The physical dashboard number is not logged, so its additional 1-2 mph optimism remains downstream of the recovered whole-km/h carrier or otherwise internal to the meter.",
+  "semantic_boundary": "Exact F33 directly binds 0x0D7 B1:B2 to Toyota CAN Vehicle Speed (SP1). SP1 runs about 0.5% above the wheel-equivalent 0x0D7 signal247 on highway captures, and 0x610 B2 most closely matches SP1 rounded to the nearest whole km/h. 0x610 B2 is also the unique whole-km/h bus0 carrier matching Meter_P5 Vehicle Speed Meter geometry, but the retained logs contain no Combination Meter 0x7C0 diagnostic read to make that second join direct. Native 0x615 carries reference-DBC TOLER_A/TOLER_B values 1.018/+0.2 km/h on both complete highway routes; cross-target RAV4 Prime meter firmware independently establishes the downstream positive calibration, half-unit quantization, and hysteresis used for indicated speed.",
   "source_files": [
     {
       "name": "0000002c--c784367b7e--0.rlog.zst",

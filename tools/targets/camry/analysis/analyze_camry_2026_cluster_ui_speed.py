@@ -179,7 +179,8 @@ def analyze_highway_route(LogReader, route: str, files: list[Path]) -> dict:
   d7_pairs: list[tuple[float, float]] = []
   frc_diffs: list[float] = []
   byte_stats: dict[tuple[int, int, int], list[float]] = {}
-  counts = {'0x0AA_bus0': 0, '0x0D7_bus0': 0, '0x610_bus0': 0, '0x1B2_bus2': 0}
+  calibration_615_counts: dict[bytes, int] = {}
+  counts = {'0x0AA_bus0': 0, '0x0D7_bus0': 0, '0x610_bus0': 0, '0x615_bus0': 0, '0x1B2_bus2': 0}
 
   for path in files:
     wheels: list[tuple[int, float]] = []
@@ -213,6 +214,10 @@ def analyze_highway_route(LogReader, route: str, files: list[Path]) -> dict:
         elif frame.address == 0x610 and len(dat) == 8:
           counts['0x610_bus0'] += 1
           meter_integer.append((t, float(dat[2])))
+        elif frame.address == 0x615 and len(dat) == 8:
+          counts['0x615_bus0'] += 1
+          prefix = dat[:4]
+          calibration_615_counts[prefix] = calibration_615_counts.get(prefix, 0) + 1
 
         if last_sp1 is not None and t - last_sp1[0] <= 100_000_000 and 20 <= last_sp1[1] <= 130:
           target = round_half_up(last_sp1[1])
@@ -270,6 +275,18 @@ def analyze_highway_route(LogReader, route: str, files: list[Path]) -> dict:
       'mae_to_round_sp1': round(error_sum / samples, 6),
     })
   byte_census.sort(key=lambda x: x['mae_to_round_sp1'])
+  calibration_615 = []
+  for prefix, samples in sorted(calibration_615_counts.items()):
+    raw_a = prefix[2] & 0x3F
+    raw_b = prefix[3] & 0x3F
+    if raw_b & 0x20:
+      raw_b -= 0x40
+    calibration_615.append({
+      'b0_b3_hex': prefix.hex(' '),
+      'samples': samples,
+      'toler_a': round(0.94 + raw_a * 0.002, 3),
+      'toler_b_kph': round(raw_b * 0.2, 3),
+    })
   return {
     'route': route,
     'segments': len(files),
@@ -284,6 +301,13 @@ def analyze_highway_route(LogReader, route: str, files: list[Path]) -> dict:
       'difference_p10': quantile(frc_diffs, .1),
       'difference_p50': quantile(frc_diffs, .5),
       'difference_p90': quantile(frc_diffs, .9),
+    },
+    'meter_calibration_0x615': {
+      'reference_dbc_decode': {
+        'TOLER_A': 'B2 low 6 bits, factor 0.002, offset 0.94',
+        'TOLER_B': 'B3 low 6 bits signed, factor 0.2 km/h',
+      },
+      'observed': calibration_615,
     },
     'bus0_byte_census_vs_round_sp1': byte_census[:10],
   }
@@ -461,8 +485,9 @@ def main() -> int:
       'Exact F33 directly binds 0x0D7 B1:B2 to Toyota CAN Vehicle Speed (SP1). SP1 runs about 0.5% above the wheel-equivalent '
       '0x0D7 signal247 on highway captures, and 0x610 B2 most closely matches SP1 rounded to the nearest whole km/h. 0x610 B2 is '
       'also the unique whole-km/h bus0 carrier matching Meter_P5 Vehicle Speed Meter geometry, but the '
-      'retained logs contain no Combination Meter 0x7C0 diagnostic read to make that second join direct. The physical dashboard '
-      'number is not logged, so its additional 1-2 mph optimism remains downstream of the recovered whole-km/h carrier or otherwise internal to the meter.'
+      'retained logs contain no Combination Meter 0x7C0 diagnostic read to make that second join direct. Native 0x615 carries '
+      'reference-DBC TOLER_A/TOLER_B values 1.018/+0.2 km/h on both complete highway routes; cross-target RAV4 Prime meter firmware '
+      'independently establishes the downstream positive calibration, half-unit quantization, and hysteresis used for indicated speed.'
     ),
   }
   args.out.parent.mkdir(parents=True, exist_ok=True)
