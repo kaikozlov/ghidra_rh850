@@ -650,10 +650,34 @@ Toyota also has a distinct historical Combination Meter reprogramming family:
 `108CAN349..383` and later rows identify the meter at `0x7C0/0x7C8` but prepare
 and flash it at `0x015/0x01D` with `TCUWCanDHPrepareWriter.dll`. Those rows set
 SU regulation; the shared DH helper sends `10 85 -> 50 85`, then seed request
-`27 01 02` and a 16-byte key exchange. The live Camry's `1A 88 00` software-ID
-probe returns `7F 1A 11`, and the recovered RAV4 Prime boot/package grammar
-matches P5-Unified rather than the DH flash writer. `0x015/0x01D` therefore
-remains a useful read-only compatibility probe, not the assumed Camry path.
+`27 01 02` and a 16-byte key exchange. READY follow-up with the TSS3 oracle
+stopped ruled that family out on the Camry: `0x015 -> 0x01D` was silent for
+both `10 01` and `10 85` on Panda buses 0, 1, and 2, and the exact non-authenticated
+Phase-5 functional preparation (`0x751/0x777/0x77F`, diagnostic masks and
+CommunicationControl) still did not expose it. The historical SU software-ID
+getter begins with `1A 88 00`; the live Camry returns `7F 1A 11`. Its legacy
+central-gateway probes also do not match this network: `0x786/0x78E` is absent,
+and `0x7A4/0x7AC 21 05` returns `7F 21 11` where visible.
+
+READY testing also removed an application-session ambiguity. `27 03` returns
+`7F 27 7F` in default session and `7F 27 22` after a positive `10 03`, so it is
+not a programming-handoff discriminator on this Camry. Sending physical
+`10 02` from that confirmed extended session was still completely silent for
+10 seconds; `F181` remained the same application identity and `F186` returned
+to session `1`.
+
+The current 2026 Camry combination-meter campaign provides a stronger lead:
+the dealer procedure lists GTS+'s **Diag message input** advanced function among
+the remedy's special tools. The installed implementation is
+`DiagMessageInput/ActionTool.exe`. GTS+ launches it only with the fixed token
+`GTSPLUS-2-FIXEDMSGINPUT`; the wizard then requires the technician to select an
+encrypted `*.sdat` file. That file decrypts to an `ECUSendData` XML command list
+containing `Protocol`, `CAN_ID`, optional `N_TA`, and `Command`. ActionTool
+explicitly prohibits SID `0x27`, so the package can supply a campaign-specific
+preparatory diagnostic exchange but does not perform SecurityAccess itself.
+No `.sdat` is bundled with the installed GTS+ tree or the retained local Toyota
+corpus. The campaign command bytes therefore require the separate TIS `.sdat`
+artifact.
 
 ### Application programming-session handoff
 
