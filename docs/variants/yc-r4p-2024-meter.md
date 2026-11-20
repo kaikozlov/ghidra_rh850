@@ -581,83 +581,128 @@ abort, and uninitialized-controller failures. Its full payload run emits
 SHA-256
 `cc75cac2aaa4a648dadcad3d3d59d0c1bb293c53f1dbfcf9bc0fc88b4b6a4322`,
 identical to the registered specimen. The simulator does not model D1L RSCAN,
-the RTOS scheduler, physical CAN, or reset side effects. No vehicle traffic was
-sent. A Camry combination meter still requires its own firmware and boot
-contract. `tools/targets/camry/live/camry_meter_boot_sa_probe.py` is the narrow
-live compatibility probe. The Camry meter was observed on Panda bus 1 through
-ELM327 parameter 0 (OBD mux), `0x7C0 -> 0x7C8`. While the vehicle was READY
-(`0x51E B0[7]=1`), `10 01` and `10 03` returned positive responses, direct
-`10 02` was silent, and a following boot-shaped `27 01 || zero16` returned
-`7F 27 12`. The maintained probe now sends `10 02` once and leaves that request
-undisturbed while listening for `7F 10 78` and the final `50 02`; only an actual
-`50 02` permits the subsequent SecurityAccess attempt. It uses the recovered
-meter boot root and performs no upload, DID write, RoutineControl, or ECU reset.
+the RTOS scheduler, physical CAN, reset side effects, or vehicle traffic.
+On the **2026 Camry meter at the F-CAM splice**, the bare application
+request path was tested in user-confirmed NRTD:
 
-Current GTS+ narrows the expected reprogramming family. The live Camry meter's
-`F181` payload is `03` followed by three 16-byte slots: `8381GAQ02100`, an empty
-slot, and `8381FAQ01200`. That is the exact record shape consumed by
-`TCUWCanUnifiedCIDGetter.dll`. Conversely, the DH/SU-regulation getter's
-`1A 88 00` request returns `7F 1A 11` on the Camry meter. The P5-Unified prepare
-writer performs network-wide session/communication preparation and then sends
-the target **directly** `10 02 -> 50 02`; it does not first put the target into
-`10 03`. It then sends `27 01 || ECUAuthKey[16]`, receives a 16-byte seed, and
-sends a 16-byte derived key. Its base/spec-02 flash writer subsequently uses
-`2E 0203/0201/0202`, `34/36/37`, `10F0`, and `FF00`, matching the recovered RAV4
-meter boot/package grammar. No retained CUW in the local corpus targets this
-Camry meter, so its exact package metadata and RequiredSpecReproVer are not yet
-available.
+```text
+TX 7C0 bus 1: 02 10 02 00 00 00 00 00
+RX 7C8: none for 10 seconds
+22 F181: unchanged three-slot application CID
+22 F186: 62 F1 86 01
+```
 
-A READY live test then reproduced the subset of P5-Unified network preparation
-that Panda ELM327 mode can transmit on the meter route: functional `10 83` on
-`0x777` and `0x77F/FE`, functional `85 82`, raw diagnostic mask `0x720:A0 27`
-three times, and functional `28 81 01`. `22 F181` still returned the same three
-software-ID slots afterward. A raw ISO-TP `10 02` then produced **no CAN/UDS
-response at all** during the observation window, followed by `27 01 || zero16`
-returning `7F 27 12`. Because the target request was observed with raw ISO-TP,
-this `10 02` result is true silence rather than a hidden `7F 10 78`.
+The request was therefore framed correctly, but the Camry application stayed
+in default session. No `27 01` was sent in that run.
 
-The same experiment was repeated in NRTD (`0x51E B0[7]=0`). A direct target
-`10 02` was silent and changed the next application SecurityAccess response from
-READY's `7F 27 12` to `7F 27 7F`. Sending `10 03` afterward restored the
-ordinary application behavior and `27 01 || zero16` again returned `7F 27 12`.
-That NRTD difference is significant in light of the application's asynchronous
-programming-session state machine below. The earlier probes sent new diagnostic
-requests after the silent `10 02`; they therefore did not preserve the pending
-session request long enough to observe its final completion path cleanly.
+Current GTS+ separates ordinary meter diagnostics from reprogramming. Category
+`409` (`Meter_P5.ddb`, “Combination Meter”) owns the ordinary diagnostic UI.
+GTS DLLs own the reprogramming transport and protocol implementation; CUW
+metadata selects and configures those writers with contact type, node, CAN IDs,
+gateway records, keys, and timing. None of the retained CUWs contains
+`8381GAQ02100` or `8381FAQ01200`, so those per-package values are unavailable,
+but the GTS-owned P5-Unified interface implementation is fully inspectable.
+
+The live meter's `F181` payload—`03` plus slots `8381GAQ02100`, empty, and
+`8381FAQ01200`—does match `TCUWCanUnifiedCIDGetter.dll`. The current generic
+P5-Unified prepare writer performs this ordered sequence:
+
+1. Stop synchronous periodic traffic; emit functional `10 83` on `0x777`,
+   extended `0x77F/FE`, and the Phase-6 functional address, with sleeps and
+   network TesterPresent traffic.
+2. Run gateway authentication/mode routines only when the CUW node declares
+   gateway records.
+3. Emit `85 82` on `0x777` and `0x77F/FE`; send raw `0x720:A0 27` exactly
+   three times; then quiesce communication with `28 81 01` on the standard and
+   extended functional routes and `28 83 01` on the Phase-6 route.
+4. Install the target filter and read software ID. This read is best-effort:
+   the writer catches and ignores its failure.
+5. Send target `10 02` once and require `50 02` plus four timing bytes.
+   `7F 10 78` enters the helper's pending loop; silence is a preparation error.
+   Only after the positive response does the writer sleep two seconds and send
+   `27 01 || ECUAuthKey[16]`, derive the key from the returned 16-byte seed and
+   `ServiceAuthKey`, and send `27 02 || key[16]`.
+
+The shared P5 transport never treats a timeout as successful boot entry. It
+continues reading after NRC `0x78` up to the CUW's `P4ServerMaxTime`, then sends
+one physical `3E 00` and throws. The GTS sequence therefore agrees with the
+firmware model: `10 02` must eventually produce a final positive response.
+
+The READY partial-preamble test covered the standard/extended functional
+session, DTC mask, raw diagnostic mask, and CommunicationControl frames. Its
+target `10 02` was still silent. In NRTD the complete non-gateway P5-Unified
+preamble was also reproduced, including the Phase-6 functional `10 83` and
+`28 83 01` traffic plus the extended `0x740/FE:A0 27` mask. The target `10 02`
+again produced no diagnostic response for 10 seconds and `F186` remained `1`.
+That is exactly where GTS would abort; it would not proceed to SecurityAccess.
+The generic network preparation is therefore not the missing meter-local entry
+step on this splice.
+
+An earlier NRTD run followed a silent `10 02` with more diagnostic traffic and
+observed `7F 27 7F`; sending `10 03` later restored `7F 27 12`. The clean run
+above left the target alone for 10 seconds and then read `F186 = 1`. The earlier
+SecurityAccess difference is therefore not evidence that `10 02` entered or
+left a pending programming session.
+
+Toyota also has a distinct historical Combination Meter reprogramming family:
+`108CAN349..383` and later rows identify the meter at `0x7C0/0x7C8` but prepare
+and flash it at `0x015/0x01D` with `TCUWCanDHPrepareWriter.dll`. Those rows set
+SU regulation; the shared DH helper sends `10 85 -> 50 85`, then seed request
+`27 01 02` and a 16-byte key exchange. The live Camry's `1A 88 00` software-ID
+probe returns `7F 1A 11`, and the recovered RAV4 Prime boot/package grammar
+matches P5-Unified rather than the DH flash writer. `0x015/0x01D` therefore
+remains a useful read-only compatibility probe, not the assumed Camry path.
 
 ### Application programming-session handoff
 
-The RAV4 meter application enters programming asynchronously. Its diagnostic
-worker `0x19BAA` runs callback `0x19AFC`, which qualifies the normal vehicle
-speed input (`0x19650`: signal `0x543`, CAN `0x0D7` B1:B2, 0.01 km/h/count).
-The qualifier requires valid speed at or below **3.00 km/h** for 20 successive
-diagnostic updates. State byte `FEDD1973` initializes to `2`; accepted target
-`10 02` reaches `0xAE682 -> 0x19ECE`, which changes `2 -> 1`. The next qualified
-update maps `1 -> 0` through ROM table `0x154FD1 = {0,0,2,2}` and starts the
-handoff counter at `FEDD1970`.
+The following list is complete for the RAV4 Prime application's primary
+physical programming path. It does not establish the same policy for the 2026
+Camry meter:
 
-`0x19EEE` is the asynchronous completion gate. State above `1` reports failure,
-state `0/1` with counter below `100` reports pending, and counter `>=100` reports
-ready. DCM `0xADF2A/0xAE05A` keeps the same `10 02` operation pending and owns
-its `0x78`/completion lifecycle; final event `6` reaches `0x19F14`. Consequently
-a live probe must leave the `10 02` request undisturbed until its final response
-instead of replacing it with repeated `27 01` probes.
+| Layer | Exact RAV4 Prime condition | Failure path |
+|---|---|---|
+| Routing | Physical request on `0x7C0`, the protocol-0 route retained in the handoff record | The `0x7C2` secondary and `0x777` functional profiles do not expose this programming transition |
+| Request | `10 02` with no trailing UDS bytes | NRC `0x13` |
+| Current session | Any configured application session: `1`, `2`, or `3` (`0x172347 = {1,2,3}`) | Generic DCM rejection |
+| Security | None; the `10 02` row has no security-level requirement | — |
+| Immediate handoff state | `FEDD1973` is `0`, `1`, or initialized state `2`; state `2` is changed to `1` | State `3` produces NRC `0x22` |
+| Motion qualifier | Before the request, the qualifier counter has saturated at `20`; accepted samples are raw speed `0..300` **or** unavailable sentinel `0xFFFF` | A finite raw value `301..65534` invalidates the qualifier; a pending request then completes with NRC `0x22` |
+| Completion delay | After state `1 -> 0`, `FEDD1970` reaches ROM threshold `100` | NRC `0x78` while below the threshold |
+| Final recheck | State remains `0` and the counter remains at least `100` | No reset handoff |
 
-The final action `0x19636` copies a 64-byte programming-handoff template from
-ROM `0x10AE0` to retention RAM `0xFEDFFFC0`; the template contains physical
-address `0x7C0` and session-2 request context. It then enters the non-returning
-stage-3 shutdown/reset path. Early boot classifies the retained reset context in
-`0x5B6`: the programming class is `0xE9`, which remains in boot and is passed to
-`0x798 -> 0xFEDC59C2`, setting boot-local `FEDD3209 = 1`. The boot initializers
-consume that flag to establish programming session state.
+There is no direct NRTD/READY, supply-voltage, SecurityAccess, DTC-setting,
+CommunicationControl, or prior extended-session gate in this RAV4 Prime path.
+The worker's other status calculation cannot add one: `0x196A2` sets bit 1
+unconditionally, and `0x19BAA` preserves that bit before passing it to
+`0x19AFC`. NRTD is not tested, and unavailable speed is explicitly accepted by
+the range check.
 
-The diagnostics callback is released on scheduler mask `0x4`, every other
-OSTM0 interval; this image configures OSTM0 compare `150000`. The exact gate is
-therefore **20 + 100 callback invocations**, independent of wall-clock
-assumptions. At the nominal 80 MHz P1M-E PCLK used by this family, the 100-update
-pending interval is about 0.375 s. Retained Camry NRTD traffic confirms that
-`0x0D7` remains present at about 50 Hz with zero speed, so NRTD does not remove
-the speed source required by this RAV4-side handoff model.
+`0x19650` obtains speed from signal ID `0x543`, sourced from CAN `0x0D7`
+bytes 1:2 at `0.01 km/h` per count. Negative decoded values are clamped to
+zero. Status failure becomes sentinel `0xFFFF`. The unsigned range test rejects
+only `301..65534`; `0..300` and `0xFFFF` advance the qualifier. From reset or
+invalidation, the first accepted sample clears the counter from `0xFFFF` to
+zero and the next 20 samples saturate it at `20`.
+
+State byte `FEDD1973` initializes to `2`. Accepted `10 02` reaches
+`0xAE682 -> 0x19ECE`, changes state `2 -> 1`, and enters the asynchronous
+session transition. The DCM sends NRC `0x78`; it does not silently discard an
+accepted request. On the next qualified worker call, ROM table
+`0x154FD1 = {0,0,2,2}` changes state `1 -> 0` and starts `FEDD1970` at zero.
+`0x19EEE` then keeps returning pending until the counter reaches 100.
+
+DCM functions `0xADF2A/0xAE05A` translate the worker result into repeated
+NRC `0x78`, NRC `0x22`, or completion. Completion dispatches event `6` to
+`0x19F14`, which rechecks state `0` and the threshold before `0x19636` copies
+the 64-byte handoff template from ROM `0x10AE0` to `FEDFFFC0`. The template
+contains physical request ID `0x7C0`, programming-session context `2`, and
+guard words `5A A5 A5 5A`; the application then invokes the reset path.
+
+The bootloader retains reset context class `0xE9` as a boot-stay condition.
+With the motion qualifier already saturated, the request needs one worker call
+for state `1 -> 0` and 100 delay calls before reset. The observed Camry
+result—no NRC `0x78` or `0x22`, followed by `F186 = 1`—therefore does not match
+the recovered RAV4 Prime application handoff behavior at `0x7C0`.
 
 The RAV4 bootloader's `F181` response is also distinct from its application:
 boot builds `01 || 16*0x21`, whereas the live Camry application returns the
