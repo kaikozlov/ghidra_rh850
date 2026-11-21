@@ -57,8 +57,23 @@ ADAS EWD:
 - light parking-assist circuitry and mirror-related park/BSM interfaces;
 - radio/display receiver through a separate shielded interface.
 
-The radar links are explicitly **ADU-local CAN**, not Global CAN. `ADCU_P6`
-has independent hardware-fault DTCs for:
+The radar links are explicitly **ADU-local CAN**, not Global CAN. The ADAS EWD
+closes the exact `J83(C)` pin map:
+
+| ADU local CAN | J83(C) pins | Sensor endpoint |
+|---|---|---|
+| `CA2H/CA2L` | 13/12 | A95 front millimeter-wave radar, `CA1P/CA1N` pins 3/4 |
+| `CA3H/CA3L` | 15/14 | M6 blind-spot / rear-side radar LH, `CA1P/CA1N` pins 6/2 |
+| `CA4H/CA4L` | 9/8 | M5 blind-spot / rear-side radar RH, `CA1P/CA1N` pins 6/2 |
+| `CA5H/CA5L` | 17/16 | A68 front-side radar LH, `CA1P/CA1N` pins 6/2 |
+| `CA6H/CA6L` | 11/10 | A69 front-side radar RH, `CA1P/CA1N` pins 6/2 |
+
+Each radar is therefore on a dedicated point-to-point ADU CAN pair; the
+front-side and rear-side hardware-fault reporting groups the corresponding LH/RH
+links. The same `J83(C)` connector also carries the ADU's two global vehicle CAN
+interfaces: `CA1H/CA1L` on pins 2/1 and `CA9H/CA9L` on pins 4/3.
+
+`ADCU_P6` has independent hardware-fault DTCs for:
 
 - `C1C9849 ADAS Domain Controller Local CAN Circuit (Front Millimeter Wave)`;
 - `C1C9649 ... Local CAN Circuit (Front Side Millimeter Wave)`;
@@ -73,9 +88,18 @@ Message`; and the rear-side radar databases carry
 Message`. The side-radar databases also expose `0x9007 ADAS Domain Controller
 Generation Information`.
 
+The forward camera is not on one of those CAN pairs. The EWD draws a dedicated
+point-to-point `FCM` line from ADU connector `D85(A)` pin 2 directly to the
+one-pin `L21 Forward Sensing Camera` connector. It likewise draws dedicated
+single signal links `PVFR/PVRR/PVLH/PVRH` from the ADU to each panoramic-view
+camera, while the driver-monitor camera has dedicated `DMC`, `DLED`, and
+`GND3` connections. The ultrasonic sensors are grouped into four direct
+three-wire chains (`S1/E1/B1` through `S4/E4/B4`) rooted at the ADU.
+
 The exact payload transported by the direct `FCM` connection is not established
-by the EWD. In particular, the drawing alone does not distinguish raw video from
-a processed camera data interface.
+by the EWD. The single named conductor is enough to exclude ordinary two-wire
+CAN at that interface, but it does not identify the camera transport or how much
+processing remains in the camera head.
 
 ### Vehicle-network attachment
 
