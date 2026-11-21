@@ -14,14 +14,16 @@ vehicle has become a zonal architecture or a single central computer.
 
 ## Evidence boundary
 
-The production observations below come from three 2026 RAV4 EWD extracts
-supplied for this investigation:
+The production observations below come from three 2026 RAV4 EWD extracts and a
+Toyota/Chilton vehicle-wide CAN system diagram supplied for this investigation:
 
 - `ADAS-U.pdf`
 - `EPS-U.pdf`
 - `MPX-CAN-HEV-U.pdf`
+- Chilton `Repair content for 2026 Toyota RAV4.pdf` (2026-11-21 capture)
 
-Those source files are not committed here. Pin names and topology are EWD facts.
+Those source files are not committed here. Pin names and topology are EWD/repair-
+manual facts.
 The division of perception, planning, and request generation comes from the
 patent sources below and is an architecture match, not a recovered RAV4 software
 implementation.
@@ -68,6 +70,19 @@ One side of the controller (`CA1H/CA1L`) joins No. 6 Global CAN Junction
 Connector `J94`, which in turn connects to Network Gateway ECU `D101`.
 A second controller interface (`CA9H/CA9L`) continues toward No. 11 Global CAN
 Junction Connector `J99`.
+
+The Toyota/Chilton vehicle-wide system diagram supplied on 2026-11-21 resolves
+those attachments to **Global Bus 1** and **Global Bus 8** respectively. The
+same diagram places the rack EPS together with both brake controllers on
+**Global Bus 4**: `BRK1` is the master-cylinder brake-booster assembly,
+`BRK2` is the brake-actuator assembly, and `EPS` is the rack-and-pinion power-
+steering gear. `BRK1` and `BRK2` are additionally attached to the separate
+Powertrain Local Bus with the hybrid/powertrain controllers.
+
+Thus the ADAS Domain Controller is not physically attached to the EPS/brake
+Global Bus 4. An ADU-originated final steering PDU would have to cross the
+Network Gateway, whereas the brake/VMM candidates and EPS are already peers on
+the same global chassis bus.
 
 This makes the ADAS Domain Controller a networked vehicle ECU, not merely a
 camera module.
@@ -181,14 +196,26 @@ the Dynamic Domain Controller the strongest current candidate for the immediate
 logical source/supervisor of the P6 EPS cooperative-control ingress.
 
 The RAV4 install set contains no standalone Dynamic Domain Controller diagnostic
-category. `BSCM_A_P6` remains a strong physical-owner candidate because its
-Data List explicitly shows Toyota-Safety-Sense upper/lower longitudinal requests
-being transformed into `Vehicle Motion Control` target acceleration/IDs, and it
-retains the `ADS Control EPS Pinion Angle2` lateral observer. That observer
-already exists in P5 and is not itself proof of the lateral command. The exact
-RAV4 physical owner of the Dynamic Domain Controller function, the final
-controller-to-EPS wire PDU, and its SecOC boundary remain to be recovered from a
-TSS4 capture or firmware.
+category, and the Toyota/Chilton network diagram likewise shows no separately
+named DDC ECU. On Global Bus 4 it shows only the brake-booster assembly `BRK1`,
+brake actuator `BRK2`, SRS, EPS, and the junction/gateway connection. GTS maps
+`BSCM_B_P6` to **Brake Booster** (`BRK1`) and `BSCM_A_P6` to **Brake/EPB**
+(`BRK2`).
+
+`BSCM_A_P6` is therefore the leading physical-owner candidate. It is a Bus-4
+peer of the EPS, it is also attached to the Powertrain Local Bus, and its Data
+List explicitly shows Toyota-Safety-Sense upper/lower longitudinal requests
+being transformed into `Vehicle Motion Control` target acceleration/IDs. It
+alone among the two P6 brake databases retains `0x107E ADS Control EPS Pinion
+Angle2`. That field already exists in P5 and is an observer rather than proof of
+the final steering PDU, but in the production topology it sits in exactly the
+ECU/domain expected for a brake-hosted Vehicle Movement Manager / Dynamic Domain
+Controller function.
+
+The remaining alternatives are a DDC function hosted elsewhere and routed onto
+Bus 4 by the Network Gateway, or a separate logical node hidden inside one of
+the named assemblies. The final controller-to-EPS wire PDU and its SecOC
+boundary still require a TSS4 capture or firmware.
 
 ## 2. What "ADAS Domain Controller" means here
 
