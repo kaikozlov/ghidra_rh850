@@ -50,12 +50,28 @@ ADAS EWD:
 - forward sensing camera (`FCM`);
 - front millimeter-wave radar;
 - left and right front-side radars;
-- left and right blind-spot monitor sensors;
+- left and right rear-side radars / BSM sensors;
 - front and rear ultrasonic sensor chains;
 - driver-monitor camera;
 - front/rear/left/right panoramic-view cameras;
 - light parking-assist circuitry and mirror-related park/BSM interfaces;
 - radio/display receiver through a separate shielded interface.
+
+The radar links are explicitly **ADU-local CAN**, not Global CAN. `ADCU_P6`
+has independent hardware-fault DTCs for:
+
+- `C1C9849 ADAS Domain Controller Local CAN Circuit (Front Millimeter Wave)`;
+- `C1C9649 ... Local CAN Circuit (Front Side Millimeter Wave)`;
+- `C1C9749 ... Local CAN Circuit (Rear Side Millimeter Wave)`.
+
+The radar-side databases independently name their ADU communication dependency:
+front radar `FDRS_P6` carries `U010487 Advanced Driver Assistance System /
+Missing Message`; the front-side radar databases carry
+`C1A6D87/C1A6E87 ADAS Domain Controller to Front Side Radar LH/RH / Missing
+Message`; and the rear-side radar databases carry
+`C1A7A87/C1A7B87 ADAS Domain Controller to Rear Side Radar LH/RH / Missing
+Message`. The side-radar databases also expose `0x9007 ADAS Domain Controller
+Generation Information`.
 
 The exact payload transported by the direct `FCM` connection is not established
 by the EWD. In particular, the drawing alone does not distinguish raw video from
