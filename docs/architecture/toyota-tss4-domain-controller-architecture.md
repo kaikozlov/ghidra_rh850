@@ -212,6 +212,22 @@ the final steering PDU, but in the production topology it sits in exactly the
 ECU/domain expected for a brake-hosted Vehicle Movement Manager / Dynamic Domain
 Controller function.
 
+The brake-to-EPS supervision relationship itself is not new and did not vanish
+in P6. Both P5 brake databases (`ABS_P5` and `Brk_Bst_P5`) and both P6 brake
+databases (`BSCM_A_P6` and `BSCM_B_P6`) carry the same core records:
+`U013187 Lost Communication with Power Steering Control Module`, `U11B187 Lost
+Communication with Power Steering Control Module "A" (ch2)`, `U032057 Software
+Incompatibility with Power Steering Control Module`, and Data List bit `0x102F`
+`EPS/Steering Control Actuator ECU Communication Open`. P6 drops some P5-only
+programming/rear-steer compatibility variants, but preserves the ordinary
+message-loss and compatibility supervision.
+
+The drawn order of `BRK1`, junctions, `BRK2`, and `EPS` on Global Bus 4 is not a
+forwarding chain. They are nodes on one CAN main bus; neither brake ECU is marked
+as a gateway on that segment. Any claim that Brake sits "in front of" EPS must
+therefore come from control/dataflow evidence, not from left-to-right placement
+in the wiring diagram.
+
 The remaining alternatives are a DDC function hosted elsewhere and routed onto
 Bus 4 by the Network Gateway, or a separate logical node hidden inside one of
 the named assemblies. The final controller-to-EPS wire PDU and its SecOC
