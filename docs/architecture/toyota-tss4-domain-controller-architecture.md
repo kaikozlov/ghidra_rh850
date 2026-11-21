@@ -339,7 +339,7 @@ The 2026 RAV4 EWD no longer supports that default model. The forward sensing
 camera is a peripheral of a larger ADAS Domain Controller, and the controller
 has its own vehicle-network attachment.
 
-A working TSS4 model is therefore:
+The leading TSS4 model is therefore:
 
 ```text
 camera / center radar / side radars / BSM / ultrasonics / DMC / park cameras
@@ -350,18 +350,27 @@ camera / center radar / side radars / BSM / ultrasonics / DMC / park cameras
                                   |
                      normalized motion requests
                                   |
-                                  v
-                Dynamic Domain Controller / VMM
-                         (logical boundary)
-                         /       |       \
-                        v        v        v
-                     brake      EPS    powertrain
-                                  ^
+                               CGW / Bus 4
                                   |
-                    result/status feedback
+                     BRK1 / BSCM_B_P6
+                      inline EPS-side path
                                   |
-                     ADAS Domain Controller
+                      downstream Bus-4 leg
+                         /              \
+                        v                v
+             BRK2 / BSCM_A_P6          EPS
+             DDC / VMM candidate    steering actuator
+             request arbitration
+             actuator targets
+                    |
+                    +---------- powertrain local bus
 ```
+
+This preserves the TSS3 functional split while moving the former FRC
+perception/application compute into the ADAS Domain Controller. The brake-domain
+Vehicle Movement Manager/request-generation role remains the leading P6 model,
+with `BSCM_A_P6` as the software-owner candidate and inline `BSCM_B_P6` as a
+separate physical admission/segmentation candidate.
 
 Current GTS+ and the recovered P6 ADU recorder give a much tighter boundary on
 that model. `ADCU_P6.ddb` directly exposes `0x1E19` request pinion plus
