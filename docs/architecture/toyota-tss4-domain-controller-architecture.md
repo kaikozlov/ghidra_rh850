@@ -70,7 +70,14 @@ closes the exact `J83(C)` pin map:
 
 Each radar is therefore on a dedicated point-to-point ADU CAN pair; the
 front-side and rear-side hardware-fault reporting groups the corresponding LH/RH
-links. The same `J83(C)` connector also carries the ADU's two global vehicle CAN
+links. The paired sensor definitions are strongly symmetric: after normalizing
+LH/RH wording, `CCFDRSF_A/B_P6` share all 113 Data List rows and
+`SODCM_A/B_P6` likewise share all 113. This makes physical-port identity and
+reuse of a common sensor/message schema across left/right positions a natural
+fit for the dedicated-link topology. The separate links also isolate radar-bus
+faults and avoid arbitration between independent high-rate sensor streams.
+
+The same `J83(C)` connector also carries the ADU's two global vehicle CAN
 interfaces: `CA1H/CA1L` on pins 2/1 and `CA9H/CA9L` on pins 4/3.
 
 `ADCU_P6` has independent hardware-fault DTCs for:
