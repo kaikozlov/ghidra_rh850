@@ -119,10 +119,14 @@ codes appear in exactly the P5 order.
 The new P6 primary DIDs are the standardized `0xA002/0xA003/0xA007..0xA00C`
 and `0xA800` housekeeping/time/vehicle-state family. P6 removes 71 P5 primary
 DIDs, heavily concentrated in the older backup-power, steer-by-wire,
-reaction-force, and cooperative/Advanced-Drive diagnostic block
-`0x1CCB..0x1CF3`. In particular, the P5 fields `Advanced Drive Target Steering
-Angle`, `Target Lateral ID`, and `Cooperative Control in Progress Flag` have
-no P6 Data List counterpart.
+reaction-force, and Advanced-Drive diagnostic block `0x1CCB..0x1CF3`. The
+specific P5 `0x1CEE/0x1CEF` target-value group—`Target Lateral ID`,
+`Target Steering Angle After Output Compensation`, and
+`Advanced Drive Target Steering Angle`—has no P6 EPS Data List counterpart.
+The coarse EPS-side state did not disappear: P6 retains `0x106A Cooperation
+Control State` with the same `0=Cooperation Control, 1=Other than Cooperation
+Control` dictionary as P5, and the field also survives in the P6 EPS FFD/RoB
+surfaces.
 
 The table schema is likewise evolutionary. Sixteen table types are shared.
 P6 drops the old P5 behavior-record tables 87/88/153 and adds the P6
@@ -133,8 +137,58 @@ byte-identical in the current NA corpus.
 
 This makes `PSCM_A_P6` look like a pruned and revised successor to the P5
 steering definition, with a new P6 diagnostic/recorder ABI and a narrower
-exposed ADAS/cooperative-control surface rather than a clean-sheet EPS
-diagnostic model.
+EPS-local target-value surface rather than a clean-sheet EPS diagnostic model.
+
+### P6 lateral request and arbitration state moved into the ADAS recorder
+
+The detailed lateral-control state did not disappear with `0x1CEE/0x1CEF`.
+Toyota moved the rich request/result observability into the P6 ADU/ADAS-domain
+recorder. The recovered PCS Data Viewer P6 schema exposes several distinct
+stages:
+
+- `1B40` is the LTA client record: `LTA lateral control request ID`, separate
+  signed 0.001-angle fields named `LTA steering angle request (ADU)` and
+  `LTA steering angle request (EPS)`, plus steering-assist and damping gains and
+  LTA coordination/mode fields. `1C48` carries the analogous LCA-labelled
+  fields.
+- `2A04` is a generic five-byte ADAS lateral request: u8 request ID, signed
+  16-bit pinion-angle request at 0.001, steering-support gain at 0.01, and
+  damping gain at 0.01. Its field geometry is exactly the same as the TSS3
+  `5282` request record (`TSS request - lateral ID`, pinion angle, assist gain,
+  damping gain), which is the recorder-side request family joined to TSS3
+  `0x08A`.
+- `2A06` is the compact post-arbitration pair: u8 `Lateral control ID of
+  arbitrated result` plus signed 16-bit `Pinion angle of arbitrated result` at
+  0.001. The same result quantities also appear independently as ADU records
+  `1593` and `1620`.
+- ADCU P6 SID-22/recorder state provides higher-level mirrors: `0x1E19`
+  contains `Lateral Control Request Pinion Angle`, `EDSS Lateral Control Request
+  ID`, and `Pinion Angle Of Arbitrated Result`; `0x1ED3` contains `Lateral
+  Control ID of Arbitrated Result`; alternate snapshot `0x3486` contains the
+  `Lateral Arbitration ID`. Feature-local records such as `0x1B10` additionally
+  expose LTA active state and `LTA EPS Pinion Angle Estimated Value`.
+
+These are diagnostic/recorder data IDs, not vehicle-network CAN IDs. They prove
+that P6 preserves the same logical sequence—feature request -> normalized ADAS
+lateral request -> arbitration result—even though the final request values are
+no longer exposed by the EPS Data List itself.
+
+The downstream endpoint has a new clue. `PSCM_A_P6` adds four DTCs that do not
+exist in `EMPS_P5`: missing communication with a **Dynamic Domain Controller
+ECU** on main and sub buses, separately naming Control Module No.1 and No.2.
+The P6 EPS simultaneously retains `0x106A Cooperation Control State`. This makes
+the Dynamic Domain Controller the strongest current candidate for the immediate
+logical source/supervisor of the P6 EPS cooperative-control ingress.
+
+The RAV4 install set contains no standalone Dynamic Domain Controller diagnostic
+category. `BSCM_A_P6` remains a strong physical-owner candidate because its
+Data List explicitly shows Toyota-Safety-Sense upper/lower longitudinal requests
+being transformed into `Vehicle Motion Control` target acceleration/IDs, and it
+retains the `ADS Control EPS Pinion Angle2` lateral observer. That observer
+already exists in P5 and is not itself proof of the lateral command. The exact
+RAV4 physical owner of the Dynamic Domain Controller function, the final
+controller-to-EPS wire PDU, and its SecOC boundary remain to be recovered from a
+TSS4 capture or firmware.
 
 ## 2. What "ADAS Domain Controller" means here
 
@@ -224,56 +278,64 @@ camera / center radar / side radars / BSM / ultrasonics / DMC / park cameras
                                   v
                      ADAS Domain Controller
                perception + ADAS applications
-             + ADAS-side request/arbitration state
                                   |
-                           vehicle networks
+                     normalized motion requests
                                   |
-                       likely Brake / VMM
+                                  v
+                Dynamic Domain Controller / VMM
+                         (logical boundary)
+                         /       |       \
+                        v        v        v
+                     brake      EPS    powertrain
+                                  ^
                                   |
-                    brake / EPS / powertrain ECUs
+                    result/status feedback
+                                  |
+                     ADAS Domain Controller
 ```
 
-Current GTS+ gives a useful boundary on that model. The P6 ADAS-controller
-database `ADCU_P6.ddb` directly exposes:
+Current GTS+ and the recovered P6 ADU recorder give a much tighter boundary on
+that model. `ADCU_P6.ddb` directly exposes `0x1E19` request pinion plus
+arbitrated-result pinion, `0x1ED3` arbitrated-result lateral ID, and snapshot
+`0x3486` lateral arbitration ID. The separate ADU recorder exposes the normalized
+five-byte request `2A04` and three-byte arbitration result `2A06`; feature-local
+LTA/LCA records `1B40`/`1C48` additionally distinguish requested steering angles
+labelled `(ADU)` and `(EPS)` alongside the generic request/result layer.
 
-- DID `0x3486`: `Longitudinal Powertrain Arbitration ID`,
-  `Longitudinal Brake Arbitration ID`, and `Lateral Arbitration ID`;
-- DID `0x1E19`: `Lateral Control Request Pinion Angle`,
-  `EDSS Lateral Control Request ID`, and `Pinion Angle Of Arbitrated Result`;
-- DID `0x1ED3`: `Lateral Control ID of Arbitrated Result`.
+That proves the ADAS Domain Controller owns the feature-side request state and
+observes the selected lateral result. It does not identify the final physical
+manager merely from the recorder: diagnostic records can contain outgoing,
+incoming, and internal values.
 
-That proves the ADAS Domain Controller participates in and observes the
-request/arbitration plane. It does **not** by itself prove that the final Vehicle
-Movement Manager is resident there, because an ECU Data List can expose values
-received back from another ECU as well as locally computed state.
+The actuator side adds the missing downstream clue. `PSCM_A_P6` newly monitors a
+**Dynamic Domain Controller ECU** on redundant main/sub buses and still exposes
+`0x106A Cooperation Control State`. The RAV4 install set has no standalone DDC
+diagnostic category, so the current evidence establishes an EPS communication
+dependency on that logical controller without locating the function in a
+separate box.
 
-The later Toyota/ADVICS VMM family still gives the brake ECU as its concrete
-implementation. US20240101086A1 places the motion manager, including reception,
-arbitration, and request generation, in the brake ECU. The same family expressly
-allows the manager to be moved into an advanced-safety ECU or a separate
-management ECU. Toyota's 2026 US20260125083A1 continuation again uses a brake ECU
-containing the motion manager as its embodiment.
+The later Toyota/ADVICS VMM family gives the brake ECU as its concrete motion-
+manager implementation. Production `BSCM_A_P6` also explicitly exposes
+Toyota-Safety-Sense longitudinal requests being converted into `Vehicle Motion
+Control` targets, while retaining the lateral `ADS Control EPS Pinion Angle2`
+observer. The leading physical-owner hypothesis is therefore a DDC/VMM function
+in the Brake/Skid domain, but the RAV4 software or traffic must establish that
+placement.
 
-Therefore the strongest current RAV4/TSS4 hypothesis is **not** that the entire
-VMM definitely moved into the ADAS Domain Controller. The ADAS controller now
-owns the ADAS applications and substantial request/arbitration state, while the
-final cross-system Vehicle Movement Manager is still most likely in the
-Brake/Skid domain. The exact RAV4 manager location remains to be established
-from its brake-side diagnostics, network traffic, or software.
-
-The exact RAV4 request path, message IDs, SecOC boundary, and gateway behavior
-still require captures or software evidence.
+The exact RAV4 wire PDU carrying the final lateral instruction, its SecOC
+boundary, and the relationship between the recorder values and that PDU still
+require a TSS4 capture or firmware.
 
 ## 6. Porting consequences
 
 The windshield camera is no longer the obvious interception boundary.
 
-The highest-value next steps are to identify the ADAS Domain Controller in
-GTS+/Techstream, recover its part/software identities and diagnostic address,
-then log both of its global-CAN-facing interfaces while exercising LTA, DRCC,
-PCS, and parking functions. That should tell us whether TSS4 preserves the
-request/result/target planes seen on TSS3 and where the authenticated
-application-request boundary moved.
+The highest-value next step is to log the ADAS-controller, Brake/VMM, and EPS
+network edges while exercising LTA/LCA/PDA. The diagnostic schema already
+establishes the P6 request/result stages; synchronized traffic should bind
+`1B40/1C48`, generic `2A04`, result `2A06`, and EPS cooperation state to the
+actual vehicle-network PDUs and identify the authenticated final-instruction
+boundary.
 
 The actuator side can be investigated independently. GTS routes `PSCM_A_P6`
 through ISO 15765-2 29-bit normal-fixed addressing at physical request

@@ -429,6 +429,7 @@ records below. Positions are 1-based recorder bytes. Reproduce each row with
 | `2A06` | Three-byte result: u8 ID at byte 1; s16 pinion at byte 2 ×0.001 |
 | `1620` | Standalone s16 result pinion ×0.001 |
 | `1B40` | Twelve-byte LTA client: u8 ID at byte 1; s16 requested angles labelled **(ADU)** and **(EPS)** at bytes 2 and 4 ×0.001; u8 assist/damping gains at bytes 6 and 7 ×0.01; five u8 indicator/coordination fields at bytes 8–12 |
+| `1C48` | Twelve-byte LCA-labelled counterpart with the same ID / ADU-angle / EPS-angle / assist-gain / damping-gain core; bytes 8–12 are LCA-labelled indicator, VLO, responsiveness, gradual-change, and driver-coordination fields |
 | `2E8D`, `2E92` | CAN angle observers: s16 at byte 1 ×1.5 plus s8 expanded angle at byte 3 ×0.1; invalid values `0x7FFF` and `0x7F` |
 | `2E94` | EPS torque (CAN), s16 ×0.01 |
 | `1E19` | Float32 requested pinion at byte 1; u8 EDSS ID at byte 5; float32 arbitrated pinion at byte 6; float invalid pattern `0xFFFFFFFF` |
