@@ -95,6 +95,47 @@ domain while motion actuation remains distributed. The GTS category establishes
 the new EPS software/diagnostic generation, not its MCU ISA or ICU-S/ICU-M
 implementation.
 
+### P5 -> P6 EPS database continuity
+
+The P6 rename is much larger than the underlying semantic change.
+`EMPS_P5.ddb` is 85,846 bytes and `PSCM_A_P6.ddb` is 62,108 bytes, but the
+P6 database retains most of the P5 steering vocabulary:
+
+- all **166** P5 DTC codes survive in P6; P6 adds seven codes, and 160/166
+  retained codes keep the same description and failure text;
+- P6 has 117 unique primary Data List DIDs, **108 (92.3%)** of which already
+  exist in P5;
+- of 144 P6 Data List rows, **118 (81.9%)** retain the same primary DID and
+  Toyota field name as P5;
+- every one of those 118 retained rows keeps the same bit geometry, and
+  **105/118** keep the same scaling, signedness, unit, ranges, and enum
+  semantics.
+
+The seven added P6 DTCs are two torque-sensor supply faults, one turn-counter
+fault, and four main/sub-bus communication faults naming a **Dynamic Domain
+Controller ECU**. If the seven additions are removed, the remaining P6 DTC
+codes appear in exactly the P5 order.
+
+The new P6 primary DIDs are the standardized `0xA002/0xA003/0xA007..0xA00C`
+and `0xA800` housekeeping/time/vehicle-state family. P6 removes 71 P5 primary
+DIDs, heavily concentrated in the older backup-power, steer-by-wire,
+reaction-force, and cooperative/Advanced-Drive diagnostic block
+`0x1CCB..0x1CF3`. In particular, the P5 fields `Advanced Drive Target Steering
+Angle`, `Target Lateral ID`, and `Cooperative Control in Progress Flag` have
+no P6 Data List counterpart.
+
+The table schema is likewise evolutionary. Sixteen table types are shared.
+P6 drops the old P5 behavior-record tables 87/88/153 and adds the P6
+`CDbRoBDiagCodeTable` / `CDbRoBFreezeFrameTable` pair 163/164. The common
+signal-group, trigger, DTC-status-mask, and behavior-signal-check records are
+largely or completely inherited. `PSCM_A_P6.ddb` and `PSCM_A_P6F.ddb` are
+byte-identical in the current NA corpus.
+
+This makes `PSCM_A_P6` look like a pruned and revised successor to the P5
+steering definition, with a new P6 diagnostic/recorder ABI and a narrower
+exposed ADAS/cooperative-control surface rather than a clean-sheet EPS
+diagnostic model.
+
 ## 2. What "ADAS Domain Controller" means here
 
 The best direct architecture match is Denso
