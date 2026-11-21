@@ -34,6 +34,17 @@ def main() -> int:
     )
     check("P6 ADCU has production-style NA installs", arch["6037"]["install_row_count_na"] == 24)
     check("P6F ADCU paired family", arch["6537"]["install_row_count_na"] == 20)
+    check("P6 EPS co-occurs with every NA ADCU_P6 install", arch["6006"]["install_row_count_na"] == 24)
+    p6_eps_arch = arch["6006"]["architectures_na"][0]
+    check(
+        "production P6 EPS architecture is PSCM+radar+ADCU",
+        {row["category_id"] for row in p6_eps_arch["categories"]} == {6006, 6032, 6037, 6532, 6537},
+    )
+    check(
+        "new RAV4 variants use the P6 EPS architecture",
+        {"Rav4 HEV", "Rav4 PHEV"}.issubset(p6_eps_arch["model_names"]),
+    )
+    check("P6F EPS category has no current NA install rows", arch["6506"]["install_row_count_na"] == 0)
 
     frc = arch["498"]
     check("FRC generation has five NA install architectures", frc["architecture_count_na"] == 5)

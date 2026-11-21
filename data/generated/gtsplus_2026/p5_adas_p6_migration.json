@@ -28710,6 +28710,10 @@
               "label": "EMPS2_P5_steering_actuator"
             },
             {
+              "category_id": 6006,
+              "label": "PSCM_A_P6_steering_actuator"
+            },
+            {
               "category_id": 6037,
               "label": "ADCU_P6"
             }
@@ -29498,6 +29502,10 @@
               "label": "EMPS2_P5_steering_actuator"
             },
             {
+              "category_id": 6006,
+              "label": "PSCM_A_P6_steering_actuator"
+            },
+            {
               "category_id": 6037,
               "label": "ADCU_P6"
             }
@@ -30032,6 +30040,10 @@
               "label": "EMPS2_P5_steering_actuator"
             },
             {
+              "category_id": 6006,
+              "label": "PSCM_A_P6_steering_actuator"
+            },
+            {
               "category_id": 6037,
               "label": "ADCU_P6"
             }
@@ -30058,11 +30070,15 @@
       "label": "FRC_P5",
       "model_count_na": 51
     },
-    "6037": {
+    "6006": {
       "architecture_count_na": 2,
       "architectures_na": [
         {
           "categories": [
+            {
+              "category_id": 6006,
+              "label": "PSCM_A_P6_steering_actuator"
+            },
             {
               "category_id": 6032,
               "label": "FDRS_P6_front_radar"
@@ -30133,6 +30149,107 @@
               "label": "EMPS2_P5_steering_actuator"
             },
             {
+              "category_id": 6006,
+              "label": "PSCM_A_P6_steering_actuator"
+            },
+            {
+              "category_id": 6037,
+              "label": "ADCU_P6"
+            }
+          ],
+          "install_row_count": 4,
+          "model_names": [
+            "MAC"
+          ]
+        }
+      ],
+      "install_row_count_na": 24,
+      "label": "PSCM_A_P6_steering_actuator",
+      "model_count_na": 11
+    },
+    "6037": {
+      "architecture_count_na": 2,
+      "architectures_na": [
+        {
+          "categories": [
+            {
+              "category_id": 6006,
+              "label": "PSCM_A_P6_steering_actuator"
+            },
+            {
+              "category_id": 6032,
+              "label": "FDRS_P6_front_radar"
+            },
+            {
+              "category_id": 6037,
+              "label": "ADCU_P6"
+            },
+            {
+              "category_id": 6532,
+              "label": "FDRS_P6F_front_radar"
+            },
+            {
+              "category_id": 6537,
+              "label": "ADCU_P6F"
+            }
+          ],
+          "install_row_count": 20,
+          "model_names": [
+            "ES350e",
+            "ES350h",
+            "ES500e",
+            "Highlander BEV",
+            "Rav4 HEV",
+            "Rav4 PHEV",
+            "Sequoia HEV",
+            "TZ450e/TZ550e",
+            "Tundra",
+            "Tundra HEV"
+          ]
+        },
+        {
+          "categories": [
+            {
+              "category_id": 405,
+              "label": "EMPS_P5"
+            },
+            {
+              "category_id": 418,
+              "label": "LDA_P5"
+            },
+            {
+              "category_id": 430,
+              "label": "Fr_Camera_P5"
+            },
+            {
+              "category_id": 435,
+              "label": "ABS_P5"
+            },
+            {
+              "category_id": 466,
+              "label": "BrakeBooster_P5"
+            },
+            {
+              "category_id": 476,
+              "label": "ADS_Eth_P5"
+            },
+            {
+              "category_id": 477,
+              "label": "ADeU_Eth_P5"
+            },
+            {
+              "category_id": 498,
+              "label": "FRC_P5"
+            },
+            {
+              "category_id": 499,
+              "label": "EMPS2_P5_steering_actuator"
+            },
+            {
+              "category_id": 6006,
+              "label": "PSCM_A_P6_steering_actuator"
+            },
+            {
               "category_id": 6037,
               "label": "ADCU_P6"
             }
@@ -30147,11 +30264,22 @@
       "label": "ADCU_P6",
       "model_count_na": 11
     },
+    "6506": {
+      "architecture_count_na": 0,
+      "architectures_na": [],
+      "install_row_count_na": 0,
+      "label": "PSCM_A_P6F_steering_actuator",
+      "model_count_na": 0
+    },
     "6537": {
       "architecture_count_na": 1,
       "architectures_na": [
         {
           "categories": [
+            {
+              "category_id": 6006,
+              "label": "PSCM_A_P6_steering_actuator"
+            },
             {
               "category_id": 6032,
               "label": "FDRS_P6_front_radar"

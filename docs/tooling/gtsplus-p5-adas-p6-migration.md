@@ -124,6 +124,14 @@ cross-generation oracle.
 as a reference to the P6 vocabulary rather than duplicating thousands of rows
 in the generated artifact.
 
+The current NA install-set census also exposes the actuator boundary. Category
+`6006`, `PSCM_A_P6.ddb`, is Toyota's generation-22 **EMPS (P6)**. Every
+current NA `ADCU_P6` install row also contains `PSCM_A_P6`; the production
+architecture groups it with `FDRS_P6/P6F` and `ADCU_P6/P6F` across 20 install
+rows, including `Rav4 HEV` and `Rav4 PHEV`. Thus P6 centralizes ADAS compute
+while retaining a separate, newly versioned steering actuator ECU. The
+diagnostic category does not identify the steering MCU or HSM implementation.
+
 ## 5. Diagnostic ABI continuity is deliberate
 
 Toyota did not throw away the host diagnostic architecture when moving to P6.

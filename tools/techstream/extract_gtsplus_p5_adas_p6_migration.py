@@ -65,13 +65,15 @@ ARCHITECTURE_CATEGORY_NAMES = {
     485: "EPB_P5",
     498: "FRC_P5",
     499: "EMPS2_P5_steering_actuator",
+    6006: "PSCM_A_P6_steering_actuator",
     6032: "FDRS_P6_front_radar",
     6037: "ADCU_P6",
     6500: "P6F_family_base",
+    6506: "PSCM_A_P6F_steering_actuator",
     6532: "FDRS_P6F_front_radar",
     6537: "ADCU_P6F",
 }
-ARCH_ANCHORS = (418, 427, 428, 429, 431, 432, 430, 498, 6037, 6537)
+ARCH_ANCHORS = (418, 427, 428, 429, 431, 432, 430, 498, 6006, 6037, 6506, 6537)
 
 ADAS_KEYWORDS = {
     "lta_lane": re.compile(r"\blta\b|lane", re.IGNORECASE),

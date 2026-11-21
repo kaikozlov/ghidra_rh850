@@ -1,6 +1,6 @@
 # 2026 RAV4 / TSS4 ADAS-domain-controller architecture
 
-**Status:** production-EWD + external-source architecture note, researched 2026-11-05.
+**Status:** production-EWD + GTS+ + external-source architecture note, researched through 2026-11-21.
 
 The 2026 RAV4 introduces a materially different ADAS hardware boundary from the
 TSS3 vehicles analyzed in this repository. Toyota's production EWD names a
@@ -80,9 +80,20 @@ The EPS EWD still shows a standalone Rack & Pinion Power Steering Gear Assembly
 The vehicle-wide CAN EWD likewise shows the rack EPS and brake actuator as
 separate ECUs on the motion-control networks.
 
+Current NA GTS+ independently identifies the new steering controller as
+category `6006`, `PSCM_A_P6.ddb`, Toyota name **EMPS (P6)**, generation 22.
+The `Rav4 HEV` vehicle type 12887 mounts it in install set 8669 alongside
+`BSCM_A/B_P6`, `ADCU_P6/P6F`, and the P6 front/side/rear radar families. Across
+the current NA master, every `ADCU_P6` install row also contains
+`PSCM_A_P6`; the production-style architecture covers both `Rav4 HEV` and
+`Rav4 PHEV`. This is a new P6 EPS diagnostic family rather than reuse of
+`EMPS_P5`.
+
 Therefore the architectural change is not "ADAS controller contains the EPS."
 The centralized controller owns a large part of the ADAS compute/application
-domain while motion actuation remains distributed.
+domain while motion actuation remains distributed. The GTS category establishes
+the new EPS software/diagnostic generation, not its MCU ISA or ICU-S/ICU-M
+implementation.
 
 ## 2. What "ADAS Domain Controller" means here
 
@@ -222,6 +233,16 @@ then log both of its global-CAN-facing interfaces while exercising LTA, DRCC,
 PCS, and parking functions. That should tell us whether TSS4 preserves the
 request/result/target planes seen on TSS3 and where the authenticated
 application-request boundary moved.
+
+The actuator side can be investigated independently. GTS routes `PSCM_A_P6`
+through ISO 15765-2 29-bit normal-fixed addressing at physical request
+`0x18DA13F1` and response `0x18DAF113`, and binds the P6 Calibration-ID role
+`0x52` to `GetCID_SID22_P6_DT.dll`. A live P6 RAV4 can therefore be used to
+fingerprint the EPS directly. The resulting software identity is the cleanest
+lead for obtaining an update image and determining the processor family from
+the firmware; a physical rack teardown is the independent hardware route.
+Until one of those establishes the silicon, do not project the P5 RH850/ICU-S
+implementation onto `PSCM_A_P6`.
 
 The direct forward-camera interface should be treated as a separate reverse-
 engineering target. Its physical/protocol semantics are not given by the EWD.
