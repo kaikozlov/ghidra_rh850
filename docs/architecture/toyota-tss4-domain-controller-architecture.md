@@ -87,6 +87,22 @@ the same global chassis bus.
 This makes the ADAS Domain Controller a networked vehicle ECU, not merely a
 camera module.
 
+### `ZN` is the integrated body / zone-controller assembly, not VMM
+
+The vehicle-wide diagram repeats code `ZN` on Global Buses 1, 3, and 5 and names
+it **Integrated Body Control ECU Assembly**. Its GTS display expands that one
+physical assembly into `Integrated Body No1` and `Integrated Body No2`. GTS+ maps
+those logical controllers to generation-22 `Zone_ECU_A_P6.ddb` (category 6033)
+and `Zone_ECU_B_P6.ddb` (6034).
+
+Their diagnostic vocabulary is body/zone control: steering-wheel switches,
+lighting, mirrors, wipers, brake-hold/parking-brake switches, stop-lamp state,
+steering heater, power/OTA/body operating state, and related I/O. They monitor
+both Brake and EPS (`U012987` / `U013187`), but expose no Vehicle Movement,
+Vehicle Motion Control, lateral/longitudinal arbitration, or Dynamic Domain
+Controller surface. `ZN` is therefore the P6 body/zone-control domain, not the
+Vehicle Movement Manager.
+
 ### Actuators remain separate
 
 The EPS EWD still shows a standalone Rack & Pinion Power Steering Gear Assembly
@@ -222,11 +238,21 @@ Incompatibility with Power Steering Control Module`, and Data List bit `0x102F`
 programming/rear-steer compatibility variants, but preserves the ordinary
 message-loss and compatibility supervision.
 
-The drawn order of `BRK1`, junctions, `BRK2`, and `EPS` on Global Bus 4 is not a
-forwarding chain. They are nodes on one CAN main bus; neither brake ECU is marked
-as a gateway on that segment. Any claim that Brake sits "in front of" EPS must
-therefore come from control/dataflow evidence, not from left-to-right placement
-in the wiring diagram.
+The Bus-4 drawing is physically ordered, not merely decorative. The main line
+leaves the Central Gateway and enters `BRK1`; a second main-line leg exits
+`BRK1` and continues to **J/C Global CAN No. 1**, where `BRK2` and SRS branch and
+EPS terminates the downstream leg. Toyota does not mark `BRK1` with the diagram's
+gateway-function `*`, so the drawing alone does not classify the internal
+CA1<->downstream implementation as an active CAN gateway rather than a physical
+daisy-chain continuation. It does, however, place the brake-booster assembly
+physically between the upstream Bus-4 leg and the BRK2/EPS junction segment.
+
+This is the same topology class already recovered on the 2026 Camry: its inline
+brake-booster/master-cylinder assembly has upstream `CA1H/CA1L` and downstream
+`DC1H/DC1L` daisy-chain pairs. Toyota's diagram alone allowed passive
+continuation, while exact-car traffic later located an admission/segmentation
+boundary inside that assembly. The RAV4 currently has the topology and P6
+semantic clues but not yet the corresponding terminal-page/runtime proof.
 
 The remaining alternatives are a DDC function hosted elsewhere and routed onto
 Bus 4 by the Network Gateway, or a separate logical node hidden inside one of
