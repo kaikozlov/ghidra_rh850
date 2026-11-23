@@ -1,6 +1,6 @@
 # Application receive I-PDU and COM signal map
 
-> **Scope:** Sienna EPS `8965B4512000`
+> **Scope:** Sienna EPS `8965B4512000` (§1–11); Camry EPS `8965F3307000` (§12)
 >
 > **Document type:** subsystem analysis
 >
@@ -8,7 +8,7 @@
 >
 > **Evidence profile:** mixed — claims carry individual grades.
 >
-> **Canonical artifacts:** `data/application_rx_map.csv` (final map), `data/application_rx_signal_evidence.csv` (extraction evidence)
+> **Canonical artifacts:** `data/application_rx_map.csv` and `data/application_rx_signal_evidence.csv` (Sienna); `data/generated/camry_f33_application_rx/` (Camry)
 >
 > **Verification:** `tests/diagnostics/verify_application_receive.py`
 >
@@ -574,3 +574,75 @@ extractions, the complete signal-API xref boundary behind the 97 negative
 classifications, and consumer xrefs—come from committed CodeFlash plus read-only
 Ghidra export/audit. No claim assigns OEM signal names, engineering units, or
 physical scaling.
+
+## 12. Camry `8965F3307000`
+
+The Camry image configures **47 acceptance rules** at `0x230B8`: 43 application
+PDUs through COM (39 classic, 4 CAN-FD), the three diagnostic IDs and one
+extended XCP endpoint. Application frames copy into a fixed COM buffer
+(`0xFEBE4A7F..0xFEBE4C28`) and fixed signal cells; the diagnostic IDs end in the
+DCM dispatch; XCP stops in a staging buffer.
+
+| Class | Rules | CAN IDs | FIFO | Sink |
+|---|---:|---|---|---|
+| classic application | 39 | 3B0 63B 624 63D 00F 013 014 015 016 017 018 019 01A 01B 01C 01D 01E 01F 0D0 3BF 127 115 116 1C5 294 51E 611 2D1 675 2E8 0AA 101 0D5 13B 0D8 64F 403 490 1DA | RFIFO1 | COM PDU 5..47 |
+| CAN-FD application, 32 bytes | 4 | 025 090 0D7 0B6 | RFIFO1 | COM PDU 5..47 |
+| diagnostic UDS | 3 | 7A1 physical, 777 functional, 7A0 secondary | CFIFO5 | CanTp, DCM |
+| XCP | 1 | 1FDC0002 | RFIFO1 | staging `0xFEBE4C34` |
+
+`data/generated/camry_f33_application_rx/application_rx_map.csv` holds one row
+per rule (acceptance words, handler chain, gates, unpackers, readers, what the
+frame controls); `application_rx_signal_evidence.csv` beside it holds the
+per-signal extraction. Both come from
+`tools/targets/camry/analysis/analyze_camry_f33_application_rx_map.py`.
+
+### 12.1 Acceptance
+
+Every rule uses mask `0xC00007FF` (IDE, RTR, the 11 ID bits) and has no hardware
+length or FD rule. The XCP rule therefore admits any extended non-RTR frame
+with `ID[10:0]=0x002`; the descriptor match narrows it to `0x9FDC0002`. CAN-FD
+descriptors carry `0x40000000` in their software ID and receive drain `0x83D40`
+sets the same bit on FD frames, so a classic frame on `0x025`, `0x090`, `0x0D7`
+or `0x0B6` passes its rule and leaves
+`filter_matched_message_and_dispatch_pdu` `0x810F2` without a match.
+
+### 12.2 Chains
+
+```text
+RX ISR 0x83E0C -> 0x83D14 -> 0x80B42 -> ring 0xFEBE4038 -> 0x808D6 -> 0x80884
+  application, selector 0x01 -> 0x810F2 (slot 0) -> 0x8103E DLC
+      -> 0x80FDE plain checksum (PDU property bit 0)
+      -> 0x6A3BE ID checksum (PDU property bit 4)
+      -> 0x81D16 -> 0x81D30 -> 0x7D72C COM RxIndication
+         or -> 0x8EE7C SecOC ingress -> 0x8F98C/0x8F746/0x8F906 -> 0x8F546 -> 0x81CA6 -> 0x81D16
+      -> unpackers 0x7D12A (bitfield), 0x7E72A (byte range)
+  diagnostic, selector 0x04 -> 0x81200 (slot 2) -> 0x79DB0 -> 0x7A57A -> 0x7A4E4 -> 0x921D2 -> DCM
+  XCP, selector 0x20 -> 0x81072 (slot 5) -> 0x8312E -> 0x830D0 -> 0x830C0 -> 0x98E80
+```
+
+### 12.3 Gates and notable frames
+
+- Plain additive checksum (`0x80FDE`): `0x294`, `0x0D5`, `0x13B`, `0x64F`.
+  `data[len-1]` equals the low byte of `id + (id>>8) + (id>>16) + (id>>24) +
+  len + sum(data[0..len-2])` over the 29-bit ID.
+- ID checksum (`0x6A32C`, records at `0x28FE4`): `0x025`, `0x090`. `data[7]`
+  equals the low byte of `(id & 0xFF) + ((id >> 8) & 7) + sum(data[0..6]) + 8`.
+- SecOC: `0x00F` (profile 0), `0x0D7` (profile 1), `0x0B6` (profile 2), records
+  at `0x25848`. `0x00F` has no unpacker.
+- `0x013..0x01A` carry key fragments 0..7 and `0x01B` the selector/mode pair;
+  both reach the key request only through UDS RID `0x100E`. `0x01C..0x01F`
+  carry test-vector fragments consumed only through RID `0x100F`.
+- `0x2E8` has a configured signal and no unpacker.
+
+The 225 receive signal rows classify as 116 extracted bitfields, 12 extracted
+byte ranges, 2 table-driven bitfields, 91 configured IDs their PDU handler
+does not extract, 3 on `0x00F` and 1 on `0x2E8`.
+
+### 12.4 Comma delivery
+
+The 39 classic application IDs and the three diagnostic IDs are accepted as
+8-byte classic frames [INFERENCE: per-ID delivery from Panda bus 0 follows the
+live-proven UDS and XCP routes and was not observed per ID]. The four CAN-FD
+PDUs are not deliverable from the comma on the current topology (live
+negatives, [Camry baseline](../variants/camry-2026-live-baseline.md) §57.10,
+§59, §60).

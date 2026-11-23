@@ -1,0 +1,226 @@
+signal_id,com_pdu,signal_property,readers_same_signal_unpacker,readers_other_unpackers,consumer_count,first_consumer,first_consumer_name,consumers,other_writer_count,other_writers,extract_kind,unpacker,call_site,buf_off,bit_len,start_arg,signed,dest,dest_width,wire_field,stack_persisted,persist_dests,ram_path,classification
+58,5,0x3,0,,0,none,,,0,,none,none,,55,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+59,5,0x0,0,,0,none,,,0,,none,none,,55,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+60,5,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04AE2A,0x04AE58,58,8,0,0,0xFEBE7FF0,1,B3,False,,,extracted_bitfield
+61,5,0x0,0,,0,none,,,0,,none,none,,55,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+62,5,0x3,0,,0,none,,,0,,none,none,,55,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+63,5,0x3,0,,0,none,,,0,,none,none,,55,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+64,6,0x0,0,,0,none,,,0,,none,none,,63,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+65,6,0x0,0,,0,none,,,0,,none,none,,63,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+66,6,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04AE72,0x04AEA2,65,16,0,0,0xFEBE7FF8,2,B2..B3 BE16,False,,,extracted_bitfield
+67,6,0x0,0,,0,none,,,2,0x04AE2A 0x058C9A,bitfield,0x04AE72,0x04AEBC,65,32,0,0,0xFEBE7FF4,4,B2..B5 BE32,False,,,extracted_bitfield
+68,7,0x0,0,,0,none,,,0,,none,none,,71,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+69,7,0x0,0,,0,none,,,0,,none,none,,71,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+70,7,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,2,0x04AE72 0x058C9A,bitfield,0x04AED6,0x04AF04,73,8,0,0,0xFEBE7FFC,1,B2,False,,,extracted_bitfield
+71,7,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,2,0x04AE72 0x058C9A,bitfield,0x04AED6,0x04AF1E,74,4,4,0,0xFEBE7FFD,1,B3[7:4],False,,,extracted_bitfield
+72,7,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,2,0x04AE72 0x058C9A,bitfield,0x04AED6,0x04AF38,74,4,0,0,0xFEBE7FFE,1,B3[3:0],False,,,extracted_bitfield
+73,7,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04AED6,0x04AF52,75,4,4,0,0xFEBE7FFF,1,B4[7:4],False,,,extracted_bitfield
+74,7,0x0,0,,0,none,,,0,,none,none,,71,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+75,7,0x0,0,,0,none,,,0,,none,none,,71,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+76,7,0x0,0,,0,none,,,0,,none,none,,71,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+77,7,0x0,0,,0,none,,,0,,none,none,,71,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+78,7,0x0,0,,0,none,,,0,,none,none,,71,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+79,7,0x0,0,,0,none,,,0,,none,none,,71,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+80,8,0x0,0,,0,none,,,0,,none,none,,79,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+81,8,0x0,0,,0,none,,,0,,none,none,,79,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+82,8,0x4,0,,0,none,,,0,,none,none,,79,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+83,8,0x4,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,2,0x04AED6 0x058C9A,bitfield,0x04AF6C,0x04AF9A,82,8,0,0,0xFEBE8002,1,B3,False,,,extracted_bitfield
+84,8,0x4,0,,0,none,,,0,,none,none,,79,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+85,8,0x4,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04AF6C,0x04AFB4,84,8,0,0,0xFEBE8005,1,B5,False,,,extracted_bitfield
+86,8,0x4,0,,0,none,,,0,,none,none,,79,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+87,9,0x0,0,,0,none,,,0,,none,none,,87,0,0,0,none,0,n/a,False,,,configured_no_com_unpacker_secoc_pdu
+88,9,0x0,0,,0,none,,,0,,none,none,,87,0,0,0,none,0,n/a,False,,,configured_no_com_unpacker_secoc_pdu
+89,9,0x0,0,,0,none,,,0,,none,none,,87,0,0,0,none,0,n/a,False,,,configured_no_com_unpacker_secoc_pdu
+90,10,0x4,0,,0,none,,,0,,opaque_pdu_bytes,0x0693FE,0x069452,95,64,0,0,0xFEBE5206,8,B0..B7 opaque,False,,COM 0xFEBE4AA7 -> stack -> previous 0xFEBE50C6 -> qualified 0xFEBE5106 -> committed 0xFEBE5206,extracted_group_bytes
+91,11,0x4,0,,0,none,,,0,,opaque_pdu_bytes,0x0693FE,0x06948E,103,64,0,0,0xFEBE520E,8,B0..B7 opaque,False,,COM 0xFEBE4AAF -> stack -> previous 0xFEBE50CE -> qualified 0xFEBE510E -> committed 0xFEBE520E,extracted_group_bytes
+92,12,0x4,0,,0,none,,,0,,opaque_pdu_bytes,0x0693FE,0x0694CA,111,64,0,0,0xFEBE5216,8,B0..B7 opaque,False,,COM 0xFEBE4AB7 -> stack -> previous 0xFEBE50D6 -> qualified 0xFEBE5116 -> committed 0xFEBE5216,extracted_group_bytes
+93,13,0x4,0,,0,none,,,0,,opaque_pdu_bytes,0x0693FE,0x069506,119,64,0,0,0xFEBE521E,8,B0..B7 opaque,False,,COM 0xFEBE4ABF -> stack -> previous 0xFEBE50DE -> qualified 0xFEBE511E -> committed 0xFEBE521E,extracted_group_bytes
+94,14,0x4,0,,0,none,,,0,,opaque_pdu_bytes,0x0693FE,0x069542,127,64,0,0,0xFEBE5226,8,B0..B7 opaque,False,,COM 0xFEBE4AC7 -> stack -> previous 0xFEBE50E6 -> qualified 0xFEBE5126 -> committed 0xFEBE5226,extracted_group_bytes
+95,15,0x4,0,,0,none,,,0,,opaque_pdu_bytes,0x0693FE,0x06957E,135,64,0,0,0xFEBE522E,8,B0..B7 opaque,False,,COM 0xFEBE4ACF -> stack -> previous 0xFEBE50EE -> qualified 0xFEBE512E -> committed 0xFEBE522E,extracted_group_bytes
+96,16,0x4,0,,0,none,,,0,,opaque_pdu_bytes,0x0693FE,0x0695BA,143,64,0,0,0xFEBE5236,8,B0..B7 opaque,False,,COM 0xFEBE4AD7 -> stack -> previous 0xFEBE50F6 -> qualified 0xFEBE5136 -> committed 0xFEBE5236,extracted_group_bytes
+97,17,0x4,0,,0,none,,,0,,opaque_pdu_bytes,0x0693FE,0x0695F6,151,64,0,0,0xFEBE523E,8,B0..B7 opaque,False,,COM 0xFEBE4ADF -> stack -> previous 0xFEBE50FE -> qualified 0xFEBE513E -> committed 0xFEBE523E,extracted_group_bytes
+98,18,0x4,0,,0,none,,,11,0x068FE0 0x069064 0x06933C 0x06938E,table-driven bitfield,0x0697F4,0x069874,159,8,0,0,0xFEBE509F,1,B0,True,0xFEBE509F@0x0699FA;0xFEBE50A0@0x069A00;0xFEBE509E@0x069A0C;0xFEBE50A1@0x069A12,,extracted_bitfield_table_driven
+99,18,0x4,0,,0,none,,,6,0x068FE0 0x069064 0x06933C 0x06938E,table-driven bitfield,0x0697F4,0x0698AA,160,8,0,0,0xFEBE50A0,1,B1,True,0xFEBE50A0@0x069A00;0xFEBE509E@0x069A0C;0xFEBE50A1@0x069A12,,extracted_bitfield_table_driven
+100,19,0x4,0,,0,none,,,0,,opaque_pdu_bytes,0x0697F4,0x0698E6,167,64,0,0,0xFEBE5186,8,B0..B7 opaque,False,,COM 0xFEBE4AEF -> stack -> previous 0xFEBE5146 -> qualified 0xFEBE5166 -> committed 0xFEBE5186,extracted_group_bytes
+101,20,0x4,0,,0,none,,,0,,opaque_pdu_bytes,0x0697F4,0x069922,175,64,0,0,0xFEBE518E,8,B0..B7 opaque,False,,COM 0xFEBE4AF7 -> stack -> previous 0xFEBE514E -> qualified 0xFEBE516E -> committed 0xFEBE518E,extracted_group_bytes
+102,21,0x4,0,,0,none,,,0,,opaque_pdu_bytes,0x0697F4,0x06995E,183,64,0,0,0xFEBE5196,8,B0..B7 opaque,False,,COM 0xFEBE4AFF -> stack -> previous 0xFEBE5156 -> qualified 0xFEBE5176 -> committed 0xFEBE5196,extracted_group_bytes
+103,22,0x4,0,,0,none,,,0,,opaque_pdu_bytes,0x0697F4,0x06999A,191,64,0,0,0xFEBE519E,8,B0..B7 opaque,False,,COM 0xFEBE4B07 -> stack -> previous 0xFEBE515E -> qualified 0xFEBE517E -> committed 0xFEBE519E,extracted_group_bytes
+104,23,0x0,0,,0,none,,,0,,none,none,,199,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+105,23,0x0,0,,0,none,,,0,,none,none,,199,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+106,23,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,2,0x04AF6C 0x058C9A,bitfield,0x04AFEC,0x04B034,201,1,6,0,0xFEBE8007,1,B2[6],False,,,extracted_bitfield
+107,23,0x0,0,,0,none,,,0,,none,none,,199,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+108,23,0x0,0,,0,none,,,0,,none,none,,199,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+109,23,0x0,0,,0,none,,,0,,none,none,,199,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+110,23,0x0,0,,5,0x04E52E,rdbi_1182_callback,0x04E52E 0x053DB8 0x053FFE 0x054244 0x058074,2,0x04AF6C 0x058C9A,bitfield,0x04AFEC,0x04B01A,201,3,0,0,0xFEBE8006,1,B2[2:0],False,,,extracted_bitfield
+111,23,0x0,0,,0,none,,,0,,none,none,,199,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+112,23,0x0,0,,0,none,,,0,,none,none,,199,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+113,23,0x0,0,,0,none,,,0,,none,none,,199,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+114,23,0x0,0,,0,none,,,0,,none,none,,199,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+115,24,0x3,0,,0,none,,,0,,none,none,,207,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+116,24,0x3,0,,0,none,,,0,,none,none,,207,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+117,24,0x3,0,,0,none,,,0,,none,none,,207,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+118,24,0x3,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04B04E,0x04B096,207,1,4,0,0xFEBE800D,1,B0[4],False,,,extracted_bitfield
+119,24,0x3,0,,0,none,,,0,,none,none,,207,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+120,24,0x3,0,,0,none,,,0,,none,none,,207,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+121,24,0x3,0,,3,0x049D5E,classify_latched_source_zero_values_49d5e,0x049D5E 0x04ADCE 0x058074,2,0x04AFEC 0x058C9A,bitfield,0x04B04E,0x04B07C,209,1,0,0,0xFEBE800C,1,B2[0],False,,,extracted_bitfield
+122,24,0x0,0,,0,none,,,0,,none,none,,207,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+123,24,0x0,0,,0,none,,,0,,none,none,,207,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+124,25,0x0,0,,0,none,,,1,0x058C9A,bitfield,0x04B0B0,0x04B0FA,215,6,2,0,0xFEBE8012,1,B0[7:2],False,,,extracted_bitfield
+125,25,0x0,0,,0,none,,,0,,none,none,,215,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+126,25,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04B0B0,0x04B114,216,1,3,0,0xFEBE8013,1,B1[3],False,,,extracted_bitfield
+127,25,0x0,0,,0,none,,,0,,none,none,,215,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+128,25,0x0,0,,0,none,,,0,,none,none,,215,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+129,25,0x0,0,,0,none,,,0,,none,none,,215,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+130,25,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,2,0x04B04E 0x058C9A,bitfield,0x04B0B0,0x04B0E0,218,11,0,1,0xFEBE800E,2,B3[2:0]..B4[7:0],False,,,extracted_bitfield
+131,25,0x0,0,,0,none,,,0,,none,none,,215,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+132,25,0x0,0,,0,none,,,0,,none,none,,215,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+133,25,0x0,0,,0,none,,,0,,none,none,,215,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+134,26,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,2,0x04B0B0 0x058C9A,bitfield,0x04B12E,0x04B160,223,16,0,1,0xFEBE8014,2,B0..B1 BE16,False,,,extracted_bitfield
+135,26,0x0,0,,3,0x049D5E,classify_latched_source_zero_values_49d5e,0x049D5E 0x04ADCE 0x058074,1,0x058C9A,bitfield,0x04B12E,0x04B17A,226,1,1,0,0xFEBE8016,1,B3[1],False,,,extracted_bitfield
+136,26,0x0,0,,0,none,,,0,,none,none,,223,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+137,26,0x0,0,,0,none,,,0,,none,none,,223,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+138,27,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,2,0x04B12E 0x058C9A,bitfield,0x04B194,0x04B1C2,231,8,0,0,0xFEBE8019,1,B0,False,,,extracted_bitfield
+139,27,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,2,0x04B12E 0x058C9A,bitfield,0x04B194,0x04B1DC,233,1,7,0,0xFEBE801A,1,B2[7],False,,,extracted_bitfield
+140,28,0x0,0,,0,none,,,0,,none,none,,239,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+141,28,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,2,0x04B194 0x058C9A,bitfield,0x04B1F6,0x04B228,241,16,0,1,0xFEBE801E,2,B2..B3 BE16,False,,,extracted_bitfield
+142,28,0x0,0,,0,none,,,0,,none,none,,239,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+143,28,0x0,0,,0,none,,,0,,none,none,,239,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+144,29,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,2,0x04B1F6 0x058C9A,bitfield,0x04B242,0x04B274,247,4,4,0,0xFEBE8022,1,B0[7:4],False,,,extracted_bitfield
+145,29,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,2,0x04B1F6 0x058C9A,bitfield,0x04B242,0x04B28E,247,4,0,0,0xFEBE8023,1,B0[3:0],False,,,extracted_bitfield
+146,29,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,2,0x04B1F6 0x058C9A,bitfield,0x04B242,0x04B2A8,248,4,4,0,0xFEBE8024,1,B1[7:4],False,,,extracted_bitfield
+147,29,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04B242,0x04B2C2,248,1,3,0,0xFEBE8025,1,B1[3],False,,,extracted_bitfield
+148,29,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04B242,0x04B32A,248,2,1,0,0xFEBE8029,1,B1[2:1],False,,,extracted_bitfield
+149,29,0x0,0,,0,none,,,0,,none,none,,247,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+150,29,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04B242,0x04B2F6,249,4,4,0,0xFEBE8027,1,B2[7:4],False,,,extracted_bitfield
+151,29,0x0,0,,0,none,,,1,0x058C9A,bitfield,0x04B242,0x04B310,249,4,0,0,0xFEBE8028,1,B2[3:0],False,,,extracted_bitfield
+152,29,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04B242,0x04B344,250,4,0,0,0xFEBE802A,1,B3[3:0],False,,,extracted_bitfield
+153,29,0x0,0,,2,0x047AC4,lookup_low_nibble_code_or_zero_47ac4,0x047AC4 0x058074,1,0x058C9A,bitfield,0x04B242,0x04B2DC,251,4,4,0,0xFEBE8026,1,B4[7:4],False,,,extracted_bitfield
+154,29,0x0,0,,0,none,,,1,0x058C9A,bitfield,0x04B242,0x04B35E,251,4,0,0,0xFEBE802B,1,B4[3:0],False,,,extracted_bitfield
+155,29,0x0,0,,0,none,,,0,,none,none,,247,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+156,29,0x0,0,,0,none,,,0,,none,none,,247,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+157,30,0x3,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04B378,0x04B3A6,255,1,7,0,0xFEBE8031,1,B0[7],False,,,extracted_bitfield
+158,30,0x3,0,,0,none,,,0,,none,none,,255,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+159,30,0x3,0,,0,none,,,0,,none,none,,255,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+160,30,0x3,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,2,0x04B242 0x058C9A,bitfield,0x04B378,0x04B3C0,255,4,0,0,0xFEBE8030,1,B0[3:0],False,,,extracted_bitfield
+161,30,0x3,0,,0,none,,,0,,none,none,,255,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+162,30,0x3,0,,0,none,,,0,,none,none,,255,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+163,30,0x3,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04B378,0x04B3F4,256,4,0,0,0xFEBE8033,1,B1[3:0],False,,,extracted_bitfield
+164,30,0x0,0,,0,none,,,0,,none,none,,255,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+165,30,0x3,0,,0,none,,,0,,none,none,,255,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+166,30,0x3,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04B378,0x04B3DA,260,2,6,0,0xFEBE8032,1,B5[7:6],False,,,extracted_bitfield
+167,31,0x0,0,,0,none,,,0,,none,none,,263,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+168,31,0x0,0,,0,none,,,0,,none,none,,263,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+169,31,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04B40E,0x04B43C,266,2,4,0,0xFEBE8038,1,B3[5:4],False,,,extracted_bitfield
+170,31,0x4,0,,0,none,,,0,,none,none,,263,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+171,31,0x3,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04B40E,0x04B458,267,32,0,0,0xFEBE8034,4,B4..B7 BE32,False,,,extracted_bitfield
+172,32,0x3,0,,3,0x049D5E,classify_latched_source_zero_values_49d5e,0x049D5E 0x04ADCE 0x058074,2,0x04B40E 0x058C9A,bitfield,0x04B472,0x04B4A0,271,1,0,0,0xFEBE803B,1,B0[0],False,,,extracted_bitfield
+173,32,0x3,0,,4,0x04574C,classify_admitted_scalar_receive_condition,0x04574C 0x049D5E 0x04ADCE 0x058074,2,0x04B40E 0x058C9A,bitfield,0x04B472,0x04B4BA,272,1,0,0,0xFEBE803C,1,B1[0],False,,,extracted_bitfield
+174,32,0x3,0,,0,none,,,0,,none,none,,271,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+175,33,0x0,0,,0,none,,,0,,none,none,,279,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+176,33,0x0,0,,0,none,,,0,,none,none,,279,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+177,33,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,2,0x04B472 0x058C9A,bitfield,0x04B4D4,0x04B502,281,8,0,0,0xFEBE803F,1,B2,False,,,extracted_bitfield
+178,33,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,2,0x04B472 0x058C9A,bitfield,0x04B4D4,0x04B51C,282,8,0,0,0xFEBE8040,1,B3,False,,,extracted_bitfield
+179,33,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,2,0x04B472 0x058C9A,bitfield,0x04B4D4,0x04B536,283,8,0,0,0xFEBE8041,1,B4,False,,,extracted_bitfield
+180,33,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04B4D4,0x04B550,284,8,0,0,0xFEBE8042,1,B5,False,,,extracted_bitfield
+181,33,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04B4D4,0x04B56A,285,8,0,0,0xFEBE8043,1,B6,False,,,extracted_bitfield
+182,33,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04B4D4,0x04B584,286,8,0,0,0xFEBE8044,1,B7,False,,,extracted_bitfield
+183,34,0x0,0,,0,none,,,0,,none,none,,287,0,0,0,none,0,n/a,False,,,configured_no_com_unpacker
+184,35,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04B59E,0x04B620,295,1,7,0,0xFEBE804C,1,B0[7],False,,,extracted_bitfield
+185,35,0x0,0,,2,0x03D472,classify_received_content_a,0x03D472 0x058074,1,0x058C9A,bitfield,0x04B59E,0x04B63A,295,1,6,0,0xFEBE804D,1,B0[6],False,,,extracted_bitfield
+186,35,0x0,0,,3,0x03D50C,classify_received_content_b,0x03D50C 0x047AE0 0x058074,1,0x058C9A,bitfield,0x04B59E,0x04B654,295,1,5,0,0xFEBE804E,1,B0[5],False,,,extracted_bitfield
+187,35,0x0,0,,4,0x047AE0,clamp_sample_8048_and_compute_enable_gate_47ae0,0x047AE0 0x04AC7A 0x04C14E 0x058074,2,0x04B4D4 0x058C9A,bitfield,0x04B59E,0x04B5CE,295,12,0,1,0xFEBE8048,2,B0[3:0]..B1[7:0],False,,,extracted_bitfield
+188,35,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04B59E,0x04B5EA,299,4,4,1,0xFEBE804F,1,B4[7:4],False,,,extracted_bitfield
+189,35,0x0,0,,7,0x04E5D2,rdbi_1186_callback,0x04E5D2 0x053DB8 0x053FFE 0x054244 0x056336 0x0564CE 0x058074,1,0x058C9A,bitfield,0x04B59E,0x04B606,299,12,0,1,0xFEBE804A,2,B4[3:0]..B5[7:0],False,,,extracted_bitfield
+190,35,0x0,0,,2,0x04C490,assemble_scaled_signed_status_fields_and_change_latch_4c490,0x04C490 0x058074,1,0x058C9A,bitfield,0x04B59E,0x04B66E,301,1,3,0,0xFEBE8050,1,B6[3],False,,,extracted_bitfield
+191,35,0x0,0,,0,none,,,0,,none,none,,295,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+192,35,0x0,0,,0,none,,,0,,none,none,,295,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+193,35,0x0,0,,0,none,,,0,,none,none,,295,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+194,36,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04B68A,0x04B76C,327,1,7,0,0xFEBE8064,1,B0[7],False,,,extracted_bitfield
+195,36,0x0,0,,0,none,,,2,0x04B59E 0x058C9A,bitfield,0x04B68A,0x04B6BC,327,15,0,0,0xFEBE8054,2,B0[6:0]..B1[7:0],False,,,extracted_bitfield
+196,36,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04B68A,0x04B786,329,1,7,0,0xFEBE8065,1,B2[7],False,,,extracted_bitfield
+197,36,0x0,0,,0,none,,,1,0x058C9A,bitfield,0x04B68A,0x04B6E8,329,15,0,0,0xFEBE8056,2,B2[6:0]..B3[7:0],False,,,extracted_bitfield
+198,36,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04B68A,0x04B7A0,331,1,7,0,0xFEBE8066,1,B4[7],False,,,extracted_bitfield
+199,36,0x0,0,,0,none,,,1,0x058C9A,bitfield,0x04B68A,0x04B714,331,15,0,0,0xFEBE8058,2,B4[6:0]..B5[7:0],False,,,extracted_bitfield
+200,36,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04B68A,0x04B7BA,333,1,7,0,0xFEBE8067,1,B6[7],False,,,extracted_bitfield
+201,36,0x0,0,,0,none,,,1,0x058C9A,bitfield,0x04B68A,0x04B740,333,15,0,0,0xFEBE805A,2,B6[6:0]..B7[7:0],False,,,extracted_bitfield
+202,37,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04B7D6,0x04B81E,335,1,7,0,0xFEBE806D,1,B0[7],False,,,extracted_bitfield
+203,37,0x0,0,,0,none,,,0,,none,none,,335,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+204,37,0x0,0,,0,none,,,0,,none,none,,335,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+205,37,0x0,0,,0,none,,,0,,none,none,,335,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+206,37,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,2,0x04B68A 0x058C9A,bitfield,0x04B7D6,0x04B804,335,1,3,0,0xFEBE806C,1,B0[3],False,,,extracted_bitfield
+207,37,0x0,0,,0,none,,,0,,none,none,,335,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+208,37,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04B7D6,0x04B838,337,1,3,0,0xFEBE8070,1,B2[3],False,,,extracted_bitfield
+209,37,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,2,0x04B68A 0x058C9A,bitfield,0x04B7D6,0x04B852,337,10,0,0,0xFEBE806A,2,B2[1:0]..B3[7:0],False,,,extracted_bitfield
+210,37,0x0,0,,0,none,,,0,,none,none,,335,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+211,38,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04B86E,0x04B8D8,343,1,3,0,0xFEBE8076,1,B0[3],False,,,extracted_bitfield
+212,38,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,2,0x04B7D6 0x058C9A,bitfield,0x04B86E,0x04B8A0,344,16,0,1,0xFEBE8072,2,B1..B2 BE16,False,,,extracted_bitfield
+213,38,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04B86E,0x04B8BE,346,16,0,1,0xFEBE8074,2,B3..B4 BE16,False,,,extracted_bitfield
+214,38,0x0,0,,0,none,,,0,,none,none,,343,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+215,39,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,2,0x04B86E 0x058C9A,bitfield,0x04B8F4,0x04B922,351,5,3,0,0xFEBE8079,1,B0[7:3],False,,,extracted_bitfield
+216,39,0x0,0,,0,none,,,2,0x04B86E 0x058C9A,bitfield,0x04B8F4,0x04B93C,351,1,2,0,0xFEBE807A,1,B0[2],False,,,extracted_bitfield
+217,39,0x0,0,,0,none,,,2,0x04B86E 0x058C9A,bitfield,0x04B8F4,0x04B956,351,1,1,0,0xFEBE807B,1,B0[1],False,,,extracted_bitfield
+218,39,0x0,0,,0,none,,,0,,none,none,,351,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+219,39,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04B8F4,0x04B970,352,6,2,0,0xFEBE807C,1,B1[7:2],False,,,extracted_bitfield
+220,39,0x0,0,,0,none,,,0,,none,none,,351,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+221,39,0x0,0,,0,none,,,1,0x058C9A,bitfield,0x04B8F4,0x04B98A,352,1,0,0,0xFEBE807D,1,B1[0],False,,,extracted_bitfield
+222,39,0x0,0,,0,none,,,1,0x058C9A,bitfield,0x04B8F4,0x04B9A4,353,1,6,0,0xFEBE807E,1,B2[6],False,,,extracted_bitfield
+223,39,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04B8F4,0x04B9BE,353,1,5,0,0xFEBE807F,1,B2[5],False,,,extracted_bitfield
+224,39,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04B8F4,0x04B9D8,353,4,0,0,0xFEBE8082,1,B2[3:0],False,,,extracted_bitfield
+225,39,0x0,0,,0,none,,,0,,none,none,,351,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+226,39,0x0,0,,0,none,,,0,,none,none,,351,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+227,40,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04B9F4,0x04BA26,359,1,7,0,0xFEBE8090,1,B0[7],False,,,extracted_bitfield
+228,40,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04B9F4,0x04BA40,359,1,6,0,0xFEBE8091,1,B0[6],False,,,extracted_bitfield
+229,40,0x0,0,,0,none,,,2,0x04B8F4 0x058C9A,bitfield,0x04B9F4,0x04BA5A,359,10,0,0,0xFEBE8084,2,B0[1:0]..B1[7:0],False,,,extracted_bitfield
+230,40,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04B9F4,0x04BA86,361,1,7,0,0xFEBE8092,1,B2[7],False,,,extracted_bitfield
+231,40,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04B9F4,0x04BAA0,361,1,6,0,0xFEBE8093,1,B2[6],False,,,extracted_bitfield
+232,40,0x0,0,,0,none,,,1,0x058C9A,bitfield,0x04B9F4,0x04BABA,361,10,0,0,0xFEBE8086,2,B2[1:0]..B3[7:0],False,,,extracted_bitfield
+233,40,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04B9F4,0x04BAE6,363,1,7,0,0xFEBE8094,1,B4[7],False,,,extracted_bitfield
+234,40,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04B9F4,0x04BB00,363,1,6,0,0xFEBE8095,1,B4[6],False,,,extracted_bitfield
+235,40,0x0,0,,0,none,,,1,0x058C9A,bitfield,0x04B9F4,0x04BB1A,363,10,0,0,0xFEBE8088,2,B4[1:0]..B5[7:0],False,,,extracted_bitfield
+236,40,0x0,0,,0,none,,,0,,none,none,,359,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+237,40,0x0,0,,0,none,,,0,,none,none,,359,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+238,40,0x0,0,,0,none,,,0,,none,none,,359,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+239,40,0x0,0,,0,none,,,0,,none,none,,359,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+240,40,0x0,0,,0,none,,,0,,none,none,,359,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+241,40,0x0,0,,0,none,,,1,0x058C9A,bitfield,0x04B9F4,0x04BB46,387,4,4,0,0xFEBE8096,1,B28[7:4],False,,,extracted_bitfield
+242,40,0x0,0,,0,none,,,0,,none,none,,359,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+243,41,0x0,0,,7,0x035A06,check_learned_quad_action_state_thresholds_35a06,0x035A06 0x04AAE8 0x04FFFE 0x050042 0x050568 0x058074 0x0FCC4E,1,0x058C9A,bitfield,0x04BB62,0x04BBD0,391,1,7,0,0xFEBE80A0,1,B0[7],True,0xFEBE80A0@0x04BC14,,extracted_bitfield
+244,41,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04BB62,0x04BBEA,391,1,6,0,0xFEBE80A1,1,B0[6],False,,,extracted_bitfield
+245,41,0x0,0,,0,none,,,0,,none,none,,391,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+246,41,0x0,0,,7,0x04E5A8,did_1185_can_vehicle_speed_sp1,0x04E5A8 0x053DB8 0x053FFE 0x054244 0x056336 0x0564CE 0x058074,2,0x04B9F4 0x058C9A,bitfield,0x04BB62,0x04BB9A,392,16,0,0,0xFEBE809A,2,B1..B2 BE16,False,,,extracted_bitfield
+247,41,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04BB62,0x04BBB6,394,16,0,0,0xFEBE809C,2,B3..B4 BE16,False,,,extracted_bitfield
+248,41,0x0,0,,0,none,,,0,,none,none,,391,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+249,41,0x0,0,,0,none,,,1,0x058C9A,bitfield,0x04BB62,0x04BC04,419,4,4,0,0xFEBE80A3,1,B28[7:4],False,,,extracted_bitfield
+250,41,0x0,0,,0,none,,,0,,none,none,,391,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+251,42,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,2,0x04BB62 0x058C9A,bitfield,0x04BC28,0x04BC56,425,8,0,0,0xFEBE80A8,1,B2,False,,,extracted_bitfield
+252,42,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04BC28,0x04BC70,426,8,0,0,0xFEBE80A9,1,B3,False,,,extracted_bitfield
+253,42,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04BC28,0x04BC8A,428,8,0,0,0xFEBE80AA,1,B5,False,,,extracted_bitfield
+254,42,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04BC28,0x04BCA4,429,8,0,0,0xFEBE80AB,1,B6,False,,,extracted_bitfield
+255,43,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04BCC0,0x04BCF2,433,18,6,1,0xFEBE80AC,4,B2[7:0]..B3[7:0]..B4[7:6],False,,,extracted_bitfield
+256,43,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04BCC0,0x04BD0C,435,1,5,0,0xFEBE80B4,1,B4[5],False,,,extracted_bitfield
+257,43,0x0,0,,3,0x04ABBE,scale_word_80b0_with_sentinel_to_signed_halfword_4abbe,0x04ABBE 0x04AC7A 0x058074,1,0x058C9A,bitfield,0x04BCC0,0x04BD2A,435,18,0,1,0xFEBE80B0,4,B4[1:0]..B5[7:0]..B6[7:0],False,,,extracted_bitfield
+258,43,0x0,0,,0,none,,,0,,none,none,,431,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+259,44,0x0,0,,0,none,,,0,,none,none,,439,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+260,44,0x0,0,,0,none,,,0,,none,none,,439,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+261,44,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04BD46,0x04BD78,442,6,0,0,0xFEBE80BC,1,B3[5:0],False,,,extracted_bitfield
+262,44,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,2,0x04BCC0 0x058C9A,bitfield,0x04BD46,0x04BD96,443,16,0,1,0xFEBE80B8,2,B4..B5 BE16,False,,,extracted_bitfield
+263,44,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04BD46,0x04BDB0,445,1,7,0,0xFEBE80CB,1,B6[7],False,,,extracted_bitfield
+264,44,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04BD46,0x04BDCA,445,3,4,0,0xFEBE80BE,1,B6[6:4],False,,,extracted_bitfield
+265,44,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04BD46,0x04BDE4,445,1,2,0,0xFEBE80C0,1,B6[2],False,,,extracted_bitfield
+266,44,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04BD46,0x04BDFE,445,2,0,0,0xFEBE80C1,1,B6[1:0],False,,,extracted_bitfield
+267,44,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04BD46,0x04BE18,446,2,6,0,0xFEBE80C2,1,B7[7:6],False,,,extracted_bitfield
+268,44,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04BD46,0x04BE32,446,6,0,0,0xFEBE80C3,1,B7[5:0],False,,,extracted_bitfield
+269,44,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04BD46,0x04BE4C,447,8,0,0,0xFEBE80C4,1,B8,False,,,extracted_bitfield
+270,44,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04BD46,0x04BE66,448,8,0,0,0xFEBE80C5,1,B9,False,,,extracted_bitfield
+271,44,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04BD46,0x04BE80,449,1,7,0,0xFEBE80C6,1,B10[7],False,,,extracted_bitfield
+272,44,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04BD46,0x04BE9A,449,1,5,0,0xFEBE80CC,1,B10[5],False,,,extracted_bitfield
+273,44,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04BD46,0x04BEB4,449,3,0,0,0xFEBE80CA,1,B10[2:0],False,,,extracted_bitfield
+274,44,0x0,0,,0,none,,,0,,none,none,,439,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+275,44,0x0,0,,0,none,,,0,,none,none,,439,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+276,45,0x4,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04BED0,0x04BEFE,471,8,0,0,0xFEBE80CD,1,B0,False,,,extracted_bitfield
+277,45,0x4,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04BED0,0x04BF18,472,8,0,0,0xFEBE80CE,1,B1,False,,,extracted_bitfield
+278,45,0x4,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,1,0x058C9A,bitfield,0x04BED0,0x04BF32,473,8,0,0,0xFEBE80D1,1,B2,False,,,extracted_bitfield
+279,46,0x0,0,,0,none,,,0,,none,none,,479,0,0,0,none,0,n/a,False,,,configured_not_extracted_by_pdu_handler
+280,46,0x0,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,2,0x04BED0 0x058C9A,bitfield,0x04BF4E,0x04BF7C,479,3,4,0,0xFEBE80D2,1,B0[6:4],False,,,extracted_bitfield
+281,46,0x3,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,2,0x04BED0 0x058C9A,bitfield,0x04BF4E,0x04BF96,479,4,0,0,0xFEBE80D3,1,B0[3:0],False,,,extracted_bitfield
+282,47,0x3,0,,1,0x058074,publish_foreground_ecu_outputs,0x058074,2,0x04BF4E 0x058C9A,bitfield,0x04BFB2,0x04BFE0,480,4,0,0,0xFEBE80D6,1,B0[3:0],False,,,extracted_bitfield
