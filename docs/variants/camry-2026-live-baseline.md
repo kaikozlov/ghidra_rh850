@@ -4379,15 +4379,34 @@ currently identified as FRC wiper-operation status.
 A synchronized physical wiper ON/OFF/INT/LO/HI exercise (or
 exact source-ECU/EWD evidence) is required before assigning one.
 
-`0x614` is also column-state-compatible but has a weaker transmitter attribution.
-On route `3d` its retained `TURN_SIGNALS` raw field visits values `1`, `2`, and `3`
-on **146 / 265 / 3,916** native-bus0 frames; the current fork consumes `1/2` as
-left/right.  `StrAngleSnsr_P5` independently exposes `Turn Signal Switch (Left)`
-and `(Right)`, so this is exactly the kind of state the spiral-cable/SAS domain
-knows.  However current `Meter_P5` also exposes turn-signal-switch state, and the
-Central Gateway can republish another Toyota bus onto Bus 4.  `0x614` therefore
-supports a steering-column **state** origin but does not distinguish direct SAS
-transmit from a meter/gateway copy.
+**Turn signals:** `0x2D8/8` is the upstream directional-input candidate;
+`0x614/8` is the corresponding state publication. The
+[2024 RAV4 Prime meter firmware](yc-r4p-2024-meter.md#body-inputs-turn-hazard-doors-and-buckle)
+consumes `0x2D8` B5[3:0] before packing `0x614` B3[5:4]. The same relationship
+is observed in Camry route `0000003d--0e812cecba`, rlogs 0–9 (2026-09-04):
+`0x2D8` has 2,043 native bus0, 32 native bus2 and 2,011 returned bus2 frames.
+For native bus0, pairing each `0x614` with the preceding `0x2D8` within 1.5 s
+gives (B5 low nibble, B3[5:4]) = `(0,3)` 462, `(5,2)` 120, `(0xA,1)` 57,
+`(1,2)` 4. Raw `0x2D8` nibbles 1 and 2 also occur briefly at onset/release;
+the observed onsets lead the `0x614` state transition by roughly 10–22 ms.
+Both PDUs are periodic with additional change-triggered transmissions:
+`0x2D8` has median same-state intervals of 300.7/300.6/300.3 ms
+(off/right/left), and `0x614` has approximately 1 s same-state intervals.
+Across the 2,043 native bus0 frames (600.59 s), the only five payloads are
+`00 02 00 00 00 xx 00 00` with `xx=00/05/0A/02/01` appearing
+1,452/404/165/12/10 times. There is no varying freshness, MAC or checksum
+field; the observed PDU is unprotected and classical-CAN-sized. The retained
+log establishes DLC 8, not the physical FDF bit.
+The fork maps `0x614` codes 1/2/3 to left/right/off. The current Camry
+`StrAngleSnsr_P5` DID `0x1001` bits 24/25 expose right/left switch state;
+`Meter_P5` separately exposes switch state (`0x1101`, `0x18AA`) and indicator
+state (`0x2911`). The meter's involvement in exterior flasher control on the
+XV80 generation is corroborated by Toyota's [2026-08-06 recall announcement](https://pressroom.toyota.com/toyota-recalls-certain-model-year-2025-2026-camry-vehicles/)
+for the 7-inch combination meter. The mounted P5 Main Body catalog has an
+EDSS flasher test but no ordinary directional lamp Active Test; the meter
+catalog has left/right indicator tests. For the 12.3-inch Camry, the exact
+meter ingress and gateway routing remain to be established from the EWD or
+firmware; no external directional command has been exercised.
 
 A useful negative control is `0x24D`: it is also native bus0 and runs at almost the
 same ~1-Hz population as `0x622` (**15,516** versus **15,532** frames), but its
@@ -4395,14 +4414,14 @@ application prefix stays `00 00 00 80` throughout this corpus and pinned prior a
 attributes `PCM_CRUISE_4` to PCM.  Shared side/cadence is therefore not used as a
 producer proof.
 
-**Boundary:** the durable ordering is now `0x025` = established SAS/spiral-cable
-state family; `0x622` = **very strong** additional SAS/SCM-family producer
-candidate; `0x614` = **moderate** column-state candidate with meter/gateway
-ambiguity; and `0x0FE` = **strong steering-column acquisition candidate** whose
-actual CAN publisher may still be a separate authenticated proxy/signer.  Native
-bus0 proves only the chassis/Bus-4 side of the Comma split.  Exact 2026 source-ECU
-firmware, EWD wiring, or physical source isolation is still required to say that
-component `0xF0` itself transmits `0x622`, `0x614`, or `0x0FE`.
+**Boundary:** `0x025` is the established SAS/spiral-cable state family;
+`0x622` is a very strong additional SAS/SCM-family producer candidate;
+`0x2D8` is the directional-input candidate preceding `0x614`, with meter/gateway
+attribution for the latter; `0x0FE` is a strong steering-column acquisition
+candidate whose actual CAN publisher may be a separate authenticated proxy/signer.
+Native bus0 establishes the chassis/Bus-4 side of the Comma split. Exact 2026
+source-ECU firmware, EWD wiring, or source isolation is required to attribute
+these PDUs to individual transmitters.
 
 ## 50. Longitudinal capture observations (VAR-106)
 
