@@ -1842,9 +1842,11 @@ needs its index provenance. Closed in this pass:
   retry helpers `0x8F60E/0x8F6B2` index `FEBE5524` unguarded, but their profile
   index is a receive-queue slot id that `0x8E8A0` validates against the slot
   count for the requested position.
-- Deferred direct-request staging (`0x8BB0E`) clamps the request to `0x40`, the
-  result to `0x31`, into one `0x44` block. That path is the command-8 key-update
-  sequence and carries no selectable crypto command.
+- Deferred direct-request staging (`0x8BB0E`) clamps the request to `0x40`
+  (`0x8BB40..0x8BB46`) and the result to `0x31` (`0x8BB2A..0x8BB3C`): a `0x44`
+  block at `0xFEBF3B87` and a `0x31` block at `0xFEBF3B56`. Its only caller
+  passes both lengths as immediates (`0x98076`, `0x9807A`). That path is the
+  command-8 key-update sequence and carries no selectable crypto command.
 - The WDBI row-5 null call stays unreachable: `FEBE5D2C` is referenced only by
   WDBI handlers.
 - **All 133 stack-indexed stores in 62 functions.** 101 are bounded by an
@@ -1885,10 +1887,94 @@ needs its index provenance. Closed in this pass:
   static specs `static-spec.md` and `staging-spec.md` under
   `build/out/targets/camry-8965F3307000/ab-merge-capacity-20261123/`.
 
-Open, in priority order:
+### 13.16 2026-11-23 reach closure of variable-index stores
 
-1. NvM slot and record families (`0x67176..0x735E6`) and the COM insert offset
-   parameters at `0x7D31E/0x7D72C`: caller provenance of the index.
+**No store in the image can write past its object into a control object on any
+input a tester or the bus can supply.** Three independent checks agree, each
+within the coverage stated below.
+
+**Reach filter** (`ghidra/scripts/investigate/ReachOfUnknownBaseStores.java`).
+Of 14,134 high-p-code stores, 8,675 are the ones `AuditComputedStoreTargets`
+cannot bound. The filter folds GP/TP, resolves 415 more base registers and
+evaluates 1,880 stores against the control set (callback cells, executable
+tail, RWX region, stack tops). 1,080 cannot reach it. Of the 800 that can, 621
+carry an immediate bound on the index, 128 carry none that an instruction
+enforces (67 data-bounded, 61 unbounded) and 52 are bounded but still end on a
+target. Those 180 were reviewed at instruction level: 177 in six per-site
+tables (`route2-20261123/reach/review-G*.md`) and 3 with the NvM item below.
+
+| Reviewed rows | Count |
+|---|---:|
+| index limited by an immediate in the storing function | 100 |
+| index read from CodeFlash; no instruction checks it | 18 |
+| index validated by a named compare, in the function or a caller | 59 |
+| unvalidated or unbounded | 0 |
+
+Where the non-immediate bounds come from:
+
+- **CodeFlash-indexed (18).** Fifteen CanTp rows take the channel from the byte
+  at `connection + 1`; every connection is a 32-byte CodeFlash entry with
+  channel 0, 1 or 2, into the three cells at `0xFEBE4F40`. The tx-queue rows
+  (`0x80020`, `0x80348`, `0x80826`) take `Q = u16[record + 8]` from the record
+  table at `0x21ACC` (`Q = 0..4`) and write `0xFEBE4904 + Q`.
+- **Caller-carried bounds.** `retain_and_clear_fault_record` `0x3C116` and
+  `merge_fault_action_record` `0x3C19C` guard `slot < 24` (`0x3C120/0x3C124`,
+  `0x3C1A2/0x3C1A6`); their 123 callers pass immediates up to 23. The serial
+  channel is compared with 2 (`0x6227A`; caller `0x6257E`).
+- **SecOC receive chain.** The slot id that indexes `0xFEBE5524` is validated
+  in `0x8E8A0` (`0x8E8FE/0x8E900`, `< 3`), and `release_secoc_receive_slot`
+  `0x8F70E` runs only past the `< 3` check at `0x8E936/0x8E938`. The freshness
+  rows are bounded by `cmp 2` at `0x907F4` and `0x90BA6` and by the three
+  receive profiles.
+- **Diagnostic clear loops.** The 16 rows in `0x8B0D2..0x8E308` are counters
+  tested against immediates (768, 68, 64, 49, 32, 16).
+- **Control partition.** The monitor resets `0xC9F86` and `0xCB23A` fill 20
+  samples each into `0xFEBEC630` and `0xFEBEC744`; the steering cells
+  `0xFEBEC0D6..0xFEBEC144` lie at least `0x4EC` below.
+
+Two rows are contained without a guard of their own. The seven PWM staging rows
+in `0x61C8A..0x61DF6` stay in their two-entry arrays because both callers pass
+0 or 1. `deliver_secoc_receive_payload` `0x8F546` stores a status byte at
+`0xFEBE5524 + slot` with a 16-bit index and no guard, on a path no caller
+reaches today.
+
+`0xFEBF0FD0` and `0xFEBF0F04` sit at offsets `+0x348` and `+0x37C` of the
+application's 0x400-byte `nvm_family0_read_record` (`0xFEBF0C88`); as callback
+cells they are boot-only (§13.5).
+
+**Control-slot oracle**
+(`tools/targets/camry/research/oracle_camry_f33_control_slots.py`;
+`--self-test-only` replays its six seeded faults). On the exact-image simulator
+it checks every executed store against the callback cells, the executable tail,
+the RWX region and any live saved register or return address. 21,661 cases over
+the DCM request matrix, CanTp ingress, the stateful seeds and the `0xAB`
+families: no stock-state case wrote one. The only hits are 32 hook-cell writes
+in the `0xAB` case with a primed state no request produces (§13.15). 423 of
+7,336 functions executed a frame prologue, so this covers the diagnostic and
+CanTp paths.
+
+**NvM and COM inserts.** The 59 block images occupy `0xFEBEF400..0xFEBF0307`,
+none overlapping a control object; enabled images never overlap each other and
+every configured length equals its validator's. `nvm_set_record` `0x66D6E`
+splits the selector and each family handler compares the index against its
+count before touching a descriptor (`0x67778/0x6777A`, `0x67EF2/0x67EF4`,
+`0x67186/0x67188`; counts 32, 16, 11 at `0x2AD70`), so every caller is bounded
+whatever it passes. The 148 call sites of `nvm_set_record`, `nvm_get_record`
+and `nvm_get_record_status` pass their selector as an immediate or as one of
+five computed values that resolve to constants. Of the 517 census rows in
+`0x67176..0x735E6` (512 distinct stores), 379 are immediate-bounded, 18
+re-check an internal index, and 120 sit in 20 library functions nothing
+references. `nvm_append_queue_slot` `0x735E6` writes its link only after
+`nvm_check_slot_partition` `0x732F6` accepts the slot (`0x7361E/0x73620`, at
+most `0x7A`). The COM group clear `0x7D608` loops over a config row's `start`
+and `count`. `insert_com_big_endian_signal_without_trigger` `0x7D31E` has 47
+call sites, each with an immediate PDU index and byte offset. `0x7D72C` takes
+its destination offset and length from CodeFlash routing tables that
+dispatcher `0x81D30` range-checks (`0x81D3E..0x81D4E`), with the copy capped
+at `0x7D7A6`. Per-site tables: `route2-20261123/nvm/`.
+
+**Receive map.** The 47 acceptance rules and what each frame controls are in
+[application receive §12](../communications/application-rx.md#12-camry-8965f3307000).
 
 ## 14. Exact F33 persistent Gate-2 development patch
 
