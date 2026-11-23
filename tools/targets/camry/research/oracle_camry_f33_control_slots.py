@@ -40,6 +40,7 @@ from __future__ import annotations
 
 import argparse
 import bisect
+import csv
 import hashlib
 import json
 import re
@@ -138,6 +139,7 @@ class SiteTable:
     gadgets: dict[str, int]
     entry_set: set[int]
     prepare_like: set[int]
+    watched_trace_pcs: dict[int, tuple[int, str]] = field(default_factory=dict)
 
     def function_of(self, address: int) -> tuple[int | None, str | None]:
         index = bisect.bisect_right(self.entries, address) - 1
@@ -404,6 +406,31 @@ def build_table(image: bytes, functions: list[tuple[int, str]], work: Path) -> S
     )
 
 
+def load_watch_list(path: Path) -> dict[int, str]:
+    """Store instruction addresses and labels: a CSV with a store_pc column,
+    or one hex address per line (# starts a comment)."""
+    watch: dict[int, str] = {}
+    with path.open(encoding="utf-8", newline="") as stream:
+        if path.suffix == ".csv":
+            for row in csv.DictReader(stream):
+                watch[int(row["store_pc"], 16)] = " ".join(
+                    str(row.get(key) or "") for key in ("fn_name", "why")).strip()
+        else:
+            for line in stream:
+                token = line.split("#", 1)[0].strip()
+                if token:
+                    watch[int(token, 16)] = ""
+    return watch
+
+
+def attach_watch_list(table: SiteTable, watch: dict[int, str]) -> None:
+    """Map each watched store's trace PC (its last fetched halfword) to it."""
+    for store, label in watch.items():
+        for candidate in (store, store + 2, store + 4, store + 6):
+            if table.instruction_start(candidate) == store:
+                table.watched_trace_pcs[candidate] = (store, label)
+
+
 # ------------------------------------------------------------------- oracle
 
 @dataclass
@@ -421,6 +448,7 @@ class StepScan:
     first_slots: dict[str, int] = field(default_factory=dict)
     first_values: dict[str, int] = field(default_factory=dict)
     missing: bool = False
+    watched: dict[int, dict] = field(default_factory=dict)
 
 
 def _event(step: int, kind: str, pc: int, access: dict, table: SiteTable, **extra) -> dict:
@@ -449,11 +477,13 @@ def scan_step(accesses: list[dict], step: int, table: SiteTable) -> StepScan:
     hook_cells = frozenset(HOOK_CELLS)
     installer_pcs = table.installer_trace_pcs
     installer_instructions = table.installer_instructions
+    watched_pcs = table.watched_trace_pcs
     tail_lo, tail_hi = EXECUTABLE_TAIL
     pocket_lo, pocket_hi = RWX_POCKET
     events, anomalies = scan.events, scan.anomalies
     samples, hook_writes = scan.samples, scan.hook_writes
     prepares, disposes = scan.prepares, scan.disposes
+    watched = scan.watched
     writes: list[tuple[int, int, int]] = []    # every non-PREPARE store (pc, address, width)
     index, total = 0, len(accesses)
     while index < total:
@@ -535,6 +565,15 @@ def scan_step(accesses: list[dict], step: int, table: SiteTable) -> StepScan:
             if operation == "write":
                 write_number = len(writes)
                 writes.append((pc, address, width))
+                hit = watched_pcs.get(pc)
+                if hit is not None:
+                    row = watched.setdefault(
+                        hit[0], {"label": hit[1], "writes": 0, "numbers": [],
+                                 "lowest": address, "highest": address + width - 1})
+                    row["writes"] += 1
+                    row["numbers"].append(write_number)
+                    row["lowest"] = min(row["lowest"], address)
+                    row["highest"] = max(row["highest"], address + width - 1)
             word = address & ~3
             last_word = (address + width - 1) & ~3
             while word <= last_word:
@@ -576,6 +615,10 @@ def scan_step(accesses: list[dict], step: int, table: SiteTable) -> StepScan:
                     events.append({**_event(step, kind, pc, access, table, slot_kind=None,
                                             slot_owner=None, slot_value=None),
                                    "write": write_number})
+    for row in watched.values():
+        flagged = {event["write"] for event in events if "write" in event}
+        row["control_hits"] = sum(number in flagged for number in row.pop("numbers"))
+
     # For every flagged write, name the whole run of writes its instruction
     # issued in this step (a looping store is one writer, not many).
     for event in events:
@@ -1082,6 +1125,7 @@ def merge_runs(runs: list[CaseRun]) -> dict:
     hook_other: list[dict] = []
     abnormal: list[dict] = []
     incomplete: list[dict] = []
+    watched: dict[int, dict] = {}
     steps = accesses = live_at_end = max_live = 0
     for run in runs:
         if run.error:
@@ -1114,6 +1158,16 @@ def merge_runs(runs: list[CaseRun]) -> dict:
                                        "step": record["step"], "cell": record["cell"],
                                        "pc": record["pc"], "value": record["value"],
                                        "width": record["width"]})
+            for store, row in scan.watched.items():
+                total = watched.setdefault(
+                    store, {"label": row["label"], "writes": 0, "cases": set(),
+                            "lowest": row["lowest"], "highest": row["highest"],
+                            "control_hits": 0})
+                total["writes"] += row["writes"]
+                total["cases"].add(run.key)
+                total["lowest"] = min(total["lowest"], row["lowest"])
+                total["highest"] = max(total["highest"], row["highest"])
+                total["control_hits"] += row["control_hits"]
     return {
         "cases": len(runs), "steps": steps, "accesses": accesses,
         "prepares": prepares, "disposes": disposes, "anomalies": anomalies,
@@ -1121,6 +1175,7 @@ def merge_runs(runs: list[CaseRun]) -> dict:
         "hook_values": hook_values, "hook_other": hook_other,
         "abnormal": abnormal, "incomplete": incomplete,
         "live_at_end": live_at_end, "max_live": max_live,
+        "watched": watched,
     }
 
 
@@ -1171,19 +1226,30 @@ def family_report(family: str, merged: dict, table: SiteTable) -> dict:
             for (cell, pc), count in sorted(merged["hook_stock"].items())
         ],
         "hook_installer_values_outside_codeflash": merged["hook_other"],
+        "watched_stores": [
+            {"store": hx(store), "label": row["label"], "writes": row["writes"],
+             "cases": len(row["cases"]), "lowest_target": hx(row["lowest"]),
+             "highest_target": hx(row["highest"]), "control_hits": row["control_hits"]}
+            for store, row in sorted(merged["watched"].items())],
     }
 
 
 def union_coverage(reports: list[dict]) -> dict:
     sites: set[int] = set()
     entries: set[int] = set()
+    watched: set[int] = set()
+    hits = 0
     for report in reports:
         for row in report["prepare_sites_executed_list"]:
             address = int(row["site"], 16)
             sites.add(address)
             if row["at_function_entry"]:
                 entries.add(address)
-    return {"prepare_sites_executed": len(sites), "functions_with_prepare_executed": len(entries)}
+        for row in report["watched_stores"]:
+            watched.add(int(row["store"], 16))
+            hits += row["control_hits"]
+    return {"prepare_sites_executed": len(sites), "functions_with_prepare_executed": len(entries),
+            "watched_stores_executed": len(watched), "watched_control_hits": hits}
 
 
 # ---------------------------------------------------------------- self-test
@@ -1371,6 +1437,10 @@ def render_report(state: dict) -> str:
     add(f"- Abnormal terminations: {total['abnormal_terminations']}; incomplete cases: "
         f"{total['incomplete_cases']}.")
     add(f"- Self-validation: {'passed' if state['self_test']['passed'] else 'FAILED'}")
+    if state["watch_list"]["stores"]:
+        add(f"- Watched stores executed: **{total['watched_stores_executed']}** of "
+            f"{state['watch_list']['stores']}; control-object hits by a watched store: "
+            f"**{total['watched_control_hits']}**.")
     add("")
     test = state["self_test"]
     add("## 2. Self-validation (mandatory before any clean result)")
@@ -1529,7 +1599,33 @@ def render_report(state: dict) -> str:
         ) or "never written"
         add(f"| {cell} | {writers} | {seen} | {foreign.get(cell, 0)} |")
     add("")
-    add("## 8. Method and limits")
+    if state["watch_list"]["stores"]:
+        add("## 8. Watched stores")
+        add("")
+        add(f"`{state['watch_list']['path']}`: **{total['watched_stores_executed']}** of "
+            f"{state['watch_list']['stores']} executed by the traced families; writes by a "
+            f"watched store that hit a control object: "
+            f"**{total['watched_control_hits']}**.")
+        add("")
+        add("| store | label | writes | cases | lowest target | highest target | control hits |")
+        add("|---|---|---:|---:|---|---|---:|")
+        rows: dict[str, dict] = {}
+        for report in state["families"]:
+            for row in report["watched_stores"]:
+                entry = rows.setdefault(row["store"], {
+                    "label": row["label"], "writes": 0, "cases": 0,
+                    "lowest": row["lowest_target"], "highest": row["highest_target"],
+                    "control_hits": 0})
+                entry["writes"] += row["writes"]
+                entry["cases"] += row["cases"]
+                entry["lowest"] = min(entry["lowest"], row["lowest_target"])
+                entry["highest"] = max(entry["highest"], row["highest_target"])
+                entry["control_hits"] += row["control_hits"]
+        for store, entry in sorted(rows.items()):
+            add(f"| `{store}` | {entry['label']} | {entry['writes']} | {entry['cases']} | "
+                f"{entry['lowest']} | {entry['highest']} | {entry['control_hits']} |")
+        add("")
+    add("## 9. Method and limits")
     add("")
     for note in state["notes"]:
         add(f"- {note}")
@@ -1603,6 +1699,8 @@ def campaign(out: Path, args) -> dict:
     functions = load_functions()
     started = time.time()
     table = build_table(image, functions, work)
+    watch = load_watch_list(Path(args.watch_stores)) if args.watch_stores else {}
+    attach_watch_list(table, watch)
     print(f"derived {len(table.sites)} prepare/dispose sites in {time.time() - started:.0f}s",
           flush=True)
     sites_json = {
@@ -1660,6 +1758,8 @@ def campaign(out: Path, args) -> dict:
         "installers": installers_json,
         "self_test": self_test_result,
         "families": families,
+        "watch_list": {"path": str(args.watch_stores) if args.watch_stores else None,
+                       "stores": len(watch)},
     }
     totals = {
         "cases_traced": sum(r["cases_traced"] for r in families),
@@ -1746,6 +1846,9 @@ def main() -> int:
     parser.add_argument("--jobs", type=int, default=6)
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--timeout", type=float, default=120.0)
+    parser.add_argument("--watch-stores", type=Path,
+                        help="store instructions to report executions for: a CSV with a "
+                             "store_pc column or a list of hex addresses")
     parser.add_argument("--max-cases", type=int, default=0,
                         help="debug: cap each family at N cases (0 = no cap)")
     args = parser.parse_args()
