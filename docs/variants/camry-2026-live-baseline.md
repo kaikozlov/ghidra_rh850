@@ -1804,6 +1804,92 @@ ISR releases fixed transport/response state; DCM service, completion and
 cancellation remain serialized in foreground. The oversized-FD stale tail is
 confined to the fixed-ring data-disclosure condition above.
 
+### 13.15 2026-11-23 execution-target store census
+
+The §36 E1 census answers one question: can a bounded computed store land on a
+steering command cell. Its artifact says so (`kind:
+"steering_command_current_cone"`; 5,459 of 14,134 stores in scope). It never
+compares against the cells a hot install needs. A repeatable write of tester
+bytes into LocalRAM is sufficient on its own: place the payload in the
+executable tail, then replace a callback cell that a stock path calls without
+reinstalling (`FEBF117C/1180/1194/1198/131C/1320/1324`, `FEBE5628`). No separate
+control-transfer bug is required.
+
+The unchanged resolver, run against those cells, four tail addresses and the
+five stack tops, reports **154 candidates in 69 functions** (151 application,
+3 boot). A companion script labels the **8,675** stores whose range the
+resolver cannot bound: 6,079 through a register pointer, 1,465 at a constant
+base plus a variable index, 768 through a register pointer plus a variable
+index, and **133 into the stack with a variable index** in 62 functions.
+
+```bash
+tools/gtarget camry-8965F3307000 script run \
+  ghidra/scripts/investigate/AuditComputedStoreTargets.java -- \
+  0xFEBF117C 0xFEBF1180 0xFEBF1194 0xFEBF1198 0xFEBF131C 0xFEBF1320 0xFEBF1324 \
+  0xFEBE5628 0xFEBF0FD0 0xFEBF6B04 0xFEBFF9F0 0xFEBFFA00 0xFEBFFB00 0xFEBFFBFB \
+  0xFEBE1FF8 0xFEBE1FFC 0xFEBE07F8 0xFEBE07FC 0xFEBE0FF8 0xFEBE0FFC \
+  0xFEBE17F8 0xFEBE17FC 0xFEBE27F8 0xFEBE27FC
+tools/gtarget camry-8965F3307000 script run \
+  ghidra/scripts/investigate/TriageUnknownStoreBases.java
+```
+
+Outputs are under
+`build/out/targets/camry-8965F3307000/exec-target-store-census-20261123/`. The
+ranges are mask bounds and do not model guarding compares, so each candidate
+needs its index provenance. Closed in this pass:
+
+- SecOC COM tracking (`0x8E772..0x8E7D0`) carries explicit `< 0x60` guards. The
+  retry helpers `0x8F60E/0x8F6B2` index `FEBE5524` unguarded, but their profile
+  index is a receive-queue slot id that `0x8E8A0` validates against the slot
+  count for the requested position.
+- Deferred direct-request staging (`0x8BB0E`) clamps the request to `0x40`, the
+  result to `0x31`, into one `0x44` block. That path is the command-8 key-update
+  sequence and carries no selectable crypto command.
+- The WDBI row-5 null call stays unreachable: `FEBE5D2C` is referenced only by
+  WDBI handlers.
+- **All 133 stack-indexed stores in 62 functions.** 101 are bounded by an
+  immediate. 30 take the bound from data and validate it with a named
+  instruction. The last two (`0x83DA2`, `0x83E6C`) have no runtime compare and
+  count received frames from CodeFlash bytes `0x22EB7+ch` and `0x22EB4+ch`
+  (`02 08 02`): at most 8 words into a 16-word object. No store reaches a saved
+  register or return address, and the eleven boot-region functions
+  (`0x1F98..0x7E0C`) have boot callers only. Per-site tables with instruction
+  citations are `build/out/targets/camry-8965F3307000/stack-loops-20261123/SL1.md`
+  to `SL5.md`. `prepare {list}, imm` reserves `4*imm` local bytes and stacks
+  `lp` at `sp+4*imm`, the first word above them
+  (`ghidra/ghidra_v850/data/languages/v850_func.sinc`; `0x7D804` clears 32 bytes
+  after `prepare {r28,r29,lp}, 8`).
+- **`0x31` routine scratch.** `0x974B0` writes one word per start argument into
+  the 28-byte scratch at `0x97822`'s `sp+4`. The per-row argument count at
+  `0x269BF + 15*row` is 0 or 1 over all 19 rows.
+- **`0xAB` proprietary event read.** Merge mode is exactly `AB 01` (`0x8DEAE`
+  stores the sub-function at `FEBF45DC`; sessions `0x01`/`0x03` on the default
+  route, no security). List 2 has a hard-coded null pointer (`0x8E178`) and its
+  count `FEBF45D8` is written only as 0 (`0x8DE76`, `0x8E1D4`), so the merge
+  emits list 1 alone: two bytes per latched event, 102 at most. The
+  continuation path, the only place the serializer is sized from the `0x300`
+  staging credit, needs a status 2 that `0x50922` never returns. In the
+  simulator the merge overruns once list 2 is given a synthetic count (770
+  bytes into a 768-byte buffer; count `0xFFFF` never returns), and no request
+  produces that state. Driven through `dcm_run_scheduled_request` over the real
+  LocalRAM snapshot: 552 cases, 409 request-reachable at stock capacity, none
+  writes outside the response envelope or past the staging buffer
+  `FEBF45E4..FEBF48E3`. Longest response 340 of 768 bytes
+  (`AB 03 20 6D 00 00`); furthest staging write 335 of 768. The serializers
+  compare the capacity only after writing (`0x5582C`), which costs nothing here
+  because payload sizes are CodeFlash descriptor constants: the largest run is
+  336 bytes, and 756 bytes if all 75 descriptors were selectable, against the
+  768-byte staging object. Harnesses:
+  `tools/targets/camry/research/probe_camry_f33_ab_merge_capacity.py` and
+  `tools/targets/camry/research/audit_camry_f33_ab_event_output_contract.py`;
+  static specs `static-spec.md` and `staging-spec.md` under
+  `build/out/targets/camry-8965F3307000/ab-merge-capacity-20261123/`.
+
+Open, in priority order:
+
+1. NvM slot and record families (`0x67176..0x735E6`) and the COM insert offset
+   parameters at `0x7D31E/0x7D72C`: caller provenance of the index.
+
 ## 14. Exact F33 persistent Gate-2 development patch
 
 The non-persistent signer architecture in §13 remains the preferred production
@@ -3376,6 +3462,9 @@ The result is **zero recovered register-arithmetic STORE path that can land on a
 steering command/current target after exact index provenance is applied**. This closes
 VAR-084 **E1** as defined. It does not assert that an arbitrary corrupted pointer can never
 write there.
+The target set is the steering cone only. The same resolver against callback
+cells, the executable tail and the stack tops is
+[§13.15](#1315-2026-11-23-execution-target-store-census).
 
 **E2 — runtime DMAC destination reprogramming.** Exact F33 uses a `0x40`-byte channel
 slice at `0xFFFF8400`; the two destination-address registers are offsets **`+0x04` and
