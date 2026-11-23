@@ -99,6 +99,14 @@ blanket promise that every reset clears every local-RAM view. Target builders
 must continue to prove the exact boot/reset path and startup write survival
 from firmware.
 
+Exact F33 never sleeps with LocalRAM intact. Its only terminal path,
+`enter_terminal_hardware_sequence @ 0x61940`, stops the P4_5 `EXTCLK1O`
+supervisor clock and spins on `br self` at `0x619BE`, handing the MCU to the
+external supervisor that watches that clock ([recovery report §10](../variants/camry-f33-eps-recovery-2026-09-11.md#10-p4_5-free-running-extclk1o-supervisor-clock)).
+The resident is the application's main loop and no stock path enters it, so one
+install is needed per EPS cold boot. The admission window of each boot is
+specified in [Camry live baseline §13.8](../variants/camry-2026-live-baseline.md#138-2026-10-22-full-decomp-re-audit-keyless-installation-after-startup).
+
 What differs per firmware is a small signer/I/O ABI: RX ring geometry and
 producer, foreground tick-flag address, authenticated trip/reset cells,
 freshness encoder, command-5 wrapper/globals, lower CAN writer and transmit

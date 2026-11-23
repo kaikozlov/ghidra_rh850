@@ -1079,39 +1079,68 @@ confirm the two critical preconditions:
 The speed and supply threshold values are firmware-verified raw representations;
 this does not infer that the car can safely enter programming at any particular
 road speed. The lifecycle byte `FEBEE81F` is a foreground snapshot of
-`FEBEB1A4` (published at `0xBF3AA`), maintained as an XOR-redundant mode/health
-state by `advance_health_record_lifecycle @ 0xB4214`. Its `0x11` transition
-state is *one* explicit admission blocker; it is **not** proven to be the
-actual source of every READY-mode NRC `0x22`. The observed READY `0x22` versus
-NRTD success in §57 therefore needs a gate-state snapshot, not an assumed
-phase explanation. There are also state/latch results surrounding `0x8B1B2`
-and `0x8B334`; satisfying the two isolated predicates is necessary but not
-sufficient proof of a successful handoff.
+`FEBEB1A4` (published at `0xBF3AA`). Its `0x11` value is one-way for the life of
+an application run, which closes stationary READY:
+
+- `advance_health_record_lifecycle @ 0xB4214` (`0xB4232..0xB42D4`) moves the
+  phase `0 -> 0x11` only when the application mode family (`FEBEB11A`) is `0x400`
+  or `0x500` and source-coherence bit 3 (`FEBEB18E`, written by
+  `update_source_coherence_history @ 0xB3F44`) is latched; bit 4 then gives
+  `0x22`. In family `0x300` the phase stays `0` and mode event `0x23` is raised.
+- `reset_health_record_lifecycle_entry @ 0xB41C8` has one caller,
+  `dispatch_control_foreground_transition @ 0xC214C` (`0xC241E..0xC244A`),
+  and only for a previous mode below `0x101`.
+- Family `0x300` then leaves on its own: event `0x23` selects `0x301`,
+  `step_mode301_invocation_counter @ 0xB2B70` raises event `0x24` on its sixth
+  invocation there, and `advance_mode300_substate @ 0xB2B9E` posts event `0xC`.
+  The admission window of a boot closes about seven mode-dispatcher invocations
+  after coherence bit 3 latches, whatever the tester sends.
+
+**The one re-initialization without a reset is in place.** In family `0x700`
+with event 2 pending, `advance_application_mode @ 0xB1808` calls
+`request_foreground_restart_from_mode @ 0xB17E`, because
+`get_mode_restart_hardware_selector @ 0xFF038` returns constant zero
+(`0x66FEE`). The request sets mode `0` and marker `0xA55A`;
+`dispatch_foreground_mode_generation @ 0x58B5E` then re-runs
+`initialize_generated_application_components @ 0x58814` (the cold-start
+`0x59448` and `0xBF97A` initializers) and
+`start_mode100_after_foreground_restart @ 0xB1C54`, with LocalRAM intact. The
+next crossing into `0x101` resets the lifecycle. Event 2 is raised only by
+`route_qualified_health_mode_requests @ 0xB4F8A` once the qualified health
+state (`FEBEB20E`) reaches `0x22` inside the control-foreground health
+machine; no diagnostic request reaches it.
+
+There are also state/latch results surrounding `0x8B1B2` and `0x8B334`;
+satisfying the two isolated predicates is necessary but not sufficient proof of a
+successful handoff.
 
 **Existing read-only discriminator (no execution experiment).** The stock
 application's SID `0x23` is configured for *extended diagnostic session 3* and
 memory ID 1. Its exact allow-set is `FEBE0000..FEBFFFFF` minus five protected
 intervals from CodeFlash `0x29254`: `FEBE0000..FEBE37FF`,
 `FEBE503C..FEBE52A7`, `FEBF0288..FEBF13CB`, `FEBF4958..FEBF4B33`, and
-`FEBF6000..FEBF6CDF`. All four gate-input ranges are outside those exclusions:
+`FEBF6000..FEBF6CDF`. The gate inputs are outside those exclusions:
 
 | Read address | Width | Purpose |
 |---|---:|---|
 | `FEBEE892` | 2 bytes | Speed snapshot fed to the first precondition |
-| `FEBEE81F` | 1 byte | Snapshot of lifecycle transition state |
+| `FEBEE81F` | 1 byte | Lifecycle phase snapshot (`0`, `0x11`, `0x22`) |
 | `FEBE66BA` | 2 bytes | Supply snapshot fed to the second precondition |
 | `FEBE819A` | 1 byte | Physical/functional diagnostic addressing flag |
+| `FEBEB11A` | 2 bytes | Application mode; family `0x400` is normal operation |
+| `FEBEB18E` | 1 byte | Source-coherence history; bit 3 feeds the lifecycle |
+| `FEBEB20E` | 1 byte | Qualified health state (`0`, `0x11`, `0x22`, `0x33`) |
 
-A **parked, read-only, bench/controlled-vehicle** comparison across NRTD,
-stationary READY, and natural READY-to-NRTD transitions would discriminate the
-known predicates; interpret the recorded traces offline. An ordinary *physical* SID-23 request may itself refresh the
-addressing flag, so capture its request/address context and do not interpret
-`FEBE819A=0` in that read as a persistent permission independent of request
-addressing. The four reads are not atomic: include timestamps and repeated
-snapshots. This step does **not** request `10 02`, reset an ECU, change a mode
-flag, or write to RAM/flash. Current ROM bounds say these addresses are eligible
-for memory-ID-1 reads; the complete read sequence for these specific cells has
-not yet been observed on this vehicle.
+Firmware predicts `FEBEE81F = 0x11` with mode family `0x400` in stationary
+READY. That reading, the NRTD steady-state value, and the delay from the first
+`50 03` to `0x11` (the real race budget) have not been observed on this
+vehicle. `tsk/followups/application_rmba_probe.py` performs one such read
+(`--memory-id 1 --address --size`; plan mode unless `--execute`). An ordinary
+*physical* SID-23 request may itself refresh the addressing flag, so capture its
+request/address context and do not interpret `FEBE819A=0` in that read as a
+persistent permission independent of request addressing. The reads are not
+atomic: include timestamps and repeated snapshots. This step does **not**
+request `10 02`, reset an ECU, change a mode flag, or write to RAM/flash.
 
 **Other candidate execution entrypoints, revisited on exact F33:**
 
@@ -1153,19 +1182,22 @@ PROGRAMMING entry. Neither path is the missing post-start *stock execution*
 primitive. Do not conflate current signer request/response liveness with the
 ability to install its code in the first place.
 
-**Next research, in order:** (1) establish the precise stationary READY
-lifecycle/status distinction through read-only gate snapshots and the complete
-`0x95B88 -> 0x8B334` pending-state mapping; (2) if a stationary READY gate
-seems admissible, verify the *entire* transition semantics offline and in
-controlled non-road testing, preserving peer health; (3) seek a demonstrable
+Firmware closes that window by source coherence, not by READY: coherence bit 3
+depends on source admission and the filtered source samples, and whether NRTD
+holds it unlatched past startup is the unobserved reading above.
+
+**Next research, in order:** (1) read the gate cells above across NRTD,
+stationary READY, and the boot race to size the window; (2) seek a demonstrable
 stock-exposed byte-placement primitive plus a separate mutable continuation,
 or a single service furnishing both, rather than retrying closed XCP commands;
-(4) focus memory-safety work on a specific ingress-to-write-to-PC chain before
-claiming arbitrary code execution. No new on-road execution or peer reset test
-is authorized by this static audit.
+(3) focus memory-safety work on a specific ingress-to-write-to-PC chain before
+claiming arbitrary code execution. Stationary READY `10 02` is closed by the
+lifecycle above. No new on-road execution or peer reset test is authorized by
+this static audit.
 
-The reproducible static evidence pin for the thresholds, instructions,
-service policy, phase producer, and four readable cells is
+The reproducible static evidence pin for the thresholds, gate and phase-machine
+instructions, restart path, terminal sequence, service policy, and readable
+cells is
 `tools/test camry_8965f3307000_hot_entry_gates`. The separate pinned GNU
 V850E3v5 simulator executes original CodeFlash directly, as detailed below.
 

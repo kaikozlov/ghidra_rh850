@@ -62,8 +62,44 @@ def main() -> None:
     check(has(0xB4214, "DAT_febeb1a4", "write_xor_encoded_u8_triplicate_d268c") and
           has(0xBF3AA, "DAT_febee81f = DAT_febeb1a4", "DAT_febee892"),
           "phase snapshot and speed snapshot have identified application producers")
-    check(has(0x5D68, "puVar5[-0x6cf1] != '\\x02'", "uVar7 = 0x33"),
-          "boot RequestDownload retains SecurityAccess state-2 check")
+    # The lifecycle blocker is one-way per application run (live baseline §13.8).
+    check(image[0xB4232:0xB42D4].hex() ==
+          "7352da05200e1100430f0300"
+          "1bf061e863e084d78ff9bfff1cdaa39f0300e099d2051306efffea3df535ca0e00ff84d2993d"
+          "010600fbea151330063884ffbeaa0132003a84ffb6aa84ffe2ac84ff8eac80ff689680ff3496"
+          "200e1100430f0300a515"
+          "010600fdaa15e0e99a0d84ffbeac84ff6aac80ff149620ee5a0020362300bffffad220e65a00"
+          "d50d"
+          "010600fcaa0d200e1100d50585d2d905200e2200430f0300",
+          "lifecycle phase machine is byte-exact: 0 -> 0x11 only in families 0x400/0x500 "
+          "with coherence bit 3, 0x300 raises event 0x23, bit 4 gives 0x22")
+    check(image[0xC2418:0xC244E].hex() ==
+          "1c06fffec9351d06fffee90dbfff201bbfffec1dbfffc82abfffcc2bbfff8c23bfffa623b51d"
+          "bfffa418bfff021bbfff821dbfffca1d",
+          "lifecycle reset is entered only for a previous mode below 0x101")
+    check(sorted(entry for entry, row in rows.items()
+                 if "reset_health_record_lifecycle_entry" in row["decompiled_c"]) == [0xB41C8, 0xC214C],
+          "control-foreground transition dispatcher is the only lifecycle-reset caller")
+    check(image[0xB2B70:0xB2B9E].hex() ==
+          "80076100a4ef0df965eab90541ead50520362400bfff28ea44ef0df940067f00"
+          "800721000c32bfff16ea40063f00",
+          "mode 0x301 raises event 0x24 on its sixth invocation; event 0xC follows")
+    check(image[0x66FEE:0x66FF2].hex() == "00527f00" and
+          has(0xFF038, "platform_restart_selector_constant_zero") and
+          has(0xB17EE, "transition_application_mode(0)",
+              "thunk_publish_redundant_mode_marker_a55a_5889a") and
+          has(0x58B5E, "reinitialize_application_for_foreground_restart();",
+              "call_restart_application_at_mode100_fdd68();") and
+          has(0x58814, "initialize_ecu_application_work_state();",
+              "call_initialize_control_application_work_state_fdc14();"),
+          "family-0x700 restart is in place: mode 0, marker A55A, cold-start initializers, mode 0x100")
+    check(sorted(entry for entry, row in rows.items()
+                 if "advance_qualified_health_state" in row["decompiled_c"]) == [0xB4FFC, 0xC214C, 0xC26A4],
+          "restart-raising qualified-health machine runs only from control-foreground dispatchers")
+    check(image[0x619BE:0x619C0].hex() == "8505",
+          "terminal hardware sequence ends in a branch-to-self after the supervisor clock stop")
+    check(image[0x5EFC:0x5F0A].hex() == "a49f0f93629ac20520363300e515",
+          "boot RequestDownload denies with NRC 0x33 unless boot SecurityAccess state is 2")
 
     # Distinguish gates before proposing a disruptive live 0x10 02 experiment.
     def gate(session: int, speed_raw: int, phase: int, supply: int, address_mode: int) -> tuple[int, int]:
@@ -92,11 +128,12 @@ def main() -> None:
                         (0xFEBF0288, 0xFEBF13CB), (0xFEBF4958, 0xFEBF4B33),
                         (0xFEBF6000, 0xFEBF6CDF)],
           "exact stock RMBA protected intervals")
-    probes = {0xFEBEE892: 2, 0xFEBEE81F: 1, 0xFEBE66BA: 2, 0xFEBE819A: 1}
+    probes = {0xFEBEE892: 2, 0xFEBEE81F: 1, 0xFEBE66BA: 2, 0xFEBE819A: 1,
+              0xFEBEB11A: 2, 0xFEBEB18E: 1, 0xFEBEB20E: 1}
     check(all(0xFEBE0000 <= address and address + size <= 0xFEC00000 and
               not any(lo <= address + size - 1 and address <= hi for lo, hi in protected)
               for address, size in probes.items()),
-          "all four diagnostic-gate snapshots are within readable RAM spans")
+          "all diagnostic-gate snapshots are within readable RAM spans")
 
     print("All hot-entry gate invariants pass (static/offline; no machine execution).")
 
