@@ -5590,6 +5590,10 @@ executes or substitutes ICU-S CMAC. `8F8D2` resolves the original callback
 pointer at ROM `25918=00090448` for B6 and packs freshness ID2 with rejection
 in bit16. `90448` accepts only an all-zero upper halfword; rejection preserves
 committed history without clearing the candidate.
+`8F596` publishes after rejection when `8F202()==1`
+(`u8[FEBE5502]==D2`) or when `profile[+9]!=1` and
+`u32[FEBE551C] < u16[25842]` (`00CC`). The rows below exercise the second
+condition for B6.
 
 | Original completion state | Committed / candidate ownership | Publication and counters |
 |---|---|---|
