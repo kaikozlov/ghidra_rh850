@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
-"""Compare the canonical FACI decisions with their mechanically generated C form."""
+"""Check shared FACI decisions and the Ghidra P1M-E machine load path."""
 from __future__ import annotations
 import ctypes
 import json
+import shutil
 import subprocess
 import tempfile
 from pathlib import Path
 from unittest.mock import patch
 from tools import REPO_ROOT
 from tools.emulation import generate_p1me_faci as generator
+from tools.emulation import p1me_machine
 
 JAVA = r'''
 import java.util.*;
@@ -132,6 +134,27 @@ def check_unicode_escape_rejection(source: str) -> None:
             raise AssertionError(f'raw Java Unicode escape accepted: {comment}')
 
 
+def check_machine_load(root: Path) -> None:
+    target = "camry-8965F3307000"
+    bundle = root / "machine-bundle"
+    # Ghidra keys compiled bundles by source directory. Copy the whole bundle
+    # into a fresh directory so a warm bridge must compile the script and helper.
+    shutil.copytree(p1me_machine.SCRIPT.parent, bundle)
+    proc = subprocess.run(
+        [str(REPO_ROOT / "tools/gtarget"), target, "script", "check",
+         str(bundle / p1me_machine.SCRIPT.name)],
+        cwd=REPO_ROOT, text=True, capture_output=True, check=False,
+    )
+    if proc.returncode:
+        raise AssertionError(
+            f"cold P1M-E Ghidra script check failed (exit {proc.returncode})"
+            f"\n--- stdout ---\n{proc.stdout}\n--- stderr ---\n{proc.stderr}"
+        )
+    scenario = REPO_ROOT / "tests/fixtures/rh850/machine" / target / "tauj-start-load-next-clock.json"
+    p1me_machine.run_many(target, [scenario], root / "smoke")
+    print("PASS cold P1M-E Ghidra script compile and nominal TAUJ clock smoke")
+
+
 def main() -> int:
     generator.generate(check=True)
     source=generator.SOURCE.read_text()
@@ -158,6 +181,7 @@ def main() -> int:
     temporary_root.mkdir(parents=True,exist_ok=True)
     with tempfile.TemporaryDirectory(prefix='verify-p1me-faci-',dir=temporary_root) as directory:
         root=Path(directory)
+        check_machine_load(root)
         original=compare(root/'original',source,rows)
         changed=source.replace('(scanned / 64) * 100','(scanned / 64) * 101')
         assert changed!=source

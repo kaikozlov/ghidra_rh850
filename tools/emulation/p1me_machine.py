@@ -6,6 +6,7 @@ import os
 import argparse
 import hashlib
 import json
+import shlex
 import subprocess
 import tempfile
 from collections.abc import Sequence
@@ -688,8 +689,20 @@ def _execute(
             command, cwd=ROOT, env=environment, text=True, capture_output=True, check=False,
         )
         if not batch_report_path.is_file():
-            detail = (proc.stderr or proc.stdout).strip()
-            raise P1MEMachineError(f"P1M-E machine runner failed before reporting: {detail}")
+            message = f"P1M-E machine runner failed before reporting (exit {proc.returncode})."
+            if "script_compile_failed" in proc.stdout or "script_compile_failed" in proc.stderr:
+                check = shlex.join([
+                    str(ROOT / "tools" / "gtarget"), target_name, "script", "check", str(SCRIPT),
+                ])
+                message += (
+                    "\nGhidra could not compile or load the machine script; no scenario ran."
+                    "\nCheck the bridge's access to the script sources and OSGi cache, then run "
+                    f"this compile-only diagnostic: {check}"
+                )
+            raise P1MEMachineError(
+                f"{message}\n--- Ghidra stdout ---\n{proc.stdout}"
+                f"\n--- Ghidra stderr ---\n{proc.stderr}"
+            )
         batch = json.loads(batch_report_path.read_text(encoding="utf-8"))
     if batch.get("schema") != "rh850-p1me-machine-batch-report-v1":
         raise P1MEMachineError("P1M-E machine batch report schema drift")

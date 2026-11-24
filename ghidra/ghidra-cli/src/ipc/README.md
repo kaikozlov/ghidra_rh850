@@ -60,7 +60,7 @@ BridgeClient wraps all bridge commands as typed methods:
 | Patch | `patch_bytes()`, `patch_nop()`, `patch_export()` |
 | Disasm | `disasm()` |
 | Stats | `stats()` |
-| Scripts | `script_run()`, `script_python()`, `script_java()`, `script_list()` |
+| Scripts | `script_run()`, `script_check()`, `script_list()` |
 | Batch | `batch()` |
 
 All methods delegate to `send_command(command_name, args)`. For commands not covered by a typed method, use `send_command()` directly.

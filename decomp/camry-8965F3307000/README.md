@@ -22,9 +22,10 @@ tools/test camry_decomp
 `status` validates the registered image hash, size, and non-overlapping symbol
 ranges. `equivalent` means agreement with the retained scenarios.
 
-`source NAME_OR_ADDRESS` prints the canonical symbol, repository-relative path,
-and reconstructed body. It accepts an exact canonical name or hexadecimal entry
-address. A missing body is an error.
+`source QUERY [...]` prints the canonical symbol, repository-relative path,
+and reconstructed body for each query in order. Use an exact name, entry
+address, or PC. For a PC inside a verified function range, the header includes
+the owning entry and offset. A miss returns a nonzero status; other hits still print.
 Use `tools/pseudo --target camry-8965F3307000 NAME_OR_ADDRESS` for Ghidra pseudocode.
 
 `corpus` generates and compiles disposable candidates. It copies checked retained

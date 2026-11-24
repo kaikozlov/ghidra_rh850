@@ -1,3 +1,4 @@
+use clap::error::{ContextKind, ContextValue, ErrorKind};
 use clap::{ArgAction, Args, Parser, Subcommand};
 use serde::{Deserialize, Serialize};
 
@@ -47,6 +48,73 @@ pub struct Cli {
     /// Overrides config `java_home` and auto-detection.
     #[arg(long, global = true)]
     pub java_home: Option<std::path::PathBuf>,
+}
+
+impl Cli {
+    pub(crate) fn parse_invocation() -> Self {
+        Self::try_parse().unwrap_or_else(|mut error| {
+            add_invocation_hints(&mut error);
+            error.exit()
+        })
+    }
+}
+
+fn add_invocation_hints(error: &mut clap::Error) {
+    let (invalid, insertions): (ContextKind, &[&str]) = match error.kind() {
+        ErrorKind::UnknownArgument => (ContextKind::InvalidArg, &["-n"]),
+        ErrorKind::InvalidSubcommand => (ContextKind::InvalidSubcommand, &["to", "from"]),
+        _ => return,
+    };
+    let Some(ContextValue::String(token)) = error.get(invalid) else {
+        return;
+    };
+    if invalid == ContextKind::InvalidArg && token.parse::<usize>().is_err() {
+        return;
+    }
+
+    let Some(args) = std::env::args_os()
+        .map(|arg| {
+            arg.into_string()
+                .ok()
+                .filter(|arg| !arg.contains(char::is_control))
+        })
+        .collect::<Option<Vec<_>>>()
+    else {
+        return;
+    };
+    // Reparse the repair to ensure the token is in the intended command and
+    // preserve the original executable, flags, and operand boundaries.
+    let mut corrected: Vec<_> = args.iter().map(String::as_str).collect();
+    for (index, arg) in args.iter().enumerate().skip(1).rev() {
+        if arg != token {
+            continue;
+        }
+        let mut repairs = Vec::new();
+        for &insertion in insertions {
+            corrected.insert(index, insertion);
+            if Cli::try_parse_from(corrected.iter().copied()).is_ok_and(|cli| {
+                matches!(
+                    (insertion, cli.command),
+                    ("-n", Commands::Disasm(_))
+                        | ("to", Commands::XRef(XRefCommands::To(_)))
+                        | ("from", Commands::XRef(XRefCommands::From(_)))
+                )
+            }) {
+                if let Ok(command) = shlex::try_join(corrected.iter().copied()) {
+                    repairs.push(format!("try: {command}").into());
+                }
+            }
+            corrected.remove(index);
+        }
+        if repairs.len() == insertions.len() {
+            if let Some(ContextValue::StyledStrs(mut tips)) = error.remove(ContextKind::Suggested) {
+                tips.append(&mut repairs);
+                repairs = tips;
+            }
+            error.insert(ContextKind::Suggested, ContextValue::StyledStrs(repairs));
+            return;
+        }
+    }
 }
 
 #[derive(Subcommand, Clone, Serialize, Deserialize, Debug)]

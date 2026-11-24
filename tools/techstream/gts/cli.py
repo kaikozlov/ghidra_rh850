@@ -205,6 +205,8 @@ def cmd_search(args: argparse.Namespace) -> int:
     cuwplus = resolve_cuwplus_root(gts, args.cuwplus_root)
     db_root = gts_db_root(gts, args.region, args.family)
     kinds = set(args.kind or ["did", "dtc", "behavior", "string", "file", "route", "cuw"])
+    # One extra text-mode row is enough to distinguish a full result from a truncated one.
+    collection_limit = None if args.limit < 0 else args.limit + int(not args.json)
     results = search_rows(
         args.query,
         gts,
@@ -214,8 +216,12 @@ def cmd_search(args: argparse.Namespace) -> int:
         kinds=kinds,
         ecu_filter=args.ecu,
         all_string_dbs=args.all_string_dbs,
+        limit=collection_limit,
     )
-    _print_rows(results, as_json=args.json, limit=args.limit)
+    shown = results[:args.limit] if len(results) > args.limit else results
+    _print_rows(shown, as_json=args.json)
+    if not args.json and len(shown) < len(results):
+        print("... more results; use --limit to raise the cap", file=sys.stderr)
     return 0
 
 
@@ -595,7 +601,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--ecu", help="limit DDB semantic search to ECU filename substring")
     p.add_argument("--kind", action="append", choices=("did", "dtc", "behavior", "string", "file", "route", "cuw"), help="limit result kind; repeatable")
     p.add_argument("--all-string-dbs", action="store_true", help="also search V_English/U_English; default M_English keeps common lookup fast")
-    p.add_argument("--limit", type=int, default=80)
+    p.add_argument("--limit", type=int, default=80, help="cap total results across all sources (default: 80; 0 shows none)")
     _common(p)
     p.set_defaults(func=cmd_search)
 

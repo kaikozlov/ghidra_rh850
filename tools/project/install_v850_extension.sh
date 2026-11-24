@@ -6,6 +6,12 @@ set -euo pipefail
 ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 # shellcheck disable=SC1091
 source "$ROOT/tools/lib/build_paths.sh"
+# shellcheck disable=SC1091
+source "$ROOT/tools/lib/ghidra_install_lock.sh"
+if ! _ghidra_install_lock_is_inherited; then
+  # Direct invocations take the same lock as bootstrap before writing anything.
+  _ghidra_with_install_lock exec "$BASH" "$0" "$@"
+fi
 mkdir -p "$BUILD_CACHE" "$BUILD_WORK" "$BUILD_OUT" "$BUILD_LOGS" "$BUILD_TMP"
 GHIDRA_HOME="$("$ROOT/tools/project/resolve_ghidra_home.sh")"
 VENDOR="$ROOT/ghidra/ghidra_v850"
@@ -16,6 +22,7 @@ SETTINGS_DIR="$USER_HOME/Library/ghidra/ghidra_12.2_PUBLIC"
 EXT_DIR="${V850_EXT_DIR:-$SETTINGS_DIR/Extensions/Renesas_v850}"
 LOG_DIR="$BUILD_LOGS/sleigh"
 MANIFEST="${PROCESSOR_MANIFEST:-$BUILD_OUT/processor_manifest.json}"
+ENV_FILE="${GHIDRA_PROCESSOR_ENV_FILE:-$BUILD_CACHE/ghidra-processor.env}"
 
 GHIDRA_VERSION=$(awk -F= '$1 == "application.version" { print $2 }' "$GHIDRA_HOME/Ghidra/application.properties")
 [[ "$GHIDRA_VERSION" == "12.2" ]] || {
@@ -116,6 +123,8 @@ fi
 
 echo "Installing Renesas_v850 -> $EXT_DIR"
 mkdir -p "$(dirname "$EXT_DIR")"
+# Do not advertise a ready cache while replacing the installed extension.
+rm -f "$ENV_FILE"
 rsync -a --delete "$BUILD_EXT/" "$EXT_DIR/"
 
 python3 "$ROOT/tools/project/fingerprint_processor.py" \
@@ -124,9 +133,10 @@ python3 "$ROOT/tools/project/fingerprint_processor.py" \
   --sla "$LANG/v850e3.sla" \
   --write "$MANIFEST"
 
-# Emit a small env file callers can source.
-ENV_FILE="${GHIDRA_PROCESSOR_ENV_FILE:-$BUILD_CACHE/ghidra-processor.env}"
-cat >"$ENV_FILE" <<EOF
+# Publish the completed environment in one step for lock-free readers.
+ENV_TMP="$(mktemp "${ENV_FILE}.XXXXXX")"
+trap 'rm -f "$ENV_TMP"' EXIT
+cat >"$ENV_TMP" <<EOF
 export GHIDRA_HOME="$GHIDRA_HOME"
 export GHIDRA_ISOLATED_HOME="$USER_HOME"
 export V850_EXT_DIR="$EXT_DIR"
@@ -137,6 +147,8 @@ export GHIDRA_CLI_VERSION="$CLI_VERSION"
 export GHIDRA_JAVA_OPTIONS="\${GHIDRA_JAVA_OPTIONS:-} -Duser.home=$USER_HOME"
 export GHIDRA_HEADLESS_JAVA_OPTIONS="\${GHIDRA_HEADLESS_JAVA_OPTIONS:-} -Duser.home=$USER_HOME"
 EOF
+mv -f "$ENV_TMP" "$ENV_FILE"
+trap - EXIT
 
 echo "Installed extension: $EXT_DIR"
 echo "Processor manifest: $MANIFEST"

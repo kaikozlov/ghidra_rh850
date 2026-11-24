@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
@@ -39,15 +40,15 @@ def _english_strings(parser: DDBParser, db_root: Path):
     return load_string_db(parser, path)
 
 
-def _english_string_dbs(parser: DDBParser, db_root: Path, m_strings: StringDataBase | None = None) -> dict[str, Any]:
-    out = {}
-    for name in ("M_English.ddb", "V_English.ddb", "U_English.ddb"):
-        path = db_root / name
-        if path.is_file():
-            out[name] = m_strings if name == "M_English.ddb" and m_strings is not None else load_string_db(parser, path)
-    if "M_English.ddb" not in out:
-        raise SystemExit(f"missing GTS+ OEM string database: {db_root / 'M_English.ddb'}")
-    return out
+def _iter_english_string_dbs(
+    parser: DDBParser, db_root: Path, m_strings: StringDataBase, *, all_string_dbs: bool,
+) -> Iterator[tuple[str, StringDataBase]]:
+    yield "M_English.ddb", m_strings
+    if all_string_dbs:
+        for name in ("V_English.ddb", "U_English.ddb"):
+            path = db_root / name
+            if path.is_file():
+                yield name, load_string_db(parser, path)
 
 
 def _resolve_ecu(db_root: Path, query: str) -> Path:

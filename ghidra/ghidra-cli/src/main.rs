@@ -23,7 +23,7 @@ use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::Layer;
 
 fn main() {
-    let cli = Cli::parse();
+    let cli = Cli::parse_invocation();
 
     apply_global_env_overrides(&cli);
 
@@ -1058,6 +1058,40 @@ fn parse_expect_spec(spec: &str) -> serde_json::Value {
     serde_json::Value::Object(obj)
 }
 
+fn run_inline_script(
+    client: &BridgeClient,
+    filename: &str,
+    source: &str,
+) -> anyhow::Result<serde_json::Value> {
+    let mut builder = tempfile::Builder::new();
+    builder.prefix("ghidra-cli-inline-");
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        builder.permissions(std::fs::Permissions::from_mode(0o700));
+    }
+    let dir = builder.tempdir()?;
+    let path = dunce::canonicalize(dir.path())?.join(filename);
+    std::fs::write(&path, source)?;
+    let path = path
+        .to_str()
+        .ok_or_else(|| anyhow::anyhow!("Inline script path is not valid UTF-8"))?;
+    // Keep the source alive through queueing, execution and cooperative cancellation.
+    // A client read timeout would delete it while the bridge still has a pending job.
+    let reply = client.send_command_with_timeout(
+        "script_run",
+        Some(serde_json::json!({"path": path, "transient_source": true})),
+        None,
+    );
+    let cleanup = dir.close();
+    let mut reply = reply?;
+    cleanup?;
+    if let Some(result) = reply.as_object_mut() {
+        result.remove("path");
+    }
+    Ok(reply)
+}
+
 /// The bridge's list handlers only support a literal substring match on the
 /// primary name field, not the full filter DSL implemented client-side in
 /// `query::Filter`. When a full filter expression, sort, or count is requested,
@@ -1620,8 +1654,19 @@ fn execute_via_bridge(
                         .unwrap_or_else(|_| args.script_path.clone());
                     client.script_check(&path)
                 }
-                ScriptCommands::Python(args) => client.script_python(&args.code),
-                ScriptCommands::Java(args) => client.script_java(&args.code),
+                ScriptCommands::Python(args) => {
+                    run_inline_script(client, "InlinePython.py", &args.code)
+                }
+                ScriptCommands::Java(args) => run_inline_script(
+                    client,
+                    "InlineJava.java",
+                    &format!(
+                        "import ghidra.app.script.GhidraScript;\n\
+                         public class InlineJava extends GhidraScript {{\n\
+                         @Override public void run() throws Exception {{\n{}\n}}\n}}\n",
+                        args.code
+                    ),
+                ),
                 ScriptCommands::List => client.script_list(),
             }
         }

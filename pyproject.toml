@@ -13,6 +13,7 @@ dependencies = [
     "systemrdl-compiler>=1.33.0",
     "ida-domain>=0.5.1",
     "zstandard>=0.25.0",
+    "pyghidra>=3.2.0",
 ]
 
 [build-system]

@@ -8,10 +8,12 @@ import json
 import shutil
 import subprocess
 import tempfile
+from contextlib import redirect_stderr, redirect_stdout
+from io import StringIO
 from pathlib import Path
 from unittest.mock import patch
 
-from tools.targets.camry.decomp import promotion, sources, tree
+from tools.targets.camry.decomp import cli, promotion, sources, tree
 from tools.targets.camry.decomp.c_text import (
     _c_contains, _direct_calls, _function_heads, _match_delimiter, _split_args,
 )
@@ -42,17 +44,17 @@ def check_source_lookup() -> None:
             # of the status assigned to the canonical retained implementation.
             for status in ("converted", "equivalent", "byte-matched"):
                 matched[0]["status"] = status
-                assert sources.locate_source("0x1000") == (
-                    symbol, retained, retained.read_text(encoding="utf-8"),
-                )
+                assert list(sources.locate_sources(["0x1000"])) == [
+                    sources.SourceMatch(symbol, retained, retained.read_text(encoding="utf-8"), None),
+                ]
                 bodies, duplicates = sources._load_bodies(candidates=True)
                 expected = candidate if status == "converted" else retained
                 assert bodies["subject"] == expected.read_text(encoding="utf-8")
                 assert not duplicates
             curated.write_text("int subject(void)\n{\n  return 3;\n}\n", encoding="utf-8")
-            assert sources.locate_source("1000") == (
-                symbol, curated, curated.read_text(encoding="utf-8"),
-            )
+            assert list(sources.locate_sources(["1000"])) == [
+                sources.SourceMatch(symbol, curated, curated.read_text(encoding="utf-8"), None),
+            ]
             locations = {}
             bodies, duplicates = sources._load_bodies(candidates=True, locations=locations)
             assert bodies["subject"] == curated.read_text(encoding="utf-8")
@@ -61,21 +63,127 @@ def check_source_lookup() -> None:
             curated.unlink()
             candidate.unlink()
             matched[0]["status"] = "converted"
-            assert sources.locate_source("subject") == (
-                symbol, retained, retained.read_text(encoding="utf-8"),
-            )
-            for query, message in (
-                ("unknown", "unknown reconstructed function"),
-                ("0x3000", "unknown reconstructed function"),
-                ("missing", "no reconstructed C body"),
-            ):
-                try:
-                    sources.locate_source(query)
-                except ValueError as exc:
-                    assert message in str(exc)
-                else:
-                    raise AssertionError(f"{query}: expected lookup failure")
+            hits = list(sources.locate_sources(["subject", "unknown", "missing"]))
+            assert hits == [
+                sources.SourceMatch(symbol, retained, retained.read_text(encoding="utf-8"), None),
+                "unknown reconstructed function: unknown",
+                "no reconstructed C body for missing at 0x2000",
+            ]
     print("PASS source lookup: cache-independent canonical bodies and explicit unchecked candidates")
+
+
+def check_source_body_ranges() -> None:
+    def run(*queries: str) -> tuple[int, str, str]:
+        output = StringIO()
+        errors = StringIO()
+        with redirect_stdout(output), redirect_stderr(errors):
+            status = cli.main(["source", *queries])
+        return status, output.getvalue(), errors.getvalue()
+
+    def function(entry: int, *ranges: tuple[int, int]) -> dict:
+        def location(addr: int) -> dict:
+            return {"space": "ram", "offset": f"{addr:x}"}
+
+        return {
+            "record": "function",
+            "entry": location(entry),
+            "body_ranges": [
+                {"min": location(start), "max": location(end)} for start, end in ranges
+            ],
+        }
+
+    subject = {"name": "subject", "addr": "0x1000", "ranges": [[0x1000, 0x1017]]}
+    missing = {"name": "missing", "addr": "0x2000"}
+    helper = {"name": "helper", "addr": "0x4000"}
+    body = "int subject(void)\n{\n  return 1;\n}\n"
+    helper_body = "int helper(void)\n{\n  return 2;\n}\n"
+    with tempfile.TemporaryDirectory(prefix="camry-source-ranges-") as directory:
+        root = Path(directory)
+        retained = root / "src/retained/00001000.c"
+        retained.parent.mkdir(parents=True)
+        retained.write_text(body + "\n" + helper_body, encoding="utf-8")
+        inventory = root / "inventory.jsonl"
+        inventory.write_text(
+            "".join(json.dumps(record) + "\n" for record in [
+                function(0x1000, (0x0FFC, 0x0FFF), (0x1000, 0x1007), (0x1010, 0x1017)),
+                function(0x2000, (0x2000, 0x2007)),
+                function(0x3000, (0x1014, 0x1016), (0x3000, 0x3007), (0x3FFF, 0x4000)),
+                function(0x4000, (0x4000, 0x4007)),
+            ]),
+            encoding="utf-8",
+        )
+        target = {
+            "decompiler_corpus": "corpus.jsonl", "inventory_baseline": inventory.name,
+            "codeflash_sha256": "fixture",
+        }
+        metadata = {
+            "record": "metadata", "analysis_target": tree.TARGET, "executable_sha256": "fixture",
+            "project_inventory_sha256": hashlib.sha256(inventory.read_bytes()).hexdigest(),
+        }
+        (root / target["decompiler_corpus"]).write_text(
+            json.dumps(metadata) + "\nunused pseudocode records\n", encoding="utf-8",
+        )
+        with (
+            patch.object(cli, "REPO_ROOT", root),
+            patch.object(sources, "ROOT", root),
+            patch.object(sources, "REPO_ROOT", root),
+            patch.object(sources, "resolve_target", return_value=(tree.TARGET, target)) as registry,
+            patch.object(sources, "load_symbols", return_value=[subject, missing, helper]) as symbols,
+            patch.object(sources, "_load_bodies", wraps=sources._load_bodies) as bodies,
+            patch.object(
+                sources.pseudo, "load_function_body_ranges", wraps=sources.pseudo.load_function_body_ranges,
+            ) as ranges,
+        ):
+            path = f" * {retained.relative_to(root)} */\n"
+            header = f"/* {tree.TARGET}: subject @ 0x1000"
+            exact = header + "\n" + path + body
+            assert run("1000") == (0, exact, "")
+            registry.assert_not_called()
+            ranges.assert_not_called()
+            symbols.reset_mock()
+            bodies.reset_mock()
+
+            status, output, errors = run(
+                "0x1007", "0x1008", "0x1015", "0x2001", "0x3001", "subject", "0x1017",
+                "0x4000", "0x0ffc",
+            )
+            assert status == 1
+            assert output == "\n".join([
+                header + " (PC 0x00001007, offset +0x7)\n" + path + body,
+                exact,
+                header + " (PC 0x00001017, offset +0x17)\n" + path + body,
+                f"/* {tree.TARGET}: helper @ 0x4000\n" + path + helper_body,
+                header + " (PC 0x00000ffc, offset -0x4)\n" + path + body,
+            ])
+            assert errors.splitlines() == [
+                "no function owns PC 0x00001008",
+                "ambiguous function owner for PC 0x00001015: 0x00001000, 0x00003000",
+                "no reconstructed C body for missing at 0x2000 (PC 0x00002001)",
+                "no reconstructed C body for function at 0x00003000 (PC 0x00003001)",
+            ]
+            registry.assert_called_once_with(tree.TARGET)
+            ranges.assert_called_once_with(inventory, metadata)
+            symbols.assert_called_once_with()
+            bodies.assert_called_once()
+
+            with inventory.open("a", encoding="utf-8") as handle:
+                handle.write("\n")
+            ranges.reset_mock()
+            status, output, errors = run("0x1007", "subject", "0x1017")
+            assert status == 1 and output == exact
+            assert errors.count("project inventory does not match pseudocode corpus") == 2
+            ranges.assert_called_once_with(inventory, metadata)
+    print("PASS source body ranges: exact precedence, gaps, ambiguity, and ordered partial results")
+
+
+def check_registered_source_lookup() -> None:
+    exact, interior = sources.locate_sources(["memcpy_forward", "0x89f30"])
+    assert isinstance(exact, sources.SourceMatch), exact
+    assert isinstance(interior, sources.SourceMatch), interior
+    assert exact.path == tree.ROOT / "src/memory.c"
+    assert interior == sources.SourceMatch(exact.symbol, exact.path, exact.body, 0x89F30)
+    assert exact.symbol["addr"] == "0x89f2e"
+    print("PASS registered source lookup: memcpy_forward entry and interior agree")
 
 
 def check_c_token_matching() -> None:
@@ -653,6 +761,8 @@ const char *command_read_fault(void) {
 
 def main() -> int:
     check_source_lookup()
+    check_source_body_ranges()
+    check_registered_source_lookup()
     check_c_token_matching()
     check_promotion_declarations()
     check_host_memory_tables()

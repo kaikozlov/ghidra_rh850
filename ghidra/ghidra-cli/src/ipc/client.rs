@@ -606,14 +606,6 @@ impl BridgeClient {
         self.send_command("script_run", Some(payload))
     }
 
-    pub fn script_python(&self, code: &str) -> Result<serde_json::Value> {
-        self.send_command("script_python", Some(json!({"code": code})))
-    }
-
-    pub fn script_java(&self, code: &str) -> Result<serde_json::Value> {
-        self.send_command("script_java", Some(json!({"code": code})))
-    }
-
     pub fn script_list(&self) -> Result<serde_json::Value> {
         self.send_command("script_list", None)
     }

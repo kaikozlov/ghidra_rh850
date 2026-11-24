@@ -59,6 +59,8 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -775,8 +777,6 @@ public class GhidraCliBridge extends GhidraScript {
             // Script commands
             case "script_run":      return handleScriptRun(args);
             case "script_check":    return handleScriptCheck(args);
-            case "script_java":     return handleScriptJava(args);
-            case "script_python":   return handleScriptPython(args);
             case "script_list":     return handleScriptList();
             // Batch
             case "batch":           return handleBatch(args);
@@ -4927,6 +4927,46 @@ public class GhidraCliBridge extends GhidraScript {
 
     // --- Script Handlers ---
 
+    private JsonObject checkJavaScriptSourceAccess(File scriptFile) {
+        if (!scriptFile.getName().endsWith(".java")) return null;
+        Path source = scriptFile.toPath();
+        try {
+            // A metadata lookup can succeed even when the bridge cannot open the
+            // source or list the bundle directory. Ghidra can mask either denial
+            // with a provider or bundle-loading exception.
+            Files.newInputStream(source).close();
+            Files.newDirectoryStream(source.getParent()).close();
+            return null;
+        } catch (IOException | SecurityException e) {
+            return errorResponse("script_compile_failed",
+                "Ghidra cannot read Java script source: " + source,
+                e + "\nCheck that the Ghidra bridge can read the file and list its parent directory.");
+        }
+    }
+
+    private JsonObject scriptLoadError(File scriptFile, Object bundleHost,
+            GhidraScriptLoadException error, PrintWriter out, StringWriter buffer) {
+        // The provider writes javac output to this writer, not to the exception.
+        // Include the exception chain even when there was no compiler output.
+        error.printStackTrace(out);
+        if (scriptFile.getName().endsWith(".java") && bundleHost != null) {
+            try {
+                Path osgiDir = (Path) bundleHost.getClass().getMethod("getOsgiDir").invoke(null);
+                Path lockFile = osgiDir.resolve("parallel.lock");
+                if (!Files.isWritable(osgiDir)
+                        || (Files.exists(lockFile) && !Files.isWritable(lockFile))) {
+                    out.println("Check that the Ghidra bridge can write its OSGi cache and lock: "
+                        + lockFile);
+                }
+            } catch (ReflectiveOperationException | SecurityException e) {
+                out.println("Could not inspect the Ghidra OSGi cache: " + e);
+            }
+        }
+        out.flush();
+        return errorResponse("script_compile_failed",
+            "Script failed to compile or load: " + error.getMessage(), buffer.toString());
+    }
+
     /**
      * Compile a Java script without executing it. Uses the same bundle-host
      * registration + getScriptInstance path as handleScriptRun, but never calls
@@ -4938,23 +4978,27 @@ public class GhidraCliBridge extends GhidraScript {
         if (scriptPath == null) return errorResult("Script path required");
 
         File scriptFile = new File(scriptPath).getAbsoluteFile();
+        JsonObject accessError = checkJavaScriptSourceAccess(scriptFile);
+        if (accessError != null) return accessError;
         if (!scriptFile.exists()) return errorResult("Script not found: " + scriptFile.getPath());
 
         ResourceFile source = new ResourceFile(scriptFile);
         ResourceFile sourceDir = source.getParentFile();
+        Object bundleHost = null;
+        Object addedBundle = null;
+        boolean scriptLoaded = false;
 
         StringWriter buffer = new StringWriter();
         PrintWriter out = new PrintWriter(buffer);
         try {
-            Object bundleHost = GhidraScriptUtil.class
-                .getMethod("getBundleHost").invoke(null);
+            bundleHost = GhidraScriptUtil.class.getMethod("getBundleHost").invoke(null);
             if (bundleHost == null) return errorResult("Ghidra script bundle host unavailable");
             Class<?> bhClass = bundleHost.getClass();
             Object existing = bhClass
-                .getMethod("getExistingGhidraBundle", ResourceFile.class)
+                .getMethod("getGhidraBundle", ResourceFile.class)
                 .invoke(bundleHost, sourceDir);
             if (existing == null) {
-                bhClass.getMethod("add", ResourceFile.class, boolean.class, boolean.class)
+                addedBundle = bhClass.getMethod("add", ResourceFile.class, boolean.class, boolean.class)
                     .invoke(bundleHost, sourceDir, true, false);
             }
 
@@ -4966,6 +5010,7 @@ public class GhidraCliBridge extends GhidraScript {
 
             // getScriptInstance compiles the source. We don't call execute().
             GhidraScript script = provider.getScriptInstance(source, out);
+            scriptLoaded = true;
             out.flush();
 
             JsonObject result = new JsonObject();
@@ -4975,14 +5020,15 @@ public class GhidraCliBridge extends GhidraScript {
             result.addProperty("class", script.getClass().getName());
             return result;
         } catch (GhidraScriptLoadException e) {
-            out.flush();
-            String diag = buffer.toString().trim();
-            String msg = "Script failed to compile: " + e.getMessage();
-            return errorResponse("script_compile_failed", msg,
-                diag.isEmpty() ? null : diag);
+            return scriptLoadError(scriptFile, bundleHost, e, out, buffer);
         } catch (Exception e) {
+            e.printStackTrace(out);
             out.flush();
-            return errorResult("Script check failed: " + e.getMessage());
+            return errorResponse("script_check_failed", "Script check failed: " + e, buffer.toString());
+        } finally {
+            if (addedBundle != null) {
+                removeTransientScriptBundle(bundleHost, addedBundle, sourceDir, scriptLoaded);
+            }
         }
     }
 
@@ -4994,15 +5040,23 @@ public class GhidraCliBridge extends GhidraScript {
         // working directory the bridge JVM inherited. This removes the RE-repo
         // workaround of copying scripts into a global scripts directory.
         File scriptFile = new File(scriptPath).getAbsoluteFile();
+        JsonObject accessError = checkJavaScriptSourceAccess(scriptFile);
+        if (accessError != null) return accessError;
         if (!scriptFile.exists()) return errorResult("Script not found: " + scriptFile.getPath());
 
         String[] scriptArgs = getArgStringArray(args, "args");
         ResourceFile source = new ResourceFile(scriptFile);
         ResourceFile sourceDir = source.getParentFile();
+        boolean transientSource = getArgBool(args, "transient_source", false);
+        if (transientSource && currentProgram == null) return errorResult("No program loaded");
+        Object bundleHost = null;
+        Object transientBundle = null;
+        boolean scriptLoaded = false;
 
         StringWriter buffer = new StringWriter();
         PrintWriter out = new PrintWriter(buffer);
         try {
+            monitor.checkCancelled();
             // A script only resolves if its parent directory is a registered
             // bundle/source directory (GhidraScriptUtil.findSourceDirectoryContaining
             // scans BundleHost.getBundleFiles()). Register it if it is not already.
@@ -5011,16 +5065,16 @@ public class GhidraCliBridge extends GhidraScript {
             // add an OSGi Import-Package on ghidra.app.plugin.core.osgi, which the
             // bridge's own script bundle cannot wire, so the whole bridge fails to
             // load. handleScriptList() uses the same reflection pattern.
-            Object bundleHost = GhidraScriptUtil.class
-                .getMethod("getBundleHost").invoke(null);
+            bundleHost = GhidraScriptUtil.class.getMethod("getBundleHost").invoke(null);
             if (bundleHost == null) return errorResult("Ghidra script bundle host unavailable");
             Class<?> bhClass = bundleHost.getClass();
             Object existing = bhClass
-                .getMethod("getExistingGhidraBundle", ResourceFile.class)
+                .getMethod("getGhidraBundle", ResourceFile.class)
                 .invoke(bundleHost, sourceDir);
             if (existing == null) {
-                bhClass.getMethod("add", ResourceFile.class, boolean.class, boolean.class)
+                Object bundle = bhClass.getMethod("add", ResourceFile.class, boolean.class, boolean.class)
                     .invoke(bundleHost, sourceDir, true, false);
+                if (transientSource) transientBundle = bundle;
             }
 
             GhidraScriptProvider provider = GhidraScriptUtil.getProvider(source);
@@ -5031,6 +5085,8 @@ public class GhidraCliBridge extends GhidraScript {
 
             // getScriptInstance compiles the source via the bundle host.
             GhidraScript script = provider.getScriptInstance(source, out);
+            scriptLoaded = true;
+            monitor.checkCancelled();
             script.setScriptArgs(scriptArgs);
 
             // Run on the program executor's exclusive objects. `monitor` is the
@@ -5058,24 +5114,45 @@ public class GhidraCliBridge extends GhidraScript {
             // succeeded only when its expected records actually exist.
             return validateArtifacts(result, args, buffer.toString());
         } catch (GhidraScriptLoadException e) {
-            // Surface the actual compiler diagnostics. Ghidra otherwise masks a
-            // real javac error (e.g. "cannot find symbol" at a line) behind a
-            // generic "The class could not be found ... not found by <bundle>"
-            // message. The bundle compiler writes javac output to `out`; fold it
-            // into the structured error response.
-            out.flush();
-            String diag = buffer.toString().trim();
-            String msg = "Script failed to compile: " + e.getMessage();
-            return errorResponse("script_compile_failed", msg,
-                diag.isEmpty() ? null : diag);
+            if (transientSource && scriptFile.getName().endsWith(".py")) {
+                return errorResponse("script_runtime_unavailable",
+                    "Python requires an active PyGhidra bridge. Stop the existing bridge, then "
+                    + "start it with GHIDRA_CLI_PYGHIDRA_PYTHON set to a Python with PyGhidra installed.",
+                    e.getMessage());
+            }
+            return scriptLoadError(scriptFile, bundleHost, e, out, buffer);
         } catch (CancelledException e) {
-            return errorResult("Script cancelled");
-        } catch (Exception e) {
-            // Preserve any output the script produced before it threw.
             out.flush();
-            JsonObject err = errorResult("Script threw: " + e.getMessage());
-            err.addProperty("stdout", buffer.toString());
-            return err;
+            return errorResponse("script_cancelled", "Script cancelled", buffer.toString());
+        } catch (Exception | AssertionError | LinkageError e) {
+            out.flush();
+            if (monitor.isCancelled()) {
+                return errorResponse("script_cancelled", "Script cancelled", buffer.toString());
+            }
+            return errorResponse("script_failed", "Script threw: " + e, buffer.toString());
+        } finally {
+            if (transientBundle != null) {
+                removeTransientScriptBundle(bundleHost, transientBundle, sourceDir, scriptLoaded);
+            }
+        }
+    }
+
+    private void removeTransientScriptBundle(Object bundleHost, Object bundle,
+            ResourceFile sourceDir, boolean scriptLoaded) {
+        try {
+            var clean = bundle.getClass().getMethod("clean");
+            clean.invoke(bundle);
+            // Some Ghidra releases short-circuit binary cleanup while clearing build errors.
+            if (!scriptLoaded) clean.invoke(bundle);
+        } catch (ReflectiveOperationException e) {
+            printerr("Could not clean transient script bundle: " + e);
+        } finally {
+            try {
+                bundleHost.getClass().getMethod("remove", ResourceFile.class)
+                    .invoke(bundleHost, sourceDir);
+            } catch (ReflectiveOperationException e) {
+                printerr("Could not remove transient script bundle: " + e);
+            }
         }
     }
 
@@ -5208,14 +5285,6 @@ public class GhidraCliBridge extends GhidraScript {
             cachedGhidraVersion = "";
         }
         return cachedGhidraVersion;
-    }
-
-    private JsonObject handleScriptJava(JsonObject args) {
-        return errorResult("Inline Java execution not supported in bridge mode");
-    }
-
-    private JsonObject handleScriptPython(JsonObject args) {
-        return errorResult("Python execution not available (Java bridge replaces Python bridge)");
     }
 
     private JsonObject handleScriptList() {

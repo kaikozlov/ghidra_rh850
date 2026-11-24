@@ -106,6 +106,7 @@ PY
 fi
 
 # --- All other subcommands: route through the bridge -------------------------
+source "$ROOT/tools/lib/ghidra_bridge_env.sh"
 mkdir -p "$PROJECT_DIR"
 GHIDRA_CLI=$("$ROOT/tools/project/resolve_ghidra_cli.sh" --ensure-vendored)
 PROGRAM_NAME="${PE_PROGRAM:-CommandCommon.dll}"

@@ -2,9 +2,12 @@
 """Behavioral tests for cached, fail-closed Ghidra environment bootstrap."""
 from __future__ import annotations
 
+import fcntl
 import os
+import signal
 import subprocess
 import tempfile
+import time
 from pathlib import Path
 
 from tools import REPO_ROOT
@@ -62,10 +65,15 @@ with tempfile.TemporaryDirectory() as td:
     installer.write_text(
         "#!/usr/bin/env bash\n"
         "set -euo pipefail\n"
-        "n=0; [[ ! -f \"$FAKE_INSTALL_COUNT\" ]] || n=$(cat \"$FAKE_INSTALL_COUNT\")\n"
-        "printf '%s\\n' \"$((n + 1))\" > \"$FAKE_INSTALL_COUNT\"\n"
+        "printf 'install\\n' >> \"$FAKE_INSTALL_COUNT\"\n"
+        "if [[ ${FAKE_INSTALL_RC:-0} != 0 ]]; then exit \"$FAKE_INSTALL_RC\"; fi\n"
+        "if [[ -n ${FAKE_INSTALL_STARTED:-} ]]; then\n"
+        "  touch \"$FAKE_INSTALL_STARTED\"\n"
+        "  while [[ ! -f \"$FAKE_RELEASE_INSTALL\" ]]; do sleep 0.01; done\n"
+        "fi\n"
         "cp \"$FAKE_ENV_TEMPLATE\" \"$GHIDRA_PROCESSOR_ENV_FILE\"\n"
         "eval \"$FAKE_REPAIR_COMMAND\"\n"
+        "if [[ -n ${FAKE_CURRENT_CACHE:-} ]]; then touch \"$FAKE_CURRENT_CACHE\"; fi\n"
     )
     installer.chmod(0o755)
     fingerprint = temp / "fingerprint.py"
@@ -74,6 +82,12 @@ with tempfile.TemporaryDirectory() as td:
         "import os, sys\n"
         "from pathlib import Path\n"
         "Path(os.environ['FAKE_FINGERPRINT_LOG']).write_text(' '.join(sys.argv[1:]))\n"
+        "current = os.environ.get('FAKE_CURRENT_CACHE')\n"
+        "if current and not Path(current).exists():\n"
+        "    checked = os.environ.get('FAKE_STALE_CHECKED')\n"
+        "    if checked:\n"
+        "        Path(checked).touch()\n"
+        "    raise SystemExit(1)\n"
         "raise SystemExit(int(os.environ.get('FAKE_FINGERPRINT_RC', '0')))\n"
     )
     fingerprint.chmod(0o755)
@@ -81,7 +95,10 @@ with tempfile.TemporaryDirectory() as td:
     base_env = dict(os.environ)
     base_env.update(
         {
+            "BUILD_ROOT": str(temp / "build"),
+            "BUILD_CACHE": str(temp / "cache"),
             "GHIDRA_PROCESSOR_ENV_FILE": str(env_file),
+            "GHIDRA_ENV_FORCE_REBUILD": "0",
             "GHIDRA_INSTALL_SCRIPT": str(installer),
             "GHIDRA_FINGERPRINT_TOOL": str(fingerprint),
             "FAKE_INSTALL_COUNT": str(install_count),
@@ -91,12 +108,22 @@ with tempfile.TemporaryDirectory() as td:
         }
     )
 
-    def source(mode: str = "none", extra: dict[str, str] | None = None):
+    def bootstrap_command(mode: str = "none", *, errexit: bool = True) -> list[str]:
+        options = "-euo" if errexit else "-uo"
+        return [
+            "bash", "-c", f'set {options} pipefail; source "$1" "$2"; printf "%s" "$GHIDRA_ENV_READY"',
+            "bootstrap", str(HELPER), mode,
+        ]
+
+    def installs(path: Path = install_count) -> int:
+        return len(path.read_text().splitlines()) if path.exists() else 0
+
+    def source(mode: str = "none", extra: dict[str, str] | None = None, *, errexit: bool = True):
         env = dict(base_env)
         if extra:
             env.update(extra)
         return subprocess.run(
-            ["bash", "-c", f'set -euo pipefail; source "{HELPER}" {mode}; printf "%s" "$GHIDRA_ENV_READY"'],
+            bootstrap_command(mode, errexit=errexit),
             cwd=REPO,
             env=env,
             text=True,
@@ -115,7 +142,7 @@ with tempfile.TemporaryDirectory() as td:
     check("missing env triggers installer", result.returncode == 0, result.stderr)
     check(
         "missing env installer called once",
-        install_count.exists() and install_count.read_text().strip() == "1",
+        installs() == 1,
     )
 
     # A stale env (missing compiled SLA) must trigger reinstall.
@@ -124,7 +151,7 @@ with tempfile.TemporaryDirectory() as td:
     check("stale env triggers installer", result.returncode == 0, result.stderr)
     check(
         "stale env installer called again",
-        install_count.exists() and install_count.read_text().strip() == "2",
+        installs() == 2,
     )
 
     # A cache produced by the previous pinned Ghidra release must never be reused.
@@ -134,7 +161,7 @@ with tempfile.TemporaryDirectory() as td:
     check("previous-version cache triggers installer", result.returncode == 0, result.stderr)
     check(
         "previous-version cache is replaced",
-        install_count.exists() and install_count.read_text().strip() == "3",
+        installs() == 3,
     )
 
     result = source("full")
@@ -159,6 +186,72 @@ with tempfile.TemporaryDirectory() as td:
         result.returncode == 0 and "--sla" in args,
         args,
     )
+
+    forced = {"GHIDRA_ENV_FORCE_REBUILD": "1"}
+    result = source(extra={**forced, "FAKE_INSTALL_RC": "17"}, errexit=False)
+    check("forced installer failure fails closed without errexit",
+          result.returncode == 17 and not result.stdout, result.stderr)
+    result = source(extra=forced)
+    check("failed installer releases lock; forcing still rebuilds a warm cache",
+          result.returncode == 0 and result.stdout == "1" and installs() == 5, result.stderr)
+
+    concurrent_count = temp / "concurrent-install-count"
+    install_started = temp / "install-started"
+    release_install = temp / "release-install"
+    current_cache = temp / "current-cache"
+    second_checked_stale = temp / "second-checked-stale"
+    concurrent_env = {
+        **base_env,
+        "FAKE_INSTALL_COUNT": str(concurrent_count),
+        "FAKE_INSTALL_STARTED": str(install_started),
+        "FAKE_RELEASE_INSTALL": str(release_install),
+        "FAKE_CURRENT_CACHE": str(current_cache),
+    }
+
+    def start_caller(env: dict[str, str]) -> subprocess.Popen[str]:
+        return subprocess.Popen(
+            bootstrap_command(), cwd=REPO, env=env, text=True,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, start_new_session=True,
+        )
+
+    def wait_for_marker(path: Path, caller: subprocess.Popen[str]) -> None:
+        deadline = time.monotonic() + 15
+        while not path.exists():
+            if caller.poll() is not None:
+                _, stderr = caller.communicate()
+                raise RuntimeError(f"caller exited before writing {path.name}: {stderr}")
+            if time.monotonic() >= deadline:
+                raise TimeoutError(f"timed out waiting for {path.name}")
+            time.sleep(0.01)
+
+    # The first caller cannot publish until the second has observed stale state.
+    # Even if publication wins the next scheduling race, that probe returns stale.
+    callers = [start_caller(concurrent_env)]
+    try:
+        wait_for_marker(install_started, callers[0])
+        callers.append(start_caller({**concurrent_env, "FAKE_STALE_CHECKED": str(second_checked_stale)}))
+        wait_for_marker(second_checked_stale, callers[1])
+        release_install.touch()
+        for idx, caller in enumerate(callers, 1):
+            stdout, stderr = caller.communicate(timeout=15)
+            check(f"concurrent cold caller {idx} reads ready cache", caller.returncode == 0 and stdout == "1", stderr)
+        check("concurrent cold callers share one rebuild", installs(concurrent_count) == 1)
+    finally:
+        # Also terminate a timed-out lock helper or installer, not just its shell.
+        for caller in callers:
+            if caller.poll() is None:
+                try:
+                    os.killpg(caller.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+                caller.wait()
+
+    lock_file = Path(base_env["BUILD_CACHE"]) / "ghidra-processor.lock"
+    with lock_file.open("r+") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        result = source(extra=concurrent_env)
+    check("warm cache does not wait for the writer lock",
+          result.returncode == 0 and result.stdout == "1" and installs(concurrent_count) == 1, result.stderr)
 
 print()
 if failed:

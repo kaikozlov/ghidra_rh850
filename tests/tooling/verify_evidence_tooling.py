@@ -3,8 +3,8 @@
 
 Covers the profile-driven Corolla-H evidence extractor (corpus filtering and
 merged-source precedence), artifact catalog queries, caller-relative wrapper
-paths, the working-project exporter's output guard, and the cross-variant
-evidence extraction modes.
+paths, pseudocode view provenance, the working-project exporter's output
+guard, and the cross-variant evidence extraction modes.
 """
 from __future__ import annotations
 
@@ -12,6 +12,7 @@ import gzip
 import hashlib
 import json
 import os
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -26,6 +27,7 @@ VARIANT_TOOL = ROOT / "tools/variants/extract_variant_evidence.py"
 EXPORTER = ROOT / "tools/project/export_ghidra_project.sh"
 GTS_TOOL = ROOT / "tools/gts"
 ARTIFACT_TOOL = ROOT / "tools/artifact"
+PSEUDO_TOOL = ROOT / "tools/pseudo"
 VARIANT_MODES = ("structural", "function", "application-diagnostics", "reference-census")
 
 import tools.targets.corolla.extract.extract_corolla_h_evidence as mod
@@ -496,6 +498,140 @@ with tempfile.TemporaryDirectory(prefix="exporter-symlink-", dir=ROOT / "build/t
     check("refusing inventory output outside" not in failed_export.stderr, "inventory guard accepts canonicalized symlinked build root")
     check(inventory_out.read_text() == "sentinel\n", "failed inventory export preserves prior output")
 
+# Materialized paths come from the index, and must resolve to the selected
+# corpus's rendered files even when names and code coincide across targets.
+with tempfile.TemporaryDirectory(prefix="pseudo-view-", dir=ROOT / "build/tmp") as td:
+    fixture = Path(td).resolve()
+    view = fixture / "out" / "manual view"
+    environment = {**os.environ, "BUILD_OUT": str(view.parent)}
+    corpus = fixture / "corpus.jsonl"
+    metadata = {
+        "record": "metadata",
+        "analysis_target": "fixture-one",
+        "project_inventory_sha256": hashlib.sha256(b"fixture-one inventory").hexdigest(),
+    }
+    reference = {
+        "from_addr": "0x00000042", "to_addr": "0x00000100", "to_space": "ram",
+        "ref_type": "READ", "operand_index": 1,
+    }
+    rows = []
+    for entry, name, references in (
+        ("0x00000040", "first_fixture", [reference]),
+        ("0x00000080", "second_fixture", []),
+    ):
+        code = f"int {name}(void) {{ return 1; }}\n"
+        rows.append({
+            "record": "function", "entry_addr": entry, "name": name,
+            "signature": f"int {name}(void)", "calling_convention": "default",
+            "decompiled_c": code, "decompiled_c_sha256": hashlib.sha256(code.encode()).hexdigest(),
+            "data_references": references,
+        })
+    corpus.write_text("\n".join(map(json.dumps, [metadata, *rows])) + "\n", encoding="utf-8")
+
+    def run_pseudo(*args: str, corpus_name: str = corpus.name) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            [str(PSEUDO_TOOL), "--corpus", corpus_name, "--view-dir", "out/manual view", *args],
+            cwd=fixture, env=environment, capture_output=True, text=True, check=False,
+        )
+
+    missing_view = run_pseudo("--path", "first_fixture")
+    check(
+        missing_view.returncode == 1 and not missing_view.stdout and "missing pseudocode view index" in missing_view.stderr
+        and shlex.join(["tools/pseudo", "--corpus", str(corpus), "--view-dir", str(view), "--materialize"])
+        in missing_view.stderr,
+        "missing view points to the offline materialization command with its actual corpus and view",
+    )
+    materialized = run_pseudo("--materialize")
+    check(materialized.returncode == 0, f"explicit caller-relative corpus and view materialize: {materialized.stderr}")
+
+    index = view / "index.tsv"
+    header, first_index_row, second_index_row = index.read_text(encoding="utf-8").splitlines()
+    first_fields = first_index_row.split("\t")
+    second_fields = second_index_row.split("\t")
+    indexed_file = view / "manually indexed.c"
+    (view / first_fields[3]).rename(indexed_file)
+    first_fields[3] = indexed_file.name
+    original_index = "\n".join([header, "\t".join(first_fields), second_index_row, ""])
+    index.write_text(original_index, encoding="utf-8")
+    result = run_pseudo("--path", "first_fixture")
+    check(result.returncode == 0 and result.stdout == f"{indexed_file}\n",
+          "pseudo returns the real absolute filename from index.tsv without guessing its spelling")
+
+    result = run_pseudo("--json", "--path", "--data-ref", "0x100")
+    check(
+        result.returncode == 0 and not result.stderr and json.loads(result.stdout) == {
+            "mode": "data-ref", "corpus": str(corpus), "target": "fixture-one",
+            "results": [{"query": "0x100", "error": None, "matches": [{
+                "entry": "0x00000040", "name": "first_fixture", "signature": "int first_fixture(void)",
+                "path": str(indexed_file), "references": [reference],
+            }]}],
+        },
+        "JSON reference lookup reports the indexed path and matched canonical reference",
+    )
+
+    (view / second_fields[3]).unlink()
+    result = run_pseudo("--path", "--json", "second_fixture", "first_fixture")
+    matches = json.loads(result.stdout)["results"]
+    check(
+        result.returncode == 1 and not result.stderr and not matches[0]["matches"]
+        and "missing pseudocode view file" in matches[0]["error"]
+        and matches[1]["error"] is None and matches[1]["matches"][0]["path"] == str(indexed_file),
+        "a missing indexed file is a per-query error and does not hide another successful path",
+    )
+
+    original_code = indexed_file.read_bytes()
+    indexed_file.write_bytes(original_code + b"// locally changed\n")
+    changed_code = run_pseudo("--path", "first_fixture")
+    check(changed_code.returncode == 1 and not changed_code.stdout and "does not match the selected corpus" in changed_code.stderr,
+          "a stale file is rejected even when its index row still matches")
+    indexed_file.write_bytes(original_code)
+
+    second_fields[-1] = "0" * 64
+    index.write_text("\n".join([header, "\t".join(first_fields), "\t".join(second_fields), ""]), encoding="utf-8")
+    stale_index = run_pseudo("--path", "first_fixture")
+    check(stale_index.returncode == 1 and not stale_index.stdout and "index does not match" in stale_index.stderr,
+          "a stale index is rejected even when the requested row and file match")
+    index.write_text(original_index, encoding="utf-8")
+
+    outside = fixture / "outside.c"
+    indexed_file.rename(outside)
+    indexed_file.symlink_to(outside)
+    outside_view = run_pseudo("--path", "first_fixture")
+    check(outside_view.returncode == 1 and not outside_view.stdout and "path escapes" in outside_view.stderr,
+          "index symlinks resolving outside the view cannot leak paths")
+    indexed_file.unlink()
+    outside.rename(indexed_file)
+
+    other_corpus = fixture / "other.jsonl"
+    other_metadata = {
+        **metadata, "analysis_target": "fixture-two",
+        "project_inventory_sha256": hashlib.sha256(b"fixture-two inventory").hexdigest(),
+    }
+    other_corpus.write_text("\n".join(map(json.dumps, [other_metadata, *rows])) + "\n", encoding="utf-8")
+    wrong_view = run_pseudo("--path", "first_fixture", corpus_name=other_corpus.name)
+    check(
+        wrong_view.returncode == 1 and not wrong_view.stdout and "selected corpus or inventory" in wrong_view.stderr
+        and shlex.join(["--corpus", str(other_corpus)]) in wrong_view.stderr,
+        "identical function entries and code do not allow a path from a different inventory",
+    )
+
+    wrong_target = run_pseudo("--target", "sienna-8965B4512000", "first_fixture")
+    check(
+        wrong_target.returncode == 1 and not wrong_target.stdout and "does not match target" in wrong_target.stderr
+        and "tools/gtarget show sienna-8965B4512000" in wrong_target.stderr,
+        "an explicit target cannot silently query a corpus declaring another target",
+    )
+    unknown_target = run_pseudo("--target", "not-registered-example", "first_fixture")
+    check(unknown_target.returncode != 0 and "tools/gtarget list" in unknown_target.stderr,
+          "unknown pseudo targets point to the registry's CLI")
+    missing_corpus = run_pseudo("first_fixture", corpus_name="missing.jsonl")
+    check(
+        missing_corpus.returncode == 1 and "missing pseudocode corpus" in missing_corpus.stderr
+        and "tools/artifact list decompilations.jsonl" in missing_corpus.stderr,
+        "missing corpora point to artifact discovery",
+    )
+
+
 # Exercise every variant mode on one synthetic image/corpus so the shared
 # extraction implementation itself stays pinned.
 with tempfile.TemporaryDirectory(prefix="variant-evidence-", dir=ROOT / "build/tmp") as td:
@@ -590,6 +726,6 @@ with tempfile.TemporaryDirectory(prefix="variant-evidence-", dir=ROOT / "build/t
 
 print(
     "verified evidence tooling: corpus filtering, merged-source precedence, "
-    "artifact catalog queries, caller-relative wrapper paths, exporter output "
-    f"guard, and {len(VARIANT_MODES)} variant evidence modes"
+    "artifact catalog queries, caller-relative wrapper paths, pseudocode view provenance, "
+    f"exporter output guard, and {len(VARIANT_MODES)} variant evidence modes"
 )

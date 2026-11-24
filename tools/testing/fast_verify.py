@@ -13,7 +13,8 @@ Examples:
     tools/test core
     tools/test full
     tools/test list [query]
-    tools/test plan <suite-or-prefix|core|full|local>
+    tools/test plan <suite-or-prefix-or-@group> [...]
+    tools/test plan <core|full|local|required-external>
 
 Running ``tools/test`` with no selector performs no tests and exits successfully.
 Choose the smallest suite that exercises the code/evidence you actually changed.
@@ -295,7 +296,9 @@ def main() -> int:
     manifest = load_manifest((args.manifest or root / "verification.toml").resolve())
     suites = manifest.get("suite", {})
 
-    if args.command in {"changed", "branch"} or (args.command == "plan" and args.query and args.query[0] in {"changed", "branch"}):
+    planning = args.command == "plan"
+    selectors = args.query if planning else ([args.command, *args.query] if args.command else [])
+    if selectors and selectors[0] in {"changed", "branch"}:
         print("Automatic changed-file verification was removed. Select the relevant suite explicitly.", file=sys.stderr)
         return 2
 
@@ -308,22 +311,11 @@ def main() -> int:
         print_plan(manifest, names, args.query[0] if args.query else "all")
         return 0
 
-    if args.command == "plan":
-        if len(args.query) != 1:
-            parser.error("plan requires one explicit suite/prefix/@group/core/full/local selector")
-        selector = args.query[0]
-        if selector in {"core", "full", "local"}:
-            names = selected_suites(manifest, selector)
-        else:
-            names = resolve_query(manifest, selector)
-        if not names:
-            print(f"No suite, prefix, or @group matches: {selector}", file=sys.stderr)
-            return 2
-        print_plan(manifest, names, selector)
-        return 0
+    if planning and not selectors:
+        parser.error("plan requires at least one explicit suite/prefix/@group/core/full/local/required-external selector")
 
     legacy = [args.suite, args.core, args.full, args.local, args.required_external, args.agent]
-    if args.command and any(legacy):
+    if args.command and not planning and any(legacy):
         parser.error("positional selector cannot be combined with legacy mode flags")
 
     compact = False
@@ -331,22 +323,32 @@ def main() -> int:
     mode = "suite"
     names: list[str] = []
 
-    if args.command in {"core", "full", "local", "required-external"}:
-        if args.query:
-            parser.error(f"{args.command} does not take extra selectors")
-        mode = args.command
-        names = selected_suites(manifest, mode)
-        require_external = mode == "required-external"
-    elif args.command:
-        selectors = [args.command, *args.query]
-        for selector in selectors:
-            resolved = resolve_query(manifest, selector)
-            if not resolved:
-                print(f"No suite, prefix, or @group matches: {selector}", file=sys.stderr)
+    if selectors:
+        first = selectors[0]
+        if first in {"core", "full", "local", "required-external"}:
+            if len(selectors) > 1:
+                parser.error(f"{first} does not take extra selectors")
+            mode = first
+            names = selected_suites(manifest, mode)
+        else:
+            for selector in selectors:
+                resolved = resolve_query(manifest, selector)
+                if not resolved:
+                    print(f"No suite, prefix, or @group matches: {selector}", file=sys.stderr)
+                    return 2
+                names.extend(resolved)
+            names = _dedupe(names)
+
+        if planning:
+            if not names:
+                print(f"No suite, prefix, or @group matches: {first}", file=sys.stderr)
                 return 2
-            names.extend(resolved)
-        names = _dedupe(names)
-        require_external = any(suites[name].get("requires_external") for name in names) and not args.allow_skips
+            print_plan(manifest, names, " ".join(selectors))
+            return 0
+
+        require_external = mode == "required-external" or (
+            mode == "suite" and not args.allow_skips and any(suites[name].get("requires_external") for name in names)
+        )
     elif args.suite:
         names = resolve_query(manifest, args.suite)
         if not names:

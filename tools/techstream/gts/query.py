@@ -5,7 +5,9 @@ from __future__ import annotations
 import json
 import re
 from collections.abc import Iterable
+from itertools import islice
 from pathlib import Path
+from sys import maxsize
 from typing import Any
 
 import pefile
@@ -16,16 +18,16 @@ from tools.techstream.cuw_parameter import factory_routes_from_ini_root, select_
 from tools.techstream.gts.ddb import (
     _behavior_rows,
     _dtc_rows,
-    _english_string_dbs,
     _english_strings,
     _fold_match,
+    _iter_english_string_dbs,
     _monitor_rows,
     _normalize_did,
     _resolve_ecu,
 )
 from tools.techstream.ddb_semantics import NativeSelectionContext, select_for_consumer
 from tools.techstream.gts.execution_model import _file_sha256
-from tools.techstream.parse_ddb import DDBParser, ECU_TABLE_CLASS_NAMES
+from tools.techstream.parse_ddb import DDBParser, ECU_TABLE_CLASS_NAMES, StringDataBase
 from tools.techstream.pe_utils import binary_strings
 from tools.techstream.pe_utils import exports as pe_exports
 from tools.techstream.pe_utils import imports as pe_imports
@@ -161,18 +163,17 @@ def _cuw_route_selection(cuwplus_root: Path, descriptor: dict[str, dict[str, str
     return selection
 
 
-def _search_ddbs(
+def _iter_ecu_matches(
     query: str,
     db_root: Path,
     *,
+    parser: DDBParser,
+    strings: StringDataBase | None,
     ecu_filter: str | None,
     kinds: set[str],
-    all_string_dbs: bool = False,
-) -> list[dict[str, Any]]:
-    parser = DDBParser()
-    semantic_kinds = kinds.intersection({"did", "dtc", "behavior", "string"})
-    strings = _english_strings(parser, db_root) if semantic_kinds else None
-    results: list[dict[str, Any]] = []
+) -> Iterable[dict[str, Any]]:
+    if "file" not in kinds and strings is None:
+        return
     files = sorted(db_root.glob("*.ddb"), key=lambda p: p.name.casefold())
     if ecu_filter:
         files = [p for p in files if ecu_filter.casefold() in p.name.casefold()]
@@ -180,13 +181,12 @@ def _search_ddbs(
         if path.name in {"M_English.ddb", "V_English.ddb", "U_English.ddb", "Toyota.ddb"} or re.match(r"^[MVU]_[A-Za-z]+\.ddb$", path.name):
             continue
         if "file" in kinds and _fold_match(query, path.name):
-            results.append({
+            yield {
                 "kind": "file", "source": str(path.relative_to(db_root)),
                 "catalog_context": _raw_catalog_source(path),
-            })
-        if not kinds.intersection({"did", "dtc", "behavior"}):
+            }
+        if strings is None:
             continue
-        assert strings is not None
         try:
             db = parser.parse_ecu_db(path)
         except (ValueError, OSError):
@@ -196,27 +196,50 @@ def _search_ddbs(
             for row in _monitor_rows(db, strings, path.name):
                 if _fold_match(query, row.get("name"), f"0x{row['primary_did']:04X}", f"0x{row['alternate_did']:04X}"):
                     row["catalog_context"] = source
-                    results.append(row)
+                    yield row
         if "dtc" in kinds:
             for row in _dtc_rows(parser, db, strings, path.name):
                 if _fold_match(query, row.get("code"), row.get("packed_dtc"), row.get("description"), row.get("failure")):
                     row["catalog_context"] = source
-                    results.append(row)
+                    yield row
         if "behavior" in kinds:
             for row in _behavior_rows(db, strings, path.name):
                 if _fold_match(query, row.get("signature"), row.get("name"), row.get("comment")):
                     row["catalog_context"] = source
-                    results.append(row)
-    if "string" in kinds and not ecu_filter:
-        assert strings is not None
-        string_dbs = _english_string_dbs(parser, db_root, strings) if all_string_dbs else {"M_English.ddb": strings}
-        for source, string_db in string_dbs.items():
+                    yield row
+
+
+def _search_ddbs(
+    query: str,
+    db_root: Path,
+    *,
+    ecu_filter: str | None,
+    kinds: set[str],
+    all_string_dbs: bool,
+    limit: int,
+) -> list[dict[str, Any]]:
+    parser = DDBParser()
+    strings = _english_strings(parser, db_root) if kinds & {"did", "dtc", "behavior"} else None
+    ecu_matches = _iter_ecu_matches(query, db_root, parser=parser, strings=strings, ecu_filter=ecu_filter, kinds=kinds)
+    results = list(islice(ecu_matches, limit))
+    remaining = limit - len(results)
+    if remaining and "string" in kinds and not ecu_filter:
+        if strings is None:
+            strings = _english_strings(parser, db_root)
+        string_dbs = _iter_english_string_dbs(parser, db_root, strings, all_string_dbs=all_string_dbs)
+        for source, string_db in string_dbs:
+            matches = string_db.search(query, limit=remaining)
+            if not matches:
+                continue
             context = _raw_catalog_source(db_root / source)
-            for offset, text in string_db.search(query, limit=500):
+            for offset, text in matches:
                 results.append({
                     "kind": "string", "source": source, "offset": offset, "text": text,
                     "catalog_context": context,
                 })
+            remaining -= len(matches)
+            if not remaining:
+                break
     return results
 
 
@@ -388,14 +411,9 @@ def pe_payload(path: Path, query: str | None, min_string: int, limit: int) -> di
     return payload
 
 
-def search_rows(query: str, gts: Path, cuwplus: Path, db_root: Path, corpus: Path, *, kinds: set[str], ecu_filter: str | None, all_string_dbs: bool) -> list[dict[str, Any]]:
-    results = _search_ddbs(
-        query,
-        db_root,
-        ecu_filter=ecu_filter,
-        kinds=kinds,
-        all_string_dbs=all_string_dbs,
-    )
+def _iter_cross_corpus_matches(
+    query: str, gts: Path, cuwplus: Path, corpus: Path, kinds: set[str],
+) -> Iterable[dict[str, Any]]:
     if "file" in kinds:
         for path in _iter_pe_candidates(gts, cuwplus):
             if _fold_match(query, path.name):
@@ -403,9 +421,36 @@ def search_rows(query: str, gts: Path, cuwplus: Path, db_root: Path, corpus: Pat
                     rel = path.relative_to(REPO_ROOT)
                 except ValueError:
                     rel = path
-                results.append({"kind": "file", "source": str(rel)})
+                yield {"kind": "file", "source": str(rel)}
     if "route" in kinds:
-        results.extend(row for row in _route_rows(cuwplus) if _route_match(query, row))
+        yield from (row for row in _route_rows(cuwplus) if _route_match(query, row))
     if "cuw" in kinds:
-        results.extend(_search_cuw_corpus(query, corpus))
+        yield from _search_cuw_corpus(query, corpus)
+
+
+def search_rows(
+    query: str,
+    gts: Path,
+    cuwplus: Path,
+    db_root: Path,
+    corpus: Path,
+    *,
+    kinds: set[str],
+    ecu_filter: str | None,
+    all_string_dbs: bool,
+    limit: int | None = None,
+) -> list[dict[str, Any]]:
+    """Return the first matching rows in catalog order, or all rows if limit is None."""
+    if limit == 0:
+        return []
+    max_rows = maxsize if limit is None else min(limit, maxsize)
+    results = _search_ddbs(
+        query,
+        db_root,
+        ecu_filter=ecu_filter,
+        kinds=kinds,
+        all_string_dbs=all_string_dbs,
+        limit=max_rows,
+    )
+    results.extend(islice(_iter_cross_corpus_matches(query, gts, cuwplus, corpus, kinds), max_rows - len(results)))
     return results

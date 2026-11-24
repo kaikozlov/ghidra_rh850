@@ -8,6 +8,7 @@ import io
 import json
 import os
 import shutil
+import struct
 import subprocess
 import tempfile
 from pathlib import Path
@@ -23,7 +24,7 @@ from tools.techstream.cuw_parameter import decode_parameter_ini, factory_routes_
 from tools.techstream.gts import active_tests, commands, cuw, ddb, query
 from tools.techstream.gts import master as gts_master
 from tools.techstream.gts import execution_model, registry
-from tools.techstream.parse_ddb import DDBParser, ECU_TABLE_CLASS_NAMES
+from tools.techstream.parse_ddb import DDBParser, ECU_TABLE_CLASS_NAMES, SIGNATURE
 from tools.techstream.ddb_semantics import UnresolvedNativeContext
 
 ROOT = REPO_ROOT
@@ -33,6 +34,90 @@ def check(condition: bool, message: str) -> None:
     if not condition:
         raise AssertionError(message)
     print(f"[PASS] {message}")
+
+
+def write_search_string_db(path: Path, format_version: int, count: int) -> list[dict]:
+    rows = [f"GTS search fixture {path.name[0]} {index:04d}" for index in range(count)]
+    offsets = []
+    directory = bytearray()
+    pool = bytearray()
+    for text in rows:
+        encoded = (text + "\0").encode("utf-16-le")
+        offsets.append(len(pool))
+        directory.extend(struct.pack("<IH", len(pool), len(encoded)))
+        pool.extend(encoded)
+    decoded = directory + pool
+    # An all-literal LZSS stream is enough to exercise the real string DB decoder.
+    compressed = struct.pack("<IB", len(decoded), 0) + b"".join(
+        b"\xff" + decoded[i : i + 8] for i in range(0, len(decoded), 8)
+    )
+    header = bytearray(0x28)
+    header[:6] = bytes.fromhex("40 00 0c 1a 06 10")
+    header[8:10] = bytes((format_version, 1))
+    header[0x0A : 0x0A + len(SIGNATURE)] = SIGNATURE
+    struct.pack_into("<I", header, 0x24, len(header))
+    data = header + struct.pack("<BBII", 0, 1, count, len(compressed)) + compressed
+    path.write_bytes(data)
+    context = {
+        "selection": "raw-catalog",
+        "source": {"path": str(path), "sha256": hashlib.sha256(data).hexdigest()},
+        "native_resolution": "not-requested",
+    }
+    return [
+        {
+            "kind": "string", "source": path.name, "offset": len(directory) + offset,
+            "text": text, "catalog_context": context,
+        }
+        for offset, text in zip(offsets, rows)
+    ]
+
+
+with tempfile.TemporaryDirectory(prefix="gts-search-limit-") as td:
+    fixture = Path(td).resolve()
+    fixture_db = fixture / "NA/DB/Gen"
+    fixture_db.mkdir(parents=True)
+    m_rows = write_search_string_db(fixture_db / "M_English.ddb", 4, 1201)
+    v_rows = write_search_string_db(fixture_db / "V_English.ddb", 5, 1001)
+    file_match = fixture_db / "gts search fixture.ddb"
+    file_match.write_bytes(b"catalog fixture")
+    search_command = [
+        str(ROOT / "tools/gts"), "search", "gts search fixture", "--kind", "string",
+        "--gtsplus-root", str(fixture), "--cuwplus-root", str(fixture), "--cuw-root", str(fixture),
+    ]
+
+    def search_fixture(*args: str):
+        return subprocess.run(
+            [*search_command, *args], cwd=fixture, capture_output=True, text=True, check=True,
+        )
+
+    check(
+        json.loads(search_fixture("--limit", "2000", "--json").stdout) == m_rows,
+        "string-only CLI search returns more than 500 matches from the default database",
+    )
+    check(
+        json.loads(search_fixture("--limit", "2000", "--all-string-dbs", "--json").stdout)
+        == [*m_rows, *v_rows[:799]],
+        "high CLI search cap is shared across databases and preserves string offsets and catalog context",
+    )
+    # The result cap is filled before V_English, so its invalid contents are never decoded.
+    (fixture_db / "V_English.ddb").write_bytes(b"invalid string database")
+    low = json.loads(search_fixture("--limit", "3", "--all-string-dbs", "--kind", "file", "--json").stdout)
+    check(
+        len(low) == 3 and low[0]["kind"] == "file" and low[0]["source"] == file_match.name
+        and low[1:] == m_rows[:2],
+        "low mixed CLI search cap counts preceding file rows and skips later string databases",
+    )
+    check(
+        json.loads(search_fixture("--limit", "0", "--json").stdout) == []
+        and json.loads(search_fixture("--limit", "-1", "--json").stdout) == m_rows[:-1],
+        "CLI search retains zero-row and negative tail-slice behavior",
+    )
+    limited_text = search_fixture("--limit", "1")
+    check(
+        len(limited_text.stdout.splitlines()) == 1 and m_rows[0]["text"] in limited_text.stdout
+        and "more results; use --limit" in limited_text.stderr,
+        "text search shows the requested row and indicates truncation",
+    )
 
 
 gts = techstream_paths.resolve_gts_root()

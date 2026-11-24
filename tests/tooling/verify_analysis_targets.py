@@ -5,8 +5,10 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 from tools import REPO_ROOT
@@ -138,6 +140,36 @@ r = subprocess.run([str(ROOT / "tools/gtarget"), "list"], cwd=ROOT, capture_outp
 check("gtarget lists configured targets", r.returncode == 0 and all(name in r.stdout for name in targets))
 r = subprocess.run([str(ROOT / "tools/gtarget"), "show", "camry-8965F3307000"], cwd=ROOT, capture_output=True, text=True)
 check("gtarget shows registry metadata", r.returncode == 0 and json.loads(r.stdout)["function_seeds"] == camry["function_seeds"])
+
+with tempfile.TemporaryDirectory() as tmp:
+    isolated_tools = Path(tmp) / "tools"
+    isolated_tools.mkdir()
+    gtarget = isolated_tools / "gtarget"
+    shutil.copy2(ROOT / "tools/gtarget", gtarget)
+    usage = (
+        "tools/gtarget list",
+        "tools/gtarget show TARGET",
+        "tools/gtarget TARGET COMMAND",
+    )
+    for args in ((), ("-h",), ("--help",)):
+        r = subprocess.run([str(gtarget), *args], cwd=tmp, capture_output=True, text=True)
+        check(
+            f"gtarget {args or '(bare)'} shows usage without resolver or Ghidra",
+            r.returncode == 0 and all(form in r.stdout for form in usage) and not r.stderr,
+            r.stderr.strip(),
+        )
+
+for target in ("definitely-not-a-target", "8965F3307000"):
+    for args in (("show", target), (target, "session-status")):
+        r = subprocess.run([str(ROOT / "tools/gtarget"), *args], cwd=ROOT, capture_output=True, text=True)
+        check(
+            f"gtarget {' '.join(args)} rejects unregistered names with a discovery hint",
+            r.returncode != 0
+            and not r.stdout
+            and f"unknown analysis target: {target}" in r.stderr
+            and "tools/gtarget list" in r.stderr,
+            r.stderr.strip(),
+        )
 
 print(f"\nResults: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

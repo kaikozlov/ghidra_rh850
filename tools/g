@@ -427,5 +427,6 @@ if [[ "${GHIDRA_AGENT:-}" == "1" ]]; then
 fi
 
 # --- Dispatch -----------------------------------------------------------------
+source "$ROOT/tools/lib/ghidra_bridge_env.sh"
 
 exec "$GHIDRA_CLI" "${CLI_ARGS[@]}" "$@"

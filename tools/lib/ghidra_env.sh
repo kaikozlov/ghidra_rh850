@@ -3,13 +3,14 @@
 # Source as: source tools/lib/ghidra_env.sh [none|source|full] [manifest]
 
 _GHIDRA_ENV_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-_GHIDRA_ENV_CACHE="${BUILD_CACHE:-$_GHIDRA_ENV_ROOT/build/cache}"
-_GHIDRA_ENV_OUT="${BUILD_OUT:-$_GHIDRA_ENV_ROOT/build/out}"
+ROOT="$_GHIDRA_ENV_ROOT"
+# shellcheck disable=SC1091
+source "$ROOT/tools/lib/build_paths.sh"
 _GHIDRA_ENV_CANONICAL=1
 if [[ -n "${GHIDRA_PROCESSOR_ENV_FILE+x}" ]]; then
   _GHIDRA_ENV_CANONICAL=0
 fi
-_GHIDRA_ENV_FILE="${GHIDRA_PROCESSOR_ENV_FILE:-$_GHIDRA_ENV_CACHE/ghidra-processor.env}"
+_GHIDRA_ENV_FILE="${GHIDRA_PROCESSOR_ENV_FILE:-$BUILD_CACHE/ghidra-processor.env}"
 _GHIDRA_INSTALL="${GHIDRA_INSTALL_SCRIPT:-$_GHIDRA_ENV_ROOT/tools/project/install_v850_extension.sh}"
 _GHIDRA_CALLER_JAVA_OPTIONS="${GHIDRA_JAVA_OPTIONS:-}"
 _GHIDRA_CALLER_HEADLESS_JAVA_OPTIONS="${GHIDRA_HEADLESS_JAVA_OPTIONS:-}"
@@ -42,16 +43,20 @@ _cached_env_is_current() {
   [[ -f "${V850_EXT_DIR:-}/data/languages/v850e3.sla" ]] || return 1
   [[ -f "${PROCESSOR_MANIFEST:-}" ]] || return 1
   if ((_GHIDRA_ENV_CANONICAL)); then
-    [[ "${GHIDRA_ISOLATED_HOME:-}" == "$_GHIDRA_ENV_CACHE/ghidra-home" ]] || return 1
-    [[ "${V850_EXT_DIR:-}" == "$_GHIDRA_ENV_CACHE/ghidra-home/Library/ghidra/ghidra_12.2_PUBLIC/Extensions/Renesas_v850" ]] || return 1
-    [[ "${V850_BUILD_DIR:-}" == "$_GHIDRA_ENV_CACHE/processor-extension-src/Renesas_v850" ]] || return 1
-    [[ "${PROCESSOR_MANIFEST:-}" == "$_GHIDRA_ENV_OUT/processor_manifest.json" ]] || return 1
+    [[ "${GHIDRA_ISOLATED_HOME:-}" == "$BUILD_CACHE/ghidra-home" ]] || return 1
+    [[ "${V850_EXT_DIR:-}" == "$BUILD_CACHE/ghidra-home/Library/ghidra/ghidra_12.2_PUBLIC/Extensions/Renesas_v850" ]] || return 1
+    [[ "${V850_BUILD_DIR:-}" == "$BUILD_CACHE/processor-extension-src/Renesas_v850" ]] || return 1
+    [[ "${PROCESSOR_MANIFEST:-}" == "$BUILD_OUT/processor_manifest.json" ]] || return 1
   fi
   python3 "$_GHIDRA_FINGERPRINT" \
     --source-only --expect "$PROCESSOR_MANIFEST" >/dev/null 2>&1
 }
 
-if [[ "${GHIDRA_ENV_FORCE_REBUILD:-0}" == "1" ]] || ! _cached_env_is_current; then
+_refresh_processor_env() {
+  # A caller ahead of us may already have repaired the cache.
+  if [[ "${GHIDRA_ENV_FORCE_REBUILD:-0}" != "1" ]] && _cached_env_is_current; then
+    return 0
+  fi
   # A stale migrated env file may have exported pre-layout paths into this shell.
   # Clear those values before invoking the canonical installer so stale cache
   # metadata cannot redirect the rebuild back into legacy build/* locations.
@@ -63,20 +68,25 @@ if [[ "${GHIDRA_ENV_FORCE_REBUILD:-0}" == "1" ]] || ! _cached_env_is_current; th
   fi
   [[ -x "$_GHIDRA_INSTALL" ]] || {
     echo "ERROR: processor installer is not executable: $_GHIDRA_INSTALL" >&2
-    exit 1
+    return 1
   }
-  "$_GHIDRA_INSTALL" >&2
-  _source_processor_env || {
+  "$_GHIDRA_INSTALL" >&2 || return "$?"
+  [[ -f "$_GHIDRA_ENV_FILE" ]] || {
     echo "ERROR: processor installer did not write env file: $_GHIDRA_ENV_FILE" >&2
-    exit 1
+    return 1
   }
-fi
-
-# Re-validate after install. A successful installer exit is not enough.
-_cached_env_is_current || {
-  echo "ERROR: isolated Ghidra processor environment is missing or stale after install" >&2
-  exit 1
+  # A successful installer exit is not enough.
+  _cached_env_is_current || {
+    echo "ERROR: isolated Ghidra processor environment is missing or stale after install" >&2
+    return 1
+  }
 }
+
+if [[ "${GHIDRA_ENV_FORCE_REBUILD:-0}" == "1" ]] || ! _cached_env_is_current; then
+  # shellcheck disable=SC1091
+  source "$_GHIDRA_ENV_ROOT/tools/lib/ghidra_install_lock.sh"
+  _ghidra_with_install_lock _refresh_processor_env || exit "$?"
+fi
 
 ROOT="$_GHIDRA_ENV_ROOT"
 export ROOT GHIDRA_HOME GHIDRA_ISOLATED_HOME V850_EXT_DIR V850_BUILD_DIR

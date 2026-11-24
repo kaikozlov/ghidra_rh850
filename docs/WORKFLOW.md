@@ -327,9 +327,9 @@ daemon stop and snapshot steps. Markers warn about mutation-capable commands.
 
 ## Opening the working project
 
-`tools/g` is fully self-contained. It validates the cached isolated Ghidra
-environment (processor extension, Java options, fingerprint) and rebuilds it
-only when missing or stale — you never need to source
+`tools/g` validates the cached processor extension, Java options, and fingerprint.
+Concurrent callers share one rebuild when the cache is missing or stale. A
+warm lookup takes no install lock. You do not need to source
 `build/cache/ghidra-processor.env`.
 
 ```bash
@@ -360,6 +360,12 @@ tools/g stats --json
 
 [Output and query options](../ghidra/ghidra-cli/docs/output-format.md) covers
 formats, pagination, field selection, and configuration.
+
+`tools/g script python 'print(currentProgram.getName())'` runs on the open
+program using the repository's uv environment (`uv sync --locked`). New bridges
+enable Python automatically; an existing Java-only bridge needs one clean
+`tools/g stop` first. See [inline scripts](../ghidra/ghidra-cli/README.md#inline-ghidra-scripts).
+Both Python and Java scripts can modify the program; `batch --read-only` rejects them.
 
 Use `tools/g inspect ADDR` for the function and its call sites. Select other
 sections explicitly, or request every section with `--all`.
@@ -499,6 +505,18 @@ make pseudocode                          # rebuild the ignored build/out/pseudoc
 rg 'ICUSCMD' build/out/pseudocode
 rg 'rdbi' build/out/pseudocode
 ```
+
+Pass multiple names or addresses to `tools/pseudo` in the order you want them
+returned. For reference lookups, repeat `--data-ref ADDRESS`. Add `--json` for
+ordered `results` with a `query`, `matches`, and `error` for each input. A miss
+leaves the other results intact and sets the process exit status to 1.
+
+Use `tools/gtarget show TARGET` to find the tracked `decompiler_corpus`. For a
+per-function C file, run `tools/pseudo --target TARGET --materialize`, then
+`tools/pseudo --target TARGET --path QUERY`. The latter returns the verified
+path from the view index; it does not construct a filename from the symbol.
+Use the same `--view-dir` under `build/out/` for both commands to keep
+separate target views.
 
 ### Cross-variant structural fingerprints
 
@@ -845,7 +863,7 @@ tools/test                        # runs nothing; prints explicit-use guidance
 tools/test <suite-or-prefix>      # run the smallest relevant suite
 tools/test @exploit               # deliberate multi-suite bundle
 tools/test list [query]           # discover suites
-tools/test plan <query>           # preview an explicit selector
+tools/test plan <selector> [...]  # preview the same deduplicated suites as a run
 tools/test core                   # repository mechanics
 tools/test full                   # explicit portable sweep
 tools/test local                  # explicit external/live-project sweep

@@ -2,8 +2,10 @@
 from __future__ import annotations
 
 import argparse
-from tools import REPO_ROOT
 import json
+import sys
+
+from tools import REPO_ROOT
 
 from . import corpus, sources, tree
 
@@ -36,14 +38,27 @@ def cmd_lift(args: argparse.Namespace) -> int:
 
 
 def cmd_source(args: argparse.Namespace) -> int:
-    try:
-        symbol, path, body = sources.locate_source(args.query)
-    except ValueError as exc:
-        raise SystemExit(str(exc)) from None
-    print(f"/* {tree.TARGET}: {symbol['name']} @ {symbol['addr']}")
-    print(f" * {path.relative_to(REPO_ROOT)} */")
-    print(body, end="")
-    return 0
+    status = 0
+    printed = False
+    for result in sources.locate_sources(args.queries):
+        if isinstance(result, str):
+            sys.stdout.flush()
+            print(result, file=sys.stderr)
+            status = 1
+            continue
+        if printed:
+            print()
+        symbol = result.symbol
+        address = symbol["addr"]
+        context = ""
+        if result.pc is not None:
+            offset = result.pc - int(address, 16)
+            context = f" (PC {result.pc:#010x}, offset {offset:+#x})"
+        print(f"/* {tree.TARGET}: {symbol['name']} @ {address}{context}")
+        print(f" * {result.path.relative_to(REPO_ROOT)} */")
+        print(result.body, end="")
+        printed = True
+    return status
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -52,7 +67,10 @@ def main(argv: list[str] | None = None) -> int:
     status = sub.add_parser("status", help="print image and matched-function counts")
     status.set_defaults(func=cmd_status)
     source = sub.add_parser("source", help="show the effective reconstructed C and its source path")
-    source.add_argument("query", help="canonical function name or hexadecimal entry address")
+    source.add_argument(
+        "queries", nargs="+", metavar="QUERY",
+        help="exact canonical function name, hexadecimal entry address, or contained PC",
+    )
     source.set_defaults(func=cmd_source)
     corpus_parser = sub.add_parser("corpus", help="compile every decompiler body and rank the failures")
     corpus_parser.set_defaults(func=corpus.cmd_corpus)

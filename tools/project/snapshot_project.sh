@@ -84,6 +84,7 @@ command -v rsync >/dev/null 2>&1 || { echo "rsync is required" >&2; exit 1; }
 # install + source dance.
 # shellcheck disable=SC1091
 source "$ROOT/tools/lib/ghidra_env.sh" full
+source "$ROOT/tools/lib/ghidra_bridge_env.sh"
 
 PROJECT_DIR=$(python3 - "$PROJECT_DIR" <<'PY'
 from pathlib import Path

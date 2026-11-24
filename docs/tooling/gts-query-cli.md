@@ -162,6 +162,10 @@ The default database is the current GTS+ `NA/DB/Gen` tree. `search`, `did`, and
   `--all-string-dbs` when the slower `V_English`/`U_English` UI contexts are
   relevant (the runtime selects among those string-table contexts).
 
+`search --limit` caps the total rows across all selected sources (default: 80;
+0 shows none). String matches are returned in pool order within each database:
+`M_English` first, then `V_English` and `U_English` with `--all-string-dbs`.
+
 Overlapping current table aliases (for example table 62 and 157 copies of the
 same Data List entry) are deduplicated for interactive output. `did` also joins
 the current role-`0x41` signal-info metadata when type-13/14/15 tables are

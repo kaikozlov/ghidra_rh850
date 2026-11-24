@@ -26,6 +26,21 @@ pub enum BridgeStartMode {
 /// Embedded Java bridge script
 const JAVA_BRIDGE_SCRIPT: &str = include_str!("scripts/GhidraCliBridge.java");
 
+// Use the same launcher as `pyghidraRun -H`. Its command-line parser forwards
+// only -D/-X; add_vmargs also preserves other existing headless JVM options.
+const PYGHIDRA_HEADLESS_LAUNCH: &str = r#"
+import sys
+from pathlib import Path
+from pyghidra.ghidra_launch import GhidraLauncher
+
+end_vmargs = sys.argv.index("--", 2)
+launcher = GhidraLauncher(class_name="ghidra.app.util.headless.AnalyzeHeadless",
+                          install_dir=Path(sys.argv[1]))
+launcher.add_vmargs(*sys.argv[2:end_vmargs])
+launcher.args = sys.argv[end_vmargs + 1:]
+launcher.start()
+"#;
+
 /// Embedded findcrypt signature database (130 crypto constant signatures from
 /// antoniovazquezblanco/ghidra-findcrypt v3.1.9). Written to the scripts dir
 /// alongside the bridge script and loaded by handleFindCrypto() at runtime.
@@ -284,15 +299,31 @@ pub fn ensure_bridge_running(
 /// -Xmx argument, so the heap setting must also be appended here.
 /// If we can't find a JDK, proceed and let Ghidra try — the readiness failure
 /// path surfaces an actionable hint.
-fn configure_java(cmd: &mut Command, ghidra_install_dir: &Path) -> Result<()> {
+fn configure_java(cmd: &mut Command, ghidra_install_dir: &Path, pyghidra: bool) -> Result<()> {
     let config = crate::config::Config::load()?;
-    let mut options = std::env::var_os("GHIDRA_HEADLESS_JAVA_OPTIONS").unwrap_or_default();
-    options.push(format!(
+    let resources = format!(
         " -Xmx{} -Dcpu.core.override={}",
         config.max_heap, config.cpu_workers
-    ));
-    cmd.env("GHIDRA_HEADLESS_MAXMEM", &config.max_heap)
-        .env("GHIDRA_HEADLESS_JAVA_OPTIONS", options);
+    );
+    if pyghidra {
+        cmd.args([
+            "-XX:ParallelGCThreads=2",
+            "-XX:CICompilerCount=2",
+            "-Djava.awt.headless=true",
+        ]);
+        for name in ["GHIDRA_JAVA_OPTIONS", "GHIDRA_HEADLESS_JAVA_OPTIONS"] {
+            if let Some(value) = std::env::var_os(name) {
+                let value = value.to_string_lossy();
+                cmd.args(value.split_whitespace());
+            }
+        }
+        cmd.args(resources.split_whitespace()).arg("--");
+    } else {
+        let mut options = std::env::var_os("GHIDRA_HEADLESS_JAVA_OPTIONS").unwrap_or_default();
+        options.push(resources);
+        cmd.env("GHIDRA_HEADLESS_MAXMEM", &config.max_heap)
+            .env("GHIDRA_HEADLESS_JAVA_OPTIONS", options);
+    }
 
     match super::java::resolve_for_ghidra(ghidra_install_dir, config.get_java_home()) {
         Ok(jdk) => {
@@ -303,6 +334,10 @@ fn configure_java(cmd: &mut Command, ghidra_install_dir: &Path) -> Result<()> {
                 jdk.source
             );
             cmd.env("JAVA_HOME", &jdk.home);
+            if pyghidra {
+                // Do not let PyGhidra's LaunchSupport select a different JVM.
+                cmd.env("JAVA_HOME_OVERRIDE", &jdk.home);
+            }
         }
         Err(e) => {
             warn!(
@@ -355,7 +390,7 @@ pub fn import_oneshot(
         .arg("-noanalysis")
         .arg("-overwrite");
 
-    configure_java(&mut cmd, ghidra_install_dir)?;
+    configure_java(&mut cmd, ghidra_install_dir, false)?;
 
     cmd.stdin(Stdio::null())
         .stdout(Stdio::piped())
@@ -461,14 +496,21 @@ pub fn start_bridge(
     let db_path = scripts_dir.join("database.json");
     std::fs::write(&db_path, FINDCRYPT_DATABASE)?;
 
-    // Find analyzeHeadless
-    let headless_script = find_headless_script(ghidra_install_dir)?;
+    let pyghidra_python = std::env::var_os("GHIDRA_CLI_PYGHIDRA_PYTHON");
 
     // Compute port file path
     let port_file = port_file_path(project_path)?;
 
     // Build command
-    let mut cmd = Command::new(&headless_script);
+    let mut cmd = if let Some(python) = &pyghidra_python {
+        let mut cmd = Command::new(python);
+        cmd.args(["-I", "-c", PYGHIDRA_HEADLESS_LAUNCH])
+            .arg(ghidra_install_dir);
+        cmd
+    } else {
+        Command::new(find_headless_script(ghidra_install_dir)?)
+    };
+    configure_java(&mut cmd, ghidra_install_dir, pyghidra_python.is_some())?;
 
     // analyzeHeadless expects: <parent_directory> <project_name>
     let ghidra_project_dir = project_path.parent().unwrap_or(project_path);
@@ -505,8 +547,6 @@ pub fn start_bridge(
         .arg("-preScript")
         .arg("GhidraCliBridge.java")
         .arg(port_file.to_str().unwrap());
-
-    configure_java(&mut cmd, ghidra_install_dir)?;
 
     cmd.stdin(Stdio::null())
         .stdout(Stdio::piped())

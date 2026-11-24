@@ -186,31 +186,179 @@ fn test_script_run_java_args() {
     );
 }
 
+fn inline_script(language: &str, code: &str) -> std::process::Output {
+    assert_cmd::cargo::cargo_bin_cmd!("ghidra")
+        .args([
+            "--json",
+            "script",
+            language,
+            code,
+            "--project",
+            TEST_PROJECT,
+            "--program",
+            TEST_PROGRAM,
+        ])
+        .output()
+        .expect("Failed to run inline script")
+}
+
 #[test]
 #[serial]
-fn test_script_python_inline() {
+fn test_script_inline() {
     require_ghidra!();
     let _harness = harness();
 
-    let output = assert_cmd::cargo::cargo_bin_cmd!("ghidra")
-        .arg("script")
-        .arg("python")
-        .arg("output = 'Hello from Python'")
-        .arg("--project")
-        .arg(TEST_PROJECT)
-        .arg("--program")
-        .arg(TEST_PROGRAM)
-        .output()
-        .expect("Failed to run command");
+    for (language, success, throws, syntax_error, next) in [
+        (
+            "java",
+            r#"println("java:" + currentProgram.getName()); println(sourceFile.getAbsolutePath());"#,
+            r#"println("java-before-error"); throw new Exception("java-inline-exception");"#,
+            "println(123;",
+            r#"println("java-next");"#,
+        ),
+        (
+            "python",
+            "print('python:' + currentProgram.getName())\nprint(__file__)",
+            "print('python-before-error')\nraise RuntimeError('python-inline-exception')",
+            "print(123",
+            "print('python-next')",
+        ),
+    ] {
+        let result = inline_script(language, success);
+        if language == "python" && std::env::var_os("GHIDRA_CLI_PYGHIDRA_PYTHON").is_none() {
+            assert!(!result.status.success(), "{result:?}");
+            let json: serde_json::Value = serde_json::from_slice(&result.stderr).unwrap();
+            assert_eq!(
+                json["error"]["code"], "script_runtime_unavailable",
+                "{json}"
+            );
+            let message = json["error"]["message"].as_str().unwrap();
+            assert!(message.contains("GHIDRA_CLI_PYGHIDRA_PYTHON"), "{json}");
+            continue;
+        }
+        assert!(result.status.success(), "{result:?}");
+        let json: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
+        let mut stdout = json[0]["stdout"].as_str().unwrap().lines();
+        assert_eq!(stdout.next().unwrap(), format!("{language}:{TEST_PROGRAM}"));
+        let source_path = PathBuf::from(stdout.next().unwrap());
+        assert!(!source_path.parent().unwrap().exists(), "{json}");
+        assert_eq!(stdout.next(), None, "{json}");
 
-    // Python execution is not available in Java bridge mode
-    // Accept either success or "not available" error
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(
-        output.status.success() || stderr.contains("not available") || stderr.contains("Python"),
-        "Expected success or Python-not-available error, got: {}",
-        stderr
-    );
+        let result = inline_script(language, throws);
+        assert!(!result.status.success(), "{result:?}");
+        let json: serde_json::Value = serde_json::from_slice(&result.stderr).unwrap();
+        assert_eq!(json["error"]["code"], "script_failed", "{json}");
+        let rendered = json.to_string();
+        assert!(
+            rendered.contains(&format!("{language}-inline-exception")),
+            "{json}"
+        );
+        assert!(
+            rendered.contains(&format!("{language}-before-error")),
+            "{json}"
+        );
+
+        let result = inline_script(language, syntax_error);
+        assert!(!result.status.success(), "{result:?}");
+        let json: serde_json::Value = serde_json::from_slice(&result.stderr).unwrap();
+        let diagnostics = json["error"]["diagnostics"].as_str().unwrap();
+        assert!(!diagnostics.trim().is_empty(), "{json}");
+        assert!(!diagnostics.contains("before-error"), "{json}");
+
+        let result = inline_script(language, next);
+        assert!(result.status.success(), "{result:?}");
+        let json: serde_json::Value = serde_json::from_slice(&result.stdout).unwrap();
+        assert_eq!(
+            json[0]["stdout"].as_str().unwrap().trim(),
+            format!("{language}-next")
+        );
+    }
+}
+
+#[test]
+#[serial]
+fn test_script_inline_cancel_cleans_up() {
+    use std::time::{Duration, Instant};
+
+    require_ghidra!();
+    let client = harness().client().unwrap();
+    let marker = "inline-cancel-fixture";
+    for (language, code) in [
+        (
+            "java",
+            format!(
+                "println(sourceFile.getAbsolutePath()); \
+                 monitor.setMessage(\"{marker}\"); \
+                 for (int i = 0; i < 3000; i++) {{ monitor.checkCancelled(); Thread.sleep(10); }}"
+            ),
+        ),
+        (
+            "python",
+            format!(
+                "import time\nprint(__file__)\nmonitor.setMessage('{marker}')\n\
+                 for _ in range(3000):\n    monitor.checkCancelled()\n    time.sleep(0.01)"
+            ),
+        ),
+    ] {
+        if language == "python" && std::env::var_os("GHIDRA_CLI_PYGHIDRA_PYTHON").is_none() {
+            continue;
+        }
+        let request = std::thread::spawn(move || inline_script(language, &code));
+        let deadline = Instant::now() + Duration::from_secs(30);
+        let job_id = loop {
+            let status = client.job_status(None).unwrap();
+            let active = &status["active_job"];
+            if active["progress_message"] == marker {
+                break active["id"].as_u64().unwrap();
+            }
+            assert!(
+                !request.is_finished() && Instant::now() < deadline,
+                "{language} script did not start: {status}"
+            );
+            std::thread::sleep(Duration::from_millis(25));
+        };
+        client.cancel_job(Some(job_id)).unwrap();
+        let result = request.join().unwrap();
+        assert!(!result.status.success(), "{result:?}");
+        let json: serde_json::Value = serde_json::from_slice(&result.stderr).unwrap();
+        assert_eq!(json["error"]["code"], "script_cancelled", "{json}");
+        let diagnostics = json["error"]["diagnostics"].as_str().unwrap();
+        let source_path = PathBuf::from(diagnostics.lines().next().unwrap());
+        assert!(!source_path.parent().unwrap().exists(), "{json}");
+    }
+}
+
+#[test]
+#[serial]
+fn test_script_inline_rejected_by_read_only_batch() {
+    require_ghidra!();
+    let _harness = harness();
+
+    for (language, code) in [("java", "println(123);"), ("python", "print(123)")] {
+        let mut batch = tempfile::NamedTempFile::new().unwrap();
+        serde_json::to_writer(
+            &mut batch,
+            &serde_json::json!([{"command": "script", "args": [language, code]}]),
+        )
+        .unwrap();
+        let result = assert_cmd::cargo::cargo_bin_cmd!("ghidra")
+            .args([
+                "batch",
+                "--read-only",
+                "--project",
+                TEST_PROJECT,
+                "--program",
+                TEST_PROGRAM,
+            ])
+            .arg(batch.path())
+            .output()
+            .unwrap();
+        assert!(!result.status.success(), "{result:?}");
+        assert!(
+            String::from_utf8_lossy(&result.stderr).contains("not allowed by --read-only"),
+            "{result:?}"
+        );
+    }
 }
 
 /// Phase 4.2: a declared JSONL artifact is validated and a manifest (row count,

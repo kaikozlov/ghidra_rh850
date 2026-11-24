@@ -27,6 +27,7 @@ INVENTORY = REPO / "data/ghidra_project_inventory.baseline.jsonl"
 DEFAULT_OUTPUT = REPO / "data/generated/decompilations.jsonl"
 DEFAULT_VIEW = BUILD_OUT / "pseudocode"
 EXPORTER = REPO / "ghidra/scripts/verify/ExportDecompilerCorpus.java"
+VIEW_INDEX_HEADER = "entry_addr\tname\tsignature\tpath\tdecompiled_c_sha256"
 
 
 def sha256(path: Path) -> str:
@@ -351,43 +352,50 @@ def safe_name(name: str) -> str:
     return (slug or "function")[:96]
 
 
+def render_view_file(record: dict[str, Any], inventory_sha256: str) -> str:
+    code = record["decompiled_c"]
+    return (
+        "/* Generated decompiler view; do not edit.\n"
+        f" * entry: {record['entry_addr']}\n"
+        f" * name: {record['name']}\n"
+        f" * signature: {record.get('signature') or ''}\n"
+        f" * calling_convention: {record['calling_convention']}\n"
+        f" * project_inventory_sha256: {inventory_sha256}\n"
+        f" * data_reference_count: {len(record.get('data_references', []))}\n"
+        f" * decompiled_c_sha256: {record['decompiled_c_sha256']}\n"
+        " */\n\n"
+        + code + ("" if code.endswith("\n") else "\n")
+    )
+
+
 def materialize_view(view_dir: Path, records: list[dict[str, Any]], metadata: dict[str, Any]) -> None:
     view_dir = view_dir.expanduser().resolve()
     if not is_within(view_dir, BUILD_OUT) or view_dir == BUILD_OUT.resolve():
         raise SystemExit(f"refusing pseudocode view outside build/out/: {view_dir}")
+    inventory_sha256 = metadata.get("project_inventory_sha256")
+    if not isinstance(inventory_sha256, str) or not inventory_sha256:
+        raise SystemExit("cannot materialize a corpus without project_inventory_sha256 provenance")
 
     parent = view_dir.parent
     parent.mkdir(parents=True, exist_ok=True)
     temporary = Path(tempfile.mkdtemp(prefix=f".{view_dir.name}.", dir=parent))
     try:
-        index_lines = ["entry_addr\tname\tsignature\tpath\tdecompiled_c_sha256"]
+        index_lines = [VIEW_INDEX_HEADER]
         for record in records:
             entry_hex = record["entry_addr"][2:]
             filename = f"{entry_hex}_{safe_name(str(record['name']))}.c"
             path = temporary / filename
-            header = (
-                "/* Generated decompiler view; do not edit.\n"
-                f" * entry: {record['entry_addr']}\n"
-                f" * name: {record['name']}\n"
-                f" * signature: {record['signature'] or ''}\n"
-                f" * calling_convention: {record['calling_convention']}\n"
-                f" * project_inventory_sha256: {metadata['project_inventory_sha256']}\n"
-                f" * data_reference_count: {len(record.get('data_references', []))}\n"
-                f" * decompiled_c_sha256: {record['decompiled_c_sha256']}\n"
-                " */\n\n"
-            )
-            code = record["decompiled_c"]
-            path.write_text(header + code + ("" if code.endswith("\n") else "\n"), encoding="utf-8")
+            path.write_text(render_view_file(record, inventory_sha256), encoding="utf-8", newline="\n")
             index_lines.append(
                 "\t".join([
                     record["entry_addr"],
                     str(record["name"]),
-                    str(record["signature"] or ""),
+                    str(record.get("signature") or ""),
                     filename,
                     record["decompiled_c_sha256"],
                 ])
             )
-        (temporary / "index.tsv").write_text("\n".join(index_lines) + "\n", encoding="utf-8")
+        (temporary / "index.tsv").write_text("\n".join(index_lines) + "\n", encoding="utf-8", newline="\n")
         if view_dir.exists():
             shutil.rmtree(view_dir)
         temporary.replace(view_dir)

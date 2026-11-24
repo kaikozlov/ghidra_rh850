@@ -49,7 +49,7 @@ The small command surface to remember is:
 | Task | Entry point |
 |---|---|
 | Edit-loop tests | `tools/test <suite-or-prefix>` — run the smallest relevant suite |
-| Discover / preview | `tools/test list [query]`, `tools/test plan <selector>` (selector required) |
+| Discover / preview | `tools/test list [query]`, `tools/test plan <selector> [...]` |
 | Ghidra / pseudocode | `tools/g`, `tools/pseudo` |
 | GTS+ / Toyota vocabulary / CUW routes | `tools/gts` |
 | Toyota platform capabilities / target workflows | `tools/toyota capabilities`, `tools/toyota target list camry` |
@@ -59,7 +59,7 @@ The small command surface to remember is:
 | Discover/query configured targets | `tools/gtarget list`, `tools/gtarget show TARGET`, `tools/gtarget TARGET ...` |
 | Discover Corolla target workflows | `tools/toyota target list corolla` |
 | Camry reconstruction | `tools/toyota decomp --help` |
-| Locate effective reconstructed Camry C | `tools/toyota decomp source NAME_OR_ADDRESS` — [source ownership](../../decomp/camry-8965F3307000/README.md#source-and-evidence-ownership) |
+| Locate reconstructed Camry C | `tools/toyota decomp source QUERY [QUERY ...]` — exact names, entries, or interior PCs; [source ownership](../../decomp/camry-8965F3307000/README.md#source-and-evidence-ownership) |
 | Discover cross-variant evidence modes | `tools/toyota variant list` |
 | Discover working-project export profiles | `tools/project/export_ghidra_project.sh list` |
 

@@ -172,6 +172,84 @@ fn portable_output_options_fail_before_bridge_work() {
 }
 
 #[test]
+fn portable_disasm_rejects_positional_count_with_runnable_hint() {
+    assert_cmd::cargo::cargo_bin_cmd!("ghidra")
+        .args([
+            "--project",
+            "test project",
+            "disasm",
+            "0x401000",
+            "37",
+            "--pretty",
+        ])
+        .assert()
+        .code(2)
+        .stdout(predicate::str::is_empty())
+        .stderr(predicate::str::contains("unexpected argument '37'"))
+        .stderr(predicate::str::contains(
+            "--project 'test project' disasm 0x401000 -n 37 --pretty",
+        ))
+        .stderr(predicate::str::contains("Usage:"));
+}
+
+#[test]
+fn portable_xref_requires_direction_and_suggests_both_directions() {
+    for (command, target, quoted) in [
+        ("x-ref", "0x401000", "0x401000"),
+        ("xref", "my function", "'my function'"),
+    ] {
+        assert_cmd::cargo::cargo_bin_cmd!("ghidra")
+            .args(["--json", command, target])
+            .assert()
+            .code(2)
+            .stdout(predicate::str::is_empty())
+            .stderr(predicate::str::contains(format!(
+                "unrecognized subcommand '{target}'"
+            )))
+            .stderr(predicate::str::contains(format!(
+                "--json {command} to {quoted}"
+            )))
+            .stderr(predicate::str::contains(format!(
+                "--json {command} from {quoted}"
+            )))
+            .stderr(predicate::str::contains("Usage:"));
+    }
+}
+
+#[test]
+fn portable_disasm_and_xref_help_remain_available_with_valid_syntax() {
+    for (args, usage) in [
+        (
+            &["disasm", "0x401000", "-n", "37", "--help"][..],
+            "ghidra disasm",
+        ),
+        (
+            &["disasm", "0x401000", "--instructions", "37", "-h"][..],
+            "ghidra disasm",
+        ),
+        (
+            &["x-ref", "to", "0x401000", "--help"][..],
+            "ghidra x-ref to",
+        ),
+        (
+            &["x-ref", "from", "0x401000", "--help"][..],
+            "ghidra x-ref from",
+        ),
+        (
+            &["x-ref", "list", "0x401000", "--help"][..],
+            "ghidra x-ref list",
+        ),
+    ] {
+        assert_cmd::cargo::cargo_bin_cmd!("ghidra")
+            .args(args)
+            .assert()
+            .success()
+            .stdout(predicate::str::contains(format!("Usage: {usage}")))
+            .stderr(predicate::str::is_empty());
+    }
+}
+
+#[test]
 fn portable_configured_limit_defaults_and_environment_overrides() {
     let temp = tempfile::tempdir().unwrap();
     let config_path = temp.path().join("config.yaml");

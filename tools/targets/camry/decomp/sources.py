@@ -1,14 +1,19 @@
 """Retained source-bank organization and implementation precedence."""
 from __future__ import annotations
 
-from pathlib import Path
-from tools.targets.camry.decomp.tree import CANDIDATES, COMMON_HEADER, ROOT
-from tools.targets.camry.decomp.syntax import _c_signature
-from collections import defaultdict
-from tools.targets.camry.decomp.tree import load_matched
-from tools.targets.camry.decomp.tree import load_symbols
+import json
 import re
+from collections import defaultdict
+from collections.abc import Iterable, Iterator
+from dataclasses import dataclass
+from pathlib import Path
+
+from tools import REPO_ROOT
+from tools.project import pseudo
+from tools.project.analysis_target import target as resolve_target
 from tools.targets.camry.decomp.c_text import _function_heads
+from tools.targets.camry.decomp.syntax import _c_signature
+from tools.targets.camry.decomp.tree import CANDIDATES, COMMON_HEADER, ROOT, TARGET, load_matched, load_symbols
 
 
 def load_c_bodies(
@@ -95,27 +100,89 @@ def _load_bodies(
     return bodies, duplicates
 
 
-def locate_source(query: str) -> tuple[dict, Path, str]:
-    """Find a canonical symbol's effective C body using the linking precedence."""
-    symbols = load_symbols()
-    selected = [row for row in symbols if row["name"] == query]
-    if not selected:
-        try:
-            address = int(query, 16)
-        except ValueError:
-            raise ValueError(f"unknown reconstructed function: {query}") from None
-        selected = [row for row in symbols if int(row["addr"], 16) == address]
-    if not selected:
-        raise ValueError(f"unknown reconstructed function: {query}")
-    if len(selected) != 1:
-        raise ValueError(f"ambiguous reconstructed function: {query}; use its entry address")
-    symbol = selected[0]
+@dataclass(frozen=True)
+class SourceMatch:
+    symbol: dict
+    path: Path
+    body: str
+    pc: int | None
+
+
+def _load_source_ranges() -> dict[str, list[tuple[int, int]]]:
+    _, target = resolve_target(TARGET)
+    corpus = REPO_ROOT / target["decompiler_corpus"]
+    with corpus.open(encoding="utf-8") as handle:
+        metadata = json.loads(handle.readline())
+    if not isinstance(metadata, dict) or metadata.get("record") != "metadata":
+        raise ValueError(f"invalid corpus metadata record in {corpus}")
+    if (
+        metadata.get("analysis_target") != TARGET
+        or metadata.get("executable_sha256") != target["codeflash_sha256"]
+    ):
+        raise ValueError(f"pseudocode corpus does not match registered target {TARGET}: {corpus}")
+    return pseudo.load_function_body_ranges(REPO_ROOT / target["inventory_baseline"], metadata)
+
+
+def locate_sources(queries: Iterable[str]) -> Iterator[SourceMatch | str]:
+    """Yield an effective C body or a diagnostic for each query, in input order."""
+    by_name: dict[str, list[dict]] = defaultdict(list)
+    by_entry: dict[int, list[dict]] = defaultdict(list)
+    for symbol in load_symbols():
+        by_name[symbol["name"]].append(symbol)
+        by_entry[int(symbol["addr"], 16)].append(symbol)
+
+    ranges: dict[str, list[tuple[int, int]]] | str | None = None
+    bodies: dict[str, str] | None = None
     locations: dict[str, Path] = {}
-    bodies, _duplicates = _load_bodies(locations=locations)
-    name = symbol["name"]
-    if name not in bodies:
-        raise ValueError(f"no reconstructed C body for {name} at {symbol['addr']}")
-    return symbol, locations[name], bodies[name]
+    for query in queries:
+        pc = None
+        selected = by_name.get(query)
+        if selected is None:
+            try:
+                address = int(query, 16)
+            except ValueError:
+                yield f"unknown reconstructed function: {query}"
+                continue
+            selected = by_entry.get(address)
+            if selected is None:
+                pc = address
+                if ranges is None:
+                    try:
+                        ranges = _load_source_ranges()
+                    except (OSError, ValueError, SystemExit) as exc:
+                        ranges = str(exc)
+                if isinstance(ranges, str):
+                    yield f"cannot resolve PC {pc:#010x}: {ranges}"
+                    continue
+                owners = [
+                    entry for entry, spans in ranges.items()
+                    if any(start <= pc <= end for start, end in spans)
+                ]
+                if not owners:
+                    yield f"no function owns PC {pc:#010x}"
+                    continue
+                if len(owners) > 1:
+                    yield f"ambiguous function owner for PC {pc:#010x}: {', '.join(owners)}"
+                    continue
+                entry = owners[0]
+                selected = by_entry.get(int(entry, 16))
+                if selected is None:
+                    yield f"no reconstructed C body for function at {entry} (PC {pc:#010x})"
+                    continue
+
+        if len(selected) != 1:
+            hint = "; use its entry address" if query in by_name else ""
+            yield f"ambiguous reconstructed function: {query}{hint}"
+            continue
+        symbol = selected[0]
+        if bodies is None:
+            bodies, _duplicates = _load_bodies(locations=locations)
+        name = symbol["name"]
+        if name not in bodies:
+            context = f" (PC {pc:#010x})" if pc is not None else ""
+            yield f"no reconstructed C body for {name} at {symbol['addr']}{context}"
+            continue
+        yield SourceMatch(symbol, locations[name], bodies[name], pc)
 
 
 def _object_definitions(header: Path = COMMON_HEADER) -> list[tuple[str, str]]:

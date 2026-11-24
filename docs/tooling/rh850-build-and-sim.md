@@ -575,6 +575,11 @@ mechanically emits its primitive integer method bodies as `data/generated/p1me_f
 `model check` rejects stale output. Memory writes, scheduling and interrupt delivery
 stay with each caller. `camry_decomp` compares Java and generated C with `javac`,
 `java` and the existing host C compiler, including regeneration and syntax rejection.
+The same check compiles the complete machine script bundle in a fresh source
+directory through Ghidra's `script check`, then runs only the retained nominal
+TAUJ clock smoke with disposable reports. Run it directly with
+`uv run --no-sync python tests/tooling/verify_p1me_faci_shared.py`. Ordinary
+machine runs reuse the bridge; they do not launch a separate compile check.
 
 Each report embeds the resolved run contract: unique candidate count or
 dump-contract source, resolved entry, exact entry-instruction hash,
@@ -597,6 +602,16 @@ Machine runs wait for the Ghidra report without the bridge's default
 The `rh850_firmware` suite has a 600-second deadline: the verified boot
 milestone alone executes approximately 29 million original instructions.
 The separately selected `rh850_runtime_soak` suite has a 1,800-second deadline.
+
+If the runner fails before a report, it prints the Ghidra exit status and both
+output streams. A `script_compile_failed` result occurs before scenario
+execution. Run `tools/gtarget TARGET script check ghidra/scripts/emulate/RunP1MEMachine.java`
+to check the same loader without running firmware. In the Nov 19 incident, the
+bridge log recorded `Operation not permitted` for both the Java source and the
+OSGi `parallel.lock` before Ghidra returned an unhelpful null-pointer error.
+For an access error, verify that the bridge process can read the script and list
+its source directory, and can write its OSGi cache. See Ghidra's
+`application.log` for the denied path.
 
 Interrupt arbitration scans an index of asserted EIRF requests rather than
 rereading every EIC on each instruction. Initialization, reset, device requests,
