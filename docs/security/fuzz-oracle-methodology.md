@@ -249,25 +249,52 @@ reconnaissance is explicit, not an emergent property of random frames.
 
 ## 8. Bounded scope and explicit next obligations
 
-- There is no basic-block/edge feedback yet. Required sink hits prove coarse
-  reach, not branch saturation. The next fuzzer architecture must collect
-  branch edges, retain/minimize new-coverage inputs, use UDS/DoCAN dictionaries
-  and comparison assistance, and stop by a coverage plateau rather than a
-  trial count.
-- No source build exists for ASan/MSan/UBSan/CFI. Fences, redzones, poison,
-  invariants, and faults approximate selected properties; they are not
-  byte-granular address/definedness/lifetime shadow memory.
-- No interrupt, DMA, timer, or task scheduling is modeled. ISR stacks are
-  canaries only; races and asynchronous use-after-release remain open.
-- No dataflow-faithful DCRA1/FACI/DataFlash model exists. Nine response trials
-  and the same nine request-tail trials stop at `dcra1_crc_raw_words +
-  0x6 @ 0x67066`, whose exact instruction is `sst.b 0x1c,ep,r0` after loading
-  `ep=0xFFD51004`. They are **peripheral-blocked**, not clean and not firmware
-  memory faults. SID `0x23` memory ID 2 likewise reaches the real
-  latched-driver rejection path, not a successful DataFlash read.
-- The full-dispatch extent pass covers RDBI only. WDBI, RoutineControl,
-  negative responses, asynchronous pending/completion responses, and transport
-  segmentation need equivalent producer-extent checks.
+The original fixed-matrix GNU sim campaigns in §9 have coarse sink coverage.
+The current checkout also contains
+[`fuzz_camry_f33_stateful_coverage.py`](../../tools/targets/camry/research/fuzz_camry_f33_stateful_coverage.py):
+exact branch tracing, a comparison dictionary, sequence mutation, edge-based
+retention/minimization, plateau detection, and multi-service producer-extent
+and request-tail audits. Its retained lifecycle-prefix result is in §9.
+The implementation alone does not establish a completed full campaign or its
+coverage. Its direct DCM injection still supplies synthetic context.
+
+The separate [P1M-E machine runtime](../tooling/rh850-build-and-sim.md#implementation-plan-and-tracked-status)
+now models functional timers, interrupt arbitration, DMA, selected CAN FIFO
+behavior, CRC and DataFlash operations, with explicit unsupported boundaries.
+The GNU sim harness also has a separately checked DCRA1 CRC helper. The nine
+blocked trials in each older pass below are historical results, not an
+inventory of the current machine model. These execution engines and their
+coverage are not interchangeable.
+
+Remaining obligations:
+
+- Establish a retained, reproducible campaign baseline: covered branch edges,
+  state transitions, semantic sinks, completed/blocked cases, and minimized
+  seeds. Distinguish direct-entry tests from peripheral-to-consumer execution.
+- Compare the existing GNU sim campaign with modeled-machine scenarios for
+  equivalent reachable inputs before combining their results. Extend scheduled
+  coverage through actual modeled interrupts and peripheral completion events;
+  concurrency, resource ownership and asynchronous lifetime properties need
+  their own checks.
+- Exact proprietary CodeFlash cannot be built with ASan/MSan/UBSan/CFI.
+  Fences, redzones, poison, invariants and faults approximate selected
+  properties, not general byte-granular address/definedness/lifetime shadow
+  memory. Sanitized reconstructed C can supplement, but not replace, exact
+  original-byte execution.
+- Audit response extent and completeness by service and continuation state;
+  retain results from the implemented multi-service audit and account for
+  asynchronous and transport-visible output, incomplete cases and genuine
+  peripheral dependencies.
+- Prefer typed event streams for separate input sources, with deterministic
+  schedules and minimized reproductions. Relevant precedents are
+  [Hoedur](https://www.usenix.org/conference/usenixsecurity23/presentation/scharnowski),
+  [MultiFuzz](https://www.usenix.org/conference/usenixsecurity24/presentation/chesser),
+  [AidFuzzer](https://www.usenix.org/conference/usenixsecurity25/presentation/wang-jianqiang),
+  and [GDMA](https://www.usenix.org/conference/usenixsecurity25/presentation/scharnowski).
+  Measure silent corruption at access time as motivated by
+  [Muench et al. (NDSS 2018)](https://doi.org/10.14722/ndss.2018.23166).
+  Hardware validation belongs on an isolated non-actuating bench, not an
+  installed safety-critical ECU.
 - Of 726 RDBI DID/session executions, 288 remained incomplete in the modeled
   state and expose no completed response span to judge. Only the 429 completed
   positives support the no-stale-byte result.

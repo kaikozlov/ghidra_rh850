@@ -81,6 +81,43 @@ an observed software identity does not establish an inferred MCU identity.
 Keep unresolved questions beside the evidence in their owning report. Replace
 disproved conclusions there rather than preserving a separate error ledger.
 
+## Investigation design
+
+Choose the cheapest evidence that distinguishes competing explanations, rather
+than maximizing the amount of code reviewed. Before investigating, identify the
+exact specimen, question, observable property, relevant execution contexts, and
+what result would discriminate the hypotheses. Keep conclusions and unresolved
+questions in their owning reports; retain minimized reproducible cases when a
+new behavior or defect is established.
+
+- **Static:** recover interface and object lifecycles (producer, representation,
+  consumer, initialization, reset and ownership), not just function names.
+  Use exact matches for cross-image transfer; approximate structural similarity
+  such as [Ghidra BSim](https://github.com/NationalSecurityAgency/ghidra/blob/master/GhidraDocs/GhidraClass/BSim/README.md)
+  is a candidate generator requiring target-native confirmation.
+- **Dynamic:** select the lowest sufficient fidelity: reconstructed C for local
+  semantic checks, original-byte function execution, the modeled machine for
+  scheduled/peripheral behavior, and an isolated non-actuating bench for
+  hardware validation. Use stock recordings and independent observations to
+  distinguish firmware behavior from model or harness artifacts. Do not fuzz
+  installed safety-critical ECUs or use road tests as security experiments.
+- **System:** represent inter-ECU contracts as producer, transport, consumer,
+  timebase and validity/lifecycle conditions. Preserve synchronized OEM recorder
+  and CAN captures when a question spans controllers. Missing producer firmware
+  is an acquisition dependency, not an invitation to repeat downstream audits.
+- **Review:** distinguish static reachability, modeled execution, bench
+  observation and actual impact. Track tested states/edges and blocked or
+  incomplete paths, not just function counts. Search related revisions and
+  reproduce a minimal case before promoting a finding.
+
+Useful external methodology: [Kaspersky ICS CERT firmware component analysis](https://ics-cert.kaspersky.com/publications/reports/2022/07/06/dynamic-analysis-of-firmware-components-in-iot-devices/),
+[automotive security testing survey](https://doi.org/10.3390/s22239211),
+[Van den Herrewegen's automotive firmware thesis](https://etheses.bham.ac.uk/id/eprint/11516/),
+[MetaEmu](https://arxiv.org/abs/2208.03528) (RH850 and inter-device rehosting),
+and [Project Zero's root-cause template](https://googleprojectzero.github.io/0days-in-the-wild/0day-RCAs/template.html).
+Dynamic campaign obligations and further firmware-specific literature belong in
+[the fuzz-oracle methodology](security/fuzz-oracle-methodology.md).
+
 ## Working state is not evidence
 
 Committed projects use non-openable snapshot names under `projects/<target>/`.
