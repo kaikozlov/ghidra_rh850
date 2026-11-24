@@ -606,7 +606,17 @@ too broad in earlier TSS3 architecture notes. Category 498 `FRC_P5` exposes DID
 `0x10AF` (alternate `0x30AF`) as **ECU Security Key Registered Incomplete Flag**
 with the OEM `OFF / ON / Not Fixed` state domain, and the same database exposes
 `XF01B ECU Security Key Not Registered`. The older `Fr_Camera_P5` family exposes
-DID `0x1119` (alternate `0x3119`) as **ECU Security Key Registered Status**.
+DID `0x1119` (alternate `0x3119`) as **ECU Security Key Registered Status**
+(bit 8), followed by TCM and two ECM message-authentication-error flags
+(bits 9–11). `ADS_Eth_P5`, `ADeU_Eth_P5` and `SIS_Eth_P5` also define
+`XF01B`. ADS DDR `0x5274..0x527C` separately records CAN/Ethernet frame
+certification results for CGW, IPA, SIS, SBW, LiDAR and ADX; `0x527D` records
+security attack detection. Toyota [T-SB-0111-20 Rev1](https://static.nhtsa.gov/odi/tsbs/2022/MC-10224141-9999.pdf)
+includes 2021–22 Mirai and Lexus [L-SB-0035-22](https://static.nhtsa.gov/odi/tsbs/2022/MC-10220229-9999.pdf)
+includes 2022 LS500/LS500h. Network authentication thus predates FRC_P5.
+The pinned opendbc 2021 Mirai port uses `ToyotaTSS2PlatformConfig`, not
+`ToyotaSecOCPlatformConfig`; that is evidence about the supported ordinary
+control interface, not the 2022 US Teammate variant or all vehicle traffic.
 Toyota service documentation independently requires **Update ECU Security Key**
 after forward-recognition-camera replacement and describes the security key as
 the credential required for a replacement ECU to communicate on the vehicle

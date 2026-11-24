@@ -84,6 +84,19 @@ zero. In contrast, the catalog's **Parking Brake Switch** entry for
 active consumer (`0x6CEB0 → 0x52FAA` in dataflow order), but the parking-brake
 meaning comes from the comparison DBC alone.
 
+**Flasher arbitration:** worker `0x5A580` calls `0x5C2D8`, which ORs
+request masks from multiple inputs before `0x5A052` chooses the first active
+entry in the ROM priority table `0x160400` (21 entries). The side-mask table
+at `0x1603E0` maps selected indices 2/3 to single-side masks 1/2, and
+indices 1 and 4–16 to both sides (3). The `0x623`/`0x682` channel-0
+inputs (COM RX `0x41`/`0x94`) enter through `0x5C35E`/`0x5C37C`,
+`0x5BB0E`/`0x5BB4C` and `0x5BAD0`. Their nonzero qualified values map
+through `0x160AD4`/`0x160AF4` to both-side arbitration indices; they do not
+supply an independent left/right direction in this specimen. Other request
+slots `0x5BB40`, `0x5BE40`, `0x5BE44` are stubs. Evidence: cached
+pseudocode, direct disassembly of the dispatch/priority/callback paths,
+and ROM table bytes from the registered CodeFlash.
+
 ### Configured CAN publications
 
 `0x9DD00` indexes the six lower TX domains by the pointers at `0x16D0E0`

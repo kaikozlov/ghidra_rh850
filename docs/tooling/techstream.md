@@ -3006,7 +3006,44 @@ capture path is `CCmdImgOpeDdr::GetTSS3ImageFFDInfo`. The immediate `0x1CE4`
 seen elsewhere in this DLL specifies an allocation size for the `0x1000C62E`
 allocator.
 
-**ADS remains useful but secondary.** `ADS_Eth_P5` type-134 rows 406/407 name
+**Advanced Drive comparison domain.** The current canonical regional catalogs
+for category 476 each contain 257 distinct Data List rows, 413 type-134 DDR
+signal rows (287 distinct data IDs), 29 DDR trigger rows, 110 RoB signal rows,
+72 DTC definitions and four Active Tests (TD indicator, blower, Advanced Drive
+buzzer, clearance-warning buzzer). The regional vehicle/install-set join
+finds 17 NA, 24 EU and 14 JP vehicle types carrying 476: LS500h, MIRAI, MAC,
+and one JP OTA service entry. Twelve MAC types also carry FRC 498; none of
+the three NA Camry HV types (12704/12862/12984) carries 476. NA LS500h 12328
+and MIRAI 12330 share HV 397, EMPS 405, Meter 409, ABS 435, IPA 438, CGW 443,
+SAS 445 and CMCCM 470 with Camry 12704. The ADS host has separate extension
+control (477), spatial-information service (478), Ethernet switch and LiDAR
+categories. This makes the ADS catalog a comparative vocabulary source for
+shared actuator domains, not the Camry's own diagnostic endpoint.
+
+Selected additional type-134 fields in `catalogs/NA/476.json.gz`:
+
+| Record ID | OEM meaning |
+|---|---|
+| `0x5081` / `0x50E8` | Turn Signal State / Turn Signal Lighting Request; distinct records, both use 1 left, 2 right, 3 off |
+| `0x50E5` | Lane Change Sequence: 0 no reception, 1 waiting start, 2 blinker lighting/lane keeping, 3 lane change steering, 4 return to lane, 5 normal end, 6 failure, 7 cancellation |
+| `0x50EC`–`0x50EE` | Left/right turn-switch position and lane-change direction |
+| `0x508F` / `0x50E3` | Advanced Drive Status / Advanced Drive Control Status (Display Lv.2) |
+| `0x5153`–`0x515A` | Control-target distance, relative velocity, lateral position, object number, relative acceleration, TTC type, object class, lateral acceleration |
+| `0x517A`–`0x5182` | Horn request, planner hazard request, stop-assist status/history, Help Net request, door unlocking request, brake status, stop-assist lane-change request |
+| `0x51AE`–`0x51B0` | Right/left hands-off judgment and driver steering-wheel hold status (touch versus torque) |
+| `0x51B7` / `0x5263` | Bitfield families for Advanced Drive readiness impossibility and end reasons |
+| `0x51B8`–`0x51C3` | Automatic lane change/departure, LKP, readiness, takeover/hands-on reasons, lane-change prohibition |
+| `0x519A`–`0x51A5` | Lane-change success/failure and surrounding-vehicle gaps/relative velocities |
+| `0x5C68` | Advanced Drive Control Acceleration and Slowdown Request G (m/s²) |
+| `0x5C85` / `0x5C86` | Advanced Drive target steering angle speed / angle order value (rad/s, rad) |
+
+The separate [ADS viewer schema](pcs-data-viewer-tss3-dictionary.md#62-ads-recorder-schema)
+contains 1,419 rows and 612 payload IDs, including driving-force mediation
+records absent from the DDB. IDs and units are recorder metadata, not CAN
+frame positions. For the Camry, `FRC_P5` remains the direct source for LCA
+installation/control status (`0x1202`, `0x1681`) and the TSS3 recorder.
+
+`ADS_Eth_P5` type-134 rows 406/407 name
 `Advanced Drive Control Target Steering Angle Speed Order Value` and
 `…Target Steering Angle Order Value` (row 143 = `Lateral Control Switch
 Status`). `GetADSDDRInfoP5_DT.dll` (SHA-256 `28a4474c…46df`) reads the row

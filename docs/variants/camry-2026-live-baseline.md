@@ -360,6 +360,30 @@ it does not query a vehicle or treat synthetic responses as observations.
 The normal artifact remains regenerable without the external GTS+ corpus.
 Reproduction commands are in the [workflow](../WORKFLOW.md#gear-and-ready-evidence).
 
+### 8.4 Electronic shift-control architecture
+
+The North American XV80 [parts catalog](https://partsouq.com/en/catalog/toyota/diagram/NA/2025/CAMRY/AXVH80L-CEXGBA/category/2/diagram/3312/illustration/33725PA/vin/4T1DAACK7TU659249)
+lists transmission control cable `33820-AQ010` and shift lock assembly
+`33560-33380`. R/N/D/B on the eCVT are powertrain operating modes, so the
+cable alone does not rule out an independent electronic mode request. The
+parking pawl and the electronically actuated parking brake are separate;
+the [XV80 owner's manual, pp. 191–192](https://cdn.dealereprocess.org/cdn/servicemanuals/toyota/2025-camryhybrid.pdf)
+explicitly defines automatic EPB engagement/release on P transitions. Exact
+XV80 selector-to-pawl linkage and HV ECU shift-input wiring remain open.
+
+Current GTS+ `HV_P5` and `Engine_P5` catalogs define **Control the Shift
+Position** (Active Test 42003/42009, respectively, RID `0x1111`). These are
+shared diagnostic definitions; selectable PRND ranges and Camry support have
+not been established. `HV_P5` DID `0x1459` **Shift Request during Advanced
+Drive/Park** explicitly distinguishes OFF (0), Gear Shift Control Module (1),
+Clearance Warning Control Module Semi-Auto (2), Full-Auto (3), and Advanced
+Drive Control Module (4). DID `0x1006` includes Advanced Park availability
+information. Neither has been queried on this Camry. The factory
+[2025 Prius Advanced Park](https://ownersmanuals2.com/toyota/prius-2025-owners-manual-106170/page-315)
+changes shift position and operates turn signals automatically, providing a
+shift-by-wire comparison target. `0x127` and `0x3BF` remain observed state
+publications, not established shift-request ingress.
+
 ## 9. Exact `8965F3307000` CodeFlash and target-native steering contract
 
 The fourth stationary/NRTD pass acquired the exact EPS CodeFlash. The successful
@@ -4533,9 +4557,22 @@ state (`0x2911`). The meter's involvement in exterior flasher control on the
 XV80 generation is corroborated by Toyota's [2026-08-06 recall announcement](https://pressroom.toyota.com/toyota-recalls-certain-model-year-2025-2026-camry-vehicles/)
 for the 7-inch combination meter. The mounted P5 Main Body catalog has an
 EDSS flasher test but no ordinary directional lamp Active Test; the meter
-catalog has left/right indicator tests. For the 12.3-inch Camry, the exact
-meter ingress and gateway routing remain to be established from the EWD or
-firmware; no external directional command has been exercised.
+catalog has left/right indicator tests (IDs 40/41, DID `0x2911`, bits 27/28).
+Toyota already defines an independent ADAS request: the `ADS_Eth_P5`
+Advanced Drive Control catalog (category 476, `ddr_behavior.signals`, table
+134, rows 49/82) separates **Turn Signal State** (`0x5081`) from **Turn Signal
+Lighting Request** (`0x50E8`: 1 left, 2 right, 3 off). Toyota's
+[2021 LS/Mirai Advanced Drive announcement](https://global.toyota/en/newsroom/corporate/35063150.html)
+describes system-initiated lane changes. The Phase 6 `ADCU_P6` catalog defines
+**Hazard And Turn Lights Arbitration Output** (`0x1E2E`, pattern 562: 0 no
+request, 1 hazard, 2 left, 3 right) and EDSS hazard/directional request
+(snapshot `0x3486`, pattern 689). These are diagnostic/recorder IDs, not CAN IDs.
+The TSS3 PCS recorder `0x526C` reports **Turn signal**. Category 476 is not in
+the Camry install set; the corresponding Camry FRC/meter request path is
+unresolved. The 2026 Camry manual distinguishes the first stalk detent (LCA)
+from the second (ordinary directional operation), providing a native A/B
+comparison for a passive capture. The [reference meter arbitration](yc-r4p-2024-meter.md#body-inputs-turn-hazard-doors-and-buckle)
+also accepts several non-stalk hazard sources.
 
 A useful negative control is `0x24D`: it is also native bus0 and runs at almost the
 same ~1-Hz population as `0x622` (**15,516** versus **15,532** frames), but its

@@ -495,6 +495,15 @@ Contains:
 - driver-steering flag;
 - responsiveness request.
 
+The original disclosure's Figure 8, Step 2-4 explicitly copies the selected
+lateral package's ID, requested angle/yaw rate/radius, quantity selector,
+driver-steering flag and responsiveness request into Figure 6's target
+instruction fields. Unlike the longitudinal force conversion, this can
+preserve the physical lateral target value. It is **semantic repackaging**,
+not a claim of byte-preserving CAN-frame relay. The same passage is retained
+in the [2026 continuation US20260125069A1](https://patents.google.com/patent/US20260125069A1/en)
+(priority 2018-08-30, published 2026-05-07).
+
 This is an exceptionally strong semantic match to the exact F33 B6 interface.  Current
 GTS `EMPS_P5 0x1CEE` independently exposes **Target Lateral ID**, **Cooperative Control
 in Progress Flag**, **Target Steering Angle After Output Compensation**, and
@@ -543,6 +552,45 @@ act as a grant over future samples rather than merely label the one sample that 
 arbitrated.  Do not assume every Toyota actuator receives a manager-forwarded copy of
 the exact winning request value.  Recover that physical choice per actuator/platform.
 See [the selected-ID/direct-request close read](toyota-selected-id-direct-request-arbitration.md).
+
+### Other implementations and the B6 relay hypothesis
+
+The [2025 continuation US20250214596A1](https://patents.google.com/patent/US20250214596A1/en)
+(priority 2018-08-29) retains the direct-request scheme and its comparison
+case (Fig. 3), where the manager retransmits the selected request as a control
+signal. Neither embodiment specifies CAN IDs, transport packing or SecOC.
+The [2026 continuation US20260125083A1](https://patents.google.com/patent/US20260125083A1/en)
+(priority 2021-11-30) explicitly distinguishes incoming `PLN1` kinematic plans
+from outgoing actuator requests `ACL1`, `BRK1`, `STR1`.
+
+Other Toyota families establish that request generation need not preserve
+all selected lateral values. [US20250368184A1](https://patents.google.com/patent/US20250368184A1/en)
+(priority 2019-11-08, published 2025-12-04) receives steering angle and yaw-rate
+information together, selects a command or computes a new one, and can
+coordinate steering with brake/drive yaw control. [US20250222931A1](https://patents.google.com/patent/US20250222931A1/en)
+(priority 2022-07-15, published 2025-07-10) distinguishes target angle,
+validity and upper/lower steering-assistance torque in the STR1 output.
+[US20250381960A1](https://patents.google.com/patent/US20250381960A1/en)
+(priority 2024-06-17, published 2025-12-18) discloses manager-side smoothing
+of actuator instructions on motion-request source changes (worked longitudinal
+example). [US12649482B2](https://patents.google.com/patent/US12649482B2/en)
+(priority 2023-07-07, granted 2026-06-09) allows the motion manager to combine
+travel and HMI requests, including additive steering-angle contributions.
+These support a generated instruction domain rather than requiring a
+transparent frame relay; none assigns those mechanisms to exact Camry B6.
+
+**Exact-car boundary:** the current F33 application receive map contains B6
+and neither 0x08A nor 0x081. The 253-segment Panda census has zero native B6,
+while the EPS-local receive observations measure ~119 native deliveries/s.
+Thus an FRC-originated B6 on the observed trunk is disfavored. Distinguish
+VMM generation of a new instruction (possibly copying angle/ID), internal
+post-arbitration transport/relay between brake-domain nodes, and a hypothetical
+additional upstream B6-format input. The first is the leading logical model;
+the second remains compatible with the A30/A31 split in §8; the third has no
+positive receiver or traffic evidence. Brake-side generated Rx/Tx configuration,
+exact code/dataflow and synchronized passive observations are needed to resolve
+these distinctions. SecOC validity is independent of whether a receiver has
+an application route for that PDU or selects the request.
 
 ## 6. Why the Brake module arbitrates and why B6 comes from that domain
 

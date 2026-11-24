@@ -103,10 +103,14 @@ camera, while the driver-monitor camera has dedicated `DMC`, `DLED`, and
 `GND3` connections. The ultrasonic sensors are grouped into four direct
 three-wire chains (`S1/E1/B1` through `S4/E4/B4`) rooted at the ADU.
 
-The exact payload transported by the direct `FCM` connection is not established
-by the EWD. The single named conductor is enough to exclude ordinary two-wire
-CAN at that interface, but it does not identify the camera transport or how much
-processing remains in the camera head.
+The P6 diagnostic catalog closes the transport family: `ADCU_P6` DID
+`0x1182` exposes FRC LVDS communication/establishment, serializer, supply,
+image and signal faults; `0x1181` observes camera supply voltage. DTCs
+`C1A7D49`, `C1AA013` and `C1AA087` separately identify the forward-camera
+serializer and LVDS link. Together with the EWD, this establishes a remote
+serialized image/sensor-head interface rather than a standalone CAN ADAS
+application ECU. The exact serializer protocol and head-local processing
+remain unresolved.
 
 ### Vehicle-network attachment
 
@@ -379,6 +383,118 @@ while HMI and actuator ECUs remain separate.
 
 ## 5. TSS3 -> TSS4 interpretation
 
+### Earlier parallel architecture: 2021 Advanced Drive
+
+[Denso's 2021-04-09 announcement](https://www.denso.com/global/en/news/newsroom/2021/20210409-g01/)
+identifies the ADS and ADX multi-SoC compute ECUs, SIS localization ECU,
+locator/telephoto camera and LiDAR for LS/Mirai Advanced Drive, launched in
+[April 2021](https://global.toyota/en/newsroom/corporate/35063150.html).
+This predates mainstream TSS3. Toyota's own engineering article,
+[Technical Review Vol. 66, pp. 152–156 (2021)](https://global.toyota/pages/global_toyota/mobility/technology/toyota-technical-review/TTR_Vol66_E.pdf),
+identifies Advanced Drive as an extension of 2017 LSS+A and explicitly
+anticipates further sensor/ECU consolidation for wider adoption. Table 1
+assigns ADS recognition/localization/vehicle dynamics control, ADX AI
+recognition/future expansion, SIS HD-map output, DMC driver monitoring, and
+DSS1 conventional LSS+A. [Vol. 68, pp. 77–79 (2023)](https://global.toyota/pages/global_toyota/mobility/technology/toyota-technical-review/TTR_Vol68_E.pdf)
+adds the localization and combined longitudinal/lateral dynamics strategy,
+and describes four-second fault-tolerant operation and five OTA updates
+through August 2022.
+
+The launch functions include supervised highway route-following, overtaking,
+lane changes/splits, early yielding to merging traffic, lateral clearance
+from nearby vehicles, curve-speed control and emergency shoulder stopping
+with hazard lights, door unlocking and HELPNET. The [US backgrounder](https://pressroom.toyota.com/teammate-advanced-drive-backgrounder/)
+describes approximately six miles of route lookahead; Denso advertises
+front LiDAR and telescopic camera detection beyond 200 m. The [Japanese Mirai
+manual, printed p. 16](https://manual.toyota.jp/pdf/mirai/mirai_20tm_ver300_202202.pdf#page=18)
+shows front LiDAR, side/rear retrofit mounting provisions through software
+3.00, and side/rear LiDAR from 3.01. US launch materials specify front-facing
+LiDAR only. [T-SB-0057-24 (2024-06-28)](https://static.nhtsa.gov/odi/tsbs/2024/MC-11005075-0001.pdf)
+documents version 5.00 improvements for the 2022 US Mirai, including lane-change
+availability, blind-spot avoidance and an 85 mph maximum set speed. This full
+system is distinct from the later [Advanced Drive traffic-congestion feature](https://global.toyota/en/newsroom/toyota/36614730.html)
+introduced on the Noah/Voxy (0–40 km/h), despite the common marketing name.
+
+The Mirai Advanced Drive manual
+([OM62U0500, p. 18](https://assets.sia.toyota.com/publications/en/omota-s/OM62U0500/pdf/OM62U0500.pdf))
+explicitly distinguishes the Advanced Drive camera from the ordinary TSS
+front camera. The 2022 Mirai parts catalog independently lists
+[8646C-62010 and 881J1-50010](https://www.toyotapartsdeal.com/parts-list/2022-toyota-mirai/electrical/pre_collision_system.html)
+(camera assemblies), [881A0-62010 and 881B0-62012/13](https://www.toyotapartsdeal.com/parts-list/2022-toyota-mirai/electrical/cruise_control_auto_drive.html)
+(ADS/ADX computers), and a separate [88150-62030](https://www.toyotapartsdeal.com/parts-list/2022-toyota-mirai/electrical/switch_relay_computer.html)
+Driving Support Computer.
+
+The current regional vehicle/install-set join identifies 27 LS500h and 15
+MIRAI vehicle types with category 476 ADS. All 42 also contain categories
+418 LDA, 428 Driving Support System, 430 `Fr_Camera_P5`, 431 RSA, 432 PCS2,
+433 AHB, 477 ADX and 478 SIS; none contains 498 `FRC_P5` or 6037 ADCU.
+The 12 `MAC` entries which combine ADS and 498 also contain 6037 and mixed
+P5/P6 propulsion categories, so they are not evidence of a production
+vehicle with all three controllers. The remaining ADS entry is a JP OTA
+service type. These are catalog candidates rather than live health checks.
+`tools/gts canbus 12330` (Mirai) independently places component 0x01 Driving
+Support (Cruise Control-ACC) and 0x6D Front Camera Module on Bus 1, distinct
+from the Bus-4 brake/EPS group. `Fr_Camera_P5` DTCs `C1A9304`, `C1A9445`,
+`C1A9487` and `C1A8A87` name main, image-processing and stereo-processing
+microcomputers internal to the camera; `U110487` names the Driving Support
+ECU dependency. ADS monitors both that ECU (`U110487`, `U11A387/487/587`;
+DDR `0x51F1`) and the conventional camera (`U023A87`, `U114B87`; DDR
+`0x51E5..0x51E7`). Conversely `DSSystem_P5` monitors ADS (`U11A087`). The
+premium architecture therefore adds a high-level planning stack alongside
+conventional distributed TSS, rather than replacing its camera with a
+passive head. Technical Review Vol. 66 Fig. 4 identifies the retained camera
+as stereo and Table 1 assigns the LSS+A applications to DSS1. LS repair
+information distinguishes mono and stereo configurations: the conventional
+camera supplies target recognition to DSS1 on the stereo system, and LTA
+availability/display responsibility moves from camera to DSS. This supports
+a recognition-heavy stereo camera role; exact stereo steering-command
+publisher remains unresolved. Earlier mono cameras already had steering
+request capability, so the `Fr_Camera_P5` name is not a perception-only
+classification.
+
+### Shared P5 downstream ECU foundation
+
+The ADS-equipped Mirai/LS and Camry install sets share `EMPS_P5`, `ABS_P5`,
+`HV_P5`, `Meter_P5`, and other actuator/body diagnostic families. The generic
+P5 lateral application-ID dictionary (`EMPS_P5 0x1CEE`) already encompasses
+ordinary TSS, parking and higher-level automated driving. This supports a
+common request abstraction below the ADAS compute boundary; it does not
+establish the ADS wire IDs or variant-specific admission. Real firmware
+continuity is independently established within the TSS3 family: Corolla H/F
+have identical `0x20000..0xFFFFF` application regions, and Corolla H/Camry F33
+have identical B6 CanIf descriptors and homologous receive/security control
+flow ([Camry baseline §57.7](../variants/camry-2026-live-baseline.md)). F33
+also contains distinct application-state handling for parking-class selectors
+(§66.2), but the shared catalog's ADS-specific observer DID `0x1CEE` is absent
+from F33 metadata and Camry Brake rejects `0x107E` (§23). These are useful
+counterexamples to assuming shared catalog coverage equals live variant
+support. A comparison against confirmed Advanced Drive-equipped vehicle
+software identities, passive CAN recordings and exact receiver configurations
+is required to establish common on-wire interfaces beyond the current TSS3
+observations.
+
+### Comparison of the diagnostic software surfaces
+
+| Catalog | Data List rows | RoB fields | DDR fields | Distinguishing application scope |
+|---|---:|---:|---:|---|
+| `Fr_Camera_P5` (430) | 58 | 14 | 0 | Conventional vision/calibration; separate legacy feature categories |
+| `ADS_Eth_P5` (476) | 257 | 110 | 413 | Map-aware planning, lane-change sequence, takeover, stop assist, body requests |
+| `FRC_P5` (498) | 283 | 92 | 0 | TSS3 feature availability, ACC/PCS/LTA/LCA/PDA application state; separate TSS3 Operation FFD viewer schema |
+| `ADCU_P6` (6037) | 1647 | 717 | 1797 | Consolidated TSS and additional parking/sensor/application domains |
+
+In the canonical NA catalogs, case-folded whitespace-normalized exact field
+names over Data List + RoB + both DDB DDR families intersect as follows:
+ADS/FRC 20 (of 670/306 unique names), FRC/ADCU 74 (of 306/3014), ADS/ADCU
+49 (of 670/3014). These count vocabulary, not software reuse; the separately
+stored viewer schemas are excluded. Functional overlap is stronger than
+literal names: FRC `0x1202` and ADCU `0x2A01` both define ACC, PCS, LTA, LCA,
+LDA, PDA and RSA feature availability, while ADS `0x50E5`/`0x50E8` and ADCU
+`0x1C10`/`0x1E2E` expose lane-change state and independent lamp requests.
+The exact TSS3/P6 recorder request/result geometry join in §1 is stronger
+interface continuity than the ADS vocabulary comparison. Advanced Drive is
+an architectural precursor/parallel branch; direct ADS-to-ADCU code lineage
+has not been established. See also the [ADS catalog review](../tooling/techstream.md#622-true-tss3-lateral-control-front-recognition-camera-2-frc_p5-and-its-read-only-ffd-capture-path).
+
 For TSS3, the forward-recognition-camera side was a natural place to look for
 the ADAS application owner and the request-generation boundary.
 
@@ -472,8 +588,8 @@ the firmware; a physical rack teardown is the independent hardware route.
 Until one of those establishes the silicon, do not project the P5 RH850/ICU-S
 implementation onto `PSCM_A_P6`.
 
-The direct forward-camera interface should be treated as a separate reverse-
-engineering target. Its physical/protocol semantics are not given by the EWD.
+The direct forward-camera LVDS/serializer interface should be treated as a
+separate reverse-engineering target; the exact link framing remains open.
 
 ## Public sources
 
