@@ -1956,10 +1956,27 @@ CanTp paths.
 The reach filter leaves **372 stores** (366 distinct store PCs) whose base
 register it cannot resolve: 131 merged pointers, 92 pointers loaded from
 memory, 51 arguments, 74 integer conversions, 19 undefined cells and 2 call
-returns. Their instruction-level review is open. Run with `--watch-stores` over
-the same 21,661 cases, the oracle executes **34 of the 366** and none writes a
-control object in a stock-state case; the 32 synthetic hits above are all from
-`0x8E034` in `select_first_successful_payload_or_error_8dff6`.
+returns. Run with `--watch-stores` over the same 21,661 cases, the oracle
+executes **34 of the 366** and none writes a control object in a stock-state
+case; the 32 synthetic hits above are all from `0x8E034` in
+`select_first_successful_payload_or_error_8dff6`.
+
+The first **129 rows** are reviewed at instruction level
+(`route2-20261123/reach/review-U1.md` to `review-U4.md`): 31 bounded, 94
+validated, 4 unvalidated, none unbounded. No row reaches a control object or
+passes the end of its object. The four unvalidated rows write at fixed small
+offsets: three in the DTC count appenders (`0x8C39E`, `0x8C436`, `0x8C43E`,
+response pointer plus 0 to 3, and no compare covers offsets 2 and 3) and
+`0x7E5FC`, whose count is at most 32 but whose destination buffer's extent was
+not recovered. Store `0x8208A` (XCP DOWNLOAD) writes inside
+`0xFEBF7C00..0xFEBFFBFF` by design. Two reviewer leads were checked in
+disassembly and dropped. The NvM chunk fill at `0x7487A` takes
+`min(rem, 64) + (min(rem, 64) & 3)` bytes with
+`rem = length - 64 x (first slot + slot) - 4`, and all 124 configured block
+lengths are multiples of 4, so it fills at most 64 bytes. `0x8BF28` writes at
+most 32 bytes through its seventh argument (`addi -33,r28,r0` at `0x8BF08`).
+The deep pass (`--deep`, `reach-deep.csv`) closes that store for the wrong
+reason, reading the stack slot's address as its contents.
 
 **NvM and COM inserts.** The 59 block images occupy `0xFEBEF400..0xFEBF0307`,
 none overlapping a control object; enabled images never overlap each other and
