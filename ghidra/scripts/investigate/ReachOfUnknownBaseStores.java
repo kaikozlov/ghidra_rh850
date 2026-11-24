@@ -31,14 +31,18 @@
 // that still ends on a control object) with an origin text a reviewer can
 // follow; UNREACHABLE-CODE closes stores in functions nothing calls.
 //
-// The deep pass is research state. Known limits of its current output: a base
-// read from a stack slot is closed wrongly (Ghidra's p-code hands over the
-// slot's address in place of its contents, e.g. 0x8bf28); a pointer argument
-// forwarded through a caller can collapse to a small range (0x4fc40); loop-
-// carried pointers get no induction bound; and one hull over a table of
-// offsets loses the correlation with the index bound. Rows it does not flag
-// are closed only where their base is a constant, a CodeFlash cell, a width-
-// bounded offset, or a term a named compare bounds.
+// The deep pass is research state. Known limits of its current output: loop-
+// carried pointers get no induction bound, and for an offset read through a
+// record table (0x806a4 and its siblings) the candidates are enumerated per
+// record-table word, not per record, so those rows stay flagged. A base read
+// from a stack slot is never closed: Ghidra's p-code hands over the slot's
+// address in place of its contents (0x8bf28), so such a row is flagged and its
+// origin text names the word load. A pointer argument forwarded through a
+// caller keeps the hull of its call-site values and stays open when that hull
+// is open. Rows it does not flag are closed only where their base is a
+// constant, a CodeFlash cell, a width-bounded offset, a term a named compare
+// bounds, or an enumerated candidate set in which no value reaches a control
+// object.
 //
 // Usage: ... -- [--out DIR] [--only 0xA,0xB] [--rows] [--dump] [--deep]
 import ghidra.app.script.GhidraScript;
@@ -1493,7 +1497,7 @@ public class ReachOfUnknownBaseStores extends GhidraScript {
     r.callers = cb.toString();
     Idx ti;
     if (best != null) {
-      ti = new Idx(); ti.min = best.min; ti.max = best.max; r.ov = best.ov;
+      ti = new Idx(); ti.min = best.min; ti.max = best.max; ti.open = idxRange(r.terms, best.ov, fc).open; r.ov = best.ov;
       r.cls = best.imm && !best.kind.contains("DATA") ? "BOUNDED" : "DATA-BOUNDED-VALIDATED";
       r.evidence = best.how + (best.imm ? "" : " (bound from data " + best.bound + ")");
     } else if (mask != null) {
@@ -1968,7 +1972,7 @@ public class ReachOfUnknownBaseStores extends GhidraScript {
     SV s = new SV();
     s.v = callInputReg(cfc, at, ro);
     if (s.v == null) s.v = blockWrite(cfc, ro, at);
-    if (s.v != null) s.rg = rng(s.v, Collections.emptyMap(), new HashSet<>(), d + 1, cfc);
+    if (s.v != null) { s.rg = rng(s.v, Collections.emptyMap(), new HashSet<>(), d + 1, cfc); if (truncatedLiveIn(s.v)) s.rg = new Rg(s.rg.lo, s.rg.hi, true); }
     else {
       s.alts = new ArrayList<>();
       s.rg = liveInRange(ro, cfc, d);
@@ -2218,7 +2222,10 @@ public class ReachOfUnknownBaseStores extends GhidraScript {
     r.wraps = rl < 0 && rh >= 0;
     long lo = r.wraps ? 0 : sat0(rl), hi = r.wraps ? U32 : satU(rh);
     Hit h = absHits(lo, hi);
-    if (tight) { r.tight = hex(lo) + ".." + hex(hi) + (r.wraps ? " (wraps)" : ""); r.tightTargets = h.targets; r.tightClosed = !h.any && !r.tiOpen; }
+    if (tight) {
+      r.tight = hex(lo) + ".." + hex(hi) + (r.wraps ? " (wraps)" : ""); r.tightTargets = h.targets; r.tightClosed = !h.any && !r.tiOpen;
+      if (tMin == tMax && !r.tiOpen) { String bn = boundNote(r); if (bn != null) r.evidence = (r.evidence == null || r.evidence.isEmpty() ? "" : r.evidence + "; ") + bn; }
+    }
     else { r.lo = lo; r.hi = hi; r.targets = h.targets; r.nearest = h.nearest; r.distance = h.distance; r.reach = h.any; }
   }
   String dtBody(Varnode v, FC fc, int d) {
@@ -2244,8 +2251,13 @@ public class ReachOfUnknownBaseStores extends GhidraScript {
       Long slot = slotOf(op.getInput(1), fc);
       if (slot != null) return "load@" + opPc(op) + "[sp" + signed(slot) + "] " + slotText(fnOf(fc), slot, v.getSize(), fc, d);
       Rg a = rng(op.getInput(1), Collections.emptyMap(), new HashSet<>(), d + 1, fc);
+      Varnode av = strip(op.getInput(1));
+      String site = av.getDef() == null && av.isRegister() && av.getSize() == 4 ? " <- " + liveText.getOrDefault(fnOf(fc) + ":" + av.getOffset(), "?") : "";
+      Rg val = d <= 6 ? rng(v, Collections.emptyMap(), new HashSet<>(), d, fc) : null;
       String cell = a.open ? dtExpr(op.getInput(1), fc, d + 1) : (a.lo == a.hi ? constText(a.lo, fc) : constText(a.lo, fc) + ".." + hex(a.hi));
-      return "load@" + opPc(op) + "[" + cell + "] " + (a.open ? "unknown (address open)" : (a.span() > CELL_SPAN ? "unknown (address span > 0x1000)" : memText(a, v.getSize(), fc, d)));
+      if (a.open && (val == null || val.open)) return "load@" + opPc(op) + "[" + cell + "]" + site + " unknown (address open)";
+      if (a.open) return "load@" + opPc(op) + "[" + cell + "]" + site + " -> " + rngText(val, fc) + " (per candidate)";
+      return "load@" + opPc(op) + "[" + cell + "] " + memText(a, v.getSize(), fc, d);
     }
     if (c == PcodeOp.MULTIEQUAL) return phiText(v, op, fc, d);
     if (c == PcodeOp.CALL || c == PcodeOp.CALLIND) {
@@ -2420,6 +2432,10 @@ public class ReachOfUnknownBaseStores extends GhidraScript {
         for (Varnode x : tr) if (x.getDef() != null && x.getDef().getOpcode() == PcodeOp.LOAD) { r.evidence = nullTest(x, fc, toAddr(r.pc)); break; }
       }
     }
+    if (dump) for (Term t : r.terms) {
+      Rg tq = rng(t.v, Collections.emptyMap(), new HashSet<>(), 0, fc);
+      println("    TERM " + t.v + (t.scale == 1 ? "" : " x" + t.scale) + " def=" + t.v.getDef() + " = " + rngText(tq, fc) + (t.v.getDef() == null && t.v.isRegister() ? " | " + liveText.getOrDefault(fnOf(fc) + ":" + t.v.getOffset(), "") : ""));
+    }
     Idx ix = idxRange(r.terms, Collections.emptyMap(), fc);
     r.idxMin = ix.min; r.idxMax = ix.max; r.idxOpen = ix.open || r.bOpen;
     if (r.spBased) {
@@ -2541,14 +2557,17 @@ public class ReachOfUnknownBaseStores extends GhidraScript {
     return new ArrayList<>(Collections.singletonList(q == null ? Rg.unk(4) : q));
   }
   // deep pass: per-value evaluation. One hull of the base's candidates can
-  // span a control object that no single candidate reaches, so each candidate
-  // value of a LOAD in the pointer expression (loadCands) is evaluated on its
-  // own: the value plus the index interval under classify's overrides. The row
-  // closes only when every candidate is enumerated and none reaches.
+  // span a control object that no single candidate reaches, so the candidates
+  // are evaluated one at a time, each as the value plus the index interval
+  // under classify's overrides: first every candidate value of a LOAD in the
+  // pointer expression (loadCands), then every value of a small-range leaf
+  // under a LOAD's address (a channel or index byte, which fixes the table
+  // cell). The row closes only when every candidate is resolved and none
+  // reaches.
   void perValue(Row r) {
     FC fc = r.fc;
     Map<Varnode, Rg> base = r.ov == null ? Collections.<Varnode, Rg>emptyMap() : r.ov;
-    LinkedHashSet<Varnode> loads = new LinkedHashSet<>();
+    LinkedHashSet<Varnode> loads = new LinkedHashSet<>(), leaves = new LinkedHashSet<>();
     for (Term t : r.terms) {
       Set<Varnode> tree = new LinkedHashSet<>(); collectTree(t.v, tree, 0);
       for (Varnode x : tree) if (x.getDef() != null && x.getDef().getOpcode() == PcodeOp.LOAD) loads.add(x);
@@ -2559,34 +2578,81 @@ public class ReachOfUnknownBaseStores extends GhidraScript {
       Cands cd;
       try { cd = loadCands(L, base, fc, 2); } finally { candGuard.remove(candGuard.size() - 1); }
       if (cd.list.isEmpty()) continue;
-      int hits = 0, openIdx = 0; long worst = -1; List<String> ex = new ArrayList<>();
-      for (Rg c : cd.list) {
-        Map<Varnode, Rg> o2 = new HashMap<>(base); o2.put(L, c);
-        Idx ti = idxRange(r.terms, o2, fc);
-        if (ti.open || c.open) { openIdx++; continue; }
-        long rl = ti.min + r.idxOff, rh = ti.max + r.idxOff + r.width - 1;
-        if (rh < 0) { rl += O32; rh += O32; }
-        if (rl < 0 && rh >= 0) { rl = 0; rh = U32; }
-        long lo = sat0(rl), hi = satU(rh);
-        if (hi - lo > worst) worst = hi - lo;
-        Hit h = absHits(lo, hi);
-        if (h.any) { hits++; if (ex.size() < 3) ex.add(rngText(c, fc) + " -> " + hex(lo) + ".." + hex(hi) + " " + firstTargets(h.targets)); }
-      }
-      String sum = "per-value " + dtExpr(L, fc, 0) + ": " + cd.list.size() + " candidate values" + (cd.combos > 1 ? " from " + cd.combos + " address combinations" : "")
-          + (cd.complete ? "" : ", " + cd.unresolved + " combinations unresolved") + ", widest interval " + (worst < 0 ? "-" : "0x" + Long.toHexString(worst) + " bytes");
-      if (hits == 0 && openIdx == 0 && cd.complete) {
-        r.tightClosed = true; r.pvClosed = true;
-        if (cl(r).equals("DATA-BOUNDED-UNVALIDATED") || cl(r).equals("UNBOUNDED")) r.cls = "BOUNDED";
-        r.evidence = (r.evidence == null || r.evidence.isEmpty() ? "" : r.evidence + "; ") + sum + ", none reaches a control object";
-        r.origin = r.origin + " | " + sum + ", none reaches a control object";
-        return;
-      }
-      r.origin = r.origin + " | " + sum + (hits > 0 ? "; " + hits + " reach a control object: " + String.join("; ", ex) : "") + (openIdx > 0 ? "; " + openIdx + " have an open index" : "");
-      if (hits > 0) {
-        r.tightClosed = false;
-        r.evidence = (r.evidence == null || r.evidence.isEmpty() ? "" : r.evidence + "; ") + hits + " of " + cd.list.size() + " candidate values of " + dtExpr(L, fc, 0) + " reach a control object";
+      if (evalCands(r, L, cd.list, cd.combos, cd.unresolved, cd.complete, "per-value " + dtExpr(L, fc, 0))) return;
+    }
+    for (Varnode L : loads) {
+      Set<Varnode> at = new LinkedHashSet<>(); collectTree(L.getDef().getInput(1), at, 0);
+      for (Varnode x : at) {
+        if (x.getDef() == null || x.isConstant() || base.containsKey(x)) continue;
+        Rg q = rng(x, base, new HashSet<>(), 0, fc);
+        if (q != null && !q.open && q.ok() && q.hi > q.lo && q.hi - q.lo <= 255) leaves.add(x);
       }
     }
+    for (Varnode x : leaves) {
+      Rg q = rng(x, base, new HashSet<>(), 0, fc);
+      if (q == null) continue;
+      List<Rg> cl = new ArrayList<>();
+      for (long c = q.lo; c <= q.hi; c++) cl.add(Rg.cst(c));
+      if (evalCands(r, x, cl, cl.size(), 0, true, "per-value " + dtExpr(x, fc, 0))) return;
+    }
+  }
+  // evaluates every candidate of `key` (each as the value plus the index
+  // interval); true when all are resolved and none reaches
+  boolean evalCands(Row r, Varnode key, List<Rg> cands, int combos, int unresolved, boolean complete, String what) {
+    FC fc = r.fc;
+    Map<Varnode, Rg> base = r.ov == null ? Collections.<Varnode, Rg>emptyMap() : r.ov;
+    int hits = 0, openIdx = 0; long worst = -1; List<String> ex = new ArrayList<>();
+    for (Rg c : cands) {
+      Map<Varnode, Rg> o2 = new HashMap<>(base); o2.put(key, c);
+      Idx ti = idxRange(r.terms, o2, fc);
+      if (ti.open || c.open) { openIdx++; continue; }
+      long rl = ti.min + r.idxOff, rh = ti.max + r.idxOff + r.width - 1;
+      if (rh < 0) { rl += O32; rh += O32; }
+      if (rl < 0 && rh >= 0) { rl = 0; rh = U32; }
+      long lo = sat0(rl), hi = satU(rh);
+      if (hi - lo > worst) worst = hi - lo;
+      Hit h = absHits(lo, hi);
+      if (h.any) { hits++; if (ex.size() < 3) ex.add(rngText(c, fc) + " -> " + hex(lo) + ".." + hex(hi) + " " + firstTargets(h.targets)); }
+    }
+    String sum = what + ": " + cands.size() + " candidate values" + (combos > 1 ? " from " + combos + " address combinations" : "")
+        + (complete ? "" : ", " + unresolved + " combinations unresolved") + (openIdx > 0 ? ", " + openIdx + " not evaluable" : "")
+        + ", widest interval " + (worst < 0 ? "-" : "0x" + Long.toHexString(worst) + " bytes");
+    if (hits == 0 && openIdx == 0 && complete) {
+      r.tightClosed = true; r.pvClosed = true;
+      if (cl(r).equals("DATA-BOUNDED-UNVALIDATED") || cl(r).equals("UNBOUNDED")) r.cls = "BOUNDED";
+      r.evidence = (r.evidence == null || r.evidence.isEmpty() ? "" : r.evidence + "; ") + sum + ", none reaches a control object";
+      r.origin = r.origin + " | " + sum + ", none reaches a control object";
+      return true;
+    }
+    r.origin = r.origin + " | " + sum + (hits > 0 ? "; " + hits + " reach a control object: " + String.join("; ", ex) : "");
+    if (hits > 0) {
+      r.tightClosed = false;
+      r.evidence = (r.evidence == null || r.evidence.isEmpty() ? "" : r.evidence + "; ") + hits + " of " + cands.size() + " candidate values of " + what.substring("per-value ".length()) + " reach a control object";
+    }
+    return false;
+  }
+  // deep pass: a tightened interval that is a single address. Names the data
+  // bound of the compare classify used and its value (per candidate).
+  String boundNote(Row r) {
+    if (r.evidence == null) return null;
+    int i = r.evidence.indexOf("cmp@");
+    if (i < 0 || r.evidence.length() < i + 12) return null;
+    long at;
+    try { at = Long.parseLong(r.evidence.substring(i + 4, i + 12), 16); } catch (NumberFormatException e) { return null; }
+    for (Cmp c : r.fc.cmps) {
+      if (c.at == null || c.at.getOffset() != at) continue;
+      StringBuilder sb = new StringBuilder();
+      for (Varnode n : new Varnode[]{c.b, c.a}) {
+        if (n == null || n.isConstant() || c.bImm) continue;
+        Rg q = rng(n, Collections.emptyMap(), new HashSet<>(), 0, r.fc);
+        if (q == null || q.open) continue;
+        if (sb.length() > 0) sb.append(", ");
+        sb.append(cls(n, 0, new HashSet<>(), r.fc)).append(" = ").append(rngText(q, r.fc));
+      }
+      if (sb.length() == 0) return null;
+      return "the tightened interval is a single address; the compare's data bound: " + sb;
+    }
+    return null;
   }
   // deep pass: true when a term of the pointer expression is a 4-byte
   // stack-space varnode or a word load with an sp-relative address
@@ -2613,7 +2679,7 @@ public class ReachOfUnknownBaseStores extends GhidraScript {
       if (m.find()) {
         if ((m.group(3).equals("sp") || (m.group(3).equals("ep") && epIsSp)) && Long.decode(m.group(2)) == c) {
           if (sb.length() > 0) sb.append(", ");
-          sb.append(t).append('@').append(hex(i.getAddress().getOffset()));
+          sb.append(s).append('@').append(hex(i.getAddress().getOffset()));
           if (sb.length() > 80) break;
         }
       } else if (t.equals("movsp,ep")) epIsSp = true;
@@ -2625,15 +2691,63 @@ public class ReachOfUnknownBaseStores extends GhidraScript {
     String ins = slotLoads(fc, off);
     return "the p-code shows the slot's address, not its contents (" + (ins.isEmpty() ? "no word load from it in the listing" : ins) + "); the pointer the slot holds is not ranged, so the row is never closed";
   }
-  // deep pass: a loaded base that is the constant 0. Finds the compare of that
-  // load against 0 followed by a conditional branch and reports the side the
-  // store is reached from.
+  // deep pass: a call-site value that is only the low part of a register the
+  // caller never defines (the decompiler lost the write that put the pointer
+  // there, as at 0x4fcd0): a width is not a bound on a pointer, so the value
+  // stays open.
+  boolean truncatedLiveIn(Varnode v) {
+    for (int i = 0; i < 8 && v != null; i++) {
+      PcodeOp op = v.getDef();
+      if (op == null) return false;
+      int c = op.getOpcode();
+      if (c == PcodeOp.INT_ZEXT || c == PcodeOp.INT_SEXT || c == PcodeOp.SUBPIECE) {
+        Varnode x = op.getInput(0);
+        PcodeOp xd = x.getDef();
+        if (xd != null && (xd.getOpcode() == PcodeOp.COPY || xd.getOpcode() == PcodeOp.CAST || xd.getOpcode() == PcodeOp.INDIRECT)) x = xd.getInput(0);
+        return x.isRegister() && x.getSize() < 4;
+      }
+      if (c == PcodeOp.COPY || c == PcodeOp.CAST || c == PcodeOp.INDIRECT) { v = op.getInput(0); continue; }
+      Varnode b = op.getNumInputs() > 1 ? op.getInput(1) : null;
+      if ((c != PcodeOp.INT_ADD && c != PcodeOp.PTRADD && c != PcodeOp.PTRSUB && c != PcodeOp.INT_SUB) || b == null || !b.isConstant()) return false;
+      v = op.getInput(0);
+    }
+    return false;
+  }
+  // deep pass: a loaded base that is the constant 0. Collects the destination
+  // registers of every word load of the same cell in the function, then walks
+  // the listing from the first of them to the compare of one of those
+  // registers (through plain moves) against r0 and the conditional branch
+  // after it, and reports the side the store is reached from.
   String nullTest(Varnode v, FC fc, Address S) {
-    Set<Varnode> tree = new HashSet<>(); collectTree(v, tree, 0);
-    for (Cmp c : fc.cmps) {
-      if (!c.bImm || c.imm != 0 || c.a == null || !tree.contains(c.a)) continue;
-      boolean viaT = c.tgt != null && reaches(fc, c.tgt, c.br.getAddress(), S), viaF = c.fall != null && reaches(fc, c.fall, c.br.getAddress(), S);
-      return "the loaded base is 0 and " + hex(fnOf(fc)) + " tests it for null (" + c.ci.getMnemonicString() + "@" + c.at + ", " + c.cond + "@" + c.br.getAddress() + "): the store is reached from the " + (viaT && viaF ? "both sides" : viaT ? "branch side (zero)" : viaF ? "fall-through side (non-zero)" : "neither side");
+    PcodeOp ld = v.getDef();
+    Instruction li = ld == null || ld.getSeqnum() == null ? null : getInstructionAt(ld.getSeqnum().getTarget());
+    if (li == null) return "the loaded base is 0";
+    String cell = li.toString().split(",")[0].replaceAll("\\s+", "");
+    Set<String> regs = new HashSet<>(); Instruction first = null;
+    for (Instruction i : fc.ins) {
+      String t = i.toString().replaceAll("\\s+", "");
+      if (!t.startsWith(cell + ",") || !t.substring(t.lastIndexOf(',') + 1).matches("r\\d+")) continue;
+      regs.add(t.substring(t.lastIndexOf(',') + 1));
+      if (first == null) first = i;
+    }
+    if (first == null) return "the loaded base is 0";
+    Instruction cur = first;
+    for (int n = 0; n < 16 && cur != null; n++) {
+      cur = getInstructionAfter(cur.getAddress());
+      if (cur == null || cur.getAddress().getOffset() - first.getAddress().getOffset() > 0x60) break;
+      String m = cur.getMnemonicString(), t = cur.toString().replaceAll("\\s+", "");
+      String other = t.startsWith("cmpr0,") ? t.substring(6) : (t.startsWith("cmp") && t.endsWith(",r0") ? t.substring(3, t.length() - 3) : null);
+      if (m.equals("cmp") && other != null && regs.contains(other)) {
+        Instruction br = getInstructionAfter(cur.getAddress());
+        if (br == null || !br.getFlowType().isConditional()) return "the loaded base is 0; " + cur + "@" + cur.getAddress() + " tests it against r0 but no conditional branch follows";
+        Address[] fl = br.getFlows(); Address T = fl.length > 0 ? fl[0] : null, F = br.getAddress().add(br.getLength());
+        boolean viaT = reaches(fc, T, br.getAddress(), S), viaF = reaches(fc, F, br.getAddress(), S);
+        String bm = br.getMnemonicString();
+        boolean takenZero = bm.equals("be") || bm.equals("bz");
+        return "the loaded base is 0 and the function tests it for null (" + cur + "@" + cur.getAddress() + ", " + br + "@" + br.getAddress() + (T == null ? "" : " -> " + T) + "): the store is reached from the " + (viaT && viaF ? "both sides" : viaT ? "taken side (branch when " + (takenZero ? "zero" : "non-zero") + ")" : viaF ? "fall-through side (when " + (takenZero ? "non-zero" : "zero") + ")" : "neither side");
+      }
+      if (m.equals("mov") && t.endsWith(",ep") && regs.contains(t.substring(3, t.length() - 3))) regs.add("ep");
+      if (cur.getFlowType().isCall()) break;
     }
     return "the loaded base is 0";
   }
