@@ -1961,22 +1961,40 @@ executes **34 of the 366** and none writes a control object in a stock-state
 case; the 32 synthetic hits above are all from `0x8E034` in
 `select_first_successful_payload_or_error_8dff6`.
 
-The first **129 rows** are reviewed at instruction level
-(`route2-20261123/reach/review-U1.md` to `review-U4.md`): 31 bounded, 94
-validated, 4 unvalidated, none unbounded. No row reaches a control object or
-passes the end of its object. The four unvalidated rows write at fixed small
-offsets: three in the DTC count appenders (`0x8C39E`, `0x8C436`, `0x8C43E`,
-response pointer plus 0 to 3, and no compare covers offsets 2 and 3) and
-`0x7E5FC`, whose count is at most 32 but whose destination buffer's extent was
-not recovered. Store `0x8208A` (XCP DOWNLOAD) writes inside
-`0xFEBF7C00..0xFEBFFBFF` by design. Two reviewer leads were checked in
-disassembly and dropped. The NvM chunk fill at `0x7487A` takes
-`min(rem, 64) + (min(rem, 64) & 3)` bytes with
-`rem = length - 64 x (first slot + slot) - 4`, and all 124 configured block
-lengths are multiples of 4, so it fills at most 64 bytes. `0x8BF28` writes at
-most 32 bytes through its seventh argument (`addi -33,r28,r0` at `0x8BF08`).
-The deep pass (`--deep`, `reach-deep.csv`) closes that store for the wrong
-reason, reading the stack slot's address as its contents.
+All **372 rows** are reviewed at instruction level. The review is split across
+`route2-20261123/reach/review-U1.md` through `review-U4.md`,
+`review-W2-a.md` through `review-W2-e.md`, and `review-W3-a.md` through
+`review-W3-c.md`.
+
+| Final verdict | Rows |
+|---|---:|
+| bounded by an immediate, constant table, or fixed local extent | 140 |
+| data-bounded and validated by a named compare, caller, or immutable configuration | 223 |
+| unreachable code/store edge | 9 |
+| unvalidated or unbounded | 0 |
+
+No reachable row crosses its data-object end into a hook, callback, boot
+call-target, or saved return/register. The reference-closure verdicts assume
+the firmware does not synthesize an otherwise absent function address
+arithmetically. One row intersects the monitor's broader executable range by
+design: XCP DOWNLOAD store `0x8208A` writes only inside its configured aperture
+`0xFEBF7C00..0xFEBFFBFF`, including the executable tail.
+
+Instruction review corrected several deep-pass explanations. The DTC count
+appenders at `0x8C39E`, `0x8C436`, and `0x8C43E` lack a local
+`capacity >= 4` check, but both live dispatch routes provide capacity `0x2FD`
+and the closed cursor writers fix the stores at offsets 1..3. Their count and
+list scratch objects hold at most 159 and 160 four-byte tuples (636 and 640
+bytes). Store `0x7E5FC` is unreachable: its sole selector lies in route banks
+whose configured counts are zero. The NvM chunk fill at `0x7487A` stays at 64
+bytes because all 124 configured lengths are multiples of four. Store
+`0x8BF28` is closed by the complete action table: every one-byte output wrapper
+has action length zero; the live 32-byte actions receive the DCM response
+pointer. The seed cancellation path at `0x8D8A2` cannot reuse the key path's
+pending result because DCM saves and invokes distinct callback pointers. The
+DCM transmit copies at `0x92660`, `0x92694`, `0x926C0`, and `0x92782` receive
+only the three CanTp constructors' windows inside the configured eight-byte
+scratch frame.
 
 **NvM and COM inserts.** The 59 block images occupy `0xFEBEF400..0xFEBF0307`,
 none overlapping a control object; enabled images never overlap each other and
