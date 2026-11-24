@@ -723,7 +723,7 @@ under `build/cache/camry_20260930_vmc_corpus/` and are regenerated on demand;
 ### Method, timing, and origin bounds
 
 The pipeline is extract → join → analyze → plot (commands in
-[WORKFLOW.md](../WORKFLOW.md#external-openpilot-rlog-reducers)). The join is
+[WORKFLOW.md](../WORKFLOW.md#offline-openpilot-route-decoding)). The join is
 **preceding-only** with request windows of 75 ms and
 carState/carControl/carOutput/wheel/pedal windows of 60 ms (plan/selfdriveState
 120 ms); every snapshot carries per-source ages. Samples have bounded freshness.
@@ -886,10 +886,10 @@ events. The [qlog-only census](../../data/generated/camry_2026_08a_bit_census/ql
 keeps 37 observations and 13 adjacent pairs from [24 additional segments](../../data/generated/camry_2026_08a_bit_census/qlog_captures.csv)
 outside the full-rate totals.
 
-Replay in the [external log-reader environment](../WORKFLOW.md#external-openpilot-rlog-reducers):
+Replay with the [offline reader](../WORKFLOW.md#offline-openpilot-route-decoding):
 
 ```sh
-uv run --no-sync --project "$OPENPILOT_ROOT" python -m tools.targets.camry.analysis.analyze_camry_2026_08a_bit_census \
+uv run --locked python -m tools.targets.camry.analysis.analyze_camry_2026_08a_bit_census \
   data/generated/camry_2026_08a_bit_census/captures.csv \
   --openpilot-root "$OPENPILOT_ROOT" --logs-root "$HOME/dev/inspect/logs"
 ```
@@ -1641,9 +1641,9 @@ the [specific application behind stationary B22[2]](#what-triggers-b222),
 and the [braking ceiling under policy 1](#november-17-post-policy-one-capture-check).
 
 Reproduce from an external logs root (see
-[WORKFLOW.md](../WORKFLOW.md#external-openpilot-rlog-reducers) for the full
+[WORKFLOW.md](../WORKFLOW.md#offline-openpilot-route-decoding) for the full
 prerequisites):
 
 ```bash
-uv run --no-sync --project ../kai-openpilot/opendbc_repo python -m tools.targets.camry.analysis.analyze_camry_20260930_vmc_status --corpus-dir /tmp/tss3_vmc_corpus --logs-root ~/dev/inspect/logs --output-dir data/generated/camry_20260930_vmc_status
+uv run --locked python -m tools.targets.camry.analysis.analyze_camry_20260930_vmc_status --corpus-dir /tmp/tss3_vmc_corpus --logs-root ~/dev/inspect/logs --output-dir data/generated/camry_20260930_vmc_status
 ```

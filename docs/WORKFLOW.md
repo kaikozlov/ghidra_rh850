@@ -91,61 +91,55 @@ caller's working directory unless the command explicitly documents otherwise.
 `tools/artifact regen` and `tools/toyota` capability dispatch retain their existing
 repository-root working directory; pass absolute paths for inputs outside the checkout.
 
-### External openpilot rlog reducers
+### Offline openpilot route decoding
 
-Some Camry evidence reducers read external comma rlog corpora and need
-openpilot's reader/runtime. These are offline commands only: they never
-perform vehicle operations. Run them from this repository root; the usual
-runtime is the adjacent openpilot/opendbc checkout, selected through uv's
-`--project` so `--no-sync` keeps its environment pinned:
+Use this repository's locked Python environment. `--openpilot-root` selects
+the Cereal schema from a local openpilot checkout; it does not select an
+interpreter. The reader accepts local plain, zstd, and bzip2 rlog segments.
+
+To see which events occurred and which fields the schema defines, run
+`tools/toyota route inspect RLOG --openpilot-root CHECKOUT [--event EVENT [--field FIELD]]`.
+A defined event can have zero occurrences. An undefined field is an error.
 
 ```bash
 # 2026-09-30 VMC status corpus pipeline (paths below are the documented example)
-UV="uv run --no-sync --project ../kai-openpilot/opendbc_repo"
+UV="uv run --locked"
 $UV python -m tools.targets.camry.analysis.extract_camry_20260930_vmc_corpus \
-  --logs-root ~/dev/inspect/logs --openpilot-root ../kai-openpilot/openpilot \
+  --logs-root ~/dev/inspect/logs --openpilot-root ../kai-openpilot \
   --output-dir build/cache/camry_20260930_vmc_corpus
 $UV python -m tools.targets.camry.analysis.join_camry_20260930_vmc_corpus \
   --corpus-dir build/cache/camry_20260930_vmc_corpus
 $UV python -m tools.targets.camry.analysis.analyze_camry_20260930_vmc_status \
   --corpus-dir build/cache/camry_20260930_vmc_corpus \
   --output-dir data/generated/camry_20260930_vmc_status
+# Optional rendering step (requires matplotlib)
 $UV python -m tools.targets.camry.analysis.plot_camry_20260930_vmc_status \
   --corpus-dir build/cache/camry_20260930_vmc_corpus \
   --output-dir data/generated/camry_20260930_vmc_status
 ```
 
-- `--openpilot-root` points at a caller-supplied openpilot checkout containing
-  `tools/lib/logreader.py` (the extraction example needs it). It is caller
-  input; pass the default checkout explicitly rather than importing it as a
-  repository dependency.
+- Supply a checkout containing `cereal/log.capnp` or `openpilot/cereal/log.capnp`,
+  including its opendbc schemas when the selected Cereal version imports them.
 - Extraction/join intermediates are git-ignored caches under
   `build/cache/…`; only compact summaries under `data/generated/…` are
   committed. `--corpus-dir` explicitly accepts an existing extraction
   directory (for example `/tmp/tss3_vmc_corpus`) to reuse or analyze one
   extracted elsewhere.
-- `matplotlib` is required only by the plot module. Analysis and joining need
-  NumPy; only extraction needs the external openpilot reader/runtime.
+- Joining and analysis use the repository's NumPy; they need no schema checkout.
 - Modules accept narrowing flags such as `--routes`, `--primary`, `--missing`,
   and `--inventory` (see each module's `--help`) instead of any new wrapper
   script.
 
-The F33 B6/gate reconciliation also scans retained rlogs and needs an external
-reader environment, including `capnp`. Its `--openpilot-root` is the parent
-exposing the `openpilot` Python package, rather than the source-tree argument in
-the extraction example above. For a checkout with an existing `.venv`, run the
-registered producer from this repository root:
+The F33 B6/gate reconciliation uses the same offline reader:
 
 ```bash
-../kai-openpilot/.venv/bin/python \
+uv run --locked python \
   -m tools.targets.camry.analysis.analyze_camry_f33_b6_gate_log_reconciliation \
   --openpilot-root ../kai-openpilot
 ```
 
-Supply `--log-root` when the retained corpus is elsewhere. The ordinary
-repository Python environment is not assumed to contain the external reader's
-dependencies. Retain reader corruption warnings as evidence limits; do not
-repair raw captures or reinterpret regeneration as a new vehicle observation.
+Supply `--log-root` when the retained corpus is elsewhere. Keep reader corruption
+warnings with results: the decoder can return the valid prefix of a segment.
 
 ### Gear and READY evidence
 
@@ -171,15 +165,14 @@ Use `--gtsplus-root PATH` after `--` to select another installed corpus.
 This check compares meanings; it does not equate diagnostic byte offsets with
 CAN byte offsets or establish ECU runtime support.
 
-The existing Corolla reducers also expose a read-only all-source gear/READY
-census. With the external reader/runtime described above:
+The Corolla reducers use the same environment for the all-source gear/READY census:
 
 ```bash
-uv run --no-sync --project ../kai-openpilot/opendbc_repo python \
+uv run --locked python \
   -m tools.targets.corolla.extract.extract_corolla_2023_public_route_opendbc_evidence \
   --openpilot-root ../kai-openpilot \
   --rlog REFERENCE/public_route_corolla_2023_segment0_rlog.zst --gear-audit
-uv run --no-sync --project ../kai-openpilot/opendbc_repo python \
+uv run --locked python \
   -m tools.targets.corolla.extract.extract_span_2025_discord_rlog_opendbc_evidence \
   --openpilot-root ../kai-openpilot --gear-audit
 ```
@@ -226,7 +219,10 @@ owned through explicit `requires_external` gates rather than `REFERENCE/` paths.
 
 ### Artifact, target, and repository-memory discovery
 
-Use `tools/artifact list/show` instead of grepping for generator filenames. `tools/artifact regen` runs a derived producer. The catalog derives producers from tracked source references and declared outputs; it has no verification-ownership role.
+Use `tools/artifact list/show` to find declared producers and consumer references.
+Preview the exact invocation with `tools/artifact regen ARTIFACT --dry-run`.
+Regeneration requires a declared output or registered corpus; a reader cannot
+be selected as a producer. Use `--producer` to choose between declared owners.
 
 Use `tools/know QUERY` to locate an owning report, artifact, or verification suite. It searches maintained documentation, the artifact catalog, and the suite registry. Follow the returned report's evidence sources for the actual conclusion.
 
@@ -366,6 +362,11 @@ program using the repository's uv environment (`uv sync --locked`). New bridges
 enable Python automatically; an existing Java-only bridge needs one clean
 `tools/g stop` first. See [inline scripts](../ghidra/ghidra-cli/README.md#inline-ghidra-scripts).
 Both Python and Java scripts can modify the program; `batch --read-only` rejects them.
+
+`tools/pe import FILE` queues behind other imports into the same PE project.
+Different `PE_PROJECT` names can import concurrently. A live bridge must
+release the project first: run the `tools/pe stop` command printed by the
+importer, then retry. Imports never stop a user's bridge.
 
 Use `tools/g inspect ADDR` for the function and its call sites. Select other
 sections explicitly, or request every section with `--all`.

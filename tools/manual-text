@@ -1,0 +1,53 @@
+#!/bin/sh
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+exec uv run --project "$ROOT" --offline --no-sync python -I - "$@" <<'PY'
+import argparse
+import fcntl
+import os
+from pathlib import Path
+import subprocess
+import sys
+import tempfile
+
+from tools import REPO_ROOT
+from tools.project.build_paths import for_repo
+
+
+def _main():
+    parser = argparse.ArgumentParser(
+        prog="manual-text", description="Cache layout-preserving text for a reference PDF."
+    )
+    parser.add_argument("pdf", type=Path, help="PDF basename or path to a file directly in REFERENCE")
+    pdf = parser.parse_args().pdf
+    reference = REPO_ROOT / "REFERENCE"
+    if pdf.parent == Path("."):
+        pdf = reference / pdf
+    if (pdf.suffix.lower() != ".pdf" or pdf.parent.resolve() != reference.resolve()
+            or pdf.is_symlink() or not pdf.is_file()):
+        parser.error("expected a PDF file directly in REFERENCE")
+    pdf = reference / pdf.name
+
+    output = for_repo(REPO_ROOT).cache / "manuals" / f"{pdf.name}.txt"
+    try:
+        output.parent.mkdir(parents=True, exist_ok=True)
+        with output.with_suffix(".lock").open("a") as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX)
+            mtime = pdf.stat().st_mtime_ns
+            if not output.is_file() or output.stat().st_mtime_ns != mtime:
+                fd, temp = tempfile.mkstemp(prefix=".manual-text-", dir=output.parent)
+                os.close(fd)
+                try:
+                    subprocess.run(["pdftotext", "-layout", pdf, temp], check=True, stdout=sys.stderr)
+                    # Record the source mtime from before conversion.
+                    os.utime(temp, ns=(mtime, mtime))
+                    os.replace(temp, output)
+                finally:
+                    Path(temp).unlink(missing_ok=True)
+    except (OSError, subprocess.CalledProcessError) as error:
+        parser.exit(1, f"{parser.prog}: {error}\n")
+    print(output)
+
+
+_main()
+PY

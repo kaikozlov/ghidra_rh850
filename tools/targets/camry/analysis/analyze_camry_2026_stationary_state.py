@@ -13,9 +13,10 @@ from itertools import pairwise
 from pathlib import Path
 
 from tools import REPO_ROOT
-from tools.targets.camry.analysis.extract_camry_20260930_vmc_corpus import load_logreader, sha256_file
+from tools.targets.camry.analysis.extract_camry_20260930_vmc_corpus import sha256_file
 from tools.targets.camry.analysis.analyze_camry_2026_bus1_camera_output import decode_object_geometry, decode_object_relative_speed
 from tools.targets.camry.support import camry_f33_corpus as f33
+from tools.toyota_support.route_log import load_logreader
 
 # Native request bus changes across the August 27 harness repin.
 _CAPTURES = (

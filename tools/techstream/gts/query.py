@@ -13,8 +13,12 @@ from typing import Any
 import pefile
 
 from tools import REPO_ROOT
+from tools.techstream.cuw_parameter import (
+    factory_routes_from_ini_root,
+    select_factory_routes_for_descriptor,
+)
+from tools.techstream.ddb_semantics import NativeSelectionContext, select_for_consumer
 from tools.techstream.gts.cuw import _search_cuw_corpus
-from tools.techstream.cuw_parameter import factory_routes_from_ini_root, select_factory_routes_for_descriptor
 from tools.techstream.gts.ddb import (
     _behavior_rows,
     _dtc_rows,
@@ -25,9 +29,9 @@ from tools.techstream.gts.ddb import (
     _normalize_did,
     _resolve_ecu,
 )
-from tools.techstream.ddb_semantics import NativeSelectionContext, select_for_consumer
 from tools.techstream.gts.execution_model import _file_sha256
-from tools.techstream.parse_ddb import DDBParser, ECU_TABLE_CLASS_NAMES, StringDataBase
+from tools.techstream.gts.search_cache import _SearchCache
+from tools.techstream.parse_ddb import ECU_TABLE_CLASS_NAMES, DDBParser, StringDataBase
 from tools.techstream.pe_utils import binary_strings
 from tools.techstream.pe_utils import exports as pe_exports
 from tools.techstream.pe_utils import imports as pe_imports
@@ -126,10 +130,10 @@ def native_ecu_catalog_category(
     return qualified
 
 
-def _raw_catalog_source(path: Path) -> dict[str, Any]:
+def _raw_catalog_source(path: Path, *, sha256: str | None = None) -> dict[str, Any]:
     return {
         "selection": "raw-catalog",
-        "source": {"path": str(path), "sha256": _file_sha256(path)},
+        "source": {"path": str(path), "sha256": _file_sha256(path) if sha256 is None else sha256},
         "native_resolution": "not-requested",
     }
 
@@ -163,11 +167,36 @@ def _cuw_route_selection(cuwplus_root: Path, descriptor: dict[str, dict[str, str
     return selection
 
 
+_ECU_SEARCH_KINDS = ("did", "dtc", "behavior")
+
+
+def _source_version(path: Path) -> tuple[int, int, int, int, int]:
+    stat = path.stat()
+    return stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns
+
+
+def _require_source_version(path: Path, version: tuple[int, ...] | None) -> None:
+    try:
+        if _source_version(path) == version:
+            return
+    except OSError:
+        pass
+    raise ValueError(f"GTS+ database changed during search; rerun the query: {path}")
+
+
+def _semantic_row_matches(query: str, kind: str, row: dict[str, Any]) -> bool:
+    if kind == "did":
+        return _fold_match(query, row.get("name"), f"0x{row['primary_did']:04X}", f"0x{row['alternate_did']:04X}")
+    if kind == "dtc":
+        return _fold_match(query, row.get("code"), row.get("packed_dtc"), row.get("description"), row.get("failure"))
+    return _fold_match(query, row.get("signature"), row.get("name"), row.get("comment"))
+
+
 def _iter_ecu_matches(
     query: str,
     db_root: Path,
     *,
-    parser: DDBParser,
+    cache: _SearchCache | None,
     strings: StringDataBase | None,
     ecu_filter: str | None,
     kinds: set[str],
@@ -187,30 +216,50 @@ def _iter_ecu_matches(
             }
         if strings is None:
             continue
+        assert cache is not None
         try:
-            db = parser.parse_ecu_db(path)
-        except (ValueError, OSError):
+            version = _source_version(path)
+            sha256 = _file_sha256(path)
+        except OSError:
             continue
-        source = _raw_catalog_source(path)
-        if "did" in kinds:
-            for row in _monitor_rows(db, strings, path.name):
-                if _fold_match(query, row.get("name"), f"0x{row['primary_did']:04X}", f"0x{row['alternate_did']:04X}"):
-                    row["catalog_context"] = source
-                    yield row
-        if "dtc" in kinds:
-            for row in _dtc_rows(parser, db, strings, path.name):
-                if _fold_match(query, row.get("code"), row.get("packed_dtc"), row.get("description"), row.get("failure")):
-                    row["catalog_context"] = source
-                    yield row
-        if "behavior" in kinds:
-            for row in _behavior_rows(db, strings, path.name):
-                if _fold_match(query, row.get("signature"), row.get("name"), row.get("comment")):
+        source = _raw_catalog_source(path, sha256=sha256)
+        db = None
+        for kind in _ECU_SEARCH_KINDS:
+            if kind not in kinds:
+                continue
+            rows = cache.read(path, kind, sha256)
+            if rows is None:
+                if db is None:
+                    parser = DDBParser()
+                    try:
+                        db = parser.parse_ecu_db(path)
+                    except OSError:
+                        break
+                    except ValueError:
+                        # A structurally invalid file cannot supply any semantic kind.
+                        _require_source_version(path, version)
+                        for unavailable in _ECU_SEARCH_KINDS:
+                            cache.write(path, unavailable, sha256, [])
+                        break
+                if kind == "did":
+                    rows = _monitor_rows(db, strings, path.name)
+                elif kind == "dtc":
+                    rows = _dtc_rows(parser, db, strings, path.name)
+                else:
+                    rows = _behavior_rows(db, strings, path.name)
+                _require_source_version(path, version)
+                cache.write(path, kind, sha256, rows)
+            else:
+                _require_source_version(path, version)
+            for row in rows:
+                if _semantic_row_matches(query, kind, row):
                     row["catalog_context"] = source
                     yield row
 
 
 def _search_ddbs(
     query: str,
+    gts: Path,
     db_root: Path,
     *,
     ecu_filter: str | None,
@@ -219,8 +268,16 @@ def _search_ddbs(
     limit: int,
 ) -> list[dict[str, Any]]:
     parser = DDBParser()
-    strings = _english_strings(parser, db_root) if kinds & {"did", "dtc", "behavior"} else None
-    ecu_matches = _iter_ecu_matches(query, db_root, parser=parser, strings=strings, ecu_filter=ecu_filter, kinds=kinds)
+    strings = None
+    cache = None
+    if kinds.intersection(_ECU_SEARCH_KINDS):
+        language = db_root / "M_English.ddb"
+        version = _source_version(language) if language.is_file() else None
+        strings = _english_strings(parser, db_root)
+        dictionary_sha256 = _file_sha256(language)
+        _require_source_version(language, version)
+        cache = _SearchCache(gts, db_root, dictionary_sha256)
+    ecu_matches = _iter_ecu_matches(query, db_root, cache=cache, strings=strings, ecu_filter=ecu_filter, kinds=kinds)
     results = list(islice(ecu_matches, limit))
     remaining = limit - len(results)
     if remaining and "string" in kinds and not ecu_filter:
@@ -446,6 +503,7 @@ def search_rows(
     max_rows = maxsize if limit is None else min(limit, maxsize)
     results = _search_ddbs(
         query,
+        gts,
         db_root,
         ecu_filter=ecu_filter,
         kinds=kinds,

@@ -9,10 +9,8 @@ from pathlib import Path
 
 import numpy as np
 
-from tools.targets.camry.analysis.extract_camry_20260930_vmc_corpus import (
-  load_logreader,
-  sha256_file,
-)
+from tools.targets.camry.analysis.extract_camry_20260930_vmc_corpus import sha256_file
+from tools.toyota_support.route_log import load_logreader
 
 # First wire byte, low bit, width, field, interpretation, evidence. Multibyte
 # numeric fields are big-endian; the authentication trailer is opaque.

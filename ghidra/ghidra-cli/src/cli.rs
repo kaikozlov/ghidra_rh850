@@ -82,8 +82,7 @@ fn add_invocation_hints(error: &mut clap::Error) {
     else {
         return;
     };
-    // Reparse the repair to ensure the token is in the intended command and
-    // preserve the original executable, flags, and operand boundaries.
+    // Reparse each repair to check the command and preserve argument boundaries.
     let mut corrected: Vec<_> = args.iter().map(String::as_str).collect();
     for (index, arg) in args.iter().enumerate().skip(1).rev() {
         if arg != token {
@@ -91,19 +90,17 @@ fn add_invocation_hints(error: &mut clap::Error) {
         }
         let mut repairs = Vec::new();
         for &insertion in insertions {
-            corrected.insert(index, insertion);
-            if Cli::try_parse_from(corrected.iter().copied()).is_ok_and(|cli| {
-                matches!(
-                    (insertion, cli.command),
-                    ("-n", Commands::Disasm(_))
-                        | ("to", Commands::XRef(XRefCommands::To(_)))
-                        | ("from", Commands::XRef(XRefCommands::From(_)))
-                )
-            }) {
-                if let Ok(command) = shlex::try_join(corrected.iter().copied()) {
-                    repairs.push(format!("try: {command}").into());
+            if insertion == "-n" && index > 1 && args[index - 1] == "--count" {
+                corrected[index - 1] = insertion;
+                let repair = invocation_hint(&corrected, insertion);
+                corrected[index - 1] = "--count";
+                if let Some(repair) = repair {
+                    repairs.push(repair);
+                    break;
                 }
             }
+            corrected.insert(index, insertion);
+            repairs.extend(invocation_hint(&corrected, insertion));
             corrected.remove(index);
         }
         if repairs.len() == insertions.len() {
@@ -115,6 +112,20 @@ fn add_invocation_hints(error: &mut clap::Error) {
             return;
         }
     }
+}
+
+fn invocation_hint(args: &[&str], insertion: &str) -> Option<clap::builder::StyledStr> {
+    let cli = Cli::try_parse_from(args.iter().copied()).ok()?;
+    if !matches!(
+        (insertion, cli.command),
+        ("-n", Commands::Disasm(_))
+            | ("to", Commands::XRef(XRefCommands::To(_)))
+            | ("from", Commands::XRef(XRefCommands::From(_)))
+    ) {
+        return None;
+    }
+    let command = shlex::try_join(args.iter().copied()).ok()?;
+    Some(format!("try: {command}").into())
 }
 
 #[derive(Subcommand, Clone, Serialize, Deserialize, Debug)]
@@ -779,12 +790,94 @@ pub enum MemoryCommands {
     Search(MemSearchArgs),
 }
 
-#[derive(Args, Clone, Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct MemReadArgs {
     pub address: String,
     pub size: usize,
-    #[command(flatten)]
     pub options: QueryOptions,
+}
+
+// Both CLI forms map to the existing serialized `size` field.
+#[derive(Args)]
+#[command(group(clap::ArgGroup::new("byte_count").required(true).args(["size", "length"])))]
+struct MemReadCliArgs {
+    address: String,
+    /// Number of bytes to read, in decimal or hexadecimal
+    #[arg(value_name = "BYTES", value_parser = parse_memory_read_size)]
+    size: Option<usize>,
+    /// Alternate form for the number of bytes to read
+    #[arg(long, value_name = "BYTES", value_parser = parse_memory_read_size)]
+    length: Option<usize>,
+    #[command(flatten)]
+    options: QueryOptions,
+}
+
+impl Args for MemReadArgs {
+    fn augment_args(cmd: clap::Command) -> clap::Command {
+        MemReadCliArgs::augment_args(cmd)
+    }
+
+    fn augment_args_for_update(cmd: clap::Command) -> clap::Command {
+        MemReadCliArgs::augment_args_for_update(cmd)
+            .mut_group("byte_count", |group| group.required(false))
+    }
+}
+
+impl clap::FromArgMatches for MemReadArgs {
+    fn from_arg_matches(matches: &clap::ArgMatches) -> Result<Self, clap::Error> {
+        Self::from_arg_matches_mut(&mut matches.clone())
+    }
+
+    fn from_arg_matches_mut(matches: &mut clap::ArgMatches) -> Result<Self, clap::Error> {
+        let args = <MemReadCliArgs as clap::FromArgMatches>::from_arg_matches_mut(matches)?;
+        Ok(Self {
+            address: args.address,
+            size: args
+                .size
+                .or(args.length)
+                .expect("clap requires a byte count"),
+            options: args.options,
+        })
+    }
+
+    fn update_from_arg_matches(&mut self, matches: &clap::ArgMatches) -> Result<(), clap::Error> {
+        self.update_from_arg_matches_mut(&mut matches.clone())
+    }
+
+    fn update_from_arg_matches_mut(
+        &mut self,
+        matches: &mut clap::ArgMatches,
+    ) -> Result<(), clap::Error> {
+        if let Some(address) = matches.remove_one("address") {
+            self.address = address;
+        }
+        if let Some(size) = matches
+            .remove_one("size")
+            .or_else(|| matches.remove_one("length"))
+        {
+            self.size = size;
+        }
+        clap::FromArgMatches::update_from_arg_matches_mut(&mut self.options, matches)
+    }
+}
+
+fn parse_memory_read_size(value: &str) -> Result<usize, String> {
+    let digits = value
+        .strip_prefix("0x")
+        .or_else(|| value.strip_prefix("0X"));
+    let size = match digits {
+        Some(digits) if !digits.starts_with('+') => usize::from_str_radix(digits, 16).ok(),
+        Some(_) => None,
+        None => value.parse::<usize>().ok(),
+    };
+    // The bridge reads the count as a Java int.
+    size.filter(|&size| size <= i32::MAX as usize)
+        .ok_or_else(|| {
+            format!(
+                "Use a decimal or hexadecimal byte count from 0 to {}",
+                i32::MAX
+            )
+        })
 }
 
 #[derive(Args, Clone, Serialize, Deserialize, Debug)]

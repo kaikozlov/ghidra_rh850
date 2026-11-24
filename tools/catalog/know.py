@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import tomllib
+from itertools import islice
 from pathlib import Path
 
 from tools import REPO_ROOT
@@ -81,17 +82,10 @@ def main() -> int:
     ap.add_argument("--limit", type=int, default=60)
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
-    kinds = set(args.kind or ("doc", "artifact", "suite"))
-    loaders = {
-        "artifact": artifacts,
-        "suite": suites,
-        "doc": docs,
-    }
-    result = []
-    for kind in ("doc", "artifact", "suite"):
-        if kind in kinds:
-            result.extend(loaders[kind](args.query))
-    result = result[: max(0, args.limit)]
+    loaders = (("doc", docs), ("artifact", artifacts), ("suite", suites))
+    rows = (row for kind, load in loaders if not args.kind or kind in args.kind
+            for row in load(args.query))
+    result = list(islice(rows, max(0, args.limit)))
     if args.json:
         print(json.dumps(result, indent=2, sort_keys=True))
     else:

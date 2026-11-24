@@ -4,9 +4,11 @@
 from __future__ import annotations
 
 import argparse
+import fcntl
 import hashlib
 import json
 import math
+import os
 import re
 import shutil
 import subprocess
@@ -17,6 +19,7 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from tools import REPO_ROOT
+from tools.project.build_paths import for_repo
 
 ROOT = REPO_ROOT
 IMAGE = "ghidra-rh850-v850-gcc:16.2.0-binutils2.46.1-gdb18.1-simfix4-bswap1-noreturn1-codegen1-unwind1"
@@ -361,6 +364,75 @@ def cmd_info(_args: argparse.Namespace) -> int:
         "image_id": image_id,
     }, sort_keys=True))
     return 0
+
+def _listing_digest(path: Path) -> str:
+    with path.open("rb") as stream:
+        return hashlib.file_digest(stream, "sha256").hexdigest()
+
+
+def _cmd_listing(args: argparse.Namespace) -> int:
+    from tools.project.analysis_target import target
+
+    name, row = target(args.target)
+    registered_path = row.get("codeflash")
+    if not isinstance(registered_path, str):
+        raise Rh850ToolError(f"target {name} has no registered CodeFlash image")
+    image = (ROOT / registered_path).resolve()
+    try:
+        mounted_image = "/src/" + image.relative_to(ROOT).as_posix()
+    except ValueError as exc:
+        raise Rh850ToolError(f"target {name} CodeFlash image is outside the repository: {image}") from exc
+    if not image.is_file():
+        raise Rh850ToolError(f"target {name} CodeFlash image is missing: {image}")
+
+    try:
+        base = int(str(row.get("codeflash_base")), 0)
+    except ValueError as exc:
+        raise Rh850ToolError(f"target {name} has an invalid CodeFlash base") from exc
+    size = image.stat().st_size
+    if not (0 <= base < 2**32 and 0 < size <= 2**32 - base):
+        raise Rh850ToolError(f"target {name} CodeFlash image does not fit in the 32-bit address space")
+    expected_size = row.get("codeflash_size")
+    if expected_size is not None and size != expected_size:
+        raise Rh850ToolError(f"target {name} CodeFlash size drift: {size} != {expected_size}")
+    digest = _listing_digest(image)
+    expected_digest = row.get("codeflash_sha256")
+    if expected_digest is not None and digest != expected_digest:
+        raise Rh850ToolError(f"target {name} CodeFlash identity drift")
+
+    objdump = [
+        "v850-elf-objdump", "-D", "-z", "-b", "binary", "-m", "v850e3v5",
+        f"--adjust-vma={base:#x}", mounted_image,
+    ]
+    image_id = _image_id()
+    key = hashlib.sha256(json.dumps([
+        "rh850-linear-listing-v1", digest, image_id, objdump,
+    ]).encode()).hexdigest()
+    cache = for_repo(ROOT).cache / "rh850-listing"
+    cache.mkdir(parents=True, exist_ok=True)
+    listing = cache / f"{key}.txt"
+    with (cache / f"{key}.lock").open("a") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        if not listing.is_file() or not listing.stat().st_size:
+            # Run the inspected ID so a retag cannot change this cache entry's toolchain.
+            command = _container_base(writable=False)[:-1] + [
+                "--pull=never", "--env", "LC_ALL=C", image_id, *objdump,
+            ]
+            with tempfile.TemporaryDirectory(prefix=f".{key}-", dir=cache) as work:
+                output = Path(work) / "listing.txt"
+                with output.open("xb") as stream:
+                    proc = subprocess.run(command, cwd=ROOT, stdout=stream, check=False)
+                    if proc.returncode != 0:
+                        raise Rh850ToolError(f"objdump failed for target {name} (exit {proc.returncode})")
+                    if not os.fstat(stream.fileno()).st_size:
+                        raise Rh850ToolError(f"objdump produced an empty listing for target {name}")
+                    if _listing_digest(image) != digest:
+                        raise Rh850ToolError(f"target {name} CodeFlash changed during disassembly")
+                    os.fchmod(stream.fileno(), 0o444)
+                output.replace(listing)
+    print(listing)
+    return 0
+
 
 def cmd_doctor(_args: argparse.Namespace) -> int:
     image_id = _image_id()
@@ -808,6 +880,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="print canonical toolchain metadata as JSON",
     )
     p.set_defaults(func=cmd_info)
+
+    p = toolchain_sub.add_parser(
+        "listing",
+        help="cache a linear CodeFlash disassembly listing for a registered target",
+        description=(
+            "Print the cached file path for a linear objdump listing of the registered "
+            "CodeFlash image at its registered base. This is not a function inventory."
+        ),
+    )
+    p.add_argument("target", metavar="TARGET", help="registered analysis target")
+    p.set_defaults(func=_cmd_listing)
 
     p = toolchain_sub.add_parser(
         "doctor",

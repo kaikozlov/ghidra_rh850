@@ -172,6 +172,33 @@ fn portable_output_options_fail_before_bridge_work() {
 }
 
 #[test]
+fn portable_memory_read_rejects_missing_mixed_and_invalid_lengths() {
+    for (args, message) in [
+        (&[][..], "required arguments"),
+        (&["--count"][..], "required arguments"),
+        (&["--length"][..], "a value is required"),
+        (&["32", "--length", "0x20"][..], "cannot be used with"),
+        (&["--length", "0x20", "32"][..], "cannot be used with"),
+        (&["32", "0x20"][..], "unexpected argument"),
+        (&["32bytes"][..], "invalid value"),
+        (&["0x"][..], "invalid value"),
+        (&["0x+20"][..], "invalid value"),
+        (&["--length", "0x2g"][..], "invalid value"),
+        (&["2147483648"][..], "invalid value"),
+        (&["--length", "0x80000000"][..], "invalid value"),
+        (&["--length", "0x10000000000000000"][..], "invalid value"),
+    ] {
+        assert_cmd::cargo::cargo_bin_cmd!("ghidra")
+            .args(["memory", "read", "0x100"])
+            .args(args)
+            .assert()
+            .code(2)
+            .stdout(predicate::str::is_empty())
+            .stderr(predicate::str::contains(message));
+    }
+}
+
+#[test]
 fn portable_disasm_rejects_positional_count_with_runnable_hint() {
     assert_cmd::cargo::cargo_bin_cmd!("ghidra")
         .args([
@@ -190,6 +217,28 @@ fn portable_disasm_rejects_positional_count_with_runnable_hint() {
             "--project 'test project' disasm 0x401000 -n 37 --pretty",
         ))
         .stderr(predicate::str::contains("Usage:"));
+}
+
+#[test]
+fn portable_disasm_rejects_count_value_with_runnable_hint() {
+    assert_cmd::cargo::cargo_bin_cmd!("ghidra")
+        .args([
+            "--project",
+            "test project",
+            "disasm",
+            "0x401000",
+            "--count",
+            "37",
+            "--pretty",
+        ])
+        .assert()
+        .code(2)
+        .stdout(predicate::str::is_empty())
+        .stderr(predicate::str::contains("unexpected argument '37'"))
+        .stderr(predicate::str::contains(
+            "--project 'test project' disasm 0x401000 -n 37 --pretty",
+        ))
+        .stderr(predicate::str::contains("disasm 0x401000 --count -n 37").not());
 }
 
 #[test]

@@ -8,6 +8,7 @@ requires the RAM monitor.  Panda TX echoes are never treated as F33 reception.
 from __future__ import annotations
 
 from tools.targets.camry.support import camry_f33_corpus as f33
+from tools.toyota_support.route_log import load_logreader
 from tools import REPO_ROOT
 import argparse
 import hashlib
@@ -20,7 +21,6 @@ from typing import Any
 
 ROOT = REPO_ROOT
 DEFAULT_LOG_ROOT = Path('/Users/kai/dev/inspect/logs/camry-2026')
-DEFAULT_OPENPILOT = Path('/Users/kai/dev/inspect/repos/kai-openpilot')
 DEFAULT_OUT = ROOT / 'data/generated/camry_f33_b6_gate_log_reconciliation.json'
 FRESHNESS_ART = ROOT / 'data/generated/camry_b6_freshness_contract.json'
 EXTERNAL_INGRESS_ART = ROOT / 'data/generated/camry_8965F3307000_external_lateral_ingress.json'
@@ -34,12 +34,6 @@ def sha256(path: Path) -> str:
     for chunk in iter(lambda: f.read(1 << 20), b''):
       h.update(chunk)
   return h.hexdigest()
-
-
-def load_logreader(openpilot_root: Path):
-  sys.path.insert(0, str(openpilot_root))
-  from openpilot.tools.lib.logreader import LogReader  # type: ignore[import-not-found]
-  return LogReader
 
 
 def discover_route_files(log_root: Path, route_name: str) -> list[tuple[int, Path]]:
@@ -376,7 +370,7 @@ def static_proof() -> dict[str, Any]:
 def main() -> int:
   ap = argparse.ArgumentParser()
   ap.add_argument('--log-root', type=Path, default=DEFAULT_LOG_ROOT)
-  ap.add_argument('--openpilot-root', type=Path, default=DEFAULT_OPENPILOT)
+  ap.add_argument('--openpilot-root', type=Path, required=True, help='openpilot checkout providing the Cereal schema')
   ap.add_argument('--out', type=Path, default=DEFAULT_OUT)
   args = ap.parse_args()
 

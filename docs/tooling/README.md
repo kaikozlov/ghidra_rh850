@@ -51,8 +51,12 @@ The small command surface to remember is:
 | Edit-loop tests | `tools/test <suite-or-prefix>` — run the smallest relevant suite |
 | Discover / preview | `tools/test list [query]`, `tools/test plan <selector> [...]` |
 | Ghidra / pseudocode | `tools/g`, `tools/pseudo` |
+| Read memory / disassemble instructions | `tools/g memory read ADDR 0x20`, `tools/g disasm ADDR -n 16` (`--count` alone reports a count) |
+| Linear listing of a whole registered CodeFlash image | `tools/rh850 toolchain listing TARGET` — prints a cached objdump file path; use Ghidra for function boundaries |
+| Search a reference PDF | `rg -n 'pattern' "$(tools/manual-text MANUAL.pdf)"` — reuses layout-preserving text with page breaks |
 | GTS+ / Toyota vocabulary / CUW routes | `tools/gts` |
 | Toyota platform capabilities / target workflows | `tools/toyota capabilities`, `tools/toyota target list camry` |
+| Offline rlog events and schema fields | `tools/toyota route inspect RLOG --openpilot-root CHECKOUT` |
 | Maintained reports, artifacts, and verification suites | `tools/know QUERY` |
 | Generated artifacts / producers | `tools/artifact list`, `show`, `regen` |
 | Broad gates | `tools/test core` / `full` / `local` |
@@ -71,7 +75,7 @@ tools/artifact show camry_8965F3307000_fault_status.json
 tools/artifact regen camry_8965F3307000_fault_status.json
 ```
 
-The catalog is derived from tracked artifact paths and source references; it is not another manually maintained builder registry. `regen` exposes the selected producer before execution and requires an explicit `--producer` when discovery is ambiguous.
+`regen --dry-run` previews the selected invocation. Only declared outputs and registered corpora can be regenerated; `--producer` chooses among declared owners. References from other tools appear as consumers.
 
 Repository memory has the same task-shaped surface:
 

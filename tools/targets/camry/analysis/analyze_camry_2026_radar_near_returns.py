@@ -13,11 +13,10 @@ import numpy as np
 from tools.targets.camry.analysis.analyze_camry_2026_bus1_camera_output import (
     decode_object_geometry, decode_object_relative_speed, near_returns_18c,
 )
+from tools.toyota_support.route_log import RouteLogReader, load_logreader
 
 
-def compare_route(route: Path) -> dict:
-    from openpilot.tools.lib.logreader import LogReader
-
+def compare_route(route: Path, reader: RouteLogReader) -> dict:
     files = sorted(route.glob(f'{route.name}--*/rlog.zst'), key=lambda p: int(p.parent.name.rsplit('--', 1)[1]))
     if not files:
         raise ValueError(f'no segmented rlogs under {route}')
@@ -32,7 +31,7 @@ def compare_route(route: Path) -> dict:
     for path in files:
         with path.open('rb') as src:
             hashes.update((hashlib.file_digest(src, 'sha256').hexdigest() + '\n').encode())
-        for event in LogReader(str(path), sort_by_time=False):
+        for event in reader(path, sort_by_time=False):
             t = event.logMonoTime
             kind = event.which()
             if kind == 'carParams':
@@ -111,5 +110,8 @@ def compare_route(route: Path) -> dict:
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('route', type=Path, nargs='+')
-    for route in parser.parse_args().route:
-        print(json.dumps(compare_route(route), sort_keys=True), flush=True)
+    parser.add_argument('--openpilot-root', type=Path, required=True, help='openpilot checkout providing the Cereal schema')
+    args = parser.parse_args()
+    reader = load_logreader(args.openpilot_root)
+    for route in args.route:
+        print(json.dumps(compare_route(route, reader), sort_keys=True), flush=True)

@@ -8,19 +8,15 @@ and samples each route into fixed-column float64 streams plus raw 32-byte
 ``<output-dir>/<route>.json`` (extraction metadata and input provenance), and
 one shared ``manifest.json`` describing the inventory.
 
-Invocation (repository root, environment providing numpy, capnp, zstandard):
+Invocation (repository root):
 
-  uv run --no-sync --project /path/to/opendbc python \
+  uv run --locked python \
     -m tools.targets.camry.analysis.extract_camry_20260930_vmc_corpus \
     --logs-root /path/to/rlogs --openpilot-root /path/to/openpilot-checkout \
     --routes 00000089--0dd1afd752
 
-Environment prerequisites:
-- numpy (existing repository dependency).
-- ``--openpilot-root`` is a caller-supplied openpilot checkout containing
-  ``tools/lib/logreader.py`` (nested-package forks accepted). Its importable
-  parent is added to ``sys.path`` lazily at runtime. The caller must supply the
-  checkout path explicitly, including when using the default checkout.
+``--openpilot-root`` selects the Cereal schema checkout (flat or nested).
+The repository environment supplies the decoder.
 
 Provenance: each route's ``.json`` records the selected source files with
 their readable absolute ``path`` (matching the cached originals),
@@ -38,7 +34,6 @@ import argparse
 import hashlib
 import json
 import re
-import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -67,23 +62,6 @@ TIMING_NOTE = (
   "logMonoTime events in each rlog; cached init/carParams timestamps serve "
   "as capture metadata."
 )
-
-
-def load_logreader(openpilot_root: Path):
-  """Import LogReader from the caller-supplied openpilot checkout."""
-  root = openpilot_root.resolve()
-  for candidate in (root, root / "openpilot"):
-    if (candidate / "tools/lib/logreader.py").exists():
-      # In a nested-package checkout `candidate` is itself the openpilot
-      # package, so `from openpilot...` needs candidate's parent importable.
-      base = candidate.parent if (candidate / "__init__.py").exists() else candidate
-      if str(base) not in sys.path:
-        sys.path.insert(0, str(base))
-      break
-  else:
-    raise FileNotFoundError(f"no tools/lib/logreader.py under {openpilot_root}")
-  from openpilot.tools.lib.logreader import LogReader  # type: ignore[import-not-found]
-  return LogReader
 
 
 def sha256_file(path: Path) -> str:
@@ -235,9 +213,11 @@ def extract(route: dict, logs_root: Path, output_dir: Path, openpilot_root: Path
 
 
 def main() -> None:
+  from tools.toyota_support.route_log import load_logreader
+
   parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
   parser.add_argument("--logs-root", type=Path, required=True, help="directory tree of <route>--<segment>/rlog.zst captures")
-  parser.add_argument("--openpilot-root", type=Path, required=True, help="openpilot checkout providing tools/lib/logreader.py")
+  parser.add_argument("--openpilot-root", type=Path, required=True, help="openpilot checkout providing the Cereal schema")
   parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR, help=f"corpus output directory (default {DEFAULT_OUTPUT_DIR}, ignored by git)")
   parser.add_argument("--routes", nargs="*", help="restrict to these route ids")
   parser.add_argument("--primary", action="store_true", help="restrict to the five primary routes")

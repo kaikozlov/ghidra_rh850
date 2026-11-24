@@ -166,6 +166,15 @@ The default database is the current GTS+ `NA/DB/Gen` tree. `search`, `did`, and
 0 shows none). String matches are returned in pool order within each database:
 `M_English` first, then `V_English` and `U_English` with `--all-string-dbs`.
 
+Semantic `search` results (`did`, `dtc`, and `behavior`) reuse rows from
+`build/cache/gts/search-rows/` by default, or `gts/search-rows/` under
+`BUILD_CACHE` when set. The cache is scoped to the selected installation,
+region, and database family. Changing an ECU DDB rebuilds only its rows.
+Changing `M_English.ddb` or the parser or row schema invalidates the dependent
+rows. `search` still enumerates the selected directory, so it cannot return
+rows for a removed DDB. String-only and file-only searches bypass this cache.
+The cache holds only offline ECU catalog rows and can be deleted at any time.
+
 Overlapping current table aliases (for example table 62 and 157 copies of the
 same Data List entry) are deduplicated for interactive output. `did` also joins
 the current role-`0x41` signal-info metadata when type-13/14/15 tables are

@@ -131,16 +131,19 @@ except ValueError:
 if timeout < 0:
     raise SystemExit("GHIDRA_HEADLESS_QUIESCE_TIMEOUT must be >= 0")
 
-needle = "ghidra.app.util.headless.AnalyzeHeadless"
+identity = f" ghidra.app.util.headless.AnalyzeHeadless {project_dir} {project_name}"
+# ps flattens argv. The runner always puts -scriptPath immediately after
+# the project name, so boundary-match there rather than splitting on spaces.
+runner_args = f"{identity} -scriptPath "
 deadline = time.monotonic() + timeout
 while True:
     result = subprocess.run(
-        ["ps", "-axo", "pid=,command="],
+        ["ps", "-ww", "-axo", "pid=,command="],
         check=True, capture_output=True, text=True,
     )
     matches = []
     for line in result.stdout.splitlines():
-        if needle not in line or project_dir not in line or project_name not in line:
+        if not (line.endswith(identity) or runner_args in line):
             continue
         pid_text, _, command = line.strip().partition(" ")
         if pid_text.isdigit():

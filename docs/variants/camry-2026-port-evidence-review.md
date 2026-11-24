@@ -155,11 +155,11 @@ object cycle within 30 ms contained no occupied seven-byte geometry record
 copied verbatim anywhere after B3 in the sampled frame. Their physical field
 meanings and transmitting nodes cannot be assigned from that comparison.
 
-Replay from this repository with the openpilot Python environment:
+Replay from this repository with the matching Cereal schema:
 
 ```sh
-uv run --offline --no-project --python ../kai-openpilot/.venv/bin/python \
-  python -m tools.targets.camry.analysis.analyze_camry_2026_radar_near_returns \
+uv run --locked python -m tools.targets.camry.analysis.analyze_camry_2026_radar_near_returns \
+  --openpilot-root ../kai-openpilot \
   ~/dev/inspect/logs/{0000013a--8201802acc,0000013c--0a6b872c87,0000013e--27d453251c}
 ```
 
@@ -525,9 +525,9 @@ Reproduction:
 uv run --locked python -m tools.targets.camry.analysis.analyze_camry_2026_native_cruise_release
 tools/test camry_2026_native_cruise_release
 
-# Explicit full original-source scan, using the existing openpilot LogReader environment.
-uv run --no-sync --project ../kai-openpilot/opendbc_repo python -m \
-  tools.targets.camry.analysis.analyze_camry_2026_native_cruise_release --extract
+# Explicit full original-source scan, using the same repository interpreter.
+uv run --locked python -m tools.targets.camry.analysis.analyze_camry_2026_native_cruise_release \
+  --extract --openpilot-root ../kai-openpilot
 ```
 
 Artifacts are `data/generated/camry_2026_native_cruise_release.json` and

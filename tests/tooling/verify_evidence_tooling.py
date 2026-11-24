@@ -16,11 +16,14 @@ import shlex
 import subprocess
 import sys
 import tempfile
+from contextlib import redirect_stdout
+from io import StringIO
 from pathlib import Path
 from unittest.mock import patch
 
 from tools import REPO_ROOT
-from tools.catalog import artifact_catalog
+from tools.catalog import artifact, artifact_catalog
+from tools.project import analysis_target
 from tools.techstream import extract_gtsplus_lifecycle_operations as operations_mod
 ROOT = REPO_ROOT
 VARIANT_TOOL = ROOT / "tools/variants/extract_variant_evidence.py"
@@ -39,6 +42,21 @@ def check(condition: bool, message: str) -> None:
     if not condition:
         raise AssertionError(message)
     print(f"[PASS] {message}")
+
+
+def artifact_invocation(*args: str) -> tuple[int, str]:
+    stdout = StringIO()
+    with (
+        patch.object(sys, "argv", [str(ARTIFACT_TOOL), *args]),
+        patch.object(artifact, "subprocess") as launcher,
+        redirect_stdout(stdout),
+    ):
+        try:
+            return artifact.main(), stdout.getvalue()
+        except SystemExit as exc:
+            return 1, str(exc)
+        finally:
+            launcher.run.assert_not_called()
 
 
 # Preserve the old extractors' distinction between whole JSONL corpora and
@@ -130,10 +148,41 @@ check(
 proc = subprocess.run([str(ARTIFACT_TOOL), "list", "fault_status"], cwd=ROOT, text=True, capture_output=True)
 check(proc.returncode == 0 and "camry_8965F3307000_fault_status.json" in proc.stdout, "artifact catalog provides substring discovery")
 
+layout = "data/dataflash_nvm_records.csv"
+check(
+    artifact_catalog.producer_candidates(layout) == ["tools/firmware/generate_dataflash_layout.py"]
+    and "tools/toyota_support/analyze_toyota_dataflash.py" in artifact_catalog.consumers(layout),
+    "legacy output with a short option alias is owned by the generator, not its layout reader",
+)
+
+registry = analysis_target.load()
+for target, row in registry["targets"].items():
+    path = row["decompiler_corpus"]
+    with (ROOT / path).open(encoding="utf-8") as corpus_file:
+        metadata = json.loads(corpus_file.readline())
+    generator = metadata["generator_path"]
+    status, command = artifact_invocation("regen", "--dry-run", path)
+    expected = ["--project-dir", str(ROOT / row["work_dir"])]
+    if target != "sienna-8965B4512000":
+        expected = ["--target", target, *expected, "--output", str(ROOT / path)]
+    check(
+        status == 0
+        and artifact_catalog.producer_candidates(path) == [generator]
+        and shlex.split(command) == [
+            "uv", "run", "--project", str(ROOT), "--locked", "python", "-m",
+            generator.removesuffix(".py").replace("/", "."), *expected,
+        ],
+        f"{target} registered corpus resolves to its recorded generator and work project",
+    )
+
 # Directory ownership includes tracked nested proofs, not siblings or untracked files.
 with tempfile.TemporaryDirectory(prefix="artifact-directory-") as td:
     fixture = Path(td)
     producer = "tools/extract_package.py"
+    other_producer = "tools/rewrite_package.py"
+    reader = "tools/targets/corolla/builders/build_corolla_h_reader_only.py"
+    reader_only = "data/generated/corolla_8965H1202000_reader_only.json"
+    ambiguous = "data/generated/shared.json"
     tracked_outputs = [
         "data/generated/package.json",
         "data/generated/package.proofs/first.json",
@@ -144,44 +193,80 @@ with tempfile.TemporaryDirectory(prefix="artifact-directory-") as td:
     (fixture / "tools").mkdir()
     (fixture / producer).write_text(
         'DEFAULT_OUT = REPO_ROOT / "data/generated/package.json"\n'
-        'ARTIFACT_OUTPUT_DIR = REPO_ROOT / "data/generated/package.proofs"\n',
+        'ARTIFACT_OUTPUT_DIR = REPO_ROOT / "data/generated/package.proofs"\n'
+        f'ARTIFACT_OUTPUT = REPO_ROOT / "{ambiguous}"\n',
         encoding="utf-8",
     )
-    for relative in [*tracked_outputs, sibling, untracked]:
+    (fixture / other_producer).write_text(
+        f'parser.add_argument("-o", "--output", default=Path("{ambiguous}"))\n',
+        encoding="utf-8",
+    )
+    (fixture / reader).parent.mkdir(parents=True)
+    (fixture / reader).write_text(
+        f'LAYOUT_CSV = REPO_ROOT / "{reader_only}"\n'
+        f'INPUT = REPO_ROOT / "{tracked_outputs[0]}"\n',
+        encoding="utf-8",
+    )
+    for relative in [*tracked_outputs, sibling, untracked, reader_only, ambiguous]:
         path = fixture / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text("{}\n", encoding="utf-8")
     subprocess.run(["git", "init", "--quiet", str(fixture)], check=True, capture_output=True)
     subprocess.run(
-        ["git", "add", "--force", "--", producer, *tracked_outputs, sibling],
+        ["git", "add", "--force", "--", producer, other_producer, reader,
+         *tracked_outputs, sibling, reader_only, ambiguous],
         cwd=fixture, check=True, capture_output=True,
     )
-    old_repo = artifact_catalog.REPO
     cached_queries = (
         artifact_catalog._tracked_artifacts,
         artifact_catalog._source_files_cached,
         artifact_catalog._declared_outputs,
         artifact_catalog._producer_candidates,
+        artifact_catalog._corpus_invocations,
     )
-    try:
-        artifact_catalog.REPO = fixture
+    with patch.object(artifact_catalog, "REPO", fixture), patch.object(artifact, "REPO", fixture):
         for query in cached_queries:
             query.cache_clear()
-        check(
-            all(artifact_catalog.producer_candidates(path) == [producer]
-                for path in tracked_outputs),
-            "declared output directory resolves its tracked nested proof producers",
-        )
-        check(
-            artifact_catalog.producer_candidates(sibling) == []
-            and artifact_catalog.producer_candidates(untracked) == []
-            and untracked not in artifact_catalog.tracked_artifacts(),
-            "output directory ownership excludes prefix siblings and untracked files",
-        )
-    finally:
-        artifact_catalog.REPO = old_repo
-        for query in cached_queries:
-            query.cache_clear()
+        try:
+            check(
+                all(artifact_catalog.producer_candidates(path) == [producer]
+                    for path in tracked_outputs),
+                "declared output directory resolves its tracked nested proof producers",
+            )
+            check(
+                artifact_catalog.producer_candidates(sibling) == []
+                and artifact_catalog.producer_candidates(untracked) == []
+                and untracked not in artifact_catalog.tracked_artifacts(),
+                "output directory ownership excludes prefix siblings and untracked files",
+            )
+            status, command = artifact_invocation("show", reader_only, "--json")
+            description = json.loads(command)
+            check(
+                status == 0 and description["consumers"] == [reader] and not description["producers"],
+                "a path mention and matching builder name identify a reader, not a producer",
+            )
+            status, message = artifact_invocation("regen", reader_only, "--producer", reader)
+            check(status != 0 and "no producer" in message, "a reader-only artifact cannot be regenerated")
+            status, message = artifact_invocation("regen", tracked_outputs[0], "--producer", reader)
+            check(status != 0 and "does not own" in message, "--producer cannot select a reader of an owned artifact")
+            status, message = artifact_invocation("regen", ambiguous)
+            check(
+                status != 0 and "ambiguous" in message and producer in message and other_producer in message,
+                "two distinct declarations require a producer choice regardless of script name",
+            )
+            status, command = artifact_invocation(
+                "regen", ambiguous, "--producer", other_producer, "--dry-run", "--", "--label", "two words",
+            )
+            check(
+                status == 0 and shlex.split(command) == [
+                    "uv", "run", "--project", str(fixture), "--locked", "python", "-m",
+                    "tools.rewrite_package", "--label", "two words",
+                ],
+                "dry run selects the explicit owner and preserves generator argument boundaries",
+            )
+        finally:
+            for query in cached_queries:
+                query.cache_clear()
 
 # Matching duplicate metadata must not attribute recovered code to its installed stub.
 with tempfile.TemporaryDirectory(prefix="operation-source-", dir=ROOT / "build/tmp") as td:

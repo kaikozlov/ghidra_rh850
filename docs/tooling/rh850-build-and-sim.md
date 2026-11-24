@@ -1040,6 +1040,11 @@ an image or compiler override. A compiler upgrade can change bytes without
 changing behavior, so field-qualified historical binaries remain separate from
 newly built artifacts until the new artifacts receive their own qualification.
 
+For a whole registered CodeFlash image, use `tools/rh850 toolchain listing TARGET`.
+It prints the path to a linear listing at the registered base. The cache identity
+includes image bytes, objdump options, and Docker image ID. Concurrent callers
+share one disassembly; the repository is mounted read-only.
+
 `tools/rh850 toolchain run ...` is the escape hatch for invoking any
 `v850-elf-*` program with the repository mounted at `/src`; for example,
 `tools/rh850 toolchain run v850-elf-objdump -d build/out/example.elf`.

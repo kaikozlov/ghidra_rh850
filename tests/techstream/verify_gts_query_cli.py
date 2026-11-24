@@ -2,15 +2,17 @@
 """Verify the unified GTS+ query/recovery CLI against pinned external artifacts."""
 from __future__ import annotations
 
-import hashlib
 import csv
+import hashlib
 import io
 import json
 import os
 import shutil
 import struct
 import subprocess
+import sys
 import tempfile
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from unittest.mock import patch
 
@@ -36,8 +38,8 @@ def check(condition: bool, message: str) -> None:
     print(f"[PASS] {message}")
 
 
-def write_search_string_db(path: Path, format_version: int, count: int) -> list[dict]:
-    rows = [f"GTS search fixture {path.name[0]} {index:04d}" for index in range(count)]
+def write_search_string_db(path: Path, format_version: int, count: int, *, label: str = "GTS search fixture") -> list[dict]:
+    rows = [f"{label} {path.name[0]} {index:04d}" for index in range(count)]
     offsets = []
     directory = bytearray()
     pool = bytearray()
@@ -118,6 +120,176 @@ with tempfile.TemporaryDirectory(prefix="gts-search-limit-") as td:
         and "more results; use --limit" in limited_text.stderr,
         "text search shows the requested row and indicates truncation",
     )
+
+
+def write_search_ecu(path: Path, did: int) -> None:
+    monitor = bytearray(0x3A)
+    struct.pack_into("<I", monitor, 0x18, 1)
+    struct.pack_into("<H", monitor, 0x2A, 1)
+    struct.pack_into("<H", monitor, 0x32, 1)
+    struct.pack_into("<H", monitor, 0x36, did)
+    dtc = struct.pack("<12sIIH6x", "U0129".encode("utf-16-le"), 1, 0, 1)
+    physical = struct.pack("<iiiHH6x", 1, 1, 0, 1, 1)
+    # JSON sort_keys must sort these by integer value, not by their string spellings.
+    patterns = b"".join(struct.pack("<II4xH", 1, value, 1) for value in (10, 2))
+    unit = struct.pack("<IH2x", 1, 1)
+    behavior = struct.pack("<12sIIH", b"", 1, 1, 1)
+    tables = (
+        (5, 2, dtc * 2), (13, 1, physical), (14, 2, patterns), (15, 1, unit),
+        (62, 1, monitor), (87, 1, behavior), (157, 1, monitor),
+    )
+    header = bytearray(0x24 + 158 * 4)
+    header[:6] = bytes.fromhex("40 00 0c 1a 06 10")
+    header[8:10] = bytes((2, 158))
+    header[0x0A : 0x0A + len(SIGNATURE)] = SIGNATURE
+    for table, count, data in tables:
+        struct.pack_into("<I", header, 0x24 + table * 4, len(header))
+        header.extend(struct.pack("<BBII", table, 0, count, len(data)))
+        header.extend(data)
+    path.write_bytes(header)
+
+
+# Each subprocess enters the real CLI with a shared isolated cache and reports
+# structural ECU parser calls without changing stdout, stderr, or the sources.
+SEARCH_CACHE_CLI = """
+import sys
+from pathlib import Path
+from tools.techstream.gts import cli
+from tools.techstream.parse_ddb import DDBParser
+
+report = Path(sys.argv.pop(1))
+parse_ecu_db = DDBParser.parse_ecu_db
+
+def track_parse(parser, path):
+    with report.open("a", encoding="utf-8") as stream:
+        print(Path(path).name, file=stream)
+    return parse_ecu_db(parser, path)
+
+DDBParser.parse_ecu_db = track_parse
+raise SystemExit(cli.main())
+"""
+
+with tempfile.TemporaryDirectory(prefix="gts-search-cache-") as td:
+    fixture = Path(td).resolve()
+    install = fixture / "release"
+    fixture_db = install / "NA/DB/Gen"
+    fixture_db.mkdir(parents=True)
+    cache = fixture / "cache"
+    dictionary = fixture_db / "M_English.ddb"
+    ecu_a = fixture_db / "fixture-A.ddb"
+    ecu_b = fixture_db / "fixture-B.ddb"
+    write_search_ecu(ecu_a, 0x1001)
+    write_search_ecu(ecu_b, 0x1002)
+
+    def run_cached_search(*args: str, term: str = "fixture", root: Path = install, cache_root: Path = cache):
+        with tempfile.TemporaryDirectory(dir=fixture) as report_dir:
+            report = Path(report_dir) / "parses.txt"
+            report.touch()
+            result = subprocess.run(
+                [sys.executable, "-c", SEARCH_CACHE_CLI, str(report),
+                 "search", term, "--gtsplus-root", str(root),
+                 "--cuwplus-root", str(fixture), "--cuw-root", str(fixture), *args],
+                cwd=fixture, env={**os.environ, "BUILD_CACHE": str(cache_root)}, capture_output=True, check=True,
+            )
+            return result, report.read_text().splitlines()
+
+    mixed = ("--kind", "file", "--kind", "did", "--kind", "dtc", "--kind", "behavior")
+    _, parsed = run_cached_search("--kind", "file", "--json")
+    semantic_entries = cache / "gts/search-rows"
+    check(not parsed and not semantic_entries.exists(), "file-only search does not load a dictionary or create semantic cache entries")
+    write_search_string_db(dictionary, 4, 1, label="Old search fixture")
+    limited, parsed = run_cached_search(*mixed, "--limit", "1", "--json")
+    check(
+        not parsed and not semantic_entries.exists() and [row["kind"] for row in json.loads(limited.stdout)] == ["file"],
+        "the mixed search limit stops before ECU parsing or cache population",
+    )
+
+    with ThreadPoolExecutor(max_workers=2) as clients:
+        left, right = [clients.submit(run_cached_search, *mixed, "--json") for _ in range(2)]
+        cold, cold_parsed = left.result()
+        other, other_parsed = right.result()
+    warm, parsed = run_cached_search(*mixed, "--json")
+    rows = json.loads(warm.stdout)
+    check(
+        cold.stdout == other.stdout == warm.stdout and not parsed
+        and set(cold_parsed + other_parsed) == {ecu_a.name, ecu_b.name},
+        "concurrent cold and warm CLI launches return byte-identical JSON without warm ECU parsing",
+    )
+    check(
+        [(row["source"], row["kind"]) for row in rows]
+        == [(path.name, kind) for path in (ecu_a, ecu_b) for kind in ("file", "did", "dtc", "dtc", "behavior")]
+        and rows[1]["tables"] == [62, 157]
+        and list(rows[1]["signal_info"]["pattern_display"]) == ["2", "10"]
+        and rows[2]["code"] == rows[3]["code"] and [rows[2]["record"], rows[3]["record"]] == [0, 1],
+        "cached rows retain catalog/kind order, monitor aliases, numeric enum order and DTC duplicates",
+    )
+    by_id, parsed = run_cached_search("--kind", "did", "--ecu", "fixture-B", "--json", term="0x1002")
+    check(
+        json.loads(by_id.stdout) == [rows[6]] and not parsed,
+        "a different search term and ECU filter reuse the unfiltered semantic rows",
+    )
+    cold_text, _ = run_cached_search(*mixed, "--limit", "2", cache_root=fixture / "text-cache")
+    warm_text, parsed = run_cached_search(*mixed, "--limit", "2")
+    check(
+        cold_text.stdout == warm_text.stdout and cold_text.stderr == warm_text.stderr and not parsed
+        and b"more results" in warm_text.stderr,
+        "cold and warm text limits and truncation notices match exactly",
+    )
+
+    damaged = next(cache.rglob("*-did.rows"))
+    damaged.write_bytes(damaged.read_bytes()[:-5])
+    recovered, parsed = run_cached_search(*mixed, "--json")
+    check(recovered.stdout == warm.stdout and len(parsed) == 1, "a partial cache entry rebuilds only its ECU")
+
+    old_stat = ecu_a.stat()
+    write_search_ecu(ecu_a, 0x1003)
+    os.utime(ecu_a, ns=(old_stat.st_atime_ns, old_stat.st_mtime_ns))
+    replaced, parsed = run_cached_search(*mixed, "--json")
+    updated = json.loads(replaced.stdout)
+    check(
+        ecu_a.stat().st_size == old_stat.st_size and parsed == [ecu_a.name]
+        and [row["primary_did"] for row in updated if row["kind"] == "did"] == [0x1003, 0x1002]
+        and updated[1]["catalog_context"]["source"]
+        == {"path": str(ecu_a), "sha256": hashlib.sha256(ecu_a.read_bytes()).hexdigest()},
+        "an in-place replacement with unchanged size and mtime invalidates only that ECU and refreshes provenance",
+    )
+
+    ecu_a.write_bytes(b"invalid ECU database")
+    broken, parsed = run_cached_search(*mixed, "--json")
+    broken_warm, parsed_warm = run_cached_search(*mixed, "--json")
+    broken_rows = json.loads(broken.stdout)
+    check(
+        parsed == [ecu_a.name] and not parsed_warm and broken.stdout == broken_warm.stdout
+        and broken_rows[0]["kind"] == "file" and broken_rows[1:] == updated[5:],
+        "an unparseable replacement retains its filename but none of the displaced semantic rows",
+    )
+
+    ecu_a.unlink()
+    missing, parsed = run_cached_search(*mixed, "--json")
+    check(
+        not parsed and json.loads(missing.stdout) == updated[5:],
+        "removed inputs do not return stale rows and other ECUs stay warm",
+    )
+    write_search_string_db(dictionary, 4, 1, label="New search fixture")
+    relabeled, parsed = run_cached_search(*mixed, "--json")
+    check(
+        parsed == [ecu_b.name] and json.loads(relabeled.stdout)[1]["name"].startswith("New search fixture"),
+        "semantic rows invalidate when the selected language dictionary changes",
+    )
+
+    for root, region, family in ((fixture / "other-release", "NA", "Gen"), (install, "EU", "Spe")):
+        namespace = root / region / "DB" / family
+        namespace.mkdir(parents=True)
+        shutil.copyfile(dictionary, namespace / dictionary.name)
+        shutil.copyfile(ecu_b, namespace / ecu_b.name)
+        separate, parsed = run_cached_search(*mixed, "--json", "--region", region, "--family", family, root=root)
+        check(
+            parsed == [ecu_b.name] and all(
+                row["catalog_context"]["source"]["path"] == str(namespace / ecu_b.name)
+                for row in json.loads(separate.stdout)
+            ),
+            f"identical bytes in the separately selected {root.name} {region}/{family} have independent provenance and cache entries",
+        )
 
 
 gts = techstream_paths.resolve_gts_root()

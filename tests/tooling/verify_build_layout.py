@@ -2,11 +2,14 @@
 """Verify safe cleanup and Ghidra wrapper output with disposable tool fixtures."""
 from __future__ import annotations
 
+import hashlib
 import json
 import os
+import shlex
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 from tools import REPO_ROOT
@@ -57,26 +60,34 @@ with tempfile.TemporaryDirectory(prefix="rh850-build-layout-") as td:
 
 print("\n== PE import output and dispatch ==")
 with tempfile.TemporaryDirectory(prefix="pe-wrapper-") as td:
-    temp = Path(td)
+    temp = Path(td).resolve()
     fake_home = temp / "ghidra"
     fake_headless = fake_home / "support" / "analyzeHeadless"
     fake_headless.parent.mkdir(parents=True)
     capture = temp / "headless-args.json"
     fake_headless.write_text(
         "#!/usr/bin/env python3\n"
-        "import json, os, sys\n"
+        "import json, os, sys, time\n"
         "from pathlib import Path\n"
         "Path(os.environ['FAKE_CAPTURE']).write_text(json.dumps(sys.argv[1:]))\n"
+        "if gate := os.environ.get('FAKE_GATE'):\n"
+        "    deadline = time.monotonic() + 30\n"
+        "    while not Path(gate).exists() and time.monotonic() < deadline:\n"
+        "        time.sleep(0.02)\n"
+        "    if not Path(gate).exists(): sys.exit(98)\n"
         "print(os.environ.get('FAKE_OUTPUT', 'INFO fake headless complete'))\n"
         "raise SystemExit(int(os.environ.get('FAKE_RC', '0')))\n"
     )
     fake_headless.chmod(0o755)
     binary = temp / "sample with spaces.dll"
     binary.write_bytes(b"MZ")
-    build = temp / "build"
+    build = temp / "build space"
+    home = temp / "home"
+    data = temp / "data"
     env = dict(os.environ, BUILD_ROOT=str(build), GHIDRA_HOME=str(fake_home),
                GHIDRA_AGENT="0", GHIDRA_ANALYSIS_TIMEOUT="300",
-               PE_PROJECT="fixture_pe", FAKE_CAPTURE=str(capture))
+               PE_PROJECT="fixture_pe", FAKE_CAPTURE=str(capture),
+               HOME=str(home), XDG_DATA_HOME=str(data))
     for name in ("CACHE", "WORK", "OUT", "LOGS", "TMP"):
         env[f"BUILD_{name}"] = str(build / name.lower())
     fake_cli = build / "cache" / "ghidra-cli" / "ghidra"
@@ -123,6 +134,79 @@ with tempfile.TemporaryDirectory(prefix="pe-wrapper-") as td:
 
     cp = subprocess.run(["bash", str(REPO / "tools/pe"), "--json", "import", str(binary)], cwd=REPO, env=dict(env, FAKE_OUTPUT="REPORT SCRIPT ERROR: fixture failure"), capture_output=True, text=True, timeout=15)
     check("PE import does not report success after a headless script error", cp.returncode != 0 and not cp.stdout.strip() and "fixture failure" in cp.stderr)
+
+    bridge_dir = (home / "Library/Application Support" if sys.platform == "darwin" else data) / "ghidra-cli"
+    project_dir = build / "work" / "pe-project"
+    quoted_project = "a PE project's name"
+    bridge_key = "bridge-" + hashlib.md5(str(project_dir / quoted_project).encode(), usedforsecurity=False).hexdigest()
+    pid_file = bridge_dir / f"{bridge_key}.pid"
+    native_lock = project_dir / f"{quoted_project}.lock"
+    pid_file.write_text(str(os.getpid()))
+    native_lock.write_text("keep")
+    capture.unlink()
+    pe_import = ["bash", str(REPO / "tools/pe"), "--json", "import", str(binary)]
+    cp = subprocess.run(pe_import, cwd=REPO, env=dict(env, PE_PROJECT=quoted_project), capture_output=True, text=True, timeout=15)
+    command = cp.stderr.rsplit("before importing: ", 1)[-1]
+    check("PE import refuses a live bridge with the selected project's clean stop command",
+          cp.returncode == 1 and not cp.stdout and not capture.exists()
+          and shlex.split(command) == [f"BUILD_WORK={env['BUILD_WORK']}",
+                                       f"PE_PROJECT={quoted_project}", "tools/pe", "stop"],
+          cp.stderr)
+    check("PE import does not mutate bridge metadata or Ghidra locks",
+          pid_file.read_text() == str(os.getpid()) and native_lock.read_text() == "keep")
+    pid_file.write_text("malformed")
+    cp = subprocess.run(pe_import, cwd=REPO, env=dict(env, PE_PROJECT=quoted_project), capture_output=True, text=True, timeout=15)
+    check("PE import ignores stale malformed metadata without removing it",
+          cp.returncode == 0 and capture.exists() and pid_file.read_text() == "malformed"
+          and native_lock.read_text() == "keep", cp.stderr)
+
+    gate = temp / "release"
+    first_capture = temp / "first"
+    second_capture = temp / "second"
+    overlap_capture = temp / "overlap"
+    with subprocess.Popen(pe_import, cwd=REPO, env=dict(env, FAKE_CAPTURE=str(first_capture), FAKE_GATE=str(gate)),
+                          stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True) as first:
+        try:
+            deadline = time.monotonic() + 15
+            while not first_capture.exists() and first.poll() is None and time.monotonic() < deadline:
+                time.sleep(0.02)
+            check("PE import reaches headless with its project lease", first_capture.exists())
+            with subprocess.Popen(pe_import, cwd=REPO, env=dict(env, FAKE_CAPTURE=str(second_capture)),
+                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True) as second:
+                try:
+                    cp = subprocess.run(pe_import, cwd=REPO, env=dict(env, PE_PROJECT="fixture_pe_other", FAKE_CAPTURE=str(overlap_capture)),
+                                        capture_output=True, text=True, timeout=15)
+                    check("different PE projects can import concurrently",
+                          cp.returncode == 0 and overlap_capture.exists() and first.poll() is None, cp.stderr)
+                    check("same-project PE import queues before invoking headless",
+                          second.poll() is None and not second_capture.exists())
+                finally:
+                    gate.touch()
+                _, second_stderr = second.communicate(timeout=15)
+                check("queued PE import succeeds after the first finishes",
+                      second.returncode == 0 and second_capture.exists(), second_stderr)
+        finally:
+            gate.touch()
+        _, first_stderr = first.communicate(timeout=15)
+        check("the first PE import succeeds", first.returncode == 0, first_stderr)
+
+    other_gate = temp / "release-other"
+    other_process = [
+        sys.executable, "-c",
+        "import sys, time; from pathlib import Path\n"
+        "deadline = time.monotonic() + 20\n"
+        "while not Path(sys.argv[1]).exists() and time.monotonic() < deadline: time.sleep(0.02)",
+        str(other_gate), "ghidra.app.util.headless.AnalyzeHeadless",
+        str(project_dir), "fixture_pe suffix", "-scriptPath", "fixture",
+    ]
+    with subprocess.Popen(other_process) as other:
+        try:
+            cp = subprocess.run(pe_import, cwd=REPO, env=dict(env, GHIDRA_HEADLESS_QUIESCE_TIMEOUT="0"),
+                                capture_output=True, text=True, timeout=15)
+            check("headless quiescence ignores a different project sharing the same name prefix",
+                  cp.returncode == 0 and other.poll() is None, cp.stderr)
+        finally:
+            other_gate.touch()
 
 print(f"\nResults: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

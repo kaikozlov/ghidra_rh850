@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """Extract opendbc-porting evidence from Span's tracked 2025 Corolla Discord rlog.
 
-The rlog is tracked and hash-pinned, but LogReader/cereal comes from a compatible
-openpilot checkout supplied via --openpilot-root.  All Toyota signal/checksum
-interpretation used below is local and explicitly bounded to pinned prior art or
-exact H/F firmware-derived rules.
+The rlog is tracked and hash-pinned. --openpilot-root selects a checkout's
+Cereal schema. Toyota signal/checksum interpretation is local and bounded to
+pinned prior art or exact H/F firmware-derived rules.
 """
 from __future__ import annotations
 
@@ -15,11 +14,11 @@ import collections
 import itertools
 import json
 import re
-import sys
 from bisect import bisect_right
 from pathlib import Path
 from typing import Any
 
+from tools.toyota_support.route_log import load_logreader
 from tools.toyota_support.toyota_route_opendbc_common import (
     GearReadyCensus,
     be_raw,
@@ -107,7 +106,7 @@ def signed_n(value: int, bits: int) -> int:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--rlog", type=Path, default=DEFAULT_RLOG)
-    ap.add_argument("--openpilot-root", type=Path, required=True)
+    ap.add_argument("--openpilot-root", type=Path, required=True, help="openpilot checkout providing the Cereal schema")
     ap.add_argument("--output", type=Path, default=DEFAULT_OUT)
     ap.add_argument("--gear-audit", action="store_true",
                     help="print the deterministic gear/READY all-source census JSON (with input SHA) to stdout "
@@ -121,10 +120,7 @@ def main() -> int:
     if actual != {"sha256": expected["sha256"], "size": expected["size"]}:
         raise SystemExit(f"rlog identity mismatch: expected {expected}, got {actual}")
 
-    sys.path.insert(0, str(args.openpilot_root.resolve()))
-    from openpilot.tools.lib.logreader import (
-        LogReader,  # type: ignore[import-not-found]
-    )
+    LogReader = load_logreader(args.openpilot_root)
 
     frames: dict[tuple[int, int, int], list[tuple[int, bytes]]] = collections.defaultdict(list)
     census = GearReadyCensus() if args.gear_audit else None

@@ -4011,6 +4011,10 @@ The category `utilities` array retains raw table77 rows and complete D8/D9/DA `s
 
 ## 10. Current GTS+ application lifecycle
 
+The `auth_settings`, `cuw_utility`, and `vci_transport` extractors keep their
+bulk evidence tables in [data/techstream/lifecycle](../../data/techstream/lifecycle/).
+Edit the matching JSON for evidence records and the Python module for extraction logic.
+
 The linked domain artifacts join the installed client's process, state, and
 handoff ownership. Normal ownership is:
 

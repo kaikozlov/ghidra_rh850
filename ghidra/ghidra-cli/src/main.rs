@@ -2951,6 +2951,57 @@ mod tests {
     }
 
     #[test]
+    fn portable_memory_read_lengths_normalize_in_batch() {
+        for source in [
+            "memory read 0x100 32 --count\nmemory read 0x100 0x20 --count",
+            r#"[{"command":"memory","args":["read","0x100","--length","0x20","--count"]}]"#,
+        ] {
+            for command in batch::parse_batch(source).unwrap() {
+                let argv = std::iter::once("ghidra").chain(command.argv.iter().map(String::as_str));
+                let cli = Cli::try_parse_from(argv).unwrap();
+                let Commands::Memory(cli::MemoryCommands::Read(args)) = cli.command else {
+                    panic!("expected memory read");
+                };
+                assert_eq!(args.address, "0x100");
+                assert_eq!(args.size, 32);
+                assert!(args.options.count);
+
+                let original_shape = serde_json::json!({
+                    "address": "0x100",
+                    "size": 32,
+                    "options": args.options,
+                });
+                assert_eq!(serde_json::to_value(&args).unwrap(), original_shape);
+                let restored: cli::MemReadArgs = serde_json::from_value(original_shape).unwrap();
+                assert_eq!(restored.size, 32);
+                assert!(restored.options.count);
+            }
+        }
+    }
+
+    #[test]
+    fn portable_memory_read_length_boundaries() {
+        for (length, expected) in [("0", 0), ("0X7fffffff", i32::MAX as usize)] {
+            let cli = Cli::try_parse_from(["ghidra", "memory", "read", "0x100", length]).unwrap();
+            let Commands::Memory(cli::MemoryCommands::Read(args)) = cli.command else {
+                panic!("expected memory read");
+            };
+            assert_eq!(args.size, expected);
+        }
+    }
+
+    #[test]
+    fn portable_disasm_bare_count_remains_count_only() {
+        let cli = Cli::try_parse_from(["ghidra", "disasm", "main", "--count", "--pretty"]).unwrap();
+        assert!(cli.pretty);
+        let Commands::Disasm(args) = cli.command else {
+            panic!("expected disasm");
+        };
+        assert!(args.options.count);
+        assert_eq!(args.num_instructions, None);
+    }
+
+    #[test]
     fn output_format_precedence_matches_error_mode() {
         for (args, expected, json) in [
             (

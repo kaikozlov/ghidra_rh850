@@ -4,7 +4,9 @@
 //! starts a TCP socket server. The CLI connects directly to this server
 //! to execute commands. No intermediate daemon process is needed.
 
-use std::io::{BufRead, BufReader, Write};
+#[cfg(not(unix))]
+use std::io::Write;
+use std::io::{BufRead, BufReader};
 use std::net::TcpStream;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
@@ -71,25 +73,22 @@ pub fn get_data_dir() -> Result<PathBuf> {
 }
 
 /// Compute MD5 hash of project path for file naming.
-fn project_hash(project_path: &Path) -> String {
-    format!(
-        "{:x}",
-        md5::compute(project_path.to_string_lossy().as_bytes())
-    )
+fn project_hash(project_path: &Path) -> md5::Digest {
+    md5::compute(project_path.to_string_lossy().as_bytes())
 }
 
 /// Get the port file path for a project.
 pub fn port_file_path(project_path: &Path) -> Result<PathBuf> {
     let data_dir = get_data_dir()?;
     let hash = project_hash(project_path);
-    Ok(data_dir.join(format!("bridge-{}.port", hash)))
+    Ok(data_dir.join(format!("bridge-{hash:x}.port")))
 }
 
 /// Get the PID file path for a project.
 pub fn pid_file_path(project_path: &Path) -> Result<PathBuf> {
     let data_dir = get_data_dir()?;
     let hash = project_hash(project_path);
-    Ok(data_dir.join(format!("bridge-{}.pid", hash)))
+    Ok(data_dir.join(format!("bridge-{hash:x}.pid")))
 }
 
 /// Read the port from the port file.
@@ -121,7 +120,12 @@ pub fn read_pid_file(project_path: &Path) -> Result<Option<u32>> {
 pub fn is_pid_alive(pid: u32) -> bool {
     #[cfg(unix)]
     {
-        unsafe { libc::kill(pid as i32, 0) == 0 }
+        let Ok(pid) = i32::try_from(pid) else {
+            return false;
+        };
+        pid > 0
+            && (unsafe { libc::kill(pid, 0) } == 0
+                || std::io::Error::last_os_error().raw_os_error() == Some(libc::EPERM))
     }
     #[cfg(windows)]
     {
@@ -134,8 +138,26 @@ pub fn is_pid_alive(pid: u32) -> bool {
     }
 }
 
-/// Clean up stale port and PID files.
+/// Clean up stale discovery files without touching Ghidra's project locks.
 pub fn cleanup_stale_files(project_path: &Path) -> Result<()> {
+    // Stop and status must not wait for a running headless import. If another
+    // opener already holds the lease, it owns discovery-file cleanup.
+    #[cfg(unix)]
+    let Some(_lock) = lock_project(project_path, libc::LOCK_NB)?
+    else {
+        return Ok(());
+    };
+    if read_pid_file(project_path)
+        .ok()
+        .flatten()
+        .is_some_and(is_pid_alive)
+    {
+        return Ok(());
+    }
+    remove_bridge_files(project_path)
+}
+
+fn remove_bridge_files(project_path: &Path) -> Result<()> {
     let port_path = port_file_path(project_path)?;
     let pid_path = pid_file_path(project_path)?;
     if port_path.exists() {
@@ -145,34 +167,61 @@ pub fn cleanup_stale_files(project_path: &Path) -> Result<()> {
         std::fs::remove_file(&pid_path).ok();
     }
 
-    // Remove Ghidra project lock files left behind after force-kill.
-    // Ghidra creates {project_name}.lock and {project_name}.lock~ as siblings
-    // of the project directory. If the JVM is killed, these aren't cleaned up
-    // and the next analyzeHeadless invocation may refuse to open the project.
-    if let Some(project_name) = project_path.file_name() {
-        if let Some(parent) = project_path.parent() {
-            let lock_name = format!("{}.lock", project_name.to_string_lossy());
-            let lock_path = parent.join(&lock_name);
-            let lock_tilde = parent.join(format!("{}~", lock_name));
-            if lock_path.exists() {
-                debug!("Removing stale Ghidra lock: {:?}", lock_path);
-                std::fs::remove_file(&lock_path).ok();
-            }
-            if lock_tilde.exists() {
-                debug!("Removing stale Ghidra lock: {:?}", lock_tilde);
-                std::fs::remove_file(&lock_tilde).ok();
-            }
-        }
-    }
-
     Ok(())
 }
 
+#[cfg(unix)]
+fn project_lock_path(project_path: &Path) -> Result<PathBuf> {
+    // Match tools.project.pe_project_lock: canonicalize the directory, not
+    // the project name, since there is no file at the bare project path.
+    let canonical_path = project_path
+        .parent()
+        .and_then(|parent| parent.canonicalize().ok())
+        .zip(project_path.file_name())
+        .map(|(mut parent, name)| {
+            parent.push(name);
+            parent
+        });
+    let hash = project_hash(canonical_path.as_deref().unwrap_or(project_path));
+    Ok(get_data_dir()?.join(format!("bridge-{hash:x}.open.lock")))
+}
+
+#[cfg(unix)]
+fn lock_project(project_path: &Path, flags: libc::c_int) -> Result<Option<std::fs::File>> {
+    use std::os::fd::AsRawFd;
+
+    let lock_path = project_lock_path(project_path)?;
+    let file = std::fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(&lock_path)?;
+    // Keep the inode in place: unlinking would let a second opener lock a
+    // different inode while this file is still locked or has waiters.
+    loop {
+        if unsafe { libc::flock(file.as_raw_fd(), libc::LOCK_EX | flags) } == 0 {
+            return Ok(Some(file));
+        }
+        let error = std::io::Error::last_os_error();
+        match error.kind() {
+            std::io::ErrorKind::Interrupted => continue,
+            std::io::ErrorKind::WouldBlock if flags == libc::LOCK_NB => return Ok(None),
+            _ => return Err(error).with_context(|| format!("Locking {}", lock_path.display())),
+        }
+    }
+}
+
+#[cfg(unix)]
+fn acquire_startup_lock(project_path: &Path) -> Result<std::fs::File> {
+    Ok(lock_project(project_path, 0)?.expect("blocking project lock"))
+}
+
 /// RAII guard that removes the startup lock file on drop.
+#[cfg(not(unix))]
 struct StartupLockGuard {
     path: PathBuf,
 }
 
+#[cfg(not(unix))]
 impl Drop for StartupLockGuard {
     fn drop(&mut self) {
         let _ = std::fs::remove_file(&self.path);
@@ -186,10 +235,11 @@ impl Drop for StartupLockGuard {
 /// processes) are detected and cleaned up automatically.
 ///
 /// Blocks until the lock is acquired or the 60-second timeout expires.
+#[cfg(not(unix))]
 fn acquire_startup_lock(project_path: &Path) -> Result<StartupLockGuard> {
     let data_dir = get_data_dir()?;
     let hash = project_hash(project_path);
-    let lock_path = data_dir.join(format!("bridge-{}.starting", hash));
+    let lock_path = data_dir.join(format!("bridge-{hash:x}.starting"));
     let pid = std::process::id().to_string();
     let deadline = std::time::Instant::now() + Duration::from_secs(60);
 
@@ -273,24 +323,21 @@ pub fn ensure_bridge_running(
         return Ok(port);
     }
 
-    // Slow path: acquire the per-project startup lock so that concurrent
-    // callers don't each launch their own analyzeHeadless (which would fail
-    // with "Unable to lock project!" because Ghidra uses an exclusive lock).
-    let _lock = acquire_startup_lock(project_path)?;
-
-    // Re-check under the lock: another process may have started the bridge
-    // while we were waiting.
-    if let Some(port) = is_bridge_running(project_path) {
-        info!(
-            "Bridge already running on port {} (detected after lock)",
-            port
-        );
-        return Ok(port);
-    }
-
-    // Clean up any stale port/pid/lock files before starting fresh.
-    cleanup_stale_files(project_path)?;
     start_bridge(project_path, ghidra_install_dir, mode)
+}
+
+fn refuse_live_bridge_owner(project_path: &Path) -> Result<()> {
+    if let Some(pid) = read_pid_file(project_path)
+        .ok()
+        .flatten()
+        .filter(|&pid| is_pid_alive(pid))
+    {
+        anyhow::bail!(
+            "Bridge process {pid} still owns project {} (it may be shutting down)",
+            project_path.display()
+        );
+    }
+    Ok(())
 }
 
 /// Apply the CLI's resource policy and select a full JDK for headless Ghidra.
@@ -366,6 +413,8 @@ pub fn import_oneshot(
     ghidra_install_dir: &Path,
 ) -> Result<String> {
     info!("Importing binary into new project (one-shot)...");
+    let _lock = acquire_startup_lock(project_path)?;
+    refuse_live_bridge_owner(project_path)?;
 
     let headless_script = find_headless_script(ghidra_install_dir)?;
 
@@ -482,6 +531,19 @@ pub fn start_bridge(
     ghidra_install_dir: &Path,
     mode: BridgeStartMode,
 ) -> Result<u16> {
+    // Only cold callers take the same lease as tools/pe import. Recheck after
+    // waiting: another caller may already have opened the project.
+    let _lock = acquire_startup_lock(project_path)?;
+    if let Some(port) = is_bridge_running(project_path) {
+        info!(
+            "Bridge already running on port {} (detected after lock)",
+            port
+        );
+        return Ok(port);
+    }
+    refuse_live_bridge_owner(project_path)?;
+    remove_bridge_files(project_path)?;
+
     info!("Starting Ghidra bridge...");
 
     // Write the Java bridge script to disk
@@ -686,7 +748,7 @@ pub fn start_bridge(
             // it safe to join the reader threads. Joining before killing was the
             // original hang: a surviving JVM held the pipes open forever.
             kill_process_tree(&mut child);
-            cleanup_stale_files(project_path).ok();
+            remove_bridge_files(project_path).ok();
 
             let (_, last_error, stdout_lines) = stdout_handle.join().unwrap_or_default();
             let stderr_output = stderr_handle.join().unwrap_or_default();
@@ -1100,6 +1162,71 @@ mod tests {
             || true,                   // always alive
         );
         assert_eq!(outcome, ReadyOutcome::TimedOut);
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn cold_bridge_start_waits_for_project_import_lease() {
+        use std::net::TcpListener;
+        use std::sync::mpsc;
+
+        let dir = tempfile::tempdir().unwrap();
+        let project = dir.path().join("fixture");
+        let other_project = dir.path().join("fixture-other");
+        let lock = acquire_startup_lock(&project).unwrap();
+        assert!(lock_project(&project, libc::LOCK_NB).unwrap().is_none());
+        assert!(lock_project(&other_project, libc::LOCK_NB)
+            .unwrap()
+            .is_some());
+        let (trying, tried) = mpsc::channel();
+        let (result_tx, result_rx) = mpsc::channel();
+        let caller = {
+            let project = project.clone();
+            let home = dir.path().to_path_buf();
+            std::thread::spawn(move || {
+                trying.send(()).unwrap();
+                let result = start_bridge(&project, &home, BridgeStartMode::Project);
+                result_tx.send(result).unwrap();
+            })
+        };
+        tried.recv_timeout(Duration::from_secs(5)).unwrap();
+        assert!(matches!(
+            result_rx.recv_timeout(Duration::from_millis(100)),
+            Err(mpsc::RecvTimeoutError::Timeout)
+        ));
+
+        // Simulate the other opener publishing a bridge before dropping its
+        // lease. Warm callers should find it immediately; the cold caller
+        // must recheck before it tries to start its own JVM.
+        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+        let port = listener.local_addr().unwrap().port();
+        std::fs::write(port_file_path(&project).unwrap(), port.to_string()).unwrap();
+        write_pid_file(&project, std::process::id()).unwrap();
+        let (warm_tx, warm_rx) = mpsc::channel();
+        let warm_caller = {
+            let project = project.clone();
+            let home = dir.path().to_path_buf();
+            std::thread::spawn(move || {
+                let port =
+                    ensure_bridge_running(&project, &home, BridgeStartMode::Project).unwrap();
+                cleanup_stale_files(&project).unwrap(); // Must not wait for the lease.
+                warm_tx.send(port).unwrap();
+            })
+        };
+        let warm_port = warm_rx.recv_timeout(Duration::from_secs(5)).unwrap();
+        drop(lock);
+
+        let cold_port = result_rx
+            .recv_timeout(Duration::from_secs(5))
+            .unwrap()
+            .unwrap();
+        caller.join().unwrap();
+        warm_caller.join().unwrap();
+        remove_bridge_files(&project).unwrap();
+        std::fs::remove_file(project_lock_path(&project).unwrap()).unwrap();
+        std::fs::remove_file(project_lock_path(&other_project).unwrap()).unwrap();
+        assert_eq!(warm_port, port);
+        assert_eq!(cold_port, port);
     }
 
     /// Spawn a shell that itself spawns a long-lived child, then prove

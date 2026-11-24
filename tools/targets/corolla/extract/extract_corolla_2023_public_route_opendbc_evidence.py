@@ -2,9 +2,8 @@
 """Extract opendbc-porting evidence from the pinned 2023 Corolla public rlog.
 
 This helper regenerates external-source evidence. The raw rlog is
-intentionally untracked. Point --openpilot-root at a checkout that can import
-openpilot.tools.lib.logreader; all Toyota signal/checksum decoding used here is
-implemented locally so the result does not depend on that checkout's Toyota DBC.
+intentionally untracked. --openpilot-root selects a checkout's Cereal schema.
+Toyota signal/checksum decoding used here is implemented locally.
 """
 from __future__ import annotations
 
@@ -14,7 +13,6 @@ from bisect import bisect_right
 import collections
 import json
 import re
-import sys
 from pathlib import Path
 from typing import Any
 
@@ -75,6 +73,7 @@ OLD_REQUIRED_IDS = {
 }
 
 
+from tools.toyota_support.route_log import load_logreader
 from tools.toyota_support.toyota_route_opendbc_common import GearReadyCensus, be_raw, lateral_reference_family, rate_hz, sha256, stats, toyota_checksum
 
 
@@ -88,7 +87,7 @@ def expected_source() -> dict[str, object]:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--rlog", type=Path, required=True)
-    ap.add_argument("--openpilot-root", type=Path, required=True)
+    ap.add_argument("--openpilot-root", type=Path, required=True, help="openpilot checkout providing the Cereal schema")
     ap.add_argument("--output", type=Path, default=DEFAULT_OUT)
     ap.add_argument("--gear-audit", action="store_true",
                     help="print the deterministic gear/READY all-source census JSON (with input SHA) to stdout "
@@ -102,8 +101,7 @@ def main() -> int:
     if actual != src:
         raise SystemExit(f"rlog identity mismatch: expected {src}, got {actual}")
 
-    sys.path.insert(0, str(args.openpilot_root.resolve()))
-    from openpilot.tools.lib.logreader import LogReader  # type: ignore[import-not-found]
+    LogReader = load_logreader(args.openpilot_root)
 
     frames: dict[tuple[int, int, int], list[tuple[int, bytes]]] = collections.defaultdict(list)
     census = GearReadyCensus() if args.gear_audit else None

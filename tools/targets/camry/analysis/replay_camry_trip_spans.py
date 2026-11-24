@@ -10,10 +10,8 @@ from collections import defaultdict
 from itertools import pairwise
 from pathlib import Path
 
-from tools.targets.camry.analysis.extract_camry_20260930_vmc_corpus import (
-  load_logreader,
-  sha256_file,
-)
+from tools.targets.camry.analysis.extract_camry_20260930_vmc_corpus import sha256_file
+from tools.toyota_support.route_log import load_logreader
 
 
 def measure(manifest, spans, logs_root, reader, route_filter):

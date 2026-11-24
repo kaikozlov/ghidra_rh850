@@ -22,7 +22,8 @@ from tools.targets.camry.analysis.analyze_camry_2026_stationary_state import (
   _trial_frames,
   _wheels_at_zero,
 )
-from tools.targets.camry.analysis.extract_camry_20260930_vmc_corpus import load_logreader, sha256_file
+from tools.targets.camry.analysis.extract_camry_20260930_vmc_corpus import sha256_file
+from tools.toyota_support.route_log import load_logreader
 
 
 _WHEELS = Struct('>4H')

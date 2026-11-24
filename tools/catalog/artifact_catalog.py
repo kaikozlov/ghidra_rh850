@@ -8,7 +8,10 @@ from collections.abc import Iterable
 from functools import cache, lru_cache
 from pathlib import Path
 
+from tools.project import analysis_target
+
 REPO = Path(__file__).resolve().parents[2]
+
 
 def _git_files(*pathspecs: str) -> list[str]:
     proc = subprocess.run(
@@ -21,13 +24,32 @@ def _git_files(*pathspecs: str) -> list[str]:
     return sorted(p for p in proc.stdout.splitlines() if p)
 
 
+@cache
+def _corpus_invocations() -> dict[str, tuple[str, tuple[str, ...]]]:
+    """Use the registered work project and the generator used by Makefile."""
+    invocations = {}
+    for target, row in analysis_target.load()["targets"].items():
+        path = row["decompiler_corpus"]
+        project_args = ("--project-dir", str(REPO / row["work_dir"]))
+        if target == "sienna-8965B4512000":
+            invocations[path] = ("tools/project/generate_decompiler_corpus.py", project_args)
+        else:
+            invocations[path] = (
+                "tools/project/generate_target_decompiler_corpus.py",
+                ("--target", target, *project_args, "--output", str(REPO / path)),
+            )
+    return invocations
+
+
 @lru_cache(maxsize=1)
 def _tracked_artifacts() -> tuple[str, ...]:
     tracked = set(_git_files("data/generated"))
     tracked_files = set(_git_files())
+    tracked.update(_corpus_invocations().keys() & tracked_files)
     for tool in _source_files_cached():
         tracked.update(path for path in _declared_outputs(tool) if path in tracked_files)
     return tuple(sorted(tracked))
+
 
 def tracked_artifacts() -> list[str]:
     return list(_tracked_artifacts())
@@ -35,14 +57,7 @@ def tracked_artifacts() -> list[str]:
 
 @lru_cache(maxsize=1)
 def _source_files_cached() -> tuple[str, ...]:
-    return tuple([
-        p for p in _git_files("tools")
-        if Path(p).suffix in {".py", ".sh"} or "/" not in Path(p).name
-    ])
-
-
-def _source_files() -> list[str]:
-    return list(_source_files_cached())
+    return tuple(p for p in _git_files("tools") if p.endswith(".py"))
 
 
 def _mentions(path: str, candidates: Iterable[str]) -> list[str]:
@@ -77,6 +92,15 @@ def _path_expr(node: ast.AST) -> Path | None:
     return None
 
 
+def _artifact_path(node: ast.AST) -> str | None:
+    path = _path_expr(node)
+    if path is not None and not path.is_absolute() and ".." not in path.parts:
+        rel = path.as_posix()
+        if rel.startswith(("data/", "ghidra/ghidra_v850/data/")):
+            return rel
+    return None
+
+
 @cache
 def _declared_outputs(tool: str) -> tuple[str, ...]:
     """Recover output files and tracked members of explicit artifact directories."""
@@ -95,34 +119,31 @@ def _declared_outputs(tool: str) -> tuple[str, ...]:
             targets = list(node.targets); value = node.value
         elif isinstance(node, ast.AnnAssign):
             targets = [node.target]; value = node.value
-        if value is not None:
-            names = [t.id for t in targets if isinstance(t, ast.Name)]
-            if any("OUT" in name.upper() or "OUTPUT" in name.upper() for name in names):
-                resolved = _path_expr(value)
-                if resolved is not None:
-                    rel = resolved.as_posix().lstrip("./")
-                    if rel.startswith(("data/", "ghidra/ghidra_v850/data/")):
-                        if "ARTIFACT_OUTPUT_DIR" in names:
-                            out.extend(_git_files(rel))
-                        else:
-                            out.append(rel)
-    # Generic tools often declare their artifact only as argparse --out/--output
-    # defaults rather than module constants. Recover those defaults as local
-    # producer metadata too.
-    for node in ast.walk(tree):
-        if not isinstance(node, ast.Call) or not node.args:
+        if value is None:
             continue
-        first = node.args[0]
-        if not isinstance(first, ast.Constant) or first.value not in {"--out", "--output"}:
+        names = [t.id for t in targets if isinstance(t, ast.Name)]
+        if not any({"OUT", "OUTPUT"}.intersection(name.split("_")) for name in names):
+            continue
+        if (rel := _artifact_path(value)) is not None:
+            if "ARTIFACT_OUTPUT_DIR" in names:
+                out.extend(_git_files(f":(literal){rel}/"))
+            else:
+                out.append(rel)
+    # A CLI output default may be the only declaration, even with a short alias.
+    for node in ast.walk(tree):
+        if not (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "add_argument"
+            and any(
+                isinstance(arg, ast.Constant) and arg.value in ("--out", "--output")
+                for arg in node.args
+            )
+        ):
             continue
         default = next((kw.value for kw in node.keywords if kw.arg == "default"), None)
-        if default is None:
-            continue
-        resolved = _path_expr(default)
-        if resolved is not None:
-            rel = resolved.as_posix().lstrip("./")
-            if rel.startswith(("data/", "ghidra/ghidra_v850/data/")):
-                out.append(rel)
+        if default is not None and (rel := _artifact_path(default)) is not None:
+            out.append(rel)
     return tuple(dict.fromkeys(out))
 
 
@@ -130,43 +151,20 @@ def declared_outputs(tool: str) -> list[str]:
     return list(_declared_outputs(tool))
 
 
-def _naming_producer(path: str) -> str | None:
-    name = Path(path).name
-    if name.startswith("corolla_8965H1202000_") and name.endswith(".json"):
-        suffix = Path(name).stem.removeprefix("corolla_8965H1202000_")
-        candidate = f"tools/targets/corolla/builders/build_corolla_h_{suffix}.py"
-        if (REPO / candidate).is_file():
-            return candidate
-    if name.startswith("corolla_hf_") and name.endswith(".json"):
-        suffix = Path(name).stem.removeprefix("corolla_hf_")
-        candidate = f"tools/targets/corolla/builders/build_corolla_hf_{suffix}.py"
-        if (REPO / candidate).is_file():
-            return candidate
-    return None
+def producer_args(path: str, producer: str) -> tuple[str, ...]:
+    invocation = _corpus_invocations().get(path)
+    return invocation[1] if invocation and invocation[0] == producer else ()
 
 
 @cache
 def _producer_candidates(path: str) -> tuple[str, ...]:
-    """Return likely producers, preferring declared output ownership.
-
-    A source file that only mentions an artifact is a consumer. We
-    therefore first recover conventional OUT/OUTPUT constants, then the established
-    Corolla semantic-builder naming contract, and only then fall back to source
-    mentions for older tools that have not adopted declarative output metadata yet.
-    """
-    declared = [tool for tool in _source_files() if path in declared_outputs(tool)]
-    if declared:
-        return tuple(declared)
-    named = _naming_producer(path)
-    if named:
-        return (named,)
-    ignore = {"tools/catalog/artifact_catalog.py"}
-    mentioned = [p for p in _mentions(path, _source_files()) if p not in ignore]
-    ranked = [
-        p for p in mentioned
-        if Path(p).name.startswith(("build_", "generate_", "extract_", "analyze_", "inspect_", "compare_"))
-    ]
-    return tuple(ranked or mentioned)
+    """Return only producers with a declaration for this exact output."""
+    invocation = _corpus_invocations().get(path)
+    return tuple(
+        tool for tool in _source_files_cached()
+        if (invocation is not None and invocation[0] == tool and (REPO / tool).is_file())
+        or path in _declared_outputs(tool)
+    )
 
 
 def producer_candidates(path: str) -> list[str]:
@@ -176,9 +174,10 @@ def producer_candidates(path: str) -> list[str]:
 def consumers(path: str) -> list[str]:
     candidates = _git_files("tools", "tests", "ghidra/scripts",
                             "ghidra/ghidra_v850/src", "Makefile", "verification.toml")
+    producers = set(_producer_candidates(path))
     return [
         p for p in _mentions(path, candidates)
-        if p not in {"tools/catalog/artifact_catalog.py"}
+        if p != "tools/catalog/artifact_catalog.py" and p not in producers
     ]
 
 

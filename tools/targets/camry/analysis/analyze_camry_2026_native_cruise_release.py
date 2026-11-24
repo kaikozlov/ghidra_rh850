@@ -11,7 +11,6 @@ import argparse
 import gzip
 import io
 import json
-import sys
 from collections import Counter, deque
 from pathlib import Path
 
@@ -91,8 +90,9 @@ def classify(center: int, context: list[list]) -> dict:
 
 def discover(log_root: Path, openpilot_root: Path, output: Path) -> None:
     """Scan all sources in the already-pinned ten-route scope, then retain windows."""
-    sys.path.insert(0, str(openpilot_root))
-    from openpilot.tools.lib.logreader import LogReader
+    from tools.toyota_support.route_log import load_logreader
+
+    reader = load_logreader(openpilot_root)
 
     with gzip.open(SCOPE, 'rt') as stream:
         scope = json.loads(next(stream))
@@ -107,7 +107,7 @@ def discover(log_root: Path, openpilot_root: Path, output: Path) -> None:
             path = log_root / info['path']
             if sha(path) != info['sha256']:
                 raise ValueError(f'changed source: {info["path"]}')
-            for event in LogReader(str(path)):
+            for event in reader(path):
                 nanos, kind = int(event.logMonoTime), event.which()
                 if kind == 'carControl':
                     buffer.append([index, nanos, kind, bool(event.carControl.cruiseControl.cancel)])
@@ -153,7 +153,7 @@ def discover(log_root: Path, openpilot_root: Path, output: Path) -> None:
             path = log_root / info['path']
             if sha(path) != info['sha256']:
                 raise ValueError(f'changed source: {info["path"]}')
-            for event in LogReader(str(path)):
+            for event in reader(path):
                 nanos, kind = int(event.logMonoTime), event.which()
                 if abs(nanos - release['nanos']) > WINDOW_NS:
                     continue
@@ -255,9 +255,11 @@ def main() -> None:
     ap.add_argument('--fixture', type=Path, default=FIXTURE)
     ap.add_argument('--out', type=Path, default=OUTPUT)
     ap.add_argument('--log-root', type=Path, default=ROOT.parents[1] / 'logs/camry-2026')
-    ap.add_argument('--openpilot-root', type=Path, default=ROOT.parent / 'kai-openpilot')
+    ap.add_argument('--openpilot-root', type=Path, help='openpilot checkout providing the Cereal schema (required for --extract)')
     args = ap.parse_args()
     if args.extract:
+        if args.openpilot_root is None:
+            ap.error('--extract requires --openpilot-root')
         discover(args.log_root, args.openpilot_root, args.fixture)
     report = build(args.fixture)
     args.out.parent.mkdir(parents=True, exist_ok=True)

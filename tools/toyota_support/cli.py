@@ -104,6 +104,7 @@ def cmd_capabilities(_args: argparse.Namespace) -> int:
         "e2e-p05": ["crc", "check", "protect", "recover-data-id"],
         "ram": ["list", "build", "onboard", "kit"],
         "decomp": ["status", "source", "corpus", "oracle", "lift"],
+        "route": ["inspect"],
         "targets": {name: len(target_capabilities(name)) for name in TARGETS},
     }
     print(json.dumps(payload, indent=2, sort_keys=True))
@@ -147,6 +148,12 @@ def cmd_eps_isolated_probe(args: argparse.Namespace) -> int:
 
 def cmd_variant(args: argparse.Namespace) -> int:
     return _run_path(TOOLS / "variants/extract_variant_evidence.py", args.args)
+
+
+def _cmd_route_inspect(args: argparse.Namespace) -> int:
+    from tools.toyota_support.route_inspect import inspect_command
+
+    return inspect_command(args)
 
 
 def cmd_ram_list(args: argparse.Namespace) -> int:
@@ -287,6 +294,19 @@ def build_parser() -> argparse.ArgumentParser:
     q = sub.add_parser("eps-isolated-probe", help="mode/liveness probe of an isolated EPS-side CAN segment")
     q.add_argument("args", nargs=argparse.REMAINDER)
     q.set_defaults(func=cmd_eps_isolated_probe)
+
+    q = sub.add_parser("route", help="inspect local openpilot route logs")
+    qs = q.add_subparsers(dest="route_command", required=True)
+    i = qs.add_parser(
+        "inspect",
+        help="compare observed event types with the Cereal schema",
+        description="Print JSON with segment event counts and Cereal schema definitions.",
+    )
+    i.add_argument("rlog", type=Path, help="local segment rlog file")
+    i.add_argument("--openpilot-root", type=Path, required=True, help="openpilot checkout providing the Cereal schema")
+    i.add_argument("--event", help="Cereal Event union member to inspect")
+    i.add_argument("--field", help="schema field path inside --event (dot-separated)")
+    i.set_defaults(func=_cmd_route_inspect)
 
     q = sub.add_parser("variant", help="cross-variant evidence extraction")
     q.add_argument("args", nargs=argparse.REMAINDER)

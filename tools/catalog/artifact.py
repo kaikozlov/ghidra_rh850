@@ -4,11 +4,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import shlex
 import subprocess
 import sys
 from pathlib import Path
 
-from tools.catalog.artifact_catalog import REPO, consumers, producer_candidates, rows, tracked_artifacts
+from tools.catalog.artifact_catalog import (
+    REPO, consumers, producer_args, producer_candidates, rows, tracked_artifacts,
+)
 
 
 def resolve_artifact(query: str) -> str:
@@ -30,7 +33,7 @@ def print_rows(items: list[dict], as_json: bool) -> None:
         print(json.dumps(items, indent=2, sort_keys=True))
         return
     for row in items:
-        producers = ",".join(row["producers"]) or "—"
+        producers = ",".join(row["producers"]) or "no producer"
         print(f"{row['artifact']}\tproducer={producers}")
 
 
@@ -55,7 +58,7 @@ def cmd_show(args: argparse.Namespace) -> int:
     else:
         print(row["artifact"])
         print(f"size\t{row['size']}")
-        print("producers\t" + (", ".join(row["producers"]) or "—"))
+        print("producers\t" + (", ".join(row["producers"]) or "no producer"))
         print("consumers")
         for value in row["consumers"]:
             print(f"  {value}")
@@ -64,22 +67,19 @@ def cmd_show(args: argparse.Namespace) -> int:
 
 def choose_producer(path: str, override: str | None) -> str:
     candidates = producer_candidates(path)
+    if not candidates:
+        raise SystemExit(f"no producer declared for {path}")
     if override:
         candidate = override if override.startswith("tools/") else f"tools/{override}"
         if candidate not in candidates:
-            raise SystemExit(f"{candidate} does not name {path}; candidates: {candidates}")
+            raise SystemExit(f"{candidate} does not own {path}; declared producers: {', '.join(candidates)}")
         return candidate
-    ranked = [
-        p for p in candidates
-        if Path(p).name.startswith(("build_", "generate_", "extract_", "analyze_", "inspect_", "compare_"))
-    ]
-    pool = ranked or candidates
-    if len(pool) != 1:
+    if len(candidates) > 1:
         raise SystemExit(
-            "producer is ambiguous; pass --producer. candidates:\n" +
-            "\n".join(f"  {p}" for p in pool)
+            f"producer is ambiguous for {path}; pass --producer. Declared producers:\n" +
+            "\n".join(f"  {p}" for p in candidates)
         )
-    return pool[0]
+    return candidates[0]
 
 
 def producer_command(producer: str, passthrough: list[str]) -> list[str]:
@@ -97,11 +97,12 @@ def producer_command(producer: str, passthrough: list[str]) -> list[str]:
 def cmd_regen(args: argparse.Namespace) -> int:
     path = resolve_artifact(args.artifact)
     producer = choose_producer(path, args.producer)
-    passthrough = list(args.generator_args)
-    if passthrough[:1] == ["--"]:
-        passthrough = passthrough[1:]
-    command = producer_command(producer, passthrough)
-    print("+ " + " ".join(command), file=sys.stderr)
+    command = producer_command(producer, [*producer_args(path, producer), *args.generator_args])
+    rendered = shlex.join(command)
+    if args.dry_run:
+        print(rendered)
+        return 0
+    print("+ " + rendered, file=sys.stderr)
     return subprocess.run(command, cwd=REPO, check=False).returncode
 
 
@@ -116,16 +117,25 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("artifact")
     p.add_argument("--json", action="store_true")
     p.set_defaults(func=cmd_show)
-    p = sub.add_parser("regen", help="run the derived producer for one artifact")
+    p = sub.add_parser(
+        "regen", help="run the declared producer for one artifact",
+        epilog="Pass generator arguments after --.",
+    )
     p.add_argument("artifact")
     p.add_argument("--producer", help="select a producer when multiple candidates exist")
-    p.add_argument("generator_args", nargs=argparse.REMAINDER, help="arguments passed to producer after --")
+    p.add_argument("--dry-run", action="store_true", help="print the exact producer command without running it")
     p.set_defaults(func=cmd_regen)
     return ap
 
 
 def main() -> int:
-    args = build_parser().parse_args()
+    tokens = sys.argv[1:]
+    passthrough = []
+    if tokens[:1] == ["regen"] and "--" in tokens:
+        separator = tokens.index("--")
+        tokens, passthrough = tokens[:separator], tokens[separator + 1:]
+    args = build_parser().parse_args(tokens)
+    args.generator_args = passthrough
     return int(args.func(args))
 
 

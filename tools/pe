@@ -79,16 +79,9 @@ if [[ "${IMPORT_ARGS[0]:-}" == "import" ]]; then
   BINARY="$1"
   shift
   PROGRAM_NAME="$(basename "$BINARY")"
-  GHIDRA_HOME="$("$ROOT/tools/project/resolve_ghidra_home.sh")"
-
-  if ((IMPORT_QUIET == 0)); then
-    echo "Importing $PROGRAM_NAME..." >&2
-  fi
-  GHIDRA_HOME="$GHIDRA_HOME" GHIDRA_NO_BOOTSTRAP=1 \
-    GHIDRA_ANALYSIS_TIMEOUT="${GHIDRA_ANALYSIS_TIMEOUT:-300}" \
-    "$ROOT/tools/project/run_headless" \
-      --project-dir "$PROJECT_DIR" --project "$PROJECT_NAME" \
-      --label pe-import --quiet -- -import "$BINARY" -overwrite "$@"
+  GHIDRA_ANALYSIS_TIMEOUT="${GHIDRA_ANALYSIS_TIMEOUT:-300}" \
+    uv run --project "$ROOT" --locked python -m tools.project.pe_project_lock \
+      "$PROJECT_DIR" "$PROJECT_NAME" "$IMPORT_QUIET" "$BINARY" "$PROGRAM_NAME" "$@"
 
   if [[ "$IMPORT_JSON" == "1" ]]; then
     python3 - "$PROGRAM_NAME" "$IMPORT_PRETTY" <<'PY'
@@ -121,4 +114,6 @@ if [[ "${GHIDRA_AGENT:-}" == "1" ]]; then
   CLI_ARGS+=(--json)
 fi
 
+# The stock CLI's environment override would take precedence over --projects-dir.
+unset GHIDRA_PROJECT_DIR
 exec "$GHIDRA_CLI" "${CLI_ARGS[@]}" "$@"
