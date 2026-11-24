@@ -1953,6 +1953,14 @@ in the `0xAB` case with a primed state no request produces (§13.15). 423 of
 7,336 functions executed a frame prologue, so this covers the diagnostic and
 CanTp paths.
 
+The reach filter leaves **372 stores** (366 distinct store PCs) whose base
+register it cannot resolve: 131 merged pointers, 92 pointers loaded from
+memory, 51 arguments, 74 integer conversions, 19 undefined cells and 2 call
+returns. Their instruction-level review is open. Run with `--watch-stores` over
+the same 21,661 cases, the oracle executes **34 of the 366** and none writes a
+control object in a stock-state case; the 32 synthetic hits above are all from
+`0x8E034` in `select_first_successful_payload_or_error_8dff6`.
+
 **NvM and COM inserts.** The 59 block images occupy `0xFEBEF400..0xFEBF0307`,
 none overlapping a control object; enabled images never overlap each other and
 every configured length equals its validator's. `nvm_set_record` `0x66D6E`
