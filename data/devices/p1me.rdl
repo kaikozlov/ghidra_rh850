@@ -3240,6 +3240,12 @@ addrmap p1me {
     GRMCFG->source_ref="R01UH0585EJ0120 section17.4.2.1 Table17.94 p920";
     rscfd_init_word_t C1NCFG @ 0xFFD20010;
     C1NCFG->source_ref="R01UH0585EJ0120 section17.4.3.1 Table17.95 pp921-922";
+    rscfd_init_word_t C0NCFG @ 0xFFD20000;
+    C0NCFG->source_ref="R01UH0585EJ0120 section17.4.3.1 Table17.95 pp921-922";
+    rscfd_init_word_t C2NCFG @ 0xFFD20020;
+    C2NCFG->source_ref="R01UH0585EJ0120 section17.4.3.1 Table17.95 pp921-922";
+    rscfd_init_word_t GERFL @ 0xFFD20090;
+    GERFL->source_ref="R01UH0585EJ0120 section17.4.4.4 Table17.109 pp956-959";
     rscfd_init_word_t GAFLECTR @ 0xFFD20098;
     GAFLECTR->source_ref="R01UH0585EJ0120 section17.4.5.1 Table17.113 p963";
     rscfd_init_word_t GAFLCFG0 @ 0xFFD2009C;
@@ -3252,6 +3258,32 @@ addrmap p1me {
     TMIEC0->source_ref="R01UH0585EJ0120 section17.4.11.7 Table17.153 pp1029-1030";
     rscfd_init_word_t TMIEC1 @ 0xFFD20394;
     TMIEC1->source_ref="R01UH0585EJ0120 section17.4.11.7 Table17.153 pp1029-1030";
+    rscfd_init_word_t TXQCC0 @ 0xFFD203A0;
+    TXQCC0->source_ref="R01UH0585EJ0120 section17.4.13.1 Table17.159";
+    rscfd_init_word_t TXQCC1 @ 0xFFD203A4;
+    TXQCC1->source_ref="R01UH0585EJ0120 section17.4.13.1 Table17.159";
+    rscfd_init_word_t TXQCC2 @ 0xFFD203A8;
+    TXQCC2->source_ref="R01UH0585EJ0120 section17.4.13.1 Table17.159";
+    rscfd_init_word_t THLCC0 @ 0xFFD20400;
+    THLCC0->source_ref="R01UH0585EJ0120 section17.4.14.1 Table17.162";
+    rscfd_init_word_t THLCC1 @ 0xFFD20404;
+    THLCC1->source_ref="R01UH0585EJ0120 section17.4.14.1 Table17.162";
+    rscfd_init_word_t THLCC2 @ 0xFFD20408;
+    THLCC2->source_ref="R01UH0585EJ0120 section17.4.14.1 Table17.162";
+    rscfd_init_word_t GTSTCFG @ 0xFFD20468;
+    GTSTCFG->source_ref="R01UH0585EJ0120 section17.4.15.1 Table17.165";
+    rscfd_init_word_t GTSTCTR @ 0xFFD2046C;
+    GTSTCTR->source_ref="R01UH0585EJ0120 section17.4.15.2 Table17.166";
+    rscfd_init_word_t RESERVED_0478 @ 0xFFD20478;
+    RESERVED_0478->desc="RSCFD reserved word at +0478h written as zero by exact-image initializer";
+    RESERVED_0478->source_ref="R01UH0585EJ0120 Table17.89 (reserved offset); firmware writes at 0x8436E and 0x8458E";
+    rscfd_init_word_t GLOCKK @ 0xFFD2047C;
+    GLOCKK->source_ref="R01UH0585EJ0120 section17.4.15.3 Table17.167";
+    external mem {
+        memwidth=32; mementries=64; sw=rw; evidence="manual";
+        source_ref="R01UH0585EJ0120 section17.4.15.4 Table17.168";
+        executable=false; reset_policy="RSCFD controller RAM initialization";
+    } RSCFD_RAM_TEST_PAGE @ 0xFFD26400;
     rscfd_init_word_t CFCC0 @ 0xFFD20118;
     CFCC0->source_ref="R01UH0585EJ0120 section17.4.8.1 Table17.132 pp989-991";
     rscfd_init_word_t CFCC1 @ 0xFFD2011C;
@@ -3292,6 +3324,10 @@ addrmap p1me {
         behavior="rscfd"; control_register="RFCC1"; pointer_register="RFPCTR1"; interrupt_register="EIC190"; fifo_index=1; fifo_channel=1;
         field { sw=rw; reset=1; } value[31:0];
     } RFSTS1 @ 0xFFD200DC;
+    rscfd_init_word_t RFSTS0 @ 0xFFD200D8;
+    RFSTS0->source_ref="R01UH0585EJ0120 section17.4.7.2 Table17.126 pp981-983";
+    rscfd_init_word_t RFSTS2 @ 0xFFD200E0;
+    RFSTS2->source_ref="R01UH0585EJ0120 section17.4.7.2 Table17.126 pp981-983";
 
     reg {
         regwidth=32; accesswidth=32; desc="RSCFD0CFDRFPCTR1: receive FIFO 1 pointer control; writing RFPC=0xFF pops the oldest unread message";
@@ -3801,6 +3837,12 @@ addrmap p1me {
         evidence="manual"; source_ref="R01UH0585EJ0120 section 17.4.8.2, Table 17.133"; behavior="rscfd"; access_widths="1,2,4";
         field { sw=rw; reset=1; } value[31:0];
     } CFSTS_CH1_4 @ 0xFFD20188;
+    rscfd_init_word_t CFSTS6 @ 0xFFD20190;
+    CFSTS6->source_ref="R01UH0585EJ0120 section17.4.8.2 Table17.133 pp992-995";
+    rscfd_init_word_t CFSTS7 @ 0xFFD20194;
+    CFSTS7->source_ref="R01UH0585EJ0120 section17.4.8.2 Table17.133 pp992-995";
+    rscfd_init_word_t CFSTS8 @ 0xFFD20198;
+    CFSTS8->source_ref="R01UH0585EJ0120 section17.4.8.2 Table17.133 pp992-995";
 
 
     reg {
@@ -3841,22 +3883,28 @@ addrmap p1me {
     } CFDTMTARSTS1 @ 0xFFD20364;
 
     reg {
-        regwidth=16; accesswidth=16; desc="RSCFD channel0 Tx message-buffer result summary (bit n reflects CFDTMSTSn.TMTRF)";
-        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD transmit-buffer status and interrupt registers"; behavior="rscfd";
-        field { sw=r; reset=0; } value[15:0];
-    } CFDTMTRF_CH0 @ 0xFFD20370;
+        regwidth=32; accesswidth=32; desc="RSCFD transmit-buffer completion status for buffers 0..31";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table 17.89 and section 17.4.12.3"; behavior="rscfd"; access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDTMTCSTS0 @ 0xFFD20370;
 
     reg {
-        regwidth=16; accesswidth=16; desc="RSCFD channel1 Tx message-buffer result summary (bit n reflects local CFDTMSTSn.TMTRF)";
-        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD transmit-buffer status and interrupt registers"; behavior="rscfd";
-        field { sw=r; reset=0; } value[15:0];
-    } CFDTMTRF_CH1 @ 0xFFD20372;
+        regwidth=32; accesswidth=32; desc="RSCFD transmit-buffer completion status for buffers 32..47";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table 17.89 and section 17.4.12.3"; behavior="rscfd"; access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDTMTCSTS1 @ 0xFFD20374;
 
     reg {
-        regwidth=16; accesswidth=16; desc="RSCFD channel2 Tx message-buffer result summary (bit n reflects local CFDTMSTSn.TMTRF)";
-        evidence="manual"; source_ref="R01UH0585EJ0120 section 17, RSCFD transmit-buffer status and interrupt registers"; behavior="rscfd";
-        field { sw=r; reset=0; } value[15:0];
-    } CFDTMTRF_CH2 @ 0xFFD20374;
+        regwidth=32; accesswidth=32; desc="RSCFD transmit-buffer abort status for buffers 0..31";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table 17.89 and section 17.4.12.4"; behavior="rscfd"; access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDTMTASTS0 @ 0xFFD20380;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD transmit-buffer abort status for buffers 32..47";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table 17.89 and section 17.4.12.4"; behavior="rscfd"; access_widths="1,2,4";
+        field { sw=r; reset=0; } value[31:0];
+    } CFDTMTASTS1 @ 0xFFD20384;
 
     reg {
         regwidth=32; accesswidth=32; desc="RSCFD Tx message-buffer control base (CFDTMCn.TMTR at +n)";
@@ -4303,11 +4351,27 @@ addrmap p1me {
         evidence="manual"; source_ref="R01UH0585EJ0120 Table 17.106, section 17.4.4.1 (pages 948-950); SFR list FFD20084"; behavior="rscfd";
         field { sw=rw; reset=0; } value[31:0];
     } GCFG @ 0xFFD20084;
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDC0CTR: CAN0 channel control; CHMDC[1:0] and CSLPR bit2; reset 0x5";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table17.96 section17.4.3.2 pp923-925"; behavior="rscfd";
+        trigger="rscfd-channel-control"; status_register="C0STS";
+        field { sw=rw; reset=5; } value[31:0];
+    } C0CTR @ 0xFFD20004;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDC0STS: CAN0 channel status; reset 0x5";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table17.97 section17.4.3.3 pp928-929"; behavior="rscfd"; access_widths="1,2,4";
+        field { sw=r; reset=5; } value[31:0];
+    } C0STS @ 0xFFD20008;
+
+    rscfd_init_word_t C0ERFL @ 0xFFD2000C;
+    C0ERFL->source_ref="R01UH0585EJ0120 Table17.98 section17.4.3.4 pp930-934";
 
     reg {
         regwidth=32; accesswidth=32; desc="RSCFD0CFDGCTR: global control; GSLPR bit 2 global stop, GMDC[1:0] bits 1-0 (00 global operating, 01 global reset, 10 global test); reset 0x5 (global reset with stop)";
         evidence="manual"; source_ref="R01UH0585EJ0120 Table 17.107, section 17.4.4.2 (page 952); SFR list FFD20088"; behavior="rscfd";
         field { sw=rw; reset=5; } value[31:0];
+        trigger="rscfd-global-control"; status_register="GSTS";
     } GCTR @ 0xFFD20088;
 
     reg {
@@ -4321,6 +4385,7 @@ addrmap p1me {
         regwidth=32; accesswidth=32; desc="RSCFD0CFDC1CTR (CmCTR = base+0x04+0x10*m, m=1): CAN1 channel control; CHMDC[1:0] bits 1-0 (00 channel communication, 01 channel reset, 10 channel halt), CSLPR bit 2 channel stop; reset 0x5 (channel reset and stop)";
         evidence="manual"; source_ref="R01UH0585EJ0120 Table 17.96, section 17.4.3.2 (pages 923-925); SFR list FFD20014"; behavior="rscfd";
         field { sw=rw; reset=5; } value[31:0];
+        trigger="rscfd-channel-control"; status_register="C1STS";
     } C1CTR @ 0xFFD20014;
 
     reg {
@@ -4336,6 +4401,22 @@ addrmap p1me {
         access_widths="1,2,4";
         field { sw=rw; reset=0; } value[31:0];
     } C1ERFL @ 0xFFD2001C;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDC2CTR: CAN2 channel control; CHMDC[1:0] and CSLPR bit2; reset 0x5";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table17.96 section17.4.3.2 pp923-925"; behavior="rscfd";
+        trigger="rscfd-channel-control"; status_register="C2STS";
+        field { sw=rw; reset=5; } value[31:0];
+    } C2CTR @ 0xFFD20024;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="RSCFD0CFDC2STS: CAN2 channel status; reset 0x5";
+        evidence="manual"; source_ref="R01UH0585EJ0120 Table17.97 section17.4.3.3 pp928-929"; behavior="rscfd"; access_widths="1,2,4";
+        field { sw=r; reset=5; } value[31:0];
+    } C2STS @ 0xFFD20028;
+
+    rscfd_init_word_t C2ERFL @ 0xFFD2002C;
+    C2ERFL->source_ref="R01UH0585EJ0120 Table17.98 section17.4.3.4 pp930-934";
 
     reg {
         regwidth=32; accesswidth=32; desc="RSCFD Tx message-buffer RAM base (0x20-byte entries)";

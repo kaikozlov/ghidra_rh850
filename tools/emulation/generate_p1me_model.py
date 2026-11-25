@@ -222,7 +222,6 @@ def _model() -> tuple[dict[str, Any], list[dict[str, Any]], dict[str, Any]]:
             "registers": [row for row in registers if row["evidence"] != "manual"],
         },
         "execution": {
-            "engine": "Ghidra PcodeEmulator",
             "profile": "functional",
             "timing_claims": False,
             "unknown_read_policy": "fault",

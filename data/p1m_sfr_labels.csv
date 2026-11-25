@@ -786,13 +786,22 @@ address,name,size,access,comment
 0xFFCDA030,BSEQ0ST,4,r,"BIST sequencer result; 2 means normally completed, not a diagnostic reset-cause flag"
 0xFFCDA034,BSEQ0STB,4,r,Inverted low two bits of BIST sequencer result
 0xFFCDA038,BISTST,4,r,"Field BIST failure bits: LBIST1 bit0, LBIST2 bit1, MBIST bit2; skipped=7"
+0xFFD20000,C0NCFG,4,rw,RS-CANFD software configuration storage; no autonomous completion or bus traffic
+0xFFD20004,C0CTR,4,rw,RSCFD0CFDC0CTR: CAN0 channel control; CHMDC[1:0] and CSLPR bit2; reset 0x5
+0xFFD20008,C0STS,4,r,RSCFD0CFDC0STS: CAN0 channel status; reset 0x5
+0xFFD2000C,C0ERFL,4,rw,RS-CANFD software configuration storage; no autonomous completion or bus traffic
 0xFFD20010,C1NCFG,4,rw,RS-CANFD software configuration storage; no autonomous completion or bus traffic
 0xFFD20014,C1CTR,4,rw,"RSCFD0CFDC1CTR (CmCTR = base+0x04+0x10*m, m=1): CAN1 channel control; CHMDC[1:0] bits 1-0 (00 channel communication, 01 channel reset, 10 channel halt), CSLPR bit 2 channel stop; reset 0x5 (channel reset and stop)"
 0xFFD20018,C1STS,4,rw,"RSCFD0CFDC1STS (CmSTS = base+0x08+0x10*m, m=1): CAN1 channel status; TEC[31:24] and REC[23:16] error counters, ESIF bit 8, COMSTS bit 7, RECSTS bit 6, TRMSTS bit 5, BOSTS bit 4, EPSTS bit 3, CSLPSTS bit 2, CHLTSTS bit 1, CRSTSTS bit 0; reset 0x5 (channel stop + channel reset state); native diagnostic receive gate 0x83EF2 polls (C1STS & 7) == 0 before entering the CFIFO receive path"
 0xFFD2001C,C1ERFL,4,rw,"RSCFD0CFDC1ERFL (CmERFL = base+0x0C+0x10*m, m=1): CAN1 channel error flags; flag bits are write-zero-clear and reset clear"
+0xFFD20020,C2NCFG,4,rw,RS-CANFD software configuration storage; no autonomous completion or bus traffic
+0xFFD20024,C2CTR,4,rw,RSCFD0CFDC2CTR: CAN2 channel control; CHMDC[1:0] and CSLPR bit2; reset 0x5
+0xFFD20028,C2STS,4,r,RSCFD0CFDC2STS: CAN2 channel status; reset 0x5
+0xFFD2002C,C2ERFL,4,rw,RS-CANFD software configuration storage; no autonomous completion or bus traffic
 0xFFD20084,GCFG,4,rw,"RSCFD0CFDGCFG: global configuration; CMPOC bit 5 payload-overflow mode (0 = frame whose payload exceeds storage size is not stored; 1 = stored with excess payload discarded), DRE bit 2 DLC replacement, ITRCP[31:16] interval-timer prescaler, TSBTCS[15:13]/TSSS bit 12/TSP[11:8] timestamp clock; reset 0x0"
 0xFFD20088,GCTR,4,rw,"RSCFD0CFDGCTR: global control; GSLPR bit 2 global stop, GMDC[1:0] bits 1-0 (00 global operating, 01 global reset, 10 global test); reset 0x5 (global reset with stop)"
 0xFFD2008C,GSTS,4,r,"RSCFD0CFDGSTS: global status; GRAMINIT bit 3, GSLPSTS bit 2, GHLTSTS bit 1, GRSTSTS bit 0; reset 0xD"
+0xFFD20090,GERFL,4,rw,RS-CANFD software configuration storage; no autonomous completion or bus traffic
 0xFFD20098,GAFLECTR,4,rw,RS-CANFD software configuration storage; no autonomous completion or bus traffic
 0xFFD2009C,GAFLCFG0,4,rw,RS-CANFD software configuration storage; no autonomous completion or bus traffic
 0xFFD200A4,RMNB,4,rw,RS-CANFD software configuration storage; no autonomous completion or bus traffic
@@ -804,7 +813,9 @@ address,name,size,access,comment
 0xFFD200CC,RFCC5,4,rw,RS-CANFD software configuration storage; no autonomous completion or bus traffic
 0xFFD200D0,RFCC6,4,rw,RS-CANFD software configuration storage; no autonomous completion or bus traffic
 0xFFD200D4,RFCC7,4,rw,RS-CANFD software configuration storage; no autonomous completion or bus traffic
+0xFFD200D8,RFSTS0,4,rw,RS-CANFD software configuration storage; no autonomous completion or bus traffic
 0xFFD200DC,RFSTS1,4,rw,"RSCFD0CFDRFSTS1: receive FIFO 1 status; RFMC[15:8] count, RFIF bit 3, RFMLT bit 2, RFFLL bit 1, RFEMP bit 0"
+0xFFD200E0,RFSTS2,4,rw,RS-CANFD software configuration storage; no autonomous completion or bus traffic
 0xFFD200FC,RFPCTR1,4,w,RSCFD0CFDRFPCTR1: receive FIFO 1 pointer control; writing RFPC=0xFF pops the oldest unread message
 0xFFD20118,CFCC0,4,rw,RS-CANFD software configuration storage; no autonomous completion or bus traffic
 0xFFD2011C,CFCC1,4,rw,RS-CANFD software configuration storage; no autonomous completion or bus traffic
@@ -819,6 +830,9 @@ address,name,size,access,comment
 0xFFD20184,CFSTS_CH1,4,rw,"RSCFD0CFDCFSTS3 (CFSTSk = base+0x178+4k, k=3): transmit/receive FIFO 3 status; CAN channel m=k/3=1; CFMC[15:8] message count, CFTXIF bit 4, CFRXIF bit 3, CFMLT bit 2, CFFLL bit 1, CFEMP bit 0; flags clear on write 0 to the flag with 1 elsewhere; reset CFEMP=1"
 0xFFD20188,CFSTS_CH1_4,4,rw,RSCFD common-FIFO 4 status
 0xFFD2018C,CFSTS5,4,rw,"RSCFD0CFDCFSTS5 (CFSTSk = base+0x178+4k, k=5): transmit/receive FIFO 5 status; CAN channel m=k/3=1; CFMC[15:8] message count, CFTXIF bit 4, CFRXIF bit 3, CFMLT bit 2, CFFLL bit 1, CFEMP bit 0; flags clear on write 0 to the flag with 1 elsewhere; reset CFEMP=1"
+0xFFD20190,CFSTS6,4,rw,RS-CANFD software configuration storage; no autonomous completion or bus traffic
+0xFFD20194,CFSTS7,4,rw,RS-CANFD software configuration storage; no autonomous completion or bus traffic
+0xFFD20198,CFSTS8,4,rw,RS-CANFD software configuration storage; no autonomous completion or bus traffic
 0xFFD201D8,CFPCTR,4,rw,"RSCFD common-FIFO pointer control base (CFPCTRk = base+0x1D8+4k, k=0..8; write 0xFF to CFPC[7:0] advances)"
 0xFFD201E4,CFPCTR_CH1,4,w,"RSCFD0CFDCFPCTR3 (CFPCTRk = base+0x1D8+4k, k=3): CFIFO 3 pointer control; CFPC[7:0] write-only; receive mode: write 0xFF moves the read pointer to the next unread message and decrements CFMC (requires CFE=1 and CFEMP=0)"
 0xFFD201EC,CFPCTR5,4,w,"RSCFD0CFDCFPCTR5 (CFPCTRk = base+0x1D8+4k, k=5): CFIFO 5 pointer control; CFPC[7:0] write-only; receive mode: write 0xFF moves the read pointer to the next unread message and decrements CFMC (requires CFE=1 and CFEMP=0)"
@@ -843,12 +857,23 @@ address,name,size,access,comment
 0xFFD20354,CFDTMTRSTS1,4,r,RSCFD transmit-request status for buffers 32..47
 0xFFD20360,CFDTMTARSTS0,4,r,RSCFD transmit-abort-request status for buffers 0..31
 0xFFD20364,CFDTMTARSTS1,4,r,RSCFD transmit-abort-request status for buffers 32..47
-0xFFD20370,CFDTMTRF_CH0,2,r,RSCFD channel0 Tx message-buffer result summary (bit n reflects CFDTMSTSn.TMTRF)
-0xFFD20372,CFDTMTRF_CH1,2,r,RSCFD channel1 Tx message-buffer result summary (bit n reflects local CFDTMSTSn.TMTRF)
-0xFFD20374,CFDTMTRF_CH2,2,r,RSCFD channel2 Tx message-buffer result summary (bit n reflects local CFDTMSTSn.TMTRF)
+0xFFD20370,CFDTMTCSTS0,4,r,RSCFD transmit-buffer completion status for buffers 0..31
+0xFFD20374,CFDTMTCSTS1,4,r,RSCFD transmit-buffer completion status for buffers 32..47
+0xFFD20380,CFDTMTASTS0,4,r,RSCFD transmit-buffer abort status for buffers 0..31
+0xFFD20384,CFDTMTASTS1,4,r,RSCFD transmit-buffer abort status for buffers 32..47
 0xFFD20390,TMIEC0,4,rw,RS-CANFD software configuration storage; no autonomous completion or bus traffic
 0xFFD20394,TMIEC1,4,rw,RS-CANFD software configuration storage; no autonomous completion or bus traffic
+0xFFD203A0,TXQCC0,4,rw,RS-CANFD software configuration storage; no autonomous completion or bus traffic
+0xFFD203A4,TXQCC1,4,rw,RS-CANFD software configuration storage; no autonomous completion or bus traffic
+0xFFD203A8,TXQCC2,4,rw,RS-CANFD software configuration storage; no autonomous completion or bus traffic
+0xFFD20400,THLCC0,4,rw,RS-CANFD software configuration storage; no autonomous completion or bus traffic
+0xFFD20404,THLCC1,4,rw,RS-CANFD software configuration storage; no autonomous completion or bus traffic
+0xFFD20408,THLCC2,4,rw,RS-CANFD software configuration storage; no autonomous completion or bus traffic
+0xFFD20468,GTSTCFG,4,rw,RS-CANFD software configuration storage; no autonomous completion or bus traffic
+0xFFD2046C,GTSTCTR,4,rw,RS-CANFD software configuration storage; no autonomous completion or bus traffic
 0xFFD20474,GFDCFG,4,rw,RS-CANFD software configuration storage; no autonomous completion or bus traffic
+0xFFD20478,RESERVED_0478,4,rw,RSCFD reserved word at +0478h written as zero by exact-image initializer
+0xFFD2047C,GLOCKK,4,rw,RS-CANFD software configuration storage; no autonomous completion or bus traffic
 0xFFD20490,CFDCDTCT,4,rw,RSCFD DMA transfer control
 0xFFD204FC,GRMCFG,4,rw,RS-CANFD software configuration storage; no autonomous completion or bus traffic
 0xFFD20500,C0DCFG,4,rw,RS-CANFD software configuration storage; no autonomous completion or bus traffic

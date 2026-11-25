@@ -312,6 +312,9 @@ tests = ["tests/firmware/verify_motor_calibration_handlers.py"]
 [suite.rh850_device_model]
 tests = ["tests/firmware/verify_p1m_device_profile.py"]
 
+[suite.rh850_machine_jit]
+tests = ["tests/tooling/verify_p1me_jit.py"]
+
 [suite.rh850_firmware]
 tests = ["tests/tooling/verify_rh850_machine.py"]
 # The verified boot milestone executes approximately 29 million instructions.

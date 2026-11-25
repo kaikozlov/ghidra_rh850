@@ -1,17 +1,22 @@
 #!/usr/bin/env python3
 """Resolve exact targets and execute strict P1M-E machine scenarios in Ghidra."""
 from __future__ import annotations
-import os
 
 import argparse
+import fcntl
 import hashlib
 import json
+import os
 import shlex
+import struct
 import subprocess
+import sys
 import tempfile
-from collections.abc import Sequence
+from collections.abc import Iterable, Iterator, Sequence
+from contextlib import contextmanager, nullcontext
+from itertools import chain
 from pathlib import Path
-from typing import Any
+from typing import Any, TextIO
 
 from tools import REPO_ROOT
 from tools.project.analysis_target import target as resolve_target
@@ -27,6 +32,56 @@ GPR_NAMES = (
     *(f"r{index}" for index in range(6, 30)),
     "ep", "lp",
 )
+
+@contextmanager
+def private_machine_slot(count: int) -> Iterator[None]:
+    """Hold one of the repository-wide private-machine process slots."""
+    if type(count) is not int or count < 1:
+        raise ValueError("private machine job count must be an integer of at least 1")
+    lock_dir = ROOT / "build" / "locks"
+    lock_dir.mkdir(parents=True, exist_ok=True)
+    first_busy: TextIO | None = None
+    acquired: TextIO | None = None
+    try:
+        for index in range(count):
+            handle = (lock_dir / f"p1me-private-machine-{index}.lock").open(
+                "a+", encoding="utf-8",
+            )
+            try:
+                fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError:
+                if first_busy is None:
+                    first_busy = handle
+                else:
+                    handle.close()
+            else:
+                acquired = handle
+                break
+        if acquired is None:
+            assert first_busy is not None
+            first_busy.seek(0)
+            owner = first_busy.read().strip() or "unknown"
+            print(
+                f"P1M-E private machine slot busy; waiting for PID {owner}",
+                file=sys.stderr,
+                flush=True,
+            )
+            fcntl.flock(first_busy.fileno(), fcntl.LOCK_EX)
+            acquired = first_busy
+        elif first_busy is not None:
+            first_busy.close()
+            first_busy = None
+        acquired.seek(0)
+        acquired.truncate()
+        acquired.write(f"{os.getpid()}\n")
+        acquired.flush()
+        yield
+    finally:
+        if acquired is not None:
+            fcntl.flock(acquired.fileno(), fcntl.LOCK_UN)
+            acquired.close()
+        elif first_busy is not None:
+            first_busy.close()
 
 
 class P1MEMachineError(RuntimeError):
@@ -179,7 +234,7 @@ def _validate_checks(rows: Any, context: str) -> list[dict[str, Any]]:
     return normalized
 
 
-def _validate_events(rows: Any, context: str) -> list[dict[str, Any]]:
+def _validate_events(rows: Any, context: str, *, expand: bool = True) -> list[dict[str, Any]]:
     events = _require_list(rows, context)
     normalized: list[dict[str, Any]] = []
     fields = {
@@ -189,11 +244,12 @@ def _validate_events(rows: Any, context: str) -> list[dict[str, Any]]:
         "adc-sample": {"unit", "channel", "value", "boundary"},
         "rsent-frame": {"unit", "pulse_samples", "after_spc_triggers", "delay_hsb_cycles"},
         "interrupt": {"channel", "firmware_control"},
-        "can-tx-complete": {"buffer", "firmware_control"},
+        "can-tx-complete": {"buffer", "firmware_control", "tolerate_no_pending"},
         "memory-write": {"address", "data_hex"},
         "register-input": {"register", "value"},
         "ecm-pin-drive": {"pin", "drive"},
         "peripheral-reset": {"reset_class"},
+        "reset-assert": {"reset_class"},
     }
     serial_boundaries: set[tuple[int, int]] = set()
     rsent_boundaries: set[tuple[int, int]] = set()
@@ -214,25 +270,31 @@ def _validate_events(rows: Any, context: str) -> list[dict[str, Any]]:
             "register-input": {"register", "value"},
             "ecm-pin-drive": {"pin", "drive"},
             "peripheral-reset": {"reset_class"},
+            "reset-assert": {"reset_class"},
         }[kind]
         relative_serial = kind == "csih-word" and "after_transmit_words" in row
         relative_spc = kind == "rsent-frame" and "after_spc_triggers" in row
+        relative_reset = "after_reset_instructions" in row
         if relative_serial:
             boundary = {"after_transmit_words", "delay_instructions"}
         elif relative_spc:
             boundary = {"after_spc_triggers", "delay_hsb_cycles"}
+        elif relative_reset:
+            boundary = {"after_reset_instructions"}
         else:
             boundary = {"after_instructions"}
         _require_keys(
             row,
-            allowed={"kind", "after_instructions", "evidence"} | fields[kind]
-            | ({"repeat", "stride_words"} if relative_serial else set()),
+            allowed={"kind", "after_instructions", "after_reset_instructions", "evidence"}
+            | fields[kind] | ({"repeat", "stride_words"} if relative_serial else set()),
             required={"kind", "evidence"} | boundary | required,
             context=item_context,
         )
         if relative_serial or relative_spc:
-            if "after_instructions" in row:
-                raise P1MEMachineError(f"{item_context}: choose an absolute or controller-relative boundary, not both")
+            if "after_instructions" in row or relative_reset:
+                raise P1MEMachineError(
+                    f"{item_context}: choose one instruction, reset, or controller-relative boundary",
+                )
             ordinal_name, delay_name = (
                 ("after_transmit_words", "delay_instructions")
                 if relative_serial else ("after_spc_triggers", "delay_hsb_cycles")
@@ -251,9 +313,16 @@ def _validate_events(rows: Any, context: str) -> list[dict[str, Any]]:
         else:
             if "delay_instructions" in row or "delay_hsb_cycles" in row:
                 raise P1MEMachineError(f"{item_context}: delay requires a controller-relative boundary")
-            tick = row["after_instructions"]
+            if relative_reset and "after_instructions" in row:
+                raise P1MEMachineError(
+                    f"{item_context}: choose an absolute or reset-relative boundary, not both",
+                )
+            tick_name = "after_reset_instructions" if relative_reset else "after_instructions"
+            tick = row[tick_name]
             if type(tick) is not int or not 0 <= tick <= 0x7FFFFFFFFFFFFFFF:
-                raise P1MEMachineError(f"{item_context}: after_instructions must be a nonnegative signed-64 integer")
+                raise P1MEMachineError(
+                    f"{item_context}: {tick_name} must be a nonnegative signed-64 integer",
+                )
         if kind == "clock":
             if type(row["p_bus_cycles"]) is not int or not 0 < row["p_bus_cycles"] <= 0x7FFFFFFFFFFFFFFF:
                 raise P1MEMachineError(f"{item_context}: p_bus_cycles must be a positive signed-64 integer")
@@ -310,6 +379,10 @@ def _validate_events(rows: Any, context: str) -> list[dict[str, Any]]:
                     raise P1MEMachineError(f"{item_context}: invalid interrupt channel")
             elif type(row["buffer"]) is not int or not 0 <= row["buffer"] < 48:
                 raise P1MEMachineError(f"{item_context}: invalid RSCFD transmit buffer")
+            if "tolerate_no_pending" in row and type(row["tolerate_no_pending"]) is not bool:
+                raise P1MEMachineError(
+                    f"{item_context}: tolerate_no_pending must be boolean",
+                )
             if "firmware_control" in row:
                 try:
                     control = int(row["firmware_control"], 0)
@@ -327,12 +400,11 @@ def _validate_events(rows: Any, context: str) -> list[dict[str, Any]]:
                 raise P1MEMachineError(f"{item_context}: unsupported ECM pin")
             if not isinstance(row["drive"], str) or row["drive"] not in {"released", "low"}:
                 raise P1MEMachineError(f"{item_context}: ECM drive must be released or low")
-        elif kind == "peripheral-reset":
-            # Unit-scoped peripheral boundary only; CPU registers/PC are unchanged.
+        elif kind in {"peripheral-reset", "reset-assert"}:
             if not isinstance(row["reset_class"], str) or row["reset_class"] not in {
                 "power-on", "system-1-cvm", "system-1-pin", "system-2", "application-1"
             }:
-                raise P1MEMachineError(f"{item_context}: unsupported peripheral reset class")
+                raise P1MEMachineError(f"{item_context}: unsupported reset class")
         elif kind == "register-input":
             if not isinstance(row["register"], str) or not row["register"]:
                 raise P1MEMachineError(f"{item_context}: register name must be a nonempty string")
@@ -390,7 +462,10 @@ def _validate_events(rows: Any, context: str) -> list[dict[str, Any]]:
                 if serial_boundary in serial_boundaries:
                     raise P1MEMachineError(f"{item_context}: duplicate completion for this CSIH transmitted word")
                 serial_boundaries.add(serial_boundary)
-                normalized.append({**explicit, "after_transmit_words": ordinal})
+                if expand:
+                    normalized.append({**explicit, "after_transmit_words": ordinal})
+            if not expand:
+                normalized.append(row)
         else:
             normalized.append(row)
     return normalized
@@ -467,7 +542,236 @@ def _validate_icus_startup_stub(value: Any, context: str) -> dict[str, Any] | No
     return value
 
 
+def _validate_steps(rows: Any, context: str, *, expand: bool = True) -> list[dict[str, Any]]:
+    steps = _require_list(rows, context)
+    checkpoints: set[str] = set()
+    trial_names: set[str] = set()
+    normalized: list[dict[str, Any]] = []
+    for index, row in enumerate(steps):
+        item_context = f"{context}[{index}]"
+        if not isinstance(row, dict):
+            raise P1MEMachineError(f"{item_context}: expected an object")
+        kind = row.get("kind")
+        if kind == "checkpoint":
+            _require_keys(
+                row,
+                allowed={"kind", "name", "after_instructions"},
+                required={"kind", "name"},
+                context=item_context,
+            )
+            name = row["name"]
+            after = row.get("after_instructions")
+            if not isinstance(name, str) or not name or name in checkpoints:
+                raise P1MEMachineError(f"{item_context}: checkpoint name must be unique")
+            if after is not None and (type(after) is not int or after < 0):
+                raise P1MEMachineError(
+                    f"{item_context}: after_instructions must be a nonnegative integer",
+                )
+            checkpoints.add(name)
+            normalized.append(row)
+        elif kind == "restore":
+            _require_keys(
+                row,
+                allowed={"kind", "checkpoint"},
+                required={"kind", "checkpoint"},
+                context=item_context,
+            )
+            if row["checkpoint"] not in checkpoints:
+                raise P1MEMachineError(f"{item_context}: restore names an unknown checkpoint")
+            normalized.append(row)
+        elif kind == "trial":
+            _require_keys(
+                row,
+                allowed={
+                    "kind", "name", "max_instructions", "stop_addresses",
+                    "stop_after_arrivals", "events", "checks", "capture_rows",
+                },
+                required={
+                    "kind", "name", "max_instructions", "stop_addresses",
+                    "events", "checks",
+                },
+                context=item_context,
+            )
+            name = row["name"]
+            if not checkpoints:
+                raise P1MEMachineError(f"{item_context}: trial requires a prior checkpoint")
+            if not isinstance(name, str) or not name or name in trial_names:
+                raise P1MEMachineError(f"{item_context}: trial name must be unique")
+            if type(row["max_instructions"]) is not int or row["max_instructions"] <= 0:
+                raise P1MEMachineError(f"{item_context}: max_instructions must be positive")
+            if type(row.get("capture_rows", True)) is not bool:
+                raise P1MEMachineError(f"{item_context}: capture_rows must be boolean")
+            stops = _require_list(row["stop_addresses"], f"{item_context}.stop_addresses")
+            if any(not isinstance(value, str) for value in stops):
+                raise P1MEMachineError(f"{item_context}: stop addresses must be strings")
+            arrivals = _require_list(
+                row.get("stop_after_arrivals", []),
+                f"{item_context}.stop_after_arrivals",
+            )
+            for arrival_index, arrival in enumerate(arrivals):
+                arrival_context = f"{item_context}.stop_after_arrivals[{arrival_index}]"
+                if not isinstance(arrival, dict):
+                    raise P1MEMachineError(f"{arrival_context}: expected an object")
+                _require_keys(
+                    arrival,
+                    allowed={"address", "count"},
+                    required={"address", "count"},
+                    context=arrival_context,
+                )
+                try:
+                    address = int(arrival["address"], 0)
+                except (TypeError, ValueError) as exc:
+                    raise P1MEMachineError(
+                        f"{arrival_context}: address must be an integer string",
+                    ) from exc
+                if not isinstance(arrival["address"], str) or not 0 <= address <= 0xFFFFFFFF:
+                    raise P1MEMachineError(
+                        f"{arrival_context}: address must be a 32-bit integer string",
+                    )
+                if type(arrival["count"]) is not int or arrival["count"] <= 0:
+                    raise P1MEMachineError(
+                        f"{arrival_context}: count must be positive",
+                    )
+                arrival["address"] = hex(address)
+            trial_names.add(name)
+            normalized.append({
+                **row,
+                "capture_rows": row.get("capture_rows", True),
+                "stop_after_arrivals": arrivals,
+                "events": _validate_events(row["events"], f"{item_context}.events", expand=expand),
+                "checks": _validate_checks(row["checks"], f"{item_context}.checks"),
+            })
+        else:
+            raise P1MEMachineError(f"{item_context}: unsupported step kind")
+    if steps and (not checkpoints or not trial_names):
+        raise P1MEMachineError(f"{context}: steps require a checkpoint and a trial")
+    return normalized
+
+def _validate_event_socket(value: Any, context: str) -> dict[str, Any] | None:
+    if value is None:
+        return None
+    if not isinstance(value, dict):
+        raise P1MEMachineError(f"{context}: expected an object")
+    _require_keys(
+        value, allowed={"host", "port", "ready_address", "ready_after_arrivals"},
+        required={"host", "port"}, context=context,
+    )
+    if value["host"] not in {"127.0.0.1", "::1", "localhost"}:
+        raise P1MEMachineError(f"{context}: host must be loopback")
+    if type(value["port"]) is not int or not 0 < value["port"] <= 65535:
+        raise P1MEMachineError(f"{context}: port must be in 1..65535")
+    if "ready_address" in value:
+        try:
+            ready_address = int(value["ready_address"], 0)
+        except (TypeError, ValueError) as exc:
+            raise P1MEMachineError(
+                f"{context}: ready_address must be a 32-bit integer string",
+            ) from exc
+        if not isinstance(value["ready_address"], str) or not 0 <= ready_address <= 0xFFFFFFFF:
+            raise P1MEMachineError(
+                f"{context}: ready_address must be a 32-bit integer string",
+            )
+    if "ready_after_arrivals" in value:
+        if "ready_address" in value:
+            raise P1MEMachineError(
+                f"{context}: ready_address and ready_after_arrivals are mutually exclusive",
+            )
+        arrival = value["ready_after_arrivals"]
+        if not isinstance(arrival, dict):
+            raise P1MEMachineError(f"{context}.ready_after_arrivals: expected an object")
+        _require_keys(
+            arrival, allowed={"address", "count"}, required={"address", "count"},
+            context=f"{context}.ready_after_arrivals",
+        )
+        try:
+            arrival_address = int(arrival["address"], 0)
+        except (TypeError, ValueError) as exc:
+            raise P1MEMachineError(
+                f"{context}.ready_after_arrivals.address must be a 32-bit integer string",
+            ) from exc
+        if (
+            not isinstance(arrival["address"], str)
+            or not 0 <= arrival_address <= 0xFFFFFFFF
+            or type(arrival["count"]) is not int
+            or arrival["count"] <= 0
+        ):
+            raise P1MEMachineError(
+                f"{context}.ready_after_arrivals requires a 32-bit address and positive count",
+            )
+    return value
+
+
+def _validate_reset_replay(
+    value: Any, scenario_path: Path, *, expand: bool = True,
+) -> dict[str, Any] | None:
+    if value is None:
+        return None
+    context = f"{scenario_path}.reset_replay"
+    if not isinstance(value, dict):
+        raise P1MEMachineError(f"{context}: expected an object")
+    _require_keys(value, allowed={"scenario"}, required={"scenario"}, context=context)
+    source = value["scenario"]
+    if not isinstance(source, str) or not source:
+        raise P1MEMachineError(f"{context}.scenario: expected a nonempty path")
+    fragment_path = (scenario_path.parent / source).resolve()
+    fragment = _load_scenario(fragment_path, expand=expand)
+    if fragment.get("reset_replay") is not None:
+        raise P1MEMachineError(f"{context}: nested reset replay is unsupported")
+    return {
+        "scenario": str(fragment_path),
+        "memory": fragment["memory"],
+        "events": fragment["events"],
+        "hsb_cycles_per_instruction": fragment["hsb_cycles_per_instruction"],
+        "dataflash_cells": fragment["dataflash_cells"],
+        "icus_startup_stub": fragment["icus_startup_stub"],
+        "dma_master_rewrite_assumption": fragment["dma_master_rewrite_assumption"],
+    }
+
+
+def _validate_snapshot_outputs(
+    rows: Any, context: str, base: Path,
+) -> list[dict[str, Any]]:
+    normalized = _require_list(rows, context)
+    result: list[dict[str, Any]] = []
+    for index, row in enumerate(normalized):
+        item_context = f"{context}[{index}]"
+        if not isinstance(row, dict):
+            raise P1MEMachineError(f"{item_context}: expected an object")
+        _require_keys(
+            row,
+            allowed={"path", "address", "size", "evidence"},
+            required={"path", "address", "size", "evidence"},
+            context=item_context,
+        )
+        try:
+            address = int(row["address"], 0)
+        except (TypeError, ValueError) as exc:
+            raise P1MEMachineError(f"{item_context}: address must be an integer string") from exc
+        size = row["size"]
+        if (
+            not isinstance(row["address"], str)
+            or type(size) is not int or size <= 0
+            or not 0 <= address <= 0xFFFFFFFF
+            or address + size > 0x100000000
+        ):
+            raise P1MEMachineError(f"{item_context}: snapshot range is outside 32-bit memory")
+        if not isinstance(row["path"], str) or not row["path"]:
+            raise P1MEMachineError(f"{item_context}: path must be a nonempty string")
+        if not isinstance(row["evidence"], str) or not row["evidence"].strip():
+            raise P1MEMachineError(f"{item_context}: evidence is required")
+        result.append({
+            **row,
+            "address": hex(address),
+            "path": str(_absolute_input(Path(row["path"]), base=base)),
+        })
+    return result
+
+
 def load_scenario(path: Path) -> dict[str, Any]:
+    return _load_scenario(path, expand=True)
+
+
+def _load_scenario(path: Path, *, expand: bool) -> dict[str, Any]:
     scenario_path = _absolute_input(path)
     try:
         raw = json.loads(scenario_path.read_text(encoding="utf-8"))
@@ -476,17 +780,25 @@ def load_scenario(path: Path) -> dict[str, Any]:
     if not isinstance(raw, dict):
         raise P1MEMachineError(f"{scenario_path}: scenario root must be an object")
     allowed = {
-        "schema", "name", "entry", "max_instructions", "reset", "stop_addresses",
-        "gpr_fill", "registers", "memory", "pre_reset_memory", "artifacts", "checks",
-        "expected_fault", "expected_termination", "events", "peripheral_file",
-        "bounded_entries", "bounded_edges",
+        "schema", "name", "source", "entry", "max_instructions", "reset",
+        "stop_addresses", "gpr_fill", "registers", "memory", "pre_reset_memory",
+        "artifacts", "checks", "expected_fault", "expected_termination", "events",
+        "peripheral_file", "bounded_entries", "bounded_edges",
         "hsb_cycles_per_instruction", "dataflash_cells", "icus_startup_stub",
-        "dma_master_rewrite_assumption",
+        "dma_master_rewrite_assumption", "steps", "compare_operands",
+        "input_derived_table_indices", "reset_replay", "event_socket",
+        "snapshot_outputs", "engine",
     }
     required = {"schema", "name", "entry", "max_instructions", "stop_addresses", "checks"}
     _require_keys(raw, allowed=allowed, required=required, context=str(scenario_path))
     if raw["schema"] != SCENARIO_SCHEMA:
         raise P1MEMachineError(f"{scenario_path}: scenario schema drift")
+    engine = raw.get("engine", os.environ.get("P1ME_MACHINE_ENGINE", "jit"))
+    if engine not in ("plain", "jit"):
+        raise P1MEMachineError(f"{scenario_path}: engine must be plain or jit")
+    source = raw.get("source")
+    if "source" in raw and not isinstance(source, dict):
+        raise P1MEMachineError(f"{scenario_path}: source must be an object")
     if not isinstance(raw["max_instructions"], int) or raw["max_instructions"] <= 0:
         raise P1MEMachineError(f"{scenario_path}: max_instructions must be positive")
     registers = raw.get("registers", {})
@@ -541,9 +853,14 @@ def load_scenario(path: Path) -> dict[str, Any]:
         raise P1MEMachineError(
             f"{scenario_path}: dma_master_rewrite_assumption must be a nonempty evidence string",
         )
+    for option in ("compare_operands", "input_derived_table_indices"):
+        if option in raw and type(raw[option]) is not bool:
+            raise P1MEMachineError(f"{scenario_path}: {option} must be boolean")
     normalized = {
         "schema": raw["schema"],
         "name": raw["name"],
+        "source": source,
+        "engine": engine,
         "entry": _validate_entry(raw["entry"], f"{scenario_path}.entry"),
         "max_instructions": raw["max_instructions"],
         "reset": raw.get("reset", "none"),
@@ -567,8 +884,24 @@ def load_scenario(path: Path) -> dict[str, Any]:
             raw.get("icus_startup_stub"), f"{scenario_path}.icus_startup_stub",
         ),
         "dma_master_rewrite_assumption": dma_rewrite,
-        "events": _validate_events(raw.get("events", []), f"{scenario_path}.events"),
+        "events": _validate_events(raw.get("events", []), f"{scenario_path}.events", expand=expand),
+        "steps": _validate_steps(raw.get("steps", []), f"{scenario_path}.steps", expand=expand),
+        "compare_operands": raw.get("compare_operands", False),
+        "input_derived_table_indices": raw.get(
+            "input_derived_table_indices", False,
+        ),
+        "reset_replay": _validate_reset_replay(raw.get("reset_replay"), scenario_path, expand=expand),
+        "event_socket": _validate_event_socket(
+            raw.get("event_socket"), f"{scenario_path}.event_socket",
+        ),
+        "snapshot_outputs": _validate_snapshot_outputs(
+            raw.get("snapshot_outputs", []),
+            f"{scenario_path}.snapshot_outputs",
+            scenario_path.parent,
+        ),
     }
+    if source is None:
+        normalized.pop("source")
     if peripheral_file:
         normalized["peripheral_file"] = True
     if bounded_entries:
@@ -621,6 +954,82 @@ def _load_model() -> tuple[dict[str, Any], str]:
         raise P1MEMachineError("generated machine model schema drift")
     return model, _sha256(MODEL)
 
+def _write_drcov(
+    report: dict[str, Any],
+    target: dict[str, Any],
+    output_path: Path,
+) -> None:
+    """Write unique entered instructions as DynamoRIO text basic blocks."""
+    trace = report.get("instruction_trace")
+    if not isinstance(trace, list):
+        trials = report.get("checkpointing", {}).get("trials", [])
+        trace = chain.from_iterable(trial.get("instruction_trace", []) for trial in trials)
+    _write_drcov_instructions(_report_instructions(trace), target, output_path)
+
+
+def _report_instructions(trace: Iterable[Any]) -> Iterator[tuple[int, int]]:
+    for index, row in enumerate(trace):
+        try:
+            pc, size = int(row["pc"], 0), int(row["size"])
+        except (KeyError, TypeError, ValueError) as exc:
+            raise P1MEMachineError(
+                f"instruction_trace[{index}]: expected pc and size",
+            ) from exc
+        yield pc, size
+
+
+def _spooled_instructions(path: Path) -> Iterator[tuple[int, int]]:
+    """Read the Java writer's big-endian uint32 PC and uint8 size records."""
+    if path.is_file():
+        pair = struct.Struct(">IB")
+        with path.open("rb") as stream:
+            while chunk := stream.read(pair.size * 16384):
+                yield from pair.iter_unpack(chunk)
+
+
+def _write_drcov_instructions(
+    trace: Iterable[tuple[int, int]], target: dict[str, Any], output_path: Path,
+) -> None:
+    module = target["codeflash"]
+    base = int(module["base"], 0)
+    end = base + module["size"]
+    module_path = Path(module["path"]).resolve()
+    module_name = module_path.relative_to(ROOT)
+    seen: dict[int, int] = {}
+    for index, (pc, size) in enumerate(trace):
+        if not base <= pc or pc + size > end:
+            raise P1MEMachineError(
+                f"instruction_trace[{index}]: instruction outside registered CodeFlash",
+            )
+        if not 0 < size <= 0xFFFF:
+            raise P1MEMachineError(
+                f"instruction_trace[{index}]: size outside drcov uint16 range",
+            )
+        prior_size = seen.setdefault(pc, size)
+        if prior_size != size:
+            raise P1MEMachineError(
+                f"instruction_trace[{index}]: conflicting size at {pc:#x}",
+            )
+    if not seen:
+        raise P1MEMachineError("instruction trace requested but absent from machine report")
+
+    lines = [
+        "DRCOV VERSION: 3",
+        "DRCOV FLAVOR: drcov",
+        "Module Table: version 5, count 1",
+        "Columns: id, containing_id, start, end, entry, offset, preferred_base, path",
+        f"{0:3d}, {0:3d}, 0x{base:016x}, 0x{end:016x}, "
+        f"0x{0:016x}, 0x{0:016x}, 0x{base:016x},  {module_name}",
+        f"BB Table: {len(seen)} bbs",
+        "module id, start, size:",
+    ]
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with output_path.open("w", encoding="utf-8") as output:
+        output.write("\n".join(lines) + "\n")
+        output.writelines(
+            f"module[{0:3d}]: 0x{pc - base:016x}, {size:3d}\n" for pc, size in seen.items()
+        )
+
 
 def _failure_summary(report: dict[str, Any]) -> str:
     scenario = report.get("scenario", "<unknown>")
@@ -649,6 +1058,8 @@ def _execute(
     scenario_paths: Sequence[Path],
     *,
     instruction_trace: bool = False,
+    private_headless: bool | None = None,
+    report_outputs: Sequence[dict[str, str]] | None = None,
 ) -> dict[str, Any]:
     if not scenario_paths:
         raise P1MEMachineError("at least one scenario is required")
@@ -657,7 +1068,7 @@ def _execute(
     products = {row["product_id"] for row in model["products"]}
     if target["mcu"] not in products:
         raise P1MEMachineError(f"machine model does not describe MCU {target['mcu']}")
-    scenarios = [load_scenario(path) for path in scenario_paths]
+    scenarios = [_load_scenario(path, expand=False) for path in scenario_paths]
     names = [scenario["name"] for scenario in scenarios]
     if len(names) != len(set(names)):
         raise P1MEMachineError("scenario names must be unique within one batch")
@@ -672,22 +1083,75 @@ def _execute(
         tmp_path = Path(tmp)
         contract_path = tmp_path / "run-contract.json"
         batch_report_path = tmp_path / "batch-report.json"
-        with contract_path.open("w", encoding="utf-8") as output:
-            json.dump(contract, output, indent=2)
-            output.write("\n")
-        command = [
-            str(ROOT / "tools" / "gtarget"), target_name, "script", "run", str(SCRIPT),
-            "--", str(contract_path), str(batch_report_path),
-        ]
+        contract_path.write_text(json.dumps(contract, separators=(",", ":")), encoding="utf-8")
+        if private_headless is None:
+            private_headless = os.environ.get(
+                "P1ME_MACHINE_PRIVATE_HEADLESS", "",
+            ).lower() in {"1", "true", "yes"}
+        private_jobs = 1
+        if private_headless:
+            bootstrap = subprocess.run(
+                [
+                    "bash", "-c",
+                    "source tools/lib/ghidra_env.sh none >/dev/null && env -0",
+                ],
+                cwd=ROOT, capture_output=True, check=True,
+            )
+            environment = os.environ.copy()
+            environment.update(
+                entry.decode().split("=", 1)
+                for entry in bootstrap.stdout.split(b"\0")
+                if entry and b"=" in entry
+            )
+            environment.setdefault("GHIDRA_HEADLESS_MAXMEM", "4G")
+            raw_jobs = os.environ.get("P1ME_MACHINE_PRIVATE_JOBS", "1")
+            try:
+                private_jobs = int(raw_jobs)
+            except ValueError as exc:
+                raise P1MEMachineError(
+                    "P1ME_MACHINE_PRIVATE_JOBS must be an integer of at least 1",
+                ) from exc
+            if private_jobs < 1:
+                raise P1MEMachineError(
+                    "P1ME_MACHINE_PRIVATE_JOBS must be an integer of at least 1",
+                )
+            analyze = Path(environment["GHIDRA_HOME"]) / "support/analyzeHeadless"
+            (tmp_path / "project").mkdir()
+            command = [
+                str(analyze), str(tmp_path / "project"), "p1me_machine",
+                "-scriptPath", str(SCRIPT.parent),
+            ]
+            # Address-selected scenarios load and verify their own flash images;
+            # only structural selectors consult a Ghidra program listing.
+            if any(scenario["entry"]["scope"] != "resolved-address" for scenario in scenarios):
+                command += [
+                    "-import", target["codeflash"]["path"], "-processor", target["processor"],
+                    "-loader", "BinaryLoader", "-loader-baseAddr", target["codeflash"]["base"],
+                ]
+            command += [
+                "-noanalysis",
+                "-postScript", SCRIPT.name,
+                str(contract_path), str(batch_report_path),
+            ]
+        else:
+            command = [
+                str(ROOT / "tools" / "gtarget"), target_name,
+                "script", "run", str(SCRIPT),
+                "--", str(contract_path), str(batch_report_path),
+            ]
+            environment = os.environ.copy()
+            environment.setdefault("GHIDRA_CLI_READ_TIMEOUT", "0")
         if instruction_trace:
             command.append("--instruction-trace")
-        # The instruction budget bounds execution; whole-image runs can exceed
-        # the bridge's default 300-second response wait.
-        environment = os.environ.copy()
-        environment.setdefault("GHIDRA_CLI_READ_TIMEOUT", "0")
-        proc = subprocess.run(
-            command, cwd=ROOT, env=environment, text=True, capture_output=True, check=False,
-        )
+        if report_outputs is not None:
+            outputs_path = tmp_path / "report-outputs.json"
+            outputs_path.write_text(json.dumps(report_outputs), encoding="utf-8")
+            command.extend(["--report-outputs", str(outputs_path)])
+        slot = private_machine_slot(private_jobs) if private_headless else nullcontext()
+        with slot:
+            proc = subprocess.run(
+                command, cwd=ROOT, env=environment, text=True, capture_output=True, check=False,
+            )
         if not batch_report_path.is_file():
             message = f"P1M-E machine runner failed before reporting (exit {proc.returncode})."
             if "script_compile_failed" in proc.stdout or "script_compile_failed" in proc.stderr:
@@ -703,8 +1167,13 @@ def _execute(
                 f"{message}\n--- Ghidra stdout ---\n{proc.stdout}"
                 f"\n--- Ghidra stderr ---\n{proc.stderr}"
             )
-        batch = json.loads(batch_report_path.read_text(encoding="utf-8"))
-    if batch.get("schema") != "rh850-p1me-machine-batch-report-v1":
+        with batch_report_path.open(encoding="utf-8") as stream:
+            batch = json.load(stream)
+    expected_schema = (
+        "rh850-p1me-machine-report-manifest-v1"
+        if report_outputs is not None else "rh850-p1me-machine-batch-report-v1"
+    )
+    if batch.get("schema") != expected_schema:
         raise P1MEMachineError("P1M-E machine batch report schema drift")
     return batch
 
@@ -715,6 +1184,7 @@ def capture_many(
     output_dir: Path,
     *,
     instruction_trace: bool = False,
+    private_headless: bool | None = None,
 ) -> list[dict[str, Any]]:
     """Run a batch and return every report, including failed checks.
 
@@ -723,12 +1193,22 @@ def capture_many(
     """
     output_dir = _absolute_input(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
-    batch = _execute(target_name, scenario_paths, instruction_trace=instruction_trace)
+    batch = _execute(
+        target_name, scenario_paths,
+        instruction_trace=instruction_trace,
+        private_headless=private_headless,
+    )
     reports = batch["reports"]
     if len(reports) != len(scenario_paths):
         raise P1MEMachineError("batch report count drifted")
+    target = _target_contract(target_name) if instruction_trace else None
     for scenario_path, report in zip(scenario_paths, reports, strict=True):
-        output = output_dir / f"{Path(scenario_path).stem}.report.json"
+        stem = Path(scenario_path).stem
+        output = output_dir / f"{stem}.report.json"
+        if target is not None:
+            drcov_path = output_dir / f"{stem}.drcov"
+            _write_drcov(report, target, drcov_path)
+            report["drcov_path"] = str(drcov_path)
         with output.open("w", encoding="utf-8") as stream:
             json.dump(report, stream, indent=2)
             stream.write("\n")
@@ -742,12 +1222,14 @@ def run_many(
     output_dir: Path,
     *,
     instruction_trace: bool = False,
+    private_headless: bool | None = None,
 ) -> list[dict[str, Any]]:
     reports = capture_many(
         target_name,
         scenario_paths,
         output_dir,
         instruction_trace=instruction_trace,
+        private_headless=private_headless,
     )
     failures = [report for report in reports if not report.get("passed")]
     if failures:
@@ -761,11 +1243,20 @@ def run(
     report_path: Path,
     *,
     instruction_trace: bool = False,
+    private_headless: bool | None = None,
 ) -> dict[str, Any]:
-    batch = _execute(target_name, [scenario_path], instruction_trace=instruction_trace)
+    batch = _execute(
+        target_name, [scenario_path],
+        instruction_trace=instruction_trace,
+        private_headless=private_headless,
+    )
     report = batch["reports"][0]
     report_path = _absolute_input(report_path)
     report_path.parent.mkdir(parents=True, exist_ok=True)
+    if instruction_trace:
+        drcov_path = report_path.with_name(f"{Path(scenario_path).stem}.drcov")
+        _write_drcov(report, _target_contract(target_name), drcov_path)
+        report["drcov_path"] = str(drcov_path)
     with report_path.open("w", encoding="utf-8") as output:
         json.dump(report, output, indent=2)
         output.write("\n")
@@ -773,6 +1264,55 @@ def run(
     if not report.get("passed"):
         raise P1MEMachineError(_failure_summary(report))
     return report
+
+
+def _run_cli(
+    target_name: str,
+    scenario_paths: Sequence[Path],
+    output_dir: Path,
+    *,
+    instruction_trace: bool,
+    private_headless: bool,
+) -> list[str]:
+    output_dir = _absolute_input(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    stems = [path.stem for path in scenario_paths]
+    report_paths = [output_dir / f"{stem}.report.json" for stem in stems]
+    drcov_paths = [output_dir / f"{stem}.drcov" for stem in stems] if instruction_trace else []
+    # Keep staging private and on the destination filesystem for atomic replacement.
+    with tempfile.TemporaryDirectory(prefix=".p1me-reports-", dir=output_dir) as tmp:
+        stage = Path(tmp)
+        outputs = []
+        for index in range(len(report_paths)):
+            entry = {"report": str(stage / f"{index}.json")}
+            if instruction_trace:
+                entry.update(
+                    instruction_spool=str(stage / f"{index}.trace"),
+                    drcov_path=str(drcov_paths[index]),
+                )
+            outputs.append(entry)
+        manifest = _execute(
+            target_name, scenario_paths,
+            instruction_trace=instruction_trace,
+            private_headless=private_headless,
+            report_outputs=outputs,
+        )
+        verdicts = manifest["reports"]
+        if len(verdicts) != len(report_paths):
+            raise P1MEMachineError("batch report count drifted")
+        target = _target_contract(target_name) if instruction_trace else None
+        for index, (entry, report_path) in enumerate(zip(outputs, report_paths, strict=True)):
+            if target is not None:
+                staged_drcov = stage / f"{index}.drcov"
+                _write_drcov_instructions(
+                    _spooled_instructions(Path(entry["instruction_spool"])), target, staged_drcov,
+                )
+                os.replace(staged_drcov, drcov_paths[index])
+            os.replace(entry["report"], report_path)
+        failures = [_failure_summary(verdict) for verdict in verdicts if not verdict.get("passed")]
+        if failures:
+            raise P1MEMachineError("; ".join(failures))
+    return [str(path) for path in report_paths]
 
 
 def main() -> int:
@@ -783,19 +1323,25 @@ def main() -> int:
     parser.add_argument(
         "--instruction-trace",
         action="store_true",
-        help="include every entered instruction and its scheduler tick in each report",
+        help="include every entered (pc, size) instruction and write one drcov file per scenario",
+    )
+    parser.add_argument(
+        "--private-headless",
+        action="store_true",
+        help="run in a no-analysis scratch Ghidra project instead of the shared daemon",
     )
     args = parser.parse_args()
     try:
-        reports = run_many(
+        reports = _run_cli(
             args.target,
             args.scenarios,
             args.output_dir,
             instruction_trace=args.instruction_trace,
+            private_headless=args.private_headless,
         )
     except P1MEMachineError as exc:
         parser.error(str(exc))
-    print(json.dumps({"reports": [report["report_path"] for report in reports]}, indent=2))
+    print(json.dumps({"reports": reports}, indent=2))
     return 0
 
 

@@ -2,15 +2,18 @@
 //@category Emulation
 // Execute exact registered RH850/P1M-E firmware with strict machine-state provenance.
 // Args: <absolute-run-contract-json> <absolute-report-json> [--instruction-trace]
+//       [--report-outputs <absolute-staging-plan-json>]
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
-import com.google.gson.stream.JsonReader;
+import com.google.gson.JsonPrimitive;
 import com.google.gson.stream.JsonWriter;
 import ghidra.app.plugin.processors.sleigh.SleighLanguage;
+import ghidra.generic.util.datastruct.SemisparseByteArray;
 import ghidra.app.script.GhidraScript;
 import ghidra.framework.model.DomainObjectException;
 import ghidra.pcode.emu.PcodeEmulationCallbacks;
@@ -23,6 +26,8 @@ import ghidra.pcode.exec.PcodeExecutorStatePiece;
 import ghidra.pcode.exec.PcodeStateCallbacks;
 import ghidra.pcode.exec.PcodeExecutorStatePiece.Reason;
 import ghidra.pcode.exec.BytesPcodeExecutorState;
+import ghidra.pcode.exec.BytesPcodeExecutorStatePiece;
+import ghidra.pcode.exec.BytesPcodeExecutorStateSpace;
 import ghidra.pcode.exec.PcodeExecutorState;
 import ghidra.pcode.exec.PcodeProgram;
 import ghidra.pcode.exec.PcodeUseropLibrary;
@@ -33,6 +38,9 @@ import ghidra.program.model.address.AddressRange;
 import ghidra.program.model.address.AddressSetView;
 import ghidra.program.model.address.AddressSpace;
 import ghidra.program.model.lang.InstructionPrototype;
+import ghidra.program.model.lang.Language;
+import ghidra.program.model.lang.LanguageID;
+import ghidra.program.util.DefaultLanguageService;
 import ghidra.program.model.lang.ProcessorContextImpl;
 import ghidra.program.model.lang.Register;
 import ghidra.program.model.lang.RegisterValue;
@@ -42,35 +50,75 @@ import ghidra.program.model.listing.Function;
 import ghidra.program.model.listing.FunctionIterator;
 import ghidra.program.model.listing.Instruction;
 import ghidra.program.model.listing.InstructionIterator;
-import ghidra.program.model.pcode.PcodeOp;
 import ghidra.program.model.scalar.Scalar;
 import ghidra.util.exception.CancelledException;
+import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.Closeable;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Array;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public class RunP1MEMachine extends GhidraScript {
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private static final Gson GSON = new GsonBuilder()
+        .registerTypeAdapter(new com.google.gson.reflect.TypeToken<List<ExternalEvent>>() {}.getType(),
+            (com.google.gson.JsonDeserializer<List<ExternalEvent>>) (json, type, context) -> {
+                List<ExternalEvent> events = new ArrayList<>(json.getAsJsonArray().size());
+                for (JsonElement element : json.getAsJsonArray()) {
+                    JsonObject row = element.getAsJsonObject();
+                    ExternalEvent first = context.deserialize(row, ExternalEvent.class);
+                    events.add(first);
+                    long repeat = row.has("repeat") ? row.get("repeat").getAsLong() : 1;
+                    if (repeat == 1) continue;
+                    if (first.after_transmit_words == null || repeat < 1)
+                        throw new IllegalArgumentException("repeat requires a CSIH transmit ordinal");
+                    long stride = row.has("stride_words") ? row.get("stride_words").getAsLong() : 1;
+                    long ordinal = first.after_transmit_words;
+                    for (long i = 1; i < repeat; i++) {
+                        ordinal = Math.addExact(ordinal, stride);
+                        events.add(first.atTransmitWord(ordinal));
+                    }
+                }
+                return events;
+            })
+        .setPrettyPrinting().create();
     private static final String CONTRACT_SCHEMA = "rh850-p1me-machine-run-v2";
     private static final String MODEL_SCHEMA = "rh850-p1me-machine-v2";
     private static final String SCENARIO_SCHEMA = "rh850-p1me-machine-scenario-v2";
+
+
 
     static final class MachineFault extends RuntimeException {
         final String kind;
@@ -317,15 +365,27 @@ public class RunP1MEMachine extends GhidraScript {
         }
     }
 
-    static final class ExternalEvent {
+    static final class ExternalEvent implements Cloneable {
+        // The expanded rows share their immutable payload but have independent wire ordinals.
+        ExternalEvent atTransmitWord(long ordinal) {
+            try {
+                ExternalEvent input = (ExternalEvent) super.clone();
+                input.after_transmit_words = ordinal;
+                return input;
+            }
+            catch (CloneNotSupportedException impossible) {
+                throw new AssertionError(impossible);
+            }
+        }
+
         String kind;
         Long after_instructions;
         Long after_transmit_words;
         Long delay_instructions;
         Long after_spc_triggers;
+        Long after_reset_instructions;
         Long delay_hsb_cycles;
         int[] pulse_samples;
-        transient long ordinal;
         String evidence;
         String address;
         String register;
@@ -346,6 +406,7 @@ public class RunP1MEMachine extends GhidraScript {
         String boundary;
         int label;
         int timestamp;
+        boolean tolerate_no_pending;
     }
 
     static final class IcusStartupResponse {
@@ -361,12 +422,39 @@ public class RunP1MEMachine extends GhidraScript {
         List<IcusStartupResponse> responses;
     }
 
+    static final class ResetReplay {
+        String scenario;
+        List<MemoryInit> memory = new ArrayList<>();
+        List<ExternalEvent> events = new ArrayList<>();
+        Long hsb_cycles_per_instruction;
+        List<FlashCellRange> dataflash_cells = new ArrayList<>();
+        IcusStartupConfig icus_startup_stub;
+        String dma_master_rewrite_assumption;
+    }
+
+    static final class EventSocketConfig {
+        String host;
+        int port;
+        String ready_address;
+        StopArrival ready_after_arrivals;
+    }
+
+    static final class SnapshotOutput {
+        String path;
+        String address;
+        int size;
+        String evidence;
+    }
+
+
 
     static final class Scenario {
         String schema;
         String name;
+        JsonObject source;
         EntrySelector entry;
         long max_instructions;
+        String engine = "jit";
         String reset = "none";
         List<String> stop_addresses = new ArrayList<>();
         Map<String, String> registers = new LinkedHashMap<>();
@@ -384,11 +472,36 @@ public class RunP1MEMachine extends GhidraScript {
         boolean peripheral_file;
         List<String> bounded_entries;
         List<BoundedEdge> bounded_edges;
+        boolean compare_operands;
+        boolean input_derived_table_indices;
+        ResetReplay reset_replay;
+        EventSocketConfig event_socket;
+        List<SnapshotOutput> snapshot_outputs = new ArrayList<>();
+        List<ScenarioStep> steps = new ArrayList<>();
 
         boolean stubbed() {
             return icus_startup_stub != null || dma_master_rewrite_assumption != null;
         }
     }
+
+    static final class StopArrival {
+        String address;
+        long count;
+    }
+
+    static final class ScenarioStep {
+        String kind;
+        String name;
+        String checkpoint;
+        Long after_instructions;
+        long max_instructions;
+        List<String> stop_addresses = new ArrayList<>();
+        List<StopArrival> stop_after_arrivals = new ArrayList<>();
+        List<ExternalEvent> events = new ArrayList<>();
+        List<CheckDef> checks = new ArrayList<>();
+        Boolean capture_rows;
+    }
+
 
     static final class BoundedEdge {
         String pc;
@@ -407,22 +520,31 @@ public class RunP1MEMachine extends GhidraScript {
     /** Buffered trace storage: retain rows on disk, not for the lifetime of the emulator. */
     static final class JsonRows implements Closeable {
         final Path path;
+        final FileChannel spool;
         final BufferedWriter output;
         final JsonWriter writer;
         final Map<String, long[]> kindCounts;
         long count;
         boolean sealed;
+        record Span(long start, long end) {}
+        private final List<Span> trials = new ArrayList<>();
+        private long trialStart = -1;
+        Consumer<JsonObject> listener;
+        boolean discard;
 
         JsonRows(Path directory, String prefix, boolean countKinds) throws IOException {
             path = Files.createTempFile(directory, prefix, ".json");
             try {
-                output = Files.newBufferedWriter(path, StandardCharsets.UTF_8);
+                spool = FileChannel.open(path, StandardOpenOption.READ, StandardOpenOption.WRITE);
+                output = new BufferedWriter(Channels.newWriter(spool, StandardCharsets.UTF_8), 65536);
             }
             catch (IOException exception) {
                 Files.deleteIfExists(path);
                 throw exception;
             }
             writer = new JsonWriter(output);
+            writer.setHtmlSafe(true);
+            writer.setSerializeNulls(false);
             kindCounts = countKinds ? new HashMap<>() : null;
             try {
                 writer.beginArray();
@@ -434,18 +556,96 @@ public class RunP1MEMachine extends GhidraScript {
         }
 
         void add(JsonObject row) {
+            if (discard) {
+                if (listener != null) listener.accept(row);
+                return;
+            }
             if (sealed) throw new IllegalStateException("cannot append to a sealed trace");
             GSON.toJson(row, writer);
             count++;
-            if (kindCounts != null && row.has("kind")) {
-                String kind = row.get("kind").getAsString();
-                long[] counter = kindCounts.get(kind);
-                if (counter == null) {
-                    counter = new long[1];
-                    kindCounts.put(kind, counter);
-                }
-                counter[0]++;
+            if (kindCounts != null && row.has("kind")) incrementKind(row.get("kind").getAsString());
+            if (listener != null) listener.accept(row);
+        }
+
+        private void incrementKind(String kind) {
+            long[] counter = kindCounts.get(kind);
+            if (counter == null) {
+                counter = new long[1];
+                kindCounts.put(kind, counter);
             }
+            counter[0]++;
+        }
+
+        private void requireOpen() {
+            if (sealed) throw new IllegalStateException("cannot append to a sealed trace");
+        }
+
+        private void finishTypedRow(JsonObject row, String kind) {
+            if (!discard) {
+                count++;
+                if (kindCounts != null) incrementKind(kind);
+            }
+            if (listener != null) listener.accept(row);
+        }
+
+        private void addAccess(String kind, JsonPrimitive pc, long instruction,
+                               JsonPrimitive address, int size, String evidence, String initiator) {
+            if (!discard) {
+                requireOpen();
+                try {
+                    writer.beginObject()
+                        .name("kind").value(kind)
+                        .name("pc").value(pc.getAsString())
+                        .name("instruction").value(instruction)
+                        .name("address").value(address.getAsString())
+                        .name("size").value(size)
+                        .name("evidence").value(evidence);
+                    if (initiator != null) writer.name("initiator").value(initiator);
+                    writer.endObject();
+                }
+                catch (IOException e) {
+                    throw new JsonIOException(e);
+                }
+            }
+            JsonObject row = null;
+            if (listener != null) {
+                row = new JsonObject();
+                row.addProperty("kind", kind);
+                row.add("pc", pc);
+                row.addProperty("instruction", instruction);
+                row.add("address", address);
+                row.addProperty("size", size);
+                row.addProperty("evidence", evidence);
+                if (initiator != null) row.addProperty("initiator", initiator);
+            }
+            finishTypedRow(row, kind);
+        }
+
+        private void addAlias(JsonPrimitive from, JsonPrimitive to, int size) {
+            String kind = "alias-write";
+            if (!discard) {
+                requireOpen();
+                try {
+                    writer.beginObject()
+                        .name("kind").value(kind)
+                        .name("from").value(from.getAsString())
+                        .name("to").value(to.getAsString())
+                        .name("size").value(size)
+                        .endObject();
+                }
+                catch (IOException e) {
+                    throw new JsonIOException(e);
+                }
+            }
+            JsonObject row = null;
+            if (listener != null) {
+                row = new JsonObject();
+                row.addProperty("kind", kind);
+                row.add("from", from);
+                row.add("to", to);
+                row.addProperty("size", size);
+            }
+            finishTypedRow(row, kind);
         }
 
         long size() { return count; }
@@ -454,43 +654,69 @@ public class RunP1MEMachine extends GhidraScript {
             long[] counter = kindCounts.get(kind);
             return counter == null ? 0 : counter[0];
         }
+        record Counters(long count, Map<String, Long> kinds) {}
 
-        private static void copyValue(JsonReader input, JsonWriter output) throws IOException {
-            switch (input.peek()) {
-                case BEGIN_OBJECT:
-                    input.beginObject();
-                    output.beginObject();
-                    while (input.hasNext()) {
-                        output.name(input.nextName());
-                        copyValue(input, output);
-                    }
-                    input.endObject();
-                    output.endObject();
-                    break;
-                case BEGIN_ARRAY:
-                    input.beginArray();
-                    output.beginArray();
-                    while (input.hasNext()) copyValue(input, output);
-                    input.endArray();
-                    output.endArray();
-                    break;
-                case STRING: output.value(input.nextString()); break;
-                case NUMBER: output.jsonValue(input.nextString()); break;
-                case BOOLEAN: output.value(input.nextBoolean()); break;
-                case NULL: input.nextNull(); output.nullValue(); break;
-                default: throw new IOException("unexpected token in trace spool: " + input.peek());
+        Counters checkpointCounters() {
+            Map<String, Long> kinds = new LinkedHashMap<>();
+            if (kindCounts != null) {
+                for (Map.Entry<String, long[]> entry : kindCounts.entrySet())
+                    kinds.put(entry.getKey(), entry.getValue()[0]);
+            }
+            return new Counters(count, kinds);
+        }
+
+        void restoreCounters(Counters counters) {
+            count = counters.count();
+            if (kindCounts != null) {
+                kindCounts.clear();
+                for (Map.Entry<String, Long> entry : counters.kinds().entrySet())
+                    kindCounts.put(entry.getKey(), new long[] {entry.getValue()});
             }
         }
 
-        void writeTo(JsonWriter destination) throws IOException {
+        private long position() throws IOException {
+            writer.flush();
+            return spool.position();
+        }
+
+        void beginTrial(boolean capture) throws IOException {
+            if (trialStart != -1 || discard) throw new IllegalStateException("trial already active");
+            discard = !capture;
+            if (capture) trialStart = position();
+        }
+
+        void endTrial() throws IOException {
+            if (discard) trials.add(new Span(0, 0));
+            else {
+                if (trialStart < 0) throw new IllegalStateException("trial not active");
+                long end = position();
+                // If the spool already had a row, the first new row starts with a comma.
+                long start = trialStart > 1 && end > trialStart ? trialStart + 1 : trialStart;
+                trials.add(new Span(start, end));
+            }
+            trialStart = -1;
+            discard = false;
+        }
+
+        // Gson owns the array delimiters. Its elements are already UTF-8 JSON:
+        // splice the complete row range without parsing or building it again.
+        void writeTo(JsonWriter destination, FileChannel report, int trial) throws IOException {
             if (!sealed) {
                 writer.endArray();
-                writer.close();
+                writer.flush();
                 sealed = true;
             }
-            try (JsonReader input = new JsonReader(Files.newBufferedReader(path, StandardCharsets.UTF_8))) {
-                copyValue(input, destination);
+            Span span = trial < 0 ? new Span(1, spool.size() - 1) : trials.get(trial);
+            destination.beginArray();
+            if (span.start < span.end) {
+                destination.flush();
+                for (long at = span.start; at < span.end;) {
+                    long n = spool.transferTo(at, span.end - at, report);
+                    if (n == 0) throw new IOException("incomplete trace spool: " + path);
+                    at += n;
+                }
             }
+            destination.endArray();
         }
 
         @Override
@@ -504,18 +730,30 @@ public class RunP1MEMachine extends GhidraScript {
     static final class Trace implements Closeable {
         private static final int TRACE_CHUNK_SIZE = 16384;
         private static final int MAX_TRACE_ENTRIES = 16777216;
+        private static final int RECENT_PC_COUNT = 16;
         final boolean instructionTraceEnabled;
-        final List<int[]> instructionPcs = new ArrayList<>();
-        final List<long[]> instructionTicks = new ArrayList<>();
+        private final List<InstructionChunk> instructionChunks = new ArrayList<>();
+        private final List<InstructionRange> trialInstructions = new ArrayList<>();
+        private boolean instructionTailShared;
         final List<JsonObject> instructionShortcuts = new ArrayList<>();
+        private final ObservationRows compareOperands;
+        private final ObservationRows tableIndices;
+        private TupleKeys compareKeys = new TupleKeys();
+        private TupleKeys indexKeys = new TupleKeys();
+        private int trialInstructionStart;
         int instructionTraceSize;
         long instructions;
-        final List<Long> recentPcs = new ArrayList<>();
-        final Set<Long> executed = new HashSet<>();
+        private final long[] recentPcs = new long[RECENT_PC_COUNT];
+        private int recentNext;
+        private int recentSize;
+        ExecutedPcs executed = new ExecutedPcs();
         final Map<String, Long> syncCounts = new LinkedHashMap<>();
         final JsonRows memoryAccesses;
         final JsonRows deviceEvents;
-        final Set<Long> writtenBytes = new HashSet<>();
+        final WrittenBytes writtenBytes = new WrittenBytes();
+        private static final int HEX_CACHE_BITS = 12;
+        private final int[] hexKeys = new int[1 << HEX_CACHE_BITS];
+        private final JsonPrimitive[] hexValues = new JsonPrimitive[hexKeys.length];
         boolean traceLostAddress;
         String busInitiator;
 
@@ -529,6 +767,8 @@ public class RunP1MEMachine extends GhidraScript {
                 catch (IOException cleanup) { exception.addSuppressed(cleanup); }
                 throw exception;
             }
+            compareOperands = new ObservationRows(directory, ".p1me-compares-");
+            tableIndices = new ObservationRows(directory, ".p1me-indices-");
             this.instructionTraceEnabled = instructionTraceEnabled;
             syncCounts.put("SYNCE", 0L);
             syncCounts.put("SYNCM", 0L);
@@ -538,34 +778,118 @@ public class RunP1MEMachine extends GhidraScript {
 
         @Override
         public void close() throws IOException {
-            try (JsonRows memory = memoryAccesses; JsonRows events = deviceEvents) {
-                // Both spools are closed/deleted even if one cleanup fails.
+            try (JsonRows memory = memoryAccesses; JsonRows events = deviceEvents;
+                 ObservationRows compares = compareOperands; ObservationRows indices = tableIndices) {
+                // Close every spool even if one cleanup fails.
             }
         }
 
-        void enterInstruction(long pc) {
+        void enterInstruction(long pc, int size) {
             if (!instructionTraceEnabled) return;
             if (instructionTraceSize >= MAX_TRACE_ENTRIES) {
                 throw new IllegalStateException(
                     "complete instruction trace exceeds " + MAX_TRACE_ENTRIES + " entries");
             }
+            if (size <= 0 || size > 0xff) {
+                throw new IllegalStateException("instruction trace size outside 1..255");
+            }
             int chunk = instructionTraceSize / TRACE_CHUNK_SIZE;
             int offset = instructionTraceSize % TRACE_CHUNK_SIZE;
-            if (offset == 0) {
-                try {
-                    instructionPcs.add(new int[TRACE_CHUNK_SIZE]);
-                    instructionTicks.add(new long[TRACE_CHUNK_SIZE]);
+            try {
+                if (offset == 0) {
+                    instructionChunks.add(new InstructionChunk());
+                    instructionTailShared = false;
                 }
-                catch (OutOfMemoryError error) {
-                    throw new IllegalStateException("cannot allocate complete instruction trace", error);
+                else if (instructionTailShared) {
+                    // Checkpoints and finished trials retain the old chunk even when
+                    // a restore makes its tail available for new execution.
+                    instructionChunks.set(chunk, instructionChunks.get(chunk).copy());
+                    instructionTailShared = false;
                 }
+            }
+            catch (OutOfMemoryError error) {
+                throw new IllegalStateException("cannot allocate complete instruction trace", error);
             }
             if ((pc & ~0xffffffffL) != 0) {
                 throw new IllegalStateException("instruction trace PC outside 32-bit address space");
             }
-            instructionPcs.get(chunk)[offset] = (int) pc;
-            instructionTicks.get(chunk)[offset] = instructions;
+            InstructionChunk entries = instructionChunks.get(chunk);
+            entries.pcs[offset] = (int) pc;
+            entries.sizes[offset] = (byte) size;
+            entries.ticks[offset] = instructions;
             instructionTraceSize++;
+        }
+        private record InstructionChunk(int[] pcs, byte[] sizes, long[] ticks) {
+            InstructionChunk() {
+                this(new int[TRACE_CHUNK_SIZE], new byte[TRACE_CHUNK_SIZE], new long[TRACE_CHUNK_SIZE]);
+            }
+
+            InstructionChunk copy() {
+                return new InstructionChunk(pcs.clone(), sizes.clone(), ticks.clone());
+            }
+        }
+
+        private record InstructionRange(List<InstructionChunk> chunks, int start, int count) {
+            long pc(int index) {
+                int offset = start + index;
+                return Integer.toUnsignedLong(chunks.get(offset / TRACE_CHUNK_SIZE)
+                    .pcs[offset % TRACE_CHUNK_SIZE]);
+            }
+
+            int size(int index) {
+                int offset = start + index;
+                return Byte.toUnsignedInt(chunks.get(offset / TRACE_CHUNK_SIZE)
+                    .sizes[offset % TRACE_CHUNK_SIZE]);
+            }
+        }
+
+        long instructionPc(int index) {
+            return Integer.toUnsignedLong(instructionChunks.get(index / TRACE_CHUNK_SIZE)
+                .pcs[index % TRACE_CHUNK_SIZE]);
+        }
+
+        int instructionSize(int index) {
+            return Byte.toUnsignedInt(instructionChunks.get(index / TRACE_CHUNK_SIZE)
+                .sizes[index % TRACE_CHUNK_SIZE]);
+        }
+
+        int trialInstructionCount(int trial) { return trialInstructions.get(trial).count; }
+        long trialInstructionPc(int trial, int index) { return trialInstructions.get(trial).pc(index); }
+        int trialInstructionSize(int trial, int index) { return trialInstructions.get(trial).size(index); }
+
+        void noteRecentPc(long pc) {
+            recentPcs[recentNext] = pc;
+            recentNext = (recentNext + 1) & (RECENT_PC_COUNT - 1);
+            if (recentSize < RECENT_PC_COUNT) recentSize++;
+        }
+
+        JsonArray recentPcs() {
+            JsonArray rows = new JsonArray();
+            int start = recentNext - recentSize;
+            for (int i = 0; i < recentSize; i++) {
+                rows.add(hex32(recentPcs[(start + i) & (RECENT_PC_COUNT - 1)]));
+            }
+            return rows;
+        }
+
+        void compare(long pc, long branch, String mnemonic, int width, long left, long right) {
+            if (compareKeys.add(pc, left, right)) {
+                compareOperands.addCompare(pc, branch, mnemonic, width, left, right);
+            }
+        }
+
+        void tableIndex(long pc, long base, long index, int scale, long effective, int width, String access) {
+            if (indexKeys.add(pc, index, effective)) {
+                tableIndices.addIndex(pc, base, index, scale, effective, width, access);
+            }
+        }
+
+        void writeCompareOperands(JsonWriter writer, FileChannel output, int trial) throws IOException {
+            compareOperands.writeTo(writer, output, trial);
+        }
+
+        void writeTableIndices(JsonWriter writer, FileChannel output, int trial) throws IOException {
+            tableIndices.writeTo(writer, output, trial);
         }
 
         void shortcut(String kind, long pc, long resumePc) {
@@ -581,15 +905,23 @@ public class RunP1MEMachine extends GhidraScript {
             instructionShortcuts.add(row);
         }
 
-        void writeInstructionTrace(JsonWriter writer) throws Exception {
+        void writeInstructionTrace(JsonWriter writer, int trial) throws IOException {
+            InstructionRange range = trial < 0
+                ? new InstructionRange(instructionChunks, 0, instructionTraceSize)
+                : trialInstructions.get(trial);
             writer.beginArray();
-            for (int index = 0; index < instructionTraceSize; index++) {
-                int chunk = index / TRACE_CHUNK_SIZE;
-                int offset = index % TRACE_CHUNK_SIZE;
-                writer.beginObject();
-                writer.name("pc").value(hex32(Integer.toUnsignedLong(instructionPcs.get(chunk)[offset])));
-                writer.name("instruction").value(instructionTicks.get(chunk)[offset]);
-                writer.endObject();
+            int index = range.start;
+            int stop = index + range.count;
+            for (InstructionChunk chunk : range.chunks) {
+                int end = Math.min(stop, (index / TRACE_CHUNK_SIZE + 1) * TRACE_CHUNK_SIZE);
+                for (; index < end; index++) {
+                    int offset = index % TRACE_CHUNK_SIZE;
+                    writer.beginObject()
+                        .name("pc").value(hex32(chunk.pcs[offset]))
+                        .name("size").value(Byte.toUnsignedInt(chunk.sizes[offset]))
+                        .name("instruction").value(chunk.ticks[offset])
+                        .endObject();
+                }
             }
             writer.endArray();
         }
@@ -598,33 +930,518 @@ public class RunP1MEMachine extends GhidraScript {
             syncCounts.put(operation, syncCounts.get(operation) + 1);
         }
 
+        // Only immutable values are cached. No cached value depends on a checkpoint.
+        private JsonPrimitive hexAddress(long value) {
+            int key = (int) value;
+            int slot = (key * 0x9e3779b9) >>> (32 - HEX_CACHE_BITS);
+            JsonPrimitive cached = hexValues[slot];
+            if (cached == null || hexKeys[slot] != key) {
+                cached = new JsonPrimitive(hex32(key));
+                hexKeys[slot] = key;
+                hexValues[slot] = cached;
+            }
+            return cached;
+        }
+
         void access(String kind, long pc, long address, int size, String evidence) {
+            boolean write = "write".equals(kind);
             if (memoryAccesses.size() >= 1048576) {
                 // A poll that rewrites the same slots does not hide a later
                 // store. A write to an address the trace never recorded does.
-                if ("write".equals(kind)) {
-                    for (int offset = 0; offset < size; offset++) {
-                        if (!writtenBytes.contains(address + offset)) {
-                            traceLostAddress = true;
-                            return;
+                if (write && !writtenBytes.markOrCovers(address, size, false))
+                    traceLostAddress = true;
+                return;
+            }
+            if (write) writtenBytes.markOrCovers(address, size, true);
+            if (memoryAccesses.discard && memoryAccesses.listener == null) return;
+            memoryAccesses.addAccess(kind, hexAddress(pc), instructions,
+                hexAddress(address), size, evidence, busInitiator);
+        }
+
+        void aliasWrite(long from, long to, int size) {
+            if (deviceEvents.discard && deviceEvents.listener == null) return;
+            deviceEvents.addAlias(hexAddress(from), hexAddress(to), size);
+        }
+
+        // Store the exact tuples, not just their hashes. PC is a 32-bit address,
+        // so PC + 1 reserves zero for an empty slot without restricting operands.
+        private static final class TupleKeys {
+            private static final long[] EMPTY = new long[0];
+            private long[] pcs = EMPTY;
+            private long[] first = EMPTY;
+            private long[] second = EMPTY;
+            private int size;
+
+            private int slot(long pc, long left, long right) {
+                long hash = (pc * 0x9e3779b97f4a7c15L)
+                    ^ (left * 0xc2b2ae3d27d4eb4fL) ^ (right * 0x165667b19e3779f9L);
+                hash = (hash ^ (hash >>> 33)) * 0xff51afd7ed558ccdL;
+                int mask = pcs.length - 1;
+                int slot = (int) (hash ^ (hash >>> 32)) & mask;
+                while (pcs[slot] != 0
+                        && (pcs[slot] != pc || first[slot] != left || second[slot] != right)) {
+                    slot = (slot + 1) & mask;
+                }
+                return slot;
+            }
+
+            private void resize(int capacity) {
+                long[] oldPcs = pcs, oldFirst = first, oldSecond = second;
+                pcs = new long[capacity];
+                first = new long[capacity];
+                second = new long[capacity];
+                for (int i = 0; i < oldPcs.length; i++) {
+                    if (oldPcs[i] == 0) continue;
+                    int slot = slot(oldPcs[i], oldFirst[i], oldSecond[i]);
+                    pcs[slot] = oldPcs[i];
+                    first[slot] = oldFirst[i];
+                    second[slot] = oldSecond[i];
+                }
+            }
+
+            boolean add(long pc, long left, long right) {
+                long key = pc + 1;
+                if (pcs.length == 0) resize(16);
+                int slot = slot(key, left, right);
+                if (pcs[slot] != 0) return false;
+                if (size == pcs.length - (pcs.length >>> 2)) {
+                    resize(Math.multiplyExact(pcs.length, 2));
+                    slot = slot(key, left, right);
+                }
+                pcs[slot] = key;
+                first[slot] = left;
+                second[slot] = right;
+                size++;
+                return true;
+            }
+
+            TupleKeys copy() {
+                TupleKeys result = new TupleKeys();
+                if (size != 0) {
+                    result.pcs = pcs.clone();
+                    result.first = first.clone();
+                    result.second = second.clone();
+                    result.size = size;
+                }
+                return result;
+            }
+        }
+
+        static final class ExecutedPcs {
+            private static final int PAGE_BITS = 12;
+            private static final int GROUP_BITS = 8;
+            private static final int GROUP_MASK = (1 << GROUP_BITS) - 1;
+            private static final int WORD_MASK = (1 << (PAGE_BITS - 6)) - 1;
+            private long[][][] groups;
+            private int lastPageNumber = -1;
+            private long[] lastPage;
+            private int size;
+
+            private long[] page(int number, boolean create) {
+                if (groups == null) {
+                    if (!create) return null;
+                    groups = new long[1 << (32 - PAGE_BITS - GROUP_BITS)][][];
+                }
+                int groupIndex = number >>> GROUP_BITS;
+                long[][] group = groups[groupIndex];
+                if (group == null) {
+                    if (!create) return null;
+                    groups[groupIndex] = group = new long[1 << GROUP_BITS][];
+                }
+                int pageIndex = number & GROUP_MASK;
+                long[] page = group[pageIndex];
+                if (page == null && create) group[pageIndex] = page = new long[WORD_MASK + 1];
+                return page;
+            }
+
+            void add(long pc) {
+                int address = (int) pc;
+                int number = address >>> PAGE_BITS;
+                if (number != lastPageNumber) {
+                    lastPage = page(number, true);
+                    lastPageNumber = number;
+                }
+                int word = (address >>> 6) & WORD_MASK;
+                long mask = 1L << address;
+                long before = lastPage[word];
+                if ((before & mask) == 0) {
+                    lastPage[word] = before | mask;
+                    size++;
+                }
+            }
+
+            boolean contains(long pc) {
+                if ((pc & ~0xffffffffL) != 0) return false;
+                int address = (int) pc;
+                long[] page = page(address >>> PAGE_BITS, false);
+                return page != null && (page[(address >>> 6) & WORD_MASK] & (1L << address)) != 0;
+            }
+
+            int size() { return size; }
+
+            ExecutedPcs copy() {
+                ExecutedPcs result = new ExecutedPcs();
+                if (groups == null) return result;
+                result.size = size;
+                result.groups = groups.clone();
+                for (int i = 0; i < groups.length; i++) {
+                    if (groups[i] == null) continue;
+                    long[][] group = groups[i];
+                    long[][] copy = result.groups[i] = group.clone();
+                    for (int j = 0; j < group.length; j++) {
+                        if (group[j] != null) copy[j] = group[j].clone();
+                    }
+                }
+                return result;
+            }
+        }
+
+        /**
+         * Comparisons and indexed accesses share one physical copy of each row
+         * between the scenario and its trials. A restore changes the logical
+         * prefix, not the file, so earlier trials keep their immutable ranges.
+         */
+        private static final class ObservationRows implements Closeable {
+            private static final String HEX = "0123456789ABCDEF";
+            private record Segment(Segment previous, JsonRows.Span range) {}
+            private final Path directory;
+            private final String prefix;
+            private final List<JsonRows.Span> trials = new ArrayList<>();
+            private final char[] digits = new char[18];
+            private Path path;
+            private FileChannel spool;
+            private BufferedWriter output;
+            private boolean haveRows;
+            private Segment segments;
+            private long segmentStart;
+            private long trialStart;
+
+            ObservationRows(Path directory, String prefix) {
+                this.directory = directory;
+                this.prefix = prefix;
+                digits[0] = '0';
+                digits[1] = 'x';
+            }
+
+            private void beginRow() throws IOException {
+                if (output == null) {
+                    path = Files.createTempFile(directory, prefix, ".json");
+                    spool = FileChannel.open(path, StandardOpenOption.READ, StandardOpenOption.WRITE);
+                    output = new BufferedWriter(Channels.newWriter(spool, StandardCharsets.UTF_8), 65536);
+                }
+                if (haveRows) output.write(',');
+                haveRows = true;
+            }
+
+            private void hex(long value, int width) throws IOException {
+                for (int i = width + 1; i >= 2; i--, value >>>= 4) {
+                    digits[i] = HEX.charAt((int) value & 15);
+                }
+                output.write(digits, 0, width + 2);
+            }
+
+            private void operand(long value, int minimum) throws IOException {
+                if (minimum == 0 || minimum > 16) {
+                    output.write(String.format("0x%0" + minimum + "X", value));
+                    return;
+                }
+                int significant = (67 - Long.numberOfLeadingZeros(value)) >>> 2;
+                hex(value, Math.max(minimum, significant));
+            }
+
+            private void integer(int number) throws IOException {
+                long value = number;
+                if (value < 0) {
+                    output.write('-');
+                    value = -value;
+                }
+                int i = digits.length;
+                do {
+                    digits[--i] = (char) ('0' + value % 10);
+                    value /= 10;
+                } while (value != 0);
+                output.write(digits, i, digits.length - i);
+            }
+
+            void addCompare(long pc, long branch, String mnemonic, int width, long left, long right) {
+                try {
+                    beginRow();
+                    output.write("{\"compare_pc\":\"");
+                    hex(pc, 8);
+                    output.write("\",\"branch_pc\":\"");
+                    hex(branch, 8);
+                    // The observer accepts only the fixed set of comparison mnemonics.
+                    output.write("\",\"mnemonic\":\"");
+                    output.write(mnemonic);
+                    output.write("\",\"width_bits\":");
+                    integer(width);
+                    output.write(",\"left\":\"");
+                    operand(left, width / 4);
+                    output.write("\",\"right\":\"");
+                    operand(right, width / 4);
+                    output.write("\"}");
+                }
+                catch (IOException e) {
+                    throw new JsonIOException(e);
+                }
+            }
+
+            void addIndex(long pc, long base, long index, int scale, long effective, int width, String access) {
+                try {
+                    beginRow();
+                    output.write("{\"pc\":\"");
+                    hex(pc, 8);
+                    output.write("\",\"base\":\"");
+                    hex(base, 8);
+                    output.write("\",\"index\":\"");
+                    hex(index, 8);
+                    output.write("\",\"scale\":");
+                    integer(scale);
+                    output.write(",\"effective_address\":\"");
+                    hex(effective, 8);
+                    output.write("\",\"access_width_bits\":");
+                    integer(width);
+                    // The bus callbacks supply only load/store/branch.
+                    output.write(",\"access\":\"");
+                    output.write(access);
+                    output.write("\"}");
+                }
+                catch (IOException e) {
+                    throw new JsonIOException(e);
+                }
+            }
+
+            private long position() throws IOException {
+                if (output == null) return 0;
+                output.flush();
+                return spool.position();
+            }
+
+            private static JsonRows.Span range(long start, long end) {
+                // Every row except the very first has a leading separator.
+                return new JsonRows.Span(start > 0 && end > start ? start + 1 : start, end);
+            }
+
+            void beginTrial() throws IOException { trialStart = position(); }
+            void endTrial() throws IOException { trials.add(range(trialStart, position())); }
+
+            Segment checkpoint() throws IOException {
+                long end = position();
+                if (segmentStart != end) {
+                    JsonRows.Span appended = range(segmentStart, end);
+                    if (segments != null && segments.range.end + 1 == appended.start) {
+                        // Include the spool's separator between adjacent ranges.
+                        segments = new Segment(segments.previous, new JsonRows.Span(segments.range.start, end));
+                    }
+                    else segments = new Segment(segments, appended);
+                    segmentStart = end;
+                }
+                return segments;
+            }
+
+            void restore(Segment snapshot) throws IOException {
+                segments = snapshot;
+                segmentStart = position();
+            }
+
+            private void transfer(JsonRows.Span range, FileChannel report) throws IOException {
+                for (long at = range.start; at < range.end;) {
+                    long copied = spool.transferTo(at, range.end - at, report);
+                    if (copied == 0) throw new IOException("incomplete observation spool: " + path);
+                    at += copied;
+                }
+            }
+
+            void writeTo(JsonWriter writer, FileChannel report, int trial) throws IOException {
+                writer.beginArray();
+                if (trial >= 0) {
+                    JsonRows.Span range = trials.get(trial);
+                    if (range.start < range.end) {
+                        writer.flush();
+                        transfer(range, report);
+                    }
+                }
+                else {
+                    Segment segment = checkpoint();
+                    if (segment != null) {
+                        ArrayDeque<JsonRows.Span> ranges = new ArrayDeque<>();
+                        for (; segment != null; segment = segment.previous) ranges.push(segment.range);
+                        writer.flush();
+                        transfer(ranges.pop(), report);
+                        if (!ranges.isEmpty()) {
+                            var comma = java.nio.ByteBuffer.wrap(new byte[] {','});
+                            do {
+                                comma.rewind();
+                                while (comma.hasRemaining()) report.write(comma);
+                                transfer(ranges.pop(), report);
+                            } while (!ranges.isEmpty());
                         }
                     }
                 }
-                return;
+                writer.endArray();
             }
-            if ("write".equals(kind)) {
-                for (int offset = 0; offset < size; offset++)
-                    writtenBytes.add(address + offset);
+
+            @Override
+            public void close() throws IOException {
+                try {
+                    if (output != null) output.close();
+                    else if (spool != null) spool.close();
+                }
+                finally {
+                    if (path != null) Files.deleteIfExists(path);
+                }
             }
-            JsonObject row = new JsonObject();
-            row.addProperty("kind", kind);
-            row.addProperty("pc", hex32(pc));
-            row.addProperty("instruction", instructions);
-            row.addProperty("address", hex32(address));
-            row.addProperty("size", size);
-            row.addProperty("evidence", evidence);
-            if (busInitiator != null) row.addProperty("initiator", busInitiator);
-            memoryAccesses.add(row);
+        }
+
+        private static final class WrittenBytes {
+            private static final int PAGE_BITS = 12;
+            private static final int PAGE_SIZE = 1 << PAGE_BITS;
+            private final Map<Long, BitSet> pages = new HashMap<>();
+
+            boolean markOrCovers(long address, int size, boolean mark) {
+                while (size > 0) {
+                    long pageNumber = address >>> PAGE_BITS;
+                    int first = (int) address & (PAGE_SIZE - 1);
+                    int length = Math.min(size, PAGE_SIZE - first);
+                    BitSet page = pages.get(pageNumber);
+                    if (mark) {
+                        if (page == null) {
+                            page = new BitSet(PAGE_SIZE);
+                            pages.put(pageNumber, page);
+                        }
+                        page.set(first, first + length);
+                    }
+                    else if (page == null || page.nextClearBit(first) < first + length) {
+                        return false;
+                    }
+                    address += length;
+                    size -= length;
+                }
+                return true;
+            }
+
+            void restore(WrittenBytes source) {
+                pages.clear();
+                source.pages.forEach((number, page) -> pages.put(number, (BitSet) page.clone()));
+            }
+        }
+        static final class Checkpoint {
+            final long instructions;
+            final int instructionTraceSize;
+            final List<InstructionChunk> instructionChunks;
+            final List<JsonObject> instructionShortcuts;
+            final ObservationRows.Segment compareRows;
+            final ObservationRows.Segment indexRows;
+            final TupleKeys compareKeys;
+            final TupleKeys indexKeys;
+            final long[] recentPcs;
+            final int recentNext;
+            final int recentSize;
+            final ExecutedPcs executed;
+            final Map<String, Long> syncCounts;
+            final WrittenBytes writtenBytes = new WrittenBytes();
+            final boolean traceLostAddress;
+            final String busInitiator;
+            final JsonRows.Counters memoryCounters;
+            final JsonRows.Counters eventCounters;
+            Checkpoint(Trace trace) throws IOException {
+                instructions = trace.instructions;
+                instructionTraceSize = trace.instructionTraceSize;
+                instructionChunks = List.copyOf(trace.instructionChunks);
+                trace.instructionTailShared = true;
+                instructionShortcuts = List.copyOf(trace.instructionShortcuts);
+                recentPcs = trace.recentPcs.clone();
+                recentNext = trace.recentNext;
+                recentSize = trace.recentSize;
+                executed = trace.executed.copy();
+                compareRows = trace.compareOperands.checkpoint();
+                indexRows = trace.tableIndices.checkpoint();
+                compareKeys = trace.compareKeys.copy();
+                indexKeys = trace.indexKeys.copy();
+                syncCounts = new LinkedHashMap<>(trace.syncCounts);
+                writtenBytes.restore(trace.writtenBytes);
+                traceLostAddress = trace.traceLostAddress;
+                busInitiator = trace.busInitiator;
+                memoryCounters = trace.memoryAccesses.checkpointCounters();
+                eventCounters = trace.deviceEvents.checkpointCounters();
+            }
+        }
+
+        Checkpoint checkpoint() throws IOException {
+            return new Checkpoint(this);
+        }
+
+        void restore(Checkpoint checkpoint) throws IOException {
+            instructions = checkpoint.instructions;
+            instructionTraceSize = checkpoint.instructionTraceSize;
+            instructionChunks.clear();
+            instructionChunks.addAll(checkpoint.instructionChunks);
+            instructionTailShared = true;
+            instructionShortcuts.clear();
+            instructionShortcuts.addAll(checkpoint.instructionShortcuts);
+            compareOperands.restore(checkpoint.compareRows);
+            tableIndices.restore(checkpoint.indexRows);
+            compareKeys = checkpoint.compareKeys.copy();
+            indexKeys = checkpoint.indexKeys.copy();
+            System.arraycopy(checkpoint.recentPcs, 0, recentPcs, 0, RECENT_PC_COUNT);
+            recentNext = checkpoint.recentNext;
+            recentSize = checkpoint.recentSize;
+            executed = checkpoint.executed.copy();
+            syncCounts.clear();
+            syncCounts.putAll(checkpoint.syncCounts);
+            writtenBytes.restore(checkpoint.writtenBytes);
+            traceLostAddress = checkpoint.traceLostAddress;
+            busInitiator = checkpoint.busInitiator;
+            memoryAccesses.restoreCounters(checkpoint.memoryCounters);
+            deviceEvents.restoreCounters(checkpoint.eventCounters);
+        }
+
+        void beginTrial(boolean captureRows) throws IOException {
+            memoryAccesses.beginTrial(captureRows);
+            deviceEvents.beginTrial(captureRows);
+            trialInstructionStart = instructionTraceSize;
+            compareOperands.beginTrial();
+            tableIndices.beginTrial();
+        }
+
+        void endTrial() throws IOException {
+            memoryAccesses.endTrial();
+            deviceEvents.endTrial();
+            compareOperands.endTrial();
+            tableIndices.endTrial();
+            if (instructionTraceEnabled) {
+                int first = trialInstructionStart;
+                int count = instructionTraceSize - first;
+                List<InstructionChunk> chunks = count == 0 ? List.of()
+                    : List.copyOf(instructionChunks.subList(first / TRACE_CHUNK_SIZE,
+                        (instructionTraceSize - 1) / TRACE_CHUNK_SIZE + 1));
+                trialInstructions.add(new InstructionRange(chunks, first % TRACE_CHUNK_SIZE, count));
+                if (count != 0) instructionTailShared = true;
+            }
+        }
+    }
+
+    // The payload is immutable after deserialization. Keep scheduling state in
+    // the queue instead of cloning or modifying every scenario event on restore.
+    record WireInput(long trigger, long ordinal, ExternalEvent payload) {}
+
+    static final class WireInputs {
+        final List<WireInput> rows = new ArrayList<>();
+        int next;
+        boolean unordered;
+
+        void add(long trigger, long ordinal, ExternalEvent payload) {
+            if (next < rows.size() && trigger < rows.getLast().trigger) unordered = true;
+            rows.add(new WireInput(trigger, ordinal, payload));
+        }
+
+        WireInput take(long trigger) {
+            if (unordered) {
+                rows.subList(next, rows.size()).sort(Comparator.comparingLong(WireInput::trigger));
+                unordered = false;
+            }
+            if (next == rows.size() || rows.get(next).trigger != trigger) return null;
+            return rows.get(next++);
         }
     }
 
@@ -674,6 +1491,7 @@ public class RunP1MEMachine extends GhidraScript {
             Set.of("FSTATR", "FASTAT", "FCMDR", "FBCSTAT", "FPSADDR");
         static final long RSCFD_TX_RAM_BASE = 0xFFD24000L;
         static final long RSCFD_TX_RECORD_SIZE = 0x20L;
+        static final long RSCFD_RAM_INITIALIZATION_CYCLES = 3794;
 
         final SleighLanguage language;
         final MachineSpec spec;
@@ -682,10 +1500,20 @@ public class RunP1MEMachine extends GhidraScript {
         PcodeThread<byte[]> executionThread;
         final List<RegionDef> regions;
         final List<RegisterDef> registers;
+        // Immutable address definitions; lookaside entries hold no guest state.
+        final RegionDef[] regionCache = new RegionDef[64];
+        final RegisterDef[] registerCache = new RegisterDef[64];
+        record MpuDescriptor(java.util.function.LongSupplier attributes, java.util.function.LongSupplier lower,
+                             java.util.function.LongSupplier upper) {}
+        final MpuDescriptor[] mpu = new MpuDescriptor[16];
+        final int[] mpuHints = new int[64];
         final Map<String, RegisterDef> registersByName = new HashMap<>();
         final Map<Integer, RegisterDef> interruptRegisters = new LinkedHashMap<>();
         final RegisterDef[] interruptRegistersByAddress;
         final BitSet pendingInterrupts;
+        final byte[] pendingPriorities; // -1 if masked or no longer asserted; indexed by EIC
+        final BitSet[] channelsByPriority = new BitSet[16];
+        int pendingPriorityMask;
         final Map<Integer, ReceiveFifo> receiveFifos = new HashMap<>();
         final Map<Long, RegisterDef> pendingRscfdTransmits = new HashMap<>();
         // R01UH0585EJ0120 Table 17.132: CFDC and CFPLS encodings.
@@ -720,6 +1548,9 @@ public class RunP1MEMachine extends GhidraScript {
         RegionDef dataFlash;
         final PriorityQueue<ScheduledEvent> externalEvents = new PriorityQueue<>(ScheduledEvent.ORDER);
         final Map<String, Csih> csihControllers = new HashMap<>();
+        final List<ExternalEvent> resetRelativeEvents = new ArrayList<>();
+        ResetReplay resetReplay;
+        EventSocket eventSocket;
         final Map<RegisterDef, Csih> csihBindings = new HashMap<>();
         long registerBeforeWrite;
         boolean guardWriteIgnored;
@@ -733,12 +1564,19 @@ public class RunP1MEMachine extends GhidraScript {
         final Rsent rsent;
         long hsbCyclesPerInstruction;
         long hsbCycles;
+        // Clock state is materialized at hsbCycles. The budget covers only ticks
+        // strictly before the next observable edge, excluding those already deferred.
+        private long deferredClockCycles;
+        private long quietClockBudget;
+        boolean compareOperands;
+        boolean inputDerivedTableIndices;
         boolean discardBusStore;
         long segFlags;
         boolean segNotificationPending;
         int faciPendingCommand;
         long faciReadErrors;
         long faciDeadline = Long.MAX_VALUE;
+        long rscfdRamInitDeadline = RSCFD_RAM_INITIALIZATION_CYCLES;
         int faciOperation;
         long faciBlankFirst;
         long faciBlankCycles;
@@ -773,9 +1611,8 @@ public class RunP1MEMachine extends GhidraScript {
         final Map<String, List<RegionDef>> aliases = new HashMap<>();
         final PriorityQueue<ScheduledEvent> scheduledEvents = new PriorityQueue<>(ScheduledEvent.ORDER);
         long nextEventOrdinal;
-        PcodeEmulator emulator;
+        PcodeMachine<byte[]> emulator;
         AddressSpace memorySpace;
-        boolean internalWrite;
         boolean peripheralFile;
         boolean peripheralPollBusy;
         // Same threshold as tools/camry_oracle.py PERIPHERAL_POLL_READS.
@@ -814,6 +1651,9 @@ public class RunP1MEMachine extends GhidraScript {
             interruptRegistersByAddress = interruptRegisters.values().toArray(RegisterDef[]::new);
             Arrays.sort(interruptRegistersByAddress, Comparator.comparingLong(row -> row.address));
             pendingInterrupts = new BitSet(interruptRegistersByAddress.length);
+            pendingPriorities = new byte[interruptRegistersByAddress.length];
+            Arrays.fill(pendingPriorities, (byte) -1);
+            Arrays.setAll(channelsByPriority, ignored -> new BitSet());
             resetFactorKnownMask = requiredRegister("reset controller", "status", "RESF").reset_mask;
             bindPortAliases();
             registers.sort(Comparator.comparingLong(row -> row.address));
@@ -865,7 +1705,7 @@ public class RunP1MEMachine extends GhidraScript {
             rsent = new Rsent();
         }
 
-        void attach(PcodeEmulator emulator) {
+        void attach(PcodeMachine<byte[]> emulator) {
             this.emulator = emulator;
             this.memorySpace = language.getDefaultSpace();
         }
@@ -877,12 +1717,19 @@ public class RunP1MEMachine extends GhidraScript {
         }
 
         void dispatchDueEvents() {
-            while (!scheduledEvents.isEmpty() && scheduledEvents.peek().tick <= trace.instructions) {
+            ScheduledEvent next = scheduledEvents.peek();
+            if (next == null || next.tick > trace.instructions) return;
+            prepareClockMutation(executionThread);
+            do {
                 scheduledEvents.remove().action.run();
-            }
+                next = scheduledEvents.peek();
+            } while (next != null && next.tick <= trace.instructions);
         }
 
         RegionDef region(long address, int size) {
+            int slot = (int) (address >>> 12 ^ address >>> 20) & (regionCache.length - 1);
+            RegionDef hit = regionCache[slot];
+            if (hit != null && size > 0 && hit.contains(address, size)) return hit;
             int low = 0;
             int high = regions.size() - 1;
             int candidate = -1;
@@ -898,10 +1745,18 @@ public class RunP1MEMachine extends GhidraScript {
             }
             if (candidate < 0) return null;
             RegionDef region = regions.get(candidate);
+            if (candidate + 1 == regions.size() ||
+                    region.end_exclusive <= regions.get(candidate + 1).start)
+                regionCache[slot] = region;
             return region.contains(address, size) ? region : null;
         }
 
         RegisterDef register(long address, int size) {
+            if (registers.isEmpty() || address < registers.get(0).address) return null;
+            int slot = (int) (address >>> 1) & (registerCache.length - 1);
+            RegisterDef hit = registerCache[slot];
+            if (hit != null && hit.address == address)
+                return hit.contains(address, size) ? hit : null;
             int low = 0;
             int high = registers.size() - 1;
             int candidate = -1;
@@ -917,6 +1772,7 @@ public class RunP1MEMachine extends GhidraScript {
             }
             if (candidate < 0) return null;
             RegisterDef register = registers.get(candidate);
+            registerCache[slot] = register;
             return register.contains(address, size) ? register : null;
         }
 
@@ -925,24 +1781,48 @@ public class RunP1MEMachine extends GhidraScript {
             return source == null || source.getCounter() == null ? 0 : source.getCounter().getOffset();
         }
         long processorRegister(PcodeThread<byte[]> thread, String name) {
+            if (thread instanceof P1MEJitMachine.MachineThread jit) {
+                return jit.processorRegister(name);
+            }
             Register register = language.getRegister(name);
             if (register == null) {
                 throw new IllegalStateException("processor model lacks register " + name);
             }
+            return processorRegister(thread, register);
+        }
+
+        long processorRegister(PcodeThread<byte[]> thread, Register register) {
+            if (thread instanceof P1MEJitMachine.MachineThread jit) return jit.processorRegister(register);
             byte[] value = thread.getState().getVar(register, Reason.INSPECT);
             return Utils.bytesToLong(value, value.length, language.isBigEndian()) & 0xffffffffL;
         }
 
+        java.util.function.LongSupplier registerReader(PcodeThread<byte[]> thread, String name) {
+            Register register = language.getRegister(name);
+            if (thread instanceof P1MEJitMachine.MachineThread jit)
+                return jit.bindProcessorRegister(register)::read;
+            return () -> processorRegister(thread, register);
+        }
+
+        void bindMpu(PcodeThread<byte[]> thread) {
+            Arrays.setAll(mpu, i -> new MpuDescriptor(registerReader(thread, "MPAT" + i),
+                registerReader(thread, "MPLA" + i), registerReader(thread, "MPUA" + i)));
+        }
+
         void processorRegister(PcodeThread<byte[]> thread, String name, long value) {
+            if (thread instanceof P1MEJitMachine.MachineThread jit) {
+                jit.processorRegister(name, value);
+                return;
+            }
             Register register = language.getRegister(name);
             if (register == null) throw new IllegalArgumentException("unknown processor register: " + name);
             thread.getState().setVar(register, bytes(value, register.getNumBytes(), language.isBigEndian()));
         }
 
-        void noteBoundedCall(PcodeThread<byte[]> thread, Instruction instruction) {
+        void noteBoundedCall(PcodeThread<byte[]> thread) {
             // A jarl into a rewritten loop saves the caller's frame. The
             // back-edge returns there after one iteration, as the host does.
-            if (!"jarl".equals(instruction.getMnemonicString())) return;
+            if (boundedEntries.isEmpty()) return;
             long next = pc(thread);
             if (!boundedEntries.contains(next) || next == scenarioEntry) return;
             long[] saved = new long[1 + BOUNDED_SAVED.length];
@@ -997,32 +1877,23 @@ public class RunP1MEMachine extends GhidraScript {
         void deliverInterrupt(PcodeThread<byte[]> thread) {
             long psw = processorRegister(thread, "PSW");
             if ((psw & 0xa0) != 0) return;
-            long serviced = processorRegister(thread, "ISPR") & 0xffff;
-            int ceiling = serviced == 0 ? 16 : Long.numberOfTrailingZeros(serviced);
-            long pmr = processorRegister(thread, "PMR");
-            RegisterDef selected = null;
-            int priority = 16;
-            boolean priorityMasked = false;
-            for (int index = pendingInterrupts.nextSetBit(0); index >= 0;
-                    index = pendingInterrupts.nextSetBit(index + 1)) {
-                RegisterDef eic = interruptRegistersByAddress[index];
-                long value = unsigned(memory(eic.address, eic.size));
-                if ((value & 0x1080) != 0x1000) continue;
-                int candidate = (int) value & 15;
-                if (candidate >= ceiling) continue;
-                if ((pmr & (1L << candidate)) != 0) {
-                    priorityMasked = true;
-                    continue;
-                }
-                if (candidate < priority || (candidate == priority && selected != null
-                        && eic.interrupt_channel < selected.interrupt_channel)) {
-                    priority = candidate;
-                    selected = eic;
-                }
+            int eligible = pendingPriorityMask;
+            int serviced = 0, pmr = 0;
+            if (eligible != 0) {
+                serviced = (int) processorRegister(thread, "ISPR") & 0xffff;
+                if (serviced != 0) eligible &= Integer.lowestOneBit(serviced) - 1;
+                pmr = (int) processorRegister(thread, "PMR");
             }
+            boolean priorityMasked = (eligible & pmr) != 0;
             long icsr = processorRegister(thread, "ICSR");
-            processorRegister(thread, "ICSR", (icsr & ~1L) | (priorityMasked ? 1L : 0L));
-            if (selected == null) return;
+            if (((icsr & 1) != 0) != priorityMasked)
+                processorRegister(thread, "ICSR", icsr ^ 1);
+            eligible &= ~pmr;
+            if (eligible == 0) return;
+            materializeClock(thread);
+            int priority = Integer.numberOfTrailingZeros(eligible);
+            int channel = channelsByPriority[priority].nextSetBit(0);
+            RegisterDef selected = interruptRegisters.get(channel);
             long control = unsigned(memory(selected.address, selected.size));
             long base = processorRegister(thread, (psw & 0x8000) == 0 ? "RBASE" : "EBASE");
             long handler;
@@ -1095,7 +1966,7 @@ public class RunP1MEMachine extends GhidraScript {
         }
 
         void requireAlignment(PcodeThread<byte[]> thread, long address, int size, String access) {
-            if (size <= 1) return;
+            if (size <= 1 || ((size & (size - 1)) == 0 && (address & (size - 1)) == 0)) return;
             long mctl = processorRegister(thread, "MCTL");
             int alignment = size;
             if ((mctl & 2) != 0) {
@@ -1109,28 +1980,38 @@ public class RunP1MEMachine extends GhidraScript {
             }
         }
 
-        void requireMpu(PcodeThread<byte[]> thread, long address, int size,
+        // The successful descriptor covers through this exclusive address.
+        long requireMpu(PcodeThread<byte[]> thread, long address, int size,
                         String access, boolean user) {
             long mpm = processorRegister(thread, "MPM");
-            if ((mpm & 1) == 0) return;
-            if (!user && (mpm & 2) == 0) return;
+            if ((mpm & 1) == 0 || (!user && (mpm & 2) == 0)) return 0x1_0000_0000L;
             long last = address + Integer.toUnsignedLong(size) - 1;
-            long asid = processorRegister(thread, "ASID") & 0x3ff;
+            long asid = -1;
             int permission = access.equals("execute") ? (user ? 2 : 5)
                 : access.equals("write") ? (user ? 1 : 4) : (user ? 0 : 3);
             boolean matched = false;
-            for (int index = 0; index < 16; index++) {
-                long attributes = processorRegister(thread, "MPAT" + index);
+            // Permission is the union of matching descriptors. Try the last
+            // grant for this page first, but always read its live registers.
+            int slot = (int) (address >>> 12 ^ address >>> 20 ^ permission) & (mpuHints.length - 1);
+            int first = mpuHints[slot];
+            for (int i = 0; i < mpu.length; i++) {
+                int index = (first + i) & 15;
+                MpuDescriptor descriptor = mpu[index];
+                long attributes = descriptor.attributes.getAsLong();
                 if ((attributes & 0x80) == 0) continue;
-                if ((attributes & 0x40) == 0 && ((attributes >>> 16) & 0x3ff) != asid) {
-                    continue;
+                if ((attributes & 0x40) == 0) {
+                    if (asid < 0) asid = processorRegister(thread, "ASID") & 0x3ff;
+                    if (((attributes >>> 16) & 0x3ff) != asid) continue;
                 }
-                long lower = processorRegister(thread, "MPLA" + index) & 0xfffffffcL;
-                long upper = processorRegister(thread, "MPUA" + index) | 3L;
+                long lower = descriptor.lower.getAsLong() & 0xfffffffcL;
+                long upper = descriptor.upper.getAsLong() | 3L;
                 if (Long.compareUnsigned(address, lower) < 0
                         || Long.compareUnsigned(last, upper) > 0) continue;
                 matched = true;
-                if ((attributes & (1L << permission)) != 0) return;
+                if ((attributes & (1L << permission)) != 0) {
+                    mpuHints[slot] = index;
+                    return upper + 1;
+                }
             }
             throw fault("mpu-" + access, thread, address, size, access,
                 "manual:R01US0123EJ0140 sections 3.5 and 5.1",
@@ -1250,9 +2131,9 @@ public class RunP1MEMachine extends GhidraScript {
             }
         }
 
-        void requireGuards(PcodeThread<byte[]> thread, long address, int size, String access) {
-            if (peripheralFile) return;
-            RegionDef region = region(address, size);
+        // True means the entire mapped region is guard-free for this kind of access.
+        boolean requireGuards(PcodeThread<byte[]> thread, long address, int size, String access,
+                              RegionDef region) {
             if (region != null && "global_ram".equals(region.name) && access.equals("write")) {
                 int spid = cpuSpid(thread);
                 // Table31.153: every matching enabled region must permit a write.
@@ -1268,20 +2149,24 @@ public class RunP1MEMachine extends GhidraScript {
                         if (((address + lane) & valid) == (base & valid)) {
                             segError(thread, address, 0x10L);
                             discardBusStore = true;
-                            return;
+                            return false;
                         }
                     }
                 }
+                return false;
             }
             if (region != null) {
-                if ("dataflash".equals(region.name))
+                if ("dataflash".equals(region.name)) {
                     requireBusGuard(thread, "FSGD0PROT04", address, size, access);
-                return;
+                    return false;
+                }
+                return true;
             }
             RegisterDef target = register(address, size);
-            if (target == null) return; // Preserve the precise unmapped/width boundary.
+            if (target == null) return false; // Preserve the precise unmapped/width boundary.
             String guard = peripheralGuards.get(target);
             if (guard != null) requireBusGuard(thread, guard, address, size, access);
+            return false;
         }
 
         long segFlagValue() {
@@ -1327,6 +2212,7 @@ public class RunP1MEMachine extends GhidraScript {
 
         void deliverSystemError(PcodeThread<byte[]> thread) {
             if (!segNotificationPending) return;
+            materializeClock(thread);
             segNotificationPending = false;
             long flags = enabledSegFlags();
             if (flags == 0) return;
@@ -1354,12 +2240,17 @@ public class RunP1MEMachine extends GhidraScript {
         void requireAccessProtection(PcodeThread<byte[]> thread, long address, int size, String access) {
             boolean user = (processorRegister(thread, "PSW") & (1L << 30)) != 0;
             requireMpu(thread, address, size, access, user);
-            requireGuards(thread, address, size, access);
+            if (peripheralFile) return;
+            RegionDef region = region(address, size);
+            requireGuards(thread, address, size, access, region);
             if (discardBusStore && access.equals("write")) return;
-            if (!user || peripheralFile) return;
+            if (user) requireUserIpg(thread, address, size, access, region);
+        }
+
+        void requireUserIpg(PcodeThread<byte[]> thread, long address, int size, String access,
+                            RegionDef region) {
             RegisterDef ipg = requiredRegister("P1M-E", "IPG enable", "IPGENUM");
             if ((registerValue(ipg) & 1) == 0) return;
-            RegionDef region = region(address, size);
             if (region != null && (region.name.startsWith("codeflash")
                     || "local_ram".equals(region.alias_group))) return;
             throw fault("unsupported-ipg-user-access", thread, address, size, access,
@@ -1375,14 +2266,19 @@ public class RunP1MEMachine extends GhidraScript {
         }
 
 
-        void requireExecute(PcodeThread<byte[]> thread, long address, int size) {
-            requireAccessProtection(thread, address, size, "execute");
+        long requireExecute(PcodeThread<byte[]> thread, long address, int size) {
+            boolean user = (processorRegister(thread, "PSW") & (1L << 30)) != 0;
+            long mpuEnd = requireMpu(thread, address, size, "execute", user);
             RegionDef region = region(address, size);
+            boolean guardFree = peripheralFile || requireGuards(thread, address, size, "execute", region);
+            if (user && !peripheralFile) requireUserIpg(thread, address, size, "execute", region);
             if (region == null || !region.executable) {
                 throw fault("execute-unmapped", thread, address, size, "execute",
                     region == null ? "unknown" : region.evidence,
                     "instruction fetch outside an executable P1M-E region");
             }
+            // IPG checks select whole regions. Do not reuse a size-specific bus-guard result.
+            return guardFree ? Math.min(mpuEnd, region.end_exclusive) : 0;
         }
 
         final class GuardCapture {
@@ -1467,19 +2363,19 @@ public class RunP1MEMachine extends GhidraScript {
             return guard == null || dmaBusGuard(thread, guard, spid, write);
         }
 
+        byte[] readInputLanes(RegisterDef register, long address, int size) {
+            int lane = Math.toIntExact(address - register.address);
+            int shift = 8 * (language.isBigEndian() ? register.size - lane - size : lane);
+            return bytes(readInputResponses.get(register.name) >>> shift, size, language.isBigEndian());
+        }
+
         byte[] dmaRead(PcodeThread<byte[]> thread, Dma.Channel channel, long address, int size) {
             String previous = trace.busInitiator;
             trace.busInitiator = channel.initiator;
             try {
                 if (!dmaAccessAllowed(thread, channel, address, size, false)) return null;
                 RegisterDef register = beforeRead(thread, address, size, false);
-                if (register != null && register.read_input) {
-                    long response = readInputResponses.get(register.name);
-                    int lane = Math.toIntExact(address - register.address);
-                    int shift = language.isBigEndian()
-                        ? 8 * (register.size - lane - size) : 8 * lane;
-                    return bytes(response >>> shift, size, language.isBigEndian());
-                }
+                if (register != null && register.read_input) return readInputLanes(register, address, size);
                 byte[] result = memory(thread, address, size);
                 adc.readCompleted(thread, address, size);
                 rsent.readCompleted(thread, address, size);
@@ -1569,6 +2465,7 @@ public class RunP1MEMachine extends GhidraScript {
                 return null;
             }
             if (peripheralFile) {
+                prepareClockMutation(thread);
                 // Scenario checks compare these bytes. Keeping them out of the
                 // access trace reserves its capacity for RAM traffic.
                 scriptPeripheralPoll(thread, address, size);
@@ -1579,6 +2476,9 @@ public class RunP1MEMachine extends GhidraScript {
                 throw fault("unmapped-read", thread, address, size, "read", "unknown",
                     "no SystemRDL memory region or register covers this read");
             }
+            materializeClock(thread);
+            // Consuming RSENT's receive buffer can promote a frame and request DMA.
+            if ("rsent".equals(register.behavior)) quietClockBudget = 0;
             requireRegisterPrivilege(thread, register, "read");
             if (!register.allows(address, size)) {
                 throw fault("mmio-width", thread, address, size, "read",
@@ -1673,7 +2573,6 @@ public class RunP1MEMachine extends GhidraScript {
         }
 
         void beforeWrite(PcodeThread<byte[]> thread, long address, int size, byte[] value, boolean cpu) {
-            if (internalWrite) return;
             discardBusStore = false;
             requireAlignment(thread, address, size, "write");
             if (cpu) requireAccessProtection(thread, address, size, "write");
@@ -1703,6 +2602,7 @@ public class RunP1MEMachine extends GhidraScript {
                 return;
             }
             if (peripheralFile) {
+                prepareClockMutation(thread);
                 return;
             }
             RegisterDef register = register(address, size);
@@ -1710,6 +2610,7 @@ public class RunP1MEMachine extends GhidraScript {
                 throw fault("unmapped-write", thread, address, size, "write", "unknown",
                     "no SystemRDL memory region or register covers this write");
             }
+            prepareClockMutation(thread);
             if (size > register.size || !register.allows(address, size)) {
                 throw fault("mmio-width", thread, address, size, "write",
                     register.evidence, "illegal access width/alignment for register " + register.name);
@@ -2008,12 +2909,18 @@ public class RunP1MEMachine extends GhidraScript {
 
         void applyReset(String resetClass) {
             if (resetClass == null || resetClass.equals("none")) return;
+            prepareClockMutation(executionThread);
             if (registersByName.get("FSTATR").reset_classes.contains(resetClass)) resetFaci();
             for (Csih controller : csihControllers.values()) controller.reset();
             dma.reset();
             adc.reset();
             rsent.reset();
             if (icusStartupStub != null) icusStartupStub.reset();
+            RegisterDef rscfdStatus = registersByName.get("GSTS");
+            if (rscfdStatus != null && rscfdStatus.reset_classes.contains(resetClass)) {
+                rscfdRamInitDeadline = Math.addExact(
+                    hsbCycles, RSCFD_RAM_INITIALIZATION_CYCLES);
+            }
             dcraSeeded.clear();
             segFlags = 0;
             segNotificationPending = false;
@@ -2388,12 +3295,11 @@ public class RunP1MEMachine extends GhidraScript {
         }
 
         RegisterDef rscfdTransmitResultSummary(long buffer) {
-            long channel = buffer / 16;
-            if (channel < 0 || channel > 2) {
-                throw new IllegalStateException("RSCFD transmit buffer is outside channels0..2");
+            if (buffer < 0 || buffer > 47) {
+                throw new IllegalStateException("RSCFD transmit buffer is outside buffers0..47");
             }
-            return requiredRegister("RSCFD", "transmit-result-summary",
-                "CFDTMTRF_CH" + channel);
+            return requiredRegister("RSCFD", "transmit-complete-status",
+                "CFDTMTCSTS" + (buffer / 32));
         }
 
         RegisterDef rscfdTransmitInterruptEnable(long buffer) {
@@ -2436,13 +3342,14 @@ public class RunP1MEMachine extends GhidraScript {
         void setRscfdTransmitResult(long buffer, boolean present) {
             long channel = buffer / 16;
             RegisterDef summary = rscfdTransmitResultSummary(buffer);
-            long bit = 1L << (buffer & 15);
+            long summaryBit = 1L << (buffer & 31);
             long next = present
-                ? registerValue(summary) | bit
-                : registerValue(summary) & ~bit;
+                ? registerValue(summary) | summaryBit
+                : registerValue(summary) & ~summaryBit;
             setRegisterValue(summary.name, next);
             long enabled = registerValue(rscfdTransmitInterruptEnable(buffer));
-            if (channel == 1 && (next & enabled) == 0) {
+            long channelResults = next >>> ((buffer / 16 & 1) * 16);
+            if (channel == 1 && (channelResults & enabled) == 0) {
                 RegisterDef eic = interruptRegisters.get(188);
                 if (eic != null) {
                     setRegisterValue(eic.name, registerValue(eic) & ~0x1000L);
@@ -2475,6 +3382,42 @@ public class RunP1MEMachine extends GhidraScript {
                 setRscfdTransmitResult(channel * 16 + resource, result != 0);
             }
         }
+
+        void resetRscfdControllerState() {
+            pendingRscfdTransmits.clear();
+            for (ReceiveFifo fifo : receiveFifos.values()) {
+                fifo.messages.clear();
+                setRegisterValue(fifo.status.name, 1);
+                refreshReceiveFifo(fifo);
+            }
+            for (RegisterDef register : registers) {
+                if ("rscfd-transmit-status".equals(register.trigger)) {
+                    setRegisterValue(register.name, 0);
+                }
+            }
+        }
+
+        void handleRscfdModeWrite(RegisterDef register, long value) {
+            RegisterDef status =
+                requiredRegister(register.name, "status", register.status_register);
+            long mode = value & 3;
+            long state = switch ((int) mode) {
+                case 0 -> 0;
+                case 1 -> 1;
+                case 2 -> 2;
+                default -> throw new IllegalStateException(
+                    register.name + " requests reserved RSCFD mode 3");
+            };
+            if ((value & 4) != 0) state |= 4;
+            setRegisterValue(status.name, (registerValue(status) & ~0xfL) | state);
+            if ("rscfd-global-control".equals(register.trigger) && mode == 1) {
+                // Tables 17.107-17.108: entering global reset initializes the
+                // controller RAM/FIFO state; GRAMINIT is complete at this
+                // functional (non-cycle-accurate) write boundary.
+                resetRscfdControllerState();
+            }
+        }
+
 
         void handleRscfdWrite(PcodeThread<byte[]> thread, RegisterDef register, byte[] value,
                               long registerBeforeWrite) {
@@ -2535,8 +3478,18 @@ public class RunP1MEMachine extends GhidraScript {
             long buffer = Integer.toUnsignedLong(input.buffer);
             RegisterDef control = pendingRscfdTransmits.remove(buffer);
             if (control == null) {
-                throw new IllegalArgumentException(
-                    "can-tx-complete buffer " + buffer + " has no pending transmission");
+                if (!input.tolerate_no_pending) {
+                    throw new IllegalArgumentException(
+                        "can-tx-complete buffer " + buffer + " has no pending transmission");
+                }
+                JsonObject ignored = new JsonObject();
+                ignored.addProperty("kind", "can-tx-complete-ignored");
+                ignored.addProperty("scheduler_tick", trace.instructions);
+                ignored.addProperty("controller", "RSCFD");
+                ignored.addProperty("buffer", buffer);
+                ignored.addProperty("evidence", input.evidence);
+                trace.deviceEvents.add(ignored);
+                return;
             }
             RegisterDef status = requiredRegister(
                 control.name, "completion-status", control.status_register);
@@ -2696,36 +3649,86 @@ public class RunP1MEMachine extends GhidraScript {
             tsg.flushPic(thread);
         }
 
-        void advanceClock(PcodeThread<byte[]> thread, long cycles) {
+        void retireClock(PcodeThread<byte[]> thread) {
+            long cycles = hsbCyclesPerInstruction;
+            if (cycles == 0) return;
+            if (cycles > 0 && cycles <= quietClockBudget) {
+                deferredClockCycles += cycles;
+                quietClockBudget -= cycles;
+                return;
+            }
+            // Commit prior ticks to every device before an edge can fault partway through this tick.
+            prepareClockMutation(thread);
+            advanceClock(thread, cycles, true);
+        }
+
+        void materializeClock(PcodeThread<byte[]> thread) {
+            long span = deferredClockCycles;
+            if (span == 0) return;
+            deferredClockCycles = 0;
+            advanceClockSpan(thread, span, false, false);
+        }
+
+        private void prepareClockMutation(PcodeThread<byte[]> thread) {
+            materializeClock(thread);
+            quietClockBudget = 0;
+        }
+
+        private void advanceClock(PcodeThread<byte[]> thread, long cycles, boolean deferQuietTail) {
             if (cycles < 0) throw new IllegalArgumentException("negative CLK_HSB advance");
             while (cycles != 0) {
-                long span = Math.min(cycles, adc.hsbCyclesUntilEvent());
-                span = Math.min(span, Math.min(tauj.cyclesUntilEvent(),
-                    Math.min(taud.cyclesUntilEvent(), tsg.cyclesUntilEvent())));
-                span = Math.min(span, rsent.cyclesUntilEvent());
-                span = Math.min(span, dma.cyclesUntilEvent());
+                long adcDeadline = adc.hsbCyclesUntilEvent();
+                long rsentDeadline = rsent.cyclesUntilEvent();
+                long next = Math.min(adcDeadline, Math.min(rsentDeadline, dma.cyclesUntilEvent()));
                 if (faciDeadline != Long.MAX_VALUE)
-                    span = Math.min(span, faciDeadline - hsbCycles);
+                    next = Math.min(next, faciDeadline - hsbCycles);
                 if (icusStartupStub != null && icusStartupStub.deadline != Long.MAX_VALUE)
-                    span = Math.min(span, icusStartupStub.deadline - hsbCycles);
+                    next = Math.min(next, icusStartupStub.deadline - hsbCycles);
+                if (rscfdRamInitDeadline != Long.MAX_VALUE)
+                    next = Math.min(next, rscfdRamInitDeadline - hsbCycles);
+                // A one-tick span cannot cross a timer edge. When deferring,
+                // however, we need every deadline to bound future retirements.
+                if (next > 1 && (deferQuietTail || cycles > 1))
+                    next = Math.min(next, Math.min(tauj.cyclesUntilEvent(),
+                        Math.min(taud.cyclesUntilEvent(), tsg.cyclesUntilEvent())));
+                if (deferQuietTail && !taud.picDirty && !tsg.picDirty && !tsg.picRoutingDeferred) {
+                    long bound = Math.min(next, Long.MAX_VALUE - hsbCycles);
+                    if (cycles < bound) {
+                        deferredClockCycles = cycles;
+                        quietClockBudget = bound - cycles - 1;
+                        return;
+                    }
+                }
+                long span = Math.min(cycles, next);
                 if (span <= 0) throw new IllegalStateException("non-advancing peripheral clock");
-                hsbCycles = Math.addExact(hsbCycles, span);
-                tsg.deferPicRouting();
-                // Commit ADC results before qualifying coincident new triggers.
-                // Bus reads see the committed peripheral state at this HSB edge.
-                adc.advanceHsbClock(thread, span);
-                taud.advanceClock(thread, span);
-                tauj.advanceClock(thread, span);
-                tsg.advanceClock(thread, span);
-                rsent.advanceClock(thread, span);
-                finishPicRouting(thread);
-                if (hsbCycles == faciDeadline) completeFaciOperation();
-                if (icusStartupStub != null && icusStartupStub.deadline != Long.MAX_VALUE
-                        && hsbCycles == icusStartupStub.deadline)
-                    icusStartupStub.complete();
-                dma.advanceClock(thread);
+                advanceClockSpan(thread, span, span == adcDeadline && adcDeadline != Long.MAX_VALUE,
+                    span == rsentDeadline);
                 cycles -= span;
             }
+        }
+
+        private void advanceClockSpan(PcodeThread<byte[]> thread, long span,
+                boolean adcEvent, boolean rsentEvent) {
+            hsbCycles = Math.addExact(hsbCycles, span);
+            tsg.deferPicRouting();
+            // Commit ADC results before qualifying coincident new triggers.
+            // Bus reads see the committed peripheral state at this HSB edge.
+            adc.advanceHsbSpan(thread, span, adcEvent);
+            taud.advanceSpan(thread, span);
+            tauj.advanceSpan(thread, span);
+            tsg.advanceSpan(thread, span);
+            rsent.advanceSpan(thread, span, rsentEvent);
+            finishPicRouting(thread);
+            if (hsbCycles == faciDeadline) completeFaciOperation();
+            if (hsbCycles == rscfdRamInitDeadline) {
+                RegisterDef status = requiredRegister("RSCFD", "status", "GSTS");
+                setRegisterValue(status.name, registerValue(status) & ~8L);
+                rscfdRamInitDeadline = Long.MAX_VALUE;
+            }
+            if (icusStartupStub != null && icusStartupStub.deadline != Long.MAX_VALUE
+                    && hsbCycles == icusStartupStub.deadline)
+                icusStartupStub.complete();
+            dma.advanceClock(thread);
         }
 
         Csih csih(RegisterDef register) {
@@ -2761,8 +3764,7 @@ public class RunP1MEMachine extends GhidraScript {
             int generation;
             // Scenario wire ordinals are independent of controller resets.
             long transmittedWords;
-            List<ExternalEvent> relativeInputs;
-            int nextRelativeInput;
+            final WireInputs relativeInputs = new WireInputs();
 
             Csih(String prefix) {
                 this.prefix = prefix;
@@ -2956,11 +3958,11 @@ public class RunP1MEMachine extends GhidraScript {
                     long wordOrdinal = ++transmittedWords;
                     event.addProperty("transmit_ordinal", wordOrdinal);
                     trace.deviceEvents.add(event);
-                    if (relativeInputs != null && nextRelativeInput < relativeInputs.size()
-                            && relativeInputs.get(nextRelativeInput).after_transmit_words == wordOrdinal) {
-                        ExternalEvent input = relativeInputs.get(nextRelativeInput++);
+                    WireInput wire = relativeInputs.take(wordOrdinal);
+                    if (wire != null) {
+                        ExternalEvent input = wire.payload;
                         long tick = Math.addExact(trace.instructions, input.delay_instructions);
-                        externalEvents.add(new ScheduledEvent(tick, input.ordinal, () -> {
+                        externalEvents.add(new ScheduledEvent(tick, wire.ordinal, () -> {
                             // An aborted transfer cannot consume a later word's input.
                             if (epoch != generation || wordOrdinal != transmittedWords
                                     || !active || !launched) return;
@@ -3240,34 +4242,29 @@ public class RunP1MEMachine extends GhidraScript {
             }
             long cyclesUntilEvent() {
                 if (clockHorizonDirty) {
-                    clockHorizon = picTsgSources == 0 ? Long.MAX_VALUE : 1;
-                    for (Unit u : units) clockHorizon = Math.min(clockHorizon, u.cyclesUntilEvent());
+                    clockHorizon = picTsgSources != 0 ? 1
+                        : Math.min(units[0].cyclesUntilEvent(), units[1].cyclesUntilEvent());
                     clockHorizonDirty = false;
                 }
                 return clockHorizon;
             }
-            // hsbCycles is actual divided/gated CLK_HSB; never CPU instruction ticks.
-            void advanceClock(PcodeThread<byte[]> thread, long hsbCycles) {
-                if (hsbCycles < 0) throw new IllegalArgumentException("negative HSB cycles");
-                while (hsbCycles != 0) {
-                    long span = cyclesUntilEvent();
-                    if (hsbCycles < span) {
-                        for (Unit u : units) u.moveQuiet(hsbCycles);
-                        if (clockHorizon != Long.MAX_VALUE) clockHorizon -= hsbCycles;
-                        return;
-                    }
-                    if (span > 1) for (Unit u : units) u.moveQuiet(span - 1);
-                    nextSources = 0;
-                    // Commit every timer's clock edge before DMA can write any timer's shadow bank.
-                    for (Unit u : units) u.edge(thread);
-                    for (Unit u : units) u.deliver(thread);
-                    if (picTsgSources != nextSources) {
-                        picTsgSources = nextSources;
-                        picSourcesChanged(thread);
-                    }
-                    clockHorizonDirty = true;
-                    hsbCycles -= span;
+            // The HSB coordinator has already bounded the span to our next edge.
+            void advanceSpan(PcodeThread<byte[]> thread, long span) {
+                if (span < cyclesUntilEvent()) {
+                    for (Unit u : units) u.moveQuiet(span);
+                    if (clockHorizon != Long.MAX_VALUE) clockHorizon -= span;
+                    return;
                 }
+                if (span > 1) for (Unit u : units) u.moveQuiet(span - 1);
+                nextSources = 0;
+                // Commit every timer's clock edge before DMA can write any timer's shadow bank.
+                for (Unit u : units) u.edge(thread);
+                for (Unit u : units) u.deliver(thread);
+                if (picTsgSources != nextSources) {
+                    picTsgSources = nextSources;
+                    picSourcesChanged(thread);
+                }
+                clockHorizonDirty = true;
             }
             // Parent calls once for final raw-register checks, not on each clock quantum.
             void flushSnapshot() {
@@ -3411,10 +4408,10 @@ public class RunP1MEMachine extends GhidraScript {
                             "implemented mode is symmetric HT-PWM, direct PCLK, reload RIA=0, no pattern/error detection or output override");
                     if (enabled && runningFixed(o) && value != v(o))
                         throw unsupported(thread, register, "register changes are prohibited while TE=1");
-                    if (enabled && pending && reloadable(o))
+                    if (enabled && pending && reloadable(o) && value != v(o))
                         throw fault("prohibited-tsg-reload-write", thread, register.address,
                             register.size, "write", register.source_ref,
-                            "registers to reload must not be rewritten while RSF=1 (section25.4.1.3)");
+                            "changed reload value while RSF=1 (section25.4.1.3)");
                     if ((o == 0x06c || o == 0x070) && (v(0x210) & 0x8000) == 0
                             && ((value >>> 16) & 0x7fff) == (v(0x210) & 0x7fff)) {
                         if ((value & 1) != 0) throw unsupported(thread, register, "HT-PWM deadtime must be even");
@@ -3605,7 +4602,8 @@ public class RunP1MEMachine extends GhidraScript {
                             nextSources |= 1L << (16 + 8 * index + k);
                 }
                 void deliver(PcodeThread<byte[]> thread) {
-                    for (int m = 0; m <= 14; m++) if ((interrupts & (1 << m)) != 0) {
+                    for (int mask = interrupts; mask != 0; mask &= mask - 1) {
+                        int m = Integer.numberOfTrailingZeros(mask);
                         requestInterrupt(thread, irqBase + m);
                         if (m == 11 || m == 12) dma.request(thread, 99 + 4 * index + m - 11);
                         if (m == 13 || m == 14) dma.request(thread, 101 + 4 * index + m - 13);
@@ -3686,31 +4684,27 @@ public class RunP1MEMachine extends GhidraScript {
                 for (Unit u : units) next = Math.min(next, u.deadline());
                 return next;
             }
-            void advanceClock(PcodeThread<byte[]> t, long hsbCycles) {
-                if (hsbCycles < 0) throw new IllegalArgumentException("negative HSB clock span");
-                while (hsbCycles != 0) {
-                    long span = Math.min(hsbCycles, cyclesUntilEvent());
-                    for (Unit u : units) u.advance(span);
-                    finishEdges(t);
-                    hsbCycles -= span;
-                }
+            void advanceSpan(PcodeThread<byte[]> t, long span) {
+                for (Unit u : units) u.advance(span);
+                finishEdges(t);
             }
             void finishEdges(PcodeThread<byte[]> t) {
                 // Channel dependency graph points only downward: no recursion or arbitrary cutoff.
                 for (Unit u : units) {
-                    if ((u.emitted | u.signals | u.priorSignals) == 0) continue;
+                    int held = u.signals | u.priorSignals;
+                    if ((u.emitted | held) == 0) continue;
                     int raised = 0;
-                    for (int c = 0; c < 16; c++) {
-                        int bit = 1 << c;
-                        if ((u.emitted & ~(u.signals | u.priorSignals) & bit) == 0) continue;
-                        raised |= bit;
+                    for (int pending = u.emitted & ~held; pending != 0; pending = u.emitted & ~(held | raised)) {
+                        int c = Integer.numberOfTrailingZeros(pending);
+                        raised |= 1 << c;
                         u.cascade(c);
                     }
-                    if ((u.signals | u.emitted) != (u.signals | u.priorSignals)) picDirty = true;
+                    if ((u.signals | u.emitted) != held) picDirty = true;
                     u.signals |= u.emitted;
                     u.emitted = 0;
                     u.priorSignals = 0;
-                    for (int c = 0; c < 16; c++) if ((raised & (1 << c)) != 0) {
+                    for (int mask = raised; mask != 0; mask &= mask - 1) {
+                        int c = Integer.numberOfTrailingZeros(mask);
                         requestInterrupt(t, (u.number == 0 ? 141 : 158) + c);
                         int alternate = u.number == 0 ? c : c - 5;
                         boolean selectable = alternate >= 0 && alternate <= 10;
@@ -3725,6 +4719,7 @@ public class RunP1MEMachine extends GhidraScript {
                 final RegisterDef[] data = new RegisterDef[16], count = new RegisterDef[16],
                     mode = new RegisterDef[16], user = new RegisterDef[16], status = new RegisterDef[16];
                 final long[] phase = new long[4], ticks = new long[4];
+                final int[] clockChannels = new int[4];
                 final int[] modes = new int[16], edges = new int[16], reloads = new int[16], counters = new int[16];
                 final long[] divisors = new long[4];
                 int enabledMask, tpsValue, brsValue;
@@ -3762,7 +4757,8 @@ public class RunP1MEMachine extends GhidraScript {
                     return -1;
                 }
                 void reset() {
-                    Arrays.fill(phase, 0); Arrays.fill(ticks, 0);
+                    Arrays.fill(phase, 0);
+                    Arrays.fill(clockChannels, 0);
                     Arrays.fill(running, false); Arrays.fill(overflow, false);
                     Arrays.fill(known, false); Arrays.fill(sampled, false); Arrays.fill(driven, false);
                     signals = emitted = priorSignals = 0;
@@ -3771,6 +4767,7 @@ public class RunP1MEMachine extends GhidraScript {
                     for (int c = 0; c < 16; c++) {
                         modes[c] = (int)registerValue(mode[c]); edges[c] = (int)registerValue(user[c]) & 3;
                         reloads[c] = (int)registerValue(data[c]); counters[c] = (int)registerValue(count[c]);
+                        if (enabled(c)) clockChannels[cks(c)] |= 1 << c;
                     }
                 }
                 void validateMode(PcodeThread<byte[]> t, RegisterDef r, int value, int c) {
@@ -3833,6 +4830,7 @@ public class RunP1MEMachine extends GhidraScript {
                 void start(int mask) {
                     enabledMask |= mask; setRegisterValue(enable.name, enabledMask);
                     for (int c = 0; c < 16; c++) if ((mask & (1 << c)) != 0) {
+                        clockChannels[cks(c)] |= 1 << c;
                         running[c] = false; overflow[c] = false;
                         if (kind(c) == 4 || sts(c) == 0 || (kind(c) == 0 && sts(c) == 1)) restart(c);
                     }
@@ -3850,7 +4848,10 @@ public class RunP1MEMachine extends GhidraScript {
                     else if (o == 0x1c4) { start(v); setRegisterValue(r.name, 0); }
                     else if (o == 0x1c8) {
                         enabledMask &= ~v; setRegisterValue(enable.name, enabledMask);
-                        for (int c = 0; c < 16; c++) if ((v & (1 << c)) != 0) running[c] = false;
+                        for (int c = 0; c < 16; c++) if ((v & (1 << c)) != 0) {
+                            clockChannels[cks(c)] &= ~(1 << c);
+                            running[c] = false;
+                        }
                         setRegisterValue(r.name, 0);
                     } else if (o >= 0x180 && o < 0x1c0) {
                         int c = (o - 0x180) / 4;
@@ -3884,7 +4885,8 @@ public class RunP1MEMachine extends GhidraScript {
                     }
                 }
                 void cascade(int source) {
-                    for (int c = source + 1; c < 16; c++) if (enabled(c)) {
+                    for (int mask = enabledMask & (-1 << (source + 1)); mask != 0; mask &= mask - 1) {
+                        int c = Integer.numberOfTrailingZeros(mask);
                         int p = master(c);
                         if ((sts(c) == 4 && p == source) || (sts(c) == 5 && c == source + 1)) {
                             if (kind(c) != 8 || !running[c] || (m(c) & 1) != 0) restart(c);
@@ -3920,9 +4922,10 @@ public class RunP1MEMachine extends GhidraScript {
                     return false;
                 }
                 long deadline() {
-                    long next = signals == 0 ? Long.MAX_VALUE : 1;
-                    if (enabledMask == 0) return next;
-                    for (int c = 0; c < 16; c++) if (enabled(c)) {
+                    if (signals != 0) return 1;
+                    long next = Long.MAX_VALUE;
+                    for (int mask = enabledMask; mask != 0; mask &= mask - 1) {
+                        int c = Integer.numberOfTrailingZeros(mask);
                         int ck = cks(c); long div = divisor(ck);
                         if (known[c] && driven[c] != sampled[c]) next = Math.min(next, div - phase[ck]);
                         if (!running[c] || ccs(c) != 0) continue;
@@ -3936,13 +4939,33 @@ public class RunP1MEMachine extends GhidraScript {
                     // The coordinator always splits at signal falls and counter/input events.
                     priorSignals = signals;
                     signals = 0;
+                    // All prescalers run even when no channel selects them.
+                    int dueChannels = 0;
                     for (int ck = 0; ck < 4; ck++) {
-                        long div = divisor(ck), rest = span % div + phase[ck];
-                        ticks[ck] = span / div + rest / div; phase[ck] = rest % div;
+                        long div = divisor(ck);
+                        if (span == 1) {
+                            if (div != 1) {
+                                long next = phase[ck] + 1;
+                                if (next < div) {
+                                    phase[ck] = next;
+                                    continue;
+                                }
+                                phase[ck] = 0;
+                            }
+                        } else {
+                            long rest = span % div + phase[ck];
+                            boolean wraps = rest >= div;
+                            phase[ck] = wraps ? rest - div : rest;
+                            if (clockChannels[ck] == 0) continue;
+                            long amount = span / div + (wraps ? 1 : 0);
+                            if (amount == 0) continue;
+                            ticks[ck] = amount;
+                        }
+                        dueChannels |= clockChannels[ck];
                     }
-                    for (int c = 0; c < 16; c++) if (enabled(c)) {
-                        long amount = ticks[cks(c)];
-                        if (amount == 0) continue;
+                    for (int mask = dueChannels; mask != 0; mask &= mask - 1) {
+                        int c = Integer.numberOfTrailingZeros(mask);
+                        long amount = span == 1 ? 1 : ticks[cks(c)];
                         if (inputEdge(c)) continue;
                         if (!running[c] || ccs(c) != 0) continue;
                         if (!capture(c)) down(c, amount);
@@ -4004,17 +5027,10 @@ public class RunP1MEMachine extends GhidraScript {
                 for (Unit u : units) result = Math.min(result, u.cyclesUntilEvent());
                 return result;
             }
-            void advanceClock(PcodeThread<byte[]> thread, long hsbCycles) {
-                if (hsbCycles < 0) throw new IllegalArgumentException("negative HSB cycles");
-                while (hsbCycles != 0) {
-                    long span = Math.min(hsbCycles, cyclesUntilEvent());
-                    // Commit every counter/reload before requests can cause DMA writes.
-                    // Quiet progression is cached primitive arithmetic: no getVar,
-                    // registerValue, byte arrays, backing-counter writes or JSON events.
-                    for (Unit u : units) u.move(span);
-                    for (Unit u : units) u.deliver(thread, span);
-                    hsbCycles -= span;
-                }
+            void advanceSpan(PcodeThread<byte[]> thread, long span) {
+                // Commit every counter/reload before delivering requests.
+                for (Unit u : units) u.move(span);
+                for (Unit u : units) u.deliver(thread, span);
             }
 
             final class Unit {
@@ -4026,9 +5042,9 @@ public class RunP1MEMachine extends GhidraScript {
                 final RegisterDef te, ts, tt, to, toe, tol, tps, brs, tom, toc, rde, rdm, rdt;
                 final RegisterDef[] data = new RegisterDef[4], counter = new RegisterDef[4],
                     mode = new RegisterDef[4], user = new RegisterDef[4];
-                final boolean[] pending = new boolean[4], irqHigh = new boolean[4];
+                final boolean[] pending = new boolean[4];
                 long rootPhase;
-                int baudFactor, brgPhase, dirtyCounters, requestMask, startMask, underflowMask;
+                int baudFactor, brgPhase, dirtyCounters, irqHigh, requestMask, startMask, underflowMask;
 
                 Unit(int index) {
                     this.index = index;
@@ -4090,13 +5106,13 @@ public class RunP1MEMachine extends GhidraScript {
                 long ticks(int ck, long cycles) {
                     long divisor = div[ck];
                     if (divisor == 1) return cycles;
+                    if (cycles == 1) return phase(ck) == divisor - 1 ? 1 : 0;
                     return cycles / divisor + (cycles % divisor + phase(ck)) / divisor;
                 }
                 void reset() {
                     rootPhase = 0;
-                    brgPhase = requestMask = startMask = underflowMask = 0;
+                    brgPhase = irqHigh = requestMask = startMask = underflowMask = 0;
                     Arrays.fill(pending, false);
-                    Arrays.fill(irqHigh, false);
                     loadRegisters();
                 }
                 void validateStart(PcodeThread<byte[]> thread, int mask) {
@@ -4160,10 +5176,8 @@ public class RunP1MEMachine extends GhidraScript {
                     } else if (register == tt) {
                         int mask = (int) value & 15;
                         put(te, enabled() & ~mask);
-                        for (int c = 0; c < 4; c++) if ((mask & (1 << c)) != 0) {
-                            pending[c] = false;
-                            irqHigh[c] = false;
-                        }
+                        irqHigh &= ~mask;
+                        for (int c = 0; c < 4; c++) if ((mask & (1 << c)) != 0) pending[c] = false;
                         put(tt, 0);
                     } else if (register == to) {
                         long protectedBits = v(toe) & 15;
@@ -4178,11 +5192,10 @@ public class RunP1MEMachine extends GhidraScript {
                     // CDR cache is only the reload latch: never replace active CNT here.
                 }
                 long cyclesUntilEvent() {
+                    if (irqHigh != 0) return 1;
                     long result = Long.MAX_VALUE;
-                    int on = enabled();
-                    for (int c = 0; c < 4; c++) {
-                        if (irqHigh[c]) result = 1;
-                        if ((on & (1 << c)) == 0) continue;
+                    for (int mask = enabled(); mask != 0; mask &= mask - 1) {
+                        int c = Integer.numberOfTrailingZeros(mask);
                         int ck = clock(c);
                         long counts = pending[c] ? 1 : state[4 + c] + 1;
                         // Maximum = 2^32 * (32768*256) < Long.MAX_VALUE.
@@ -4191,51 +5204,55 @@ public class RunP1MEMachine extends GhidraScript {
                     return result;
                 }
                 void move(long cycles) {
-                    requestMask = startMask = underflowMask = 0;
-                    int on = enabled();
-                    long output = v(to), outputsEnabled = v(toe);
-                    for (int c = 0; c < 4; c++) {
-                        boolean pulse = false;
-                        if ((on & (1 << c)) != 0) {
-                            long countTicks = ticks(clock(c), cycles);
-                            if (countTicks != 0) {
-                                if (pending[c]) {
-                                    if (countTicks != 1) throw new IllegalStateException("TAUJ start edge was skipped");
-                                    pending[c] = false;
-                                    count(c, v(data[c]));
-                                    startMask |= 1 << c;
-                                    pulse = (v(mode[c]) & 1) != 0;
-                                } else {
-                                    long current = state[4 + c];
-                                    if (countTicks <= current) count(c, current - countTicks);
-                                    else {
-                                        if (countTicks != current + 1)
-                                            throw new IllegalStateException("TAUJ underflow edge was skipped");
-                                        count(c, v(data[c]));
-                                        underflowMask |= 1 << c;
-                                        pulse = true;
-                                    }
-                                }
+                    startMask = underflowMask = 0;
+                    int pulses = 0;
+                    for (int mask = enabled(); mask != 0; mask &= mask - 1) {
+                        int c = Integer.numberOfTrailingZeros(mask), bit = 1 << c;
+                        long countTicks = ticks(clock(c), cycles);
+                        if (countTicks == 0) continue;
+                        if (pending[c]) {
+                            if (countTicks != 1) throw new IllegalStateException("TAUJ start edge was skipped");
+                            pending[c] = false;
+                            count(c, v(data[c]));
+                            startMask |= bit;
+                            if ((v(mode[c]) & 1) != 0) pulses |= bit;
+                        } else {
+                            long current = state[4 + c];
+                            if (countTicks <= current) count(c, current - countTicks);
+                            else {
+                                if (countTicks != current + 1)
+                                    throw new IllegalStateException("TAUJ underflow edge was skipped");
+                                count(c, v(data[c]));
+                                underflowMask |= bit;
+                                pulses |= bit;
                             }
                         }
-                        // Pulses last one HSB clock. Adjacent pulses remain high,
-                        // notably CDR=0/divisor=1 (manual Figure24.17).
-                        if (pulse && !(irqHigh[c] && cycles == 1)) requestMask |= 1 << c;
-                        irqHigh[c] = pulse;
-                        if (pulse && (outputsEnabled & (1L << c)) != 0) output ^= 1L << c;
                     }
-                    if (output != v(to)) put(to, output); // output changes only at real edges
+                    // Pulses last one HSB clock. Adjacent pulses remain high,
+                    // notably CDR=0/divisor=1 (manual Figure24.17).
+                    requestMask = cycles == 1 ? pulses & ~irqHigh : pulses;
+                    irqHigh = pulses;
+                    if (pulses != 0) {
+                        long flip = pulses & v(toe);
+                        if (flip != 0) put(to, v(to) ^ flip);
+                    }
                     if (baudFactor != 1) {
-                        long preTicks = cycles / pre[3]
-                            + (cycles % pre[3] + (rootPhase & (pre[3] - 1))) / pre[3];
-                        brgPhase = (int) ((brgPhase + preTicks % baudFactor) % baudFactor);
+                        long mask = pre[3] - 1;
+                        if (cycles == 1) {
+                            if ((rootPhase & mask) == mask && ++brgPhase == baudFactor) brgPhase = 0;
+                        } else {
+                            int shift = Long.numberOfTrailingZeros(pre[3]);
+                            long preTicks = (cycles >>> shift)
+                                + (((cycles & mask) + (rootPhase & mask)) >>> shift);
+                            brgPhase = (int) ((brgPhase + preTicks % baudFactor) % baudFactor);
+                        }
                     }
                     rootPhase = (rootPhase + (cycles & 32767)) & 32767;
                 }
                 void deliver(PcodeThread<byte[]> thread, long span) {
                     int events = startMask | underflowMask;
-                    if ((events | requestMask) == 0) return;
-                    for (int c = 0; c < 4; c++) {
+                    for (int mask = events | requestMask; mask != 0; mask &= mask - 1) {
+                        int c = Integer.numberOfTrailingZeros(mask);
                         if ((events & (1 << c)) != 0) {
                             JsonObject event = new JsonObject();
                             event.addProperty("kind", "tauj-clock");
@@ -4344,6 +5361,8 @@ public class RunP1MEMachine extends GhidraScript {
                 int type, id, additions, accumulated, completed;
                 long channelControl;
                 long conversionDue = NEVER;
+                long auxiliaryDeadline = NEVER;
+                boolean auxiliaryDeadlineDirty;
                 boolean errorLine;
 
                 Unit(int number) {
@@ -4390,6 +5409,8 @@ public class RunP1MEMachine extends GhidraScript {
                     Arrays.fill(active, false);
                     Arrays.fill(timerDue, NEVER);
                     Arrays.fill(irqDue, NEVER);
+                    auxiliaryDeadline = NEVER;
+                    auxiliaryDeadlineDirty = false;
                     for (int group = 0; group < 5; group++) status(group);
                 }
                 void reset() {
@@ -4553,7 +5574,7 @@ public class RunP1MEMachine extends GhidraScript {
                     boolean endOfScan = endOfCycle && (continuous || cyclesLeft[group] == 1);
                     boolean output = (channelControl & 0x80) != 0
                         || (endOfScan && (get(sg(group) + 0x10) & 0x10) != 0);
-                    if (output) irqDue[group] = Math.addExact(now, 6 / clockDivisor());
+                    if (output) setIrqDeadline(group, Math.addExact(now, 6 / clockDivisor()));
                     if (endOfCycle) {
                         if (!continuous && --cyclesLeft[group] == 0) {
                             active[group] = false;
@@ -4588,19 +5609,32 @@ public class RunP1MEMachine extends GhidraScript {
                 }
                 void startTimer(PcodeThread<byte[]> thread, int group) {
                     if (timerDue[group] != NEVER) return;
-                    timerDue[group] = Math.addExact(now, get(sg(group) + 0x28));
+                    setTimerDeadline(group, Math.addExact(now, get(sg(group) + 0x28)));
                     status(group);
                     // ADTIP=0 emits its first trigger simultaneously with start.
                     if (timerDue[group] == now) timer(thread, group);
                 }
                 void timer(PcodeThread<byte[]> thread, int group) {
-                    timerDue[group] = Math.addExact(now, get(sg(group) + 0x2c) + 1);
+                    setTimerDeadline(group, Math.addExact(now, get(sg(group) + 0x2c) + 1));
                     if ((get(sg(group) + 0x10) & 3) >= 2) request(thread, group);
                 }
+                void setTimerDeadline(int group, long due) {
+                    timerDue[group] = due;
+                    auxiliaryDeadlineDirty = true;
+                }
+                void setIrqDeadline(int group, long due) {
+                    irqDue[group] = due;
+                    auxiliaryDeadlineDirty = true;
+                }
                 long nextDeadline() {
-                    long next = conversionDue;
-                    for (int group = 0; group < 5; group++) next = Math.min(next, Math.min(timerDue[group], irqDue[group]));
-                    return next;
+                    if (auxiliaryDeadlineDirty) {
+                        long next = NEVER;
+                        for (int group = 0; group < 5; group++)
+                            next = Math.min(next, Math.min(timerDue[group], irqDue[group]));
+                        auxiliaryDeadline = next;
+                        auxiliaryDeadlineDirty = false;
+                    }
+                    return Math.min(conversionDue, auxiliaryDeadline);
                 }
                 void advance(PcodeThread<byte[]> thread) {
                     // Stable ordering for coincident timer/results: result commits before a new edge.
@@ -4610,7 +5644,7 @@ public class RunP1MEMachine extends GhidraScript {
                     for (int group = 0; group < 5; group++) {
                         if (timerDue[group] == now) timer(thread, group);
                         if (irqDue[group] == now) {
-                            irqDue[group] = NEVER;
+                            setIrqDeadline(group, NEVER);
                             requestInterrupt(thread, (number == 0 ? 77 : 178) + group);
                             // Tap the peripheral edge irrespective of CPU EIMK.
                             dma.request(thread, 55 + number * 5 + group);
@@ -4658,7 +5692,7 @@ public class RunP1MEMachine extends GhidraScript {
                         int sub = (offset - 0x480) % 0x80;
                         if (sub == 0 && (value & 1) != 0) request(thread, group);
                         if (sub == 8 && (value & 1) != 0 && (get(sg(group) + 0x10) & 3) >= 2) startTimer(thread, group);
-                        if (sub == 12 && (value & 1) != 0) { timerDue[group] = NEVER; status(group); }
+                        if (sub == 12 && (value & 1) != 0) { setTimerDeadline(group, NEVER); status(group); }
                     }
                     if (!reg(offset).access.contains("r")) put(offset, 0);
                 }
@@ -4679,25 +5713,18 @@ public class RunP1MEMachine extends GhidraScript {
                 if (address >= 0xfff92000L && address <= 0xfff92800L) return units[1];
                 throw new IllegalArgumentException("not an ADC unit address: " + hex32(address));
             }
-            void advanceClock(PcodeThread<byte[]> thread, long adcClockCycles) {
-                if (adcClockCycles < 0) throw new IllegalArgumentException("negative CLK_ADC advance");
-                long target = Math.addExact(now, adcClockCycles);
-                for (;;) {
-                    long next = Math.min(units[0].nextDeadline(), units[1].nextDeadline());
-                    if (next == NEVER || next > target) break;
-                    now = next;
-                    units[0].advance(thread);
-                    units[1].advance(thread);
+            void advanceHsbSpan(PcodeThread<byte[]> thread, long span, boolean atEvent) {
+                // CKSC8C is 2 or 4: one ADC tick per two or four HSB cycles.
+                long total = Math.addExact(hsbRemainder, span);
+                long cycles = total >>> clockDivisor();
+                hsbRemainder = total & (clockSelection - 1);
+                now = Math.addExact(now, cycles);
+                if (atEvent) {
+                    do {
+                        units[0].advance(thread);
+                        units[1].advance(thread);
+                    } while (Math.min(units[0].nextDeadline(), units[1].nextDeadline()) == now);
                 }
-                now = target;
-            }
-            void advanceHsbClock(PcodeThread<byte[]> thread, long hsbCycles) {
-                if (hsbCycles < 0) throw new IllegalArgumentException("negative CLK_HSB advance");
-                int divisor = 2 * clockDivisor();
-                long total = Math.addExact(hsbRemainder, hsbCycles);
-                long cycles = total / divisor;
-                hsbRemainder = total % divisor;
-                advanceClock(thread, cycles);
             }
             void hardwareTrigger(PcodeThread<byte[]> thread, int unit, int group) {
                 if (unit < 0 || unit > 1 || group < 0 || group > 4) throw new IllegalArgumentException("invalid ADC hardware trigger");
@@ -4848,8 +5875,8 @@ public class RunP1MEMachine extends GhidraScript {
                 long timestampRemainder, spcDue=NEVER, pulseDue=NEVER;
                 // Explicit wire ordinals, like CSIH, survive peripheral resets.
                 long spcSequence;
-                List<ExternalEvent> relativeInputs;
-                int nextRelativeInput, generation;
+                final WireInputs relativeInputs = new WireInputs();
+                int generation;
                 int[] pulses;
                 int phase, statusNibble, crc, packed;
                 long calibration, messageSamples, capturedTimestamp;
@@ -4955,15 +5982,15 @@ public class RunP1MEMachine extends GhidraScript {
                     spcSequence++;
                     spcDue=Math.addExact(now,(value+1)*tickCycles());
                     event("rsent-spc-start",this,"SPCT write generates output pulse, not a sensor response");
-                    if (relativeInputs != null && nextRelativeInput < relativeInputs.size()
-                            && relativeInputs.get(nextRelativeInput).after_spc_triggers == spcSequence) {
-                        ExternalEvent input = relativeInputs.get(nextRelativeInput++);
+                    WireInput wire = relativeInputs.take(spcSequence);
+                    if (wire != null) {
+                        ExternalEvent input = wire.payload;
                         if (input.delay_hsb_cycles < spcDue - now)
                             throw new IllegalArgumentException("RSENT response overlaps its SPC output pulse");
                         int epoch = generation;
                         long sequence = spcSequence;
                         wireEvents.add(new ScheduledEvent(Math.addExact(now, input.delay_hsb_cycles),
-                            input.ordinal, () -> {
+                            wire.ordinal, () -> {
                                 if (epoch != generation || sequence != spcSequence || !outstanding) return;
                                 receive(thread, number, input.pulse_samples, input.evidence);
                             }));
@@ -5165,35 +6192,43 @@ public class RunP1MEMachine extends GhidraScript {
                 return true;
             }
             long cyclesUntilEvent() {
-                long due=wireEvents.isEmpty() ? NEVER : wireEvents.peek().tick;
+                ScheduledEvent wire = wireEvents.peek();
+                long due = wire == null ? NEVER : wire.tick;
                 for(Unit u:units) due=Math.min(due,Math.min(u.spcDue,u.pulseDue));
                 return due==NEVER ? NEVER : Math.max(0,due-now);
             }
-            void advanceClock(PcodeThread<byte[]> thread,long hsbCycles) {
-                if(hsbCycles<0) throw new IllegalArgumentException("negative HSB progress");
-                long end=Math.addExact(now,hsbCycles);
-                do {
-                    long step=Math.min(end-now,cyclesUntilEvent());
-                    if(step>0) {
-                        for(Unit u:units) if(u.running()) {
-                            long divisor=u.timestampDivisor();
-                            long ticks=step/divisor;
-                            long rem=u.timestampRemainder+step%divisor;
-                            u.v[TSC]=(u.v[TSC]+ticks+rem/divisor)&0xffffffffL;
-                            u.timestampRemainder=rem%divisor;
+            void advanceSpan(PcodeThread<byte[]> thread, long span, boolean atEvent) {
+                long end = Math.addExact(now, span);
+                for (Unit u : units) if (u.running()) {
+                    long divisor = u.timestampDivisor();
+                    if (span == 1) {
+                        long rem = u.timestampRemainder + 1;
+                        if (rem == divisor) {
+                            u.v[TSC] = (u.v[TSC] + 1) & 0xffffffffL;
+                            rem = 0;
                         }
-                        now+=step;
+                        u.timestampRemainder = rem;
+                    } else {
+                        long ticks = span / divisor;
+                        long rem = u.timestampRemainder + span % divisor;
+                        boolean wraps = rem >= divisor;
+                        u.v[TSC] = (u.v[TSC] + ticks + (wraps ? 1 : 0)) & 0xffffffffL;
+                        u.timestampRemainder = wraps ? rem - divisor : rem;
                     }
-                    for(Unit u:units) {
-                        if(u.spcDue==now) {
-                            u.spcDue=NEVER;
-                            event("rsent-spc-end",u,"trigger waveform complete; response still outstanding");
+                }
+                now = end;
+                if (!atEvent && now != NEVER) return;
+                do {
+                    for (Unit u : units) {
+                        if (u.spcDue == now) {
+                            u.spcDue = NEVER;
+                            event("rsent-spc-end", u, "trigger waveform complete; response still outstanding");
                         }
-                        if(u.pulseDue==now) u.pulseBoundary(thread);
+                        if (u.pulseDue == now) u.pulseBoundary(thread);
                     }
                     while (!wireEvents.isEmpty() && wireEvents.peek().tick <= now)
                         wireEvents.remove().action.run();
-                } while(now<end || cyclesUntilEvent()==0);
+                } while (cyclesUntilEvent() == 0);
             }
             void flush() { for(Unit u:units) u.put(TSC,u.v[TSC]); }
             void reset() {
@@ -5577,44 +6612,199 @@ public class RunP1MEMachine extends GhidraScript {
             }
         }
 
-        void configureExternalEvents(PcodeThread<byte[]> thread, List<ExternalEvent> inputs) {
-            long ordinal = 0;
+        final class EventSocket implements Closeable {
+            final ServerSocket server;
+            final Socket socket;
+            final BufferedReader input;
+            final PrintWriter output;
+            final PcodeThread<byte[]> thread;
+            final long readyAddress;
+            final long readyArrivalAddress;
+            final long readyArrivalCount;
+            long readyArrivals;
+            boolean ready;
+
+            EventSocket(EventSocketConfig config, PcodeThread<byte[]> thread) throws IOException {
+                this.thread = thread;
+                InetAddress host = InetAddress.getByName(config.host);
+                if (!host.isLoopbackAddress())
+                    throw new IllegalArgumentException("event_socket host must be loopback");
+                server = new ServerSocket(config.port, 1, host);
+                socket = server.accept();
+                socket.setSoTimeout(1);
+                input = new BufferedReader(new InputStreamReader(
+                    socket.getInputStream(), StandardCharsets.UTF_8));
+                output = new PrintWriter(socket.getOutputStream(), true, StandardCharsets.UTF_8);
+                readyAddress = config.ready_address == null
+                    ? -1 : parseUnsigned(config.ready_address);
+                readyArrivalAddress = config.ready_after_arrivals == null
+                    ? -1 : parseUnsigned(config.ready_after_arrivals.address);
+                readyArrivalCount = config.ready_after_arrivals == null
+                    ? -1 : config.ready_after_arrivals.count;
+                trace.memoryAccesses.discard = true;
+                trace.deviceEvents.listener = this::publish;
+                trace.deviceEvents.discard = true;
+                if (readyAddress < 0 && readyArrivalAddress < 0) publishReady();
+            }
+
+            void publishReady() {
+                JsonObject row = new JsonObject();
+                row.addProperty("kind", "machine-ready");
+                row.addProperty("instruction", trace.instructions);
+                output.println(new Gson().toJson(row));
+                ready = true;
+            }
+
+            void poll(PcodeThread<byte[]> thread) {
+                long pc = thread.getCounter().getOffset();
+                if (!ready && pc == readyAddress) publishReady();
+                if (!ready && pc == readyArrivalAddress
+                        && ++readyArrivals == readyArrivalCount) publishReady();
+                else if (ready && pc == readyArrivalAddress) {
+                    JsonObject row = new JsonObject();
+                    row.addProperty("kind", "instruction-arrival");
+                    row.addProperty("address", hex32(pc));
+                    row.addProperty("instruction", trace.instructions);
+                    output.println(new Gson().toJson(row));
+                }
+                try {
+                    while (input.ready()) {
+                        String line = input.readLine();
+                        if (line == null) throw new MachineHalt("event-socket-closed");
+                        JsonObject row = GSON.fromJson(line, JsonObject.class);
+                        String kind = row.get("kind").getAsString();
+                        if ("stop".equals(kind)) throw new MachineHalt("event-socket-stop");
+                        if (!Set.of("can-rx", "clock", "interrupt").contains(kind))
+                            throw new IllegalArgumentException(
+                                "event_socket accepts can-rx, clock, interrupt, or stop");
+                        ExternalEvent event = GSON.fromJson(row, ExternalEvent.class);
+                        if (event.evidence == null || event.evidence.isBlank())
+                            event.evidence = "loopback event socket";
+                        applyExternalEvent(thread, event);
+                    }
+                }
+                catch (SocketTimeoutException ignored) {
+                    // No complete line is available at this instruction boundary.
+                }
+                catch (IOException exception) {
+                    throw new IllegalStateException("event socket read failed", exception);
+                }
+            }
+
+            void publish(JsonObject row) {
+                String kind = row.get("kind").getAsString();
+                if ("interrupt-return".equals(kind)) {
+                    output.println(new Gson().toJson(row));
+                    return;
+                }
+                if (!"can-tx".equals(kind)) return;
+                output.println(new Gson().toJson(row));
+                ExternalEvent completion = new ExternalEvent();
+                completion.kind = "can-tx-complete";
+                completion.buffer = row.get("buffer").getAsInt();
+                completion.firmware_control = "0x8048";
+                completion.evidence = "loopback event socket transmit completion";
+                completeRscfdTransmit(thread, completion);
+            }
+
+            @Override
+            public void close() throws IOException {
+                trace.deviceEvents.listener = null;
+                socket.close();
+                server.close();
+            }
+        }
+
+        enum EventOrigin { SCENARIO, TRIAL, RESET }
+
+        void configureExternalEvents(PcodeThread<byte[]> thread, List<ExternalEvent> inputs,
+                long baseInstruction, EventOrigin origin) {
             for (ExternalEvent input : inputs) {
-                input.ordinal = ordinal++;
-                if (input.after_transmit_words != null) {
+                long ordinal = nextEventOrdinal++;
+                if (input.after_reset_instructions != null) {
+                    if (origin == EventOrigin.RESET && baseInstruction != 0)
+                        throw new IllegalArgumentException(
+                            "reset-relative event is unsupported inside a reset replay fragment");
+                    resetRelativeEvents.add(input);
+                }
+                else if ("memory-write".equals(input.kind) && input.after_instructions == 0
+                        && (origin != EventOrigin.TRIAL || baseInstruction == 0)) {
+                    // A tick-zero overlay is initial machine state. Apply it
+                    // before the thread begins decoding so a checkpoint at zero
+                    // captures it without invalidating an active decode.
+                    applyExternalEvent(thread, input);
+                }
+                else if (input.after_transmit_words != null) {
                     Csih controller = csih(requiredRegister(
                         "csih-word", "controller", "CSIH" + input.unit + "CTL0"));
-                    if (controller.relativeInputs == null) controller.relativeInputs = new ArrayList<>();
-                    controller.relativeInputs.add(input);
+                    long base = origin == EventOrigin.SCENARIO ? 0 : controller.transmittedWords;
+                    controller.relativeInputs.add(Math.addExact(base, input.after_transmit_words), ordinal, input);
                 }
                 else if (input.after_spc_triggers != null) {
                     Rsent.Unit receiver = rsent.unit(input.unit);
-                    if (receiver.relativeInputs == null) receiver.relativeInputs = new ArrayList<>();
-                    receiver.relativeInputs.add(input);
+                    long base = origin == EventOrigin.SCENARIO ? 0 : receiver.spcSequence;
+                    receiver.relativeInputs.add(Math.addExact(base, input.after_spc_triggers), ordinal, input);
                 }
                 else {
-                    externalEvents.add(new ScheduledEvent(input.after_instructions, input.ordinal,
-                        () -> applyExternalEvent(thread, input)));
+                    long tick = Math.addExact(baseInstruction, input.after_instructions);
+                    externalEvents.add(new ScheduledEvent(
+                        tick, ordinal, () -> applyExternalEvent(thread, input)));
                 }
             }
-            Comparator<ExternalEvent> order = Comparator.comparingLong(input -> input.after_transmit_words);
-            for (Csih controller : csihControllers.values()) {
-                if (controller.relativeInputs != null) controller.relativeInputs.sort(order);
+        }
+
+
+        void replayAfterReset(PcodeThread<byte[]> thread) {
+            if (resetReplay != null) {
+                for (MemoryInit init : resetReplay.memory) {
+                    long address = parseUnsigned(init.address);
+                    byte[] value;
+                    if (init.hex != null) {
+                        value = parseHex(init.hex);
+                    }
+                    else {
+                        value = new byte[init.size];
+                        Arrays.fill(value, (byte) (init.fill & 0xff));
+                    }
+                    initializeMemory(address, value, init.evidence);
+                }
+                if (resetReplay.hsb_cycles_per_instruction != null)
+                    hsbCyclesPerInstruction = resetReplay.hsb_cycles_per_instruction;
+                initializeDataFlashCells(resetReplay.dataflash_cells);
+                if (resetReplay.icus_startup_stub != null)
+                    icusStartupStub = new IcusStartupStub(resetReplay.icus_startup_stub);
+                dma.masterRewriteAssumption = resetReplay.dma_master_rewrite_assumption;
+                configureExternalEvents(
+                    thread, resetReplay.events, trace.instructions, EventOrigin.RESET);
             }
-            for (Rsent.Unit receiver : rsent.units) {
-                if (receiver.relativeInputs != null)
-                    receiver.relativeInputs.sort(Comparator.comparingLong(input -> input.after_spc_triggers));
+            for (ExternalEvent input : resetRelativeEvents) {
+                long ordinal = nextEventOrdinal++;
+                long tick = Math.addExact(trace.instructions, input.after_reset_instructions);
+                if ("memory-write".equals(input.kind) && input.after_reset_instructions == 0) {
+                    applyExternalEvent(thread, input);
+                }
+                else {
+                    externalEvents.add(new ScheduledEvent(
+                        tick, ordinal, () -> applyExternalEvent(thread, input)));
+                }
             }
         }
 
         void dispatchExternalEvents() {
-            while (!externalEvents.isEmpty() && externalEvents.peek().tick <= trace.instructions)
+            ScheduledEvent next = externalEvents.peek();
+            if (next == null || next.tick > trace.instructions) return;
+            // Wire-relative CSIH completions also enter here, not via applyExternalEvent.
+            prepareClockMutation(executionThread);
+            do {
                 externalEvents.remove().action.run();
+                next = externalEvents.peek();
+            } while (next != null && next.tick <= trace.instructions);
         }
 
         void applyExternalEvent(PcodeThread<byte[]> thread, ExternalEvent input) {
+            prepareClockMutation(thread);
             switch (input.kind) {
-                case "clock": advanceClock(thread, input.p_bus_cycles); break;
+                case "clock": advanceClock(thread, input.p_bus_cycles, false); break;
                 case "adc-sample": adc.input(input); break;
                 case "rsent-frame":
                     rsent.receive(thread, input.unit, input.pulse_samples, input.evidence);
@@ -5632,6 +6822,7 @@ public class RunP1MEMachine extends GhidraScript {
                 case "register-input": externalRegisterInput(input); break;
                 case "ecm-pin-drive": externalEcmPinDrive(input); break;
                 case "peripheral-reset": externalPeripheralReset(input); break;
+                case "reset-assert": externalResetAssert(thread, input); break;
                 default: throw new IllegalArgumentException("unknown external event " + input.kind);
             }
         }
@@ -6557,6 +7748,99 @@ public class RunP1MEMachine extends GhidraScript {
             event.addProperty("evidence", input.evidence);
             trace.deviceEvents.add(event);
         }
+        Map<RegionDef, byte[]> resetMemoryBefore() {
+            Map<RegionDef, byte[]> before = new LinkedHashMap<>();
+            for (RegionDef region : regions) {
+                if (!region.name.toLowerCase().contains("ram")) continue;
+                try {
+                    before.put(region, emulator.getSharedState().getVar(
+                        memorySpace, region.start, region.size, true, Reason.INSPECT));
+                }
+                catch (RuntimeException unavailable) {
+                    before.put(region, null);
+                }
+            }
+            return before;
+        }
+
+        JsonArray resetMemoryChanges(Map<RegionDef, byte[]> before) {
+            JsonArray rows = new JsonArray();
+            for (Map.Entry<RegionDef, byte[]> entry : before.entrySet()) {
+                RegionDef region = entry.getKey();
+                byte[] prior = entry.getValue();
+                byte[] after;
+                try {
+                    after = emulator.getSharedState().getVar(
+                        memorySpace, region.start, region.size, true, Reason.INSPECT);
+                }
+                catch (RuntimeException unavailable) {
+                    after = null;
+                }
+                if (prior == null || after == null) {
+                    if (prior == after) continue;
+                    JsonObject row = new JsonObject();
+                    row.addProperty("region", region.name);
+                    row.addProperty("address", hex32(region.start));
+                    row.addProperty("size", region.size);
+                    row.addProperty("initialized_before", prior != null);
+                    row.addProperty("initialized_after", after != null);
+                    rows.add(row);
+                    continue;
+                }
+                int first = 0;
+                while (first < prior.length) {
+                    while (first < prior.length && prior[first] == after[first]) first++;
+                    if (first == prior.length) break;
+                    int last = first + 1;
+                    while (last < prior.length && prior[last] != after[last]) last++;
+                    JsonObject row = new JsonObject();
+                    row.addProperty("region", region.name);
+                    row.addProperty("address", hex32(region.start + first));
+                    row.addProperty("size", last - first);
+                    rows.add(row);
+                    first = last;
+                }
+            }
+            return rows;
+        }
+
+        void clearResetQueues() {
+            scheduledEvents.clear();
+            pendingRscfdTransmits.clear();
+            for (ReceiveFifo fifo : receiveFifos.values()) fifo.messages.clear();
+            pendingInterrupts.clear();
+            Arrays.fill(pendingPriorities, (byte) -1);
+            for (BitSet channels : channelsByPriority) channels.clear();
+            pendingPriorityMask = 0;
+        }
+
+        void externalResetAssert(PcodeThread<byte[]> thread, ExternalEvent input) {
+            Map<RegionDef, byte[]> before = resetMemoryBefore();
+            clearResetQueues();
+            applyReset(input.reset_class);
+            initializeProcessorReset(thread);
+            thread.overrideCounter(memorySpace.getAddress(0));
+            thread.overrideContextWithDefault();
+            thread.setSuspended(false);
+            replayAfterReset(thread);
+            JsonObject event = new JsonObject();
+            event.addProperty("kind", "reset-assert");
+            event.addProperty("reset_class", input.reset_class);
+            event.addProperty("reset_cause_register", "RESF");
+            event.addProperty("reset_cause_value", hex32(resetFactorValue()));
+            event.addProperty("instruction", trace.instructions);
+            event.add("changed_memory_ranges", resetMemoryChanges(before));
+            event.addProperty("internal_scheduled_events", "discarded");
+            event.addProperty("can_controller_queues", "discarded");
+            event.addProperty("future_external_events", "retained");
+            if (resetReplay != null) {
+                event.addProperty("replayed_scenario", resetReplay.scenario);
+                event.addProperty("replayed_memory_rows", resetReplay.memory.size());
+                event.addProperty("replayed_event_rows", resetReplay.events.size());
+            }
+            event.addProperty("evidence", input.evidence);
+            trace.deviceEvents.add(event);
+        }
 
         void handleRegisterWrite(PcodeThread<byte[]> thread, long address, int size, byte[] value) {
             RegisterDef register = register(address, size);
@@ -6678,6 +7962,11 @@ public class RunP1MEMachine extends GhidraScript {
                     | (level ? registerBeforeWrite & 0x1000L : 0)
                     | (registerValue(register) & writable));
             }
+            else if ("intc_eic".equals(register.behavior)) {
+                // Firmware-only EICs can be reprogrammed before or after an explicit
+                // request. A CPU store to these words is not itself a request source.
+                refreshPendingInterrupts(address, size, false);
+            }
             handleReceiveWrite(thread, register, value);
             if (register.trigger == null) return;
             switch (register.trigger) {
@@ -6728,6 +8017,10 @@ public class RunP1MEMachine extends GhidraScript {
                     handleRscfdWrite(thread, register, value, registerBeforeWrite);
                     break;
                 case "rscfd-transmit-status": handleRscfdTransmitStatusWrite(register); break;
+                case "rscfd-global-control":
+                case "rscfd-channel-control":
+                    handleRscfdModeWrite(register, registerValue(register));
+                    break;
                 case "rscfd-fd-counter-clear": {
                     // Section17.2.2: classical mode maps this address to a rule word.
                     if ((registerValue(registersByName.get("GRMCFG")) & 1) == 0) break;
@@ -6826,7 +8119,6 @@ public class RunP1MEMachine extends GhidraScript {
         }
 
         void afterWrite(PcodeThread<byte[]> thread, long address, int size, byte[] value) {
-            if (internalWrite) return;
             if (discardBusStore) {
                 discardBusStore = false;
                 return;
@@ -6839,16 +8131,11 @@ public class RunP1MEMachine extends GhidraScript {
                     for (RegionDef alias : group) {
                         if (alias == region) continue;
                         setMemory(alias.start + delta, value);
-                        JsonObject event = new JsonObject();
-                        event.addProperty("kind", "alias-write");
-                        event.addProperty("from", hex32(address));
-                        event.addProperty("to", hex32(alias.start + delta));
-                        event.addProperty("size", size);
-                        trace.deviceEvents.add(event);
+                        trace.aliasWrite(address, alias.start + delta, size);
                     }
                 }
             }
-            if (peripheralFile) refreshPendingInterrupts(address, size);
+            if (peripheralFile) refreshPendingInterrupts(address, size, true);
             else handleRegisterWrite(thread, address, size, value);
         }
 
@@ -6929,8 +8216,9 @@ public class RunP1MEMachine extends GhidraScript {
             }
         }
 
-        // Index EIRF by address-sorted EIC; retain mask/priority arbitration at delivery.
-        void refreshPendingInterrupts(long address, int size) {
+        // Model writes index EIRF. Raw writes to firmware-only EICs update arbitration
+        // only for already indexed requests; an untouched lane may still be undefined.
+        void refreshPendingInterrupts(long address, int size, boolean indexRequests) {
             if (interruptRegistersByAddress.length == 0 || size == 0) return;
             RegisterDef last = interruptRegistersByAddress[interruptRegistersByAddress.length - 1];
             long end = address + size;
@@ -6947,20 +8235,29 @@ public class RunP1MEMachine extends GhidraScript {
             for (int index = low; index < interruptRegistersByAddress.length; index++) {
                 RegisterDef eic = interruptRegistersByAddress[index];
                 if (eic.address >= end) break;
-                pendingInterrupts.set(
-                    index, (unsigned(memory(eic.address, eic.size)) & 0x1000) != 0);
+                if (!indexRequests && !pendingInterrupts.get(index)) continue;
+                long control = unsigned(memory(eic.address, eic.size));
+                int previous = pendingPriorities[index];
+                int priority = (control & 0x1080) == 0x1000 ? (int) control & 15 : -1;
+                if (previous != priority) {
+                    int channel = eic.interrupt_channel;
+                    if (previous >= 0) {
+                        channelsByPriority[previous].clear(channel);
+                        if (channelsByPriority[previous].isEmpty()) pendingPriorityMask &= ~(1 << previous);
+                    }
+                    if (priority >= 0) {
+                        channelsByPriority[priority].set(channel);
+                        pendingPriorityMask |= 1 << priority;
+                    }
+                    pendingPriorities[index] = (byte) priority;
+                }
+                if (indexRequests) pendingInterrupts.set(index, (control & 0x1000) != 0);
             }
         }
 
         void setMemory(long address, byte[] value) {
-            internalWrite = true;
-            try {
-                emulator.getSharedState().setVar(memorySpace, address, value.length, true, value);
-                refreshPendingInterrupts(address, value.length);
-            }
-            finally {
-                internalWrite = false;
-            }
+            emulator.getSharedState().setVar(memorySpace, address, value.length, true, value);
+            refreshPendingInterrupts(address, value.length, true);
         }
 
         void externalMemoryWrite(ExternalEvent input) {
@@ -7213,102 +8510,401 @@ public class RunP1MEMachine extends GhidraScript {
         boolean protectedIsprWrite;
         boolean icctrlWrite;
         long isprBeforeInstruction;
-        byte[] readInputBacking;
 
         Callbacks(SleighLanguage language, Model model) {
             this.language = language;
             this.model = model;
         }
+        static final Set<String> FLAG_ARITHMETIC = Set.of(
+            "add", "addi", "sub", "subr", "satadd", "satsub", "satsubr",
+            "shl", "shr", "sar", "and", "or", "xor", "not", "mul", "mulu",
+            "div", "divu", "mac", "macu"
+        );
+        static final class InstructionObservation {
+            static final Register[] NO_REGISTERS = new Register[0];
+            static final int DERIVE_NONE = 0, DERIVE_SHIFT = 1, DERIVE_ADD = 2;
 
-        private long offset(byte[] value) {
+            final Instruction instruction;
+            final PcodeProgram decodedProgram;
+            final long pc;
+            final String mnemonic;
+            final String compareMnemonic;
+            final boolean conditional;
+            final boolean computed;
+            final boolean readsIcctrl;
+            final boolean writesIcctrl;
+            final boolean writesIspr;
+            final int compareWidth;
+            final OperandValue penultimateValue;
+            final OperandValue lastValue;
+            final Register[] addressRegisters;
+            final AddressDerivation[] addressDerivations;
+            final Register destination;
+            final int derivation;
+            private static final AddressDerivation[] NO_DERIVATIONS = new AddressDerivation[0];
+            private AddressDerivation[] resultDerivations;
+
+            InstructionObservation(Callbacks callbacks, Instruction instruction, PcodeProgram decodedProgram,
+                    boolean comparisons, boolean indices, boolean peripheralFile) {
+                this.instruction = instruction;
+                this.decodedProgram = decodedProgram;
+                pc = instruction.getAddress().getOffset();
+                mnemonic = instruction.getMnemonicString();
+                String lower = comparisons || indices ? mnemonic.toLowerCase() : mnemonic;
+                int last = instruction.getNumOperands() - 1;
+                boolean compare = comparisons && last >= 1 && (lower.equals("cmp")
+                    || lower.equals("tst") || lower.equals("cmpf.s") || lower.equals("cmpf.d")
+                    || FLAG_ARITHMETIC.contains(lower));
+                var flow = comparisons || indices ? instruction.getFlowType() : null;
+                conditional = comparisons && flow.isConditional();
+                computed = indices && flow.isComputed();
+                compareMnemonic = compare ? lower : null;
+                derivation = !indices || last < 1 ? DERIVE_NONE
+                    : lower.equals("shl") && last == 1 ? DERIVE_SHIFT
+                    : lower.equals("add") ? DERIVE_ADD : DERIVE_NONE;
+
+                Register[] addresses = indices && last >= 0 ? new Register[last + 1] : NO_REGISTERS;
+                addressDerivations = addresses.length == 0 ? NO_DERIVATIONS
+                    : new AddressDerivation[addresses.length];
+                OperandValue left = null;
+                OperandValue right = null;
+                boolean stsr = peripheralFile && mnemonic.equals("stsr");
+                boolean icctrlRead = false;
+                if (indices || compare || stsr) {
+                    for (int index = 0; index <= last; index++) {
+                        Register address = indices || (stsr && !icctrlRead)
+                            ? instruction.getRegister(index) : null;
+                        if (stsr && address != null && "ICCTRL".equals(address.getName())) {
+                            icctrlRead = true;
+                        }
+                        boolean needLeft = index == last - 1 && (compare || derivation != DERIVE_NONE);
+                        boolean needRight = index == last && compare;
+                        boolean needValue = needLeft || needRight;
+                        OperandValue value = null;
+                        // Index probes prefer the direct register. Operand values
+                        // instead use the first displayed scalar or register.
+                        if (needValue || (indices && address == null)) {
+                            for (Object object : instruction.getOpObjects(index)) {
+                                if (object instanceof Register register) {
+                                    if (address == null) address = register;
+                                    if (value == null && needValue) {
+                                        value = new OperandValue(register, 0, register.getBitLength());
+                                    }
+                                }
+                                else if (value == null && needValue && object instanceof Scalar scalar) {
+                                    value = new OperandValue(null, scalar.getUnsignedValue(),
+                                        scalar.bitLength());
+                                }
+                                if ((!indices || address != null) && (!needValue || value != null)) break;
+                            }
+                        }
+                        if (indices) {
+                            addresses[index] = address;
+                            if (address != null) addressDerivations[index] = callbacks.derivationSlot(address);
+                        }
+                        if (needLeft) left = value;
+                        if (needRight) right = value;
+                    }
+                }
+                readsIcctrl = icctrlRead;
+                Register system = mnemonic.equals("ldsr") ? instruction.getRegister(1) : null;
+                writesIcctrl = !peripheralFile && system != null && "ICCTRL".equals(system.getName());
+                writesIspr = system != null && "ISPR".equals(system.getName());
+                penultimateValue = left;
+                lastValue = right;
+                compareWidth = !compare || left == null || right == null ? 0
+                    : lower.equals("cmpf.d") ? 64 : lower.equals("cmpf.s") ? 32
+                    : Math.max(left.width(), right.width());
+                addressRegisters = addresses;
+                destination = indices && last >= 0 ? addresses[last] : null;
+            }
+
+            AddressDerivation[] resultDerivations(Callbacks callbacks) {
+                if (resultDerivations != null) return resultDerivations;
+                List<Register> registers = new ArrayList<>();
+                if (decodedProgram != null) {
+                    // Match Sleigh's register results using the plan's unmodified
+                    // p-code. STORE contributes an Address, never a Register.
+                    for (var op : decodedProgram.getCode()) {
+                        var output = op.getOutput();
+                        if (op.getOpcode() == ghidra.program.model.pcode.PcodeOp.STORE
+                                || output == null || !(output.isRegister() || output.isAddress())) {
+                            continue;
+                        }
+                        Register register = callbacks.language.getRegister(output.getAddress(), output.getSize());
+                        if (register != null && !registers.contains(register)) registers.add(register);
+                    }
+                }
+                else {
+                    for (Object object : instruction.getResultObjects()) {
+                        if (object instanceof Register register) registers.add(register);
+                    }
+                }
+                if (registers.isEmpty()) return resultDerivations = NO_DERIVATIONS;
+                var resolved = new AddressDerivation[registers.size()];
+                for (int i = 0; i < resolved.length; i++) {
+                    resolved[i] = callbacks.derivationSlot(registers.get(i));
+                }
+                return resultDerivations = resolved;
+            }
+        }
+
+        record OperandValue(Register register, long scalar, int width) {}
+        record PendingCompare(InstructionObservation instruction, long left, long right) {}
+        // Decoded observations for the same register share a slot.
+        static final class AddressDerivation {
+            long base;
+            long index;
+            int scale; // Zero denotes an inactive slot; every real scale is positive.
+
+            boolean matches(long effective) {
+                return scale != 0 && index != 0 && ((base + index * scale) & 0xffffffffL) == effective;
+            }
+        }
+
+        record SavedDerivation(AddressDerivation slot, long base, long index, int scale) {}
+        private final Map<String, AddressDerivation> addressDerivations = new HashMap<>();
+        private int activeDerivations;
+        final long[] inspected = new long[2];
+        InstructionObservation currentObservation;
+        InstructionObservation pendingComparison;
+        long pendingLeft;
+        long pendingRight;
+
+        InstructionObservation decodeObservation(Instruction instruction, PcodeProgram decodedProgram) {
+            return new InstructionObservation(this, instruction, decodedProgram,
+                model.compareOperands, model.inputDerivedTableIndices, model.peripheralFile);
+        }
+
+        private AddressDerivation derivationSlot(Register register) {
+            return addressDerivations.computeIfAbsent(register.getName(), name -> new AddressDerivation());
+        }
+
+        private void setDerivation(AddressDerivation slot, long base, long index, int scale) {
+            if (slot.scale == 0) activeDerivations++;
+            slot.base = base;
+            slot.index = index;
+            slot.scale = scale;
+        }
+
+        List<SavedDerivation> checkpointDerivations() {
+            var saved = new ArrayList<SavedDerivation>(activeDerivations);
+            for (AddressDerivation slot : addressDerivations.values()) {
+                if (slot.scale != 0) saved.add(new SavedDerivation(slot, slot.base, slot.index, slot.scale));
+            }
+            return saved;
+        }
+
+        void restoreDerivations(List<SavedDerivation> saved) {
+            for (AddressDerivation slot : addressDerivations.values()) slot.scale = 0;
+            activeDerivations = 0;
+            for (SavedDerivation row : saved) setDerivation(row.slot, row.base, row.index, row.scale);
+        }
+
+        PendingCompare checkpointCompare() {
+            return pendingComparison == null ? null
+                : new PendingCompare(pendingComparison, pendingLeft, pendingRight);
+        }
+
+        void restoreCompare(PendingCompare pending) {
+            pendingComparison = pending == null ? null : pending.instruction();
+            if (pending != null) {
+                pendingLeft = pending.left();
+                pendingRight = pending.right();
+            }
+        }
+
+        boolean inspectRegister(PcodeThread<byte[]> thread, Register register, int slot) {
+            if (thread instanceof P1MEJitMachine.MachineThread jit) {
+                return jit.readObservedRegister(register, inspected, slot);
+            }
+            try {
+                byte[] value = thread.getState().getVar(register, Reason.INSPECT);
+                inspected[slot] = Utils.bytesToLong(value, value.length, language.isBigEndian());
+                return true;
+            }
+            catch (RuntimeException unavailable) {
+                return false;
+            }
+        }
+
+        boolean inspectOperand(PcodeThread<byte[]> thread, OperandValue operand, int slot) {
+            if (operand == null) return false;
+            if (operand.register() != null) return inspectRegister(thread, operand.register(), slot);
+            inspected[slot] = operand.scalar();
+            return true;
+        }
+
+        boolean noteCompare(PcodeThread<byte[]> thread, InstructionObservation observation) {
+            if (observation.compareWidth == 0
+                    || !inspectOperand(thread, observation.penultimateValue, 0)
+                    || !inspectOperand(thread, observation.lastValue, 1)) return false;
+            pendingComparison = observation;
+            pendingLeft = inspected[0];
+            pendingRight = inspected[1];
+            return true;
+        }
+
+        void consumeCompare(InstructionObservation branch) {
+            InstructionObservation compare = pendingComparison;
+            if (compare == null || !branch.conditional) return;
+            model.trace.compare(compare.pc, branch.pc, compare.compareMnemonic, compare.compareWidth,
+                pendingLeft, pendingRight);
+            pendingComparison = null;
+        }
+
+        void updateAddressDerivations(PcodeThread<byte[]> thread, InstructionObservation observation,
+                boolean compared) {
+            Register destination = observation.destination;
+            if (destination == null) return;
+            AddressDerivation[] slots = observation.addressDerivations;
+            AddressDerivation destinationSlot = slots[slots.length - 1];
+            boolean reuseDestination = compared && observation.lastValue.register() == destination;
+            if (observation.derivation == InstructionObservation.DERIVE_SHIFT) {
+                if ((reuseDestination || inspectRegister(thread, destination, 1)) && inspected[1] != 0
+                        && (compared || inspectOperand(thread, observation.penultimateValue, 0))
+                        && inspected[0] >= 0 && inspected[0] < 31) {
+                    setDerivation(destinationSlot, 0, inspected[1], 1 << (int) inspected[0]);
+                    return;
+                }
+            }
+            else if (observation.derivation == InstructionObservation.DERIVE_ADD) {
+                AddressDerivation source = slots[slots.length - 2];
+                if (source != null && (compared || inspectOperand(thread, observation.penultimateValue, 0))
+                        && inspected[0] != 0 && (reuseDestination || inspectRegister(thread, destination, 1))) {
+                    long sourceValue = inspected[0];
+                    long base = inspected[1];
+                    if (destinationSlot.scale != 0) {
+                        setDerivation(destinationSlot, (sourceValue + destinationSlot.base) & 0xffffffffL,
+                            destinationSlot.index, destinationSlot.scale);
+                    }
+                    else if (source.scale != 0) {
+                        setDerivation(destinationSlot, (base + source.base) & 0xffffffffL,
+                            source.index, source.scale);
+                    }
+                    else {
+                        setDerivation(destinationSlot, base, sourceValue, 1);
+                    }
+                    return;
+                }
+            }
+            if (activeDerivations == 0) return;
+            for (AddressDerivation result : observation.resultDerivations(this)) {
+                if (result.scale != 0) {
+                    result.scale = 0;
+                    activeDerivations--;
+                }
+            }
+        }
+
+        void recordIndex(long pc, AddressDerivation derivation, long effective, int width, String access) {
+            model.trace.tableIndex(pc, derivation.base, derivation.index, derivation.scale,
+                effective, width, access);
+        }
+
+        void noteIndex(long effective, int width, String access) {
+            InstructionObservation observation = currentObservation;
+            if (observation == null || activeDerivations == 0) return;
+            for (AddressDerivation derivation : observation.addressDerivations) {
+                if (derivation == null || !derivation.matches(effective)) continue;
+                recordIndex(observation.pc, derivation, effective, width, access);
+                return;
+            }
+        }
+
+        void noteIndirectBranch(PcodeThread<byte[]> thread, InstructionObservation observation) {
+            if (!observation.computed || activeDerivations == 0) return;
+            for (int i = 0; i < observation.addressDerivations.length; i++) {
+                AddressDerivation derivation = observation.addressDerivations[i];
+                if (derivation == null || derivation.scale == 0 || derivation.index == 0
+                        || !inspectRegister(thread, observation.addressRegisters[i], 0)
+                        || !derivation.matches(inspected[0])) {
+                    continue;
+                }
+                recordIndex(observation.pc, derivation, inspected[0], 32, "branch");
+                return;
+            }
+        }
+
+        long offset(byte[] value) {
             return Utils.bytesToLong(value, value.length, language.isBigEndian()) & 0xffffffffL;
         }
 
         @Override
         public void beforeDecodeInstruction(PcodeThread<byte[]> thread, Address counter,
                                             RegisterValue context) {
-            model.requireExecute(thread, counter.getOffset(), 1);
+            authorizeInstructionStart(thread, counter);
+        }
+
+        long authorizeInstructionStart(PcodeThread<byte[]> thread, Address counter) {
+            return model.requireExecute(thread, counter.getOffset(), 1);
         }
 
         @Override
         public void beforeExecuteInstruction(PcodeThread<byte[]> thread,
                                              Instruction instruction, PcodeProgram program) {
-            model.trace.enterInstruction(instruction.getAddress().getOffset());
-            model.requireExecute(
-                thread, instruction.getAddress().getOffset(), instruction.getLength());
-            thread.getState().getVar(model.memorySpace, instruction.getAddress().getOffset(),
-                instruction.getLength(), true, Reason.EXECUTE_READ);
-            String mnemonic = instruction.getMnemonicString();
-            if (model.peripheralFile && "stsr".equals(mnemonic)) {
-                for (int operand = 0; operand < instruction.getNumOperands(); operand++) {
-                    Register system = instruction.getRegister(operand);
-                    if (system != null && "ICCTRL".equals(system.getName())) {
-                        model.scriptIcctrl(thread);
-                        break;
-                    }
-                }
+            beforeExecuteInstruction(thread, instruction, null, 0);
+        }
+
+        void beforeExecuteInstruction(PcodeThread<byte[]> thread, Instruction instruction,
+                                      Address fetchStart, long fetchEnd) {
+            Address address = instruction.getAddress();
+            long pc = address.getOffset();
+            int size = instruction.getLength();
+            model.trace.enterInstruction(pc, size);
+            if (size <= 0 || Long.compareUnsigned(pc + size, fetchEnd) > 0
+                    || !address.equals(fetchStart)) {
+                model.requireExecute(thread, pc, size);
             }
-            interruptReturn = "eiret".equals(mnemonic);
+            P1MEJitMachine.MachineThread jit = thread instanceof P1MEJitMachine.MachineThread machineThread
+                ? machineThread : null;
+            if (jit == null || !jit.hasVerifiedInstructionBytes(instruction)) {
+                thread.getState().getVar(model.memorySpace, pc, size, true, Reason.EXECUTE_READ);
+            }
+            InstructionObservation observation = jit == null ? null : jit.currentObservation(instruction);
+            if (observation == null) observation = decodeObservation(instruction, null);
+            currentObservation = observation;
+            consumeCompare(observation);
+            noteIndirectBranch(thread, observation);
+            boolean compared = noteCompare(thread, observation);
+            if (model.inputDerivedTableIndices) updateAddressDerivations(thread, observation, compared);
+            if (observation.readsIcctrl) model.scriptIcctrl(thread);
+            interruptReturn = "eiret".equals(observation.mnemonic);
             automaticPriorityReturn = interruptReturn
                 && (model.processorRegister(thread, "PSW") & 0x40) == 0
                 && (model.processorRegister(thread, "INTCFG") & 1) == 0;
-            Register destination = "ldsr".equals(mnemonic) ? instruction.getRegister(1) : null;
-            icctrlWrite = !model.peripheralFile && destination != null
-                && "ICCTRL".equals(destination.getName());
-            protectedIsprWrite = destination != null && "ISPR".equals(destination.getName())
+            icctrlWrite = observation.writesIcctrl;
+            protectedIsprWrite = observation.writesIspr
                 && (model.processorRegister(thread, "INTCFG") & 1) == 0;
             if (automaticPriorityReturn || protectedIsprWrite) {
                 isprBeforeInstruction = model.processorRegister(thread, "ISPR");
             }
         }
 
-        @Override
-        public void beforeLoad(PcodeThread<byte[]> thread, PcodeOp op, AddressSpace space,
-                               byte[] offset, int size) {
-            if (space.equals(language.getDefaultSpace())) {
-                long address = offset(offset);
-                RegisterDef register = model.beforeRead(thread, address, size);
-                if (register != null && register.read_input) {
-                    // Materialize only this LOAD's bus lanes, then restore command
-                    // backing bytes in afterLoad. CPU writes never alter the response.
-                    readInputBacking = model.memory(address, size);
-                    long response = model.readInputResponses.get(register.name);
-                    int lane = Math.toIntExact(address - register.address);
-                    int shift = language.isBigEndian()
-                        ? 8 * (register.size - lane - size) : 8 * lane;
-                    model.setMemory(address, bytes(response >>> shift, size, language.isBigEndian()));
-                }
-            }
+        // CPU data transactions only. Concrete-offset access is the backing path for
+        // fetch, inspection, device updates, and the transfer after authorization.
+        byte[] readBus(long address, int size) {
+            PcodeThread<byte[]> thread = model.executionThread;
+            noteIndex(address, size * 8, "load");
+            RegisterDef register = model.beforeRead(thread, address, size);
+            byte[] result = register != null && register.read_input
+                ? model.readInputLanes(register, address, size)
+                : model.emulator.getSharedState().getVar(model.memorySpace, address, size,
+                    true, Reason.EXECUTE_READ);
+            model.adc.readCompleted(thread, address, size);
+            model.rsent.readCompleted(thread, address, size);
+            return result;
         }
 
-        @Override
-        public void afterLoad(PcodeThread<byte[]> thread, PcodeOp op, AddressSpace space,
-                              byte[] offset, int size, byte[] value) {
-            if (readInputBacking != null) {
-                model.setMemory(offset(offset), readInputBacking);
-                readInputBacking = null;
+        void writeBus(long address, byte[] value) {
+            PcodeThread<byte[]> thread = model.executionThread;
+            int size = value.length;
+            noteIndex(address, size * 8, "store");
+            model.beforeWrite(thread, address, size, value);
+            if (!model.discardBusStore) {
+                model.emulator.getSharedState().setVar(model.memorySpace, address, size, true, value);
             }
-            if (space.equals(language.getDefaultSpace())) {
-                long address = offset(offset);
-                model.adc.readCompleted(thread, address, size);
-                model.rsent.readCompleted(thread, address, size);
-            }
-        }
-
-        @Override
-        public void beforeStore(PcodeThread<byte[]> thread, PcodeOp op, AddressSpace space,
-                                byte[] offset, int size, byte[] value) {
-            if (space.equals(language.getDefaultSpace())) {
-                model.beforeWrite(thread, offset(offset), size, Arrays.copyOf(value, size));
-            }
-        }
-
-        @Override
-        public void afterStore(PcodeThread<byte[]> thread, PcodeOp op, AddressSpace space,
-                               byte[] offset, int size, byte[] value) {
-            if (space.equals(language.getDefaultSpace())) {
-                model.afterWrite(thread, offset(offset), size, Arrays.copyOf(value, size));
-            }
+            model.afterWrite(thread, address, size, value);
         }
 
         @Override
@@ -7319,34 +8915,37 @@ public class RunP1MEMachine extends GhidraScript {
             else if (protectedIsprWrite) {
                 model.processorRegister(thread, "ISPR", isprBeforeInstruction);
             }
+            InstructionObservation observation = currentObservation;
+            boolean sameInstruction = observation != null && observation.instruction == instruction;
+            long pc = sameInstruction ? observation.pc : instruction.getAddress().getOffset();
             if (interruptReturn) {
                 JsonObject event = new JsonObject();
                 event.addProperty("kind", "interrupt-return");
-                event.addProperty("pc", hex32(instruction.getAddress().getOffset()));
+                event.addProperty("pc", hex32(pc));
                 event.addProperty("return_pc", hex32(model.pc(thread)));
                 event.addProperty("scheduler_tick", model.trace.instructions + 1);
                 model.trace.deviceEvents.add(event);
             }
-            switch (instruction.getMnemonicString()) {
+            String mnemonic = sameInstruction ? observation.mnemonic : instruction.getMnemonicString();
+            switch (mnemonic) {
                 case "synce" -> model.trace.sync("SYNCE");
                 case "syncm" -> model.trace.sync("SYNCM");
                 case "syncp" -> model.trace.sync("SYNCP");
                 case "synci" -> model.trace.sync("SYNCI");
                 default -> { }
             }
-            if ("prepare".equals(instruction.getMnemonicString())) {
+            if ("prepare".equals(mnemonic)) {
                 model.clearPreparedFrame(thread, instruction);
             }
             if (icctrlWrite) model.completeInstructionCacheClear(thread);
             model.trace.instructions++;
-            model.trace.executed.add(instruction.getAddress().getOffset());
-            model.noteBoundedCall(thread, instruction);
-            model.trace.recentPcs.add(instruction.getAddress().getOffset());
-            if (model.trace.recentPcs.size() > 16) model.trace.recentPcs.remove(0);
-            if (model.hsbCyclesPerInstruction != 0)
-                model.advanceClock(thread, model.hsbCyclesPerInstruction);
+            model.trace.executed.add(pc);
+            if ("jarl".equals(mnemonic)) model.noteBoundedCall(thread);
+            model.trace.noteRecentPc(pc);
+            model.retireClock(thread);
             model.dispatchDueEvents();
             model.deliverSystemError(thread);
+            currentObservation = null;
         }
 
         @Override
@@ -7434,11 +9033,18 @@ public class RunP1MEMachine extends GhidraScript {
     }
 
     static String hex32(long value) {
-        return String.format("0x%08X", value & 0xffffffffL);
+        String digits = "0123456789ABCDEF";
+        byte[] text = new byte[10];
+        text[0] = '0';
+        text[1] = 'x';
+        for (int index = 9; index >= 2; index--, value >>>= 4) {
+            text[index] = (byte) digits.charAt((int) value & 15);
+        }
+        return new String(text, StandardCharsets.ISO_8859_1);
     }
 
     static byte[] bytes(long value, int size, boolean bigEndian) {
-        return Arrays.copyOf(Utils.longToBytes(value, size, bigEndian), size);
+        return Utils.longToBytes(value, size, bigEndian);
     }
 
     static byte[] parseHex(String value) {
@@ -7591,7 +9197,7 @@ public class RunP1MEMachine extends GhidraScript {
                         "resolved entry lacks initialized executable RAM: " + hex32(resolved));
                 }
                 byte[] window = model.memory(thread, resolved, available);
-                SleighLanguage language = (SleighLanguage) currentProgram.getLanguage();
+                SleighLanguage language = model.language;
                 InstructionPrototype prototype = language.parse(
                     new ByteMemBufferImpl(language.getDefaultSpace().getAddress(resolved),
                         window, language.isBigEndian()),
@@ -7615,7 +9221,7 @@ public class RunP1MEMachine extends GhidraScript {
                 return new ResolvedEntry(resolved, proof);
             }
             int offset = Math.toIntExact(resolved - imageBase);
-            int length = entryInstructionLength(codeflash, imageBase, resolved);
+            int length = entryInstructionLength(model.language, codeflash, imageBase, resolved);
             String instructionHash = sha256(Arrays.copyOfRange(
                 codeflash, offset, offset + length));
             JsonObject proof = new JsonObject();
@@ -7655,7 +9261,7 @@ public class RunP1MEMachine extends GhidraScript {
         }
         int bodyOffset = Math.toIntExact(match.address - imageBase);
         int entryOffset = Math.toIntExact(resolved - imageBase);
-        int entryLength = entryInstructionLength(codeflash, imageBase, resolved);
+        int entryLength = entryInstructionLength(model.language, codeflash, imageBase, resolved);
         JsonObject proof = new JsonObject();
         proof.addProperty("role", selector.role);
         proof.addProperty("scope", selector.scope);
@@ -7671,18 +9277,18 @@ public class RunP1MEMachine extends GhidraScript {
         return new ResolvedEntry(resolved, proof);
     }
 
-    private int entryInstructionLength(byte[] codeflash, long imageBase, long resolved)
-            throws Exception {
-        Address address = currentProgram.getLanguage().getDefaultSpace().getAddress(resolved);
-        try {
-            Instruction instruction = currentProgram.getListing().getInstructionAt(address);
-            if (instruction != null) {
-                return instruction.getLength();
+    private int entryInstructionLength(SleighLanguage language, byte[] codeflash, long imageBase,
+            long resolved) throws Exception {
+        Address address = language.getDefaultSpace().getAddress(resolved);
+        if (currentProgram != null) {
+            try {
+                Instruction instruction = currentProgram.getListing().getInstructionAt(address);
+                if (instruction != null) return instruction.getLength();
+            }
+            catch (DomainObjectException unavailable) {
+                // Decode from the verified flash image instead.
             }
         }
-        catch (DomainObjectException exc) {
-        }
-        SleighLanguage language = (SleighLanguage) currentProgram.getLanguage();
         int offset = Math.toIntExact(resolved - imageBase);
         int window = Math.min(16, codeflash.length - offset);
         if (window <= 0) {
@@ -7770,9 +9376,9 @@ public class RunP1MEMachine extends GhidraScript {
     }
 
     private List<JsonObject> evaluateChecks(Model model, PcodeThread<byte[]> thread,
-                                            SleighLanguage language, Scenario scenario) {
+                                            SleighLanguage language, List<CheckDef> checks) {
         List<JsonObject> results = new ArrayList<>();
-        for (CheckDef check : scenario.checks) {
+        for (CheckDef check : checks) {
             JsonObject result = new JsonObject();
             result.addProperty("name", check.name);
             result.addProperty("kind", check.kind);
@@ -7855,7 +9461,8 @@ public class RunP1MEMachine extends GhidraScript {
         report.addProperty("target", contract.target.name);
         report.addProperty("mcu", contract.target.mcu);
         report.addProperty("scenario", scenario.name);
-        report.addProperty("engine", "Ghidra PcodeEmulator");
+        report.addProperty("engine", scenario.engine.equals("jit")
+            ? "Ghidra JitPcodeEmulator" : "Ghidra PcodeEmulator");
         report.addProperty("codeflash_sha256", contract.target.codeflash.sha256);
         report.addProperty("model_sha256", contract.model_sha256);
         report.addProperty("executable_overlays", false);
@@ -7863,12 +9470,16 @@ public class RunP1MEMachine extends GhidraScript {
         report.add("entry_resolution", resolution);
         JsonObject resolvedContract = new JsonObject();
         resolvedContract.add("entry", resolution.deepCopy());
+        if (scenario.source != null)
+            resolvedContract.add("source", scenario.source.deepCopy());
         resolvedContract.add("stop_addresses", GSON.toJsonTree(scenario.stop_addresses));
         resolvedContract.addProperty("max_instructions", scenario.max_instructions);
         resolvedContract.addProperty("hsb_cycles_per_instruction", scenario.hsb_cycles_per_instruction);
         resolvedContract.addProperty("expected_termination", scenario.expected_termination);
         resolvedContract.addProperty("reset", scenario.reset);
-        resolvedContract.add("events", GSON.toJsonTree(scenario.events));
+        resolvedContract.addProperty("compare_operands", scenario.compare_operands);
+        resolvedContract.addProperty(
+            "input_derived_table_indices", scenario.input_derived_table_indices);
         if (scenario.icus_startup_stub != null)
             resolvedContract.add("icus_startup_stub", GSON.toJsonTree(scenario.icus_startup_stub));
         if (scenario.dma_master_rewrite_assumption != null)
@@ -7876,11 +9487,11 @@ public class RunP1MEMachine extends GhidraScript {
         report.add("resolved_run_contract", resolvedContract);
         report.addProperty("instruction_count", trace.instructions);
         report.addProperty("unique_instruction_addresses", trace.executed.size());
-        JsonArray recent = new JsonArray();
-        for (long pc : trace.recentPcs) recent.add(hex32(pc));
-        report.add("recent_pcs", recent);
+        report.add("recent_pcs", trace.recentPcs());
         report.add("sync_counts", GSON.toJsonTree(trace.syncCounts));
         report.addProperty("trace_lost_address", trace.traceLostAddress);
+        report.add("compare_operands", com.google.gson.JsonNull.INSTANCE);
+        report.add("input_derived_table_indices", com.google.gson.JsonNull.INSTANCE);
         if (trace.instructionTraceEnabled) {
             report.addProperty("instruction_trace_semantics",
                 "entered instructions in callback order; instruction is the retired count before "
@@ -7890,27 +9501,342 @@ public class RunP1MEMachine extends GhidraScript {
         return report;
     }
 
-    static class InitializedBytesState extends BytesPcodeExecutorState {
-        InitializedBytesState(SleighLanguage language, PcodeStateCallbacks callbacks) {
-            super(new ghidra.pcode.exec.BytesPcodeExecutorStatePiece(language, callbacks) {
-                @Override
-                protected ghidra.pcode.exec.BytesPcodeExecutorStateSpace newSpace(AddressSpace space) {
-                    return new ghidra.pcode.exec.BytesPcodeExecutorStateSpace(language, space, this) {
-                        @Override
-                        public byte[] read(long offset, int size, Reason reason, PcodeStateCallbacks cb) {
-                            long end = offset + size - 1L;
-                            // The common fully initialized read needs no complement-range allocation.
-                            // Partial, empty and wrapping ranges retain Ghidra's callbacks and faults.
-                            if (size > 0 && Long.compareUnsigned(offset, end) <= 0
-                                    && Long.compareUnsigned(end, space.getMaxAddress().getOffset()) <= 0
-                                    && bytes.isInitialized(offset, end)) {
-                                return readBytes(offset, size, reason);
-                            }
-                            return super.read(offset, size, reason, cb);
-                        }
-                    };
+    static final class MemoryStateSnapshot {
+        private final Map<AddressSpace, SemisparseByteArray> spaces;
+        final long pageCount;
+        final long initializedBytes;
+        final long initializedRanges;
+
+        private MemoryStateSnapshot(Map<AddressSpace, SemisparseByteArray> spaces,
+                long pageCount, long initializedBytes, long initializedRanges) {
+            this.spaces = spaces;
+            this.pageCount = pageCount;
+            this.initializedBytes = initializedBytes;
+            this.initializedRanges = initializedRanges;
+        }
+
+        static MemoryStateSnapshot capture(
+                Map<AddressSpace, ? extends BytesPcodeExecutorStateSpace> liveSpaces) {
+            Map<AddressSpace, SemisparseByteArray> snapshots = new LinkedHashMap<>();
+            long pages = 0;
+            long initialized = 0;
+            long ranges = 0;
+            for (var entry : liveSpaces.entrySet()) {
+                var data = InitializedBytes.backingOf(entry.getValue()).fork();
+                snapshots.put(entry.getKey(), data);
+                long previousPage = -1;
+                for (var span : data.getInitialized().spans()) {
+                    initialized = Math.addExact(initialized, span.length());
+                    ranges++;
+                    long first = Long.divideUnsigned(span.min(), SemisparseByteArray.BLOCK_SIZE);
+                    long last = Long.divideUnsigned(span.max(), SemisparseByteArray.BLOCK_SIZE);
+                    // Spans are ordered but can share a page; count each initialized page once.
+                    pages = Math.addExact(pages, last - Math.max(first, previousPage + 1) + 1);
+                    previousPage = last;
                 }
-            });
+            }
+            return new MemoryStateSnapshot(snapshots, pages, initialized, ranges);
+        }
+
+        void restore(Map<AddressSpace, ? extends BytesPcodeExecutorStateSpace> liveSpaces,
+                java.util.function.Function<AddressSpace, ? extends BytesPcodeExecutorStateSpace> getOrCreateSpace) {
+            liveSpaces.keySet().retainAll(spaces.keySet());
+            for (var entry : spaces.entrySet()) {
+                var bytes = InitializedBytes.backingOf(getOrCreateSpace.apply(entry.getKey()));
+                // Retain the space object, not its pages. JIT entries must rebind after restore.
+                bytes.clear();
+                bytes.putAll(entry.getValue());
+            }
+        }
+    }
+
+    // Each upstream piece fixes its own space superclass and exposes the bytes only to subclasses.
+    interface InitializedBytes {
+        SemisparseByteArray backing();
+
+        static SemisparseByteArray backingOf(BytesPcodeExecutorStateSpace space) {
+            return ((InitializedBytes) space).backing();
+        }
+
+        static boolean covers(SemisparseByteArray bytes, AddressSpace space, long offset, int size) {
+            long end = offset + size - 1L;
+            return size > 0 && Long.compareUnsigned(offset, end) <= 0
+                && Long.compareUnsigned(end, space.getMaxAddress().getOffset()) <= 0
+                && bytes.isInitialized(offset, end);
+        }
+    }
+
+    static final class InitializedBytesSpace extends BytesPcodeExecutorStateSpace
+            implements InitializedBytes {
+        InitializedBytesSpace(Language language, AddressSpace space,
+                BytesPcodeExecutorStatePiece piece) {
+            super(language, space, piece);
+        }
+
+        @Override
+        public SemisparseByteArray backing() {
+            return bytes;
+        }
+
+        @Override
+        public byte[] read(long offset, int size, Reason reason, PcodeStateCallbacks cb) {
+            // Partial, empty and wrapping ranges retain Ghidra's callbacks and faults.
+            if (InitializedBytes.covers(bytes, space, offset, size))
+                return readBytes(offset, size, reason);
+            return super.read(offset, size, reason, cb);
+        }
+    }
+
+    static final class InitializedBytesPiece extends BytesPcodeExecutorStatePiece {
+        InitializedBytesPiece(Language language, PcodeStateCallbacks callbacks) {
+            super(language, callbacks);
+        }
+
+        @Override
+        protected BytesPcodeExecutorStateSpace newSpace(AddressSpace space) {
+            return new InitializedBytesSpace(language, space, this);
+        }
+
+        MemoryStateSnapshot checkpoint() {
+            return MemoryStateSnapshot.capture(spaceMap);
+        }
+
+        void restore(MemoryStateSnapshot checkpoint) {
+            checkpoint.restore(spaceMap, space -> getForSpace(space, true));
+        }
+    }
+
+    interface CheckpointableBytesState {
+        MemoryStateSnapshot checkpoint();
+        void restore(MemoryStateSnapshot checkpoint);
+    }
+
+    static final class InitializedBytesState extends BytesPcodeExecutorState
+            implements CheckpointableBytesState {
+        private final InitializedBytesPiece initializedPiece;
+        private final Callbacks bus;
+
+        InitializedBytesState(Language language, Callbacks callbacks, PcodeThread<byte[]> thread) {
+            this(new InitializedBytesPiece(language, callbacks.wrapFor(thread)),
+                thread == null ? callbacks : null);
+        }
+
+        private InitializedBytesState(InitializedBytesPiece piece, Callbacks bus) {
+            super(piece);
+            this.initializedPiece = piece;
+            this.bus = bus;
+        }
+
+        @Override
+        public byte[] getVar(AddressSpace space, byte[] offset, int size, boolean quantize, Reason reason) {
+            if (bus != null && reason == Reason.EXECUTE_READ && space.equals(bus.model.memorySpace))
+                return bus.readBus(bus.offset(offset), size);
+            return super.getVar(space, offset, size, quantize, reason);
+        }
+
+        @Override
+        public void setVar(AddressSpace space, byte[] offset, int size, boolean quantize,
+                byte[] value) {
+            if (bus != null && space.equals(bus.model.memorySpace)) {
+                bus.writeBus(bus.offset(offset), value.length == size ? value : Arrays.copyOf(value, size));
+                return;
+            }
+            super.setVar(space, offset, size, quantize, value);
+        }
+
+        @Override
+        public MemoryStateSnapshot checkpoint() {
+            return initializedPiece.checkpoint();
+        }
+
+        @Override
+        public void restore(MemoryStateSnapshot checkpoint) {
+            initializedPiece.restore(checkpoint);
+        }
+    }
+
+    static final class ModelGraphCheckpoint {
+        private static final Set<String> MODEL_UNCAPTURED = Set.of(
+            "language", "spec", "trace", "executionThread", "regions", "registers",
+            "regionCache", "registerCache", "mpu", "mpuHints",
+            "registersByName", "interruptRegisters", "interruptRegistersByAddress",
+            "portAliasFields", "portAliasDependents", "gramGuards", "peripheralGuards",
+            "aliases", "csihBindings", "emulator", "memorySpace",
+            // The capture boundary commits all ticks. Restore recomputes the budget.
+            "deferredClockCycles", "quietClockBudget"
+        );
+        final List<Runnable> restoreOperations = new ArrayList<>();
+        final IdentityHashMap<Object, Boolean> visited = new IdentityHashMap<>();
+        int mutableFieldCount;
+
+        ModelGraphCheckpoint(Model model) {
+            captureObject(model, "Model");
+        }
+
+        private boolean immutable(Object value) {
+            Class<?> type = value.getClass();
+            if (type.isEnum() || type.isRecord() || value instanceof String
+                    || value instanceof Number || value instanceof Boolean
+                    || value instanceof Character || value instanceof Class
+                    || value instanceof Runnable || value instanceof Comparator
+                    || value instanceof JsonElement || value instanceof Address
+                    || value instanceof AddressSpace || value instanceof Register
+                    || value instanceof RegisterValue || value instanceof SleighLanguage
+                    || value instanceof PcodeExecutor<?> || value instanceof PcodeProgram
+                    || value instanceof PcodeThread<?> || value instanceof PcodeEmulator
+                    || value instanceof MachineSpec || value instanceof RegionDef
+                    || value instanceof RegisterDef || value instanceof ExternalEvent) {
+                return true;
+            }
+            Package pkg = type.getPackage();
+            String name = pkg == null ? "" : pkg.getName();
+            return name.startsWith("java.time.") || name.startsWith("java.math.");
+        }
+
+        @SuppressWarnings({"rawtypes", "unchecked"})
+        private void captureObject(Object value, String path) {
+            if (value == null || immutable(value) || visited.put(value, Boolean.TRUE) != null) return;
+            Class<?> type = value.getClass();
+            if (type.isArray()) {
+                int length = Array.getLength(value);
+                Object copy = Array.newInstance(type.getComponentType(), length);
+                System.arraycopy(value, 0, copy, 0, length);
+                restoreOperations.add(() -> System.arraycopy(copy, 0, value, 0, length));
+                if (!type.getComponentType().isPrimitive()) {
+                    for (int index = 0; index < length; index++)
+                        captureObject(Array.get(value, index), path + "[" + index + "]");
+                }
+                return;
+            }
+            if (value instanceof BitSet bits) {
+                BitSet copy = (BitSet) bits.clone();
+                restoreOperations.add(() -> {
+                    bits.clear();
+                    bits.or(copy);
+                });
+                return;
+            }
+            if (value instanceof Map map) {
+                Map copy = new LinkedHashMap(map);
+                restoreOperations.add(() -> {
+                    map.clear();
+                    map.putAll(copy);
+                });
+                for (Object entryObject : copy.entrySet()) {
+                    Map.Entry entry = (Map.Entry) entryObject;
+                    captureObject(entry.getKey(), path + ".key");
+                    captureObject(entry.getValue(), path + ".value");
+                }
+                return;
+            }
+            if (value instanceof Collection collection) {
+                List copy = new ArrayList(collection);
+                restoreOperations.add(() -> {
+                    collection.clear();
+                    collection.addAll(copy);
+                });
+                for (Object item : copy) captureObject(item, path + "[]");
+                return;
+            }
+            if (!type.getName().startsWith(RunP1MEMachine.class.getName() + "$")) {
+                throw new IllegalStateException(
+                    "checkpoint cannot capture " + path + " of type " + type.getName());
+            }
+            for (Class<?> current = type; current != Object.class; current = current.getSuperclass()) {
+                for (Field field : current.getDeclaredFields()) {
+                    if (Modifier.isStatic(field.getModifiers()) || field.isSynthetic()) continue;
+                    if (value instanceof Model && MODEL_UNCAPTURED.contains(field.getName())) continue;
+                    try {
+                        field.setAccessible(true);
+                        Object fieldValue = field.get(value);
+                        if (!Modifier.isFinal(field.getModifiers())) {
+                            Object saved = fieldValue;
+                            restoreOperations.add(() -> {
+                                try {
+                                    field.set(value, saved);
+                                }
+                                catch (IllegalAccessException exception) {
+                                    throw new IllegalStateException(
+                                        "cannot restore " + path + "." + field.getName(), exception);
+                                }
+                            });
+                            mutableFieldCount++;
+                        }
+                        captureObject(fieldValue, path + "." + field.getName());
+                    }
+                    catch (IllegalAccessException exception) {
+                        throw new IllegalStateException(
+                            "cannot capture " + path + "." + field.getName(), exception);
+                    }
+                }
+            }
+        }
+
+        void restore() {
+            for (Runnable operation : restoreOperations) operation.run();
+        }
+    }
+
+    static final class MachineCheckpoint {
+        final ModelGraphCheckpoint model;
+        final MemoryStateSnapshot sharedMemory;
+        final MemoryStateSnapshot localMemory;
+        final Trace.Checkpoint trace;
+        final Address counter;
+        final RegisterValue context;
+        final boolean suspended;
+        final long captureNanoseconds;
+        final Callbacks.PendingCompare pendingCompare;
+        final List<Callbacks.SavedDerivation> addressDerivations;
+
+        MachineCheckpoint(Model machine, Callbacks callbacks, PcodeThread<byte[]> thread) throws IOException {
+            if (thread.getFrame() != null)
+                throw new IllegalStateException("checkpoint requires an instruction boundary");
+            long started = System.nanoTime();
+            machine.materializeClock(thread);
+            model = new ModelGraphCheckpoint(machine);
+            CheckpointableBytesState shared =
+                (CheckpointableBytesState) thread.getState().getSharedState();
+            CheckpointableBytesState local =
+                (CheckpointableBytesState) thread.getState().getLocalState();
+            sharedMemory = shared.checkpoint();
+            localMemory = local.checkpoint();
+            trace = machine.trace.checkpoint();
+            counter = thread.getCounter();
+            context = thread.getContext();
+            suspended = thread.isSuspended();
+            pendingCompare = callbacks.checkpointCompare();
+            addressDerivations = callbacks.checkpointDerivations();
+            captureNanoseconds = System.nanoTime() - started;
+        }
+
+        long pageCount() {
+            return sharedMemory.pageCount + localMemory.pageCount;
+        }
+
+        long initializedBytes() {
+            return sharedMemory.initializedBytes + localMemory.initializedBytes;
+        }
+
+        long initializedRanges() {
+            return sharedMemory.initializedRanges + localMemory.initializedRanges;
+        }
+
+        long restore(Model machine, Callbacks callbacks, PcodeThread<byte[]> thread) throws IOException {
+            long started = System.nanoTime();
+            model.restore();
+            machine.deferredClockCycles = 0;
+            machine.quietClockBudget = 0;
+            ((CheckpointableBytesState) thread.getState().getSharedState()).restore(sharedMemory);
+            ((CheckpointableBytesState) thread.getState().getLocalState()).restore(localMemory);
+            machine.trace.restore(trace);
+            callbacks.restoreCompare(pendingCompare);
+            callbacks.restoreDerivations(addressDerivations);
+            if (thread.getFrame() != null) thread.dropInstruction();
+            thread.overrideCounter(counter);
+            if (context != null) thread.overrideContext(context);
+            thread.setSuspended(suspended);
+            return System.nanoTime() - started;
         }
     }
 
@@ -7923,25 +9849,18 @@ public class RunP1MEMachine extends GhidraScript {
         model.hsbCyclesPerInstruction = scenario.hsb_cycles_per_instruction == null
             ? 0 : scenario.hsb_cycles_per_instruction;
         model.peripheralFile = scenario.peripheral_file;
+        model.compareOperands = scenario.compare_operands;
+        model.inputDerivedTableIndices = scenario.input_derived_table_indices;
         Callbacks callbacks = new Callbacks(language, model);
-        PcodeEmulator emulator = new PcodeEmulator(language, callbacks) {
+        PcodeMachine<byte[]> emulator = scenario.engine.equals("jit")
+            ? new P1MEJitMachine(language, callbacks) : new PcodeEmulator(language, callbacks) {
             @Override
             protected PcodeExecutorState<byte[]> createSharedState() {
-                return new InitializedBytesState(language, callbacks.wrapFor(null)) {
-                    @Override
-                    public void setVar(AddressSpace space, byte[] offset, int size,
-                                       boolean quantize, byte[] value) {
-                        // A failed transaction retires STORE's instruction,
-                        // without ever turning the target into backing storage.
-                        if (model.discardBusStore && !model.internalWrite
-                                && space.equals(language.getDefaultSpace())) return;
-                        super.setVar(space, offset, size, quantize, value);
-                    }
-                };
+                return new InitializedBytesState(language, callbacks, null);
             }
             @Override
             protected PcodeExecutorState<byte[]> createLocalState(PcodeThread<byte[]> thread) {
-                return new InitializedBytesState(language, callbacks.wrapFor(thread));
+                return new InitializedBytesState(language, callbacks, thread);
             }
             @Override
             protected PcodeUseropLibrary<byte[]> createUseropLibrary() {
@@ -7949,7 +9868,9 @@ public class RunP1MEMachine extends GhidraScript {
             }
         };
         try {
-            return executeScenario(contract, language, scenario, codeflash, dataflash, trace, model, emulator);
+            return executeScenario(
+                contract, language, scenario, codeflash, dataflash, trace,
+                model, callbacks, emulator);
         }
         finally {
             // Ghidra 12.2 SymbolsCache strongly retains its weak-map library key,
@@ -7964,17 +9885,332 @@ public class RunP1MEMachine extends GhidraScript {
         }
     }
 
+    static final class ExecutionResult {
+        MachineFault fault;
+        MachineHalt halt;
+        boolean stopAfterArrivals;
+        Map<Long, Long> arrivalCounts = Map.of();
+    }
+
+    static final class StepBatchResult {
+        final JsonObject report;
+        final boolean passed;
+        final String finalTermination;
+
+        StepBatchResult(JsonObject report, boolean passed, String finalTermination) {
+            this.report = report;
+            this.passed = passed;
+            this.finalTermination = finalTermination;
+        }
+    }
+    static final class ArrivalCounter {
+        final long[] addresses, limits, counts;
+
+        ArrivalCounter(List<StopArrival> rows) {
+            int n = rows.size();
+            addresses = new long[n];
+            limits = new long[n];
+            counts = new long[n];
+            for (int i = 0; i < n; i++) {
+                StopArrival row = rows.get(i);
+                long address = parseUnsigned(row.address);
+                for (int j = 0; j < i; j++) if (addresses[j] == address)
+                    throw new IllegalArgumentException("duplicate stop_after_arrivals address");
+                if (row.count <= 0) throw new IllegalArgumentException("arrival count must be positive");
+                addresses[i] = address;
+                limits[i] = row.count;
+            }
+        }
+
+        boolean arrive(long address) {
+            for (int i = 0; i < addresses.length; i++) if (addresses[i] == address) {
+                counts[i] = Math.incrementExact(counts[i]);
+                return counts[i] >= limits[i];
+            }
+            return false;
+        }
+
+        Map<Long, Long> snapshot() {
+            Map<Long, Long> result = new LinkedHashMap<>();
+            for (int i = 0; i < addresses.length; i++) result.put(addresses[i], counts[i]);
+            return result;
+        }
+    }
+
+
+    private ExecutionResult runUntil(
+            Model model, PcodeThread<byte[]> thread, long instructionLimit,
+            Set<Long> stops) throws Exception {
+        return runUntil(model, thread, instructionLimit, stops, null);
+    }
+
+    private ExecutionResult runUntil(
+            Model model, PcodeThread<byte[]> thread, long instructionLimit,
+            Set<Long> stops, ArrivalCounter arrivals) throws Exception {
+        ExecutionResult result = new ExecutionResult();
+        long[] stopAddresses = stops.stream().mapToLong(Long::longValue).sorted().toArray();
+        if (arrivals != null && arrivals.addresses.length == 0) arrivals = null;
+        try {
+            while (true) {
+                long pc = thread.getCounter().getOffset();
+                if (arrivals != null && arrivals.arrive(pc)) {
+                    result.stopAfterArrivals = true;
+                    break;
+                }
+                if (model.trace.instructions >= instructionLimit ||
+                        (stopAddresses.length != 0 && Arrays.binarySearch(stopAddresses, pc) >= 0)) break;
+                monitor.checkCancelled();
+                if (model.eventSocket != null) model.eventSocket.poll(thread);
+                if (!model.boundedEdges.isEmpty() && model.returnBoundedCallee(thread)) continue;
+                model.dispatchDueEvents();
+                model.dispatchExternalEvents();
+                model.deliverInterrupt(thread);
+                model.completeCountedDelay(thread);
+                thread.stepInstruction();
+            }
+        }
+        catch (RuntimeException exception) {
+            result.fault = cause(exception, MachineFault.class);
+            result.halt = cause(exception, MachineHalt.class);
+            if (exception instanceof IllegalArgumentException) throw exception;
+            if (result.fault == null && result.halt == null) {
+                throw new IllegalStateException(
+                    exception.getMessage() + " at pc=" + hex32(thread.getCounter().getOffset())
+                    + " frame_active=" + (thread.getFrame() != null), exception);
+            }
+        }
+        finally {
+            model.materializeClock(thread);
+        }
+        if (arrivals != null) result.arrivalCounts = arrivals.snapshot();
+        return result;
+    }
+
+
+    private static String byteHex(byte[] value) {
+        return java.util.HexFormat.of().formatHex(value);
+    }
+
+    private JsonArray registerRows(PcodeThread<byte[]> thread) {
+        List<Map.Entry<Register, byte[]>> values =
+            new ArrayList<>(thread.getState().getRegisterValues().entrySet());
+        values.sort(Comparator
+            .comparing((Map.Entry<Register, byte[]> entry) -> entry.getKey().getName())
+            .thenComparingLong(entry -> entry.getKey().getAddress().getOffset()));
+        JsonArray rows = new JsonArray();
+        for (Map.Entry<Register, byte[]> entry : values) {
+            JsonObject row = new JsonObject();
+            row.addProperty("name", entry.getKey().getName());
+            row.addProperty("address", hex32(entry.getKey().getAddress().getOffset()));
+            row.addProperty("size", entry.getValue().length);
+            row.addProperty("value_hex", byteHex(entry.getValue()));
+            rows.add(row);
+        }
+        return rows;
+    }
+
+    private static void flushPeripheralSnapshots(Model model) {
+        model.materializeClock(model.executionThread);
+        model.taud.flush();
+        model.tauj.flush();
+        model.tsg.flushSnapshot();
+        model.rsent.flush();
+    }
+
+    private StepBatchResult executeSteps(
+            Model model, Callbacks callbacks, PcodeThread<byte[]> thread,
+            SleighLanguage language, Scenario scenario) throws Exception {
+        Map<String, MachineCheckpoint> checkpoints = new LinkedHashMap<>();
+        JsonArray checkpointRows = new JsonArray();
+        JsonArray trialRows = new JsonArray();
+        long segmentStarted = System.nanoTime();
+        long pendingRestoreNanoseconds = 0;
+        boolean restored = false;
+        boolean allPassed = true;
+        String finalTermination = "incomplete";
+
+        for (ScenarioStep step : scenario.steps) {
+            switch (step.kind) {
+                case "checkpoint": {
+                    if (step.after_instructions != null) {
+                        long checkpointInstruction = step.after_instructions;
+                        if (checkpointInstruction > scenario.max_instructions) {
+                            throw new IllegalArgumentException(
+                                "checkpoint instruction boundary exceeds scenario budget");
+                        }
+                        ExecutionResult prefix = runUntil(
+                            model, thread, checkpointInstruction, Set.of());
+                        if (prefix.fault != null || prefix.halt != null
+                                || model.trace.instructions != checkpointInstruction) {
+                            throw new IllegalStateException(
+                                "checkpoint prefix did not reach instruction " + checkpointInstruction);
+                        }
+                        // Events at the reached boundary are part of the prefix. In
+                        // particular, tick-zero snapshot overlays must be installed
+                        // before the checkpoint is captured.
+                        model.dispatchDueEvents();
+                        model.dispatchExternalEvents();
+                    }
+                    long prefixNanoseconds = System.nanoTime() - segmentStarted;
+                    MachineCheckpoint checkpoint = new MachineCheckpoint(model, callbacks, thread);
+                    if (checkpoints.put(step.name, checkpoint) != null)
+                        throw new IllegalArgumentException("duplicate checkpoint " + step.name);
+                    JsonObject row = new JsonObject();
+                    row.addProperty("name", step.name);
+                    row.addProperty("instruction", model.trace.instructions);
+                    row.addProperty("prefix_nanoseconds", prefixNanoseconds);
+                    row.addProperty("capture_nanoseconds", checkpoint.captureNanoseconds);
+                    row.addProperty("memory_pages", checkpoint.pageCount());
+                    row.addProperty("memory_page_bytes",
+                        Math.multiplyExact(checkpoint.pageCount(), SemisparseByteArray.BLOCK_SIZE));
+                    row.addProperty("initialized_bytes", checkpoint.initializedBytes());
+                    row.addProperty("initialized_ranges", checkpoint.initializedRanges());
+                    row.addProperty("mutable_model_fields",
+                        checkpoint.model.mutableFieldCount);
+                    checkpointRows.add(row);
+                    segmentStarted = System.nanoTime();
+                    restored = false;
+                    pendingRestoreNanoseconds = 0;
+                    break;
+                }
+                case "restore": {
+                    MachineCheckpoint checkpoint = checkpoints.get(step.checkpoint);
+                    if (checkpoint == null)
+                        throw new IllegalArgumentException("unknown checkpoint " + step.checkpoint);
+                    pendingRestoreNanoseconds = checkpoint.restore(model, callbacks, thread);
+                    restored = true;
+                    segmentStarted = System.nanoTime();
+                    break;
+                }
+                case "trial": {
+                    long startInstruction = model.trace.instructions;
+                    model.configureExternalEvents(thread, step.events, startInstruction, Model.EventOrigin.TRIAL);
+                    Set<Long> trialStops = new HashSet<>();
+                    for (String value : step.stop_addresses)
+                        trialStops.add(parseUnsigned(value));
+                    ArrivalCounter arrivals = new ArrivalCounter(step.stop_after_arrivals);
+                    boolean captureRows = step.capture_rows == null || step.capture_rows;
+                    model.trace.beginTrial(captureRows);
+                    P1MEJitMachine.MachineThread jit = thread instanceof P1MEJitMachine.MachineThread t ? t : null;
+                    long compiledAtStart = jit == null ? 0 : jit.compiledInstructions;
+                    long trialStarted = System.nanoTime();
+                    ExecutionResult result = runUntil(
+                        model, thread,
+                        Math.addExact(startInstruction, step.max_instructions),
+                        trialStops, arrivals);
+                    if (thread.getFrame() != null) thread.dropInstruction();
+                    flushPeripheralSnapshots(model);
+                    List<JsonObject> checks =
+                        evaluateChecks(model, thread, language, step.checks);
+                    long trialNanoseconds = System.nanoTime() - trialStarted;
+                    model.trace.endTrial();
+                    long finalPc = thread.getCounter().getOffset();
+                    boolean atStop = trialStops.contains(finalPc);
+                    String termination = result.fault != null ? "unexpected-fault"
+                        : result.halt != null ? "halt"
+                        : result.stopAfterArrivals ? "stop-after-arrivals"
+                        : atStop ? "stop-address"
+                        : model.trace.instructions >= startInstruction + step.max_instructions
+                            ? "instruction-budget" : "incomplete";
+                    boolean checksPassed =
+                        checks.stream().allMatch(row -> row.get("passed").getAsBoolean());
+                    boolean passed = result.fault == null
+                        && !"incomplete".equals(termination) && checksPassed;
+                    allPassed &= passed;
+                    finalTermination = termination;
+
+                    JsonObject row = new JsonObject();
+                    row.addProperty("name", step.name);
+                    row.addProperty("start", restored ? "restore" : "checkpoint");
+                    row.addProperty("start_instruction", startInstruction);
+                    row.addProperty("instruction_count",
+                        model.trace.instructions - startInstruction);
+                    if (jit != null) row.addProperty("jit_compiled_instructions",
+                        jit.compiledInstructions - compiledAtStart);
+                    row.addProperty("final_pc", hex32(finalPc));
+                    row.addProperty("termination_reason", termination);
+                    row.addProperty("restore_nanoseconds", pendingRestoreNanoseconds);
+                    row.addProperty("execution_nanoseconds", trialNanoseconds);
+                    if (trialNanoseconds > 0) {
+                        row.addProperty("instructions_per_second",
+                            (model.trace.instructions - startInstruction) * 1_000_000_000.0
+                                / trialNanoseconds);
+                    }
+                    row.addProperty("passed", passed);
+                    row.addProperty("capture_rows", captureRows);
+                    if (result.fault != null) row.add("fault", result.fault.toJson());
+                    if (result.halt != null) row.addProperty("halt", result.halt.operation);
+                    row.add("checks", GSON.toJsonTree(checks));
+                    row.add("register_rows", registerRows(thread));
+                    JsonArray arrivalRows = new JsonArray();
+                    for (StopArrival requested : step.stop_after_arrivals) {
+                        long address = parseUnsigned(requested.address);
+                        JsonObject arrival = new JsonObject();
+                        arrival.addProperty("address", hex32(address));
+                        arrival.addProperty("count", requested.count);
+                        arrival.addProperty(
+                            "arrivals", result.arrivalCounts.getOrDefault(address, 0L));
+                        arrivalRows.add(arrival);
+                    }
+                    row.add("stop_after_arrivals", arrivalRows);
+                    if (model.trace.instructionTraceEnabled)
+                        row.add("instruction_trace", com.google.gson.JsonNull.INSTANCE);
+                    row.add("compare_operands", com.google.gson.JsonNull.INSTANCE);
+                    row.add("input_derived_table_indices", com.google.gson.JsonNull.INSTANCE);
+                    trialRows.add(row);
+                    restored = false;
+                    pendingRestoreNanoseconds = 0;
+                    segmentStarted = System.nanoTime();
+                    break;
+                }
+                default:
+                    throw new IllegalArgumentException("unsupported scenario step " + step.kind);
+            }
+        }
+
+        JsonObject report = new JsonObject();
+        report.add("checkpoints", checkpointRows);
+        report.add("trials", trialRows);
+        report.addProperty("all_trials_passed", allPassed);
+        report.add("uncaptured_components", new JsonArray());
+        return new StepBatchResult(report, allPassed, finalTermination);
+    }
+
+    private JsonArray writeSnapshotOutputs(
+            Model model, PcodeThread<byte[]> thread, Scenario scenario) throws Exception {
+        JsonArray rows = new JsonArray();
+        for (SnapshotOutput output : scenario.snapshot_outputs) {
+            long address = parseUnsigned(output.address);
+            byte[] value = model.memory(thread, address, output.size);
+            Path path = Path.of(output.path);
+            Path parent = path.getParent();
+            if (parent != null) Files.createDirectories(parent);
+            Files.write(path, value);
+            JsonObject row = new JsonObject();
+            row.addProperty("path", path.toString());
+            row.addProperty("address", hex32(address));
+            row.addProperty("size", value.length);
+            row.addProperty("sha256", sha256(value));
+            row.addProperty("evidence", output.evidence);
+            rows.add(row);
+        }
+        return rows;
+    }
+
+
     private JsonObject executeScenario(
             RunContract contract, SleighLanguage language, Scenario scenario,
             byte[] codeflash, byte[] dataflash, Trace trace, Model model,
-            PcodeEmulator emulator) throws Exception {
+            Callbacks callbacks, PcodeMachine<byte[]> emulator) throws Exception {
         model.attach(emulator);
         if (scenario.icus_startup_stub != null)
             model.icusStartupStub = model.new IcusStartupStub(scenario.icus_startup_stub);
         model.dma.masterRewriteAssumption = scenario.dma_master_rewrite_assumption;
+        model.resetReplay = scenario.reset_replay;
         PcodeThread<byte[]> thread = emulator.newThread("PE1");
         model.executionThread = thread;
         model.initializeProcessorReset(thread);
+        model.bindMpu(thread);
         model.setMemory(parseUnsigned(contract.target.codeflash.base), codeflash);
         if (contract.target.dataflash != null) {
             model.setMemory(parseUnsigned(contract.target.dataflash.base), dataflash);
@@ -7994,7 +10230,9 @@ public class RunP1MEMachine extends GhidraScript {
             scenario.entry, codeflash, parseUnsigned(contract.target.codeflash.base),
             model, thread, scenario);
 
-        model.configureExternalEvents(thread, scenario.events);
+        model.configureExternalEvents(thread, scenario.events, 0, Model.EventOrigin.SCENARIO);
+        if (scenario.event_socket != null)
+            model.eventSocket = model.new EventSocket(scenario.event_socket, thread);
         thread.overrideCounter(language.getDefaultSpace().getAddress(resolved.address));
         thread.overrideContextWithDefault();
         Set<Long> stops = new HashSet<>();
@@ -8015,35 +10253,34 @@ public class RunP1MEMachine extends GhidraScript {
 
         MachineFault fault = null;
         MachineHalt halt = null;
+        StepBatchResult batch = null;
         try {
-            while (trace.instructions < scenario.max_instructions
-                    && !stops.contains(thread.getCounter().getOffset())) {
-                monitor.checkCancelled();
-                if (model.returnBoundedCallee(thread)) continue;
-                model.dispatchDueEvents();
-                model.dispatchExternalEvents();
-                model.deliverInterrupt(thread);
-                model.completeCountedDelay(thread);
-                thread.stepInstruction();
+            if (scenario.steps.isEmpty()) {
+                ExecutionResult result =
+                    runUntil(model, thread, scenario.max_instructions, stops);
+                fault = result.fault;
+                halt = result.halt;
+            }
+            else {
+                batch = executeSteps(model, callbacks, thread, language, scenario);
             }
         }
-        catch (RuntimeException exc) {
-            fault = cause(exc, MachineFault.class);
-            halt = cause(exc, MachineHalt.class);
-            if (fault == null && halt == null) throw exc;
+        finally {
+            if (model.eventSocket != null) model.eventSocket.close();
         }
 
         JsonObject report = reportBase(contract, scenario, trace, resolved.proof);
+        if (thread instanceof P1MEJitMachine.MachineThread jit)
+            report.addProperty("jit_compiled_instructions", jit.compiledInstructions);
         long finalPc = thread.getCounter().getOffset();
         report.addProperty("final_pc", hex32(finalPc));
         if (fault != null) report.add("fault", fault.toJson());
         if (halt != null) report.addProperty("halt", halt.operation);
+        if (batch != null) report.add("checkpointing", batch.report);
+        if (batch == null) flushPeripheralSnapshots(model);
+        report.add("snapshot_outputs", writeSnapshotOutputs(model, thread, scenario));
 
-        model.taud.flush();
-        model.tauj.flush();
-        model.tsg.flushSnapshot();
-        model.rsent.flush();
-        List<JsonObject> checks = evaluateChecks(model, thread, language, scenario);
+        List<JsonObject> checks = evaluateChecks(model, thread, language, scenario.checks);
         report.add("checks", GSON.toJsonTree(checks));
         boolean checksPassed = checks.stream().allMatch(row -> row.get("passed").getAsBoolean());
         boolean passed;
@@ -8060,15 +10297,17 @@ public class RunP1MEMachine extends GhidraScript {
         }
         else {
             boolean atStop = stops.contains(finalPc);
-            boolean completed = halt != null || atStop;
+            boolean completed = batch != null || halt != null || atStop;
             termination = fault != null ? "unexpected-fault"
+                : batch != null ? batch.finalTermination
                 : halt != null ? "halt"
                 : atStop ? "stop-address"
                 : trace.instructions >= scenario.max_instructions ? "instruction-budget"
                 : "incomplete";
             boolean expectedTermination = scenario.expected_termination == null
                 ? completed : scenario.expected_termination.equals(termination);
-            passed = fault == null && expectedTermination && checksPassed;
+            passed = fault == null && expectedTermination && checksPassed
+                && (batch == null || batch.passed);
         }
         report.addProperty("termination_reason", termination);
         report.addProperty("passed", passed);
@@ -8089,7 +10328,45 @@ public class RunP1MEMachine extends GhidraScript {
             "stop_addresses", "registers", "memory", "pre_reset_memory", "artifacts", "checks",
             "expected_fault", "expected_termination", "reset", "events", "peripheral_file",
             "bounded_entries", "bounded_edges", "hsb_cycles_per_instruction", "dataflash_cells",
-            "icus_startup_stub", "dma_master_rewrite_assumption"), "scenario");
+            "icus_startup_stub", "dma_master_rewrite_assumption", "source", "steps",
+            "compare_operands", "input_derived_table_indices", "reset_replay",
+            "event_socket", "snapshot_outputs", "engine"), "scenario");
+        if (scenarioJson.has("engine") &&
+                !Set.of("plain", "jit").contains(scenarioJson.get("engine").getAsString()))
+            throw new IllegalArgumentException("scenario engine must be plain or jit");
+        JsonElement source = scenarioJson.get("source");
+        if (source != null && !source.isJsonObject())
+            throw new IllegalArgumentException("scenario source must be an object");
+        JsonArray steps = scenarioJson.getAsJsonArray("steps");
+        JsonElement eventSocket = scenarioJson.get("event_socket");
+        if (eventSocket != null && !eventSocket.isJsonNull()) {
+            requireKeys(
+                eventSocket.getAsJsonObject(),
+                Set.of("host", "port", "ready_address", "ready_after_arrivals"),
+                "event_socket");
+            if (steps.size() != 0)
+                throw new IllegalArgumentException("event_socket does not compose with steps");
+        }
+        for (JsonElement element : steps) {
+            JsonObject step = element.getAsJsonObject();
+            String kind = step.get("kind").getAsString();
+            switch (kind) {
+                case "checkpoint":
+                    requireKeys(step, Set.of("kind", "name", "after_instructions"),
+                        "checkpoint step");
+                    break;
+                case "restore":
+                    requireKeys(step, Set.of("kind", "checkpoint"), "restore step");
+                    break;
+                case "trial":
+                    requireKeys(step, Set.of("kind", "name", "max_instructions",
+                        "stop_addresses", "stop_after_arrivals", "events", "checks",
+                        "capture_rows"), "trial step");
+                    break;
+                default:
+                    throw new IllegalArgumentException("unsupported scenario step: " + kind);
+            }
+        }
         JsonElement stub = scenarioJson.get("icus_startup_stub");
         if (stub != null && !stub.isJsonNull()) {
             JsonObject config = stub.getAsJsonObject();
@@ -8118,37 +10395,160 @@ public class RunP1MEMachine extends GhidraScript {
         }
     }
 
-    private void writeScenarioReport(JsonWriter writer, JsonObject report, Trace trace)
-            throws Exception {
-        writer.beginObject();
-        for (Map.Entry<String, JsonElement> field : report.entrySet()) {
-            writer.name(field.getKey());
-            GSON.toJson(field.getValue(), writer);
+    private static final class ScenarioReportOutput {
+        String report;
+        String instruction_spool;
+        String drcov_path;
+    }
+
+    private static final class ReportFile implements Closeable {
+        final FileChannel channel;
+        final BufferedWriter output;
+        final JsonWriter writer;
+
+        ReportFile(Path path) throws IOException {
+            channel = FileChannel.open(path, StandardOpenOption.WRITE, StandardOpenOption.CREATE,
+                StandardOpenOption.TRUNCATE_EXISTING);
+            output = new BufferedWriter(Channels.newWriter(channel, StandardCharsets.UTF_8), 65536);
+            writer = new JsonWriter(output);
         }
-        if (!"runner-error".equals(report.get("termination_reason").getAsString())) {
+
+        void finish() throws IOException {
+            writer.flush();
+            output.write('\n');
+        }
+
+        @Override
+        public void close() throws IOException {
+            writer.close();
+        }
+    }
+
+    private void writeObservationField(JsonWriter writer, FileChannel output, Trace trace,
+            int trial, Map.Entry<String, JsonElement> field) throws Exception {
+        writer.name(field.getKey());
+        switch (field.getKey()) {
+            case "compare_operands" -> trace.writeCompareOperands(writer, output, trial);
+            case "input_derived_table_indices" -> trace.writeTableIndices(writer, output, trial);
+            case "instruction_trace" -> trace.writeInstructionTrace(writer, trial);
+            default -> GSON.toJson(field.getValue(), writer);
+        }
+    }
+
+    private void writeCheckpointReport(JsonWriter writer, FileChannel output,
+            JsonObject checkpointing, Trace trace) throws Exception {
+        writer.beginObject();
+        for (var field : checkpointing.entrySet()) {
+            writer.name(field.getKey());
+            if (!"trials".equals(field.getKey())) {
+                GSON.toJson(field.getValue(), writer);
+                continue;
+            }
+            writer.beginArray();
+            int index = 0;
+            for (JsonElement trial : field.getValue().getAsJsonArray()) {
+                writer.beginObject();
+                for (var item : trial.getAsJsonObject().entrySet())
+                    writeObservationField(writer, output, trace, index, item);
+                writer.name("memory_rows");
+                trace.memoryAccesses.writeTo(writer, output, index);
+                writer.name("event_rows");
+                trace.deviceEvents.writeTo(writer, output, index++);
+                writer.endObject();
+            }
+            writer.endArray();
+        }
+        writer.endObject();
+    }
+
+    private void writeScenarioReport(JsonWriter writer, FileChannel output, JsonObject report,
+            Scenario scenario, Trace trace, String drcovPath) throws Exception {
+        writer.beginObject();
+        for (var field : report.entrySet()) {
+            if ("checkpointing".equals(field.getKey())) {
+                writer.name(field.getKey());
+                writeCheckpointReport(writer, output, field.getValue().getAsJsonObject(), trace);
+            }
+            else if ("resolved_run_contract".equals(field.getKey())) {
+                writer.name(field.getKey()).beginObject();
+                for (var entry : field.getValue().getAsJsonObject().entrySet())
+                    GSON.toJson(entry.getValue(), writer.name(entry.getKey()));
+                GSON.toJson(scenario.events, List.class, writer.name("events"));
+                GSON.toJson(scenario.steps, List.class, writer.name("steps"));
+                writer.endObject();
+            }
+            else writeObservationField(writer, output, trace, -1, field);
+        }
+        if (!isRunnerError(report)) {
             writer.name("memory_accesses");
-            trace.memoryAccesses.writeTo(writer);
+            trace.memoryAccesses.writeTo(writer, output, -1);
             writer.name("device_events");
-            trace.deviceEvents.writeTo(writer);
+            trace.deviceEvents.writeTo(writer, output, -1);
             if (trace.instructionTraceEnabled) {
                 writer.name("instruction_trace_shortcuts");
                 GSON.toJson(trace.instructionShortcuts, List.class, writer);
                 writer.name("instruction_trace");
-                trace.writeInstructionTrace(writer);
+                trace.writeInstructionTrace(writer, -1);
+            }
+        }
+        if (drcovPath != null) writer.name("drcov_path").value(drcovPath);
+        writer.endObject();
+    }
+
+    private static boolean isRunnerError(JsonObject report) {
+        return "runner-error".equals(report.get("termination_reason").getAsString());
+    }
+
+    private void writeInstructionSpool(Path path, Trace trace) throws IOException {
+        // Feed Python's drcov writer without decoding the JSON instruction trace.
+        try (DataOutputStream stream = new DataOutputStream(
+                new BufferedOutputStream(Files.newOutputStream(path), 65536))) {
+            for (int index = 0; index < trace.instructionTraceSize; index++) {
+                stream.writeInt((int) trace.instructionPc(index));
+                stream.writeByte(trace.instructionSize(index));
+            }
+        }
+    }
+
+    private void writeVerdict(JsonWriter writer, JsonObject report, boolean passed)
+            throws IOException {
+        writer.beginObject();
+        writer.name("passed").value(passed);
+        if (!passed) {
+            for (String key : List.of("scenario", "termination_reason", "error", "fault", "recent_pcs")) {
+                if (report.has(key)) GSON.toJson(report.get(key), writer.name(key));
+            }
+            if (report.has("checks")) {
+                for (JsonElement row : report.getAsJsonArray("checks")) {
+                    if (!row.getAsJsonObject().get("passed").getAsBoolean()) {
+                        writer.name("checks").beginArray();
+                        GSON.toJson(row, writer);
+                        writer.endArray();
+                        break;
+                    }
+                }
             }
         }
         writer.endObject();
     }
 
+
     @Override
     protected void run() throws Exception {
         String[] args = getScriptArgs();
-        if (args.length < 2 || args.length > 3
-                || (args.length == 3 && !"--instruction-trace".equals(args[2]))) {
-            throw new IllegalArgumentException(
-                "expected contract JSON and report JSON paths [--instruction-trace]");
+        String usage = "expected contract JSON and report JSON paths [--instruction-trace]"
+            + " [--report-outputs <staging-plan-json>]";
+        if (args.length < 2) throw new IllegalArgumentException(usage);
+        boolean instructionTraceEnabled = false;
+        Path reportOutputsPath = null;
+        for (int i = 2; i < args.length; i++) {
+            if ("--instruction-trace".equals(args[i]) && !instructionTraceEnabled)
+                instructionTraceEnabled = true;
+            else if ("--report-outputs".equals(args[i]) && reportOutputsPath == null
+                    && i + 1 < args.length)
+                reportOutputsPath = Path.of(args[++i]);
+            else throw new IllegalArgumentException(usage);
         }
-        boolean instructionTraceEnabled = args.length == 3;
         Path contractPath = Path.of(args[0]);
         Path reportPath = Path.of(args[1]);
         JsonObject contractJson = GSON.fromJson(Files.readString(contractPath), JsonObject.class);
@@ -8173,6 +10573,12 @@ public class RunP1MEMachine extends GhidraScript {
                 throw new IllegalArgumentException("max_instructions must be positive: " + scenario.name);
             }
         }
+        ScenarioReportOutput[] reportOutputs = null;
+        if (reportOutputsPath != null) {
+            reportOutputs = GSON.fromJson(Files.readString(reportOutputsPath), ScenarioReportOutput[].class);
+            if (reportOutputs == null || reportOutputs.length != contract.scenarios.size())
+                throw new IllegalArgumentException("staging plan report count drifted");
+        }
 
         byte[] modelBytes = Files.readAllBytes(Path.of(contract.model_path));
         if (!sha256(modelBytes).equalsIgnoreCase(contract.model_sha256)) {
@@ -8189,7 +10595,9 @@ public class RunP1MEMachine extends GhidraScript {
             throw new IllegalArgumentException("machine model does not describe MCU " + contract.target.mcu);
         }
 
-        SleighLanguage language = (SleighLanguage) currentProgram.getLanguage();
+        SleighLanguage language = (SleighLanguage) (currentProgram == null
+            ? DefaultLanguageService.getLanguageService().getLanguage(new LanguageID(contract.target.processor))
+            : currentProgram.getLanguage());
         if (!language.getLanguageID().getIdAsString().equals(contract.target.processor)) {
             throw new IllegalArgumentException("processor mismatch: " + language.getLanguageID());
         }
@@ -8201,15 +10609,18 @@ public class RunP1MEMachine extends GhidraScript {
         Files.createDirectories(reportPath.getParent());
         Path partialReport = Files.createTempFile(reportPath.getParent(), ".p1me-batch-", ".json");
         try {
-            try (BufferedWriter output = Files.newBufferedWriter(partialReport, StandardCharsets.UTF_8);
-                    JsonWriter writer = new JsonWriter(output)) {
-                writer.setIndent("  ");
+            try (ReportFile batch = new ReportFile(partialReport)) {
+                JsonWriter writer = batch.writer;
+                if (reportOutputs == null) writer.setIndent("  ");
                 writer.beginObject();
-                writer.name("schema").value("rh850-p1me-machine-batch-report-v1");
+                writer.name("schema").value(reportOutputs == null
+                    ? "rh850-p1me-machine-batch-report-v1"
+                    : "rh850-p1me-machine-report-manifest-v1");
                 writer.name("target").value(contract.target.name);
                 writer.name("mcu").value(contract.target.mcu);
                 writer.name("reports").beginArray();
-                for (Scenario scenario : contract.scenarios) {
+                for (int index = 0; index < contract.scenarios.size(); index++) {
+                    Scenario scenario = contract.scenarios.get(index);
                     monitor.checkCancelled();
                     try (Trace trace = new Trace(instructionTraceEnabled, reportPath.getParent())) {
                         JsonObject report;
@@ -8234,15 +10645,28 @@ public class RunP1MEMachine extends GhidraScript {
                             error.addProperty("detail", exc.getMessage());
                             report.add("error", error);
                         }
-                        passed &= report.get("passed").getAsBoolean();
-                        writeScenarioReport(writer, report, trace);
+                        boolean scenarioPassed = report.get("passed").getAsBoolean();
+                        passed &= scenarioPassed;
+                        if (reportOutputs == null) {
+                            writeScenarioReport(writer, batch.channel, report, scenario, trace, null);
+                        }
+                        else {
+                            ScenarioReportOutput paths = reportOutputs[index];
+                            try (ReportFile staged = new ReportFile(Path.of(paths.report))) {
+                                writeScenarioReport(staged.writer, staged.channel, report, scenario, trace,
+                                    paths.drcov_path);
+                                staged.finish();
+                            }
+                            if (paths.instruction_spool != null && !isRunnerError(report))
+                                writeInstructionSpool(Path.of(paths.instruction_spool), trace);
+                            writeVerdict(writer, report, scenarioPassed);
+                        }
                     }
                 }
                 writer.endArray();
                 writer.name("passed").value(passed);
                 writer.endObject();
-                writer.flush();
-                output.newLine();
+                batch.finish();
             }
             Files.move(partialReport, reportPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
         }

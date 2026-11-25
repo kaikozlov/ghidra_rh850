@@ -2190,6 +2190,13 @@
       "evidence": "Explicit synthetic initial not-busy input for the reconstructed initializer; no operation result supplied"
     },
     {
+      "kind": "register-input",
+      "register": "ICUSSTS2",
+      "value": "0",
+      "after_instructions": 0,
+      "evidence": "Explicit synthetic initial companion-status-clear input for the recovered driver poll; not a claimed hardware reset value or command completion"
+    },
+    {
       "kind": "adc-sample",
       "after_instructions": 0,
       "unit": 0,

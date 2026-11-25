@@ -18,11 +18,10 @@
   "expected_termination": "stop-address",
   "events": [
     {
-      "kind": "register-input",
-      "register": "GSTS",
-      "value": "0x5",
+      "kind": "clock",
+      "p_bus_cycles": 3794,
       "after_instructions": 300,
-      "evidence": "Explicit synthetic CAN RAM-init completion snapshot, preserving GSLPSTS/GRSTSTS. Manual section17.11.1 specifies 3794 pclk cycles after MCU reset; this instruction boundary is a conditional input, not a pclk timing claim."
+      "evidence": "Explicit CLK_HSB stimulus for the 3794-pclk CAN RAM initialization interval in manual section 17.11.1."
     }
   ],
   "checks": [

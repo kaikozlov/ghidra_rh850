@@ -2,7 +2,7 @@
   "schema": "rh850-p1me-machine-v2",
   "source": {
     "path": "data/devices/p1me.rdl",
-    "sha256": "ef314d4567c62e78306a99bd8aa98ee0bea2ba500842a89fc098657d075a044b",
+    "sha256": "e79f165f22b26a08df886582e68bed4c0983fa90332c81ea0ae2b7cc3c9b5fb8",
     "systemrdl_compiler": "1.33.0"
   },
   "products": [
@@ -167,6 +167,20 @@
         "reset_rules": [],
         "evidence": "manual",
         "source_ref": "R01UH0585EJ0120 Tables31.157-31.158,3.78-3.81"
+      },
+      {
+        "name": "RSCFD_RAM_TEST_PAGE",
+        "start": 4291978240,
+        "end_exclusive": 4291978496,
+        "size": 256,
+        "access": "rw",
+        "executable": false,
+        "alias_group": null,
+        "reset_policy": "RSCFD controller RAM initialization",
+        "reset_control": null,
+        "reset_rules": [],
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section17.4.15.4 Table17.168"
       }
     ],
     "registers": [
@@ -15602,6 +15616,70 @@
         ]
       },
       {
+        "name": "C0NCFG",
+        "address": 4291952640,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section17.4.3.1 Table17.95 pp921-922",
+        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
+      },
+      {
+        "name": "C0CTR",
+        "address": 4291952644,
+        "size": 4,
+        "access_widths": [
+          4
+        ],
+        "access": "rw",
+        "reset": 5,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 Table17.96 section17.4.3.2 pp923-925",
+        "description": "RSCFD0CFDC0CTR: CAN0 channel control; CHMDC[1:0] and CSLPR bit2; reset 0x5",
+        "trigger": "rscfd-channel-control",
+        "status_register": "C0STS"
+      },
+      {
+        "name": "C0STS",
+        "address": 4291952648,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "r",
+        "reset": 5,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 Table17.97 section17.4.3.3 pp928-929",
+        "description": "RSCFD0CFDC0STS: CAN0 channel status; reset 0x5"
+      },
+      {
+        "name": "C0ERFL",
+        "address": 4291952652,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 Table17.98 section17.4.3.4 pp930-934",
+        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
+      },
+      {
         "name": "C1NCFG",
         "address": 4291952656,
         "size": 4,
@@ -15629,7 +15707,9 @@
         "behavior": "rscfd",
         "evidence": "manual",
         "source_ref": "R01UH0585EJ0120 Table 17.96, section 17.4.3.2 (pages 923-925); SFR list FFD20014",
-        "description": "RSCFD0CFDC1CTR (CmCTR = base+0x04+0x10*m, m=1): CAN1 channel control; CHMDC[1:0] bits 1-0 (00 channel communication, 01 channel reset, 10 channel halt), CSLPR bit 2 channel stop; reset 0x5 (channel reset and stop)"
+        "description": "RSCFD0CFDC1CTR (CmCTR = base+0x04+0x10*m, m=1): CAN1 channel control; CHMDC[1:0] bits 1-0 (00 channel communication, 01 channel reset, 10 channel halt), CSLPR bit 2 channel stop; reset 0x5 (channel reset and stop)",
+        "trigger": "rscfd-channel-control",
+        "status_register": "C1STS"
       },
       {
         "name": "C1STS",
@@ -15664,6 +15744,70 @@
         "description": "RSCFD0CFDC1ERFL (CmERFL = base+0x0C+0x10*m, m=1): CAN1 channel error flags; flag bits are write-zero-clear and reset clear"
       },
       {
+        "name": "C2NCFG",
+        "address": 4291952672,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section17.4.3.1 Table17.95 pp921-922",
+        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
+      },
+      {
+        "name": "C2CTR",
+        "address": 4291952676,
+        "size": 4,
+        "access_widths": [
+          4
+        ],
+        "access": "rw",
+        "reset": 5,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 Table17.96 section17.4.3.2 pp923-925",
+        "description": "RSCFD0CFDC2CTR: CAN2 channel control; CHMDC[1:0] and CSLPR bit2; reset 0x5",
+        "trigger": "rscfd-channel-control",
+        "status_register": "C2STS"
+      },
+      {
+        "name": "C2STS",
+        "address": 4291952680,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "r",
+        "reset": 5,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 Table17.97 section17.4.3.3 pp928-929",
+        "description": "RSCFD0CFDC2STS: CAN2 channel status; reset 0x5"
+      },
+      {
+        "name": "C2ERFL",
+        "address": 4291952684,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 Table17.98 section17.4.3.4 pp930-934",
+        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
+      },
+      {
         "name": "GCFG",
         "address": 4291952772,
         "size": 4,
@@ -15689,7 +15833,9 @@
         "behavior": "rscfd",
         "evidence": "manual",
         "source_ref": "R01UH0585EJ0120 Table 17.107, section 17.4.4.2 (page 952); SFR list FFD20088",
-        "description": "RSCFD0CFDGCTR: global control; GSLPR bit 2 global stop, GMDC[1:0] bits 1-0 (00 global operating, 01 global reset, 10 global test); reset 0x5 (global reset with stop)"
+        "description": "RSCFD0CFDGCTR: global control; GSLPR bit 2 global stop, GMDC[1:0] bits 1-0 (00 global operating, 01 global reset, 10 global test); reset 0x5 (global reset with stop)",
+        "trigger": "rscfd-global-control",
+        "status_register": "GSTS"
       },
       {
         "name": "GSTS",
@@ -15706,6 +15852,22 @@
         "evidence": "manual",
         "source_ref": "R01UH0585EJ0120 section 17.4.4.3, Table 17.108 (pages 954-955)",
         "description": "RSCFD0CFDGSTS: global status; GRAMINIT bit 3, GSLPSTS bit 2, GHLTSTS bit 1, GRSTSTS bit 0; reset 0xD"
+      },
+      {
+        "name": "GERFL",
+        "address": 4291952784,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section17.4.4.4 Table17.109 pp956-959",
+        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
       },
       {
         "name": "GAFLECTR",
@@ -15890,6 +16052,22 @@
         "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
       },
       {
+        "name": "RFSTS0",
+        "address": 4291952856,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section17.4.7.2 Table17.126 pp981-983",
+        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
+      },
+      {
         "name": "RFSTS1",
         "address": 4291952860,
         "size": 4,
@@ -15907,6 +16085,22 @@
         "pointer_register": "RFPCTR1",
         "fifo_index": 1,
         "fifo_channel": 1
+      },
+      {
+        "name": "RFSTS2",
+        "address": 4291952864,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section17.4.7.2 Table17.126 pp981-983",
+        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
       },
       {
         "name": "RFPCTR1",
@@ -16149,6 +16343,54 @@
         "pointer_register": "CFPCTR5",
         "fifo_index": 5,
         "fifo_channel": 1
+      },
+      {
+        "name": "CFSTS6",
+        "address": 4291953040,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section17.4.8.2 Table17.133 pp992-995",
+        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
+      },
+      {
+        "name": "CFSTS7",
+        "address": 4291953044,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section17.4.8.2 Table17.133 pp992-995",
+        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
+      },
+      {
+        "name": "CFSTS8",
+        "address": 4291953048,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section17.4.8.2 Table17.133 pp992-995",
+        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
       },
       {
         "name": "CFPCTR",
@@ -16536,46 +16778,68 @@
         "description": "RSCFD transmit-abort-request status for buffers 32..47"
       },
       {
-        "name": "CFDTMTRF_CH0",
+        "name": "CFDTMTCSTS0",
         "address": 4291953520,
-        "size": 2,
+        "size": 4,
         "access_widths": [
-          2
+          1,
+          2,
+          4
         ],
         "access": "r",
         "reset": 0,
         "behavior": "rscfd",
         "evidence": "manual",
-        "source_ref": "R01UH0585EJ0120 section 17, RSCFD transmit-buffer status and interrupt registers",
-        "description": "RSCFD channel0 Tx message-buffer result summary (bit n reflects CFDTMSTSn.TMTRF)"
+        "source_ref": "R01UH0585EJ0120 Table 17.89 and section 17.4.12.3",
+        "description": "RSCFD transmit-buffer completion status for buffers 0..31"
       },
       {
-        "name": "CFDTMTRF_CH1",
-        "address": 4291953522,
-        "size": 2,
-        "access_widths": [
-          2
-        ],
-        "access": "r",
-        "reset": 0,
-        "behavior": "rscfd",
-        "evidence": "manual",
-        "source_ref": "R01UH0585EJ0120 section 17, RSCFD transmit-buffer status and interrupt registers",
-        "description": "RSCFD channel1 Tx message-buffer result summary (bit n reflects local CFDTMSTSn.TMTRF)"
-      },
-      {
-        "name": "CFDTMTRF_CH2",
+        "name": "CFDTMTCSTS1",
         "address": 4291953524,
-        "size": 2,
+        "size": 4,
         "access_widths": [
-          2
+          1,
+          2,
+          4
         ],
         "access": "r",
         "reset": 0,
         "behavior": "rscfd",
         "evidence": "manual",
-        "source_ref": "R01UH0585EJ0120 section 17, RSCFD transmit-buffer status and interrupt registers",
-        "description": "RSCFD channel2 Tx message-buffer result summary (bit n reflects local CFDTMSTSn.TMTRF)"
+        "source_ref": "R01UH0585EJ0120 Table 17.89 and section 17.4.12.3",
+        "description": "RSCFD transmit-buffer completion status for buffers 32..47"
+      },
+      {
+        "name": "CFDTMTASTS0",
+        "address": 4291953536,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "r",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 Table 17.89 and section 17.4.12.4",
+        "description": "RSCFD transmit-buffer abort status for buffers 0..31"
+      },
+      {
+        "name": "CFDTMTASTS1",
+        "address": 4291953540,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "r",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 Table 17.89 and section 17.4.12.4",
+        "description": "RSCFD transmit-buffer abort status for buffers 32..47"
       },
       {
         "name": "TMIEC0",
@@ -16610,6 +16874,134 @@
         "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
       },
       {
+        "name": "TXQCC0",
+        "address": 4291953568,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section17.4.13.1 Table17.159",
+        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
+      },
+      {
+        "name": "TXQCC1",
+        "address": 4291953572,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section17.4.13.1 Table17.159",
+        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
+      },
+      {
+        "name": "TXQCC2",
+        "address": 4291953576,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section17.4.13.1 Table17.159",
+        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
+      },
+      {
+        "name": "THLCC0",
+        "address": 4291953664,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section17.4.14.1 Table17.162",
+        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
+      },
+      {
+        "name": "THLCC1",
+        "address": 4291953668,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section17.4.14.1 Table17.162",
+        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
+      },
+      {
+        "name": "THLCC2",
+        "address": 4291953672,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section17.4.14.1 Table17.162",
+        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
+      },
+      {
+        "name": "GTSTCFG",
+        "address": 4291953768,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section17.4.15.1 Table17.165",
+        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
+      },
+      {
+        "name": "GTSTCTR",
+        "address": 4291953772,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section17.4.15.2 Table17.166",
+        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
+      },
+      {
         "name": "GFDCFG",
         "address": 4291953780,
         "size": 4,
@@ -16623,6 +17015,38 @@
         "behavior": "rscfd",
         "evidence": "manual",
         "source_ref": "R01UH0585EJ0120 section17.4.4.7 Table17.112 p962",
+        "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
+      },
+      {
+        "name": "RESERVED_0478",
+        "address": 4291953784,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 Table17.89 (reserved offset); firmware writes at 0x8436E and 0x8458E",
+        "description": "RSCFD reserved word at +0478h written as zero by exact-image initializer"
+      },
+      {
+        "name": "GLOCKK",
+        "address": 4291953788,
+        "size": 4,
+        "access_widths": [
+          1,
+          2,
+          4
+        ],
+        "access": "rw",
+        "reset": 0,
+        "behavior": "rscfd",
+        "evidence": "manual",
+        "source_ref": "R01UH0585EJ0120 section17.4.15.3 Table17.167",
         "description": "RS-CANFD software configuration storage; no autonomous completion or bus traffic"
       },
       {
@@ -62614,7 +63038,6 @@
     ]
   },
   "execution": {
-    "engine": "Ghidra PcodeEmulator",
     "profile": "functional",
     "timing_claims": false,
     "unknown_read_policy": "fault",

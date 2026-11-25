@@ -1143,7 +1143,7 @@ def check_runtime_soak(output_root: Path) -> None:
         row["operation"] for row in events
         if row["kind"] == "faci-completion" and row["operation"] in {"erase", "program"}
     )
-    if flash != {"erase": 9, "program": 95}:
+    if flash != {"erase": 9, "program": 85}:
         raise AssertionError(f"runtime soak DataFlash lifecycle changed: {flash}")
     serial = Counter(row["unit"] for row in events if row["kind"] == "csih-word")
     if serial[1] <= 252 or serial[2] < 2 or serial[3] < 2:

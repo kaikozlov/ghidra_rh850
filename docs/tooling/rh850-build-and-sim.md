@@ -193,11 +193,11 @@ separate processor/project milestone audits.
 
 ## Specification-backed P1M-E machine
 
-`tools/rh850 test firmware` uses Ghidra's modern `PcodeEmulator` and the
-vendored RH850G3M SLEIGH language. It is separate from GNU `sim/v850`: the
-p-code machine loads the exact registered CodeFlash/DataFlash identities,
-rejects CodeFlash overlays, applies the SystemRDL memory/register model, and
-faults on an unmapped or uninitialized read instead of supplying zero.
+`tools/rh850 test firmware` uses Ghidra's p-code JIT by default with the vendored
+RH850G3M SLEIGH language. Set `P1ME_MACHINE_ENGINE=plain` to use the interpreter;
+a scenario's `engine` field takes precedence. Both engines load the registered
+flash images, reject CodeFlash overlays, and enforce the SystemRDL memory and
+register model.
 
 The canonical device source is `data/devices/p1me.rdl`.
 `tools/rh850 model update` compiles it into:
