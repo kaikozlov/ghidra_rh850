@@ -17,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.TreeSet;
@@ -56,7 +57,7 @@ public class ExportFunctionStructuralFingerprints extends GhidraScript {
         return out.toString();
     }
 
-    private static String longArrayJson(TreeSet<Long> values) {
+    private static String longArrayJson(Collection<Long> values) {
         StringBuilder out = new StringBuilder(values.size() * 14 + 2);
         out.append('[');
         boolean first = true;
@@ -103,7 +104,7 @@ public class ExportFunctionStructuralFingerprints extends GhidraScript {
         int functionCount = 0;
         int instructionCount = 0;
         try (BufferedWriter writer = Files.newBufferedWriter(output, StandardCharsets.UTF_8)) {
-            writer.write("{\"record\":\"metadata\",\"schema_version\":2," +
+            writer.write("{\"record\":\"metadata\",\"schema_version\":3," +
                 "\"ghidra_version\":" + jsonString(Application.getApplicationVersion()) + "," +
                 "\"program_name\":" + jsonString(currentProgram.getName()) + "," +
                 "\"executable_sha256\":" + jsonString(currentProgram.getExecutableSHA256()) + "," +
@@ -117,6 +118,7 @@ public class ExportFunctionStructuralFingerprints extends GhidraScript {
                 Function function = functions.next();
                 List<String> mnemonics = new ArrayList<>();
                 List<String> lengths = new ArrayList<>();
+                List<Long> callTargetsBySite = new ArrayList<>();
                 TreeSet<Long> directCalls = new TreeSet<>();
                 int conditionalBranches = 0;
                 int unconditionalBranches = 0;
@@ -144,6 +146,7 @@ public class ExportFunctionStructuralFingerprints extends GhidraScript {
                                 for (Address target : flows) {
                                     if (target != null && target.isMemoryAddress()) {
                                         directCalls.add(target.getOffset());
+                                        callTargetsBySite.add(target.getOffset());
                                     }
                                 }
                             }
@@ -171,6 +174,7 @@ public class ExportFunctionStructuralFingerprints extends GhidraScript {
                 record.append("\"mnemonics\":").append(stringArrayJson(mnemonics)).append(',');
                 record.append("\"instruction_lengths\":").append(stringArrayJson(lengths)).append(',');
                 record.append("\"direct_call_targets\":").append(longArrayJson(directCalls)).append(',');
+                record.append("\"direct_call_sites\":").append(longArrayJson(callTargetsBySite)).append(',');
                 record.append("\"direct_call_target_count\":").append(directCalls.size()).append(',');
                 record.append("\"indirect_call_count\":").append(indirectCalls).append(',');
                 record.append("\"conditional_branch_count\":").append(conditionalBranches).append(',');

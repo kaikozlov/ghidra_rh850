@@ -1657,7 +1657,13 @@ fn execute_via_bridge(
                     // `--save` is handled by run_with_bridge after this job succeeds:
                     // clean bridge teardown is the only reliable persistence boundary
                     // while the persistent AnalyzeHeadless script owns an outer transaction.
-                    client.script_run(&path, &args.args, &expect, args.allow_empty)
+                    client.script_run(
+                        &path,
+                        &args.args,
+                        &expect,
+                        args.allow_empty,
+                        args.transient_source,
+                    )
                 }
                 ScriptCommands::Check(args) => {
                     let path = std::fs::canonicalize(&args.script_path)

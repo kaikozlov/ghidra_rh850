@@ -8,7 +8,7 @@ use std::net::TcpStream;
 use std::time::Duration;
 
 use anyhow::Result;
-use serde_json::json;
+use serde_json::{json, Value};
 use tracing::debug;
 
 use super::protocol::{BridgeRequest, BridgeResponse, CommandError};
@@ -593,15 +593,20 @@ impl BridgeClient {
 
     pub fn script_run(
         &self,
-        script_path: &str,
+        path: &str,
         args: &[String],
-        expect: &[serde_json::Value],
+        expect: &[Value],
         allow_empty: bool,
-    ) -> Result<serde_json::Value> {
-        let mut payload = json!({"path": script_path, "args": args});
-        if !expect.is_empty() {
-            payload["expect"] = serde_json::Value::Array(expect.to_vec());
-            payload["allow_empty"] = json!(allow_empty);
+        transient_source: bool,
+    ) -> Result<Value> {
+        let mut payload = serde_json::json!({
+            "path": path,
+            "args": args,
+            "expect": expect,
+            "allow_empty": allow_empty
+        });
+        if transient_source {
+            payload["transient_source"] = Value::Bool(true);
         }
         self.send_command("script_run", Some(payload))
     }

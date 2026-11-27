@@ -409,7 +409,7 @@ independent instruction simulator for differential checks.
 |TSG and PIC2|Model selected symmetric HT-PWM counters, compare/reload state, phase direction and internal ADC/DMA/interrupt routes.|A clocked full-period check observes the first valley and subcounter load after native phase initialization. While RSF is set, a reload write faults if it changes the pending value. DMA and CPU writes of the same pending value preserve state. Pin feedback and advanced modes outside this subset are not modeled.|
 |ADC|Use the registered MCU's physical channels, explicit sample inputs, native result packing/read clearing, scan deadlines and IRQ/DMA requests.|Original `0x60178` initialization and internal diagnostics return after 15428 instructions without injected results. Synthetic two-channel conversion checks verify packed data, channel identity and masked completion IRQs; a DMA halfword read receives the old value before clearing both packed results. External pin samples remain explicit inputs.|
 |RSENT|Model RSENT0/1 SPC operation, mode transitions, timestamps, pulse decoding/CRC, two receive buffers, status/receive interrupts and DMA read side effects.|Original `0x60C06` returns after 624 instructions without receive inputs. Synthetic pulse checks verify native timestamps/data and CRC rejection; a TAUJ→DMAC→SPCT→receive-DMAC run writes the native 24-byte record. A two-frame check preserves distinct payloads in order and the promoted buffer's DMA request. FND clears only after FRXD data reaches the bus reader. Status IRQs are level-sensitive; receive IRQs are edge-sensitive.|
-|CSIH|Model enabled master transfers, direct/FIFO/dual/transmit buffers, word/halfword data aliases, pointers, EDL frame boundaries, status clearing and documented interrupt routing.|Original initialization helpers execute unchanged, including `0x623C0` with its single recessive-priority CS4 selection. Dominant/recessive arbitration applies only to broadcasts. Explicit `csih-word` inputs complete launched words; absent completions remain pending. The model does not infer serial timing or external ASIC responses. Unsupported job/data-consistency/loopback/handshake/slave-select modes, receive-only operation and FIFO timeout remain explicit boundaries.|
+|CSIH|Model enabled master transfers, direct/FIFO/dual/transmit buffers, word/halfword data aliases, pointers, EDL frame boundaries, status clearing and documented interrupt routing.|Original initialization helpers execute unchanged, including `0x623C0` with its single recessive-priority CS4 selection. Dominant/recessive arbitration applies only to broadcasts. Explicit `csih-word` inputs complete launched words; absent completions remain pending. The model does not infer serial timing or external ASIC responses. TAUJ0 typed events add one P-Bus clock cycle of phase skew; normal instruction retirement advances the timer. Bulk clock jumps are rejected because they can dispatch multiple timer edges without the intervening CPU time in which finite CSIH2/3 inputs complete. Unsupported job/data-consistency/loopback/handshake and slave operation stop at manual-backed boundaries.|
 |RSCFD|Model all three channel control/status banks, global control/status/error/test state, acceptance-rule RAM, the 64-word RAM-test page, FIFO configuration and status, transmit queues/history, and common receive FIFOs 3 and 5. Transmit resources cover the registered signer responses and diagnostic buffer.|`GCTR` and `CmCTR` writes update mode status immediately. After an MCU reset, `GRAMINIT` clears after 3794 pclk cycles supplied by explicit `clock.p_bus_cycles` events, per R01UH0585EJ0120 §17.11.1. Instruction retirement does not advance this deadline. Global reset clears modeled queues and transmit state. The transmit event identifies the buffer by message-RAM address. Post-filter receive events exercise mode and enable gates, FIFO capacity and overflow, thresholds, sticky flags, oldest-message windows, and native pointer pops. CAN1 receive interrupts combine the modeled FIFO levels. The model does not execute acceptance rules or simulate arbitration, CAN timing, clock-supply frequency, or error-state evolution.|
 |FACI / DataFlash|Preserve source images; mutate only simulated DataFlash. Model access-error clearing, keyed controls, mode transitions, clocked blank checks, 64-byte erase, 4-byte program and forced stop.|Original `0x78EC6` and `0x78E2A` issue native command sequences. Completion changes physical-cell state and, for programming, payload bytes; FRDY's rising edge requests EIC379. Regressions cover deadlines, neighboring cells, programmed-FF blankness, interruption/re-erase, and reset retention. CodeFlash mutation, suspend/resume, DMA programming, OCD emulation and partial-prefix stop recovery remain unsupported.|
 |DataFlash ECC/read controls|Model error/overflow flag clearing independently; keyed `DFECCCTL`/`DFTSTCTL` fields, masked `DFERRINT`, and `EEPRDCYCL` codes3..F.|Protection keys read zero; rejected keys preserve prior fields. Codes0..2 and non-normal ECC/test-mode payload reads fault. The original `0x880` helper executes with explicit command-read bus responses; those unspecified responses are not reset constants. Read-cycle fields do not add CPU stalls; ECC generation/correction and ECM delivery are not modeled.|
@@ -619,6 +619,9 @@ The generated suite derives every input from the resolved contract:
 
 `tools/test rh850_firmware` requires these scenarios to pass on every
 registered signer target: Camry, Crown, Corolla F, and Corolla H.
+The transmit scenarios supply `can-tx-complete` after the firmware requests
+the mailbox. Transmit result `04` appears only after completion, and the
+firmware does not reuse a mailbox while its transmission is pending.
 
 Camry's retained original-byte scenarios are one JSON object per line in
 `decomp/camry-8965F3307000/oracles.jsonl`. `tools/test camry_decomp` checks the
@@ -666,9 +669,12 @@ required explicitly. Do not combine `expected_termination` with
 Machine runs wait for the Ghidra report without the bridge's default
 300-second timeout. An explicit `GHIDRA_CLI_READ_TIMEOUT` overrides that wait;
 `max_instructions` remains the execution bound.
-The `rh850_firmware` suite has a 600-second deadline: the verified boot
-milestone alone executes approximately 29 million original instructions.
-The separately selected `rh850_runtime_soak` suite has a 1,800-second deadline.
+For edit-loop fixtures, `tools/test rh850_firmware` uses `plain` at budgets up
+to one million instructions and `jit` above that. It has a 600-second
+deadline. Use the separate `tools/test rh850_runtime_soak` for boot-length
+scenarios (3,600-second deadline). On 2026-11-27 the Camry set was 893
+plain-tier fixtures (4.6 million executed instructions, 20 s) and 62 JIT-tier
+fixtures (50.9 million executed instructions, 10 s); the suite passed in 66 s.
 
 If execution fails before reporting, the CLI prints Ghidra's exit status and
 both output streams. For `script_compile_failed`, run
@@ -819,6 +825,18 @@ also accept their controller-relative forms below. Supported kinds:
   isolated retention scenario. It reapplies peripheral and RAM reset rules,
   including STAC-controlled RAM initialization. It **does not restart the
   CPU** or represent a complete ECU reset.
+- `reset-assert`: `reset_class` applies the same register, peripheral, and
+  RAM reset rules and restarts PE1 at address zero with architectural reset
+  state. `system-1-pin` models the external RESET pin (R01UH0585EJ0120 §8,
+  Tables 8.1 and 8.2). The report records the reset class, `RESF`, instruction
+  boundary, affected RAM ranges, and queue policy. The reset discards device
+  deadlines, controller CAN queues, and the pending transmit-word and
+  SPC-trigger wire inputs, but preserves future absolute external events. A
+  replayed `RESF` register-input resolves only the bits the new reset leaves
+  unknown; flags the controller derived and the firmware cleared stay.
+- `can-tx-complete`: completes a pending transmission. If the mailbox has no
+  pending transmission, the event faults by default. `tolerate_no_pending: true`
+  records `can-tx-complete-ignored` with the buffer number instead.
 
 For `RESF`, a `register-input` supplies the complete observed word but may
 resolve only currently unknown bits. It cannot clear or invent already-derived
@@ -848,6 +866,86 @@ does not execute RSCFD acceptance filters. ICU-S output/completion words may be
 supplied as scheduled scenario state; they are not provisioned-key
 cryptography. Register rules tagged `manual` come from the public Renesas
 manuals; rules tagged `recovered` remain exact-firmware-derived.
+
+### Retained capture replay
+
+Convert a retained panda JSON capture or comma route NDJSON
+(`[segment, logMonoTime_ns, src, address, data_hex]`):
+
+```bash
+uv run --locked python tools/targets/camry/analysis/convert_camry_capture_machine_events.py \
+  targets/camry-2026/raw-20260826/camry_ready_gear_20260826.json.gz
+```
+
+`--bus` selects the capture bus (`src` for NDJSON). The converter groups
+`can-rx` and `can-tx-complete` events into 5 ms periods; `--cycle-instructions`
+scales their guest instruction offsets. It derives receive metadata and
+mailboxes from the registered image. Outputs are `<stem>.scenario.json` with
+capture provenance, `<stem>.candump.log`, and `<stem>.quantization.json`.
+
+```bash
+uv run --locked python -m tools.targets.camry.research.replay_camry_f33_capture_machine \
+  build/out/camry_capture_replay/camry_ready_gear_20260826.scenario.json \
+  --periods 200 \
+  --out build/out/targets/camry-8965F3307000/capture-replay-gear-complete
+```
+
+Replay starts with the `original-reset-to-runtime-synthetic-board` fixture
+and checkpoints after the 26-cycle `0x0702` readiness gate. It preserves
+capture order and empty periods. It delivers FIFO 5 receive events one at a
+time, waiting for EIC187 to return to `0x66066` between frames, and applies
+transmit completions to pending mailboxes at the end of each period. That
+pacing models post-filter delivery, not on-wire burst pressure.
+
+`summary.json` records capture identity, ingress counts by `(CAN ID, DLC)`,
+stops and faults, and firmware transmits. `capture-replay.candump.log` labels
+captured receive frames separately from simulated transmit requests.
+Use `--full-capture-rows` to retain memory and device rows. With
+`--discriminate-periods N`, replay compares a single changed field (one
+payload byte for uncataloged IDs) in the first period against unmodified and
+idle runs. It writes the plan and resumable results under the output directory.
+The [Camry replay report](../variants/camry-2026-live-baseline.md#79-retained-ready-capture-replay-through-the-exact-image-machine)
+owns the measured results and mode limits.
+
+### python-can exact-firmware bridge
+
+[`P1MEMachineBus`](../../tools/emulation/p1me_can_bridge.py) implements the
+optional python-can `BusABC` for the registered Camry image. It runs the
+synthetic-board fixture on the target daemon and occupies its program executor
+until the bus closes. Readiness is the 26th fetch of `0x660BC`, configured by
+`event_socket.ready_after_arrivals` instead of `ready_address`.
+
+Host frames matching an image-derived receive rule become post-filter FIFO 5
+events; the bridge discards other frames. Host and firmware frames share a
+serialized bus with an 8,880-instruction frame time. Firmware transmit
+completion delivers a `can.Message` immediately, or after the matching
+EIC188 return when that mailbox's `TMIEC` bit enables the interrupt.
+Guest instruction time and client wall time are independent.
+
+- `P1MEMachineBus(start_held=True)` sets `event_socket.hold_when_ready`.
+  `wait_foreground_cycles(count, timeout, hold=True)` holds a later cycle
+  boundary until `resume()`.
+- Sends and `read_memory(address, size, timeout)` are serviced at guest
+  instruction boundaries. While held, the boundary stays fixed; bus delivery
+  still follows modeled frame timing after execution resumes.
+- `reset(timeout)` asserts the external RESET pin, reapplies the synthetic
+  board inputs, and waits for the next readiness gate.
+
+Run the [capture converter](#retained-capture-replay) with its default output
+directory first, then run the standard client, capture-equivalence, and reset
+checks:
+
+```bash
+uv run --locked --with python-can --with can-isotp --with udsoncan \
+  python -m tools.emulation.prove_p1me_bridge
+```
+
+`proof.json` records the diagnostic responses and checks the bridge replay
+against its instruction-timed scenario twin (frame ticks, final boundary,
+communication and application-mode state). Add `--reset-count 3` to compare
+seeds across RESET-pin boots. See the
+[Camry reset lifecycle evidence](../security/application-security-access.md#81-camry-8965f3307000-reset-lifecycle)
+for the diagnostic and reset findings.
 
 ### Scripted ICU-S startup
 
@@ -1407,12 +1505,10 @@ tools/rh850 test firmware camry-8965F3307000 \
   --output-dir build/out/rh850-machine/serial-lifecycle/original-reset-spooled
 ```
 
-The fixture requires startup readiness at `0xFEBE3800 == 0x5A` and a
-`stop-address` termination at `0x660BC`. Decompilation of `0x66062` and its
-disassembly identify this branch as the end of the first foreground dispatch
-cycle, after the subsystem and NVM calls return. The observed milestone run
-retired **29,006,190 instructions**. Its 35-million-instruction budget is a
-failure ceiling, not the success condition.
+The fixture requires `0xFEBE3800 == 0x5A` and `stop-address` termination at
+`0x660BC`, the branch at the end of the first foreground dispatch cycle
+after the subsystem and NvM calls return. The 35-million-instruction limit
+is a failure ceiling.
 
 The long-duration lifecycle bench reuses the same declared inputs:
 
@@ -1420,12 +1516,12 @@ The long-duration lifecycle bench reuses the same declared inputs:
 tools/test rh850_runtime_soak
 ```
 
-This explicit-only suite is excluded from `make verify-processor` and the
-`full`/`local` bundles. It runs 80 million instructions, representing one
-second of declared HSB-clock progress, and requires balanced interrupt round
-trips, 9 completed DataFlash block erases, 95 completed word programs, and
-continued traffic on all three CSIH units beyond the initial exchange.
-Successful runs are classified as `verified-stubbed-execution`.
+The soak runs separately from `make verify-processor` and the core edit-loop
+bundle. It checks the reset-to-runtime milestone, then runs 80 million
+instructions for one second of declared HSB-clock progress. It requires
+balanced interrupt round trips, 9 DataFlash block erases, 85 word programs,
+and continued traffic on all three CSIH units after the initial exchange.
+The verdict for a successful run is `verified-stubbed-execution`.
 
 Both cases declare their environment rather than changing firmware decisions:
 

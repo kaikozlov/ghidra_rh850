@@ -22,6 +22,7 @@ calibrations are compared under [../variants/README.md](../variants/README.md).
 | App↔HSM command surface | Exhaustive cross-target census of every ICU-S/ICUMC command the application can issue (all EPS dumps + Venza airbag) | [icu-hsm-command-surface.md](icu-hsm-command-surface.md) |
 | Ephemeral SecOC bypass | Fail-stock RAM-only bootstrap, lifetime, hook, and internal-command feasibility | [ephemeral-secoc-bypass.md](ephemeral-secoc-bypass.md) |
 | Memory-safety audit | Externally reachable input-handler vulnerabilities | [memory-safety-audit.md](memory-safety-audit.md) |
+| Firmware confidentiality | P1M-E interface locks and dump coverage | [Lock configuration](#firmware-confidentiality-and-lock-configuration) |
 | Fuzz-oracle methodology | How sim fuzzing oracles are validated before any "clean" result is believed; blind-spot registry, CWE mapping, seeded-bug self-test | [fuzz-oracle-methodology.md](fuzz-oracle-methodology.md) |
 
 Dealer/tooling key-provisioning evidence is separate from those firmware
@@ -35,6 +36,24 @@ The RAM-only fail-stock alternative to the persistent SecOC patch is assessed in
 uses a callback-free retained foreground scheduler and stock COM delivery; the
 tracked 704-byte runtime is under `tools/targets/tss3/research/ram_runtime/` and remains
 unvalidated on hardware.
+
+## Firmware confidentiality and lock configuration
+
+P1M-E programming-interface locks control access to flash. The debugger's
+ID check is specified in R01UH0585EJ0120 §34.1(16); Table 35.5 lists the
+operations permitted on an ID mismatch. R01UH0615EJ0120 §7.1 covers the
+shared ID for OCD, serial programming, and CodeFlash P/E authentication.
+Renesas notice TN-RH8-B0463A/E corrects the allowed combinations of
+programmer-connection and command prohibitions with ID authentication.
+
+The Security and OTP Setting Areas are distinct from CodeFlash and DataFlash
+(R01UH0615EJ0120, Table 3.1). Neither area is present in the registered P1M-E
+dumps, so their active lock settings are unknown.
+
+Published fault-injection results concern specific specimens:
+[RAV4 Prime EPS](https://icanhack.nl/blog/rh850-glitch/),
+[RH850 debug password](https://blog.quarkslab.com/bypassing-debug-password-protection-on-the-rh850-family-using-fault-injection.html),
+and [F1L BCM](https://jerinsunny.github.io/blogs/2024/02/14/rh850-voltage-glitching.html).
 
 ## Important distinctions
 

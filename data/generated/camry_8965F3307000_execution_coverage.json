@@ -1,0 +1,830 @@
+{
+  "schema": "rh850-execution-coverage-v2",
+  "target": "camry-8965F3307000",
+  "evidence": "Exact-image P1M-E simulation instruction traces from the listed scenarios",
+  "module": {
+    "id": 0,
+    "base": "0x00000000",
+    "length": 1048576,
+    "path": "firmware/camry-8965F3307000/CodeFlash.bin",
+    "sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7"
+  },
+  "scenario_ids": [
+    "camry_f33_scheduler_publication_native_ch1_single_request_returns",
+    "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+  ],
+  "runs": [
+    {
+      "scenario_id": "camry_f33_scheduler_publication_native_ch1_single_request_returns",
+      "drcov": "build/out/targets/camry-8965F3307000/execution-coverage/camry_f33_scheduler_publication_native_ch1_single_request_returns.drcov",
+      "sha256": "df46d9def21500a43a6f3beda0e535855874e139d952507470237f62c6dc5c0c",
+      "instruction_records": 862,
+      "unique_basic_blocks": 809
+    },
+    {
+      "scenario_id": "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+      "drcov": "build/out/targets/camry-8965F3307000/execution-coverage/camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return.drcov",
+      "sha256": "14dc92cca34e3da7f930a2b9b300eece4e1104781f92e7774fc8216164457751",
+      "instruction_records": 2867,
+      "unique_basic_blocks": 1596
+    }
+  ],
+  "instruction_records": 3729,
+  "unique_instruction_count": 1596,
+  "unattributed_instruction_count": 0,
+  "function_inventory_count": 7338,
+  "executed_function_count": 71,
+  "functions": [
+    {
+      "address": "0x00057FD2",
+      "name": "publish_current_control_snapshot",
+      "executed_instruction_count": 30,
+      "execution_count": 60,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x0005802E",
+      "name": "fill_constant_block_5802e",
+      "executed_instruction_count": 23,
+      "execution_count": 92,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ]
+    },
+    {
+      "address": "0x000588E8",
+      "name": "dispatch_current_control_slice_by_redundant_mode_588e8",
+      "executed_instruction_count": 28,
+      "execution_count": 28,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x0005897A",
+      "name": "snapshot_ch1_inputs",
+      "executed_instruction_count": 10,
+      "execution_count": 20,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ]
+    },
+    {
+      "address": "0x0005899E",
+      "name": "dispatch_ch1_processing_slice_by_redundant_mode_5899e",
+      "executed_instruction_count": 23,
+      "execution_count": 46,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ]
+    },
+    {
+      "address": "0x0005C7B6",
+      "name": "snapshot_application_banks_to_febe6168_5c7b6",
+      "executed_instruction_count": 214,
+      "execution_count": 428,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ]
+    },
+    {
+      "address": "0x0005DE82",
+      "name": "dispatch_acquisition_and_fit_mode_step_bit0_5de82",
+      "executed_instruction_count": 18,
+      "execution_count": 18,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x0005DF1E",
+      "name": "update_steady_current_feedback",
+      "executed_instruction_count": 10,
+      "execution_count": 10,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x0005E200",
+      "name": "return_only_stub_5e200",
+      "executed_instruction_count": 1,
+      "execution_count": 1,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x0005E202",
+      "name": "run_current_control_and_stage_output",
+      "executed_instruction_count": 10,
+      "execution_count": 10,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x0005E3CA",
+      "name": "dispatch_torque_feedback_mode_step_5e3ca",
+      "executed_instruction_count": 16,
+      "execution_count": 32,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ]
+    },
+    {
+      "address": "0x0005E420",
+      "name": "dispatch_motor_command_mode_step_5e420",
+      "executed_instruction_count": 8,
+      "execution_count": 16,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ]
+    },
+    {
+      "address": "0x00060676",
+      "name": "consume_acquisition_group0_entry",
+      "executed_instruction_count": 14,
+      "execution_count": 84,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x00060720",
+      "name": "consume_acquisition_group8_entry",
+      "executed_instruction_count": 14,
+      "execution_count": 84,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x00060940",
+      "name": "count_transfer_entries",
+      "executed_instruction_count": 23,
+      "execution_count": 46,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x00060EFA",
+      "name": "write_serial_halfword_matrix_when_idle_60efa",
+      "executed_instruction_count": 47,
+      "execution_count": 382,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x00060F7C",
+      "name": "set_bounded_serial_transfer_count_60f7c",
+      "executed_instruction_count": 20,
+      "execution_count": 40,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x00061054",
+      "name": "read_serial_controller_status",
+      "executed_instruction_count": 34,
+      "execution_count": 68,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x00061DFA",
+      "name": "apply_phase_port_enable_mask_61dfa",
+      "executed_instruction_count": 48,
+      "execution_count": 96,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x00061E72",
+      "name": "publish_staged_phase_compares_and_port_masks_61e72",
+      "executed_instruction_count": 23,
+      "execution_count": 43,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x000620DC",
+      "name": "select_acquisition_six_entry_base",
+      "executed_instruction_count": 10,
+      "execution_count": 20,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x000620FE",
+      "name": "copy_acquisition_group0_samples",
+      "executed_instruction_count": 23,
+      "execution_count": 88,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x0006213E",
+      "name": "copy_acquisition_group8_samples",
+      "executed_instruction_count": 23,
+      "execution_count": 88,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x0006217E",
+      "name": "copy_acquisition_group_pair",
+      "executed_instruction_count": 6,
+      "execution_count": 6,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x00062274",
+      "name": "stage_and_send_five_halfword_acquisition_frame_62274",
+      "executed_instruction_count": 34,
+      "execution_count": 148,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x00062576",
+      "name": "sample_serial_acquisition_channel",
+      "executed_instruction_count": 39,
+      "execution_count": 78,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x00062714",
+      "name": "send_selected_rom_acquisition_frame_or_zeros_62714",
+      "executed_instruction_count": 17,
+      "execution_count": 34,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x0006276C",
+      "name": "step_acquisition_rom_frame_countdown_6276c",
+      "executed_instruction_count": 33,
+      "execution_count": 66,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x000627E0",
+      "name": "accumulate_serial_acquisition_failures",
+      "executed_instruction_count": 28,
+      "execution_count": 56,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x00062846",
+      "name": "service_serial_acquisition_channel",
+      "executed_instruction_count": 19,
+      "execution_count": 38,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x0006289C",
+      "name": "service_serial_acquisition_pair",
+      "executed_instruction_count": 8,
+      "execution_count": 13,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x000629A2",
+      "name": "copy_cached_serial_acquisition_records",
+      "executed_instruction_count": 40,
+      "execution_count": 63,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x00062DF0",
+      "name": "republish_image_identity_on_redundant_check_error_62df0",
+      "executed_instruction_count": 9,
+      "execution_count": 18,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ]
+    },
+    {
+      "address": "0x000652AA",
+      "name": "record_supervised_task_dispatch",
+      "executed_instruction_count": 17,
+      "execution_count": 51,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ]
+    },
+    {
+      "address": "0x000652E2",
+      "name": "record_ch0_dispatch",
+      "executed_instruction_count": 5,
+      "execution_count": 5,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x0006530E",
+      "name": "record_ch1_dispatch",
+      "executed_instruction_count": 5,
+      "execution_count": 10,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ]
+    },
+    {
+      "address": "0x00065984",
+      "name": "apply_mpu_attribute_profile",
+      "executed_instruction_count": 40,
+      "execution_count": 120,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ]
+    },
+    {
+      "address": "0x00065AC0",
+      "name": "push_sixteen_mpu_attributes_65ac0",
+      "executed_instruction_count": 36,
+      "execution_count": 108,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ]
+    },
+    {
+      "address": "0x00065B4A",
+      "name": "pop_sixteen_mpu_attributes_65b4a",
+      "executed_instruction_count": 36,
+      "execution_count": 108,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ]
+    },
+    {
+      "address": "0x00065D38",
+      "name": "delay_if_febe39d9_bit0_set_65d38",
+      "executed_instruction_count": 4,
+      "execution_count": 8,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ]
+    },
+    {
+      "address": "0x00065FAE",
+      "name": "run_ch0_application_task",
+      "executed_instruction_count": 15,
+      "execution_count": 15,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x00065FEA",
+      "name": "run_ch1_application_task",
+      "executed_instruction_count": 15,
+      "execution_count": 30,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ]
+    },
+    {
+      "address": "0x00066062",
+      "name": "run_eic136_foreground_dispatch_loop_66062",
+      "executed_instruction_count": 1,
+      "execution_count": 2,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ]
+    },
+    {
+      "address": "0x00066786",
+      "name": "fast_control_cycle",
+      "executed_instruction_count": 6,
+      "execution_count": 6,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x0006679E",
+      "name": "run_init_chain_6679e",
+      "executed_instruction_count": 6,
+      "execution_count": 12,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ]
+    },
+    {
+      "address": "0x00066824",
+      "name": "publish_fast_acquisition_inputs",
+      "executed_instruction_count": 62,
+      "execution_count": 62,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x000668E2",
+      "name": "consume_rsent_sensor_slots",
+      "executed_instruction_count": 8,
+      "execution_count": 16,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ]
+    },
+    {
+      "address": "0x000701A0",
+      "name": "read_priority_mask_701a0",
+      "executed_instruction_count": 2,
+      "execution_count": 4,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ]
+    },
+    {
+      "address": "0x000701A6",
+      "name": "write_priority_mask_preserving_irq_disable_701a6",
+      "executed_instruction_count": 9,
+      "execution_count": 36,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ]
+    },
+    {
+      "address": "0x000701C4",
+      "name": "priority_mask_enter",
+      "executed_instruction_count": 12,
+      "execution_count": 60,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ]
+    },
+    {
+      "address": "0x000701EA",
+      "name": "priority_mask_restore",
+      "executed_instruction_count": 9,
+      "execution_count": 45,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ]
+    },
+    {
+      "address": "0x00070822",
+      "name": "read_xor_redundant_u32_with_vote_status_70822",
+      "executed_instruction_count": 34,
+      "execution_count": 68,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ]
+    },
+    {
+      "address": "0x000713B0",
+      "name": "FUN_000713b0",
+      "executed_instruction_count": 44,
+      "execution_count": 44,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x0007145A",
+      "name": "FUN_0007145a",
+      "executed_instruction_count": 45,
+      "execution_count": 90,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ]
+    },
+    {
+      "address": "0x000BF33E",
+      "name": "fill_constant_block_bf33e",
+      "executed_instruction_count": 37,
+      "execution_count": 74,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ]
+    },
+    {
+      "address": "0x000C1B24",
+      "name": "copy_cell_block_c1b24",
+      "executed_instruction_count": 32,
+      "execution_count": 64,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ]
+    },
+    {
+      "address": "0x000C2000",
+      "name": "dispatch_service_substitution_for_current_mode_c2000",
+      "executed_instruction_count": 14,
+      "execution_count": 28,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ]
+    },
+    {
+      "address": "0x000FC2A0",
+      "name": "snapshot_request_and_calibration_status_blocks_fc2a0",
+      "executed_instruction_count": 4,
+      "execution_count": 8,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ]
+    },
+    {
+      "address": "0x000FC3CC",
+      "name": "snapshot_three_control_input_blocks_fc3cc",
+      "executed_instruction_count": 5,
+      "execution_count": 5,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x000FC462",
+      "name": "snapshot_service_pair_and_control_summary_fc462",
+      "executed_instruction_count": 4,
+      "execution_count": 8,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ]
+    },
+    {
+      "address": "0x000FCC00",
+      "name": "snapshot_request_status_to_ef80_block_fcc00",
+      "executed_instruction_count": 28,
+      "execution_count": 56,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ]
+    },
+    {
+      "address": "0x000FCC4E",
+      "name": "snapshot_calibration_and_admission_to_f300_block_fcc4e",
+      "executed_instruction_count": 26,
+      "execution_count": 52,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ]
+    },
+    {
+      "address": "0x000FD400",
+      "name": "copy_cell_block_fd400",
+      "executed_instruction_count": 13,
+      "execution_count": 13,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x000FD426",
+      "name": "snapshot_acquisition_status_to_e740_block_fd426",
+      "executed_instruction_count": 10,
+      "execution_count": 10,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x000FD444",
+      "name": "snapshot_service_byte_and_signed_word_pair_fd444",
+      "executed_instruction_count": 6,
+      "execution_count": 12,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ]
+    },
+    {
+      "address": "0x000FD456",
+      "name": "copy_cell_block_fd456",
+      "executed_instruction_count": 24,
+      "execution_count": 24,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x000FD49E",
+      "name": "snapshot_rom_bounds_and_retained_control_to_eb00_block_fd49e",
+      "executed_instruction_count": 65,
+      "execution_count": 130,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ]
+    },
+    {
+      "address": "0x000FDC28",
+      "name": "copy_cell_block_c1b24",
+      "executed_instruction_count": 3,
+      "execution_count": 6,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ]
+    },
+    {
+      "address": "0x000FDD04",
+      "name": "call_mode_steady_dispatch_with_service_substitution_fdd04",
+      "executed_instruction_count": 5,
+      "execution_count": 10,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ]
+    },
+    {
+      "address": "0x000FE114",
+      "name": "thunk_snapshot_three_control_input_blocks_fc3cc",
+      "executed_instruction_count": 3,
+      "execution_count": 3,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ]
+    },
+    {
+      "address": "0x000FE128",
+      "name": "thunk_snapshot_service_pair_and_control_summary_fc462",
+      "executed_instruction_count": 3,
+      "execution_count": 6,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ]
+    }
+  ],
+  "incision": {
+    "isr_entries": {
+      "candidate_count": 0,
+      "candidates": []
+    },
+    "isr_overlapping_function_entries": {
+      "candidate_count": 0,
+      "candidates": []
+    },
+    "task_switch_targets": {
+      "candidate_count": 0,
+      "candidates": []
+    },
+    "task_switch_overlapping_function_targets": {
+      "candidate_count": 0,
+      "candidates": []
+    }
+  },
+  "intbp_entries": [
+    {
+      "address": "0x000660BE",
+      "channels": [
+        188
+      ],
+      "is_function_start": true,
+      "execution_count": 0,
+      "scenario_ids": [],
+      "reached": false
+    },
+    {
+      "address": "0x00066100",
+      "channels": [
+        187
+      ],
+      "is_function_start": true,
+      "execution_count": 0,
+      "scenario_ids": [],
+      "reached": false
+    },
+    {
+      "address": "0x00066142",
+      "channels": [
+        292
+      ],
+      "is_function_start": true,
+      "execution_count": 0,
+      "scenario_ids": [],
+      "reached": false
+    },
+    {
+      "address": "0x00066184",
+      "channels": [
+        293
+      ],
+      "is_function_start": true,
+      "execution_count": 0,
+      "scenario_ids": [],
+      "reached": false
+    },
+    {
+      "address": "0x000661C6",
+      "channels": [
+        379
+      ],
+      "is_function_start": true,
+      "execution_count": 0,
+      "scenario_ids": [],
+      "reached": false
+    },
+    {
+      "address": "0x000713B0",
+      "channels": [
+        133
+      ],
+      "is_function_start": true,
+      "execution_count": 1,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ],
+      "reached": true
+    },
+    {
+      "address": "0x0007145A",
+      "channels": [
+        134
+      ],
+      "is_function_start": true,
+      "execution_count": 2,
+      "scenario_ids": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ],
+      "reached": true
+    },
+    {
+      "address": "0x00071506",
+      "channels": [
+        135
+      ],
+      "is_function_start": true,
+      "execution_count": 0,
+      "scenario_ids": [],
+      "reached": false
+    },
+    {
+      "address": "0x00071AE4",
+      "channels": [
+        8
+      ],
+      "is_function_start": true,
+      "execution_count": 0,
+      "scenario_ids": [],
+      "reached": false
+    }
+  ],
+  "seed_script": "SeedCamryF33Entries.java",
+  "seed_candidates": []
+}

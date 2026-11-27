@@ -1,0 +1,1285 @@
+{
+  "schema_version": 1,
+  "method": {
+    "bsim_config": "medium_32",
+    "database": "build/cache/bsim-family/toyota-eps-family",
+    "reference_set": "CC-RH V2.08.00 v850e3v5 runtime",
+    "extracted_objects": 2315,
+    "data_only_objects": 39,
+    "signature_xml": 2276,
+    "unique_md5_committed": 573,
+    "database_executables_after_commit": 757,
+    "thresholds": [
+      0.85,
+      0.95
+    ],
+    "calibrated_provenance_floor_instructions": 101
+  },
+  "images": [
+    {
+      "target": "camry-8965F3307000",
+      "sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+      "matched_functions": 6023,
+      "similarity_ge_0_85": 1086,
+      "similarity_ge_0_95": 1079,
+      "ge_0_85_at_least_101_instructions": 0,
+      "max_instruction_count_ge_0_85": 61,
+      "top20": [
+        {
+          "source_address": "0x00032C78",
+          "source_name": "get_staged_monitor_current_range_status",
+          "source_instruction_count": 3,
+          "target_name": "FUN_00010038",
+          "target_executable": "roundf.obj",
+          "target_path": "ccrh/ccrh/rhs4n",
+          "similarity": 1.0000000000000002,
+          "confidence": 10.828749328351403
+        },
+        {
+          "source_address": "0x00034C3A",
+          "source_name": "check_fit_record_admission",
+          "source_instruction_count": 3,
+          "target_name": "FUN_00010038",
+          "target_executable": "roundf.obj",
+          "target_path": "ccrh/ccrh/rhs4n",
+          "similarity": 1.0000000000000002,
+          "confidence": 10.828749328351403
+        },
+        {
+          "source_address": "0x000354CA",
+          "source_name": "ba_fb_latch_owner5_fast_release",
+          "source_instruction_count": 3,
+          "target_name": "FUN_00010038",
+          "target_executable": "roundf.obj",
+          "target_path": "ccrh/ccrh/rhs4n",
+          "similarity": 1.0000000000000002,
+          "confidence": 10.828749328351403
+        },
+        {
+          "source_address": "0x00079CB8",
+          "source_name": "nvm_poll_probe_mode",
+          "source_instruction_count": 3,
+          "target_name": "FUN_00010038",
+          "target_executable": "roundf.obj",
+          "target_path": "ccrh/ccrh/rhs4n",
+          "similarity": 1.0000000000000002,
+          "confidence": 10.828749328351403
+        },
+        {
+          "source_address": "0x0008B858",
+          "source_name": "diag_routine_crypto_admit",
+          "source_instruction_count": 3,
+          "target_name": "FUN_00010038",
+          "target_executable": "roundf.obj",
+          "target_path": "ccrh/ccrh/rhs4n",
+          "similarity": 1.0000000000000002,
+          "confidence": 10.828749328351403
+        },
+        {
+          "source_address": "0x000FEFFC",
+          "source_name": "query_application_nvm_readiness",
+          "source_instruction_count": 3,
+          "target_name": "FUN_00010038",
+          "target_executable": "roundf.obj",
+          "target_path": "ccrh/ccrh/rhs4n",
+          "similarity": 1.0000000000000002,
+          "confidence": 10.828749328351403
+        },
+        {
+          "source_address": "0x000FF038",
+          "source_name": "get_mode_restart_hardware_selector",
+          "source_instruction_count": 3,
+          "target_name": "FUN_00010038",
+          "target_executable": "roundf.obj",
+          "target_path": "ccrh/ccrh/rhs4n",
+          "similarity": 1.0000000000000002,
+          "confidence": 10.828749328351403
+        },
+        {
+          "source_address": "0x0004C238",
+          "source_name": "refresh_latched_status_with_override_4c238",
+          "source_instruction_count": 5,
+          "target_name": "FUN_0001001c",
+          "target_executable": "printf.obj",
+          "target_path": "ccrh/ccrh/rhf4z",
+          "similarity": 1.0,
+          "confidence": 12.893682214690443
+        },
+        {
+          "source_address": "0x00000770",
+          "source_name": "enable_and_initialize_boot_diagnostics_770",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x0000152A",
+          "source_name": "prepare_and_run_relocated_flash_driver_152a",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x00005148",
+          "source_name": "boot_publish_session_three_and_cancel_security_delay_5148",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x000051C8",
+          "source_name": "boot_join_session_and_consume_transfer_foreground_51c8",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x000070D4",
+          "source_name": "boot_image_crypto_initialize",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x00035C38",
+          "source_name": "run_5f6a_counter_update_35c38",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x0003984A",
+          "source_name": "update_scaled_pair_sums_and_thermal_squared_inputs_3984a",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x0004522E",
+          "source_name": "update_bounded_difference_binmap_pair_4522e",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x0004A49E",
+          "source_name": "initialize_and_update_communication_inhibits_4a49e",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x0004C784",
+          "source_name": "refresh_prioritized_status_and_copied_pair_4c784",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x0004D094",
+          "source_name": "refresh_diagnostic_admission_and_dispatch_pending_request_4d094",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x000551BC",
+          "source_name": "poll_and_flush_capture_record_persistence_551bc",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        }
+      ],
+      "controls": [
+        {
+          "source_address": "0x00054A90",
+          "source_name": "__v850_copy_words_24",
+          "source_instruction_count": 12,
+          "target_name": "FUN_00010048",
+          "target_executable": "qsort.obj",
+          "target_path": "ccrh/ccrh/rhs8n",
+          "similarity": 0.3115471388149887,
+          "confidence": 6.277779440073802
+        },
+        {
+          "source_address": "0x00054AAC",
+          "source_name": "__v850_copy_words_8",
+          "source_instruction_count": 12,
+          "target_name": "FUN_00010048",
+          "target_executable": "qsort.obj",
+          "target_path": "ccrh/ccrh/rhs8n",
+          "similarity": 0.3115471388149887,
+          "confidence": 6.277779440073802
+        },
+        {
+          "source_address": "0x00078F28",
+          "source_name": "dataflash_copy_words_ecc",
+          "source_instruction_count": 27,
+          "target_name": "FUN_00010048",
+          "target_executable": "qsort.obj",
+          "target_path": "ccrh/ccrh/rhs8n",
+          "similarity": 0.15425633050700505,
+          "confidence": 2.961336503415972
+        }
+      ]
+    },
+    {
+      "target": "sienna-8965B4512000",
+      "sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde",
+      "matched_functions": 5928,
+      "similarity_ge_0_85": 1099,
+      "similarity_ge_0_95": 1091,
+      "ge_0_85_at_least_101_instructions": 0,
+      "max_instruction_count_ge_0_85": 61,
+      "top20": [
+        {
+          "source_address": "0x0004B8A4",
+          "source_name": "FUN_0004b8a4",
+          "source_instruction_count": 5,
+          "target_name": "FUN_0001001c",
+          "target_executable": "printf.obj",
+          "target_path": "ccrh/ccrh/rhf4z",
+          "similarity": 1.0,
+          "confidence": 12.893682214690443
+        },
+        {
+          "source_address": "0x00000770",
+          "source_name": "FUN_00000770",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x0000152A",
+          "source_name": "FUN_0000152a",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x00005148",
+          "source_name": "FUN_00005148",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x000051C8",
+          "source_name": "FUN_000051c8",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x000070D4",
+          "source_name": "payload_crypto_initialize",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x00035718",
+          "source_name": "FUN_00035718",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x00039024",
+          "source_name": "FUN_00039024",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x000447FE",
+          "source_name": "FUN_000447fe",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x00049A0A",
+          "source_name": "FUN_00049a0a",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x0004BB0A",
+          "source_name": "FUN_0004bb0a",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x0004C420",
+          "source_name": "FUN_0004c420",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x00054140",
+          "source_name": "FUN_00054140",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x00057768",
+          "source_name": "FUN_00057768",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x00069380",
+          "source_name": "FUN_00069380",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x0007433C",
+          "source_name": "FUN_0007433c",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x000744F4",
+          "source_name": "FUN_000744f4",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x00074678",
+          "source_name": "FUN_00074678",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x000746C0",
+          "source_name": "FUN_000746c0",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x000748F2",
+          "source_name": "FUN_000748f2",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        }
+      ],
+      "controls": [
+        {
+          "source_address": "0x00004678",
+          "source_name": "CanIf_RxIndication",
+          "source_instruction_count": 48,
+          "target_name": "__REL_analyze1f.s",
+          "target_executable": "com4f.obj",
+          "target_path": "ccrh/ccrh/rhs4n",
+          "similarity": 0.16692166339120507,
+          "confidence": 2.4478537582931628
+        },
+        {
+          "source_address": "0x00051D80",
+          "source_name": "__v850_copy_words_18",
+          "source_instruction_count": 12,
+          "target_name": "FUN_00010048",
+          "target_executable": "qsort.obj",
+          "target_path": "ccrh/ccrh/rhs8n",
+          "similarity": 0.3115471388149887,
+          "confidence": 6.277779440073802
+        },
+        {
+          "source_address": "0x00053A14",
+          "source_name": "__v850_copy_words_24",
+          "source_instruction_count": 12,
+          "target_name": "FUN_00010048",
+          "target_executable": "qsort.obj",
+          "target_path": "ccrh/ccrh/rhs8n",
+          "similarity": 0.3115471388149887,
+          "confidence": 6.277779440073802
+        },
+        {
+          "source_address": "0x00051A0E",
+          "source_name": "__v850_copy_words_60",
+          "source_instruction_count": 12,
+          "target_name": "FUN_00010048",
+          "target_executable": "qsort.obj",
+          "target_path": "ccrh/ccrh/rhs8n",
+          "similarity": 0.3115471388149887,
+          "confidence": 6.277779440073802
+        },
+        {
+          "source_address": "0x00053A30",
+          "source_name": "__v850_copy_words_8",
+          "source_instruction_count": 12,
+          "target_name": "FUN_00010048",
+          "target_executable": "qsort.obj",
+          "target_path": "ccrh/ccrh/rhs8n",
+          "similarity": 0.3115471388149887,
+          "confidence": 6.277779440073802
+        }
+      ]
+    },
+    {
+      "target": "crown-8965F3012000",
+      "sha256": "5b89fdbc69edc2f66ef8a557f88b08c758e3146bd4e90067320d7966812b1273",
+      "matched_functions": 5814,
+      "similarity_ge_0_85": 1053,
+      "similarity_ge_0_95": 1045,
+      "ge_0_85_at_least_101_instructions": 0,
+      "max_instruction_count_ge_0_85": 61,
+      "top20": [
+        {
+          "source_address": "0x0004BAFA",
+          "source_name": "FUN_0004bafa",
+          "source_instruction_count": 5,
+          "target_name": "FUN_0001001c",
+          "target_executable": "printf.obj",
+          "target_path": "ccrh/ccrh/rhf4z",
+          "similarity": 1.0,
+          "confidence": 12.893682214690443
+        },
+        {
+          "source_address": "0x00000770",
+          "source_name": "FUN_00000770",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x0000152A",
+          "source_name": "FUN_0000152a",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x00005148",
+          "source_name": "FUN_00005148",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x000051C8",
+          "source_name": "FUN_000051c8",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x000070D4",
+          "source_name": "FUN_000070d4",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x000358B8",
+          "source_name": "FUN_000358b8",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x00039206",
+          "source_name": "FUN_00039206",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x00044BEA",
+          "source_name": "FUN_00044bea",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x00049E5A",
+          "source_name": "FUN_00049e5a",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x0004C0E6",
+          "source_name": "FUN_0004c0e6",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x0004C9F6",
+          "source_name": "FUN_0004c9f6",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x000546AA",
+          "source_name": "FUN_000546aa",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x00057CCA",
+          "source_name": "FUN_00057cca",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x00069810",
+          "source_name": "FUN_00069810",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x000747FC",
+          "source_name": "FUN_000747fc",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x000749B4",
+          "source_name": "FUN_000749b4",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x00074B38",
+          "source_name": "FUN_00074b38",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x00074B80",
+          "source_name": "FUN_00074b80",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x00074DB2",
+          "source_name": "FUN_00074db2",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        }
+      ],
+      "controls": [
+        {
+          "source_address": "0x000522F2",
+          "source_name": "__v850_copy_words_18",
+          "source_instruction_count": 12,
+          "target_name": "FUN_00010048",
+          "target_executable": "qsort.obj",
+          "target_path": "ccrh/ccrh/rhs8n",
+          "similarity": 0.3115471388149887,
+          "confidence": 6.277779440073802
+        },
+        {
+          "source_address": "0x00053F7E",
+          "source_name": "__v850_copy_words_24",
+          "source_instruction_count": 12,
+          "target_name": "FUN_00010048",
+          "target_executable": "qsort.obj",
+          "target_path": "ccrh/ccrh/rhs8n",
+          "similarity": 0.3115471388149887,
+          "confidence": 6.277779440073802
+        },
+        {
+          "source_address": "0x00051F80",
+          "source_name": "__v850_copy_words_60",
+          "source_instruction_count": 12,
+          "target_name": "FUN_00010048",
+          "target_executable": "qsort.obj",
+          "target_path": "ccrh/ccrh/rhs8n",
+          "similarity": 0.3115471388149887,
+          "confidence": 6.277779440073802
+        },
+        {
+          "source_address": "0x00053F9A",
+          "source_name": "__v850_copy_words_8",
+          "source_instruction_count": 12,
+          "target_name": "FUN_00010048",
+          "target_executable": "qsort.obj",
+          "target_path": "ccrh/ccrh/rhs8n",
+          "similarity": 0.3115471388149887,
+          "confidence": 6.277779440073802
+        }
+      ]
+    },
+    {
+      "target": "corolla-8965F1208000",
+      "sha256": "fdb35b76891cf84a8b89e0a05c9c7c5cfcd27994cf85ccc01ff32828f53091f6",
+      "matched_functions": 5762,
+      "similarity_ge_0_85": 1050,
+      "similarity_ge_0_95": 1043,
+      "ge_0_85_at_least_101_instructions": 0,
+      "max_instruction_count_ge_0_85": 61,
+      "top20": [
+        {
+          "source_address": "0x00046E84",
+          "source_name": "FUN_00046e84",
+          "source_instruction_count": 5,
+          "target_name": "FUN_0001001c",
+          "target_executable": "printf.obj",
+          "target_path": "ccrh/ccrh/rhf4z",
+          "similarity": 1.0,
+          "confidence": 12.893682214690443
+        },
+        {
+          "source_address": "0x00000754",
+          "source_name": "FUN_00000754",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x0000150E",
+          "source_name": "FUN_0000150e",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x0000512C",
+          "source_name": "FUN_0000512c",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x000051AC",
+          "source_name": "FUN_000051ac",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x000070B8",
+          "source_name": "FUN_000070b8",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x000312DC",
+          "source_name": "FUN_000312dc",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x000347E4",
+          "source_name": "FUN_000347e4",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x000360D6",
+          "source_name": "FUN_000360d6",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x00045302",
+          "source_name": "FUN_00045302",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x00047474",
+          "source_name": "FUN_00047474",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x00047D66",
+          "source_name": "FUN_00047d66",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x0004F868",
+          "source_name": "FUN_0004f868",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x00052CD6",
+          "source_name": "FUN_00052cd6",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x000636C0",
+          "source_name": "FUN_000636c0",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x0006E6DC",
+          "source_name": "FUN_0006e6dc",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x0006E894",
+          "source_name": "FUN_0006e894",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x0006EA18",
+          "source_name": "FUN_0006ea18",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x0006EA60",
+          "source_name": "FUN_0006ea60",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x0006EC92",
+          "source_name": "FUN_0006ec92",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        }
+      ],
+      "controls": [
+        {
+          "source_address": "0x0004D4CE",
+          "source_name": "__v850_copy_words_18",
+          "source_instruction_count": 12,
+          "target_name": "FUN_00010048",
+          "target_executable": "qsort.obj",
+          "target_path": "ccrh/ccrh/rhs8n",
+          "similarity": 0.3115471388149887,
+          "confidence": 6.277779440073802
+        },
+        {
+          "source_address": "0x0004F13C",
+          "source_name": "__v850_copy_words_24",
+          "source_instruction_count": 12,
+          "target_name": "FUN_00010048",
+          "target_executable": "qsort.obj",
+          "target_path": "ccrh/ccrh/rhs8n",
+          "similarity": 0.3115471388149887,
+          "confidence": 6.277779440073802
+        },
+        {
+          "source_address": "0x0004D15C",
+          "source_name": "__v850_copy_words_60",
+          "source_instruction_count": 12,
+          "target_name": "FUN_00010048",
+          "target_executable": "qsort.obj",
+          "target_path": "ccrh/ccrh/rhs8n",
+          "similarity": 0.3115471388149887,
+          "confidence": 6.277779440073802
+        },
+        {
+          "source_address": "0x0004F158",
+          "source_name": "__v850_copy_words_8",
+          "source_instruction_count": 12,
+          "target_name": "FUN_00010048",
+          "target_executable": "qsort.obj",
+          "target_path": "ccrh/ccrh/rhs8n",
+          "similarity": 0.3115471388149887,
+          "confidence": 6.277779440073802
+        }
+      ]
+    },
+    {
+      "target": "corolla-8965H1202000",
+      "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+      "matched_functions": 5762,
+      "similarity_ge_0_85": 1050,
+      "similarity_ge_0_95": 1043,
+      "ge_0_85_at_least_101_instructions": 0,
+      "max_instruction_count_ge_0_85": 61,
+      "top20": [
+        {
+          "source_address": "0x00046E84",
+          "source_name": "FUN_00046e84",
+          "source_instruction_count": 5,
+          "target_name": "FUN_0001001c",
+          "target_executable": "printf.obj",
+          "target_path": "ccrh/ccrh/rhf4z",
+          "similarity": 1.0,
+          "confidence": 12.893682214690443
+        },
+        {
+          "source_address": "0x00000754",
+          "source_name": "FUN_00000754",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x0000150E",
+          "source_name": "FUN_0000150e",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x0000512C",
+          "source_name": "FUN_0000512c",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x000051AC",
+          "source_name": "FUN_000051ac",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x000070B8",
+          "source_name": "FUN_000070b8",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x000312DC",
+          "source_name": "FUN_000312dc",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x000347E4",
+          "source_name": "FUN_000347e4",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x000360D6",
+          "source_name": "FUN_000360d6",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x00045302",
+          "source_name": "FUN_00045302",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x00047474",
+          "source_name": "FUN_00047474",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x00047D66",
+          "source_name": "FUN_00047d66",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x0004F868",
+          "source_name": "FUN_0004f868",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x00052CD6",
+          "source_name": "FUN_00052cd6",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x000636C0",
+          "source_name": "FUN_000636c0",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x0006E6DC",
+          "source_name": "FUN_0006e6dc",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x0006E894",
+          "source_name": "FUN_0006e894",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x0006EA18",
+          "source_name": "FUN_0006ea18",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x0006EA60",
+          "source_name": "FUN_0006ea60",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        },
+        {
+          "source_address": "0x0006EC92",
+          "source_name": "FUN_0006ec92",
+          "source_instruction_count": 4,
+          "target_name": "FUN_00010012",
+          "target_executable": "_exp10xd.obj",
+          "target_path": "ccrh/ccrh/libc",
+          "similarity": 1.0,
+          "confidence": 10.6748829726427
+        }
+      ],
+      "controls": [
+        {
+          "source_address": "0x0004D4CE",
+          "source_name": "__v850_copy_words_18",
+          "source_instruction_count": 12,
+          "target_name": "FUN_00010048",
+          "target_executable": "qsort.obj",
+          "target_path": "ccrh/ccrh/rhs8n",
+          "similarity": 0.3115471388149887,
+          "confidence": 6.277779440073802
+        },
+        {
+          "source_address": "0x0004F13C",
+          "source_name": "__v850_copy_words_24",
+          "source_instruction_count": 12,
+          "target_name": "FUN_00010048",
+          "target_executable": "qsort.obj",
+          "target_path": "ccrh/ccrh/rhs8n",
+          "similarity": 0.3115471388149887,
+          "confidence": 6.277779440073802
+        },
+        {
+          "source_address": "0x0004D15C",
+          "source_name": "__v850_copy_words_60",
+          "source_instruction_count": 12,
+          "target_name": "FUN_00010048",
+          "target_executable": "qsort.obj",
+          "target_path": "ccrh/ccrh/rhs8n",
+          "similarity": 0.3115471388149887,
+          "confidence": 6.277779440073802
+        },
+        {
+          "source_address": "0x0004F158",
+          "source_name": "__v850_copy_words_8",
+          "source_instruction_count": 12,
+          "target_name": "FUN_00010048",
+          "target_executable": "qsort.obj",
+          "target_path": "ccrh/ccrh/rhs8n",
+          "similarity": 0.3115471388149887,
+          "confidence": 6.277779440073802
+        }
+      ]
+    }
+  ]
+}

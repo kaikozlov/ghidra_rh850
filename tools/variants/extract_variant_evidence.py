@@ -1,23 +1,26 @@
 #!/usr/bin/env python3
-"""Compact image-bound evidence from disposable variant corpora.
+"""Image-bound variant evidence and BSim family queries.
 
-Subcommands here replace the former one-file-per-selection extractors. The four
-modes share exactly one abstraction: read a disposable target-native JSONL
-corpus, select function records, bind each selected record to raw CodeFlash
-bytes with SHA-256, and write the mode's existing tracked JSON schema. They
-differ only in *how* records are selected (explicit addresses, callback-table
-resolution, or whole-corpus substring census). Modes that would need dynamic
-target discovery or semantic joins stay in their own tools.
+The compact evidence modes bind records from target-native exports to CodeFlash
+bytes. ``bsim`` queries a registered target against named database scopes and
+records one best match or miss per function and scope.
 """
 from __future__ import annotations
 
-from tools import REPO_ROOT
 import argparse
+import csv
 import hashlib
 import json
 import struct
+import subprocess
+import tempfile
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
+
+from tools import REPO_ROOT
+from tools.project.analysis_target import load as load_targets
+from tools.project.project_layout import materialize
 
 DID = struct.Struct("<HHIII")
 RID_CB = struct.Struct("<HHII")
@@ -42,6 +45,11 @@ MODES: dict[str, dict[str, Any]] = {
         "summary": "complete exact-substring direct-reference census over a corpus",
         "input": "disposable target-native Ghidra corpus (JSONL)",
         "selection": "whole-corpus --term NAME=SUBSTRING census",
+    },
+    "bsim": {
+        "summary": "best BSim match per function and target/reference scope",
+        "input": "registered target working project plus regenerable H2 BSim database",
+        "selection": "all BSim-signable functions; server-side MD5/path scopes",
     },
 }
 
@@ -339,6 +347,199 @@ def run_reference_census(args: argparse.Namespace) -> None:
     for name in terms:
         print(f"  {name}: {len(matches[name])} functions")
 
+EPS_TARGETS = (
+    "camry-8965F3307000",
+    "sienna-8965B4512000",
+    "crown-8965F3012000",
+    "corolla-8965F1208000",
+    "corolla-8965H1202000",
+)
+
+
+def _md5(path: Path) -> str:
+    digest = hashlib.md5(usedforsecurity=False)
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _bsim_url(path: Path) -> str:
+    resolved = path.resolve()
+    if resolved.name.endswith(".mv.db"):
+        resolved = resolved.with_name(resolved.name.removesuffix(".mv.db"))
+    database_file = resolved.with_name(resolved.name + ".mv.db")
+    if not database_file.is_file():
+        raise SystemExit(f"BSim database not found: {database_file}")
+    return f"file:{resolved}"
+
+
+def _iter_bsim_rows(path: Path) -> Iterator[dict[str, Any]]:
+    with path.open(encoding="utf-8") as stream:
+        for line in stream:
+            if line.strip():
+                yield json.loads(line)
+
+
+def _apply_bsim_matches(
+    args: argparse.Namespace, output: Path, targets: dict[str, dict[str, Any]]
+) -> int:
+    if args.target != "sienna-8965B4512000":
+        raise SystemExit("calibrated BSim application is available only for the Sienna query")
+    artifact = REPO_ROOT / "data/generated/sienna_8965B4512000_bsim_calibrated_transfer.json"
+    evidence = json.loads(artifact.read_text())
+    minimum_similarity = evidence["similarity_threshold"]
+    minimum_instructions = evidence["minimum_instruction_count"]
+    if args.similarity < minimum_similarity or args.instruction_floor < minimum_instructions:
+        raise SystemExit(
+            "cannot apply below the calibrated operating point "
+            f"(similarity {minimum_similarity}, at least {minimum_instructions} instructions)"
+        )
+    approved: dict[tuple[str, str, str], str] = {}
+    for target, target_evidence in evidence["targets"].items():
+        for match in target_evidence["applied_names"]:
+            approved[
+                (target, match["source_address"], match["target_address"])
+            ] = match["source_name"]
+
+    grouped: dict[Path, dict[int, str]] = {}
+    for row in _iter_bsim_rows(output):
+        key = (row.get("scope"), row.get("source_address"), row.get("target_address"))
+        if (
+            row.get("record") == "match"
+            and row.get("matched")
+            and row["similarity"] >= args.similarity
+            and row.get("source_instruction_count", 0) >= args.instruction_floor
+            and key in approved
+        ):
+            seed_path = REPO_ROOT / targets[row["scope"]]["function_seeds"]
+            grouped.setdefault(seed_path, {})[int(row["target_address"], 16)] = approved[key]
+
+    provenance = artifact.relative_to(REPO_ROOT).as_posix()
+    additions = 0
+    for path, names in grouped.items():
+        with path.open(newline="", encoding="utf-8") as stream:
+            records = list(csv.reader(stream))
+        existing = {int(record[0], 16) for record in records[1:]}
+        with path.open("a", newline="", encoding="utf-8") as stream:
+            writer = csv.writer(stream, lineterminator="\n")
+            for address in sorted(names.keys() - existing):
+                writer.writerow(
+                    (
+                        f"0x{address:08X}",
+                        provenance,
+                        f"name={names[address]}; exact mnemonic and instruction-length "
+                        "sequence at calibrated BSim operating point",
+                    )
+                )
+                additions += 1
+    return additions
+
+
+def run_bsim(args: argparse.Namespace) -> None:
+    registry = load_targets()
+    targets = registry["targets"]
+    if args.target not in EPS_TARGETS:
+        raise SystemExit(f"BSim target must be one of: {', '.join(EPS_TARGETS)}")
+    if args.references_only:
+        if args.against or not args.reference_set:
+            raise SystemExit("--references-only requires --reference-set and no --against")
+        against: list[str] = []
+    else:
+        against = args.against or [name for name in EPS_TARGETS if name != args.target]
+    unknown = sorted(set(against) - set(EPS_TARGETS))
+    if unknown:
+        raise SystemExit(f"unknown EPS comparison target(s): {', '.join(unknown)}")
+    if args.target in against:
+        raise SystemExit("the query target cannot also be an --against target")
+
+    scopes: list[str] = []
+    for name in against:
+        image = REPO_ROOT / targets[name]["codeflash"]
+        scopes.append(f"{name}=md5:{_md5(image)}")
+    for reference_set in args.reference_set or ("ccrh", "gcc"):
+        scopes.append(f"{reference_set}=path:{reference_set}")
+
+    output = (
+        args.out
+        or REPO_ROOT / "build/out/variants/bsim" / f"{args.target}.jsonl"
+    ).resolve()
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.unlink(missing_ok=True)
+    log = REPO_ROOT / "build/logs/bsim" / f"{args.target}-query.log"
+    log.parent.mkdir(parents=True, exist_ok=True)
+    row = targets[args.target]
+    work_root = REPO_ROOT / "build/work"
+    work_root.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(
+        prefix=f"bsim-query-{args.target}-", dir=work_root
+    ) as temporary:
+        project_dir = Path(temporary)
+        materialize(
+            REPO_ROOT / row["snapshot_dir"], project_dir, row["project_name"]
+        )
+        command = [
+            str(REPO_ROOT / "tools/project/run_headless"),
+            "--project-dir",
+            str(project_dir),
+            "--project",
+            row["project_name"],
+            "--log",
+            str(log),
+            "--quiet",
+            "--",
+            "-process",
+            row["program_name"],
+            "-noanalysis",
+            "-readOnly",
+            "-postScript",
+            "QueryBSimMatches.java",
+            _bsim_url(args.database),
+            str(output),
+            str(args.similarity),
+            str(args.confidence),
+            str(args.max_matches),
+            *scopes,
+        ]
+        completed = subprocess.run(command, cwd=REPO_ROOT, text=True, check=False)
+        if completed.returncode:
+            raise SystemExit(completed.returncode)
+    if not output.is_file():
+        raise SystemExit(f"BSim query did not produce function rows: {output}")
+
+    counts = {scope.split("=", 1)[0]: 0 for scope in scopes}
+    has_function_rows = False
+    for row in _iter_bsim_rows(output):
+        if row.get("record") != "match":
+            continue
+        has_function_rows = True
+        if not row["matched"]:
+            continue
+        counts[row["scope"]] += 1
+        print(
+            "\t".join(
+                (
+                    row["source_address"],
+                    row["source_name"],
+                    str(row.get("source_instruction_count", 0)),
+                    row["scope"],
+                    row["target_name"],
+                    row["target_address"],
+                    f"{row['similarity']:.6f}",
+                    f"{row['confidence']:.6f}",
+                )
+            )
+        )
+    if not has_function_rows:
+        raise SystemExit(f"BSim query did not produce function rows: {output}")
+    print(f"wrote {output}")
+    print("matches: " + ", ".join(f"{scope}={count}" for scope, count in counts.items()))
+    if args.apply:
+        additions = _apply_bsim_matches(args, output, targets)
+        print(f"seed application: added {additions} function entries")
+    else:
+        print("query only; use --apply to add reviewed matches to the seed CSVs")
+
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -387,6 +588,44 @@ def build_parser() -> argparse.ArgumentParser:
     census.add_argument("--term", action="append", default=[], metavar="NAME=SUBSTRING")
     census.add_argument("--out", type=Path, required=True)
     census.set_defaults(run=run_reference_census)
+
+    bsim = subparsers.add_parser("bsim", help=MODES["bsim"]["summary"])
+    bsim.add_argument("target", choices=EPS_TARGETS)
+    bsim.add_argument(
+        "--database",
+        type=Path,
+        default=REPO_ROOT / "build/cache/bsim-family/toyota-eps-family",
+    )
+    bsim.add_argument(
+        "--against",
+        action="append",
+        default=[],
+        metavar="TARGET",
+        help="comparison target (repeatable; default: every other EPS target)",
+    )
+    bsim.add_argument(
+        "--references-only",
+        action="store_true",
+        help="query only explicit --reference-set scopes",
+    )
+    bsim.add_argument(
+        "--reference-set",
+        action="append",
+        choices=("ccrh", "gcc"),
+        default=[],
+        help="compiler-runtime project path to query (repeatable)",
+    )
+    bsim.add_argument("--similarity", type=float, default=1.0)
+    bsim.add_argument("--confidence", type=float, default=0.0)
+    bsim.add_argument("--instruction-floor", type=int, default=101)
+    bsim.add_argument("--max-matches", type=int, default=1)
+    bsim.add_argument("--out", type=Path)
+    bsim.add_argument(
+        "--apply",
+        action="store_true",
+        help="apply reviewed candidates at the calibrated operating point",
+    )
+    bsim.set_defaults(run=run_bsim)
 
     return parser
 

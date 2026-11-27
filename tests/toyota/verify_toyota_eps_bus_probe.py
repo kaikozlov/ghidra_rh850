@@ -24,6 +24,7 @@ from tools.toyota_support.toyota_eps_bus_probe import (
     build_plan,
     fdcan2_route,
 )
+from tools.toyota_support.toyota_eps_identity_control import _record as identity_record
 
 passed = failed = 0
 
@@ -129,6 +130,16 @@ invalid = subprocess.run(
     check=False,
 )
 check("invalid logical bus is rejected", invalid.returncode != 0)
+
+print("\n== identity control contract ==")
+identity = identity_record("panda", 1, {0xF181: b"app", 0xF189: b"cal"})
+check("reference image identifies the registered Camry calibration",
+      identity["reference_image"] == {
+          "target": "camry-8965F3307000", "software_id": "8965F3307000",
+          "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+      })
+check("identity record preserves raw DID bytes",
+      identity["dids"] == {"0xF181": "617070", "0xF189": "63616c"})
 
 print("\n== Sienna firmware diagnostic-controller continuity ==")
 codeflash = (REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()

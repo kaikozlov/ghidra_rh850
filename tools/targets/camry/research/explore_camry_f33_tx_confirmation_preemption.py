@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Exercise stock CAN-Tx confirmation preemption against CanTp/DCM foreground."""
+"""Exercise stock CAN-Tx confirmation preemption against CanTp/DCM foreground.
+
+The retained-RAM entry reconstructs boot-programmed TMIEC0 bits 22 and 23 for
+the channel-1 diagnostic buffers.
+"""
 from __future__ import annotations
 
 import argparse
@@ -102,11 +106,13 @@ def build_base(cycles: int) -> dict[str, Any]:
             ),
         },
         {
-            "kind": "register-input", "register": "TMIEC1", "value": "0xc0",
+            "kind": "register-input",
+            "register": "TMIEC0",
+            "value": "0x00c00000",
             "after_instructions": 0,
             "evidence": (
-                "Original CodeFlash channel1 interrupt-completion mask at 0x22ec0; "
-                "the retained LocalRAM snapshot cannot carry RSCFD peripheral state"
+                "Boot-programmed channel-1 diagnostic completion mask; retained "
+                "LocalRAM cannot carry RSCFD peripheral state"
             ),
         },
         {
@@ -165,8 +171,9 @@ def add_completion(base: dict[str, Any], name: str, tick: int, resource: int) ->
         "kind": "can-tx-complete", "buffer": 16 + resource, "firmware_control": "0x8048",
         "after_instructions": tick,
         "evidence": (
-            "Original startup EIC188=0x8048 and INTBP[188]=0x660BE; "
-            "external completion of a previously emitted RSCFD frame"
+            "Boot-programmed TMIEC0=0x00C00000 enables channel-1 buffers22/23; "
+            "original startup EIC188=0x8048 and INTBP[188]=0x660BE; external "
+            "completion of a previously emitted RSCFD frame"
         ),
     })
     return scenario
@@ -230,7 +237,7 @@ def main() -> int:
         work = Path(td)
         baseline_path = work / "baseline.json"
         baseline_path.write_text(json.dumps(base), encoding="utf-8")
-        baseline = capture_many(TARGET, [baseline_path], out / "baseline", instruction_trace=True)[0]
+        baseline = capture_many(TARGET, [baseline_path], out / "baseline")[0]
         tx = can_tx_event(baseline)
         resource = completion_resource(tx)
         tx_tick = int(tx["scheduler_tick"])

@@ -511,6 +511,14 @@ PDU to the first word of its eight-byte CanIf record. This independently ties
 the route IDs to the CAN identifiers instead of treating the ID-looking words
 as unreferenced constants.
 
+### 5.1 Camry F33 Tx-completion preemption
+
+The [Camry F33 shared-range audit](../security/memory-safety-audit.md#camry-interrupt-shared-range-audit)
+observes CAN1 Tx completion after `attempt_queued_can_tx` publishes hardware
+ownership. In that invocation, the EIC188 handler writes no range that the
+interrupted function accesses both before and after delivery. This observation
+applies to the exercised Camry path, not the Sienna image mapped here.
+
 ## 6. Evidence boundaries and external naming
 
 Core conclusions—counts, table addresses, IDs, lengths, cyclic counts, signal

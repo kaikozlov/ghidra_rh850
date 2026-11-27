@@ -301,6 +301,11 @@ CAN 0x7A1, channel 1 common FIFO 0
   -> RSCFD CAN 0x7A9
 ```
 
+## Camry application receive preemption
+
+The [Camry interrupt shared-range audit](../security/memory-safety-audit.md#camry-interrupt-shared-range-audit)
+covers receive interrupt EIC187 during DCM cleanup.
+
 ## Evidence limits
 
 This is static proof of the configured firmware path. It does not establish

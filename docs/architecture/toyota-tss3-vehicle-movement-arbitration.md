@@ -1068,6 +1068,44 @@ FRC / TSS3 applications
         driver inputs                    actuator/result state
 ```
 
+### Retained-gear field discrimination
+
+The [exact-image replay](../variants/camry-2026-live-baseline.md#79-retained-ready-capture-replay-through-the-exact-image-machine)
+starts in mode `0x0702`. Each run covered the same 200 periods; one run removed
+all receive traffic, one preserved the capture, and each field run changed one
+field in one frame. All 97 field runs published the two baseline `0x4A3`
+frames.
+
+| Capture ID | Fields tested | Fields | EPS Tx changed | No change, output published | Published nothing |
+|---|---:|---|---:|---:|---:|
+| `00F` | 8 | `B0`, `B1`, `B2`, `B3`, `B4`, `B5`, `B6`, `B7` | 0 | 8 | 0 |
+| `025` | 7 | `B0[7]`, `B0[6]`, `B0[5]`, `B0[3:0]..B1`, `B4[7:4]`, `B4[3:0]..B5`, `B6[3]` | 0 | 7 | 0 |
+| `090` | 10 | `B0[7]`, `B0[6]`, `B0[1:0]..B1`, `B2[7]`, `B2[6]`, `B2[1:0]..B3`, `B4[7]`, `B4[6]`, `B4[1:0]..B5`, `B28[7:4]` | 0 | 10 | 0 |
+| `0AA` | 8 | `B0[7]`, `B0[6:0]..B1`, `B2[7]`, `B2[6:0]..B3`, `B4[7]`, `B4[6:0]..B5`, `B6[7]`, `B6[6:0]..B7` | 0 | 8 | 0 |
+| `0D5` | 3 | `B0[3]`, `B1..B2 BE16`, `B3..B4 BE16` | 0 | 3 | 0 |
+| `0D7` | 5 | `B0[7]`, `B0[6]`, `B1..B2 BE16`, `B3..B4 BE16`, `B28[7:4]` | 0 | 5 | 0 |
+| `0D8` | 4 | `B2`, `B3`, `B5`, `B6` | 0 | 4 | 0 |
+| `101` | 4 | `B0[7]`, `B0[3]`, `B2[3]`, `B2[1:0]..B3` | 0 | 4 | 0 |
+| `115` | 2 | `B0..B1 BE16`, `B3[1]` | 0 | 2 | 0 |
+| `116` | 2 | `B0`, `B2[7]` | 0 | 2 | 0 |
+| `127` | 3 | `B0[7:2]`, `B1[3]`, `B3[2:0]..B4` | 0 | 3 | 0 |
+| `13B` | 8 | `B0[7:3]`, `B0[2]`, `B0[1]`, `B1[7:2]`, `B1[0]`, `B2[6]`, `B2[5]`, `B2[3:0]` | 0 | 8 | 0 |
+| `294` | 10 | `B0[7:4]`, `B0[3:0]`, `B1[7:4]`, `B1[3]`, `B1[2:1]`, `B2[7:4]`, `B2[3:0]`, `B3[3:0]`, `B4[7:4]`, `B4[3:0]` | 0 | 10 | 0 |
+| `2D1` | 2 | `B0[0]`, `B1[0]` | 0 | 2 | 0 |
+| `3B0` | 1 | `B3` | 0 | 1 | 0 |
+| `3BF` | 2 | `B0[4]`, `B2[0]` | 0 | 2 | 0 |
+| `51E` | 4 | `B0[7]`, `B0[3:0]`, `B1[3:0]`, `B5[7:6]` | 0 | 4 | 0 |
+| `611` | 2 | `B3[5:4]`, `B4..B7 BE32` | 0 | 2 | 0 |
+| `624` | 4 | `B2`, `B3[7:4]`, `B3[3:0]`, `B4[7:4]` | 0 | 4 | 0 |
+| `63B` | 2 | `B2..B3 BE16`, `B2..B5 BE32` | 0 | 2 | 0 |
+| `675` | 6 | `B2`, `B3`, `B4`, `B5`, `B6`, `B7` | 0 | 6 | 0 |
+| **Total** | **97** |  | **0** | **97** | **0** |
+
+The tested FRC `0x090` fields produced 0 of 10 EPS egress changes. The tested
+Brake-domain `0x0D7` and `0x101` fields produced 0 of 5 and 0 of 4 changes.
+This checkpoint therefore identifies no egress-visible FRC or Brake field
+consumer on the retained gear capture.
+
 ### Evidence grades
 
 **Strongly joined:**

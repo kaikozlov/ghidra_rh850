@@ -13,9 +13,10 @@ from tools.project import analysis_target
 REPO = Path(__file__).resolve().parents[2]
 
 
-def _git_files(*pathspecs: str) -> list[str]:
+def _git_files(*pathspecs: str, include_untracked: bool = False) -> list[str]:
+    flags = ["--cached", "--others", "--exclude-standard"] if include_untracked else []
     proc = subprocess.run(
-        ["git", "ls-files", "--", *pathspecs],
+        ["git", "ls-files", *flags, "--", *pathspecs],
         cwd=REPO,
         text=True,
         capture_output=True,
@@ -43,11 +44,13 @@ def _corpus_invocations() -> dict[str, tuple[str, tuple[str, ...]]]:
 
 @lru_cache(maxsize=1)
 def _tracked_artifacts() -> tuple[str, ...]:
-    tracked = set(_git_files("data/generated"))
     tracked_files = set(_git_files())
+    tracked = {path for path in tracked_files if path.startswith("data/generated/")}
     tracked.update(_corpus_invocations().keys() & tracked_files)
+    # A new producer can describe its output before either file enters the index.
+    tracked_files.update(_git_files("data/generated", include_untracked=True))
     for tool in _source_files_cached():
-        tracked.update(path for path in _declared_outputs(tool) if path in tracked_files)
+        tracked.update(tracked_files.intersection(_declared_outputs(tool)))
     return tuple(sorted(tracked))
 
 
@@ -57,7 +60,7 @@ def tracked_artifacts() -> list[str]:
 
 @lru_cache(maxsize=1)
 def _source_files_cached() -> tuple[str, ...]:
-    return tuple(p for p in _git_files("tools") if p.endswith(".py"))
+    return tuple(_git_files(":(glob)tools/**/*.py", include_untracked=True))
 
 
 def _mentions(path: str, candidates: Iterable[str]) -> list[str]:

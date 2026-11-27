@@ -167,6 +167,8 @@ static int camry_lazy_count;
 #define CAMRY_PERIPHERAL_POLL_READS 4096u
 /* Same count as execution/model.py ICCTRL_BUSY_READS. */
 #define CAMRY_ICCTRL_BUSY_READS 4u
+#define CAMRY_TAUJ1CNT0 0xFFE51010u
+#define CAMRY_TAUJ1CNT0_RESET UINT32_MAX
 #define CAMRY_PERIPHERAL_POLL_SLOTS 64
 
 typedef struct {
@@ -534,6 +536,8 @@ static void camry_require_access(uint32_t address, uint32_t width, uint32_t writ
     if (camry_peripheral_file)
         return;
     if (camry_host_register_count == 0) {
+        if (!write && address == CAMRY_TAUJ1CNT0 && width == 4u)
+            return;
         if (!write && address >= 0xFF000000u && camry_host_find(address, width) == NULL)
             camry_device_fault("uninitialized-read", address, width, 0);
         return;
@@ -899,7 +903,7 @@ uint32_t camry_read32(uint32_t address) {
             | ((uint32_t)found[1] << 8)
             | ((uint32_t)found[2] << 16)
             | ((uint32_t)found[3] << 24)
-        : camry_unmapped_value(4);
+        : address == CAMRY_TAUJ1CNT0 ? CAMRY_TAUJ1CNT0_RESET : camry_unmapped_value(4);
     return camry_peripheral_poll(address, value, 4);
 }
 

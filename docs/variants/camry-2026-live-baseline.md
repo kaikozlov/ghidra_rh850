@@ -3521,11 +3521,14 @@ corpus, and the retained LocalRAM/GlobalRAM snapshots:
   ROI-adjacent address-looking values are three self/buffer pointers inside the already-known
   COM staging region (`FEBE7E94→FEBE7F05`, `FEBE7EE0→FEBE7F08`,
   `FEBE7FBC→FEBE7FBC`). This sharply bounds descriptor/pointer-indexed hidden copies.
-- **Interrupt entry code:** fixed `INTBP=0x20200` / `EBASE=0x20000` exposes nine
-  non-default unrecovered ISR entries. Statement-level disassembly shows those entries
-  delegate into recovered timer/serial/acquisition functions; the transitive delegate set
-  contributes no command/motor ROI writer. This closes a real canonical-corpus blind spot:
-  the ISR entry bodies themselves were not recovered as ordinary functions.
+- **Interrupt entry code:** exact startup EIC writes and `INTBP=0x20200` expose
+  nine enabled entries. Eight vector targets are not functions in the database;
+  channel 8 target `0x71AE4` is a recovered function. Masked EIC136 is polled by
+  the foreground loop and its vector target `0x62E1E` is also recovered. Raw
+  handler disassembly shows that the eight entry bodies delegate into recovered
+  timer, CAN, crypto and DataFlash functions; the transitive delegate set
+  contributes no command/motor ROI writer. The exact function-status census is
+  in the [execution-context catalog](../../data/generated/camry_8965F3307000_execution_contexts.json).
 - **Fixed DMA:** descriptor-shaped SFR-source→RAM-destination records in the exact image
   route on-chip peripheral/serial sources into the known GlobalRAM rings/FIFOs/heads
   (`FEEF80A0..FEEF9128`); **no fixed descriptor targets LocalRAM**. That strengthens
@@ -8390,3 +8393,270 @@ owner states or its timeout counter. It does not synchronously commit flash.
 An already-pending F in800 instead selects the terminal wrapper at its higher
 priority; the fixture stops at that original boundary.
 
+
+## 78. Exact F33 diagnostic, movement, and freshness policy
+
+These tables are static results for CodeFlash SHA-256
+`42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7`.
+The service and routine rows were decoded from the exact F33 dispatch tables;
+they are not inferred from tester responses.
+
+### 78.1 Service, subfunction, session, and SecurityAccess policy
+
+`dcm_resolve_service @ 0x90F98` reads the 17 records at `0x25C54`, calls
+`dcm_check_session_list @ 0x90F18`, then calls
+`dcm_check_security_list @ 0x90F58`. The latter reads the current DCM
+SecurityAccess level and compares it with every configured level. Every service
+and subfunction record in this calibration has a zero security-level count and
+a null security-list pointer, so the dispatcher has no SecurityAccess-gated
+service. BA operation `F7` is the one recovered lower-layer exception:
+`ba_f7_request_enable @ 0x352CE` calls
+`ba_security_level_bit1_enabled @ 0x352B6` and rejects the request unless the
+current level has bit 1 set.
+
+| SID | Sessions | Subfunction handling | Security required / result consulted | Evidence | Open items |
+|---|---|---|---|---|---|
+| `10` | `1,2,3` | `01`: `1,2,3`; `02`: `2,3`; `03`: `1,3` | none; no configured result to consult | record `0x25C54`, subtable `0x259EC`; exact bytes consumed by `0x90F98` | none |
+| `11` | `2` | no subtable; configured null callback | none; no configured result to consult | record `0x25C6C`; exact table decode | none |
+| `14` | `1,3` | no subtable | none; no configured result to consult | record `0x25C84`, callback `0x8C2E0`; exact table decode | none |
+| `19` | `1,3` | `01..04`, each `1,3` | none; no configured result to consult | record `0x25C9C`, subtable `0x25A1C`; exact table decode | none |
+| `22` | `1,2,3` | no subtable | none; no configured result to consult | record `0x25CB4`, callback `0x962F2`; exact table decode | none |
+| `23` | `3` | no subtable | none; no configured result to consult | record `0x25CCC`, callback `0x965C0`; exact table decode | none |
+| `27` | `2,3` | `01/02`: `2`; `03/04`: `3` | establishes the level; it is not gated by an existing level | record `0x25CE4`, subtable `0x25A5C`; exact table decode | none |
+| `28` | `3` | `00/01/03`, each `3` | none; no configured result to consult | record `0x25CFC`, subtable `0x25A9C`; exact table decode | none |
+| `2E` | `2,3` | no subtable; DID policy is callback-local | none at service dispatch; no configured result to consult | record `0x25D14`, callback `0x95978`; exact table decode | none |
+| `31` | `1,2,3` | RID/control-type policy is callback-local | none at service dispatch or in the 19 RID records | record `0x25D2C`, callback `0x97AE4`; exact service and RID table decode | none |
+| `34` | `2` | no subtable; configured null application callback | none; no configured result to consult | record `0x25D44`; exact table decode | none |
+| `36` | `2` | no subtable; configured null application callback | none; no configured result to consult | record `0x25D5C`; exact table decode | none |
+| `37` | `2` | no subtable; configured null application callback | none; no configured result to consult | record `0x25D74`; exact table decode | none |
+| `3E` | `1,2,3` | `00`, sessions `1,2,3` | none; no configured result to consult | record `0x25D8C`, subtable `0x25ACC`; exact table decode | none |
+| `85` | `3` | `01/02`, each `3` | none; no configured result to consult | record `0x25DA4`, subtable `0x25ADC`; exact table decode | none |
+| `AB` | `1,3` | `01/02/03`, each `1,3` | none; no configured result to consult | record `0x25DBC`, subtable `0x25AFC`; exact table decode | none |
+| `BA` | `3` | operation byte handled by `0x8E434`; `F7` has a callback-local level-bit check | service dispatch: none; `F7`: current level bit 1 is actually read at `0x352B6` | record `0x25DD4`; decompilation and instructions at `0x352B6` | none |
+
+The 23-cell, 69-request GNU-sim/reference conformance matrix is in
+[fuzz-oracle methodology §9](../security/fuzz-oracle-methodology.md#gallia-reference-comparison);
+68 comparisons are equal. The sole polarity difference is the configured
+programming-session level-1 `2701` row: branch `0x9695C` enters the path that
+loads NRC `0x13` at `0x96982`, while Gallia classifies the complete requestSeed
+message for that supported row as positive.
+
+### 78.2 RoutineControl state writers and request-derived control flow
+
+The exact RID table is at `0x26918`; callback records start at `0x256DC`.
+The table below contains every recovered state-changing RID. RIDs `1000`,
+`1001`, and `1100` only construct capability responses, and `110B` calls
+`diag_routine_110b_action_noop @ 0x50706`; they are the four non-state-changing
+entries of the 19-entry table.
+
+| RID | State-changing effect | Request-derived call target? | Evidence | Open items |
+|---|---|---|---|---|
+| `1002` | requests lifecycle normalization and writes its status byte | no; fixed row-switch target | `diag_routine_1002_normalize_lifecycle @ 0x5018E`, exact decompilation | none |
+| `1004` | enqueues diagnostic operation 5, which rewrites retained event history | no; fixed row-switch target | `diag_routine_1004_request_history_rewrite @ 0x50214`, exact decompilation | none |
+| `1007` | restarts lifecycle group 0 | no; fixed row-switch target | `diag_routine_1007_restart_lifecycle_group0 @ 0x5028E`, exact decompilation | none |
+| `1008` | restarts lifecycle group 2 | no; fixed row-switch target | `diag_routine_1008_restart_lifecycle_group2 @ 0x50300`, exact decompilation | none |
+| `1009` | submits the record-`0x103` invalid-write path | no; fixed row-switch target | `diag_routine_1009_reset_record103 @ 0x50366`, exact decompilation | none |
+| `100E` | activates the fixed command-8 collection bank | no; fixed row-switch target | `diag_routine_100e_activate_fixed_crypto_bank0 @ 0x8B864`, exact decompilation | none |
+| `100F` | activates the fixed command-5 test bank | no; fixed row-switch target | `diag_routine_100f_activate_fixed_crypto_bank1 @ 0x8B872`, exact decompilation | none |
+| `1010` | submits the fixed command-8 key-update client | no; request bytes are payload, not a call address | RID row 9 at `0x26960`; fixed class-40 branch `request_routine_class40_service31_or_reset_9806a @ 0x9806A`, exact decompilation | none |
+| `1103` | requests learned-state service 1 and writes its status | no; fixed row-switch target | `diag_routine_1103_request_service1 @ 0x5043E`, exact decompilation | none |
+| `1106` | initializes three lifecycle/state groups | no; fixed row-switch target | `diag_routine_1106_restart_lifecycle_groups @ 0x504BC`, exact decompilation | none |
+| `1108` | enqueues persistent checkpoint-reset operation 2 | no; fixed row-switch target | `diag_routine_1108_request_checkpoint_reset @ 0x50524`, exact decompilation | none |
+| `1109` | submits the record-`0x100` reset request | no; fixed row-switch target | `diag_routine_1109_request_record100_reset @ 0x505D8`, exact decompilation | none |
+| `110A` | queues application service 2 and can terminate it | no; fixed row-switch target | `diag_routine_110a_control_service2 @ 0x50698`, exact decompilation | none |
+| `110C` | queues application service 3 | no; fixed row-switch target | `diag_routine_110c_request_service3 @ 0x5076A`, exact decompilation | none |
+| `110D` | queues application service 4 and can terminate it | no; fixed row-switch target | `diag_routine_110d_control_service4 @ 0x50820`, exact decompilation | none |
+
+`dispatch_routine_start_callbacks_by_row_9847a @ 0x9847A` switches on the
+validated row index and uses direct `jarl` instructions to the fixed wrappers.
+The request selects an existing RID/control type; it never supplies or modifies
+a function address.
+
+### 78.3 Movement conditions for state-changing diagnostic services
+
+The diagnostic speed scalar is `DAT_febee892`.
+`publish_foreground_control_outputs @ 0xBF3AA` copies the processed control
+value at `FEBEBEDE` into this scalar.
+`prepend_selected_state_record_and_increment_byte_counter_54818 @ 0x54818`
+converts it as `raw * 100 / 128`. Exact CodeFlash holds two limits:
+`0x0200` at `0x318AE` for the WDBI/RoutineControl preconditions and `0x0180`
+at `0x318B0` for the programming-session/communication checks. These correspond
+to 400 and 300 scaled units (inferred as `4.00 km/h` and `3.00 km/h` from the
+diagnostic scaling).
+
+| Service | Speed condition | Gear condition | Evidence | Open items |
+|---|---|---|---|---|
+| ECUReset `11` | application record has no callback; boot reset has no local speed read. Entry to programming session 2 is blocked when `DAT_febee892 >= 0x0180` | none found | application record `0x25C6C`; `app_session_transition_precondition @ 0x4D5BA`; boot handler decompilation | firmware-side gear signal/address remains unrecovered |
+| ClearDTC `14` | none found | none found | `0x8C2E0` callback closure; no `DAT_febee892` reference | firmware-side gear signal/address remains unrecovered |
+| SecurityAccess `27` | none found | none found | subtable `0x25A5C` and seed/key callback closure; no `DAT_febee892` reference | firmware-side gear signal/address remains unrecovered |
+| CommunicationControl `28` | no request rejection by speed; `0x4FD04` samples whether speed exceeds the limit for application control state | none found | subtable `0x25A9C` and `communication_request_sample_above_limit @ 0x4FD04` | firmware-side gear signal/address remains unrecovered |
+| WriteDataByIdentifier `2E` | DIDs `0204,2001,2002,2005,2006,2007,2008,2009,200D,2010,2013,2014` read the speed scalar and admit values at or below `0x0200`; DID `2012` has no speed read | none found | preconditions `0x4FD88..0x50042`, including `write_2013_precondition @ 0x4FFFE`, and exact `FEBEE892` data-reference census | firmware-side gear signal/address remains unrecovered |
+| InputOutputControl `2F` | unsupported in the exact application and resident service tables | unsupported | absent from the 17-record application table and resident SID dispatch | none |
+| RoutineControl `31` | speed read: `1002,1103,1106,1109`; none found: `1004,1007,1008,1009,100E,100F,1010,1108,110A,110B,110C,110D`; capability RIDs are response-only | none found | exact preconditions at `0x50152`, `0x35A06`, `0x5047E`, `0x50568`; complete action-callback decompilation | firmware-side gear signal/address remains unrecovered |
+| RequestDownload/TransferData/TransferExit `34/36/37` | application callbacks are null; resident handlers have no local speed read. The application transition into programming session 2 has the `0x0180` gate | none found | records `0x25D44/0x25D5C/0x25D74`; resident handlers `0x5D68/0x4DBA/0x5C92`; `0x4D5BA` | firmware-side gear signal/address remains unrecovered |
+| RequestUpload `35` | unsupported in the exact application and resident service tables | unsupported | absent from the 17-record application table and the 20-record resident table | none |
+| ControlDTCSetting `85` | none found | none found | subtable `0x25ADC` and callback closure; no `DAT_febee892` reference | firmware-side gear signal/address remains unrecovered |
+
+The observed CAN `0x127` gear enumeration in section 8 is capture evidence,
+not a recovered firmware producer or diagnostic gate. No firmware-side gear
+scalar has yet been identified.
+The exact normal-receive descriptor for CAN `0x127` is row 20 at `0x22088`.
+The next static step is
+`tools/g inspect 0x81d16 --decompile --callers --disasm 120`, resolving that
+row's `uVar6` into its payload callback and destination scalar before repeating
+the diagnostic reference census.
+
+### 78.4 Protected receive freshness
+
+The exact protected receive table at `0x25848` has three rows. The ordinary
+profile stores a 46-bit freshness value as trip `16` + reset `20` + message
+`8` plus two packed reset bits. The transmitted ordinary freshness field is
+four bits: message low 2 + reset low 2.
+
+| Receive ID | Counter width and synchronization | After reset / long sleep | Sender trust boundary | Evidence | Open items |
+|---|---|---|---|---|---|
+| `00F` | synchronization profile: trip `16` + reset `20`; accepts forward synchronization and bounded trip wrap | `0x90502` zeros the primary history; `0x90E6E(0,0)` resets it and dependent ordinary histories. Long-sleep policy is not recovered | external ICU-S slot-4 peer; the exact sender ECU is not established | profile row `0x25848`; exact decompilation at `0x90502`, `0x90E20`, `0x90E6E` | trace wake/sleep callers of `0x90212` and `0x90482` |
+| `0D7` | ordinary profile: 8-bit message field with transmitted low 2; same-epoch reconstruction plus reset candidates `{0,-1,+1,-2,+2}` and duplicate/reorder checks | `0x90502` zeros ordinary history; `0x90D9E(0)` clears ordinary history while retaining primary sync. Long-sleep policy is not recovered | external ICU-S slot-4 peer; the exact sender ECU is not established | profile row `0x25898`; ordinary verifier and exact history clear at `0x90D9E` | trace wake/sleep callers of `0x90212` and `0x90482` |
+| `0B6` | ordinary profile: 8-bit message field with transmitted low 2; same candidate and duplicate/reorder rules as `0D7` | same reset behavior as `0D7`; long-sleep policy is not recovered | external ICU-S slot-4 peer; missing-message DTC text identifies the Brake System Control Module domain, but the signing ECU/key owner is not established | profile row `0x258E8`; freshness ID 2 and exact reset decompilation | obtain matching Brake firmware or a labeled synchronized producer capture; trace wake/sleep callers |
+
+### 78.5 Absence-search records
+
+| Claim | Image / SHA-256 | Pattern and tool | Matches | Classification | Exact query |
+|---|---|---|---|---|---|
+| no dispatcher-level SecurityAccess gate | F33 / `42dce8e…b0e7` | parse every service/subfunction security-count and pointer field; decompile resolver/checker | 17 service rows and 20 subfunction rows; all counts zero | 37 true table records; no false positives | one-shot Python using `find_service_table`/`parse_service_table`; `tools/toyota decomp source dcm_resolve_service dcm_check_security_list dcm_check_session_list` |
+| no request-derived RoutineControl call target | F33 / `42dce8e…b0e7` | complete start dispatcher decompilation and RH850 call instructions | 19 fixed row cases; zero indirect calls | 19 true fixed targets; pointer-like decompiler table reads were false positives | `tools/g inspect 0x9847a --decompile --callers --disasm 80` |
+| no recovered gear gate in the state-changing diagnostic closure | F33 / `42dce8e…b0e7` | named gear/selector terms over retained diagnostic source chunks | zero | zero true or false positives; absence is bounded by the unrecovered gear address | `rg -n -i '\bgear\b|park_state|shift_(position|range)|selector_position' decomp/camry-8965F3307000/src/retained/{00034000,00035000,0004d000,0004f000,00050000,0008b000,0008c000,0008d000,0008e000,00090000,00095000,00097000,00098000}.c` |
+| listed services/RIDs have no speed gate | F33 / `42dce8e…b0e7` | complete data-reference census for the recovered speed scalar, then classify diagnostic callbacks | 24 total references; 18 diagnostic/control matches and 6 initialization/other matches | table rows list the true diagnostic matches; non-diagnostic references are false positives for this question | `tools/pseudo --target camry-8965F3307000 --data-ref 0xfebee892 --list` |
+| no recovered long-sleep freshness special case | F33 / `42dce8e…b0e7` | inspect all known freshness initialization/reset entry points and callers | initialization `0x90502`, selective clear `0x90D9E`, primary reset `0x90E6E`; no identified sleep callback | three true reset paths; absence remains open because wake ownership is not closed | `tools/g inspect 0x90502 --decompile --callers --disasm 90`; same for `0x90D9E` and `0x90E6E` |
+
+### 78.6 Variant closure
+
+The service-table comparison spans Sienna, Corolla H/F, Camry, and Crown.
+The handler, movement, and freshness results in this section are for Camry
+`8965F3307000`. Corolla H/F share the three active receive IDs; Sienna has six.
+
+## 79. Retained READY capture replay through the exact-image machine
+
+The [replay converter](../tooling/rh850-build-and-sim.md#retained-capture-replay)
+groups bus-1 frames from the two August 26 READY captures into 5 ms periods.
+
+| Capture | SHA-256 | Frames (bus 1 / total) | Conversion output |
+|---|---|---|---|
+| `targets/camry-2026/raw-20260826/camry_ready_gear_20260826.json.gz` | `379ec28fba65191d2898ebb156fe83e2e8e59c38bbf5fcfb7166ec9ff32c3889` | 87,109 / 135,866 | `build/out/camry_capture_replay/camry_ready_gear_20260826.*` |
+| `targets/camry-2026/raw-20260826/camry_ready_b_20260826.json.gz` | `7bae994dea1caff06d8f31f58558f67d646da38bd9531557875858eb33fa4db3` | 37,630 / 58,712 | `build/out/camry_capture_replay/camry_ready_b_20260826.*` |
+
+**Exact-image simulation, gear capture.** Starting from the reset vector, the
+machine ran the bootstrap plus 25 empty cycles and reached the checkpoint after
+26 completed foreground cycles. Live, desired, and active mode were all
+`0x0702`. In the FIFO5 acceptance check,
+all 21 distinct `(CAN ID, DLC)` pairs were enqueued and popped:
+
+- DLC 8: `00F, 0AA, 0D5, 0D8, 101, 115, 116, 127, 13B, 294, 2D1, 3B0, 3BF, 51E, 611, 624, 63B, 675`.
+- DLC 32: `025, 090, 0D7`.
+
+The unmodified 200-period replay enqueued and popped all 1,978 frames, with no
+FIFO discard, drop, or machine fault. The three mode cells read `0x0702` at
+period 0 and period 200. Separate diagnostic probes received
+`7A9#065003003201f400` for `10 03` and `7A9#037f223100000000` for `22 F189`.
+
+JIT and plain execution produced the same instruction count in every period:
+minimum 117,138, median 398,115.5, maximum 531,614. JIT wall time was 290.00 s;
+plain wall time was 3,731.74 s. The candump carries capture SHA-256
+`379ec28f…c3889`, 1,978 `eps-rx` rows, and two exact-image `eps-tx` rows.
+
+Every capture row below entered through `EIC187 @ 0x66100` and was consumed by
+`service_channel_one_receive_and_sync_83f30 @ 0x83F30`. No typed fault stopped
+traffic.
+
+| ID | DLC | Presented | Accepted | Same-period baseline-only EPS Tx versus idle |
+|---|---:|---:|---:|---|
+| `00F` | 8 | 29 | 29 | none |
+| `025` | 32 | 288 | 288 | `4A3`, periods 39 and 139, `2100010001000000` (idle: no frame) |
+| `090` | 32 | 288 | 288 | `4A3`, periods 39 and 139, `2100010001000000` (idle: no frame) |
+| `0AA` | 8 | 288 | 288 | none |
+| `0D5` | 8 | 143 | 143 | none |
+| `0D7` | 32 | 144 | 144 | none |
+| `0D8` | 8 | 95 | 95 | none |
+| `101` | 8 | 144 | 144 | none |
+| `115` | 8 | 121 | 121 | none |
+| `116` | 8 | 122 | 122 | `4A3`, period 139, `2100010001000000` (idle: no frame) |
+| `127` | 8 | 176 | 176 | `4A3`, period 139, `2100010001000000` (idle: no frame) |
+| `13B` | 8 | 96 | 96 | none |
+| `294` | 8 | 11 | 11 | none |
+| `2D1` | 8 | 10 | 10 | none |
+| `3B0` | 8 | 3 | 3 | none |
+| `3BF` | 8 | 3 | 3 | none |
+| `51E` | 8 | 3 | 3 | none |
+| `611` | 8 | 3 | 3 | none |
+| `624` | 8 | 3 | 3 | none |
+| `63B` | 8 | 5 | 5 | none |
+| `675` | 8 | 3 | 3 | none |
+
+The idle run published `4A3#2100000000000000` at period 40 and three
+`1FFFFFFF#0000000000000000` requests at period 121; the retained-input baseline
+did not. These are same-period associations, not field-causality claims.
+
+The baseline, idle, and 97 one-field/one-frame runs each covered all 200
+periods. Every field run published two frames and matched baseline EPS
+transmission timing, identifiers, and payloads: 0 responses, 97 no-response
+results, 0 runs that published nothing, and 0 typed stops. Per-run wall time was
+22.71–43.60 s (median 23.84 s; cumulative 2,475.20 s). The bounded restart
+sequence retained each run atomically.
+
+### 79.1 READY-state oracle and lifecycle results
+
+The D5 transport campaign executed 281 cases through FIFO5 and CanTp: all
+242 configured RDBI DIDs, 13 long WDBI records, 19 long RoutineControl records,
+and seven length/flow-control shapes. It completed 279 responses: every
+service case and five shapes. Definedness: 0 uninitialized reads. Object
+boundary: 0 crossing stores in 76,116,221 stores against 98 extents. Stack
+watermark: not evaluated (no instruction trace in this set). The three
+controls fired (definedness PC `0x89F86` / `0xFEEF9000` / width 4; boundary
+PC `0xFEBE000C` / `0xFEBE5D1F` / width 2, one past `dcm_shared_response_buffer`;
+stack lowest SP `0xFEBE1FC0`, 64 bytes, margin 1,984). The direct-call set is
+a separate execution set: 288 cells reaching `dcm_read_did_service @ 0x962F2`,
+1,238,835 stores, 0 uninitialized reads, 0 crossings, no `can-tx` row.
+
+| Shape without a complete response | Last observation |
+|---|---|
+| `shape-ff-declared-more-than-supplied` | FF `10402e2001000102` (64 declared) and CF `2103040506070809` popped; ECU flow control `5003003201f4` transmitted and confirmed; no response or NRC through 6,000,000 instructions |
+| `shape-response-fc-overflow` | response FF `102462f181023839` (36 declared) transmitted; tester FlowControl Overflow `3200000000000000` popped; no CF or NRC through 4,000,000 instructions |
+
+The lifecycle comparison recorded 392 checkpoints from 338 cases. GNU sim and
+reconstructed C matched at all 392. Against the Dcm-contract ranges (timer
+table and the five path-only ranges excluded), the exact machine matched GNU
+sim at 288 checkpoints, differed only in the foreground-cycle ranges at 70,
+and diverged at 34: ECUReset execution 3 (`ecu_reset#1`, `reset_reuse#2/#3`),
+response-buffer lifetime 16 (`request_download#1` first: `0xFEBE5A20` GNU
+`74000000` / machine zeros; prefix written by `dcm_dispatch_direct_service @
+0x91422`, cleared by `dcm_reset_receive_slot_and_optionally_shared_response @
+0x93CA0`), synthetic DCM callback actions 12, programming admission state 2
+(`0xFEBE5D4C`, `dcm_programming_pending_response_join @ 0x95BD0`), security
+seed value 1. Segmented requests are released and dispatched since the
+harness gives a segmented period two foreground cycles
+([methodology](../security/fuzz-oracle-methodology.md#cross-engine-lifecycle-replay));
+the run record is
+`build/out/targets/camry-8965F3307000/lifecycle-cross-engine-segmented-20261126/report.json`.
+
+Four READY-state typed-event campaigns (120 executions each: 6 seeds, 114
+mutations; seed 20261126; batch size 8) use two foreground cycles per trial;
+every input completed with no typed fault. The segmented `27 04` positive
+control reaches `app_security_compare_key @ 0x8D91A` at instruction 39,686,925;
+directed energy reaches it in 25 inputs and uniform parents in 3. The
+single-frame `2E 20 12 01` positive control reaches
+`execute_write_did_payload_and_report_result @ 0x95674` at instruction
+39,289,285 and transmits `6E 20 12`; directed energy reaches that target in 40
+inputs versus 5 with uniform parents.
+
+The security-directed, security-uniform, WDBI-directed, and WDBI-uniform
+campaigns record, respectively, 34,258/34,295/33,657/34,365 edges and
+31/48/42/49 retained cases. Each runs its 29 timer mutations to completion.
+RID `0x100F` compare gate: raw 28,572, static dictionary 953, learned operands
+18 executions. Summaries are under
+`build/out/targets/camry-8965F3307000/typed-event-d4-final-20261127/`; details
+are in the
+[methodology](../security/fuzz-oracle-methodology.md#typed-event-p1m-e-campaign).
+`tools/test camry_f33_machine_typed_event_fuzz` also asserts overlength
+segmented requests to all 13 configured WDBI DIDs: `0x95978` and the length
+rejection at `0x95734` execute, `0x95674` does not, and the staged response is
+`7F 2E 13`.

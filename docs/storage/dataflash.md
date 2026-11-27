@@ -391,7 +391,31 @@ Accordingly:
 - the ICU-S tail may exist for other protected material, but it is no longer the
   best-supported location for this SecOC key.
 
-## 7. Evidence grades
+## 7. Reset-interruption invariant
+
+The exact Camry F33 writers use the same two logical protections above:
+
+| Path | Entry | Physical command sequence | Accepted after restart |
+|---|---:|---|---|
+| checkpoint ring | `nvm_arm_family0_write @ 0x6853E` | erase `20,D0`; blank check `71,D0`; four-byte programs `E8,02,data0,data1,D0`; readback; committed trailer `AAAAAAAA` last | newest record with a committed physical trailer and matching generation/complement; otherwise the prior valid ring record, or defaults when no candidate remains |
+| raw/XOR copies | `nvm_submit_family1_write_copies @ 0x6869E` | the same physical sequence for raw, XOR-`55`, and XOR-`AA` records | only a bytewise two-copy consensus; repair the dissenting lane, or publish the configured invalid/default result |
+
+The Camry lifecycle scenarios interrupt erase, blank check, and program at
+command issue with a `system-1-pin` reset. In the model, cancellation leaves
+erase/program target cells indeterminate; blank check leaves them unchanged.
+Separate reader scenarios exercise ring fallback and triplicate consensus.
+
+Flash is retained for every reset class. `power-on`, `system-1-pin`,
+`system-1-cvm`, and `system-2` cancel an active FACI operation;
+`application-1` retains it to completion. Power-on and CVM System Reset 1
+clear LocalRAM and GlobalRAM. Pin System Reset 1 and System Reset 2 apply the
+`STAC_LM0` LocalRAM rule and clear GlobalRAM. Application Reset 1 applies the
+`STAC_LM0` and `STAC_GRAM` rules.
+
+The machine stops on an indeterminate DataFlash read. Restart behavior at the
+NvM reader's ECC/media-error boundary remains unmeasured.
+
+## 8. Evidence grades
 
 | Finding | Grade |
 |---|---|
@@ -417,7 +441,7 @@ Accordingly:
 | protected ICU-S slot 4 is personalized or erased | **Unknown** |
 | exact production relation between provisioned object 15 and ICU slot 4 | **Unknown** |
 
-## 8. References
+## 9. References
 
 - Renesas, *RH850 Family Data Flash Library Type T01 User's Manual* — 64-byte
   erase blocks, four-byte writes, undefined direct reads from erased words, and

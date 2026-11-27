@@ -20,6 +20,11 @@
    "decompiler_corpus": "data/generated/camry-8965F3307000/decompilations.jsonl",
    "decomp_root": "decomp/camry-8965F3307000",
    "rebuild_profile": "camry_f33_v1",
+   "analyzer_options": {
+    "Create Address Tables": false,
+    "Non-Returning Functions - Discovered": true
+   },
+   "daemon_max_heap": "8G",
    "codeflash_size": 1048576,
    "codeflash_base": "0x00000000",
    "dataflash_size": 32768,
@@ -179,6 +184,10 @@
    "outside_function_summary": "data/outside_function_summary.json",
    "function_discovery_reviews": "data/function_discovery_reviewed_clusters.csv",
    "rebuild_profile": "sienna_full",
+   "analyzer_options": {
+    "Create Address Tables": true,
+    "Non-Returning Functions - Discovered": true
+   },
    "codeflash_size": 1048576,
    "codeflash_base": "0x00000000",
    "dataflash_sha256": "81d87b678784bb2a07b1fdcb3d43dd40767d4f5ca1b56867b6575cd652a9ecb8",

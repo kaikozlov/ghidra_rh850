@@ -295,6 +295,7 @@ Ghidra cannot recognize, and `tools/g` / `run_headless` refuse the entire
 committed `projects/` tree. All interactive work happens under registered,
 gitignored `build/work/` paths. `data/analysis_targets.json` owns the target
 priority and paths; the current default/primary target is the 2026 Camry F33.
+Per-target analyzer choices are recorded in `data/analysis_targets.json` under `analyzer_options` and replayed by the deterministic rebuild before every analysis pass.
 
 - `make work-project` — materialize the registry-default Camry working project;
   add `TARGET=<target>` to select another registered target.
@@ -525,14 +526,16 @@ The Sienna/H/F structural matcher consumes tracked complete fingerprint exports:
 `data/function_structural_fingerprints.jsonl` for Sienna and
 `data/targets/<target>/function_structural_fingerprints.jsonl` for each Corolla.
 Each JSONL starts with the actual Ghidra version, program name, executable
-SHA-256, language and compiler identity (`schema_version: 2`), followed by every
-recovered function. Function records include exact `body_ranges` as ordered
-`{space, min, max}` objects, with inclusive hexadecimal bounds.
-The decompiler corpora contain references and rendered C, but lack the complete
-instruction mnemonic/length records needed by this matcher.
+SHA-256, language and compiler identity, followed by every recovered function.
+Schema 3 records ordered `direct_call_sites`, including repeated targets.
+For schema 2 inputs, the context matcher counts one vote per distinct
+`direct_call_targets` entry.
+Function records include exact `body_ranges` as ordered `{space, min, max}`
+objects with inclusive hexadecimal bounds. The decompiler corpora contain references and
+rendered C, but lack these complete instruction and call-site records.
 
-The 2026-10-21 exports use clean materializations of the registered snapshots,
-leaving working projects and live daemons untouched. First inspect the registry:
+Export from disposable materializations of the registered snapshots without
+opening working projects or touching live daemons. First inspect the registry:
 
 ```bash
 tools/gtarget show sienna-8965B4512000
@@ -594,10 +597,10 @@ are identical, but complete-file SHA-256 values differ because their executable
 identities differ: H
 `e7fc32a0ffa53ea4fc3a6678ff6deb5b595575c5cbd458994180dcb7ca5686a5`,
 F `720339bea51973f946d82f5d32302976e3bbfa294d887caedd9b14de01a583cc`.
-Both matcher outputs contain 3,121 unique-shape pairs, 2,865 with at least eight
-instructions, 326 named pairs and 318 named pairs with at least eight instructions.
-These canonical snapshots replace unavailable historical 6,376/5,425-function
-exports: 613 match pairs are added and 34 removed relative to those reports.
+Each Sienna/Corolla report has 2,865 unique-shape pairs with at least eight
+instructions, including 318 named pairs. The context round keeps the unique
+pairs fixed; its acceptance rules and results are in the
+[variant comparison](variants/toyota-eps-variant-comparison.md#libmatch-context-round).
 
 ## Task-oriented tooling discovery
 
@@ -915,6 +918,12 @@ make generate-semantic-coverage
 make generate-function-discovery
 make verify-semantic-coverage-live TARGET=sienna-8965B4512000 PROJECT_DIR="$PWD/build/work/project"
 ```
+
+Both generators use the same recognizer revision during a rebuild. Each summary
+records that revision and the SHA-256 of its CSV. `tools/test recognizer_revision`
+checks both values for bound ledgers and prints the regeneration command on
+failure. If both fields are `unbound`, the test warns without verifying
+freshness.
 
 `verification.toml` lists suites and external prerequisites. It does not
 assign tests to changed files. Broad sweeps and Ghidra rebuilds are release or

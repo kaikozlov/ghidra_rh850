@@ -1175,6 +1175,11 @@ upper-LocalRAM clear on hardware reset plus the retained-runtime architecture.
 The inert canary remains the correct first dynamic proof before steering delivery
 is enabled.
 
+### 19.16 ICU-S completion preemption
+
+The [Camry interrupt shared-range audit](memory-safety-audit.md#camry-interrupt-shared-range-audit)
+records the simulated ICU-S completion deliveries and the firmware priority mask.
+
 ## Cross-calibration runtime transfer
 
 The Sienna implementation is no longer an address-hard-coded payload.

@@ -65,6 +65,94 @@ and 634 user-named functions. Both targets have 1,194 exact-body transfers.
 The structural inputs are tracked alongside their target data; regeneration
 commands are in [the workflow](../WORKFLOW.md#cross-variant-structural-fingerprints).
 
+### BSim calibration and transfer
+
+BSim compares Sienna `8965B4512000` with the exact Camry, Crown, and Corolla H/F
+images using Ghidra 12.2 `medium_32`. The calibration scores known pairs
+with `QueryPair` and measures nearest-neighbor errors separately.
+
+The image control contains all 6,238 signable exact-structure Corolla H/F pairs
+and 652 deliberately unrelated named-subsystem pairs. Ranges are inclusive:
+
+| Instructions | Exact pairs | Exact similarity / confidence | Unrelated pairs | Unrelated maximum similarity / confidence |
+|---:|---:|---|---:|---|
+| at most 10 | 1,052 | 1.000 / 8.21–80.54 | 50 | 0.119 / 1.86 |
+| 11–30 | 2,720 | 0–1.000 / 0.36–99.15 | 184 | 0.215 / 4.44 |
+| 31–100 | 2,184 | 0–1.000 / -1.07–224.78 | 340 | 0.779 / 58.36 |
+| more than 100 | 282 | 0.609–1.000 / 9.95–744.48 | 78 | 0.246 / 6.81 |
+
+The same-source controls also show why similarity is not a source-level
+equivalence test. For functions of at most 10 instructions, eleven GCC `-O2`
+versus GCC `-Os -mno-app-regs` pairs score 1.0; the corresponding GCC `-O2`
+versus CC-RH `-Odefault` pairs span 0–1.0. For 11–30 instructions, the maxima
+drop to 0.526 and 0.272 respectively (five pairs per comparison).
+`build/out/variants/bsim/calibration-{compiler,image}-pairs.jsonl` records
+the underlying pair labels, sizes, and scores.
+
+At similarity 0.8, the image pair controls above 30 instructions exclude all
+labeled unrelated pairs but also exclude some exact-structure pairs.
+Nearest-neighbor searches still return false matches at similarity 1.0: the
+Corolla control had 511 at ≤10 instructions, 92 at 11–30, 52 at 31–100, and
+2 above 100. Use similarity 1.0 and at least 101 instructions for review.
+Check candidates first against the unique exact ledger, then against the
+complete mnemonic and instruction-length sequence from
+`ExportFunctionStructuralFingerprints.java`. That review rejects the six
+false top matches below. A score-only cutoff (confidence strictly greater
+than `446.26234751576357`) also excludes those false matches, but keeps only
+46 matches across the four queries.
+
+| Sienna query target | Exact-ledger | Additional verified equal-structure | False | Semantic names replayed |
+|---|---:|---:|---:|---:|
+| Camry `8965F3307000` | 79 | 12 | 0 | 0 |
+| Crown `8965F3012000` | 123 | 17 | 2 | 1 |
+| Corolla F `8965F1208000` | 103 | 13 | 2 | 1 |
+| Corolla H `8965H1202000` | 103 | 13 | 2 | 1 |
+
+BSim replayed `com_signal_deadline_monitor_d` from two seed rows, one
+for Crown and one shared by Corolla H/F. Across the five images, 96.4–96.7%
+of signable functions are below the BSim review size floor. Use structural
+matching for that range.
+
+The [BSim transfer artifact](../../data/generated/sienna_8965B4512000_bsim_calibrated_transfer.json)
+records the review. `tools/toyota variant bsim TARGET` reports source size,
+addresses, names, similarity, and confidence. `--apply` uses reviewed seed
+rows only. The database cache is
+`build/cache/bsim-family/toyota-eps-family.mv.db`.
+
+### LibMatch context round
+
+The structural matcher resolves repeated instruction shapes using already
+matched direct callers and callees. Scores count supporting call sites in
+both directions. At each round, a match must rank first at both ends by a
+margin of at least one; each accepted pair then becomes evidence for later
+rounds. Unique shape matches remain fixed.
+
+| Reference → target | Initial unique pairs | Ambiguous reference functions | Context pairs | Unresolved | Sample disagreements |
+|---|---:|---:|---:|---:|---:|
+| Sienna → Camry | 3,411 | 3,391 | 1,410 | 1,981 | 0 / 30 |
+| Sienna → Crown | 3,207 | 3,341 | 1,330 | 2,011 | 0 / 30 |
+| Sienna → Corolla F | 3,121 | 3,287 | 1,321 | 1,966 | 0 / 30 |
+| Sienna → Corolla H | 3,121 | 3,287 | 1,321 | 1,966 | 0 / 30 |
+| Camry → Crown | 3,460 | 3,422 | 1,365 | 2,057 | 0 / 30 |
+| Camry → Corolla F | 3,299 | 3,348 | 1,377 | 1,971 | 0 / 30 |
+| Camry → Corolla H | 3,299 | 3,348 | 1,377 | 1,971 | 0 / 30 |
+| Crown → Corolla F | 3,136 | 3,232 | 1,269 | 1,963 | 0 / 30 |
+| Crown → Corolla H | 3,136 | 3,232 | 1,269 | 1,963 | 0 / 30 |
+| Corolla F → Corolla H | 3,644 | 3,290 | 1,543 | 1,747 | 0 / 30 |
+
+The validation sampled 30 context pairs per comparison with seed `0x5344`.
+Every sampled pair agreed on mnemonic and instruction length after masking
+operands, with an independently recomputed relation to matched callers or
+callees. That check measures structural agreement, not semantic equivalence.
+
+Context matching finds the same pair for 24 of the 55 additional
+BSim structure matches; it leaves the other 31 unresolved or pairs them
+differently. It distinguishes `application_substate_machine` from
+`com_signal_deadline_monitor_c` in all four Sienna comparisons. A separate
+decompilation review supports 79 Crown seed rows and 47 shared Corolla seed
+rows (173 names across the three images). The
+[context validation artifact](../../data/generated/eps_libmatch_context_validation.json)
+records the samples and decompilation hashes.
 
 For the openpilot-specific cross-generation result, use
 [toyota-openpilot-porting-contract.md](../architecture/toyota-openpilot-porting-contract.md)
@@ -173,3 +261,21 @@ normal writer. Those application images have no `7F7` acceptance rule.
 
 For an unidentified newer-TSK target, first satisfy the identity/artifact contract
 in [newer-tsk-target-evidence.md](newer-tsk-target-evidence.md).
+
+## Update comparison record
+
+For a same-target calibration update, record:
+
+- Both part numbers, calibration identifiers, and full CodeFlash SHA-256 values.
+- The exact structural matcher command (see
+  [workflow](../WORKFLOW.md#cross-variant-structural-fingerprints)).
+- Added and deleted functions, with addresses, names, and dispositions.
+- Modified functions, with paired addresses and names, changed instruction
+  ranges, and evidence for the behavior change. Verify near-matches individually.
+- The first version carrying each change, or `not established` with the
+  missing predecessor identified.
+- The variant query command, images checked, and images carrying the same change.
+- Unresolved questions and the evidence needed to answer them.
+
+The measured family pairs above are cross-variant comparisons, not records
+of same-target updates.

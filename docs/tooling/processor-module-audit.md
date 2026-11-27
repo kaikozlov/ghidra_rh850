@@ -330,16 +330,96 @@ package used for this comparison is
 (SHA-256 `d72b7754cdfde84130ec585185300b447fdb73fdbf12221f070a6f7c64c2ab25`).
 It is local research input. Portable repository builds do not depend on it.
 
-Reference compilation also explains why compiler identification from instruction
-shape alone was misleading. CC-RH V2.08 naturally emits the RH850 `switch`
-opcode with a compact halfword branch table and a `cmp`/range-branch prefix,
-which closely matches the Toyota tables below. That shape therefore does **not**
-prove CC-RH. Conversely, the repository's V850 GCC 13.2 toolchain exposes
-`-mghs`/`-mrh850-abi` as its default RH850 ABI mode, and the runtime builders
-add `-mno-app-regs`; this is compatible with the firmware's fixed `gp`/`tp` and
-volatile `ep` model. Compatibility is not compiler provenance: no compiler ID
-string or byte-identical runtime-library match has been recovered, so the exact
-Toyota compiler vendor/version remains **bounded and unidentified**.
+CC-RH V2.08 emits the RH850 `switch` instruction with a compact halfword
+branch table and a `cmp`/range-branch prefix. The same shape in the Toyota
+images does not distinguish the compiler. The repository's pinned V850 GCC
+runtime uses ABI options compatible with fixed `gp`/`tp` and volatile `ep`.
+Neither observation identifies the toolchain that built the firmware.
+
+### Seven-image compiler-fingerprint census
+
+[`census_compiler_fingerprints.py`](../../tools/testing/processor/census_compiler_fingerprints.py)
+intersects the pinned `v850-elf-objdump` listing with the committed function-body
+inventories. The [census artifact](../../data/generated/compiler_fingerprint_census.json)
+records exact image identities, counts, and witnesses. Counts are limited to
+decoded instructions inside known function bodies.
+
+The five EPS images have no `callt` in those bodies; about 60–61% of their
+decoded functions begin with `prepare`. The three `callt` instructions in
+Venza are on one dynamic CTBP path (`0x17092`), not in prologues. Camry
+(`0x71508`) and Sienna (`0x70320`, `0x703CA`, `0x70476`) save CTPSW/CTPC in
+handlers that return with `eiret`.
+
+GHS documents `-no_callt -prepare_dispose` for non-CALLT prologues; interrupt
+handlers still save CTPSW/CTPC unless `-ignore_callt_state_in_interrupts` is
+set. GCC and CC-RH can produce overlapping frame shapes, while the documented
+CC-RH `ep` rule conflicts with the firmware witness above.
+
+No scanned inventory names `__stkchk`, `__stack_chk_guard`, `__stack_chk_fail`,
+or `__ghs_checksum`. The recognizer also finds neither a CC-RH fixed-canary
+sequence nor a named-guard canary sequence. These are negative results for the
+tested signatures, not proof that other protection is absent. GHS documents
+`-stack_check` for `__stkchk`, `-stack_protector` for canary checks, and
+`-checksum` for `__ghs_checksum`; IAR documents the global guard and terminal
+`__stack_chk_fail` pattern as well.
+
+| Reference | Functions | `callt` | `prepare` | `dispose` | Distinguishing result |
+|---|---:|---:|---:|---:|---|
+| GHS MULTI manual defaults | — | default | off with `-callt` | off with `-callt` | Options above; compiler unavailable |
+| GCC 16.2.0 `-Os` | 4 | 0 | 0 | 0 | no protection |
+| GCC 16.2.0 `-Os -fstack-protector-all` | 4 | 0 | 4 | 4 | 4 guard loads and 4 `__stack_chk_fail` calls |
+| GCC 16.2.0 `-Os -fstack-check` | 4 | 0 | 1 | 1 | one large-frame probe store at `-6440[sp]`; no `__stkchk` |
+| CC-RH V2.08.00 `-Osize -Oinline=0 -Xep=callee` | 4 | 0 | 0 | 2 | no protection |
+| same, `-Xstack_protector_all=1234` | 4 | 0 | 0 | 4 | 4 fixed-canary checks and 4 branches to `___stack_chk_fail` |
+
+The CC-RH listing fixture targets G3M and uses size optimization with inlining
+disabled so the functions remain individually visible.
+
+### CC-RH listing oracle
+
+`AssertV850CcrhListing` checks bytes, mnemonics, and operands for 65
+instructions in four C functions against the CC-RH V2.08.00 assembler listing.
+It imports the linked `.text` at address zero so branch comparisons include
+the nine `R_V850_PC9` relocations. The fixture normalizes 24 rendering
+differences: nine short branch targets and condition aliases, eight
+displacement/base memory operands, five returns (`lp` versus `[r31]`), and
+two `dispose` frame sizes and register lists.
+
+The [decoder-disagreement baseline](../../tests/fixtures/processor/ccrh_listing_fixture.disagreements.tsv)
+contains no defects. The fixture fails on a new disagreement or a change to
+a normalized rendering.
+
+### BSim compiler provenance
+
+Ghidra 12.2 `medium_32` compared the five exact EPS images with the pinned
+GCC 16.2.0 runtime and local CC-RH V2.08.00 `v850e3v5` runtime. Of 2,315 CC-RH
+members, 2,276 produced signatures (573 distinct executable MD5s) and 39 were
+data-only. The
+[provenance artifact](../../data/generated/eps_ccrh_bsim_compiler_provenance.json)
+contains the image hashes and ranked matches.
+
+The search used similarity ≥0.85 and at least 101 instructions. The
+[BSim controls](../variants/toyota-eps-variant-comparison.md#bsim-calibration-and-transfer)
+show weak same-source cross-compiler scores and nearest-neighbor collisions
+through 100 instructions. The size floor filters common short shapes; it
+cannot rule out a runtime that scores below the threshold.
+
+| Exact image | CC-RH matches ≥0.85 | CC-RH matches ≥0.95 | GCC matches ≥0.85 | GCC matches ≥0.85 and confidence ≥10 |
+|---|---:|---:|---:|---:|
+| Camry | 1,086 | 1,079 | 1,063 | 68 |
+| Sienna | 1,099 | 1,091 | 1,082 | 66 |
+| Crown | 1,053 | 1,045 | 1,035 | 64 |
+| Corolla F | 1,050 | 1,043 | 1,031 | 68 |
+| Corolla H | 1,050 | 1,043 | 1,031 | 68 |
+
+Neither runtime produced a match at the search threshold and size floor.
+No GCC result at similarity ≥0.85 had confidence ≥50. All 100 inspected
+CC-RH top results (20 per image) were false attributions: 3–5-instruction
+functions collided with the same library fragments. No CC-RH result at
+similarity ≥0.85 exceeded 61 instructions. The copy-helper
+controls selected `qsort.obj` (similarity 0.312), and the unrelated
+`CanIf_RxIndication` control selected `com4f.obj` (0.167). The search does
+not identify the Toyota compiler vendor or version.
 
 A **known-working public GCC payload** independently validates our payload
 compiler family without changing that provenance boundary. Pinned
@@ -874,29 +954,46 @@ switch, reference, body and case-value checks remain.
   invariant scripts and the generated semantic coverage ledger for coverage
   floors.
 
-## Historical legacy-Sienna auto-analysis defaults
+## Analyzer-choice measurement: legacy Sienna and Camry
 
-The recorded legacy-Sienna rebuild (`tools/project/rebuild_project.sh`) ran
-Ghidra's default analyzers without disabling "Address Tables" or
-"Non-Returning Functions". Observations for that image/checkpoint:
+The Camry experiment used four disposable Ghidra 12.2 projects with the
+registered language, device profiles, staged seeds, and calling-convention
+finalizer. It varied `Create Address Tables` and
+`Non-Returning Functions - Discovered`. The Sienna row records its registered
+checkpoint, not a separate analyzer experiment.
 
-- **Address Tables:** the over-eager-disassembly symptom it warns about *is*
-  present — 227 decoded `switch` opcodes are unreachable data misread as code
-  (see "Switch jump-table recovery" above). Most arise when the general
-  disassembly pass follows word-aligned operands into data.
-  Disabling this one analyzer alone would therefore leave them. The real
-  defense here is seeding all known functions before the first analysis pass
-  (`SeedEntries`, `SeedUdsServiceTable`, …, run as preScripts), which gives the
-  code finder real anchors. The residual noise is then filtered soundly and
-  completely by `RecoverSwitchTables` / `AssertSwitchTables` (20 real tables,
-  zero false positives). The final annotated project is clean.
-- **Non-Returning Functions:** no false positives have been observed in this
-  image — no truncated control flow or unreachable code after a call is flagged
-  by the invariant audits. Disabling it would instead add cost: the genuine
-  noreturn functions (boot failure loop `0x1398`, foreground cyclic loop,
-  bootloader reset path) would have to be marked `setNoReturn` by hand to keep
-  their call sites' decompilation clean.
+| Image / configuration | Functions | Instructions | Native `switch` decodes (verified / spurious) | Address tables (tables / entries / entries failing review) | Missing curated functions | Seconds |
+|---|---:|---:|---:|---:|---:|---:|
+| Sienna `8965B4512000`, both enabled | 7,090 | 197,726 | 20 / 227 | 336 / 3,102 / not measured | not measured | — |
+| Camry `8965F3307000`, both enabled | 7,336 | 206,906 | 20 / 96 | 358 / 3,439 / 2,500 | 0 | 309 |
+| Camry, Address Tables disabled | 7,335 | 205,127 | 20 / 11 | 0 / 0 / 0 | 1 (`0x71322`) | 264 |
+| Camry, Non-Returning Functions disabled | 7,336 | 206,906 | 20 / 96 | 358 / 3,439 / 2,500 | 0 | 135 |
+| Camry, both disabled | 7,335 | 205,127 | 20 / 11 | 0 / 0 / 0 | 1 (`0x71322`) | 72 |
 
-Net: leaving the defaults is a net win here. Revisit only if a future rebuild
-surfaces no-return false positives (truncated control flow) or a large new crop
-of data-as-code switches that the prefix-bound recovery cannot audit out.
+On Camry, a table entry passed review only if it targeted a function entry
+or a member of an array or structure from the seed scripts. The measurement
+replayed annotations only for functions each configuration discovered; it
+did not seed `0x71322`. The no-return audit looks for RH850 returns in marked
+functions and counts caller flow overrides. It found no marks or overrides.
+
+- **Address Tables:** Disable this analyzer for Camry. Seed `0x71322` preserves
+  the evidenced function, and the target registry owns the analyzer option for
+  deterministic rebuilds. Two rebuilds with that option on 2026-11-26 produced
+  byte-identical inventories (7,344 functions, 11,178 symbols, 3,136 listing
+  comments, 40 bookmarks); the nine seeded ISR entries, `0x71322` and
+  `0x71508` are functions.
+- **Non-Returning Functions:** Keep the Camry setting. Disabling it changed
+  none of the measured graph counts.
+
+Reproduce the Camry measurement with the command below. The table records
+elapsed times from one run; later configurations benefited from warm caches.
+
+```bash
+mkdir -p build/work
+work="$(mktemp -d "$PWD/build/work/analyzer-choice-camry.XXXXXX")/run"
+tools/project/measure_analyzer_choices.sh "$work"
+uv run --locked python -m json.tool "$work/summary.json"
+```
+
+The script writes the summary, rejected entries, switch inventories, and logs
+under the supplied work directory.

@@ -200,8 +200,9 @@ On failure, the worker returns `0x22` (conditionsNotCorrect).
 - **Attempt counter**: per-level byte in RAM near `FEBE5DA4`, incremented
   on each mismatch. Compared against configured max at
   `DAT_00023EE4 + level*0x18 + 0x2469`.
-- **Delay timer**: enforced by `0x96E24` when the configured delay word
-  is non-zero. RAM-only.
+- **Delay timer**: `dcm_security_initialize_delays` at `0x96646` arms the
+  configured per-level software-timer slot; expiry callback `0x9689C` clears
+  the matching bit in `FEBE5DC8` through `0x96622`. RAM-only.
 - **Unlock state**: `0x900FC` → `0x9075A` sets bit `(level - 1)` in a
   2-dword bitmask. Reader `0x8FDCA` → `0x906F8` scans and returns the
   current level. Cleared on session change (`0x90834`) or timeout
@@ -402,13 +403,73 @@ matching ECU or bench setup is available:
 Rules: do not send writes, resets, `0xAB`, `0xBA`, or routines. Send `27 03` as
 the first UDS request or include explicit padding bytes.
 
-## 8.1 Cross-security-state composition audit (SEC-APP-008)
+### 8.1 Camry `8965F3307000` reset lifecycle
+
+Exact CodeFlash dispatch at `0x94E82/0x94EB8` implements level 2
+(`27 03/04`); level 1 (`27 01/02`) returns through compiled error stubs.
+Exact-image scenarios `camry_f33_security_first_wrong_key` and
+`camry_f33_security_attempt_limit_and_session_lockout` start from locked READY,
+use typed FIFO5 ingress and the firmware's RSCFD transmit path, and retire each
+diagnostic transmission before the next request. Both accepted seed requests
+returned `bdcd5f4dce052555b348eebfa98c278c`.
+A fresh challenge is counter-derived, not a fixed constant or a boot-time
+value. `fill_counter_sample_pairs` at `0x8D6B0` samples the complement of
+TAUJ counter `0xFFE51010` eight times. `app_security_generate_challenge` at
+`0x8D74A` transforms those 16 bytes through the AES-counter path and stores
+the result at `FEBF495A/FEBF496A`; while the challenge remains active,
+`app_security_prepare_seed` at `0x8D824` returns that stored seed unchanged.
+
+| Check | Exact-image result |
+|---|---|
+| Wrong key 1 | `7F 27 35`; `FEBE5DD0: 0 -> 1`; `FEBE5DC8` remains zero |
+| Wrong key 2 / configured limit | `7F 27 36`; `FEBE5DD0: 1 -> 2`; `FEBE5DC8=02 00 00 00`; timer slot 8 at `FEBE5EB4` is armed with `0x2714` = 10,004 1 ms ticks (10.004 s) |
+| Three further `27 04` records | records 3 and 5 return `7F 27 24`; record 4 reaches the controller while FIFO5 is temporarily disabled and is reported as `can-rx-discard`, so it has no Dcm response |
+| Lockout response | after `10 01` then `10 03`, `27 03` returns `7F 27 37`; a following `27 04` returns `7F 27 24` |
+| Session-change state | attempt byte remains 2, delay bit remains set, and timer slot 8 remains active; exact-image oracle `camry_f33_app_session_extended_publishes_and_invalidates_security_before_response` also establishes that the challenge/client state is cleared |
+| Delay | foreground execution decrements the `0x2714` count as 10,004 1 ms ticks (10.004 s), five per 5 ms cycle. The next original Dcm foreground pass clears the delay bit and timer active byte; post-expiry `27 03` returns a positive seed. |
+| Application `11 01`, session 1 | `7F 11 7F`; no worker runs |
+| Application `11 01`, session 2 | finding: service row `0x25E40` has a null callback, so the compiled route returns `51 01` while no reset worker runs |
+| Application `11 01`, session 3 | `7F 11 7F`; no worker runs |
+
+Reproduce the reset and three-seed leg with:
+
+```bash
+uv run --locked --with python-can --with can-isotp --with udsoncan \
+  python -m tools.emulation.prove_p1me_bridge --reset-count 3
+```
+
+The 1,092 s proof starts from the 26-cycle readiness gate, completes segmented
+`22 F181`, reaches NRC `35`, `36`, and `37`, runs the 10,004-tick (10.004 s)
+delays out in foreground execution, retries `27 03`, and asserts the external
+RESET pin three times. TesterPresent every 500 foreground cycles retains the
+non-default session across each delay. The lockout timer had 9,949 ticks left
+when sampled: 55 ticks had elapsed while the final negative responses completed.
+
+The application service cannot assert reset. Boot handler `0x1560` executes
+`di`, stops `CLKD3`, clears P4/PMC4/PM4 bit `0x20`, and spins; reset assertion
+is external to this image. Machine event `reset-assert` models the external
+RESET-pin System Reset 1 class from R01UH0585EJ0120 Table 8.1 with the affected
+domains in Table 8.2. It clears internal deadlines and CAN queues, retains
+future external events, applies peripheral/register/RAM reset rules, records
+`RESF=0x00000402`, and restarts PE1 at address zero.
+
+Exact-image simulation `security_pin_reset_to_runtime` placed attempt value 2,
+the level-2 delay bit, and the observed seed in RAM before reset. System Reset 1
+cleared attempt, delay and seed RAM, rearmed both startup SecurityAccess delay
+bits (`FEBE5DC8=03 00 00 00`), and reached the 26-cycle readiness gate with
+live, desired, and active mode `0x0702`.
+
+The live pre-reset seed was `2221a0c4a3c59f6ea89324cda95c17f3`.
+Reset 1 returned `7ece4f66b049f865bda541b541a994ab` twice, reset 2 returned
+`2e90e88a7d41c3069041c5370e78aa0d`, and reset 3 returned the reset-1 value.
+The seed is stable for repeated requests in one boot but not constant across
+RESET-pin boots.
+
+### 8.2 Cross-security-state composition audit (SEC-APP-008)
 
 The static analysis covers UDS sessions (both contexts), application SA level 2,
 BA persistent authorization (SEC-APP-007), programming handoff,
-CommunicationControl, the XCP connection, and bootloader SA. The former
-"composition model" serialized handwritten conclusions; it did not execute
-state transitions or independently verify their composition.
+CommunicationControl, the XCP connection, and bootloader SA.
 
 The underlying findings support these conclusions:
 

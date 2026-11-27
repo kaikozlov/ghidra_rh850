@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import subprocess
 import tempfile
 from collections import Counter
@@ -13,10 +14,26 @@ from pathlib import Path
 import tools.targets.tss3.builders.build_tss3_request_signer as signer_builder
 from tsk.ram_runtime.target_profiles import supported_targets, target_spec
 from tools import REPO_ROOT
-from tools.emulation.p1me_machine import load_scenario
+from tools.emulation.execution_coverage import read_drcov
+from tools.emulation.p1me_machine import (
+    P1MEMachineError,
+    _target_contract,
+    _write_drcov,
+    capture_many,
+    load_scenario,
+)
+from tools.emulation.p1me_can_bridge import write_bridge_scenario
+
+from tools.targets.camry.research import replay_camry_f33_capture_machine as replay
 from tools.targets.tss3.request_signer_machine import verify_request_signer_target
 
+JIT_BATCH_THRESHOLD = 1_000_000
+
 FIXTURE_ROOT = REPO_ROOT / "tests/fixtures/rh850/machine"
+
+RESET_TO_RUNTIME_FIXTURE = replay.BOARD_FIXTURE
+SLOW_FIXTURES = {RESET_TO_RUNTIME_FIXTURE}
+
 PORTABLE_STORE_SELECTOR = {
     "role": "p1me-byte-store-primitive",
     "scope": "function",
@@ -28,8 +45,13 @@ PORTABLE_STORE_SELECTOR = {
 }
 
 
-def run(command: list[str], *, expect_success: bool = True) -> subprocess.CompletedProcess[str]:
-    proc = subprocess.run(command, cwd=REPO_ROOT, text=True, capture_output=True, check=False)
+def run(
+    command: list[str], *, expect_success: bool = True,
+    env: dict[str, str] | None = None,
+) -> subprocess.CompletedProcess[str]:
+    proc = subprocess.run(
+        command, cwd=REPO_ROOT, text=True, capture_output=True, check=False, env=env,
+    )
     if (proc.returncode == 0) != expect_success:
         raise AssertionError(
             f"unexpected exit {proc.returncode}: {' '.join(command)}\n{proc.stdout}\n{proc.stderr}"
@@ -47,21 +69,101 @@ def fixture_batches() -> list[tuple[str, list[Path]]]:
             batches.append((target_dir.name, scenarios))
     return batches
 
+def check_fixture_schemas() -> None:
+    failures: list[str] = []
+    for _target, scenarios in fixture_batches():
+        for path in scenarios:
+            try:
+                load_scenario(path)
+            except P1MEMachineError as exc:
+                failures.append(f"{path.relative_to(REPO_ROOT)}: {exc}")
+    if failures:
+        raise AssertionError(
+            "machine fixture schema rejection:\n" + "\n".join(failures)
+        )
+    print("PASS every tracked machine fixture satisfies the scenario schema")
+
+def check_slow_fixture_contracts() -> None:
+    scenario = load_scenario(RESET_TO_RUNTIME_FIXTURE)
+    ready_check = any(
+        row["kind"] == "memory" and row["address"] == "0xfebe3800"
+        and row["size"] == 1 and row.get("equals_hex") == "5a"
+        for row in scenario["checks"]
+    )
+    if (
+        scenario["entry"]["address"] != "0x0"
+        or scenario["reset"] != "power-on"
+        or scenario["stop_addresses"] != ["0x660bc"]
+        or scenario["expected_termination"] != "stop-address"
+        or not ready_check
+    ):
+        raise AssertionError("tracked reset-to-runtime contract drifted")
+    print("PASS reset-to-runtime slow fixture schema and milestone contract")
+
+def check_bridge_ready_contract(output_root: Path) -> None:
+    replay_scenario = replay.build_replay_scenario(
+        {}, [replay.CapturePeriod(0, (), ())], "diagnostic-ready-prefix",
+    )
+    readiness = replay_scenario["steps"][:replay.REPLAY_PREFIX_STEPS]
+    completion_address = hex(replay.FOREGROUND_COMPLETE)
+    empty_cycles = sum(
+        step["kind"] == "trial" and completion_address in step["stop_addresses"]
+        and not step["events"] for step in readiness
+    )
+    bridge_path = output_root / "diagnostic-ready-bridge.json"
+    write_bridge_scenario(bridge_path, 12345)
+    bridge = load_scenario(bridge_path)
+    if (
+        bridge["event_socket"] != {
+            "host": "127.0.0.1",
+            "port": 12345,
+            "ready_after_arrivals": {"address": completion_address, "count": empty_cycles},
+        }
+        or empty_cycles != 26
+        or bridge["max_instructions"] != 5_000_000_000
+        or bridge["expected_termination"] != "halt"
+        or bridge["stop_addresses"]
+    ):
+        raise AssertionError("diagnostic-ready bridge or replay prefix drifted")
+    print("PASS bridge readiness threshold matches the replay's 26 empty cycles")
+
 
 def check_exact_scenarios(output_root: Path) -> None:
-    for target, scenarios in fixture_batches():
-        output_dir = output_root / target
-        proc = run([
-            str(REPO_ROOT / "tools/rh850"),
-            "test",
-            "firmware",
-            target,
-            *(str(path) for path in scenarios),
-            "--output-dir",
-            str(output_dir),
-        ])
-        result = json.loads(proc.stdout)
-        rows = result["reports"]
+    for target, all_scenarios in fixture_batches():
+        scenarios = [path for path in all_scenarios if path not in SLOW_FIXTURES]
+        # Interpretation wins for short, isolated fixtures because class generation
+        # cannot amortize before they stop. Keep long cases on the default JIT.
+        groups = (
+            ("plain", [
+                path for path in scenarios
+                if int(json.loads(path.read_text())["max_instructions"])
+                <= JIT_BATCH_THRESHOLD
+            ]),
+            ("jit", [
+                path for path in scenarios
+                if int(json.loads(path.read_text())["max_instructions"])
+                > JIT_BATCH_THRESHOLD
+            ]),
+        )
+        rows_by_path = {}
+        for engine, engine_scenarios in groups:
+            if not engine_scenarios:
+                continue
+            output_dir = output_root / target / engine
+            proc = run([
+                str(REPO_ROOT / "tools/rh850"),
+                "test",
+                "firmware",
+                target,
+                *(str(path) for path in engine_scenarios),
+                "--output-dir",
+                str(output_dir),
+            ], env={**os.environ, "P1ME_MACHINE_ENGINE": engine})
+            engine_rows = json.loads(proc.stdout)["reports"]
+            if len(engine_rows) != len(engine_scenarios):
+                raise AssertionError(f"{target}/{engine}: report count drift")
+            rows_by_path.update(zip(engine_scenarios, engine_rows, strict=True))
+        rows = [rows_by_path[path] for path in scenarios]
         if len(rows) != len(scenarios):
             raise AssertionError(f"{target}: report count drift")
         for scenario_path, row in zip(scenarios, rows, strict=True):
@@ -89,6 +191,67 @@ def check_exact_scenarios(output_root: Path) -> None:
                 f"entry={resolution['resolved_address']}, "
                 f"{report['instruction_count']} exact instructions"
             )
+            if scenario_path.name == "checkpoint-restore-tauj-identity.json":
+                trials = report["checkpointing"]["trials"]
+                if [trial["name"] for trial in trials] != [
+                    "straight", "restored-1", "restored-2",
+                ]:
+                    raise AssertionError(
+                        f"{scenario_path.name}: checkpoint identity trial set drift",
+                    )
+                identity_fields = (
+                    "register_rows", "memory_rows", "event_rows", "checks",
+                    "final_pc", "instruction_count", "termination_reason", "passed",
+                )
+                expected = {field: trials[0][field] for field in identity_fields}
+                for trial in trials[1:]:
+                    actual = {field: trial[field] for field in identity_fields}
+                    if actual != expected:
+                        raise AssertionError(
+                            f"{scenario_path.name}/{trial['name']}: "
+                            "checkpoint state leaked or identity drifted",
+                        )
+                if report["checkpointing"]["uncaptured_components"]:
+                    raise AssertionError(
+                        f"{scenario_path.name}: machine component was not checkpointed",
+                    )
+                print(
+                    f"PASS {target}/{scenario_path.name}: straight and two restored "
+                    "trials have byte-identical register, memory, event, and check rows",
+                )
+            if scenario_path.name == "camry_f33_security_attempt_limit_and_session_lockout.json":
+                trial_names = [
+                    trial["name"] for trial in report["checkpointing"]["trials"]
+                ]
+                if trial_names != [
+                    "attempt-limit-and-session-lockout",
+                    "external-pin-reset-to-first-foreground",
+                    "post-reset-operational-readiness",
+                ]:
+                    raise AssertionError(
+                        f"{scenario_path.name}: reset readiness trial set drift",
+                    )
+                diagnostic_payloads = [
+                    event["data_hex"]
+                    for event in report["device_events"]
+                    if event["kind"] == "can-tx"
+                    and event.get("can_id", "").lower() == "0x000007a9"
+                ]
+                expected_seed_frames = [
+                    "10126703bdcd5f4d",
+                    "21ce052555b348ee",
+                    "22bfa98c278c0000",
+                ]
+                positions = iter(diagnostic_payloads)
+                if not all(any(payload == expected for payload in positions)
+                           for expected in expected_seed_frames):
+                    raise AssertionError(
+                        f"{scenario_path.name}: complete seed response frames drifted",
+                    )
+                print(
+                    f"PASS {target}/{scenario_path.name}: complete seed response and "
+                    "external reset reach the 26-cycle operational readiness gate",
+                )
 
 def check_dynamic_request_signer_targets(output_root: Path) -> None:
     targets = supported_targets()
@@ -139,6 +302,139 @@ def check_schema_rejection(output_root: Path) -> None:
     if "unsupported fields: mystery" not in proc.stderr:
         raise AssertionError(f"wrong strict-schema failure:\n{proc.stderr}")
     print("PASS unknown scenario fields are rejected before execution")
+
+
+def check_drcov_text_grammar(output_root: Path) -> None:
+    """The text table grammar follows DynamoRIO's drcov text dump fields."""
+    target = _target_contract("camry-8965F3307000")
+    module = target["codeflash"]
+    module_path = Path(module["path"]).resolve().relative_to(REPO_ROOT)
+    reference_path = output_root / "reference-text.drcov"
+    reference_path.write_text(
+        "DRCOV VERSION: 3\n"
+        "DRCOV FLAVOR: drcov\n"
+        "Module Table: version 5, count 1\n"
+        "Columns: id, containing_id, start, end, entry, offset, preferred_base, path\n"
+        f"{0:3d}, {0:3d}, 0x{int(module['base'], 0):016x}, "
+        f"0x{int(module['base'], 0) + module['size']:016x}, 0x{0:016x}, "
+        f"0x{0:016x}, 0x{int(module['base'], 0):016x},  {module_path}\n"
+        "BB Table: 2 bbs\n"
+        "module id, start, size:\n"
+        "module[  0]: 0x0000000000000002,   4\n"
+        "module[  0]: 0x0000000000000000,   2\n",
+        encoding="utf-8",
+    )
+    reference = read_drcov(reference_path)
+    if reference.blocks != ((2, 4), (0, 2)):
+        raise AssertionError(f"reference drcov grammar parsed incorrectly: {reference.blocks!r}")
+
+    writer_path = output_root / "writer-text.drcov"
+    report = {"instruction_trace": [
+        {"pc": "0x00000002", "size": 4},
+        {"pc": "0x00000000", "size": 2},
+        {"pc": "0x00000002", "size": 4},
+    ]}
+    _write_drcov(report, target, writer_path)
+    written = read_drcov(writer_path)
+    if written.module != reference.module or written.blocks != reference.blocks:
+        raise AssertionError("writer did not emit the module and unique first-seen blocks")
+    print("PASS DynamoRIO text drcov grammar and unique first-seen writer")
+
+
+def check_scenario_source_contract(output_root: Path) -> None:
+    fixture = FIXTURE_ROOT / "camry-8965F3307000" / "strict-counted-loop.json"
+    scenario = json.loads(fixture.read_text(encoding="utf-8"))
+    scenario["name"] = "strict-counted-loop-with-source"
+    source = {
+        "kind": "captured-can",
+        "sha256": "7f" * 32,
+        "detail": {"channels": [0, 1], "reviewed": True},
+    }
+    scenario["source"] = source
+    path = output_root / "scenario-source.json"
+    path.write_text(json.dumps(scenario, indent=2) + "\n", encoding="utf-8")
+    report = capture_many(
+        "camry-8965F3307000", [path], output_root / "scenario-source-output",
+    )[0]
+    if report["resolved_run_contract"].get("source") != source:
+        raise AssertionError("scenario source object did not survive into resolved_run_contract")
+
+    scenario["source"] = None
+    path.write_text(json.dumps(scenario, indent=2) + "\n", encoding="utf-8")
+    try:
+        load_scenario(path)
+    except P1MEMachineError:
+        pass
+    else:
+        raise AssertionError("explicit null scenario source was accepted")
+    print("PASS optional scenario source object is preserved and non-objects are rejected")
+
+def check_reset_replay_contract(output_root: Path) -> None:
+    """A reset can replay a validated scenario's board inputs relative to restart."""
+    fragment = {
+        "schema": "rh850-p1me-machine-scenario-v2",
+        "name": "reset-replay-fragment",
+        "entry": {"role": "reset-replay-fragment", "scope": "resolved-address", "address": "0x78ae6"},
+        "max_instructions": 4,
+        "stop_addresses": ["0x10000"],
+        "gpr_fill": "0",
+        "registers": {"lp": "0x10000"},
+        "memory": [{
+            "address": "0xfebe0100", "hex": "a5",
+            "evidence": "reset replay immediate memory row",
+        }],
+        "events": [{
+            "kind": "memory-write", "after_instructions": 2,
+            "address": "0xfebe0101", "data_hex": "5a",
+            "evidence": "reset replay instruction-relative event",
+        }],
+        "checks": [],
+    }
+    fragment_path = output_root / "reset-replay-fragment.json"
+    fragment_path.write_text(json.dumps(fragment, indent=2) + "\n", encoding="utf-8")
+    scenario = {
+        "schema": "rh850-p1me-machine-scenario-v2",
+        "name": "reset-replay-contract",
+        "entry": {"role": "reset-replay-test", "scope": "resolved-address", "address": "0x78ae6"},
+        "max_instructions": 512,
+        "stop_addresses": ["0x10000"],
+        "gpr_fill": "0",
+        "registers": {"lp": "0x10000"},
+        "reset_replay": {"scenario": fragment_path.name},
+        "events": [{
+            "kind": "reset-assert", "after_instructions": 1,
+            "reset_class": "system-1-pin",
+            "evidence": "exercise reset-relative board input replay",
+        }],
+        "expected_fault": {
+            "kind": "missing-reset-input", "address": "0xffd60010", "access": "read",
+        },
+        "checks": [
+            {
+                "name": "replayed memory row", "kind": "memory",
+                "address": "0xfebe0100", "size": 1, "equals_hex": "a5",
+            },
+            {
+                "name": "replayed relative event", "kind": "memory",
+                "address": "0xfebe0101", "size": 1, "equals_hex": "5a",
+            },
+        ],
+    }
+    path = output_root / "reset-replay-contract.json"
+    path.write_text(json.dumps(scenario, indent=2) + "\n", encoding="utf-8")
+    report = capture_many(
+        "camry-8965F3307000", [path], output_root / "reset-replay-output",
+    )[0]
+    reset_rows = [row for row in report["device_events"] if row["kind"] == "reset-assert"]
+    if (
+        not report["passed"]
+        or len(reset_rows) != 1
+        or reset_rows[0].get("replayed_scenario") != str(fragment_path.resolve())
+        or reset_rows[0].get("replayed_memory_rows") != 1
+        or reset_rows[0].get("replayed_event_rows") != 1
+    ):
+        raise AssertionError(f"reset replay contract drifted: {report!r}")
+    print("PASS reset replays validated board memory and instruction-relative events")
 
 
 def check_executable_overlay_rejection(output_root: Path) -> None:
@@ -902,7 +1198,7 @@ def check_execution_event_boundaries(output_root: Path) -> None:
 
 
 def check_rscfd_transmit_results(output_root: Path) -> None:
-    """Tx completion publishes and clears the channel result-summary bit."""
+    """Verify Tx results plus global reset status and FIFO initialization."""
     output_dir = output_root / "rscfd-transmit-results"
     output_dir.mkdir(parents=True, exist_ok=True)
     registers = {
@@ -953,7 +1249,7 @@ def check_rscfd_transmit_results(output_root: Path) -> None:
              "address": "0xFFD20266", "size": 1, "equals_hex": "00"},
         ],
         "events": [
-            {"kind": "register-input", "register": "TMIEC1", "value": "0xc0",
+            {"kind": "register-input", "register": "TMIEC0", "value": "0x00c00000",
              "after_instructions": 0, "evidence": "Channel1 resources6 and7 interrupt enabled"},
             {"kind": "can-tx-complete", "buffer": 22, "firmware_control": "0x8048",
              "after_instructions": 2, "evidence": "External completion of emitted buffer22"},
@@ -989,9 +1285,49 @@ def check_rscfd_transmit_results(output_root: Path) -> None:
              "address": "0xFFFFB178", "size": 2, "equals_hex": "4880"},
         ],
         "events": [
-            {"kind": "register-input", "register": "TMIEC1", "value": "0xc0",
+            {"kind": "register-input", "register": "TMIEC0", "value": "0x00c00000",
              "after_instructions": 0, "evidence": "Channel1 resources6 and7 interrupt enabled"},
         ],
+        "expected_termination": "stop-address",
+    }, {
+        "schema": "rh850-p1me-machine-scenario-v2",
+        "name": "rscfd-global-reset-mode-and-fifo",
+        "entry": {
+            "role": "original-ecc-word-store-and-readback",
+            "scope": "resolved-address",
+            "address": "0x7e0",
+        },
+        "max_instructions": 4,
+        "stop_addresses": ["0x000007E4"],
+        "gpr_fill": "0",
+        "registers": {
+            **registers,
+            "ep": "0xFFD20088",
+            "r1": "1",
+        },
+        "memory": [
+            {"address": "0xFFD20088", "hex": "00000000",
+             "evidence": "Global operating mode before reset request"},
+            {"address": "0xFFD20014", "hex": "00000000",
+             "evidence": "Channel1 communication mode"},
+            {"address": "0xFFD2012C", "hex": "03110000",
+             "evidence": "Enabled diagnostic common FIFO5"},
+        ],
+        "artifacts": [],
+        "checks": [
+            {"name": "global reset status sets and RAM initialization completes",
+             "kind": "memory", "address": "0xFFD2008C", "size": 4,
+             "equals_hex": "01000000"},
+            {"name": "global reset empties FIFO5", "kind": "memory",
+             "address": "0xFFD2018C", "size": 4,
+             "equals_hex": "01000000"},
+        ],
+        "events": [{
+            "kind": "can-rx", "fifo": 5, "boundary": "post-filter",
+            "can_id": "0x7A1", "data_hex": "0210030000000000",
+            "label": 52, "after_instructions": 0,
+            "evidence": "Populate FIFO before global reset",
+        }],
         "expected_termination": "stop-address",
     }]
     paths: list[Path] = []
@@ -1010,7 +1346,7 @@ def check_rscfd_transmit_results(output_root: Path) -> None:
         )
         if report.get("passed") is not True or report.get("termination_reason") != "stop-address":
             raise AssertionError(f"{path.stem}: RSCFD result lifecycle drift: {report!r}")
-    print("PASS RSCFD transmit result summary publishes and clears")
+    print("PASS RSCFD transmit results, global mode status, and FIFO reset")
 
 
 def check_peripheral_file(output_root: Path) -> None:
@@ -1117,7 +1453,29 @@ def check_register_input_boundaries(output_root: Path) -> None:
 
 def check_runtime_soak(output_root: Path) -> None:
     target = "camry-8965F3307000"
-    fixture = FIXTURE_ROOT / target / "original-reset-to-runtime-synthetic-board.json"
+    fixture = RESET_TO_RUNTIME_FIXTURE
+    boot_output = output_root / "boot-milestone"
+    boot_output.mkdir(parents=True, exist_ok=True)
+    boot_proc = run([
+        str(REPO_ROOT / "tools/rh850"), "test", "firmware", target, str(fixture),
+        "--output-dir", str(boot_output),
+    ])
+    boot_result = json.loads(boot_proc.stdout)
+    boot_report = json.loads(
+        Path(boot_result["reports"][0]["report"]).read_text(encoding="utf-8")
+    )
+    if (
+        not boot_report["passed"]
+        or boot_report["termination_reason"] != "stop-address"
+        or boot_report["final_pc"].lower() != "0x000660bc"
+        or not all(row["passed"] for row in boot_report["checks"])
+    ):
+        raise AssertionError("reset-to-runtime milestone scenario failed")
+    print(
+        f"PASS reset-to-runtime slow milestone: "
+        f"{boot_report['instruction_count']} instructions"
+    )
+
     scenario = json.loads(fixture.read_text(encoding="utf-8"))
     scenario.update(
         name="original-reset-runtime-soak",
@@ -1155,6 +1513,295 @@ def check_runtime_soak(output_root: Path) -> None:
     )
 
 
+def check_campaign_machine_features(output_root: Path) -> None:
+    """Check execution observations and boundary events."""
+    output_dir = output_root / "campaign-features"
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    compare = {
+        "schema": "rh850-p1me-machine-scenario-v2",
+        "name": "campaign-compare-and-index",
+        "entry": {
+            "role": "security-delay-bit-helper",
+            "scope": "resolved-address",
+            "address": "0x96622",
+        },
+        "max_instructions": 30,
+        "stop_addresses": ["0x10000"],
+        "gpr_fill": "0",
+        "registers": {
+            "r6": "0", "r7": "1", "gp": "0xfebeb800",
+            "lp": "0x10000", "PSW": "0",
+        },
+        "memory": [{
+            "address": "0xfebe5dc8", "hex": "00000000",
+            "evidence": "Synthetic SecurityAccess delay-bit cell",
+        }],
+        "checks": [],
+        "compare_operands": True,
+    }
+    compare_path = output_dir / "compare-index.json"
+    compare_path.write_text(json.dumps(compare, indent=2) + "\n", encoding="utf-8")
+    compare_report = capture_many(
+        "camry-8965F3307000", [compare_path], output_dir,
+    )[0]
+    rows = compare_report["compare_operands"]
+    expected = [
+        ("0x00096626", "0x00096628", "0x00000002", "0x00000000"),
+        ("0x00096634", "0x00096636", "0x00000001", "0x00000001"),
+    ]
+    actual = [
+        (row["compare_pc"], row["branch_pc"], row["left"], row["right"])
+        for row in rows
+    ]
+    if actual != expected:
+        raise AssertionError(f"compare operand observations drifted: {actual!r}")
+
+    index = {
+        "schema": "rh850-p1me-machine-scenario-v2",
+        "name": "campaign-indexed-load",
+        "entry": {
+            "role": "synthetic-indexed-load",
+            "scope": "resolved-address",
+            "address": "0xfebe0000",
+        },
+        "max_instructions": 10,
+        "stop_addresses": ["0x10000"],
+        "gpr_fill": "0",
+        "registers": {
+            "r6": "2", "r7": "0xfebe0100",
+            "lp": "0x10000", "PSW": "0",
+        },
+        "memory": [
+            {
+                "address": "0xfebe0000",
+                "hex": "c232c731264701007f00",
+                "evidence": "shl 2,r6; add r7,r6; ld.w 0[r6],r8; jmp [lp]",
+            },
+            {
+                "address": "0xfebe0108", "hex": "5a000000",
+                "evidence": "Synthetic indexed-load source",
+            },
+        ],
+        "checks": [],
+        "input_derived_table_indices": True,
+    }
+    snapshot_path = output_dir / "indexed-load-snapshot.bin"
+    snapshots = [{
+        "path": str(snapshot_path),
+        "address": "0xfebe0108",
+        "size": 4,
+        "evidence": "Synthetic snapshot-output contract",
+    }]
+    index_path = output_dir / "index.json"
+    index_path.write_text(
+        json.dumps({**index, "snapshot_outputs": snapshots}, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    index_report = capture_many(
+        "camry-8965F3307000", [index_path], output_dir,
+    )[0]
+    indices = index_report["input_derived_table_indices"]
+    if not any(
+        row["base"] == "0xFEBE0100"
+        and row["index"] == "0x00000002"
+        and row["scale"] == 4
+        and row["effective_address"] == "0xFEBE0108"
+        and row["access"] == "load"
+        for row in indices
+    ):
+        raise AssertionError(f"indexed load observation missing: {indices!r}")
+    if (
+        snapshot_path.read_bytes() != b"\x5a\x00\x00\x00"
+        or index_report["snapshot_outputs"][0]["sha256"]
+            != hashlib.sha256(b"\x5a\x00\x00\x00").hexdigest()
+    ):
+        raise AssertionError("snapshot output did not preserve exact initialized bytes")
+
+    wait_fixture = FIXTURE_ROOT / "camry-8965F3307000" / (
+        "camry_f33_scheduler_publication_foreground_wait_no_service.json"
+    )
+    trial = json.loads(wait_fixture.read_text(encoding="utf-8"))
+    trial.update(
+        name="campaign-stop-after-arrivals",
+        entry={
+            "role": "foreground-wait-loop",
+            "scope": "resolved-address",
+            "address": "0x66066",
+        },
+        max_instructions=20,
+        stop_addresses=[],
+        checks=[],
+        expected_termination="instruction-budget",
+        steps=[
+            {"kind": "checkpoint", "name": "wait", "after_instructions": 0},
+            {
+                "kind": "trial", "name": "second-arrival",
+                "max_instructions": 20, "stop_addresses": [],
+                "stop_after_arrivals": [{"address": "0x66066", "count": 2}],
+                "events": [], "checks": [],
+            },
+            {"kind": "checkpoint", "name": "current"},
+            {"kind": "restore", "checkpoint": "wait"},
+            {
+                "kind": "trial", "name": "budget-before-third",
+                "max_instructions": 2, "stop_addresses": [],
+                "stop_after_arrivals": [{"address": "0x66066", "count": 3}],
+                "events": [], "checks": [], "capture_rows": False,
+            },
+        ],
+    )
+    trial_path = output_dir / "stop-after-arrivals.json"
+    trial_path.write_text(json.dumps(trial, indent=2) + "\n", encoding="utf-8")
+    trial_report = capture_many(
+        "camry-8965F3307000", [trial_path], output_dir,
+        instruction_trace=True,
+    )[0]
+    first, second = trial_report["checkpointing"]["trials"]
+    current_checkpoint = trial_report["checkpointing"]["checkpoints"][1]
+    if (
+        first["termination_reason"] != "stop-after-arrivals"
+        or first["stop_after_arrivals"][0]["arrivals"] != 2
+        or not first["instruction_trace"]
+        or current_checkpoint["instruction"]
+            != first["start_instruction"] + first["instruction_count"]
+        or second["termination_reason"] != "instruction-budget"
+        or second["stop_after_arrivals"][0]["arrivals"] != 2
+        or second["capture_rows"] is not False
+        or second["memory_rows"]
+        or second["event_rows"]
+        or not second["instruction_trace"]
+    ):
+        raise AssertionError(f"arrival or trial-trace contract drifted: {first!r} {second!r}")
+    native_fixture = FIXTURE_ROOT / "camry-8965F3307000" / (
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns.json"
+    )
+    native = json.loads(native_fixture.read_text(encoding="utf-8"))
+    native_events = native.pop("events")
+    native.update(
+        name="campaign-real-foreground-arrival",
+        max_instructions=30_000,
+        stop_addresses=[],
+        checks=[],
+        steps=[
+            {"kind": "checkpoint", "name": "prepared", "after_instructions": 1},
+            {
+                "kind": "trial", "name": "one-native-cycle",
+                "max_instructions": 30_000, "stop_addresses": [],
+                "stop_after_arrivals": [{"address": "0x66066", "count": 2}],
+                "events": native_events, "checks": [],
+            },
+        ],
+    )
+    native.pop("expected_termination", None)
+    native_path = output_dir / "real-foreground-arrival.json"
+    native_path.write_text(json.dumps(native, indent=2) + "\n", encoding="utf-8")
+    native_report = capture_many(
+        "camry-8965F3307000", [native_path], output_dir,
+    )[0]
+    native_trial = native_report["checkpointing"]["trials"][0]
+    if (
+        native_trial["termination_reason"] != "stop-after-arrivals"
+        or native_trial["final_pc"] != "0x00066066"
+        or native_trial["stop_after_arrivals"][0]["arrivals"] != 2
+    ):
+        raise AssertionError(
+            f"real foreground 0x660BC -> 0x66066 arrival drifted: {native_trial!r}",
+        )
+
+    completion = {
+        "kind": "can-tx-complete", "buffer": 22,
+        "after_instructions": 0,
+        "evidence": "Synthetic completion without a firmware request",
+    }
+    strict = {
+        **index,
+        "name": "strict-unrequested-transmit-completion",
+        "input_derived_table_indices": False,
+        "events": [completion],
+    }
+    tolerated = {
+        **strict,
+        "name": "tolerated-unrequested-transmit-completion",
+        "events": [{**completion, "tolerate_no_pending": True}],
+    }
+    tolerated_path = output_dir / "tolerated-completion.json"
+    strict_path = output_dir / "strict-completion.json"
+    tolerated_path.write_text(json.dumps(tolerated, indent=2) + "\n", encoding="utf-8")
+    strict_path.write_text(json.dumps(strict, indent=2) + "\n", encoding="utf-8")
+    tolerated_report, strict_report = capture_many(
+        "camry-8965F3307000", [tolerated_path, strict_path], output_dir,
+    )
+    if not any(
+        row["kind"] == "can-tx-complete-ignored" and row["buffer"] == 22
+        for row in tolerated_report["device_events"]
+    ):
+        raise AssertionError("tolerated completion did not publish its ignored row")
+    if not tolerated_report["passed"] or tolerated_report["termination_reason"] != "stop-address":
+        raise AssertionError("tolerated completion did not let execution reach the stop address")
+    if strict_report["passed"] or strict_report["termination_reason"] != "runner-error":
+        raise AssertionError("strict unrequested completion no longer fails")
+
+    reset = {
+        "schema": "rh850-p1me-machine-scenario-v2",
+        "name": "external-pin-reset-restarts-cpu",
+        "entry": PORTABLE_STORE_SELECTOR,
+        "max_instructions": 1,
+        "stop_addresses": [],
+        "expected_termination": "instruction-budget",
+        "gpr_fill": "0",
+        "registers": {"PSW": "0"},
+        "memory": [
+            {
+                "address": "0xfebe0100", "hex": "a5",
+                "evidence": "Local RAM before external pin reset",
+            },
+            {
+                "address": "0xfeef8000", "hex": "5a",
+                "evidence": "Global RAM before external pin reset",
+            },
+        ],
+        "events": [{
+            "kind": "reset-assert", "reset_class": "system-1-pin",
+            "after_instructions": 0,
+            "evidence": "External RESET pin assertion; R01UH0585EJ0120 Tables 8.1 and 8.2",
+        }],
+        "checks": [
+            {
+                "name": "local RAM cleared", "kind": "memory",
+                "address": "0xfebe0100", "size": 1, "equals_hex": "00",
+            },
+            {
+                "name": "global RAM cleared", "kind": "memory",
+                "address": "0xfeef8000", "size": 1, "equals_hex": "00",
+            },
+            {
+                "name": "pin and field-BIST reset factors", "kind": "memory",
+                "address": "0xfff81000", "size": 4, "equals_hex": "02040000",
+            },
+        ],
+    }
+    reset_path = output_dir / "external-pin-reset.json"
+    reset_path.write_text(json.dumps(reset, indent=2) + "\n", encoding="utf-8")
+    reset_report = capture_many(
+        "camry-8965F3307000", [reset_path], output_dir,
+    )[0]
+    reset_rows = [
+        row for row in reset_report["device_events"] if row["kind"] == "reset-assert"
+    ]
+    if (
+        not reset_report["passed"]
+        or len(reset_rows) != 1
+        or reset_rows[0]["reset_cause_value"] != "0x00000402"
+        or not reset_rows[0]["changed_memory_ranges"]
+    ):
+        raise AssertionError(f"external pin reset contract drifted: {reset_report!r}")
+    print(
+        "PASS trial traces, compare operands, indexed accesses, arrival stops, "
+        "tolerated completions, and external reset"
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--runtime-soak", action="store_true",
@@ -1166,6 +1813,12 @@ def main() -> int:
         if args.runtime_soak:
             check_runtime_soak(output_root)
             return 0
+        check_drcov_text_grammar(output_root)
+        check_scenario_source_contract(output_root)
+        check_reset_replay_contract(output_root)
+        check_fixture_schemas()
+        check_slow_fixture_contracts()
+        check_bridge_ready_contract(output_root)
         check_exact_scenarios(output_root)
         check_dynamic_request_signer_targets(output_root)
         check_schema_rejection(output_root)
@@ -1179,6 +1832,7 @@ def main() -> int:
         check_register_input_boundaries(output_root)
         check_peripheral_file(output_root)
         check_rscfd_transmit_results(output_root)
+        check_campaign_machine_features(output_root)
     print("PASS specification-backed multi-target RH850/P1M-E machine")
     return 0
 

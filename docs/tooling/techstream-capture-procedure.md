@@ -24,6 +24,37 @@ production-vehicle reflash.
 5. Start with synchronized UTC host time and record the physical channel,
    J2534 protocol, bus wiring, ignition/power state, and bench operation label.
 
+### Camry F33 EPS identity check
+
+For a live test against `8965F3307000`, record the EPS identity before and after
+an operator-controlled power cycle:
+
+```bash
+tools/toyota eps-identity --transport panda --bus 1 \
+  --operator-power-cycle \
+  --output build/out/target-evidence/private/eps-identity.json
+```
+
+At the prompt, cycle EPS power and restore ignition before you continue. Cite
+the JSON record in the capture manifest.
+
+`reference_image` identifies the registered calibration and its CodeFlash hash.
+Compare the observed `F181` and `F189` bytes in `dids` with the expected
+responses for that calibration. `identity_match` compares the two DID reads.
+
+For the exact-firmware transport check:
+
+```bash
+tools/toyota eps-identity --transport bridge \
+  --output build/out/eps-identity-bridge.json
+```
+
+`--transport bridge` launches its optional python-can dependency ephemerally and
+uses the exact-firmware ISO-TP reader. The standard client completes segmented
+`22 F181`; F189 returns the application's NRC `31`. This verifies the command
+against the bridge. D9 remains blocked until one matching live ECU is read
+before and after an operator power cycle.
+
 ## Capture six separate operations
 
 Start a fresh logger/session boundary for each operation. Do not combine them

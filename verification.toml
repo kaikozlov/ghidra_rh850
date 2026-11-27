@@ -14,6 +14,7 @@ core_suites = [
   "annotation_ledger",
   "build_layout",
   "fast_verify",
+  "recognizer_revision",
 ]
 
 [verification.groups]
@@ -35,6 +36,7 @@ exploit = [
 gate = "make verify-processor"
 paths = [
   "data/instruction_inventory.csv",
+  "data/generated/compiler_fingerprint_census.json",
   "data/processor_manifest.baseline.json",
   "data/processor_unimpl_allowlist.txt",
   "data/switch_table_inventory.csv",
@@ -162,6 +164,10 @@ tests = ["tests/tooling/verify_architecture.py"]
 
 [suite.rh850_compiler_abi]
 tests = ["tests/firmware/verify_rh850_compiler_abi.py"]
+
+[suite.compiler_fingerprints]
+tests = ["tests/tooling/verify_compiler_fingerprint_census.py"]
+timeout = 300
 
 [suite.boot_trust]
 tests = [
@@ -302,7 +308,6 @@ tests = ["tests/firmware/verify_icus_trace_decoder.py"]
 
 [suite.motor_actuation_boundary]
 tests = ["tests/firmware/verify_motor_actuation_boundary.py"]
-
 [suite.motor_safety_monitors]
 tests = ["tests/firmware/verify_motor_safety_monitors.py"]
 
@@ -311,6 +316,7 @@ tests = ["tests/firmware/verify_motor_calibration_handlers.py"]
 
 [suite.rh850_device_model]
 tests = ["tests/firmware/verify_p1m_device_profile.py"]
+
 
 [suite.rh850_machine_jit]
 tests = ["tests/tooling/verify_p1me_jit.py"]
@@ -323,20 +329,22 @@ tests = [
   "tests/tooling/verify_rh850_machine.py",
   "tests/tooling/verify_p1me_batch_spooling.py",
 ]
-# The verified boot milestone executes approximately 29 million instructions.
+# Boot-length reset-vector scenarios run in rh850_runtime_soak; this selector
+# keeps schema and milestone-contract checks but executes only edit-loop fixtures.
 timeout = 600
 
 [suite.rh850_runtime_soak]
 tests = ["tests/tooling/verify_rh850_machine.py"]
 args = ["--runtime-soak"]
-# Explicit selection only; excluded from the default processor gate and bundles.
-modes = []
-timeout = 1800
+# Slow local gate; excluded from the default processor gate and core bundles.
+modes = ["local"]
+timeout = 3600
 
 [suite.camry_decomp]
 tests = [
   "tests/targets/camry/verify_camry_decomp.py",
   "tests/targets/camry/verify_camry_decomp_sources.py",
+  "tests/targets/camry/verify_camry_decomp_pointer_words.py",
   "tests/tooling/verify_p1me_faci_shared.py",
 ]
 # Event-driven retained scenarios replay Ghidra timing when the local cache is absent.
@@ -361,10 +369,41 @@ tests = [
 tests = ["tests/targets/camry/verify_camry_f33_stateful_memory_safety.py"]
 timeout = 180
 
+[suite.camry_f33_uds_reference]
+tests = ["tests/targets/camry/verify_camry_f33_uds_reference.py"]
+
+[suite.camry_f33_machine_typed_event_fuzz]
+tests = ["tests/targets/camry/verify_camry_f33_machine_typed_event_fuzz.py"]
+timeout = 300
+
+[suite.camry_f33_capture_replay_mapping]
+tests = ["tests/targets/camry/verify_camry_f33_capture_replay_mapping.py"]
+timeout = 60
+
+[suite.camry_f33_lifecycle_cross_engine]
+tests = ["tests/targets/camry/verify_camry_f33_lifecycle_cross_engine.py"]
+timeout = 60
+
+[suite.camry_f33_definedness_oracle]
+tests = ["tests/targets/camry/verify_camry_f33_definedness_oracle.py"]
+
+[suite.camry_f33_object_boundary_oracle]
+tests = ["tests/targets/camry/verify_camry_f33_object_boundary_oracle.py"]
+
+[suite.camry_f33_stack_watermark_oracle]
+tests = ["tests/targets/camry/verify_camry_f33_stack_watermark_oracle.py"]
+
+[suite.camry_f33_nvm_lifecycle]
+tests = ["tools/targets/camry/research/check_camry_f33_nvm_lifecycle.py"]
+timeout = 300
+
 
 [suite.camry_f33_boot_memory_safety]
 tests = ["tests/targets/camry/verify_camry_f33_boot_memory_safety.py"]
 timeout = 120
+
+[suite.camry_f33_preemption_shared_ranges]
+tests = ["tests/targets/camry/verify_camry_f33_preemption_shared_ranges.py"]
 
 [suite.ephemeral_secoc_bypass]
 tests = ["tests/runtime/verify_ephemeral_secoc_bypass.py"]
@@ -825,6 +864,9 @@ tests = ["tests/runtime/verify_secoc_semantic_patch_resolver.py"]
 [suite.exploit_interest_ranking]
 tests = ["tests/runtime/verify_exploit_interest_ranking.py"]
 
+[suite.exploit_interest_family_rules]
+tests = ["tests/runtime/verify_exploit_interest_family_rules.py"]
+
 [suite.exploit_interest_reviewed_candidates]
 tests = ["tests/runtime/verify_exploit_interest_reviewed_candidates.py"]
 
@@ -906,6 +948,7 @@ tests = [
   "tests/tooling/verify_lifecycle.py",
   "tests/tooling/verify_project_layout.py",
   "tests/tooling/verify_headless_runner.py",
+  "tests/tooling/verify_rebuild_analyzer_options.py",
   "tests/tooling/verify_ghidra_env.py",
   "tests/tooling/verify_project_inventory.py",
 ]
@@ -996,6 +1039,9 @@ requires_external = ["techstream_v18"]
 
 [suite.fast_verify]
 tests = ["tests/tooling/verify_fast_verify.py"]
+
+[suite.recognizer_revision]
+tests = ["tests/tooling/verify_recognizer_revision.py"]
 
 [suite.icus_register_footprint]
 tests = ["tests/firmware/verify_icus_register_footprint.py"]
@@ -1288,6 +1334,10 @@ tests = ["tests/targets/camry/verify_camry_2026_engagement.py"]
 [suite.camry_2026_capture_replay]
 tests = ["tests/targets/camry/verify_camry_2026_capture_replay.py"]
 # Relay-correct drive capture pins and FRC LTA synchronized capture tooling.
+
+[suite.camry_capture_machine_events]
+tests = ["tests/targets/camry/verify_camry_capture_machine_events.py"]
+# Retained-capture -> machine can-rx/can-tx-complete converter: quantization, parsing, candump.
 
 [suite.camry_2026_diagnostics]
 tests = ["tests/targets/camry/verify_camry_2026_diagnostics.py"]

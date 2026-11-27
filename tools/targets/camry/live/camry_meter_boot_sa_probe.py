@@ -38,6 +38,10 @@ TRACE_TX_ADDRS = {
   PHASE6_FUNCTIONAL_ADDR,
 }
 
+ALLOUTPUT_PASSTHROUGH_PARAM = 1
+PREPARATION_FRAME_COUNT = 26
+TX_ACCEPTED_BUS = BUS + 128
+TX_REJECTED_BUS = BUS + 192
 TESTER_PRESENT_PERIOD = 2.0
 TESTER_PRESENT_INTERMESSAGE = 0.1
 ZERO16 = bytes(16)
@@ -85,6 +89,8 @@ class TracedPanda:
   def __init__(self, panda):
     self._panda = panda
     self._io_lock = threading.Lock()
+    self._accepted_tx = 0
+    self._rejected_tx = 0
 
   def can_send(self, address, data, bus, *args, **kwargs):
     address = int(address)
@@ -103,14 +109,39 @@ class TracedPanda:
     with self._io_lock:
       messages = self._panda.can_recv() or []
     for address, data, bus in messages:
-      if int(address) == RX_ADDR and int(bus) == BUS:
-        payload = bytes(data)
+      address = int(address)
+      source = int(bus)
+      payload = bytes(data)
+      if address in TRACE_TX_ADDRS and source in {TX_ACCEPTED_BUS, TX_REJECTED_BUS}:
+        accepted = source == TX_ACCEPTED_BUS
+        if accepted:
+          self._accepted_tx += 1
+        else:
+          self._rejected_tx += 1
+        status = "accepted" if accepted else "REJECTED"
         print(
-          f"CAN RX {_address_text(int(address))} bus {int(bus)}: {payload.hex()} "
-          f"[{_describe_frame(int(address), payload)}]",
+          f"CAN TX {status} {_address_text(address)} bus {BUS}: {payload.hex()}",
+          flush=True,
+        )
+      elif address == RX_ADDR and source == BUS:
+        print(
+          f"CAN RX {_address_text(address)} bus {source}: {payload.hex()} "
+          f"[{_describe_frame(address, payload)}]",
           flush=True,
         )
     return messages
+
+  def verify_tx_receipts(self, expected: int, timeout: float = 0.5) -> None:
+    deadline = time.monotonic() + timeout
+    while self._accepted_tx + self._rejected_tx < expected and time.monotonic() < deadline:
+      self.can_recv()
+      time.sleep(0.005)
+    if self._rejected_tx or self._accepted_tx != expected:
+      raise RuntimeError(
+        f"Panda preparation receipts: accepted={self._accepted_tx}, "
+        f"rejected={self._rejected_tx}, expected={expected}"
+      )
+    print(f"Panda preparation receipts: {self._accepted_tx}/{expected} accepted", flush=True)
 
 
 def _single_frame(payload: bytes, subaddress: int | None = None) -> bytes:
@@ -252,6 +283,12 @@ def derive_key(seed: bytes, boot_root: bytes, ecu_auth_key: bytes) -> bytes:
   return AES.new(working_key, AES.MODE_ECB).encrypt(seed)
 
 
+def _wait_while_draining(panda: TracedPanda, duration: float) -> None:
+  deadline = time.monotonic() + duration
+  while time.monotonic() < deadline:
+    panda.can_recv()
+
+
 def _prepare_non_gateway(
   panda: TracedPanda,
   periodic: PeriodicTesterPresent,
@@ -261,13 +298,13 @@ def _prepare_non_gateway(
 ) -> None:
   if wake_wait:
     print(f"GTS prepare: package wake-up delay {wake_wait:g}s", flush=True)
-    time.sleep(wake_wait)
+    _wait_while_draining(panda, wake_wait)
 
   print("GTS prepare: functional 10 83 and one-shot TesterPresent group", flush=True)
   _send_functional(panda, STANDARD_FUNCTIONAL_ADDR, bytes.fromhex("1083"))
-  time.sleep(1.0)
+  _wait_while_draining(panda, 1.0)
   _send_tester_present_group(panda)
-  time.sleep(1.0)
+  _wait_while_draining(panda, 1.0)
   _send_functional(
     panda,
     EXTENDED_FUNCTIONAL_ADDR,
@@ -275,7 +312,7 @@ def _prepare_non_gateway(
     subaddress=EXTENDED_FUNCTIONAL_SUBADDR,
   )
   _send_functional(panda, PHASE6_FUNCTIONAL_ADDR, bytes.fromhex("1083"))
-  time.sleep(1.0)
+  _wait_while_draining(panda, 1.0)
 
   periodic.start(1.0)
   print("GTS prepare: omitting central-gateway and automatic-IG-off branches", flush=True)
@@ -283,30 +320,30 @@ def _prepare_non_gateway(
 
   print("GTS prepare: functional 85 82 and diagnostic mask", flush=True)
   _send_functional(panda, STANDARD_FUNCTIONAL_ADDR, bytes.fromhex("8582"))
-  time.sleep(1.0)
+  _wait_while_draining(panda, 1.0)
   _send_tester_present_group(panda)
-  time.sleep(1.0)
+  _wait_while_draining(panda, 1.0)
   _send_functional(
     panda,
     EXTENDED_FUNCTIONAL_ADDR,
     bytes.fromhex("8582"),
     subaddress=EXTENDED_FUNCTIONAL_SUBADDR,
   )
-  time.sleep(1.0)
+  _wait_while_draining(panda, 1.0)
   _send_tester_present_group(panda)
-  time.sleep(1.0)
+  _wait_while_draining(panda, 1.0)
   for _ in range(3):
     panda.can_send(DIAGNOSTIC_MASK_ADDR, bytes.fromhex("a027"), BUS)
-    time.sleep(diagnostic_mask_wait)
-  time.sleep(0.9)
+    _wait_while_draining(panda, diagnostic_mask_wait)
+  _wait_while_draining(panda, 0.9)
 
   print("GTS prepare: non-emissions functional 28 81/83 01", flush=True)
   _send_tester_present_group(panda)
-  time.sleep(1.0)
+  _wait_while_draining(panda, 1.0)
   _send_functional(panda, STANDARD_FUNCTIONAL_ADDR, bytes.fromhex("288101"))
-  time.sleep(1.0)
+  _wait_while_draining(panda, 1.0)
   _send_tester_present_group(panda)
-  time.sleep(1.0)
+  _wait_while_draining(panda, 1.0)
   _send_functional(
     panda,
     EXTENDED_FUNCTIONAL_ADDR,
@@ -314,7 +351,7 @@ def _prepare_non_gateway(
     subaddress=EXTENDED_FUNCTIONAL_SUBADDR,
   )
   _send_functional(panda, PHASE6_FUNCTIONAL_ADDR, bytes.fromhex("288301"))
-  time.sleep(1.0)
+  _wait_while_draining(panda, 1.0)
   periodic.start(1.0)
 
 
@@ -370,7 +407,8 @@ def main() -> int:
   periodic: PeriodicTesterPresent | None = None
   try:
     panda.set_heartbeat_disabled()
-    panda.set_safety_mode(CarParams.SafetyModel.elm327, 0)
+    panda.set_obd(True)
+    panda.set_safety_mode(CarParams.SafetyModel.allOutput, ALLOUTPUT_PASSTHROUGH_PARAM)
     traced_panda = TracedPanda(panda)
     periodic = PeriodicTesterPresent(traced_panda)
 
@@ -401,6 +439,7 @@ def main() -> int:
       wake_wait=args.wake_wait,
       diagnostic_mask_wait=args.diagnostic_mask_wait,
     )
+    traced_panda.verify_tx_receipts(PREPARATION_FRAME_COUNT)
 
     request_once("GTS ReadSoftwareID 22 F181", bytes.fromhex("22f181"))
     periodic.stop()
@@ -530,7 +569,11 @@ def main() -> int:
         periodic.stop()
       except RuntimeError as error:
         print(f"warning: {error}", file=sys.stderr, flush=True)
-    panda.close()
+    try:
+      panda.set_safety_mode(0)
+      panda.set_obd(False)
+    finally:
+      panda.close()
 
 
 if __name__ == "__main__":

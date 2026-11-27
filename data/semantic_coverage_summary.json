@@ -38,6 +38,8 @@
     "structurally_bounded": 3,
     "unreviewed": 7058
   },
+  "ledger_sha256": "unbound",
+  "recognizer_revision": "unbound",
   "reviewed_function_count": 32,
   "root_kind_counts": {
     "interrupt": 23,

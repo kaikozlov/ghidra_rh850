@@ -1,6 +1,6 @@
 use crate::error::{GhidraError, Result};
 use serde::{Deserialize, Serialize};
-use std::fs;
+use std::{env, fs};
 use std::path::{Component, Path, PathBuf};
 
 pub const DEFAULT_RESULT_LIMIT: usize = 50;
@@ -70,6 +70,10 @@ impl Config {
         } else {
             Self::default()
         };
+        if let Ok(max_heap) = env::var("GHIDRA_HEADLESS_MAXMEM") {
+            config.max_heap = max_heap;
+        }
+
 
         if let Ok(raw) = std::env::var("GHIDRA_CLI_DEFAULT_LIMIT") {
             let limit = raw.parse::<usize>().map_err(|_| {

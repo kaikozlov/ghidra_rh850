@@ -15,6 +15,16 @@ while (($#)); do case "$1" in
 esac; done
 [[ -n "$TARGET" ]] || { usage >&2; exit 2; }
 field(){ python3 "$ROOT/tools/project/analysis_target.py" "$TARGET" --field "$1"; }
+ANALYZER_IMPORT_ARGS=()
+ANALYZER_IMPORT_TEXT=$(python3 "$ROOT/tools/project/analysis_target.py" "$TARGET" --analyzer-headless-args post)
+if [[ -n "$ANALYZER_IMPORT_TEXT" ]]; then
+  while IFS= read -r arg; do ANALYZER_IMPORT_ARGS+=("$arg"); done <<< "$ANALYZER_IMPORT_TEXT"
+fi
+ANALYZER_ANALYSIS_ARGS=()
+ANALYZER_ANALYSIS_TEXT=$(python3 "$ROOT/tools/project/analysis_target.py" "$TARGET" --analyzer-headless-args pre)
+if [[ -n "$ANALYZER_ANALYSIS_TEXT" ]]; then
+  while IFS= read -r arg; do ANALYZER_ANALYSIS_ARGS+=("$arg"); done <<< "$ANALYZER_ANALYSIS_TEXT"
+fi
 PROJECT_NAME=$(field project_name); PROGRAM_NAME=$(field program_name)
 REGISTERED_WORK="$ROOT/$(field work_dir)"; PROJECT_DIR=${PROJECT_DIR_OVERRIDE:-$REGISTERED_WORK}
 CODEFLASH="$ROOT/$(field codeflash)"; EXPECTED_SHA=$(field codeflash_sha256); PROCESSOR=$(field processor)
@@ -90,15 +100,16 @@ echo "[$TARGET 1/4] import registered images and target-native context"
 runh import -import "$CODEFLASH" -processor "$PROCESSOR" -noanalysis \
   "${IMPORT_POSTS[@]}" \
   -postScript "$DEVICE_PROFILE_SCRIPT" \
+  "${ANALYZER_IMPORT_ARGS[@]}" \
   -commit "Import registered target images and target-native context"
 echo "[$TARGET 2/4] seed registered application roots and run base analysis"
-runh entries -process "$PROGRAM_NAME" -preScript "$ENTRY_SEED_SCRIPT" \
+runh entries -process "$PROGRAM_NAME" "${ANALYZER_ANALYSIS_ARGS[@]}" -preScript "$ENTRY_SEED_SCRIPT" \
   -commit "Seed registered target application roots"
 echo "[$TARGET 3/4] seed registered diagnostic callbacks and re-run analysis"
-runh diagnostics -process "$PROGRAM_NAME" -preScript "$DIAGNOSTIC_SEED_SCRIPT" \
+runh diagnostics -process "$PROGRAM_NAME" "${ANALYZER_ANALYSIS_ARGS[@]}" -preScript "$DIAGNOSTIC_SEED_SCRIPT" \
   -commit "Seed registered target diagnostic callbacks"
 echo "[$TARGET 4/4] seed promoted registered-target functions and analyze"
-runh recovered -process "$PROGRAM_NAME" -preScript "$RECOVERED_SEED_SCRIPT" "${RECOVERED_SEED_ARGS[@]}" \
+runh recovered -process "$PROGRAM_NAME" "${ANALYZER_ANALYSIS_ARGS[@]}" -preScript "$RECOVERED_SEED_SCRIPT" "${RECOVERED_SEED_ARGS[@]}" \
   -commit "Seed evidence-backed registered-target recovered functions"
 echo "[$TARGET 4b] finalize structural repairs and calling conventions without analysis"
 runh conventions -process "$PROGRAM_NAME" -noanalysis \

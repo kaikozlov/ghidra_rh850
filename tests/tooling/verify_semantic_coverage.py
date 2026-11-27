@@ -158,7 +158,8 @@ def check_target(name: str, metadata: dict) -> None:
     reviewed = sum(row["review_state"] != "unreviewed" for row in rows)
     bounded = sum(row["review_state"] in {"structurally_bounded", "semantically_identified"} for row in rows)
     verified = sum(row["evidence_grade"] == "verified" and row["execution_status"] == "passed" for row in rows)
-    check("summary schema version", summary.get("schema_version") == 2)
+    expected_summary_schema = 2 if summary.get("recognizer_revision") == "unbound" else 3
+    check("summary schema version", summary.get("schema_version") == expected_summary_schema)
     check("summary discovered count", summary.get("discovered_function_count") == len(rows))
     check("summary reviewed count", summary.get("reviewed_function_count") == reviewed)
     check("summary bounded semantics count", summary.get("bounded_semantics_count") == bounded)

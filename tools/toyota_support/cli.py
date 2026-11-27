@@ -100,6 +100,7 @@ def cmd_capabilities(_args: argparse.Namespace) -> int:
         "secoc": ["oracle", "session", "sign", "sync"],
         "dataflash": "Toyota EPS DataFlash/NvM + SecOC-domain analysis",
         "eps-probe": "non-destructive Toyota EPS diagnostic-bus discovery",
+        "eps-identity": "read EPS software identity around a bench power cycle",
         "eps-isolated-probe": "mode/liveness probe of an isolated EPS-side CAN segment",
         "e2e-p05": ["crc", "check", "protect", "recover-data-id"],
         "ram": ["list", "build", "onboard", "kit"],
@@ -141,6 +142,9 @@ def cmd_dataflash(args: argparse.Namespace) -> int:
 def cmd_eps_probe(args: argparse.Namespace) -> int:
     return _run_path(TOOLS / "toyota_support/toyota_eps_bus_probe.py", args.args)
 
+def cmd_eps_identity(args: argparse.Namespace) -> int:
+    return _run_path(TOOLS / "toyota_support/toyota_eps_identity_control.py", args.args)
+
 
 def cmd_eps_isolated_probe(args: argparse.Namespace) -> int:
     return _run_path(TOOLS / "toyota_support/toyota_eps_isolated_can_probe.py", args.args)
@@ -148,6 +152,12 @@ def cmd_eps_isolated_probe(args: argparse.Namespace) -> int:
 
 def cmd_variant(args: argparse.Namespace) -> int:
     return _run_path(TOOLS / "variants/extract_variant_evidence.py", args.args)
+
+
+def cmd_execution_coverage(args: argparse.Namespace) -> int:
+    from tools.emulation.execution_coverage import main as coverage_main
+
+    return coverage_main(args.args)
 
 
 def _cmd_route_inspect(args: argparse.Namespace) -> int:
@@ -287,6 +297,10 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("args", nargs=argparse.REMAINDER)
     q.set_defaults(func=cmd_dataflash)
 
+    q = sub.add_parser("eps-identity", help="record EPS identity around a power cycle")
+    q.add_argument("args", nargs=argparse.REMAINDER)
+    q.set_defaults(func=cmd_eps_identity)
+
     q = sub.add_parser("eps-probe", help="discover the Toyota EPS diagnostic bus")
     q.add_argument("args", nargs=argparse.REMAINDER)
     q.set_defaults(func=cmd_eps_probe)
@@ -311,6 +325,14 @@ def build_parser() -> argparse.ArgumentParser:
     q = sub.add_parser("variant", help="cross-variant evidence extraction")
     q.add_argument("args", nargs=argparse.REMAINDER)
     q.set_defaults(func=cmd_variant)
+
+    q = sub.add_parser(
+        "execution-coverage",
+        help="merge P1M-E drcov runs into per-function execution coverage",
+        add_help=False,
+    )
+    q.add_argument("args", nargs=argparse.REMAINDER)
+    q.set_defaults(func=cmd_execution_coverage)
 
     q = sub.add_parser("e2e-p05", help="AUTOSAR E2E Profile-5 CRC utilities")
     q.add_argument("operation", choices=("crc", "check", "protect", "recover-data-id"))
@@ -389,12 +411,16 @@ def main() -> int:
         return cmd_secoc(argparse.Namespace(surface=surface, args=argv[2:]))
     if command == "dataflash":
         return cmd_dataflash(argparse.Namespace(args=argv[1:]))
+    if command == "eps-identity":
+        return cmd_eps_identity(argparse.Namespace(args=argv[1:]))
     if command == "eps-probe":
         return cmd_eps_probe(argparse.Namespace(args=argv[1:]))
     if command == "eps-isolated-probe":
         return cmd_eps_isolated_probe(argparse.Namespace(args=argv[1:]))
     if command == "variant":
         return cmd_variant(argparse.Namespace(args=argv[1:]))
+    if command == "execution-coverage":
+        return cmd_execution_coverage(argparse.Namespace(args=argv[1:]))
     if command == "target" and len(argv) >= 2:
         action = argv[1]
         if action == "list" and len(argv) >= 3:

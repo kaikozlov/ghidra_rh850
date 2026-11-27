@@ -77,6 +77,11 @@ maintenance status bytes are no longer pending, execution simply reaches replay
 advancing the queue. Operation 4 is therefore a **finite, selector-less internal
 maintenance action**.
 
+## Interrupt shared-range result
+
+No queue byte in `FEBE828C..FEBE8293` met the overlap criterion in the
+[Camry interrupt shared-range audit](../security/memory-safety-audit.md#camry-interrupt-shared-range-audit).
+
 ## Verification boundary
 
 - `tests/diagnostics/verify_application_async_operation_queue.py` pins queue function hashes,

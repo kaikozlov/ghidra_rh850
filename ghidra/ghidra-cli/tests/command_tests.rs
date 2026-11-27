@@ -139,6 +139,24 @@ fn portable_invalid_resource_overrides_leave_saved_config_unchanged() {
 }
 
 #[test]
+fn headless_maxmem_overrides_saved_heap_for_launch() {
+    let temp = tempfile::tempdir().unwrap();
+    let config_path = temp.path().join("config.yaml");
+    assert_cmd::cargo::cargo_bin_cmd!("ghidra")
+        .env("GHIDRA_CLI_CONFIG", &config_path)
+        .args(["config", "set", "max_heap", "12G"])
+        .assert()
+        .success();
+    assert_cmd::cargo::cargo_bin_cmd!("ghidra")
+        .env("GHIDRA_CLI_CONFIG", &config_path)
+        .env("GHIDRA_HEADLESS_MAXMEM", "4G")
+        .args(["config", "list"])
+        .assert()
+        .success()
+        .stdout(predicates::str::contains("max_heap: 4G"));
+}
+
+#[test]
 fn portable_output_options_fail_before_bridge_work() {
     let temp = tempfile::tempdir().unwrap();
     let config_path = temp.path().join("config.yaml");

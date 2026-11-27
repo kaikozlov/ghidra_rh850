@@ -276,7 +276,7 @@ uint diag_routine_control_type_supported(ushort configured_index,uchar control_t
 bool reject_routine_request_length_mismatch_9733a(int param_1,ushort param_2,char param_3)
 
 {
-  undefined **ppuVar1;
+  uint32_t *ppuVar1;
   uint uVar2;
   int iVar3;
   int iVar4;
@@ -294,9 +294,9 @@ bool reject_routine_request_length_mismatch_9733a(int param_1,ushort param_2,cha
     ppuVar1 = &PTR_DAT_00026698 + uVar5;
     iVar3 = (short)(ushort)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x269bfu + (uint32_t)((short)param_2 * 0xf) * 1u)))) * 6;
     iVar4 = iVar3 + -6;
-    puVar6 = *ppuVar1;
-    puVar7 = *ppuVar1;
-    if ((*ppuVar1)[iVar3 + -5] == '\a') goto LAB_000973be;
+    puVar6 = ((undefined *)camry_host_ptr((uint32_t)(*ppuVar1)));
+    puVar7 = ((undefined *)camry_host_ptr((uint32_t)(*ppuVar1)));
+    if (((undefined *)camry_host_ptr((uint32_t)(*ppuVar1)))[iVar3 + -5] == '\a') goto LAB_000973be;
 LAB_000973b0:
     puVar6 = puVar6 + iVar4;
     uVar5 = (uint)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x261d8u + (uint32_t)((byte)puVar7[iVar4 + 1]) * 1u))));
@@ -306,9 +306,9 @@ LAB_000973b0:
     ppuVar1 = &PTR_DAT_000267d8 + uVar5;
     iVar3 = (short)(ushort)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x269c4u + (uint32_t)((short)param_2 * 0xf) * 1u)))) * 6;
     iVar4 = iVar3 + -6;
-    puVar6 = *ppuVar1;
-    puVar7 = *ppuVar1;
-    if ((*ppuVar1)[iVar3 + -5] != '\a') goto LAB_000973b0;
+    puVar6 = ((undefined *)camry_host_ptr((uint32_t)(*ppuVar1)));
+    puVar7 = ((undefined *)camry_host_ptr((uint32_t)(*ppuVar1)));
+    if (((undefined *)camry_host_ptr((uint32_t)(*ppuVar1)))[iVar3 + -5] != '\a') goto LAB_000973b0;
 LAB_000973be:
     puVar6 = puVar6 + iVar4;
     uVar5 = (uint)*(ushort *)(puVar7 + iVar4 + 2);
@@ -321,7 +321,7 @@ LAB_000973ce:
 bool reject_routine_response_capacity_shortage_973dc(int param_1,ushort param_2,char param_3)
 
 {
-  undefined **ppuVar1;
+  uint32_t *ppuVar1;
   char cVar2;
   uint uVar3;
   int iVar4;
@@ -338,25 +338,25 @@ bool reject_routine_response_capacity_shortage_973dc(int param_1,ushort param_2,
     if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x269c1u + (uint32_t)((short)param_2 * 0xf) * 1u)))) == 0) goto LAB_000974a2;
     ppuVar1 = &PTR_DAT_000266e8 + uVar5;
     iVar4 = (short)(ushort)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x269c1u + (uint32_t)((short)param_2 * 0xf) * 1u)))) * 6;
-    cVar2 = (*ppuVar1)[iVar4 + -5];
-    puVar6 = *ppuVar1;
-    puVar7 = *ppuVar1;
+    cVar2 = ((undefined *)camry_host_ptr((uint32_t)(*ppuVar1)))[iVar4 + -5];
+    puVar6 = ((undefined *)camry_host_ptr((uint32_t)(*ppuVar1)));
+    puVar7 = ((undefined *)camry_host_ptr((uint32_t)(*ppuVar1)));
   }
   else if (param_3 == '\x02') {
     if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x269c6u + (uint32_t)((short)param_2 * 0xf) * 1u)))) == 0) goto LAB_000974a2;
     ppuVar1 = &PTR_DAT_00026828 + uVar5;
     iVar4 = (short)(ushort)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x269c6u + (uint32_t)((short)param_2 * 0xf) * 1u)))) * 6;
-    cVar2 = (*ppuVar1)[iVar4 + -5];
-    puVar6 = *ppuVar1;
-    puVar7 = *ppuVar1;
+    cVar2 = ((undefined *)camry_host_ptr((uint32_t)(*ppuVar1)))[iVar4 + -5];
+    puVar6 = ((undefined *)camry_host_ptr((uint32_t)(*ppuVar1)));
+    puVar7 = ((undefined *)camry_host_ptr((uint32_t)(*ppuVar1)));
   }
   else {
     if ((param_3 != '\x03') || ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x269bcu + (uint32_t)((short)param_2 * 0xf) * 1u)))) == 0)) goto LAB_000974a2;
     ppuVar1 = &PTR_DAT_000265f8 + uVar5;
     iVar4 = (short)(ushort)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x269bcu + (uint32_t)((short)param_2 * 0xf) * 1u)))) * 6;
-    cVar2 = (*ppuVar1)[iVar4 + -5];
-    puVar6 = *ppuVar1;
-    puVar7 = *ppuVar1;
+    cVar2 = ((undefined *)camry_host_ptr((uint32_t)(*ppuVar1)))[iVar4 + -5];
+    puVar6 = ((undefined *)camry_host_ptr((uint32_t)(*ppuVar1)));
+    puVar7 = ((undefined *)camry_host_ptr((uint32_t)(*ppuVar1)));
   }
   if (cVar2 == '\a') {
     uVar5 = (uint)*(ushort *)(puVar7 + iVar4 + -4);
@@ -497,7 +497,7 @@ void pack_routine_scalar_response_and_advance_length_9767c(ushort param_1,char p
 {
   char *pcVar1;
   undefined2 uVar2;
-  undefined **ppuVar3;
+  uint32_t *ppuVar3;
   uint uVar4;
   undefined *puVar5;
   undefined *puVar6;
@@ -507,7 +507,7 @@ void pack_routine_scalar_response_and_advance_length_9767c(ushort param_1,char p
   undefined1 uVar10;
   uint uVar11;
   undefined1 uVar12;
-  undefined **ppuVar13;
+  uint32_t *ppuVar13;
   int iVar14;
   
   uVar4 = (uint)param_1;

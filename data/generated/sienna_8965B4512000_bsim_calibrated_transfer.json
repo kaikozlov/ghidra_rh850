@@ -1,0 +1,67 @@
+{
+  "schema": "rh850-bsim-calibrated-transfer-v1",
+  "source_target": "sienna-8965B4512000",
+  "source_md5": "22e47fbff0f043b734bbef2b3f0259c7",
+  "similarity_threshold": 1.0,
+  "minimum_instruction_count": 101,
+  "zero_false_confidence_strictly_greater_than": 446.26234751576357,
+  "zero_false_subset": {
+    "camry-8965F3307000": {"exact_ledger": 7, "verified_near_structure": 4},
+    "crown-8965F3012000": {"exact_ledger": 9, "verified_near_structure": 4},
+    "corolla-8965F1208000": {"exact_ledger": 7, "verified_near_structure": 4},
+    "corolla-8965H1202000": {"exact_ledger": 7, "verified_near_structure": 4}
+  },
+  "classification_method": "exact ledger, then exact mnemonic and instruction-length sequence, otherwise false",
+  "targets": {
+    "camry-8965F3307000": {
+      "exact_ledger": 79,
+      "verified_near_structure": 12,
+      "false": 0,
+      "applied_names": []
+    },
+    "crown-8965F3012000": {
+      "exact_ledger": 123,
+      "verified_near_structure": 17,
+      "false": 2,
+      "applied_names": [
+        {
+          "source_address": "0x0006A28A",
+          "source_name": "com_signal_deadline_monitor_d",
+          "target_address": "0x0006A74A"
+        }
+      ]
+    },
+    "corolla-8965F1208000": {
+      "exact_ledger": 103,
+      "verified_near_structure": 13,
+      "false": 2,
+      "applied_names": [
+        {
+          "source_address": "0x0006A28A",
+          "source_name": "com_signal_deadline_monitor_d",
+          "target_address": "0x0006462A"
+        }
+      ]
+    },
+    "corolla-8965H1202000": {
+      "exact_ledger": 103,
+      "verified_near_structure": 13,
+      "false": 2,
+      "applied_names": [
+        {
+          "source_address": "0x0006A28A",
+          "source_name": "com_signal_deadline_monitor_d",
+          "target_address": "0x0006462A"
+        }
+      ]
+    }
+  },
+  "false_matches": [
+    {"target":"crown-8965F3012000","source":"0x000531C8","candidate":"0x000532A6"},
+    {"target":"crown-8965F3012000","source":"0x00000C9A","candidate":"0x00000C9A"},
+    {"target":"corolla-8965F1208000","source":"0x00033B08","candidate":"0x0002F75A"},
+    {"target":"corolla-8965F1208000","source":"0x00064414","candidate":"0x0005E75C"},
+    {"target":"corolla-8965H1202000","source":"0x00033B08","candidate":"0x0002F75A"},
+    {"target":"corolla-8965H1202000","source":"0x00064414","candidate":"0x0005E75C"}
+  ]
+}

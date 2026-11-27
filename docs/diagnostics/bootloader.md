@@ -398,7 +398,22 @@ blockSequenceCounter`.
 Thus `10F3` arms a post-program read-back/compare transfer mode. It does not
 itself erase memory, calculate a checksum, or expose CodeFlash contents.
 
-## 11. Evidence grades
+## 11. CodeFlash reset-interruption invariant
+
+| Path | Entry | Worker / issue site | Sequence | Reset invariant |
+|---|---:|---:|---|---|
+| authorized erase | `flash_erase_start @ 0x41E0` | `0x4428`, callback at `0x4332` | erase, execute, completion | an interrupted erase cannot reach application handoff |
+| download program | `flash_program_start @ 0x4188` | queue at `0x4276`, callbacks at `0x43BE/0x4402` | program, execute, completion, optional `10F3` readback | partial bytes remain non-bootable |
+| validity marker | `routine_program_verify_task @ 0x5A04` | marker queue at `0x5286` | CRC/CMAC verification, then program `5A A5 A5 5A` | only a completed marker after successful region verification may make the region bootable |
+
+Reset startup accepts the application only when both configured regions pass CRC
+and both marker words equal `0x5AA5A55A`. All machine reset classes retain
+CodeFlash.
+
+CodeFlash is immutable in the machine. The interruption invariants above
+come from the boot checks and marker-write order, not simulated power cuts.
+
+## 12. Evidence grades
 
 | Finding | Grade |
 |---|---|

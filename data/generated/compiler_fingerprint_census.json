@@ -1,0 +1,435 @@
+{
+  "decoder": "pinned v850-elf-objdump -D -z -b binary -m v850e3v5",
+  "registry_sha256": "0f93c07a5561871cf07f9eb983af0b0e698d64213eed372cd5ef04e33fbaad16",
+  "schema": "rh850-compiler-fingerprint-census-v1",
+  "targets": {
+    "camry-8965F3307000": {
+      "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+      "decoded_function_count": 7326,
+      "ghs_checksum": {
+        "examples": [],
+        "names": [],
+        "symbol_count": 0
+      },
+      "instruction_fingerprints": {
+        "callt": {
+          "examples": [],
+          "function_count": 0,
+          "instruction_count": 0
+        },
+        "dispose": {
+          "examples": [
+            "0x00000770",
+            "0x00000780",
+            "0x0000078c"
+          ],
+          "function_count": 4362,
+          "instruction_count": 4365
+        },
+        "prepare": {
+          "examples": [
+            "0x00000770",
+            "0x00000780",
+            "0x0000078c"
+          ],
+          "function_count": 4371,
+          "instruction_count": 4371
+        }
+      },
+      "interrupt_callt_state_save_eiret": {
+        "examples": [
+          "0x00071508"
+        ],
+        "function_count": 1
+      },
+      "inventory_sha256": "be3bcc3cfb8c86bb5fac4cd7ab9768b26661541ace9dce3bdafbf6236640234c",
+      "named_helpers": [],
+      "prepare_prologues": {
+        "decoded_function_count": 7326,
+        "examples": [
+          "0x00000770",
+          "0x00000780",
+          "0x0000078c"
+        ],
+        "function_count": 4371,
+        "share": 0.596642
+      },
+      "stack_limit_check": {
+        "examples": [],
+        "function_count": 0
+      },
+      "stack_protector": {
+        "examples": [],
+        "fixed_canary_function_count": 0,
+        "function_count": 0,
+        "generic_canary_function_count": 0
+      }
+    },
+    "corolla-8965F1208000": {
+      "codeflash_sha256": "fdb35b76891cf84a8b89e0a05c9c7c5cfcd27994cf85ccc01ff32828f53091f6",
+      "decoded_function_count": 6930,
+      "ghs_checksum": {
+        "examples": [],
+        "names": [],
+        "symbol_count": 0
+      },
+      "instruction_fingerprints": {
+        "callt": {
+          "examples": [],
+          "function_count": 0,
+          "instruction_count": 0
+        },
+        "dispose": {
+          "examples": [
+            "0x00000754",
+            "0x00000764",
+            "0x00000770"
+          ],
+          "function_count": 4225,
+          "instruction_count": 4228
+        },
+        "prepare": {
+          "examples": [
+            "0x00000754",
+            "0x00000764",
+            "0x00000770"
+          ],
+          "function_count": 4233,
+          "instruction_count": 4233
+        }
+      },
+      "interrupt_callt_state_save_eiret": {
+        "examples": [],
+        "function_count": 0
+      },
+      "inventory_sha256": "10d9d69ccc7932859b0246e271ec290ec9193b212f4d5bec34d0e6fd74e64c93",
+      "named_helpers": [],
+      "prepare_prologues": {
+        "decoded_function_count": 6930,
+        "examples": [
+          "0x00000754",
+          "0x00000764",
+          "0x00000770"
+        ],
+        "function_count": 4233,
+        "share": 0.610823
+      },
+      "stack_limit_check": {
+        "examples": [],
+        "function_count": 0
+      },
+      "stack_protector": {
+        "examples": [],
+        "fixed_canary_function_count": 0,
+        "function_count": 0,
+        "generic_canary_function_count": 0
+      }
+    },
+    "corolla-8965H1202000": {
+      "codeflash_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+      "decoded_function_count": 6930,
+      "ghs_checksum": {
+        "examples": [],
+        "names": [],
+        "symbol_count": 0
+      },
+      "instruction_fingerprints": {
+        "callt": {
+          "examples": [],
+          "function_count": 0,
+          "instruction_count": 0
+        },
+        "dispose": {
+          "examples": [
+            "0x00000754",
+            "0x00000764",
+            "0x00000770"
+          ],
+          "function_count": 4225,
+          "instruction_count": 4228
+        },
+        "prepare": {
+          "examples": [
+            "0x00000754",
+            "0x00000764",
+            "0x00000770"
+          ],
+          "function_count": 4233,
+          "instruction_count": 4233
+        }
+      },
+      "interrupt_callt_state_save_eiret": {
+        "examples": [],
+        "function_count": 0
+      },
+      "inventory_sha256": "bc8d469c688ed810efc0f467fca913b7cb849473d97f2530274fd0b63c0066b8",
+      "named_helpers": [],
+      "prepare_prologues": {
+        "decoded_function_count": 6930,
+        "examples": [
+          "0x00000754",
+          "0x00000764",
+          "0x00000770"
+        ],
+        "function_count": 4233,
+        "share": 0.610823
+      },
+      "stack_limit_check": {
+        "examples": [],
+        "function_count": 0
+      },
+      "stack_protector": {
+        "examples": [],
+        "fixed_canary_function_count": 0,
+        "function_count": 0,
+        "generic_canary_function_count": 0
+      }
+    },
+    "crown-8965F3012000": {
+      "codeflash_sha256": "5b89fdbc69edc2f66ef8a557f88b08c758e3146bd4e90067320d7966812b1273",
+      "decoded_function_count": 6967,
+      "ghs_checksum": {
+        "examples": [],
+        "names": [],
+        "symbol_count": 0
+      },
+      "instruction_fingerprints": {
+        "callt": {
+          "examples": [],
+          "function_count": 0,
+          "instruction_count": 0
+        },
+        "dispose": {
+          "examples": [
+            "0x00000770",
+            "0x00000780",
+            "0x0000078c"
+          ],
+          "function_count": 4225,
+          "instruction_count": 4228
+        },
+        "prepare": {
+          "examples": [
+            "0x00000770",
+            "0x00000780",
+            "0x0000078c"
+          ],
+          "function_count": 4234,
+          "instruction_count": 4234
+        }
+      },
+      "interrupt_callt_state_save_eiret": {
+        "examples": [],
+        "function_count": 0
+      },
+      "inventory_sha256": "b2adc431dc9e441a1c752adae1d1a31b37b75153fcc33fdee61c72b77552a549",
+      "named_helpers": [],
+      "prepare_prologues": {
+        "decoded_function_count": 6967,
+        "examples": [
+          "0x00000770",
+          "0x00000780",
+          "0x0000078c"
+        ],
+        "function_count": 4234,
+        "share": 0.607722
+      },
+      "stack_limit_check": {
+        "examples": [],
+        "function_count": 0
+      },
+      "stack_protector": {
+        "examples": [],
+        "fixed_canary_function_count": 0,
+        "function_count": 0,
+        "generic_canary_function_count": 0
+      }
+    },
+    "r4p-838004AD91": {
+      "codeflash_sha256": "cc75cac2aaa4a648dadcad3d3d59d0c1bb293c53f1dbfcf9bc0fc88b4b6a4322",
+      "decoded_function_count": 14451,
+      "ghs_checksum": {
+        "examples": [],
+        "names": [],
+        "symbol_count": 0
+      },
+      "instruction_fingerprints": {
+        "callt": {
+          "examples": [],
+          "function_count": 0,
+          "instruction_count": 0
+        },
+        "dispose": {
+          "examples": [
+            "0x0000032e",
+            "0x00000398",
+            "0x000003d2"
+          ],
+          "function_count": 11415,
+          "instruction_count": 11422
+        },
+        "prepare": {
+          "examples": [
+            "0x0000032e",
+            "0x00000398",
+            "0x000003d2"
+          ],
+          "function_count": 11422,
+          "instruction_count": 11422
+        }
+      },
+      "interrupt_callt_state_save_eiret": {
+        "examples": [],
+        "function_count": 0
+      },
+      "inventory_sha256": "107f58f97d623472bb2765818fe63b02c0bd01b030763cc91d4baf0a0eb05f2c",
+      "named_helpers": [],
+      "prepare_prologues": {
+        "decoded_function_count": 14451,
+        "examples": [
+          "0x0000032e",
+          "0x00000398",
+          "0x000003d2"
+        ],
+        "function_count": 11422,
+        "share": 0.790395
+      },
+      "stack_limit_check": {
+        "examples": [],
+        "function_count": 0
+      },
+      "stack_protector": {
+        "examples": [],
+        "fixed_canary_function_count": 0,
+        "function_count": 0,
+        "generic_canary_function_count": 0
+      }
+    },
+    "sienna-8965B4512000": {
+      "codeflash_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde",
+      "decoded_function_count": 7085,
+      "ghs_checksum": {
+        "examples": [],
+        "names": [],
+        "symbol_count": 0
+      },
+      "instruction_fingerprints": {
+        "callt": {
+          "examples": [],
+          "function_count": 0,
+          "instruction_count": 0
+        },
+        "dispose": {
+          "examples": [
+            "0x00000770",
+            "0x00000780",
+            "0x0000078c"
+          ],
+          "function_count": 4259,
+          "instruction_count": 4262
+        },
+        "prepare": {
+          "examples": [
+            "0x00000770",
+            "0x00000780",
+            "0x0000078c"
+          ],
+          "function_count": 4269,
+          "instruction_count": 4269
+        }
+      },
+      "interrupt_callt_state_save_eiret": {
+        "examples": [
+          "0x00070320",
+          "0x000703ca",
+          "0x00070476"
+        ],
+        "function_count": 3
+      },
+      "inventory_sha256": "7d51b65ba7484df44e7583706f01a604771d1bf4f0510b962e048dece859eebd",
+      "named_helpers": [],
+      "prepare_prologues": {
+        "decoded_function_count": 7085,
+        "examples": [
+          "0x00000770",
+          "0x00000780",
+          "0x0000078c"
+        ],
+        "function_count": 4269,
+        "share": 0.602541
+      },
+      "stack_limit_check": {
+        "examples": [],
+        "function_count": 0
+      },
+      "stack_protector": {
+        "examples": [],
+        "fixed_canary_function_count": 0,
+        "function_count": 0,
+        "generic_canary_function_count": 0
+      }
+    },
+    "venza-8917048E30": {
+      "codeflash_sha256": "2dfaf7ce21cb04af1126192f574103f63802352f8717fa0f03986d5a11d067f9",
+      "decoded_function_count": 9999,
+      "ghs_checksum": {
+        "examples": [],
+        "names": [],
+        "symbol_count": 0
+      },
+      "instruction_fingerprints": {
+        "callt": {
+          "examples": [
+            "0x00017092"
+          ],
+          "function_count": 1,
+          "instruction_count": 3
+        },
+        "dispose": {
+          "examples": [
+            "0x00000310",
+            "0x00000378",
+            "0x000003fe"
+          ],
+          "function_count": 6852,
+          "instruction_count": 6854
+        },
+        "prepare": {
+          "examples": [
+            "0x00000310",
+            "0x00000378",
+            "0x000003fe"
+          ],
+          "function_count": 6863,
+          "instruction_count": 6865
+        }
+      },
+      "interrupt_callt_state_save_eiret": {
+        "examples": [],
+        "function_count": 0
+      },
+      "inventory_sha256": "0382a1d1349fed2a91d7999e1a69601fbf15965235d127a5a4cb5235c4c23456",
+      "named_helpers": [],
+      "prepare_prologues": {
+        "decoded_function_count": 9999,
+        "examples": [
+          "0x00000310",
+          "0x00000378",
+          "0x000003fe"
+        ],
+        "function_count": 6862,
+        "share": 0.686269
+      },
+      "stack_limit_check": {
+        "examples": [],
+        "function_count": 0
+      },
+      "stack_protector": {
+        "examples": [],
+        "fixed_canary_function_count": 0,
+        "function_count": 0,
+        "generic_canary_function_count": 0
+      }
+    }
+  }
+}

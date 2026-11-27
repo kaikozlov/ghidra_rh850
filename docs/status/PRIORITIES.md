@@ -10,8 +10,10 @@ unresolved semantics belong in the owning reports below.
    FRC-internal feature-selection → protected `0x08A` egress implementation and
    downstream Brake request-arbitration/result → B6 handoff.
    Missing evidence includes synchronized FRC recorder/CAN observations and
-   matched Brake/FRC firmware (item 2). Do not replace those with another
-   summary of already-retained EPS experiments. Current port status:
+   matched Brake/FRC firmware (item 2). The retained EPS replay accepted the
+   gear capture but produced no egress change for 97 field mutations, so the
+   next discriminator remains FRC/Brake-native evidence rather than another EPS
+   traffic replay. Current port status:
    [capability matrix](../variants/camry-2026-capability-matrix.md).
    Canonical architecture:
    [../architecture/toyota-tss3-vehicle-movement-arbitration.md](../architecture/toyota-tss3-vehicle-movement-arbitration.md).

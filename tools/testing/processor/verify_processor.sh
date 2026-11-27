@@ -29,6 +29,10 @@ fi
 python3 "$ROOT/tools/testing/processor/build_processor_fixture.py" --check --out-dir "$FIXTURE_DIR"
 MANIFEST="$FIXTURE_DIR/manifest.json"
 BINARY="$FIXTURE_DIR/rh850_semantic_fixture.bin"
+(cd "$ROOT" && uv run --locked python tools/testing/processor/build_ccrh_listing_fixture.py --check)
+CCRH_BINARY="$FIXTURE_DIR/ccrh_listing_fixture.bin"
+CCRH_EXPECTED="$FIXTURE_DIR/ccrh_listing_fixture.expected.tsv"
+CCRH_DISAGREEMENTS="$FIXTURE_DIR/ccrh_listing_fixture.disagreements.tsv"
 
 echo "==> Synthetic fixture project"
 rm -rf "$FIXTURE_PROJECT_DIR"
@@ -66,6 +70,29 @@ for capability in language-profiles extended-isa extended-registers virtualizati
     exit 1
   }
 done
+
+echo "==> CC-RH compiler-listing oracle"
+rm -rf "$FIXTURE_PROJECT_DIR"
+mkdir -p "$FIXTURE_PROJECT_DIR"
+CCRH_LOG="$BUILD_LOGS/verify-processor-ccrh-listing.log"
+"$ROOT/tools/project/run_headless" \
+  --project-dir "$FIXTURE_PROJECT_DIR" \
+  --project rh850_ccrh_listing \
+  --label processor-ccrh-listing \
+  --log "$CCRH_LOG" \
+  --quiet \
+  -- \
+  -import "$CCRH_BINARY" \
+  -processor v850e3:LE:32:default \
+  -loader BinaryLoader \
+  -loader-baseAddr 0x0 \
+  -noanalysis \
+  -postScript AssertV850CcrhListing.java "$CCRH_EXPECTED" "$CCRH_DISAGREEMENTS" \
+  -deleteProject
+grep -q 'ASSERT v850-ccrh-listing: passed' "$CCRH_LOG" || {
+  echo "CC-RH listing fixture did not report success" >&2
+  exit 1
+}
 
 echo "==> Firmware machine regression (rh850_firmware)"
 "$ROOT/tools/test" rh850_firmware

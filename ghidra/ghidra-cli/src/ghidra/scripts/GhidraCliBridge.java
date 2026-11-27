@@ -45,6 +45,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -84,8 +85,9 @@ public class GhidraCliBridge extends GhidraScript {
     private static final int MAX_CLIENT_THREADS = 32;
     private static final int MAX_PENDING_CLIENTS = 128;
     private static final int MAX_RESPONSE_THREADS = 16;
-    private static final int MAX_RETAINED_JOBS = 100;
+    private static final int MAX_RETAINED_JOBS = 25;
     private static final int MAX_STATUS_JOBS = 25;
+    private static final int MAX_RETAINED_JOB_TEXT_CHARS = 4096;
 
     private final Gson gson = new GsonBuilder().serializeNulls().create();
     private final Object lifecycleLock = new Object();
@@ -193,7 +195,7 @@ public class GhidraCliBridge extends GhidraScript {
         final String command;
         final long enqueuedAt;
         final JobTaskMonitor monitor = new JobTaskMonitor();
-        final CompletableFuture<HandleResult> completion = new CompletableFuture<>();
+        volatile CompletableFuture<HandleResult> completion = new CompletableFuture<>();
 
         volatile String state = "queued";
         volatile long startedAt;
@@ -500,18 +502,18 @@ public class GhidraCliBridge extends GhidraScript {
                 // Support both legacy {message:"..."} and structured
                 // {error:{message:"...",code:"...",diagnostics:"..."}}.
                 if (result.response.has("message")) {
-                    record.error = result.response.get("message").getAsString();
+                    record.error = boundedJobText(result.response.get("message").getAsString());
                 } else if (result.response.has("error")
                     && result.response.get("error").isJsonObject()) {
                     JsonObject errObj = result.response.getAsJsonObject("error");
                     if (errObj.has("message")) {
-                        record.error = errObj.get("message").getAsString();
+                        record.error = boundedJobText(errObj.get("message").getAsString());
                     }
                 }
             }
         } catch (Exception e) {
             record.state = record.monitor.isCancelled() ? "cancelled" : "failed";
-            record.error = e.getMessage();
+            record.error = boundedJobText(e.getMessage());
             result = new HandleResult(errorResponse(e.getMessage()), false);
             result.response.addProperty("job_id", record.id);
         } finally {
@@ -521,7 +523,10 @@ public class GhidraCliBridge extends GhidraScript {
             refreshBridgeSnapshot();
         }
 
-        record.completion.complete(result);
+        record.monitor.setMessage("");
+        CompletableFuture<HandleResult> completion = record.completion;
+        record.completion = null;
+        completion.complete(result);
         retainCompletedJob(record.id);
     }
 
@@ -607,8 +612,8 @@ public class GhidraCliBridge extends GhidraScript {
             }
 
             JobRecord record = new JobRecord(nextJobId.getAndIncrement(), command);
+            CompletableFuture<HandleResult> completion = record.completion;
             ProgramJob job = new ProgramJob(record, args.deepCopy());
-
             synchronized (lifecycleLock) {
                 if (!acceptingJobs) {
                     return CompletableFuture.completedFuture(new HandleResult(
@@ -622,7 +627,7 @@ public class GhidraCliBridge extends GhidraScript {
                         errorResponse("Bridge program queue is full; retry shortly"), false));
                 }
             }
-            return record.completion;
+            return completion;
         } catch (Exception e) {
             return CompletableFuture.completedFuture(
                 new HandleResult(errorResponse(e.getMessage()), false));
@@ -1482,6 +1487,11 @@ public class GhidraCliBridge extends GhidraScript {
         if (message != null && !message.isEmpty()) result.addProperty("progress_message", message);
         if (record.error != null) result.addProperty("error", record.error);
         return result;
+    }
+
+    private static String boundedJobText(String value) {
+        if (value == null || value.length() <= MAX_RETAINED_JOB_TEXT_CHARS) return value;
+        return value.substring(0, MAX_RETAINED_JOB_TEXT_CHARS);
     }
 
     private void retainCompletedJob(long id) {
@@ -4989,6 +4999,7 @@ public class GhidraCliBridge extends GhidraScript {
         Object bundleHost = null;
         Object addedBundle = null;
         boolean scriptLoaded = false;
+        ClassLoader scriptClassLoader = null;
 
         StringWriter buffer = new StringWriter();
         PrintWriter out = new PrintWriter(buffer);
@@ -5013,6 +5024,7 @@ public class GhidraCliBridge extends GhidraScript {
             // getScriptInstance compiles the source. We don't call execute().
             GhidraScript script = provider.getScriptInstance(source, out);
             scriptLoaded = true;
+            scriptClassLoader = script.getClass().getClassLoader();
             out.flush();
 
             JsonObject result = new JsonObject();
@@ -5029,7 +5041,8 @@ public class GhidraCliBridge extends GhidraScript {
             return errorResponse("script_check_failed", "Script check failed: " + e, buffer.toString());
         } finally {
             if (addedBundle != null) {
-                removeTransientScriptBundle(bundleHost, addedBundle, sourceDir, scriptLoaded);
+                removeTransientScriptBundle(
+                    bundleHost, addedBundle, sourceDir, scriptLoaded, scriptClassLoader);
             }
         }
     }
@@ -5054,6 +5067,7 @@ public class GhidraCliBridge extends GhidraScript {
         Object bundleHost = null;
         Object transientBundle = null;
         boolean scriptLoaded = false;
+        ClassLoader transientClassLoader = null;
 
         StringWriter buffer = new StringWriter();
         PrintWriter out = new PrintWriter(buffer);
@@ -5070,14 +5084,15 @@ public class GhidraCliBridge extends GhidraScript {
             bundleHost = GhidraScriptUtil.class.getMethod("getBundleHost").invoke(null);
             if (bundleHost == null) return errorResult("Ghidra script bundle host unavailable");
             Class<?> bhClass = bundleHost.getClass();
-            Object existing = bhClass
+            Object executionBundle = bhClass
                 .getMethod("getGhidraBundle", ResourceFile.class)
                 .invoke(bundleHost, sourceDir);
-            if (existing == null) {
-                Object bundle = bhClass.getMethod("add", ResourceFile.class, boolean.class, boolean.class)
+            if (executionBundle == null) {
+                executionBundle = bhClass
+                    .getMethod("add", ResourceFile.class, boolean.class, boolean.class)
                     .invoke(bundleHost, sourceDir, true, false);
-                if (transientSource) transientBundle = bundle;
             }
+            if (transientSource) transientBundle = executionBundle;
 
             GhidraScriptProvider provider = GhidraScriptUtil.getProvider(source);
             if (provider == null) {
@@ -5088,6 +5103,7 @@ public class GhidraCliBridge extends GhidraScript {
             // getScriptInstance compiles the source via the bundle host.
             GhidraScript script = provider.getScriptInstance(source, out);
             scriptLoaded = true;
+            if (transientSource) transientClassLoader = script.getClass().getClassLoader();
             monitor.checkCancelled();
             script.setScriptArgs(scriptArgs);
 
@@ -5134,18 +5150,21 @@ public class GhidraCliBridge extends GhidraScript {
             return errorResponse("script_failed", "Script threw: " + e, buffer.toString());
         } finally {
             if (transientBundle != null) {
-                removeTransientScriptBundle(bundleHost, transientBundle, sourceDir, scriptLoaded);
+                removeTransientScriptBundle(
+                    bundleHost, transientBundle, sourceDir, scriptLoaded, transientClassLoader);
+                System.gc();
             }
         }
     }
 
     private void removeTransientScriptBundle(Object bundleHost, Object bundle,
-            ResourceFile sourceDir, boolean scriptLoaded) {
+            ResourceFile sourceDir, boolean scriptLoaded, ClassLoader scriptClassLoader) {
         try {
             var clean = bundle.getClass().getMethod("clean");
             clean.invoke(bundle);
             // Some Ghidra releases short-circuit binary cleanup while clearing build errors.
             if (!scriptLoaded) clean.invoke(bundle);
+            if (scriptClassLoader != null) clearTransientUseropClassCache(scriptClassLoader);
         } catch (ReflectiveOperationException e) {
             printerr("Could not clean transient script bundle: " + e);
         } finally {
@@ -5155,6 +5174,23 @@ public class GhidraCliBridge extends GhidraScript {
             } catch (ReflectiveOperationException e) {
                 printerr("Could not remove transient script bundle: " + e);
             }
+        }
+    }
+
+    private void clearTransientUseropClassCache(ClassLoader scriptClassLoader) {
+        try {
+            Class<?> library = Class.forName(
+                "ghidra.pcode.exec.AnnotatedPcodeUseropLibrary");
+            var field = library.getDeclaredField("CACHE_BY_CLASS");
+            field.setAccessible(true);
+            Object value = field.get(null);
+            if (!(value instanceof Map<?, ?> cache)) return;
+            synchronized (cache) {
+                cache.keySet().removeIf(key ->
+                    key instanceof Class<?> cls && cls.getClassLoader() == scriptClassLoader);
+            }
+        } catch (ReflectiveOperationException e) {
+            printerr("Could not clear transient userop class cache: " + e);
         }
     }
 

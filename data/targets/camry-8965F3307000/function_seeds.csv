@@ -41,13 +41,22 @@ address,provenance,note
 0x00054244,data/generated/camry_8965F3307000_lateral_decompiler_evidence.json;data/generated/camry_8965F3307000_tss3_tx_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
 0x000564CE,data/generated/camry_8965F3307000_lateral_decompiler_evidence.json;data/generated/camry_8965F3307000_tss3_tx_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
 0x00058074,data/generated/camry_8965F3307000_decompiler_evidence.json;data/generated/camry_8965F3307000_lateral_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
-0x00066062,data/generated/camry_8965F3307000_lateral_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
+0x00066062,data/generated/camry_8965F3307000_execution_contexts.json;data/generated/camry_8965F3307000_execution_coverage.json,exact-F33 EIC136 polled foreground dispatch; both retained scheduler traces enter it
+0x000660BE,data/generated/camry_8965F3307000_execution_contexts.json;data/generated/camry_8965F3307000_execution_coverage.json,exact-F33 INTBP EIC188 entry for RSCFD channel-1 transmit completion
+0x00066100,data/generated/camry_8965F3307000_execution_contexts.json;data/generated/camry_8965F3307000_execution_coverage.json,exact-F33 INTBP EIC187 entry for RSCFD channel-1 receive
+0x00066142,data/generated/camry_8965F3307000_execution_contexts.json;data/generated/camry_8965F3307000_execution_coverage.json,exact-F33 INTBP EIC292 entry for ICU-S completion path A
+0x00066184,data/generated/camry_8965F3307000_execution_contexts.json;data/generated/camry_8965F3307000_execution_coverage.json,exact-F33 INTBP EIC293 entry for ICU-S completion path B
+0x000661C6,data/generated/camry_8965F3307000_execution_contexts.json;data/generated/camry_8965F3307000_execution_coverage.json,exact-F33 INTBP EIC379 entry for DataFlash suspend-ready completion
 0x0006639C,data/generated/camry_8965F3307000_lateral_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
 0x00066512,data/generated/camry_8965F3307000_lateral_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
 0x0006A5FA,data/generated/camry_8965F3307000_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
-0x00071508,firmware/camry-8965F3307000/CodeFlash.bin,exact-F33 interrupt wrapper; raw entry begins syncp and returns with eiret; required by B6 hardware-RX ingress closure
+0x00071322,docs/tooling/processor-module-audit.md;decomp/camry-8965F3307000/symbols.jsonl,evidence-backed exception-frame restore entry retained when the spurious Address Tables analyzer is disabled
+0x000713B0,data/generated/camry_8965F3307000_execution_contexts.json;data/generated/camry_8965F3307000_execution_coverage.json,exact-F33 INTBP EIC133 entry for TAUJ0 channel-0 periodic acquisition; retained preemption trace enters once
+0x0007145A,data/generated/camry_8965F3307000_execution_contexts.json;data/generated/camry_8965F3307000_execution_coverage.json,exact-F33 INTBP EIC134 entry for TAUJ0 channel-1 command/publication; both retained scheduler traces enter it
+0x00071508,firmware/camry-8965F3307000/CodeFlash.bin,exact-F33 established channel-2 interrupt wrapper beginning at syncp; seed before its EIC135 hardware-entry veneer
+0x00071506,data/generated/camry_8965F3307000_execution_contexts.json;data/generated/camry_8965F3307000_execution_coverage.json,exact-F33 INTBP EIC135 hardware-entry veneer for the TAUJ0 channel-2 observer wrapper at 0x71508
 0x0007162E,firmware/camry-8965F3307000/CodeFlash.bin,computed jump target at71BB4; ECM command/retry and exception-return control flow; no OEM fault-role closure implied
-0x00071AE4,firmware/camry-8965F3307000/CodeFlash.bin,application INTBP slot8 at20220 contains71AE4; ECM status routing and computed transfer to7162E
+0x00071AE4,data/generated/camry_8965F3307000_execution_contexts.json;data/generated/camry_8965F3307000_execution_coverage.json,exact-F33 INTBP EIC8 entry for ECM error dispatch; already a function in the retained project
 0x0007D0EA,data/generated/camry_8965F3307000_tss3_tx_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
 0x0007D12A,data/generated/camry_8965F3307000_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
 0x0007D1DC,data/generated/camry_8965F3307000_tss3_tx_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
@@ -228,3 +237,6 @@ address,provenance,note
 0x0004D48C,firmware/camry-8965F3307000/CodeFlash.bin,Configured availability leaf in fifteen retained-profile DID rows; exact MOVEA5A/R10 and JMP LP instruction boundary
 0x0006A2A0,firmware/camry-8965F3307000/CodeFlash.bin,Configured command8 completion callback pointer at27E54; bounded34-byte leaf ending in JMP LP at6A2C0
 0x0006A2DC,firmware/camry-8965F3307000/CodeFlash.bin,Configured command7 job1 completion callback pointer at27E0C; independent entry between6A2C2 and6A300
+0x000486D0,data/generated/sienna_8965B4512000_bsim_function_transfer.json,BSim exact-vector transfer at similarity 1 confidence >=500
+0x00048DA6,data/generated/sienna_8965B4512000_bsim_function_transfer.json,BSim exact-vector transfer at similarity 1 confidence >=500
+0x000D2942,data/generated/sienna_8965B4512000_bsim_function_transfer.json,BSim exact-vector transfer at similarity 1 confidence >=500

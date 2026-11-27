@@ -1,0 +1,54 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "capture_replay_mapping_fixture",
+  "source": {
+    "kind": "capture",
+    "path": "tests/fixtures/targets/camry/capture_replay_mapping.capture",
+    "sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    "bus": 1
+  },
+  "events": [
+    {
+      "kind": "can-rx",
+      "fifo": 5,
+      "boundary": "post-filter",
+      "can_id": "0x115",
+      "data_hex": "0001020304050607",
+      "label": 38,
+      "after_instructions": 0,
+      "evidence": "fixture frame 0"
+    },
+    {
+      "kind": "can-tx-complete",
+      "buffer": 16,
+      "after_instructions": 0,
+      "evidence": "fixture frame 1"
+    },
+    {
+      "kind": "can-rx",
+      "fifo": 5,
+      "boundary": "post-filter",
+      "can_id": "0x127",
+      "data_hex": "1011121314151617",
+      "label": 36,
+      "after_instructions": 0,
+      "evidence": "fixture frame 2"
+    },
+    {
+      "kind": "can-tx-complete",
+      "buffer": 16,
+      "after_instructions": 2,
+      "evidence": "fixture frame 3"
+    },
+    {
+      "kind": "can-rx",
+      "fifo": 5,
+      "boundary": "post-filter",
+      "can_id": "0x3BF",
+      "data_hex": "2021222324252627",
+      "label": 32,
+      "after_instructions": 2,
+      "evidence": "fixture frame 4"
+    }
+  ]
+}

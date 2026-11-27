@@ -95,6 +95,7 @@ def _rewrite_body(code: str) -> str:
     code = rewrite_types._rewrite_integer_address_derefs(code)
     code = rewrite_types._rewrite_loaded_pointer_words(code)
     code = rewrite_types._rewrite_pointer_macro_indexes(code)
+    code = rewrite_types._rewrite_firmware_pointer_table_aliases(code)
     code = rewrite_types._rewrite_scalar_host_indexes(code)
     code = rewrite_types._rewrite_host_pointer_adds(code)
     code = rewrite_types._rewrite_mulhi_scales(code)

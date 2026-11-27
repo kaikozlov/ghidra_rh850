@@ -64,6 +64,8 @@ The small command surface to remember is:
 | Discover/query configured targets | `tools/gtarget list`, `tools/gtarget show TARGET`, `tools/gtarget TARGET ...` |
 | Discover Corolla target workflows | `tools/toyota target list corolla` |
 | Camry reconstruction | `tools/toyota decomp --help` |
+| Camry F33 DCM UDS reference comparison | [Gallia replay command and conformance matrix](../security/fuzz-oracle-methodology.md#gallia-reference-comparison) |
+| Camry F33 nonvolatile reset lifecycle | `tools/test camry_f33_nvm_lifecycle` |
 | Locate reconstructed Camry C | `tools/toyota decomp source QUERY [QUERY ...]` — exact names, entries, or interior PCs; [source ownership](../../decomp/camry-8965F3307000/README.md#source-and-evidence-ownership) |
 | Discover cross-variant evidence modes | `tools/toyota variant list` |
 | Discover working-project export profiles | `tools/project/export_ghidra_project.sh list` |
@@ -183,3 +185,60 @@ The RH850 language `v850e3:LE:32:default` is the **vendored in-tree fork** at
 `14c1b5be32b8ec741ee626c8bca9885c58f7a473`; see
 `ghidra/ghidra_v850/PROVENANCE.json`). Install path and fingerprint checks are
 in [../WORKFLOW.md](../WORKFLOW.md).
+
+## Tool support and limits
+
+### Request-byte dataflow
+
+Reconstructed C and exact disassembly identified all 18 decision groups and 10
+sink groups in the F33 SecurityAccess, WriteDataByIdentifier, and RoutineControl
+handlers. Ghidra 12.2 `TaintPlugin` requires an external CTADL engine, and its
+source exporter fails without a UI tool. angr 10.0.7 with pypcode 4.0.1 lifted
+the handler entries with the vendored SLEIGH language, but its symbolic runs
+stopped on temporary-width or statement-offset errors. Neither produced a
+service map. The KARONTE keyword-propagation candidate was not runnable.
+
+### Machine ingress coverage
+
+Two bounded F33 runs exercised firmware transport, DCM receive-buffer, and timer
+writes. The flood and forced-edge cases covered 820 and 819 edges, respectively,
+without a typed fault, uninitialized read, or object-boundary crossing. Neither
+run reached the application handlers under test. The forced-edge policy did not
+activate because execution did not enter its target routine. The respective
+stack watermarks were 748 and 652 bytes. An unmodeled SP write prevents either
+figure from establishing a maximum.
+See the [typed-event P1M-E campaign](../security/fuzz-oracle-methodology.md#typed-event-p1m-e-campaign)
+for the simulator and coverage model.
+
+### Bench transport
+
+[`I-CAN-hack/automotive` 0.7.0a1](https://github.com/I-CAN-hack/automotive/tree/d29d252cc9829af74079e3d791bda6e993af8a48)
+matched the EPS probe's F181 ISO-TP request and flow-control bytes with zero
+padding on a virtual bus. It also matched the response reassembly and NRC
+decoding. Its Panda adapter does not implement the bench probe's Toyota
+routing, NOOUTPUT state, heartbeat lease, or health counters. It does not
+model Toyota application messages.
+
+### Function comparison
+
+[`ghidriff` 1.0.0](https://github.com/clearbluejar/ghidriff) recovered 24 of
+326 verified named pairs, missed 302, and made three wrong pairings.
+The inputs were the Sienna `8965B4512000` and Corolla `8965H1202000` EPS
+images, not two calibrations of one part. Its JSON contains decompiler-text
+diffs but no instruction-level diff. Use the exact matcher and verify
+instruction changes as described in the
+[update comparison record](../variants/toyota-eps-variant-comparison.md#update-comparison-record).
+
+The comparison used Ghidra 12.2 on macOS arm64 and these host package versions:
+
+```sh
+uv venv --python 3.11 build/tmp/ghidriff-eval/venv
+uv pip install --python build/tmp/ghidriff-eval/venv/bin/python 'ghidriff==1.0.0' 'pyghidra==3.2.0' 'jpype1==1.7.1'
+```
+
+Stock `ghidriff` 1.0.0 cannot select a raw-image language on the command
+line. The scratch install imported both images at base zero with
+`GhidraProject.importProgram`, the vendored `v850e3:LE:32:default` language,
+and its default compiler. Its `VersionTrackingDiff` run used
+`TaskMonitor.DUMMY`, the isolated Ghidra user home, and a working directory
+outside the repository's `ghidra/` namespace.

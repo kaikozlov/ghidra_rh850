@@ -84,6 +84,8 @@ Do not hand-edit statuses to claim a passing result.
 and `execution/` owns the reusable native runtime—not test modules.
 Gap thunks and full lifts share one compiled CPU runtime in `execution/host_cpu.c`.
 `c_text.py` owns shared C scanning; `syntax.py` owns signature/scalar interpretation.
+Firmware pointer-table aliases use four-byte `uint32_t` slots; conversion maps
+each loaded word through `camry_host_ptr` instead of widening it to a host double pointer.
 
 The local `camry_decomp` suite checks image identity, ROM bytes, retained
 return/memory/register/call-sequence contracts, missing oracle coverage, source

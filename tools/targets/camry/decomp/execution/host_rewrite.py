@@ -945,6 +945,8 @@ def _pointer_table_word_is_host_pointer(text: str) -> str:
     if not names:
         return text
     for name in dict.fromkeys(names):
+        if re.search(rf"\buint32_t\s*\*\s*{re.escape(name)}\s*;", text):
+            continue
         text = re.sub(
             rf"(?<![\w*])\*{re.escape(name)}\b",
             f"((undefined *)camry_host_ptr(*(volatile uint32_t *){name}))",

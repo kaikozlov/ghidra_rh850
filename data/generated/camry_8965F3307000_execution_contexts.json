@@ -1,0 +1,4929 @@
+{
+  "schema": "camry-8965f3307000-execution-contexts-v1",
+  "target": "camry-8965F3307000",
+  "image": {
+    "path": "firmware/camry-8965F3307000/CodeFlash.bin",
+    "sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+    "size": 1048576
+  },
+  "evidence_boundary": "Timer and EIC constants, vector words, startup calls, and receive tables are read from exact firmware. Timer underflow checks are exact-image simulation. The 0x030 cadence is observed in a retained capture; its foreground period is inferred using the firmware cycle count.",
+  "startup": {
+    "coordinator": {
+      "address": "0x000637EE",
+      "name": "startup_coordinator"
+    },
+    "startup_calls": [
+      {
+        "number": 1,
+        "call_site": "0x000637F6",
+        "address": "0x000632B2",
+        "name": "clear_application_ram_4k"
+      },
+      {
+        "number": 2,
+        "call_site": "0x000637FA",
+        "address": "0x000632C8",
+        "name": "run_init_chain_632c8"
+      },
+      {
+        "number": 3,
+        "call_site": "0x000637FE",
+        "address": "0x000632E8",
+        "name": "clear_error_control_registers_and_set_gram_stac_632e8"
+      },
+      {
+        "number": 4,
+        "call_site": "0x00063802",
+        "address": "0x00060E3E",
+        "name": "initialize_both_serial_buffers_and_registers_60e3e"
+      },
+      {
+        "number": 5,
+        "call_site": "0x00063806",
+        "address": "0x000610BC",
+        "name": "return_only_stub_610bc"
+      },
+      {
+        "number": 6,
+        "call_site": "0x0006380A",
+        "address": "0x00061260",
+        "name": "initialize_four_halfword_serial_frame_registers_61260"
+      },
+      {
+        "number": 7,
+        "call_site": "0x0006380E",
+        "address": "0x00063338",
+        "name": "initialize_ecm_masks_routes_and_clear_error_outputs_63338"
+      },
+      {
+        "number": 8,
+        "call_site": "0x00063812",
+        "address": "0x00062BAE",
+        "name": "startup_capture_retained_token"
+      },
+      {
+        "number": 9,
+        "call_site": "0x00063816",
+        "address": "0x00063614",
+        "name": "clear_multiple_error_status_banks_and_ecm_latches_63614"
+      },
+      {
+        "number": 10,
+        "call_site": "0x0006381A",
+        "address": "0x00060D0E",
+        "name": "initialize_port_configuration_and_mux_fields_60d0e"
+      },
+      {
+        "number": 11,
+        "call_site": "0x0006381E",
+        "address": "0x00062E6A",
+        "name": "initialize_interrupt_control_words_and_verify_priorities_62e6a"
+      },
+      {
+        "number": 12,
+        "call_site": "0x00063822",
+        "address": "0x000636D4",
+        "name": "startup_copy_helper"
+      },
+      {
+        "number": 13,
+        "call_site": "0x00063826",
+        "address": "0x000636F8",
+        "name": "copy_64_bytes_after_app_info_header_636f8"
+      },
+      {
+        "number": 14,
+        "call_site": "0x0006382A",
+        "address": "0x00063718",
+        "name": "poll_fff80104_bit0_clear_or_terminate_63718"
+      },
+      {
+        "number": 15,
+        "call_site": "0x0006382E",
+        "address": "0x0006385C",
+        "name": "run_init_chain_6385c"
+      },
+      {
+        "number": 16,
+        "call_site": "0x00063832",
+        "address": "0x000715E0",
+        "name": "clear_fffee980_control_registers_715e0"
+      },
+      {
+        "number": 17,
+        "call_site": "0x00063836",
+        "address": "0x00063738",
+        "name": "initialize_error_monitors_and_set_ecm_interrupt_mask_63738"
+      },
+      {
+        "number": 18,
+        "call_site": "0x0006383A",
+        "address": "0x00062D5E",
+        "name": "startup_publish_image_identity_check"
+      },
+      {
+        "number": 19,
+        "call_site": "0x0006383E",
+        "address": "0x000666BC",
+        "name": "application_initialize_before_timer_start"
+      },
+      {
+        "number": 20,
+        "call_site": "0x00063842",
+        "address": "0x0006378C",
+        "name": "startup_validate_resident_boot_crc"
+      },
+      {
+        "number": 21,
+        "call_site": "0x00063846",
+        "address": "0x000665F2",
+        "name": "startup_start_timers_and_load_steady_periods"
+      }
+    ],
+    "after_calls": [
+      {
+        "call_site": "0x0006384C",
+        "address": "0x000701EA",
+        "name": "priority_mask_restore",
+        "argument": 0,
+        "effect": "restore priority mask"
+      },
+      {
+        "instruction": "0x00063850",
+        "effect": "EI"
+      },
+      {
+        "call_site": "0x00063854",
+        "address": "0x00066062",
+        "name": "run_eic136_foreground_dispatch_loop_66062",
+        "effect": "enter foreground loop"
+      }
+    ]
+  },
+  "foreground_cycles": [
+    {
+      "context": "tauj0_ch0",
+      "timer": "TAUJ0 channel 0",
+      "clock": {
+        "name": "P-Bus CK0",
+        "frequency_hz": 80000000,
+        "TAUJ0TPS": 0,
+        "TAUJ0CMOR": 0,
+        "CKS": 0,
+        "CCS": 0
+      },
+      "compare": {
+        "constant_address": "0x00030DF0",
+        "period_ticks": 16000,
+        "steady_CDR": 15999,
+        "initial_offset_ticks": 800,
+        "initial_CDR": 16799
+      },
+      "period_ticks": 16000,
+      "period_ms": 0.2,
+      "initial_period_ms": 0.21,
+      "activation_entry": {
+        "address": "0x000713B0",
+        "name": "unrecovered_000713b0"
+      },
+      "hardware_vector_entry": {
+        "address": "0x000713B0",
+        "name": "unrecovered_000713b0"
+      },
+      "hardware_vector_is_function_in_database": false,
+      "task_entry": {
+        "address": "0x00065FAE",
+        "name": "run_ch0_application_task"
+      },
+      "activation": "unmasked EIINT",
+      "startup_calls": [
+        {
+          "number": 19,
+          "call_site": "0x0006383E",
+          "address": "0x000666BC",
+          "effect": "initializes TAUJ0 TPS/CMOR and first compare values through 0x664F6 -> 0x6639C"
+        },
+        {
+          "number": 21,
+          "call_site": "0x00063846",
+          "address": "0x000665F2",
+          "effect": "loads steady CDR values before EI"
+        }
+      ],
+      "role": "phase-current, diagnostic, and motor-input acquisition cycle",
+      "writes": [
+        "acquisition snapshots",
+        "diagnostic input latches",
+        "motor input latches"
+      ],
+      "consumed_by_contexts": [
+        "tauj0_ch1",
+        "foreground"
+      ],
+      "machine_crosscheck": {
+        "scenario": "camry-execution-context-tauj0-ch0-period",
+        "evidence_kind": "exact-image simulation",
+        "model_sha256": "ddd9231a4b6b1e07f04d875fef6898811393df298660e3b906c35d5b98bb2cd0",
+        "underflow_hsb_cycles": 12207,
+        "underflows": 1,
+        "interrupt_request_channel": 133,
+        "scheduler_tick": 2,
+        "vector_entry_observed": true,
+        "agreement": false,
+        "stack_watermark": {
+          "initial_sp": "0xfebe2000",
+          "lowest_sp": "0xfebe1fa4",
+          "widest_use": 92,
+          "band_start": "0xfebe1800",
+          "band_end": "0xfebe2000",
+          "margin_to_lower_edge": 1956,
+          "finding_margin": 256,
+          "finding": false,
+          "unknown_sp_writes": [],
+          "status": "observed",
+          "evidence_kind": "exact-image simulation from interrupt vector entry",
+          "scenario": "camry-execution-context-tauj0-ch0-period"
+        },
+        "note": "scheduler_tick marks the instruction boundary where the explicit clock event was applied; elapsed cadence is the modeled P-Bus cycle count"
+      },
+      "stack_watermark": {
+        "initial_sp": "0xfebe2000",
+        "lowest_sp": "0xfebe1fa4",
+        "widest_use": 92,
+        "band_start": "0xfebe1800",
+        "band_end": "0xfebe2000",
+        "margin_to_lower_edge": 1956,
+        "finding_margin": 256,
+        "finding": false,
+        "unknown_sp_writes": [],
+        "status": "observed",
+        "evidence_kind": "exact-image simulation from interrupt vector entry",
+        "scenario": "camry-execution-context-tauj0-ch0-period"
+      },
+      "capture_crosscheck": {
+        "status": "no retained capture reports an internal activation timestamp for this high-rate ISR"
+      }
+    },
+    {
+      "context": "tauj0_ch1",
+      "timer": "TAUJ0 channel 1",
+      "clock": {
+        "name": "P-Bus CK0",
+        "frequency_hz": 80000000,
+        "TAUJ0TPS": 0,
+        "TAUJ0CMOR": 0,
+        "CKS": 0,
+        "CCS": 0
+      },
+      "compare": {
+        "constant_address": "0x00030DF8",
+        "period_ticks": 32000,
+        "steady_CDR": 31999,
+        "initial_offset_ticks": 9200,
+        "initial_CDR": 41199
+      },
+      "period_ticks": 32000,
+      "period_ms": 0.4,
+      "initial_period_ms": 0.515,
+      "activation_entry": {
+        "address": "0x0007145A",
+        "name": "unrecovered_0007145a"
+      },
+      "hardware_vector_entry": {
+        "address": "0x0007145A",
+        "name": "unrecovered_0007145a"
+      },
+      "hardware_vector_is_function_in_database": false,
+      "task_entry": {
+        "address": "0x00065FEA",
+        "name": "run_ch1_application_task"
+      },
+      "activation": "unmasked EIINT",
+      "startup_calls": [
+        {
+          "number": 19,
+          "call_site": "0x0006383E",
+          "address": "0x000666BC",
+          "effect": "initializes TAUJ0 TPS/CMOR and first compare values through 0x664F6 -> 0x6639C"
+        },
+        {
+          "number": 21,
+          "call_site": "0x00063846",
+          "address": "0x000665F2",
+          "effect": "loads steady CDR values before EI"
+        }
+      ],
+      "role": "assist-source, command-generation, and publication cycle",
+      "writes": [
+        "assist-source snapshots",
+        "command/current publication banks",
+        "observer inputs"
+      ],
+      "consumed_by_contexts": [
+        "tauj0_ch2",
+        "foreground"
+      ],
+      "machine_crosscheck": {
+        "scenario": "camry-execution-context-tauj0-ch1-period",
+        "evidence_kind": "exact-image simulation",
+        "model_sha256": "ddd9231a4b6b1e07f04d875fef6898811393df298660e3b906c35d5b98bb2cd0",
+        "underflow_hsb_cycles": 28207,
+        "underflows": 1,
+        "interrupt_request_channel": 134,
+        "scheduler_tick": 2,
+        "vector_entry_observed": true,
+        "agreement": false,
+        "stack_watermark": {
+          "initial_sp": "0xfebe2000",
+          "lowest_sp": "0xfebe1fa4",
+          "widest_use": 92,
+          "band_start": "0xfebe1800",
+          "band_end": "0xfebe2000",
+          "margin_to_lower_edge": 1956,
+          "finding_margin": 256,
+          "finding": false,
+          "unknown_sp_writes": [],
+          "status": "observed",
+          "evidence_kind": "exact-image simulation from interrupt vector entry",
+          "scenario": "camry-execution-context-tauj0-ch1-period"
+        },
+        "note": "scheduler_tick marks the instruction boundary where the explicit clock event was applied; elapsed cadence is the modeled P-Bus cycle count"
+      },
+      "stack_watermark": {
+        "initial_sp": "0xfebe2000",
+        "lowest_sp": "0xfebe1fa4",
+        "widest_use": 92,
+        "band_start": "0xfebe1800",
+        "band_end": "0xfebe2000",
+        "margin_to_lower_edge": 1956,
+        "finding_margin": 256,
+        "finding": false,
+        "unknown_sp_writes": [],
+        "status": "observed",
+        "evidence_kind": "exact-image simulation from interrupt vector entry",
+        "scenario": "camry-execution-context-tauj0-ch1-period"
+      },
+      "capture_crosscheck": {
+        "status": "no retained capture reports an internal activation timestamp for this high-rate ISR"
+      }
+    },
+    {
+      "context": "tauj0_ch2",
+      "timer": "TAUJ0 channel 2",
+      "clock": {
+        "name": "P-Bus CK0",
+        "frequency_hz": 80000000,
+        "TAUJ0TPS": 0,
+        "TAUJ0CMOR": 0,
+        "CKS": 0,
+        "CCS": 0
+      },
+      "compare": {
+        "constant_address": "0x00030E00",
+        "period_ticks": 80000,
+        "steady_CDR": 79999,
+        "initial_offset_ticks": 9600,
+        "initial_CDR": 89599
+      },
+      "period_ticks": 80000,
+      "period_ms": 1.0,
+      "initial_period_ms": 1.12,
+      "activation_entry": {
+        "address": "0x00071506",
+        "name": "unrecovered_00071506"
+      },
+      "hardware_vector_entry": {
+        "address": "0x00071506",
+        "name": "unrecovered_00071506"
+      },
+      "hardware_vector_is_function_in_database": false,
+      "task_entry": {
+        "address": "0x00066026",
+        "name": "run_ch2_application_task"
+      },
+      "activation": "unmasked EIINT",
+      "startup_calls": [
+        {
+          "number": 19,
+          "call_site": "0x0006383E",
+          "address": "0x000666BC",
+          "effect": "initializes TAUJ0 TPS/CMOR and first compare values through 0x664F6 -> 0x6639C"
+        },
+        {
+          "number": 21,
+          "call_site": "0x00063846",
+          "address": "0x000665F2",
+          "effect": "loads steady CDR values before EI"
+        }
+      ],
+      "role": "monitor, observer-scaling, and observer-publication cycle",
+      "writes": [
+        "monitor state",
+        "scaled observer state",
+        "observer publication bank"
+      ],
+      "consumed_by_contexts": [
+        "foreground"
+      ],
+      "machine_crosscheck": {
+        "scenario": "camry-execution-context-tauj0-ch2-period",
+        "evidence_kind": "exact-image simulation",
+        "model_sha256": "ddd9231a4b6b1e07f04d875fef6898811393df298660e3b906c35d5b98bb2cd0",
+        "underflow_hsb_cycles": 76207,
+        "underflows": 1,
+        "interrupt_request_channel": 135,
+        "scheduler_tick": 2,
+        "vector_entry_observed": true,
+        "agreement": false,
+        "stack_watermark": {
+          "initial_sp": "0xfebe2000",
+          "lowest_sp": "0xfebe1fa4",
+          "widest_use": 92,
+          "band_start": "0xfebe1800",
+          "band_end": "0xfebe2000",
+          "margin_to_lower_edge": 1956,
+          "finding_margin": 256,
+          "finding": false,
+          "unknown_sp_writes": [],
+          "status": "observed",
+          "evidence_kind": "exact-image simulation from interrupt vector entry",
+          "scenario": "camry-execution-context-tauj0-ch2-period"
+        },
+        "note": "scheduler_tick marks the instruction boundary where the explicit clock event was applied; elapsed cadence is the modeled P-Bus cycle count"
+      },
+      "stack_watermark": {
+        "initial_sp": "0xfebe2000",
+        "lowest_sp": "0xfebe1fa4",
+        "widest_use": 92,
+        "band_start": "0xfebe1800",
+        "band_end": "0xfebe2000",
+        "margin_to_lower_edge": 1956,
+        "finding_margin": 256,
+        "finding": false,
+        "unknown_sp_writes": [],
+        "status": "observed",
+        "evidence_kind": "exact-image simulation from interrupt vector entry",
+        "scenario": "camry-execution-context-tauj0-ch2-period"
+      },
+      "capture_crosscheck": {
+        "status": "no retained capture reports an internal activation timestamp for this high-rate ISR"
+      }
+    },
+    {
+      "context": "foreground",
+      "timer": "TAUJ0 channel 3",
+      "clock": {
+        "name": "P-Bus CK0",
+        "frequency_hz": 80000000,
+        "TAUJ0TPS": 0,
+        "TAUJ0CMOR": 0,
+        "CKS": 0,
+        "CCS": 0
+      },
+      "compare": {
+        "constant_address": "0x00030E08",
+        "period_ticks": 400000,
+        "steady_CDR": 399999,
+        "initial_offset_ticks": 10000,
+        "initial_CDR": 409999
+      },
+      "period_ticks": 400000,
+      "period_ms": 5.0,
+      "initial_period_ms": 5.125,
+      "activation_entry": {
+        "address": "0x00066062",
+        "name": "run_eic136_foreground_dispatch_loop_66062"
+      },
+      "hardware_vector_entry": {
+        "address": "0x00062E1E",
+        "name": "enable_irqs_then_enter_terminal_loop_62e1e"
+      },
+      "hardware_vector_is_function_in_database": true,
+      "task_entry": {
+        "address": "0x00066062",
+        "name": "run_eic136_foreground_dispatch_loop_66062"
+      },
+      "activation": "EIC136 EIRF polled and cleared by the foreground loop; EIMK remains set",
+      "startup_calls": [
+        {
+          "number": 19,
+          "call_site": "0x0006383E",
+          "address": "0x000666BC",
+          "effect": "initializes TAUJ0 TPS/CMOR and first compare values through 0x664F6 -> 0x6639C"
+        },
+        {
+          "number": 21,
+          "call_site": "0x00063846",
+          "address": "0x000665F2",
+          "effect": "loads steady CDR values before EI"
+        }
+      ],
+      "role": "polled communication, application, diagnostic, crypto, and NVM foreground cycle",
+      "writes": [
+        "COM and diagnostic state",
+        "foreground output projections",
+        "NVM state"
+      ],
+      "consumed_by_contexts": [],
+      "machine_crosscheck": {
+        "scenario": "camry-execution-context-tauj0-ch3-period",
+        "evidence_kind": "exact-image simulation",
+        "model_sha256": "ddd9231a4b6b1e07f04d875fef6898811393df298660e3b906c35d5b98bb2cd0",
+        "underflow_hsb_cycles": 396207,
+        "underflows": 1,
+        "interrupt_request_channel": 136,
+        "scheduler_tick": 2,
+        "vector_entry_observed": false,
+        "agreement": false,
+        "stack_watermark": {
+          "initial_sp": "0xfebe7800",
+          "lowest_sp": "0xfebe77f8",
+          "widest_use": 8,
+          "band_start": "0xfebe7000",
+          "band_end": "0xfebe7800",
+          "margin_to_lower_edge": 2040,
+          "finding_margin": 256,
+          "finding": false,
+          "unknown_sp_writes": [],
+          "status": "observed",
+          "evidence_kind": "exact-image simulation from the native foreground PREPARE at 0x66062",
+          "scenario": "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+        },
+        "note": "scheduler_tick marks the instruction boundary where the explicit clock event was applied; elapsed cadence is the modeled P-Bus cycle count"
+      },
+      "stack_watermark": {
+        "initial_sp": "0xfebe7800",
+        "lowest_sp": "0xfebe77f8",
+        "widest_use": 8,
+        "band_start": "0xfebe7000",
+        "band_end": "0xfebe7800",
+        "margin_to_lower_edge": 2040,
+        "finding_margin": 256,
+        "finding": false,
+        "unknown_sp_writes": [],
+        "status": "observed",
+        "evidence_kind": "exact-image simulation from the native foreground PREPARE at 0x66062",
+        "scenario": "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      },
+      "capture_crosscheck": {
+        "evidence_kind": "observed in a retained capture; foreground period inferred from the firmware's two-activation PDU cycle",
+        "source_artifact": "data/generated/camry_8965F3307000_eps_tx.json",
+        "capture_source": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-8.zst",
+        "can_id": "0x030",
+        "frame_count": 6000,
+        "interval_count": 5999,
+        "duration_s": 59.993426,
+        "firmware_cycle_activations": 2,
+        "observed_frame_period_ms": 10.000571095182531,
+        "inferred_foreground_period_ms": 5.0002855475912655,
+        "firmware_foreground_period_ms": 5.0,
+        "difference_percent": 0.005710951825310673,
+        "agreement": true
+      }
+    }
+  ],
+  "isr_catalog": [
+    {
+      "eic_channel": 8,
+      "eic_address": "0xFFFEEA10",
+      "eic_control": "0x0040",
+      "vector_index": 8,
+      "vector_word_address": "0x00020220",
+      "entry": {
+        "address": "0x00071AE4",
+        "name": "dispatch_ecm_status_exception_71ae4"
+      },
+      "is_function_in_database": true,
+      "role": "ECM error dispatch",
+      "writes": [
+        "ECM error latches",
+        "fault counters",
+        "clear registers"
+      ],
+      "foreground_consumers": [],
+      "tracked_machine_execution_count": 0,
+      "tracked_machine_scenarios": [],
+      "stack_watermark": {
+        "status": "not observed in the execution-context producer trace",
+        "finding_margin": 256
+      },
+      "evidence_kind": "firmware EIC/INTBP tables and raw handler disassembly; tracked exact-image simulation count where nonzero"
+    },
+    {
+      "eic_channel": 133,
+      "eic_address": "0xFFFFB10A",
+      "eic_control": "0x0046",
+      "vector_index": 133,
+      "vector_word_address": "0x00020414",
+      "entry": {
+        "address": "0x000713B0",
+        "name": "unrecovered_000713b0"
+      },
+      "is_function_in_database": false,
+      "role": "TAUJ0 channel-0 periodic acquisition",
+      "writes": [
+        "diagnostic and motor input latches",
+        "acquisition snapshots"
+      ],
+      "foreground_consumers": [
+        {
+          "address": "0x00065FEA",
+          "name": "run_ch1_application_task"
+        },
+        {
+          "address": "0x00066062",
+          "name": "run_eic136_foreground_dispatch_loop_66062"
+        }
+      ],
+      "tracked_machine_execution_count": 1,
+      "tracked_machine_scenarios": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return"
+      ],
+      "stack_watermark": {
+        "initial_sp": "0xfebe2000",
+        "lowest_sp": "0xfebe1fa4",
+        "widest_use": 92,
+        "band_start": "0xfebe1800",
+        "band_end": "0xfebe2000",
+        "margin_to_lower_edge": 1956,
+        "finding_margin": 256,
+        "finding": false,
+        "unknown_sp_writes": [],
+        "status": "observed",
+        "evidence_kind": "exact-image simulation from interrupt vector entry",
+        "scenario": "camry-execution-context-tauj0-ch0-period"
+      },
+      "evidence_kind": "firmware EIC/INTBP tables and raw handler disassembly; tracked exact-image simulation count where nonzero"
+    },
+    {
+      "eic_channel": 134,
+      "eic_address": "0xFFFFB10C",
+      "eic_control": "0x0047",
+      "vector_index": 134,
+      "vector_word_address": "0x00020418",
+      "entry": {
+        "address": "0x0007145A",
+        "name": "unrecovered_0007145a"
+      },
+      "is_function_in_database": false,
+      "role": "TAUJ0 channel-1 command/publication cycle",
+      "writes": [
+        "assist-source snapshots",
+        "command/current publication banks"
+      ],
+      "foreground_consumers": [
+        {
+          "address": "0x00066026",
+          "name": "run_ch2_application_task"
+        },
+        {
+          "address": "0x00066062",
+          "name": "run_eic136_foreground_dispatch_loop_66062"
+        }
+      ],
+      "tracked_machine_execution_count": 2,
+      "tracked_machine_scenarios": [
+        "camry_f33_scheduler_publication_native_ch0_preempts_ch1_full_return",
+        "camry_f33_scheduler_publication_native_ch1_single_request_returns"
+      ],
+      "stack_watermark": {
+        "initial_sp": "0xfebe2000",
+        "lowest_sp": "0xfebe1fa4",
+        "widest_use": 92,
+        "band_start": "0xfebe1800",
+        "band_end": "0xfebe2000",
+        "margin_to_lower_edge": 1956,
+        "finding_margin": 256,
+        "finding": false,
+        "unknown_sp_writes": [],
+        "status": "observed",
+        "evidence_kind": "exact-image simulation from interrupt vector entry",
+        "scenario": "camry-execution-context-tauj0-ch1-period"
+      },
+      "evidence_kind": "firmware EIC/INTBP tables and raw handler disassembly; tracked exact-image simulation count where nonzero"
+    },
+    {
+      "eic_channel": 135,
+      "eic_address": "0xFFFFB10E",
+      "eic_control": "0x0049",
+      "vector_index": 135,
+      "vector_word_address": "0x0002041C",
+      "entry": {
+        "address": "0x00071506",
+        "name": "unrecovered_00071506"
+      },
+      "is_function_in_database": false,
+      "role": "TAUJ0 channel-2 observer cycle",
+      "writes": [
+        "monitor state",
+        "observer publication bank"
+      ],
+      "foreground_consumers": [
+        {
+          "address": "0x00066062",
+          "name": "run_eic136_foreground_dispatch_loop_66062"
+        }
+      ],
+      "tracked_machine_execution_count": 0,
+      "tracked_machine_scenarios": [],
+      "stack_watermark": {
+        "initial_sp": "0xfebe2000",
+        "lowest_sp": "0xfebe1fa4",
+        "widest_use": 92,
+        "band_start": "0xfebe1800",
+        "band_end": "0xfebe2000",
+        "margin_to_lower_edge": 1956,
+        "finding_margin": 256,
+        "finding": false,
+        "unknown_sp_writes": [],
+        "status": "observed",
+        "evidence_kind": "exact-image simulation from interrupt vector entry",
+        "scenario": "camry-execution-context-tauj0-ch2-period"
+      },
+      "evidence_kind": "firmware EIC/INTBP tables and raw handler disassembly; tracked exact-image simulation count where nonzero"
+    },
+    {
+      "eic_channel": 187,
+      "eic_address": "0xFFFFB176",
+      "eic_control": "0x8048",
+      "vector_index": 187,
+      "vector_word_address": "0x000204EC",
+      "entry": {
+        "address": "0x00066100",
+        "name": "unrecovered_00066100"
+      },
+      "is_function_in_database": false,
+      "role": "RSCFD channel-1 receive",
+      "writes": [
+        "software receive ring at 0xFEBE4038",
+        "ring indices and count"
+      ],
+      "foreground_consumers": [
+        {
+          "address": "0x0007A254",
+          "name": "service_ready_communication_policy_and_pdu_chains_7a254"
+        },
+        {
+          "address": "0x0007A408",
+          "name": "cantp_foreground_cycle"
+        },
+        {
+          "address": "0x000988C2",
+          "name": "dcm_foreground_cycle"
+        }
+      ],
+      "tracked_machine_execution_count": 0,
+      "tracked_machine_scenarios": [],
+      "stack_watermark": {
+        "status": "not observed in the execution-context producer trace",
+        "finding_margin": 256
+      },
+      "evidence_kind": "firmware EIC/INTBP tables and raw handler disassembly; tracked exact-image simulation count where nonzero"
+    },
+    {
+      "eic_channel": 188,
+      "eic_address": "0xFFFFB178",
+      "eic_control": "0x8048",
+      "vector_index": 188,
+      "vector_word_address": "0x000204F0",
+      "entry": {
+        "address": "0x000660BE",
+        "name": "unrecovered_000660be"
+      },
+      "is_function_in_database": false,
+      "role": "RSCFD channel-1 transmit completion",
+      "writes": [
+        "RSCFD completion status",
+        "software transmit-route completion state"
+      ],
+      "foreground_consumers": [
+        {
+          "address": "0x000667E6",
+          "name": "foreground_subsystem_cycle"
+        }
+      ],
+      "tracked_machine_execution_count": 0,
+      "tracked_machine_scenarios": [],
+      "stack_watermark": {
+        "status": "not observed in the execution-context producer trace",
+        "finding_margin": 256
+      },
+      "evidence_kind": "firmware EIC/INTBP tables and raw handler disassembly; tracked exact-image simulation count where nonzero"
+    },
+    {
+      "eic_channel": 292,
+      "eic_address": "0xFFFFB248",
+      "eic_control": "0x0048",
+      "vector_index": 292,
+      "vector_word_address": "0x00020690",
+      "entry": {
+        "address": "0x00066142",
+        "name": "unrecovered_00066142"
+      },
+      "is_function_in_database": false,
+      "role": "ICU-S completion path A",
+      "writes": [
+        "guarded crypto callback and job state"
+      ],
+      "foreground_consumers": [
+        {
+          "address": "0x00088EC0",
+          "name": "service_tag_generation_completion_and_timeouts_88ec0"
+        }
+      ],
+      "tracked_machine_execution_count": 0,
+      "tracked_machine_scenarios": [],
+      "stack_watermark": {
+        "status": "not observed in the execution-context producer trace",
+        "finding_margin": 256
+      },
+      "evidence_kind": "firmware EIC/INTBP tables and raw handler disassembly; tracked exact-image simulation count where nonzero"
+    },
+    {
+      "eic_channel": 293,
+      "eic_address": "0xFFFFB24A",
+      "eic_control": "0x0048",
+      "vector_index": 293,
+      "vector_word_address": "0x00020694",
+      "entry": {
+        "address": "0x00066184",
+        "name": "unrecovered_00066184"
+      },
+      "is_function_in_database": false,
+      "role": "ICU-S completion path B",
+      "writes": [
+        "guarded crypto callback and job state"
+      ],
+      "foreground_consumers": [
+        {
+          "address": "0x00088EC0",
+          "name": "service_tag_generation_completion_and_timeouts_88ec0"
+        }
+      ],
+      "tracked_machine_execution_count": 0,
+      "tracked_machine_scenarios": [],
+      "stack_watermark": {
+        "status": "not observed in the execution-context producer trace",
+        "finding_margin": 256
+      },
+      "evidence_kind": "firmware EIC/INTBP tables and raw handler disassembly; tracked exact-image simulation count where nonzero"
+    },
+    {
+      "eic_channel": 379,
+      "eic_address": "0xFFFFB2F6",
+      "eic_control": "0x0048",
+      "vector_index": 379,
+      "vector_word_address": "0x000207EC",
+      "entry": {
+        "address": "0x000661C6",
+        "name": "unrecovered_000661c6"
+      },
+      "is_function_in_database": false,
+      "role": "DataFlash suspend-ready completion",
+      "writes": [
+        "flash-operation completion state"
+      ],
+      "foreground_consumers": [
+        {
+          "address": "0x00066CF6",
+          "name": "nvm_application_cycle"
+        }
+      ],
+      "tracked_machine_execution_count": 0,
+      "tracked_machine_scenarios": [],
+      "stack_watermark": {
+        "status": "not observed in the execution-context producer trace",
+        "finding_margin": 256
+      },
+      "evidence_kind": "firmware EIC/INTBP tables and raw handler disassembly; tracked exact-image simulation count where nonzero"
+    }
+  ],
+  "receive_interrupts": [
+    {
+      "eic_channel": 187,
+      "entry": {
+        "address": "0x00066100",
+        "name": "unrecovered_00066100"
+      },
+      "delegate_chain": [
+        {
+          "address": "0x00066812",
+          "name": "thunk_service_channel_one_receive_and_sync_83f30"
+        },
+        {
+          "address": "0x00083F30",
+          "name": "service_channel_one_receive_and_sync_83f30"
+        }
+      ],
+      "stack_watermark": {
+        "status": "not observed in the execution-context producer trace",
+        "finding_margin": 256
+      },
+      "routes": [
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 0,
+          "rule_address": "0x0230B8",
+          "can_id": "0x3B0",
+          "id_format": "standard",
+          "label": "0x09",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none: fixed destinations (COM buffer 0xFEBE4A7F..+7 and GP-relative signal cells)",
+          "payload_sources": [
+            {
+              "configured_signal_id": 58,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 59,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 60,
+              "classification": "extracted_bitfield",
+              "wire_field": "B3",
+              "bit_length": 8,
+              "destination": {
+                "address": "0xFEBE7FF0",
+                "width_bytes": 1,
+                "object": "COM signal 60 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 61,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 62,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 63,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 1,
+          "rule_address": "0x0230C8",
+          "can_id": "0x63B",
+          "id_format": "standard",
+          "label": "0x0A",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none: fixed destinations (COM buffer 0xFEBE4A87..+7 and GP-relative signal cells)",
+          "payload_sources": [
+            {
+              "configured_signal_id": 64,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 65,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 66,
+              "classification": "extracted_bitfield",
+              "wire_field": "B2..B3 BE16",
+              "bit_length": 16,
+              "destination": {
+                "address": "0xFEBE7FF8",
+                "width_bytes": 2,
+                "object": "COM signal 66 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 67,
+              "classification": "extracted_bitfield",
+              "wire_field": "B2..B5 BE32",
+              "bit_length": 32,
+              "destination": {
+                "address": "0xFEBE7FF4",
+                "width_bytes": 4,
+                "object": "COM signal 67 destination",
+                "ram_path": null
+              },
+              "consumer_functions": []
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 2,
+          "rule_address": "0x0230D8",
+          "can_id": "0x624",
+          "id_format": "standard",
+          "label": "0x0B",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none: fixed destinations (COM buffer 0xFEBE4A8F..+7 and GP-relative signal cells)",
+          "payload_sources": [
+            {
+              "configured_signal_id": 68,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 69,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 70,
+              "classification": "extracted_bitfield",
+              "wire_field": "B2",
+              "bit_length": 8,
+              "destination": {
+                "address": "0xFEBE7FFC",
+                "width_bytes": 1,
+                "object": "COM signal 70 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 71,
+              "classification": "extracted_bitfield",
+              "wire_field": "B3[7:4]",
+              "bit_length": 4,
+              "destination": {
+                "address": "0xFEBE7FFD",
+                "width_bytes": 1,
+                "object": "COM signal 71 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 72,
+              "classification": "extracted_bitfield",
+              "wire_field": "B3[3:0]",
+              "bit_length": 4,
+              "destination": {
+                "address": "0xFEBE7FFE",
+                "width_bytes": 1,
+                "object": "COM signal 72 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 73,
+              "classification": "extracted_bitfield",
+              "wire_field": "B4[7:4]",
+              "bit_length": 4,
+              "destination": {
+                "address": "0xFEBE7FFF",
+                "width_bytes": 1,
+                "object": "COM signal 73 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 74,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 75,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 76,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 77,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 78,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 79,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 3,
+          "rule_address": "0x0230E8",
+          "can_id": "0x63D",
+          "id_format": "standard",
+          "label": "0x0C",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none: fixed destinations (COM buffer 0xFEBE4A97..+7 and GP-relative signal cells)",
+          "payload_sources": [
+            {
+              "configured_signal_id": 80,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 81,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 82,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 83,
+              "classification": "extracted_bitfield",
+              "wire_field": "B3",
+              "bit_length": 8,
+              "destination": {
+                "address": "0xFEBE8002",
+                "width_bytes": 1,
+                "object": "COM signal 83 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 84,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 85,
+              "classification": "extracted_bitfield",
+              "wire_field": "B5",
+              "bit_length": 8,
+              "destination": {
+                "address": "0xFEBE8005",
+                "width_bytes": 1,
+                "object": "COM signal 85 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 86,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 4,
+          "rule_address": "0x0230F8",
+          "can_id": "0x00F",
+          "id_format": "standard",
+          "label": "0x0D",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none: fixed destinations (COM buffer 0xFEBE4A9F..+7 and GP-relative signal cells)",
+          "payload_sources": [
+            {
+              "configured_signal_id": 87,
+              "classification": "configured_no_com_unpacker_secoc_pdu",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 88,
+              "classification": "configured_no_com_unpacker_secoc_pdu",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 89,
+              "classification": "configured_no_com_unpacker_secoc_pdu",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 5,
+          "rule_address": "0x023108",
+          "can_id": "0x013",
+          "id_format": "standard",
+          "label": "0x0E",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none in EPS RAM: fixed crypto banks 0xFEBE50C6..0xFEBE5245; the bytes become ICU-S key material only through the UDS-activated collected key update",
+          "payload_sources": [
+            {
+              "configured_signal_id": 90,
+              "classification": "extracted_group_bytes",
+              "wire_field": "B0..B7 opaque",
+              "bit_length": 64,
+              "destination": {
+                "address": "0xFEBE5206",
+                "width_bytes": 8,
+                "object": "COM signal 90 destination",
+                "ram_path": "COM 0xFEBE4AA7 -> stack -> previous 0xFEBE50C6 -> qualified 0xFEBE5106 -> committed 0xFEBE5206"
+              },
+              "consumer_functions": []
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 6,
+          "rule_address": "0x023118",
+          "can_id": "0x014",
+          "id_format": "standard",
+          "label": "0x0F",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none in EPS RAM: fixed crypto banks 0xFEBE50C6..0xFEBE5245; the bytes become ICU-S key material only through the UDS-activated collected key update",
+          "payload_sources": [
+            {
+              "configured_signal_id": 91,
+              "classification": "extracted_group_bytes",
+              "wire_field": "B0..B7 opaque",
+              "bit_length": 64,
+              "destination": {
+                "address": "0xFEBE520E",
+                "width_bytes": 8,
+                "object": "COM signal 91 destination",
+                "ram_path": "COM 0xFEBE4AAF -> stack -> previous 0xFEBE50CE -> qualified 0xFEBE510E -> committed 0xFEBE520E"
+              },
+              "consumer_functions": []
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 7,
+          "rule_address": "0x023128",
+          "can_id": "0x015",
+          "id_format": "standard",
+          "label": "0x10",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none in EPS RAM: fixed crypto banks 0xFEBE50C6..0xFEBE5245; the bytes become ICU-S key material only through the UDS-activated collected key update",
+          "payload_sources": [
+            {
+              "configured_signal_id": 92,
+              "classification": "extracted_group_bytes",
+              "wire_field": "B0..B7 opaque",
+              "bit_length": 64,
+              "destination": {
+                "address": "0xFEBE5216",
+                "width_bytes": 8,
+                "object": "COM signal 92 destination",
+                "ram_path": "COM 0xFEBE4AB7 -> stack -> previous 0xFEBE50D6 -> qualified 0xFEBE5116 -> committed 0xFEBE5216"
+              },
+              "consumer_functions": []
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 8,
+          "rule_address": "0x023138",
+          "can_id": "0x016",
+          "id_format": "standard",
+          "label": "0x11",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none in EPS RAM: fixed crypto banks 0xFEBE50C6..0xFEBE5245; the bytes become ICU-S key material only through the UDS-activated collected key update",
+          "payload_sources": [
+            {
+              "configured_signal_id": 93,
+              "classification": "extracted_group_bytes",
+              "wire_field": "B0..B7 opaque",
+              "bit_length": 64,
+              "destination": {
+                "address": "0xFEBE521E",
+                "width_bytes": 8,
+                "object": "COM signal 93 destination",
+                "ram_path": "COM 0xFEBE4ABF -> stack -> previous 0xFEBE50DE -> qualified 0xFEBE511E -> committed 0xFEBE521E"
+              },
+              "consumer_functions": []
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 9,
+          "rule_address": "0x023148",
+          "can_id": "0x017",
+          "id_format": "standard",
+          "label": "0x12",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none in EPS RAM: fixed crypto banks 0xFEBE50C6..0xFEBE5245; the bytes become ICU-S key material only through the UDS-activated collected key update",
+          "payload_sources": [
+            {
+              "configured_signal_id": 94,
+              "classification": "extracted_group_bytes",
+              "wire_field": "B0..B7 opaque",
+              "bit_length": 64,
+              "destination": {
+                "address": "0xFEBE5226",
+                "width_bytes": 8,
+                "object": "COM signal 94 destination",
+                "ram_path": "COM 0xFEBE4AC7 -> stack -> previous 0xFEBE50E6 -> qualified 0xFEBE5126 -> committed 0xFEBE5226"
+              },
+              "consumer_functions": []
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 10,
+          "rule_address": "0x023158",
+          "can_id": "0x018",
+          "id_format": "standard",
+          "label": "0x13",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none in EPS RAM: fixed crypto banks 0xFEBE50C6..0xFEBE5245; the bytes become ICU-S key material only through the UDS-activated collected key update",
+          "payload_sources": [
+            {
+              "configured_signal_id": 95,
+              "classification": "extracted_group_bytes",
+              "wire_field": "B0..B7 opaque",
+              "bit_length": 64,
+              "destination": {
+                "address": "0xFEBE522E",
+                "width_bytes": 8,
+                "object": "COM signal 95 destination",
+                "ram_path": "COM 0xFEBE4ACF -> stack -> previous 0xFEBE50EE -> qualified 0xFEBE512E -> committed 0xFEBE522E"
+              },
+              "consumer_functions": []
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 11,
+          "rule_address": "0x023168",
+          "can_id": "0x019",
+          "id_format": "standard",
+          "label": "0x14",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none in EPS RAM: fixed crypto banks 0xFEBE50C6..0xFEBE5245; the bytes become ICU-S key material only through the UDS-activated collected key update",
+          "payload_sources": [
+            {
+              "configured_signal_id": 96,
+              "classification": "extracted_group_bytes",
+              "wire_field": "B0..B7 opaque",
+              "bit_length": 64,
+              "destination": {
+                "address": "0xFEBE5236",
+                "width_bytes": 8,
+                "object": "COM signal 96 destination",
+                "ram_path": "COM 0xFEBE4AD7 -> stack -> previous 0xFEBE50F6 -> qualified 0xFEBE5136 -> committed 0xFEBE5236"
+              },
+              "consumer_functions": []
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 12,
+          "rule_address": "0x023178",
+          "can_id": "0x01A",
+          "id_format": "standard",
+          "label": "0x15",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none in EPS RAM: fixed crypto banks 0xFEBE50C6..0xFEBE5245; the bytes become ICU-S key material only through the UDS-activated collected key update",
+          "payload_sources": [
+            {
+              "configured_signal_id": 97,
+              "classification": "extracted_group_bytes",
+              "wire_field": "B0..B7 opaque",
+              "bit_length": 64,
+              "destination": {
+                "address": "0xFEBE523E",
+                "width_bytes": 8,
+                "object": "COM signal 97 destination",
+                "ram_path": "COM 0xFEBE4ADF -> stack -> previous 0xFEBE50FE -> qualified 0xFEBE513E -> committed 0xFEBE523E"
+              },
+              "consumer_functions": []
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 13,
+          "rule_address": "0x023188",
+          "can_id": "0x01B",
+          "id_format": "standard",
+          "label": "0x16",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none in EPS RAM: two fixed selector/mode cells 0xFEBE509F/0xFEBE50A0",
+          "payload_sources": [
+            {
+              "configured_signal_id": 98,
+              "classification": "extracted_bitfield_table_driven",
+              "wire_field": "B0",
+              "bit_length": 8,
+              "destination": {
+                "address": "0xFEBE509F",
+                "width_bytes": 1,
+                "object": "COM signal 98 destination",
+                "ram_path": null
+              },
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 99,
+              "classification": "extracted_bitfield_table_driven",
+              "wire_field": "B1",
+              "bit_length": 8,
+              "destination": {
+                "address": "0xFEBE50A0",
+                "width_bytes": 1,
+                "object": "COM signal 99 destination",
+                "ram_path": null
+              },
+              "consumer_functions": []
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 14,
+          "rule_address": "0x023198",
+          "can_id": "0x01C",
+          "id_format": "standard",
+          "label": "0x17",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none in EPS RAM: fixed crypto-test banks 0xFEBE5146..0xFEBE51A5",
+          "payload_sources": [
+            {
+              "configured_signal_id": 100,
+              "classification": "extracted_group_bytes",
+              "wire_field": "B0..B7 opaque",
+              "bit_length": 64,
+              "destination": {
+                "address": "0xFEBE5186",
+                "width_bytes": 8,
+                "object": "COM signal 100 destination",
+                "ram_path": "COM 0xFEBE4AEF -> stack -> previous 0xFEBE5146 -> qualified 0xFEBE5166 -> committed 0xFEBE5186"
+              },
+              "consumer_functions": []
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 15,
+          "rule_address": "0x0231A8",
+          "can_id": "0x01D",
+          "id_format": "standard",
+          "label": "0x18",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none in EPS RAM: fixed crypto-test banks 0xFEBE5146..0xFEBE51A5",
+          "payload_sources": [
+            {
+              "configured_signal_id": 101,
+              "classification": "extracted_group_bytes",
+              "wire_field": "B0..B7 opaque",
+              "bit_length": 64,
+              "destination": {
+                "address": "0xFEBE518E",
+                "width_bytes": 8,
+                "object": "COM signal 101 destination",
+                "ram_path": "COM 0xFEBE4AF7 -> stack -> previous 0xFEBE514E -> qualified 0xFEBE516E -> committed 0xFEBE518E"
+              },
+              "consumer_functions": []
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 16,
+          "rule_address": "0x0231B8",
+          "can_id": "0x01E",
+          "id_format": "standard",
+          "label": "0x19",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none in EPS RAM: fixed crypto-test banks 0xFEBE5146..0xFEBE51A5",
+          "payload_sources": [
+            {
+              "configured_signal_id": 102,
+              "classification": "extracted_group_bytes",
+              "wire_field": "B0..B7 opaque",
+              "bit_length": 64,
+              "destination": {
+                "address": "0xFEBE5196",
+                "width_bytes": 8,
+                "object": "COM signal 102 destination",
+                "ram_path": "COM 0xFEBE4AFF -> stack -> previous 0xFEBE5156 -> qualified 0xFEBE5176 -> committed 0xFEBE5196"
+              },
+              "consumer_functions": []
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 17,
+          "rule_address": "0x0231C8",
+          "can_id": "0x01F",
+          "id_format": "standard",
+          "label": "0x1A",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none in EPS RAM: fixed crypto-test banks 0xFEBE5146..0xFEBE51A5",
+          "payload_sources": [
+            {
+              "configured_signal_id": 103,
+              "classification": "extracted_group_bytes",
+              "wire_field": "B0..B7 opaque",
+              "bit_length": 64,
+              "destination": {
+                "address": "0xFEBE519E",
+                "width_bytes": 8,
+                "object": "COM signal 103 destination",
+                "ram_path": "COM 0xFEBE4B07 -> stack -> previous 0xFEBE515E -> qualified 0xFEBE517E -> committed 0xFEBE519E"
+              },
+              "consumer_functions": []
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 18,
+          "rule_address": "0x0231D8",
+          "can_id": "0x0D0",
+          "id_format": "standard",
+          "label": "0x1B",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none: fixed destinations (COM buffer 0xFEBE4B0F..+7 and GP-relative signal cells)",
+          "payload_sources": [
+            {
+              "configured_signal_id": 104,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 105,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 106,
+              "classification": "extracted_bitfield",
+              "wire_field": "B2[6]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE8007",
+                "width_bytes": 1,
+                "object": "COM signal 106 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 107,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 108,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 109,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 110,
+              "classification": "extracted_bitfield",
+              "wire_field": "B2[2:0]",
+              "bit_length": 3,
+              "destination": {
+                "address": "0xFEBE8006",
+                "width_bytes": 1,
+                "object": "COM signal 110 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x0004E52E",
+                  "name": "rdbi_1182_callback"
+                },
+                {
+                  "address": "0x00053DB8",
+                  "name": "build_diagnostic_capture_kind10"
+                },
+                {
+                  "address": "0x00053FFE",
+                  "name": "build_diagnostic_capture_kind4"
+                },
+                {
+                  "address": "0x00054244",
+                  "name": "build_diagnostic_capture_default"
+                },
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 111,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 112,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 113,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 114,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 19,
+          "rule_address": "0x0231E8",
+          "can_id": "0x3BF",
+          "id_format": "standard",
+          "label": "0x1C",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none: fixed destinations (COM buffer 0xFEBE4B17..+7 and GP-relative signal cells)",
+          "payload_sources": [
+            {
+              "configured_signal_id": 115,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 116,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 117,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 118,
+              "classification": "extracted_bitfield",
+              "wire_field": "B0[4]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE800D",
+                "width_bytes": 1,
+                "object": "COM signal 118 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 119,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 120,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 121,
+              "classification": "extracted_bitfield",
+              "wire_field": "B2[0]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE800C",
+                "width_bytes": 1,
+                "object": "COM signal 121 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00049D5E",
+                  "name": "classify_latched_source_zero_values_49d5e"
+                },
+                {
+                  "address": "0x0004ADCE",
+                  "name": "pack_four_source_bytes_equal_to_one_4adce"
+                },
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 122,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 123,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 20,
+          "rule_address": "0x0231F8",
+          "can_id": "0x127",
+          "id_format": "standard",
+          "label": "0x1D",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none: fixed destinations (COM buffer 0xFEBE4B1F..+7 and GP-relative signal cells)",
+          "payload_sources": [
+            {
+              "configured_signal_id": 124,
+              "classification": "extracted_bitfield",
+              "wire_field": "B0[7:2]",
+              "bit_length": 6,
+              "destination": {
+                "address": "0xFEBE8012",
+                "width_bytes": 1,
+                "object": "COM signal 124 destination",
+                "ram_path": null
+              },
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 125,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 126,
+              "classification": "extracted_bitfield",
+              "wire_field": "B1[3]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE8013",
+                "width_bytes": 1,
+                "object": "COM signal 126 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 127,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 128,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 129,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 130,
+              "classification": "extracted_bitfield",
+              "wire_field": "B3[2:0]..B4[7:0]",
+              "bit_length": 11,
+              "destination": {
+                "address": "0xFEBE800E",
+                "width_bytes": 2,
+                "object": "COM signal 130 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 131,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 132,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 133,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 21,
+          "rule_address": "0x023208",
+          "can_id": "0x115",
+          "id_format": "standard",
+          "label": "0x1E",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none: fixed destinations (COM buffer 0xFEBE4B27..+7 and GP-relative signal cells)",
+          "payload_sources": [
+            {
+              "configured_signal_id": 134,
+              "classification": "extracted_bitfield",
+              "wire_field": "B0..B1 BE16",
+              "bit_length": 16,
+              "destination": {
+                "address": "0xFEBE8014",
+                "width_bytes": 2,
+                "object": "COM signal 134 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 135,
+              "classification": "extracted_bitfield",
+              "wire_field": "B3[1]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE8016",
+                "width_bytes": 1,
+                "object": "COM signal 135 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00049D5E",
+                  "name": "classify_latched_source_zero_values_49d5e"
+                },
+                {
+                  "address": "0x0004ADCE",
+                  "name": "pack_four_source_bytes_equal_to_one_4adce"
+                },
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 136,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 137,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 22,
+          "rule_address": "0x023218",
+          "can_id": "0x116",
+          "id_format": "standard",
+          "label": "0x1F",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none: fixed destinations (COM buffer 0xFEBE4B2F..+7 and GP-relative signal cells)",
+          "payload_sources": [
+            {
+              "configured_signal_id": 138,
+              "classification": "extracted_bitfield",
+              "wire_field": "B0",
+              "bit_length": 8,
+              "destination": {
+                "address": "0xFEBE8019",
+                "width_bytes": 1,
+                "object": "COM signal 138 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 139,
+              "classification": "extracted_bitfield",
+              "wire_field": "B2[7]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE801A",
+                "width_bytes": 1,
+                "object": "COM signal 139 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 23,
+          "rule_address": "0x023228",
+          "can_id": "0x1C5",
+          "id_format": "standard",
+          "label": "0x20",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none: fixed destinations (COM buffer 0xFEBE4B37..+7 and GP-relative signal cells)",
+          "payload_sources": [
+            {
+              "configured_signal_id": 140,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 141,
+              "classification": "extracted_bitfield",
+              "wire_field": "B2..B3 BE16",
+              "bit_length": 16,
+              "destination": {
+                "address": "0xFEBE801E",
+                "width_bytes": 2,
+                "object": "COM signal 141 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 142,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 143,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 24,
+          "rule_address": "0x023238",
+          "can_id": "0x294",
+          "id_format": "standard",
+          "label": "0x21",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none: fixed destinations (COM buffer 0xFEBE4B3F..+7 and GP-relative signal cells)",
+          "payload_sources": [
+            {
+              "configured_signal_id": 144,
+              "classification": "extracted_bitfield",
+              "wire_field": "B0[7:4]",
+              "bit_length": 4,
+              "destination": {
+                "address": "0xFEBE8022",
+                "width_bytes": 1,
+                "object": "COM signal 144 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 145,
+              "classification": "extracted_bitfield",
+              "wire_field": "B0[3:0]",
+              "bit_length": 4,
+              "destination": {
+                "address": "0xFEBE8023",
+                "width_bytes": 1,
+                "object": "COM signal 145 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 146,
+              "classification": "extracted_bitfield",
+              "wire_field": "B1[7:4]",
+              "bit_length": 4,
+              "destination": {
+                "address": "0xFEBE8024",
+                "width_bytes": 1,
+                "object": "COM signal 146 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 147,
+              "classification": "extracted_bitfield",
+              "wire_field": "B1[3]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE8025",
+                "width_bytes": 1,
+                "object": "COM signal 147 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 148,
+              "classification": "extracted_bitfield",
+              "wire_field": "B1[2:1]",
+              "bit_length": 2,
+              "destination": {
+                "address": "0xFEBE8029",
+                "width_bytes": 1,
+                "object": "COM signal 148 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 149,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 150,
+              "classification": "extracted_bitfield",
+              "wire_field": "B2[7:4]",
+              "bit_length": 4,
+              "destination": {
+                "address": "0xFEBE8027",
+                "width_bytes": 1,
+                "object": "COM signal 150 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 151,
+              "classification": "extracted_bitfield",
+              "wire_field": "B2[3:0]",
+              "bit_length": 4,
+              "destination": {
+                "address": "0xFEBE8028",
+                "width_bytes": 1,
+                "object": "COM signal 151 destination",
+                "ram_path": null
+              },
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 152,
+              "classification": "extracted_bitfield",
+              "wire_field": "B3[3:0]",
+              "bit_length": 4,
+              "destination": {
+                "address": "0xFEBE802A",
+                "width_bytes": 1,
+                "object": "COM signal 152 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 153,
+              "classification": "extracted_bitfield",
+              "wire_field": "B4[7:4]",
+              "bit_length": 4,
+              "destination": {
+                "address": "0xFEBE8026",
+                "width_bytes": 1,
+                "object": "COM signal 153 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00047AC4",
+                  "name": "lookup_low_nibble_code_or_zero_47ac4"
+                },
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 154,
+              "classification": "extracted_bitfield",
+              "wire_field": "B4[3:0]",
+              "bit_length": 4,
+              "destination": {
+                "address": "0xFEBE802B",
+                "width_bytes": 1,
+                "object": "COM signal 154 destination",
+                "ram_path": null
+              },
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 155,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 156,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 25,
+          "rule_address": "0x023248",
+          "can_id": "0x51E",
+          "id_format": "standard",
+          "label": "0x22",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none: fixed destinations (COM buffer 0xFEBE4B47..+7 and GP-relative signal cells)",
+          "payload_sources": [
+            {
+              "configured_signal_id": 157,
+              "classification": "extracted_bitfield",
+              "wire_field": "B0[7]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE8031",
+                "width_bytes": 1,
+                "object": "COM signal 157 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 158,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 159,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 160,
+              "classification": "extracted_bitfield",
+              "wire_field": "B0[3:0]",
+              "bit_length": 4,
+              "destination": {
+                "address": "0xFEBE8030",
+                "width_bytes": 1,
+                "object": "COM signal 160 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 161,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 162,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 163,
+              "classification": "extracted_bitfield",
+              "wire_field": "B1[3:0]",
+              "bit_length": 4,
+              "destination": {
+                "address": "0xFEBE8033",
+                "width_bytes": 1,
+                "object": "COM signal 163 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 164,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 165,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 166,
+              "classification": "extracted_bitfield",
+              "wire_field": "B5[7:6]",
+              "bit_length": 2,
+              "destination": {
+                "address": "0xFEBE8032",
+                "width_bytes": 1,
+                "object": "COM signal 166 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 26,
+          "rule_address": "0x023258",
+          "can_id": "0x611",
+          "id_format": "standard",
+          "label": "0x23",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none: fixed destinations (COM buffer 0xFEBE4B4F..+7 and GP-relative signal cells)",
+          "payload_sources": [
+            {
+              "configured_signal_id": 167,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 168,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 169,
+              "classification": "extracted_bitfield",
+              "wire_field": "B3[5:4]",
+              "bit_length": 2,
+              "destination": {
+                "address": "0xFEBE8038",
+                "width_bytes": 1,
+                "object": "COM signal 169 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 170,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 171,
+              "classification": "extracted_bitfield",
+              "wire_field": "B4..B7 BE32",
+              "bit_length": 32,
+              "destination": {
+                "address": "0xFEBE8034",
+                "width_bytes": 4,
+                "object": "COM signal 171 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 27,
+          "rule_address": "0x023268",
+          "can_id": "0x2D1",
+          "id_format": "standard",
+          "label": "0x24",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none: fixed destinations (COM buffer 0xFEBE4B57..+7 and GP-relative signal cells)",
+          "payload_sources": [
+            {
+              "configured_signal_id": 172,
+              "classification": "extracted_bitfield",
+              "wire_field": "B0[0]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE803B",
+                "width_bytes": 1,
+                "object": "COM signal 172 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00049D5E",
+                  "name": "classify_latched_source_zero_values_49d5e"
+                },
+                {
+                  "address": "0x0004ADCE",
+                  "name": "pack_four_source_bytes_equal_to_one_4adce"
+                },
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 173,
+              "classification": "extracted_bitfield",
+              "wire_field": "B1[0]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE803C",
+                "width_bytes": 1,
+                "object": "COM signal 173 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x0004574C",
+                  "name": "classify_admitted_scalar_receive_condition"
+                },
+                {
+                  "address": "0x00049D5E",
+                  "name": "classify_latched_source_zero_values_49d5e"
+                },
+                {
+                  "address": "0x0004ADCE",
+                  "name": "pack_four_source_bytes_equal_to_one_4adce"
+                },
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 174,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 28,
+          "rule_address": "0x023278",
+          "can_id": "0x675",
+          "id_format": "standard",
+          "label": "0x25",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none: fixed destinations (COM buffer 0xFEBE4B5F..+7 and GP-relative signal cells)",
+          "payload_sources": [
+            {
+              "configured_signal_id": 175,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 176,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 177,
+              "classification": "extracted_bitfield",
+              "wire_field": "B2",
+              "bit_length": 8,
+              "destination": {
+                "address": "0xFEBE803F",
+                "width_bytes": 1,
+                "object": "COM signal 177 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 178,
+              "classification": "extracted_bitfield",
+              "wire_field": "B3",
+              "bit_length": 8,
+              "destination": {
+                "address": "0xFEBE8040",
+                "width_bytes": 1,
+                "object": "COM signal 178 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 179,
+              "classification": "extracted_bitfield",
+              "wire_field": "B4",
+              "bit_length": 8,
+              "destination": {
+                "address": "0xFEBE8041",
+                "width_bytes": 1,
+                "object": "COM signal 179 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 180,
+              "classification": "extracted_bitfield",
+              "wire_field": "B5",
+              "bit_length": 8,
+              "destination": {
+                "address": "0xFEBE8042",
+                "width_bytes": 1,
+                "object": "COM signal 180 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 181,
+              "classification": "extracted_bitfield",
+              "wire_field": "B6",
+              "bit_length": 8,
+              "destination": {
+                "address": "0xFEBE8043",
+                "width_bytes": 1,
+                "object": "COM signal 181 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 182,
+              "classification": "extracted_bitfield",
+              "wire_field": "B7",
+              "bit_length": 8,
+              "destination": {
+                "address": "0xFEBE8044",
+                "width_bytes": 1,
+                "object": "COM signal 182 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 29,
+          "rule_address": "0x023288",
+          "can_id": "0x2E8",
+          "id_format": "standard",
+          "label": "0x26",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none: fixed destinations (COM buffer 0xFEBE4B67..+7 and GP-relative signal cells)",
+          "payload_sources": [
+            {
+              "configured_signal_id": 183,
+              "classification": "configured_no_com_unpacker",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 30,
+          "rule_address": "0x023298",
+          "can_id": "0x025",
+          "id_format": "standard",
+          "label": "0x27",
+          "fifo": "RFIFO1",
+          "descriptor_length": 32,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none: fixed destinations (COM buffer 0xFEBE4B6F..+31 and GP-relative signal cells)",
+          "payload_sources": [
+            {
+              "configured_signal_id": 184,
+              "classification": "extracted_bitfield",
+              "wire_field": "B0[7]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE804C",
+                "width_bytes": 1,
+                "object": "COM signal 184 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 185,
+              "classification": "extracted_bitfield",
+              "wire_field": "B0[6]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE804D",
+                "width_bytes": 1,
+                "object": "COM signal 185 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x0003D472",
+                  "name": "classify_received_content_a"
+                },
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 186,
+              "classification": "extracted_bitfield",
+              "wire_field": "B0[5]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE804E",
+                "width_bytes": 1,
+                "object": "COM signal 186 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x0003D50C",
+                  "name": "classify_received_content_b"
+                },
+                {
+                  "address": "0x00047AE0",
+                  "name": "clamp_sample_8048_and_compute_enable_gate_47ae0"
+                },
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 187,
+              "classification": "extracted_bitfield",
+              "wire_field": "B0[3:0]..B1[7:0]",
+              "bit_length": 12,
+              "destination": {
+                "address": "0xFEBE8048",
+                "width_bytes": 2,
+                "object": "COM signal 187 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00047AE0",
+                  "name": "clamp_sample_8048_and_compute_enable_gate_47ae0"
+                },
+                {
+                  "address": "0x0004AC7A",
+                  "name": "classify_two_magnitudes_with_source_gates_4ac7a"
+                },
+                {
+                  "address": "0x0004C14E",
+                  "name": "pack_status_and_scaled_words_into_eight_bytes_4c14e"
+                },
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 188,
+              "classification": "extracted_bitfield",
+              "wire_field": "B4[7:4]",
+              "bit_length": 4,
+              "destination": {
+                "address": "0xFEBE804F",
+                "width_bytes": 1,
+                "object": "COM signal 188 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 189,
+              "classification": "extracted_bitfield",
+              "wire_field": "B4[3:0]..B5[7:0]",
+              "bit_length": 12,
+              "destination": {
+                "address": "0xFEBE804A",
+                "width_bytes": 2,
+                "object": "COM signal 189 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x0004E5D2",
+                  "name": "rdbi_1186_callback"
+                },
+                {
+                  "address": "0x00053DB8",
+                  "name": "build_diagnostic_capture_kind10"
+                },
+                {
+                  "address": "0x00053FFE",
+                  "name": "build_diagnostic_capture_kind4"
+                },
+                {
+                  "address": "0x00054244",
+                  "name": "build_diagnostic_capture_default"
+                },
+                {
+                  "address": "0x00056336",
+                  "name": "populate_extended_capture_record_mode10_56336"
+                },
+                {
+                  "address": "0x000564CE",
+                  "name": "populate_extended_capture_record_mode50_564ce"
+                },
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 190,
+              "classification": "extracted_bitfield",
+              "wire_field": "B6[3]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE8050",
+                "width_bytes": 1,
+                "object": "COM signal 190 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x0004C490",
+                  "name": "assemble_scaled_signed_status_fields_and_change_latch_4c490"
+                },
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 191,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 192,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 193,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 31,
+          "rule_address": "0x0232A8",
+          "can_id": "0x0AA",
+          "id_format": "standard",
+          "label": "0x28",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none: fixed destinations (COM buffer 0xFEBE4B8F..+7 and GP-relative signal cells)",
+          "payload_sources": [
+            {
+              "configured_signal_id": 194,
+              "classification": "extracted_bitfield",
+              "wire_field": "B0[7]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE8064",
+                "width_bytes": 1,
+                "object": "COM signal 194 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 195,
+              "classification": "extracted_bitfield",
+              "wire_field": "B0[6:0]..B1[7:0]",
+              "bit_length": 15,
+              "destination": {
+                "address": "0xFEBE8054",
+                "width_bytes": 2,
+                "object": "COM signal 195 destination",
+                "ram_path": null
+              },
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 196,
+              "classification": "extracted_bitfield",
+              "wire_field": "B2[7]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE8065",
+                "width_bytes": 1,
+                "object": "COM signal 196 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 197,
+              "classification": "extracted_bitfield",
+              "wire_field": "B2[6:0]..B3[7:0]",
+              "bit_length": 15,
+              "destination": {
+                "address": "0xFEBE8056",
+                "width_bytes": 2,
+                "object": "COM signal 197 destination",
+                "ram_path": null
+              },
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 198,
+              "classification": "extracted_bitfield",
+              "wire_field": "B4[7]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE8066",
+                "width_bytes": 1,
+                "object": "COM signal 198 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 199,
+              "classification": "extracted_bitfield",
+              "wire_field": "B4[6:0]..B5[7:0]",
+              "bit_length": 15,
+              "destination": {
+                "address": "0xFEBE8058",
+                "width_bytes": 2,
+                "object": "COM signal 199 destination",
+                "ram_path": null
+              },
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 200,
+              "classification": "extracted_bitfield",
+              "wire_field": "B6[7]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE8067",
+                "width_bytes": 1,
+                "object": "COM signal 200 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 201,
+              "classification": "extracted_bitfield",
+              "wire_field": "B6[6:0]..B7[7:0]",
+              "bit_length": 15,
+              "destination": {
+                "address": "0xFEBE805A",
+                "width_bytes": 2,
+                "object": "COM signal 201 destination",
+                "ram_path": null
+              },
+              "consumer_functions": []
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 32,
+          "rule_address": "0x0232B8",
+          "can_id": "0x101",
+          "id_format": "standard",
+          "label": "0x29",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none: fixed destinations (COM buffer 0xFEBE4B97..+7 and GP-relative signal cells)",
+          "payload_sources": [
+            {
+              "configured_signal_id": 202,
+              "classification": "extracted_bitfield",
+              "wire_field": "B0[7]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE806D",
+                "width_bytes": 1,
+                "object": "COM signal 202 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 203,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 204,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 205,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 206,
+              "classification": "extracted_bitfield",
+              "wire_field": "B0[3]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE806C",
+                "width_bytes": 1,
+                "object": "COM signal 206 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 207,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 208,
+              "classification": "extracted_bitfield",
+              "wire_field": "B2[3]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE8070",
+                "width_bytes": 1,
+                "object": "COM signal 208 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 209,
+              "classification": "extracted_bitfield",
+              "wire_field": "B2[1:0]..B3[7:0]",
+              "bit_length": 10,
+              "destination": {
+                "address": "0xFEBE806A",
+                "width_bytes": 2,
+                "object": "COM signal 209 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 210,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 33,
+          "rule_address": "0x0232C8",
+          "can_id": "0x0D5",
+          "id_format": "standard",
+          "label": "0x2A",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none: fixed destinations (COM buffer 0xFEBE4B9F..+7 and GP-relative signal cells)",
+          "payload_sources": [
+            {
+              "configured_signal_id": 211,
+              "classification": "extracted_bitfield",
+              "wire_field": "B0[3]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE8076",
+                "width_bytes": 1,
+                "object": "COM signal 211 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 212,
+              "classification": "extracted_bitfield",
+              "wire_field": "B1..B2 BE16",
+              "bit_length": 16,
+              "destination": {
+                "address": "0xFEBE8072",
+                "width_bytes": 2,
+                "object": "COM signal 212 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 213,
+              "classification": "extracted_bitfield",
+              "wire_field": "B3..B4 BE16",
+              "bit_length": 16,
+              "destination": {
+                "address": "0xFEBE8074",
+                "width_bytes": 2,
+                "object": "COM signal 213 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 214,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 34,
+          "rule_address": "0x0232D8",
+          "can_id": "0x13B",
+          "id_format": "standard",
+          "label": "0x2B",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none: fixed destinations (COM buffer 0xFEBE4BA7..+7 and GP-relative signal cells)",
+          "payload_sources": [
+            {
+              "configured_signal_id": 215,
+              "classification": "extracted_bitfield",
+              "wire_field": "B0[7:3]",
+              "bit_length": 5,
+              "destination": {
+                "address": "0xFEBE8079",
+                "width_bytes": 1,
+                "object": "COM signal 215 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 216,
+              "classification": "extracted_bitfield",
+              "wire_field": "B0[2]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE807A",
+                "width_bytes": 1,
+                "object": "COM signal 216 destination",
+                "ram_path": null
+              },
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 217,
+              "classification": "extracted_bitfield",
+              "wire_field": "B0[1]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE807B",
+                "width_bytes": 1,
+                "object": "COM signal 217 destination",
+                "ram_path": null
+              },
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 218,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 219,
+              "classification": "extracted_bitfield",
+              "wire_field": "B1[7:2]",
+              "bit_length": 6,
+              "destination": {
+                "address": "0xFEBE807C",
+                "width_bytes": 1,
+                "object": "COM signal 219 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 220,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 221,
+              "classification": "extracted_bitfield",
+              "wire_field": "B1[0]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE807D",
+                "width_bytes": 1,
+                "object": "COM signal 221 destination",
+                "ram_path": null
+              },
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 222,
+              "classification": "extracted_bitfield",
+              "wire_field": "B2[6]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE807E",
+                "width_bytes": 1,
+                "object": "COM signal 222 destination",
+                "ram_path": null
+              },
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 223,
+              "classification": "extracted_bitfield",
+              "wire_field": "B2[5]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE807F",
+                "width_bytes": 1,
+                "object": "COM signal 223 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 224,
+              "classification": "extracted_bitfield",
+              "wire_field": "B2[3:0]",
+              "bit_length": 4,
+              "destination": {
+                "address": "0xFEBE8082",
+                "width_bytes": 1,
+                "object": "COM signal 224 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 225,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 226,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 35,
+          "rule_address": "0x0232E8",
+          "can_id": "0x090",
+          "id_format": "standard",
+          "label": "0x2C",
+          "fifo": "RFIFO1",
+          "descriptor_length": 32,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none: fixed destinations (COM buffer 0xFEBE4BAF..+31 and GP-relative signal cells)",
+          "payload_sources": [
+            {
+              "configured_signal_id": 227,
+              "classification": "extracted_bitfield",
+              "wire_field": "B0[7]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE8090",
+                "width_bytes": 1,
+                "object": "COM signal 227 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 228,
+              "classification": "extracted_bitfield",
+              "wire_field": "B0[6]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE8091",
+                "width_bytes": 1,
+                "object": "COM signal 228 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 229,
+              "classification": "extracted_bitfield",
+              "wire_field": "B0[1:0]..B1[7:0]",
+              "bit_length": 10,
+              "destination": {
+                "address": "0xFEBE8084",
+                "width_bytes": 2,
+                "object": "COM signal 229 destination",
+                "ram_path": null
+              },
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 230,
+              "classification": "extracted_bitfield",
+              "wire_field": "B2[7]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE8092",
+                "width_bytes": 1,
+                "object": "COM signal 230 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 231,
+              "classification": "extracted_bitfield",
+              "wire_field": "B2[6]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE8093",
+                "width_bytes": 1,
+                "object": "COM signal 231 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 232,
+              "classification": "extracted_bitfield",
+              "wire_field": "B2[1:0]..B3[7:0]",
+              "bit_length": 10,
+              "destination": {
+                "address": "0xFEBE8086",
+                "width_bytes": 2,
+                "object": "COM signal 232 destination",
+                "ram_path": null
+              },
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 233,
+              "classification": "extracted_bitfield",
+              "wire_field": "B4[7]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE8094",
+                "width_bytes": 1,
+                "object": "COM signal 233 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 234,
+              "classification": "extracted_bitfield",
+              "wire_field": "B4[6]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE8095",
+                "width_bytes": 1,
+                "object": "COM signal 234 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 235,
+              "classification": "extracted_bitfield",
+              "wire_field": "B4[1:0]..B5[7:0]",
+              "bit_length": 10,
+              "destination": {
+                "address": "0xFEBE8088",
+                "width_bytes": 2,
+                "object": "COM signal 235 destination",
+                "ram_path": null
+              },
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 236,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 237,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 238,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 239,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 240,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 241,
+              "classification": "extracted_bitfield",
+              "wire_field": "B28[7:4]",
+              "bit_length": 4,
+              "destination": {
+                "address": "0xFEBE8096",
+                "width_bytes": 1,
+                "object": "COM signal 241 destination",
+                "ram_path": null
+              },
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 242,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 36,
+          "rule_address": "0x0232F8",
+          "can_id": "0x0D7",
+          "id_format": "standard",
+          "label": "0x2D",
+          "fifo": "RFIFO1",
+          "descriptor_length": 32,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none: fixed destinations (COM buffer 0xFEBE4BCF..+31 and GP-relative signal cells)",
+          "payload_sources": [
+            {
+              "configured_signal_id": 243,
+              "classification": "extracted_bitfield",
+              "wire_field": "B0[7]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE80A0",
+                "width_bytes": 1,
+                "object": "COM signal 243 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00035A06",
+                  "name": "check_learned_quad_action_state_thresholds_35a06"
+                },
+                {
+                  "address": "0x0004AAE8",
+                  "name": "step_change_triggered_monitor_and_encode_status_4aae8"
+                },
+                {
+                  "address": "0x0004FFFE",
+                  "name": "write_2013_precondition"
+                },
+                {
+                  "address": "0x00050042",
+                  "name": "write_2014_precondition"
+                },
+                {
+                  "address": "0x00050568",
+                  "name": "diag_routine_1109_admit"
+                },
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                },
+                {
+                  "address": "0x000FCC4E",
+                  "name": "snapshot_calibration_and_admission_to_f300_block_fcc4e"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 244,
+              "classification": "extracted_bitfield",
+              "wire_field": "B0[6]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE80A1",
+                "width_bytes": 1,
+                "object": "COM signal 244 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 245,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 246,
+              "classification": "extracted_bitfield",
+              "wire_field": "B1..B2 BE16",
+              "bit_length": 16,
+              "destination": {
+                "address": "0xFEBE809A",
+                "width_bytes": 2,
+                "object": "COM signal 246 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x0004E5A8",
+                  "name": "did_1185_can_vehicle_speed_sp1"
+                },
+                {
+                  "address": "0x00053DB8",
+                  "name": "build_diagnostic_capture_kind10"
+                },
+                {
+                  "address": "0x00053FFE",
+                  "name": "build_diagnostic_capture_kind4"
+                },
+                {
+                  "address": "0x00054244",
+                  "name": "build_diagnostic_capture_default"
+                },
+                {
+                  "address": "0x00056336",
+                  "name": "populate_extended_capture_record_mode10_56336"
+                },
+                {
+                  "address": "0x000564CE",
+                  "name": "populate_extended_capture_record_mode50_564ce"
+                },
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 247,
+              "classification": "extracted_bitfield",
+              "wire_field": "B3..B4 BE16",
+              "bit_length": 16,
+              "destination": {
+                "address": "0xFEBE809C",
+                "width_bytes": 2,
+                "object": "COM signal 247 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 248,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 249,
+              "classification": "extracted_bitfield",
+              "wire_field": "B28[7:4]",
+              "bit_length": 4,
+              "destination": {
+                "address": "0xFEBE80A3",
+                "width_bytes": 1,
+                "object": "COM signal 249 destination",
+                "ram_path": null
+              },
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 250,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 37,
+          "rule_address": "0x023308",
+          "can_id": "0x0D8",
+          "id_format": "standard",
+          "label": "0x2E",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none: fixed destinations (COM buffer 0xFEBE4BEF..+7 and GP-relative signal cells)",
+          "payload_sources": [
+            {
+              "configured_signal_id": 251,
+              "classification": "extracted_bitfield",
+              "wire_field": "B2",
+              "bit_length": 8,
+              "destination": {
+                "address": "0xFEBE80A8",
+                "width_bytes": 1,
+                "object": "COM signal 251 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 252,
+              "classification": "extracted_bitfield",
+              "wire_field": "B3",
+              "bit_length": 8,
+              "destination": {
+                "address": "0xFEBE80A9",
+                "width_bytes": 1,
+                "object": "COM signal 252 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 253,
+              "classification": "extracted_bitfield",
+              "wire_field": "B5",
+              "bit_length": 8,
+              "destination": {
+                "address": "0xFEBE80AA",
+                "width_bytes": 1,
+                "object": "COM signal 253 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 254,
+              "classification": "extracted_bitfield",
+              "wire_field": "B6",
+              "bit_length": 8,
+              "destination": {
+                "address": "0xFEBE80AB",
+                "width_bytes": 1,
+                "object": "COM signal 254 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 38,
+          "rule_address": "0x023318",
+          "can_id": "0x64F",
+          "id_format": "standard",
+          "label": "0x2F",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none: fixed destinations (COM buffer 0xFEBE4BF7..+7 and GP-relative signal cells)",
+          "payload_sources": [
+            {
+              "configured_signal_id": 255,
+              "classification": "extracted_bitfield",
+              "wire_field": "B2[7:0]..B3[7:0]..B4[7:6]",
+              "bit_length": 18,
+              "destination": {
+                "address": "0xFEBE80AC",
+                "width_bytes": 4,
+                "object": "COM signal 255 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 256,
+              "classification": "extracted_bitfield",
+              "wire_field": "B4[5]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE80B4",
+                "width_bytes": 1,
+                "object": "COM signal 256 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 257,
+              "classification": "extracted_bitfield",
+              "wire_field": "B4[1:0]..B5[7:0]..B6[7:0]",
+              "bit_length": 18,
+              "destination": {
+                "address": "0xFEBE80B0",
+                "width_bytes": 4,
+                "object": "COM signal 257 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x0004ABBE",
+                  "name": "scale_word_80b0_with_sentinel_to_signed_halfword_4abbe"
+                },
+                {
+                  "address": "0x0004AC7A",
+                  "name": "classify_two_magnitudes_with_source_gates_4ac7a"
+                },
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 258,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 39,
+          "rule_address": "0x023328",
+          "can_id": "0x0B6",
+          "id_format": "standard",
+          "label": "0x30",
+          "fifo": "RFIFO1",
+          "descriptor_length": 32,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none: fixed destinations (COM buffer 0xFEBE4BFF..+31 and GP-relative signal cells)",
+          "payload_sources": [
+            {
+              "configured_signal_id": 259,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 260,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 261,
+              "classification": "extracted_bitfield",
+              "wire_field": "B3[5:0]",
+              "bit_length": 6,
+              "destination": {
+                "address": "0xFEBE80BC",
+                "width_bytes": 1,
+                "object": "COM signal 261 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 262,
+              "classification": "extracted_bitfield",
+              "wire_field": "B4..B5 BE16",
+              "bit_length": 16,
+              "destination": {
+                "address": "0xFEBE80B8",
+                "width_bytes": 2,
+                "object": "COM signal 262 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 263,
+              "classification": "extracted_bitfield",
+              "wire_field": "B6[7]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE80CB",
+                "width_bytes": 1,
+                "object": "COM signal 263 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 264,
+              "classification": "extracted_bitfield",
+              "wire_field": "B6[6:4]",
+              "bit_length": 3,
+              "destination": {
+                "address": "0xFEBE80BE",
+                "width_bytes": 1,
+                "object": "COM signal 264 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 265,
+              "classification": "extracted_bitfield",
+              "wire_field": "B6[2]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE80C0",
+                "width_bytes": 1,
+                "object": "COM signal 265 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 266,
+              "classification": "extracted_bitfield",
+              "wire_field": "B6[1:0]",
+              "bit_length": 2,
+              "destination": {
+                "address": "0xFEBE80C1",
+                "width_bytes": 1,
+                "object": "COM signal 266 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 267,
+              "classification": "extracted_bitfield",
+              "wire_field": "B7[7:6]",
+              "bit_length": 2,
+              "destination": {
+                "address": "0xFEBE80C2",
+                "width_bytes": 1,
+                "object": "COM signal 267 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 268,
+              "classification": "extracted_bitfield",
+              "wire_field": "B7[5:0]",
+              "bit_length": 6,
+              "destination": {
+                "address": "0xFEBE80C3",
+                "width_bytes": 1,
+                "object": "COM signal 268 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 269,
+              "classification": "extracted_bitfield",
+              "wire_field": "B8",
+              "bit_length": 8,
+              "destination": {
+                "address": "0xFEBE80C4",
+                "width_bytes": 1,
+                "object": "COM signal 269 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 270,
+              "classification": "extracted_bitfield",
+              "wire_field": "B9",
+              "bit_length": 8,
+              "destination": {
+                "address": "0xFEBE80C5",
+                "width_bytes": 1,
+                "object": "COM signal 270 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 271,
+              "classification": "extracted_bitfield",
+              "wire_field": "B10[7]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE80C6",
+                "width_bytes": 1,
+                "object": "COM signal 271 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 272,
+              "classification": "extracted_bitfield",
+              "wire_field": "B10[5]",
+              "bit_length": 1,
+              "destination": {
+                "address": "0xFEBE80CC",
+                "width_bytes": 1,
+                "object": "COM signal 272 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 273,
+              "classification": "extracted_bitfield",
+              "wire_field": "B10[2:0]",
+              "bit_length": 3,
+              "destination": {
+                "address": "0xFEBE80CA",
+                "width_bytes": 1,
+                "object": "COM signal 273 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 274,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 275,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 40,
+          "rule_address": "0x023338",
+          "can_id": "0x403",
+          "id_format": "standard",
+          "label": "0x31",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none: fixed destinations (COM buffer 0xFEBE4C1F..+7 and GP-relative signal cells)",
+          "payload_sources": [
+            {
+              "configured_signal_id": 276,
+              "classification": "extracted_bitfield",
+              "wire_field": "B0",
+              "bit_length": 8,
+              "destination": {
+                "address": "0xFEBE80CD",
+                "width_bytes": 1,
+                "object": "COM signal 276 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 277,
+              "classification": "extracted_bitfield",
+              "wire_field": "B1",
+              "bit_length": 8,
+              "destination": {
+                "address": "0xFEBE80CE",
+                "width_bytes": 1,
+                "object": "COM signal 277 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 278,
+              "classification": "extracted_bitfield",
+              "wire_field": "B2",
+              "bit_length": 8,
+              "destination": {
+                "address": "0xFEBE80D1",
+                "width_bytes": 1,
+                "object": "COM signal 278 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 41,
+          "rule_address": "0x023348",
+          "can_id": "0x490",
+          "id_format": "standard",
+          "label": "0x32",
+          "fifo": "RFIFO1",
+          "descriptor_length": 1,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none: fixed destinations (COM buffer 0xFEBE4C27..+0 and GP-relative signal cells)",
+          "payload_sources": [
+            {
+              "configured_signal_id": 279,
+              "classification": "configured_not_extracted_by_pdu_handler",
+              "wire_field": null,
+              "bit_length": null,
+              "destination": null,
+              "consumer_functions": []
+            },
+            {
+              "configured_signal_id": 280,
+              "classification": "extracted_bitfield",
+              "wire_field": "B0[6:4]",
+              "bit_length": 3,
+              "destination": {
+                "address": "0xFEBE80D2",
+                "width_bytes": 1,
+                "object": "COM signal 280 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            },
+            {
+              "configured_signal_id": 281,
+              "classification": "extracted_bitfield",
+              "wire_field": "B0[3:0]",
+              "bit_length": 4,
+              "destination": {
+                "address": "0xFEBE80D3",
+                "width_bytes": 1,
+                "object": "COM signal 281 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 42,
+          "rule_address": "0x023358",
+          "can_id": "0x1DA",
+          "id_format": "standard",
+          "label": "0x33",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "normal application (COM)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule",
+          "destination_summary": "none: fixed destinations (COM buffer 0xFEBE4C28..+7 and GP-relative signal cells)",
+          "payload_sources": [
+            {
+              "configured_signal_id": 282,
+              "classification": "extracted_bitfield",
+              "wire_field": "B0[3:0]",
+              "bit_length": 4,
+              "destination": {
+                "address": "0xFEBE80D6",
+                "width_bytes": 1,
+                "object": "COM signal 282 destination",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x00058074",
+                  "name": "publish_foreground_ecu_outputs"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 43,
+          "rule_address": "0x023368",
+          "can_id": "0x7A1",
+          "id_format": "standard",
+          "label": "0x34",
+          "fifo": "CFIFO5",
+          "descriptor_length": 8,
+          "demux_class": "diagnostic physical UDS (0x7A1 -> 0x7A9)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule; routed to CFIFO5 by GAFLP1 bit 13",
+          "destination_summary": "diagnostic only: SID 0x23 bounded RMBA read and SID 0x2E configured-DID write; no SID 0x2F/0x3D (baseline 13.4)",
+          "payload_sources": [
+            {
+              "configured_signal_id": null,
+              "classification": "transport_payload",
+              "wire_field": "B0..B7",
+              "bit_length": 64,
+              "destination": {
+                "address": null,
+                "width_bytes": 8,
+                "object": "CanTp/DCM receive buffers",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x0007A57A",
+                  "name": "cantp_receive_can_frame"
+                },
+                {
+                  "address": "0x0007A4E4",
+                  "name": "dispatch_cantp_received_frame_by_pci_nibble_7a4e4"
+                },
+                {
+                  "address": "0x000921D2",
+                  "name": "dcm_receive_indication"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 44,
+          "rule_address": "0x023378",
+          "can_id": "0x777",
+          "id_format": "standard",
+          "label": "0x35",
+          "fifo": "CFIFO5",
+          "descriptor_length": 8,
+          "demux_class": "diagnostic functional UDS (0x777)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule; routed to CFIFO5 by GAFLP1 bit 13",
+          "destination_summary": "diagnostic only: SID 0x23 bounded RMBA read and SID 0x2E configured-DID write; no SID 0x2F/0x3D (baseline 13.4)",
+          "payload_sources": [
+            {
+              "configured_signal_id": null,
+              "classification": "transport_payload",
+              "wire_field": "B0..B7",
+              "bit_length": 64,
+              "destination": {
+                "address": null,
+                "width_bytes": 8,
+                "object": "CanTp/DCM receive buffers",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x0007A57A",
+                  "name": "cantp_receive_can_frame"
+                },
+                {
+                  "address": "0x0007A4E4",
+                  "name": "dispatch_cantp_received_frame_by_pci_nibble_7a4e4"
+                },
+                {
+                  "address": "0x000921D2",
+                  "name": "dcm_receive_indication"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 45,
+          "rule_address": "0x023388",
+          "can_id": "0x7A0",
+          "id_format": "standard",
+          "label": "0x36",
+          "fifo": "CFIFO5",
+          "descriptor_length": 8,
+          "demux_class": "diagnostic secondary (0x7A0)",
+          "acceptance_constraints": "IDE=0 compared, RTR=0 compared, all 11 ID bits compared; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule; routed to CFIFO5 by GAFLP1 bit 13",
+          "destination_summary": "diagnostic only: SID 0x23 bounded RMBA read and SID 0x2E configured-DID write; no SID 0x2F/0x3D (baseline 13.4)",
+          "payload_sources": [
+            {
+              "configured_signal_id": null,
+              "classification": "transport_payload",
+              "wire_field": "B0..B7",
+              "bit_length": 64,
+              "destination": {
+                "address": null,
+                "width_bytes": 8,
+                "object": "CanTp/DCM receive buffers",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x0007A57A",
+                  "name": "cantp_receive_can_frame"
+                },
+                {
+                  "address": "0x0007A4E4",
+                  "name": "dispatch_cantp_received_frame_by_pci_nibble_7a4e4"
+                },
+                {
+                  "address": "0x000921D2",
+                  "name": "dcm_receive_indication"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "receive_eic_channel": 187,
+          "rule_index": 46,
+          "rule_address": "0x023398",
+          "can_id": "0x1FDC0002",
+          "id_format": "extended",
+          "label": "0x37",
+          "fifo": "RFIFO1",
+          "descriptor_length": 8,
+          "demux_class": "XCP (extended)",
+          "acceptance_constraints": "IDE=1 compared, RTR=0 compared, only ID bits 10:0 compared (GAFLMASK 0xC00007FF): the hardware rule admits every IDE=1 non-RTR frame with ID[10:0]=0x002; the software descriptor match narrows it to the exact 32-bit software id; GAFLDLC=0 (no hardware length rule); no FDF/BRS rule; an FD frame on the same ID is dropped at 0x81072 (no 0xDFDC0002 descriptor)",
+          "destination_summary": "read/write protocol: SET_MTA 0x82C62, DOWNLOAD 0x81FFE, MODIFY_BITS 0x820C4, SHORT_UPLOAD 0x82B1A; validator 0x98F2C admits 0xFEBF7C00..0xFEBFFBFF (baseline 13.5); command dispatch is compiled out by fixed CodeFlash[0x30D68]=0x5A",
+          "payload_sources": [
+            {
+              "configured_signal_id": null,
+              "classification": "xcp_staging_payload",
+              "wire_field": "B0..B7",
+              "bit_length": 64,
+              "destination": {
+                "address": "0xFEBE4C34",
+                "width_bytes": 64,
+                "object": "XCP staging buffer",
+                "ram_path": null
+              },
+              "consumer_functions": [
+                {
+                  "address": "0x000830C0",
+                  "name": "wrapper_predispatch_session_command_hook_830c0"
+                },
+                {
+                  "address": "0x00098E80",
+                  "name": "dispatch_eight_byte_command_reply_98e80"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "crosschecks": {
+    "timer_machine": {
+      "p_bus_cycle_cadence_agreement": false,
+      "contexts": 4,
+      "scheduler_tick_cadence": {
+        "status": "not comparable to elapsed timer cadence",
+        "observed_request_ticks": [
+          2,
+          2,
+          2,
+          2
+        ],
+        "reason": "each probe applies one explicit P-Bus clock event at scheduler tick 2; scheduler ticks order external events and are not elapsed-time units"
+      }
+    },
+    "retained_capture": {
+      "evidence_kind": "observed in a retained capture; foreground period inferred from the firmware's two-activation PDU cycle",
+      "source_artifact": "data/generated/camry_8965F3307000_eps_tx.json",
+      "capture_source": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba/rlog-8.zst",
+      "can_id": "0x030",
+      "frame_count": 6000,
+      "interval_count": 5999,
+      "duration_s": 59.993426,
+      "firmware_cycle_activations": 2,
+      "observed_frame_period_ms": 10.000571095182531,
+      "inferred_foreground_period_ms": 5.0002855475912655,
+      "firmware_foreground_period_ms": 5.0,
+      "difference_percent": 0.005710951825310673,
+      "agreement": true
+    }
+  },
+  "summary": {
+    "startup_call_count": 21,
+    "foreground_context_count": 4,
+    "enabled_isr_count": 9,
+    "isr_entries_missing_as_functions": 8,
+    "nondefault_eic_entries_missing_as_functions": 8,
+    "receive_interrupt_count": 1,
+    "receive_route_count": 47,
+    "configured_receive_signal_count": 225,
+    "extracted_receive_source_count": 130,
+    "stack_watermark_observed_contexts": 4,
+    "stack_watermark_findings": 0,
+    "receive_signal_classifications": {
+      "configured_no_com_unpacker": 1,
+      "configured_no_com_unpacker_secoc_pdu": 3,
+      "configured_not_extracted_by_pdu_handler": 91,
+      "extracted_bitfield": 116,
+      "extracted_bitfield_table_driven": 2,
+      "extracted_group_bytes": 12
+    }
+  },
+  "search_methods": [
+    {
+      "claim": "The startup EIC initializer unmasks these nine channels.",
+      "image": "8965F3307000 CodeFlash SHA-256 42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+      "pattern": "stores to EIC control words with EIMK bit 7 clear in startup initializer 0x62E6A, followed by INTBP[channel] lookup",
+      "tool": "tools/toyota decomp source 0x62e6a plus raw little-endian INTBP reads",
+      "matches": 9,
+      "true_positives": 9,
+      "false_positives": 0,
+      "exact_query": "tools/toyota decomp source 0x62e6a; select EIC stores whose written halfword & 0x0080 == 0; read u32(CodeFlash, 0x20200 + channel*4)"
+    },
+    {
+      "claim": "Eight startup-enabled ISR entries are not functions; channel 8 and the masked/polled EIC136 vector are recovered functions.",
+      "image": "8965F3307000 CodeFlash SHA-256 42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+      "pattern": "exact INTBP targets for the nine startup-unmasked channels plus EIC136, joined to function-entry records",
+      "tool": "data/targets/camry-8965F3307000/ghidra_project_inventory.baseline.jsonl",
+      "matches": 10,
+      "true_positives": 8,
+      "false_positives": 2,
+      "exact_query": "read u32(CodeFlash, 0x20200 + channel*4) for channels 8,133,134,135,136,187,188,292,293,379; exact-match each target against inventory records whose record == function"
+    },
+    {
+      "claim": "Configured signal rows with no payload bit source retain the bounded no-extraction classification from the application-RX census.",
+      "image": "8965F3307000 CodeFlash SHA-256 42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+      "pattern": "configured RX signal-to-PDU rows joined to literal generated bitfield/group extraction call sites and table-driven extractor rows",
+      "tool": "tools/targets/camry/analysis/analyze_camry_f33_application_rx_map.py",
+      "matches": 95,
+      "true_positives": 95,
+      "false_positives": 0,
+      "exact_query": "tools/artifact regen application_rx_signal_evidence.csv"
+    }
+  ],
+  "variant_record": {
+    "scope": "exact 2026 Camry Hybrid EPS 8965F3307000 CodeFlash",
+    "why": "Execution-aware fuzzing and dataflow review need the real foreground and interrupt entry set rather than a single main function.",
+    "cross_variant_evidence": "Sienna data/scheduler_periods.csv establishes the TAUJ constant-to-period convention. Addresses, EIC channels, timer constants, receive rules, and consumers here are decoded again from the exact Camry image; no Sienna address or signal mapping is transferred."
+  }
+}

@@ -62,7 +62,11 @@ public class AssertFunctionDiscoveryFloor extends GhidraScript {
 
         boolean mutationSelfTest = false;
         for (String argument : getScriptArgs()) {
-            if ("--mutation-self-test".equals(argument)) mutationSelfTest = true;
+            if ("--mutation-self-test".equals(argument)) {
+                mutationSelfTest = true;
+            } else {
+                throw new IllegalArgumentException("unknown argument: " + argument);
+            }
         }
         if (mutationSelfTest) runMutationSelfTest();
 

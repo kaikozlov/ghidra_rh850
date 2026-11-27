@@ -19,6 +19,23 @@ def target(name: str | None) -> tuple[str, dict]:
     except KeyError: raise SystemExit(f"unknown analysis target: {name}")
     return name, row
 
+def analyzer_headless_args(name: str | None, phase: str) -> list[str]:
+    resolved, row = target(name)
+    choices = row.get("analyzer_options")
+    if choices is None:
+        return []
+    if not isinstance(choices, dict) or not choices:
+        raise SystemExit(f"target {resolved} has invalid analyzer_options")
+    flag = "-preScript" if phase == "pre" else "-postScript"
+    args = [flag, "ApplyAnalysisOptions.java"]
+    for option, value in choices.items():
+        if not isinstance(option, str) or not option or "\n" in option or "=" in option:
+            raise SystemExit(f"target {resolved} has invalid analyzer option name")
+        if not isinstance(value, bool):
+            raise SystemExit(f"target {resolved} analyzer option {option} is not boolean")
+        args.append(f"{option}={'true' if value else 'false'}")
+    return args
+
 def path(name: str | None, field: str) -> Path:
     resolved, row = target(name)
     value = row.get(field)
@@ -50,6 +67,7 @@ def main() -> int:
     ap.add_argument("--list", action="store_true", help="list configured analysis targets")
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--field")
+    ap.add_argument("--analyzer-headless-args", choices=("pre", "post"))
     args=ap.parse_args()
     if args.list:
         obj=load()
@@ -58,6 +76,11 @@ def main() -> int:
         else:
             for row in rows:
                 print(f"{row['name']}\t{row['status']}\t{row['vehicle']}\t{row['software_id']}")
+        return 0
+    if args.analyzer_headless_args:
+        headless_args = analyzer_headless_args(args.target, args.analyzer_headless_args)
+        if headless_args:
+            print(*headless_args, sep="\n")
         return 0
     name,row=target(args.target)
     if args.field:

@@ -386,3 +386,40 @@ drivers. A persistent application hook would solve that context mismatch, but it
 would also replace an OEM safety boundary and must be engineered and validated as
 safety-critical firmware.
 
+
+## 9. Exact F33 verification matrix
+
+The following matrix applies to Camry `8965F3307000` CodeFlash SHA-256
+`42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7`.
+The cited boot neighborhoods are byte-identical to the canonical Sienna
+specimen where this report already records that comparison.
+
+| Stage | Authenticity, integrity, freshness, compatibility | Time and key | Flag lifetime | Erase/write relation and reset-vector use | Evidence | Open items |
+|---|---|---|---|---|---|---|
+| RequestDownload `34` | no payload authenticity or integrity check; no freshness; compatibility is only memory-class/range/format admission | once per request; requires DCM SecurityAccess state 2, but uses no payload-verification key | initializes resettable transfer state | accepts its own address/length; does not compare them with the preceding `FF00` erase request | `boot_service_request_download @ 0x5D68`, exact decompilation/disassembly | none |
+| RequestUpload `35` | unsupported; therefore no authenticity, integrity, freshness, or compatibility decision | not dispatched; no key | no state | no erase/write relation | absent from the exact 20-record resident service table at `0x8E54` | none |
+| TransferData `36` | enforces an 8-bit monotonic block sequence, duplicate retransmission, `<=0x400` block length and range bounds; CBC decryption is confidentiality, not authenticity; no freshness beyond the transfer-local counter; no version/part check | per block; AES-128-CBC with `Kpayload = AES-128-ECB(PAYLOAD_BUILD_SECRET,DID_201)` and tester IV `DID_202` | counter and transfer state are resettable RAM | programs the admitted download range; no automatic comparison with the independently requested erase range | `boot_service_transfer_data @ 0x4DBA` and payload KDF `0x7068`, exact decompilation/disassembly | none |
+| RequestTransferExit `37` | checks that remaining length is zero; performs no CMAC, signature, freshness, or compatibility check | once at transfer exit; no key | clears transfer/crypto contexts; no one-time latch | does not compare erased and written ranges | `boot_service_transfer_exit @ 0x5C92`, exact decompilation/disassembly | none |
+| RIDs `10F0/10F1` | verifies embedded address/length, CRC32 over `0xFF0` plaintext bytes, then AES-CMAC over `IV || plaintext`; no freshness or software-version check | after transfer, when requested; CMAC uses `Kpayload` derived from `PAYLOAD_BUILD_SECRET` and `DID_201` | RAM authorization bit 0 is set only after success and is cleared on failure/cleanup/reset; it is not set-once persistent state | authorizes the fixed RAM callback region; independent of the erase range and variable reset vector | worker `boot_advance_crc_authentication_routine_5936 @ 0x5936` and marker/auth worker `0x5A04`, exact decompilation | none |
+| RID `10F2` | validates the selected CodeFlash region by CRC and, where its descriptor enables it, CMAC; then programs marker `5A A5 A5 5A`; no freshness/version/rollback check | after write, when requested; CRC is unkeyed | marker is persistent but erasable/reprogrammable, not a monotonic one-time flag | validates the caller-selected region; it does not prove that the same range was erased and written | `boot_advance_crc_authentication_marker_routine_5a04 @ 0x5A04`, marker check `0x6C5A`, exact decompilation | identify the configured CodeFlash-CMAC key source with `tools/g inspect 0x5936 --decompile --callers --disasm 140` followed through the class-0 descriptor |
+| RID `10F3` compare mode | byte-for-byte integrity comparison only; no authenticity, freshness, or compatibility decision | optional post-program TransferData mode; no key | transfer state `8→9→10`, resettable RAM | compares tester-supplied bytes with a separately selected CodeFlash range; it is not automatically bound to `FF00` or the ordinary download | `boot_transfer_compare_progress @ 0x6C8E`, exact decompilation; resident service report records the state transitions | none |
+| Reset boot path | CRC32 descriptors, UCFD status, and fixed markers for both application regions; no signature/keyed authenticity, freshness, software-version, part-number, or rollback check | every reset before application handoff; no key | markers persist until erased; boot rechecks them each reset | successful checks call the application entry pointer at `0xFFDB8`. The tracked dump contains the image reset path but not the hardware Configuration Setting Area that selects the variable reset vector | `boot_validate_application_images @ 0x119E`, `boot_select_application_or_resident @ 0x13B0`, exact decompilation/disassembly | obtain the Configuration Setting Area bytes and decode the active variable-reset-vector option |
+
+The P1M-E flash manual, R01UH0615EJ0120 section 8.4.1, states that the
+Configuration Setting Area can select a variable CPU reset vector and that OTP
+configuration can prevent changing it. The tracked CodeFlash dump does not
+include the `0xFF300040..0xFF30008F` configuration range. Consequently the
+active hardware reset-vector option cannot be determined from this image.
+
+### Absence-search record
+
+| Claim | Image / SHA-256 | Pattern and tool | Matches | Classification | Exact query |
+|---|---|---|---|---|---|
+| no payload verification in `34/36/37` | F33 / `42dce8e…b0e7` | complete decision graphs for the three handlers, KDF and crypto cleanup | range/state/counter/CBC checks only; CMAC is reached only from the separate RoutineControl worker | true checks are listed above; no hidden verification call in the handler graphs | `tools/g inspect 0x5d68 0x4dba 0x5c92 --decompile --callers --disasm 45` and `tools/toyota decomp source 0x5d68 0x4dba 0x5c92` |
+| no automatic erase/write range identity check | F33 / `42dce8e…b0e7` | compare all address/length writes and consumers in `FF00`, `34`, transfer, and compare-mode handlers | independent `FF00` and `34` address/length acceptance; one optional `10F3` tester-directed compare | two true independent range owners; `10F3` is a false positive for automatic linkage | `tools/g inspect 0x567e --decompile --callers --disasm 120`; `tools/toyota decomp source 0x41e0 0x5d68 0x6c8e` |
+| no keyed/fresh/compatible reset decision | F33 / `42dce8e…b0e7` | complete boot-validation and handoff graphs | two CRC regions, two markers, UCFD status, one fixed application pointer; zero key/version/freshness consumers | all five observed checks are true boot gates; no false positives | `tools/g inspect 0x119e 0x13b0 --decompile --callers --disasm 45` |
+
+### Variant closure
+
+The matrix applies to F33. The Sienna byte comparisons cover only the
+neighborhoods identified above.

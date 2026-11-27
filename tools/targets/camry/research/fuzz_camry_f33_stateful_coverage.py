@@ -412,6 +412,7 @@ def lean_prelude() -> list[str]:
         f"set $r4={dcm.GP:#x}", f"set $r5={dcm.TP_BASE:#x}", f"set $tp={dcm.TP_BASE:#x}",
         "set {unsigned short}0x6a45e = 0x007f", "set {unsigned short}0x6a4c4 = 0x007f",
         "set {unsigned short}0x701c4 = 0x007f", "set {unsigned short}0x70204 = 0x007f",
+        f"set {{unsigned int}}{dcm.TAUJ1CNT0:#x} = 0xffffffff",
         f"break *{dcm.SENTINEL:#x}",
         f"restore /out/{dcm.DCRA1_MODEL_NAME} binary {dcm.DCRA1_MODEL_ENTRY:#x}",
         "break *0x67060", "commands 2", "silent",

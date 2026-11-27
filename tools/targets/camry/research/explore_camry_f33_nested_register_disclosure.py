@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Reproduce nested-interrupt live-register disclosure on exact Camry F33."""
+"""Reproduce nested-interrupt live-register disclosure on exact Camry F33.
+
+The retained-RAM entry reconstructs boot-programmed TMIEC0 bits 22 and 23.
+No transmit completion participates in the receive-plus-timer schedule.
+"""
 from __future__ import annotations
 
 import argparse
@@ -163,10 +167,13 @@ def scenario(phase: str, variant: str, local_ram: bytes) -> dict[str, Any]:
             },
             {
                 "kind": "register-input",
-                "register": "TMIEC1",
-                "value": "0xc0",
+                "register": "TMIEC0",
+                "value": "0x00c00000",
                 "after_instructions": 0,
-                "evidence": "Original CodeFlash channel-1 completion mask at 0x22EC0",
+                "evidence": (
+                    "Boot-programmed channel-1 diagnostic completion mask; "
+                    "retained RAM cannot carry RSCFD peripheral state"
+                ),
             },
             event_write(0xFEBE0000, CALL_SEQUENCER, "Restore the transparent call sequencer after loading retained RAM"),
             {
@@ -210,13 +217,13 @@ def scenario(phase: str, variant: str, local_ram: bytes) -> dict[str, Any]:
         "expected_termination": "stop-address",
         "checks": [
             {
-                "name": "both-interrupts-entered",
+                "name": "receive-and-timer-interrupts-entered",
                 "kind": "event-count",
                 "operation": "interrupt-enter",
                 "equals": 2,
             },
             {
-                "name": "both-interrupts-returned",
+                "name": "receive-and-timer-interrupts-returned",
                 "kind": "event-count",
                 "operation": "interrupt-return",
                 "equals": 2,

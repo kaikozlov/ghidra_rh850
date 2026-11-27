@@ -546,6 +546,15 @@ def _rscfd_tx_scenario(contract: dict[str, Any]) -> dict[str, Any]:
                 "evidence": "scenario: eight-byte response payload",
             },
         ],
+        events=[{
+            "kind": "can-tx-complete",
+            "buffer": controller * 16 + resource,
+            "after_instructions": 54,
+            "evidence": (
+                "External bus completion after the exact transmit helper requests "
+                "the selected RSCFD mailbox"
+            ),
+        }],
         checks=[
             _return_check(),
             {
@@ -1030,8 +1039,20 @@ def _timeout_input_lifetime_scenario(
         if check.get("address") == _hx(state + 8):
             check["equals_hex"] = _le(2, 4)
             check["name"] = check["name"].replace("one", "two")
-    # No transmit-completion ISR is scheduled: the first response remains in
-    # the mailbox, so only its transmit is counted by the inherited checks.
+    # Complete the first timeout response after its mailbox request and before
+    # the second request reaches the same mailbox.
+    scenario["events"] = [{
+        "kind": "can-tx-complete",
+        "buffer": (
+            contract["signer_abi"]["response_controller"] * 16
+            + contract["signer_abi"]["response_resource"]
+        ),
+        "after_instructions": 23_000,
+        "evidence": (
+            "External bus completion between the first timeout response and "
+            "the second request's response"
+        ),
+    }]
     scenario["checks"].extend([
         {
             "name": "second request replaces helper scratch while native input stays intact",

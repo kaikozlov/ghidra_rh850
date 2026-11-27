@@ -52,6 +52,21 @@ PROGRAM_NAME=$(TARGET_FIELD program_name)
 CODEFLASH="$ROOT/$(TARGET_FIELD codeflash)"
 EXPECTED_SHA=$(TARGET_FIELD codeflash_sha256)
 PROJECT_DIR="${PROJECT_DIR:-$ROOT/$(TARGET_FIELD work_dir)}"
+RECOGNIZER_REVISION_ARG=""
+ASSERT_POSTS=()
+case "$PROFILE" in
+  outside-functions|semantic-coverage)
+    CURRENT_RECOGNIZER_REVISION=$(
+      cd "$ROOT"
+      uv run --locked python -m tools.project.recognizer_revision
+    )
+    RECOGNIZER_REVISION_ARG=${RECOGNIZER_REVISION:-$CURRENT_RECOGNIZER_REVISION}
+    if [[ "$RECOGNIZER_REVISION_ARG" != "$CURRENT_RECOGNIZER_REVISION" ]]; then
+      echo "recognizer revision changed before $PROFILE: expected $RECOGNIZER_REVISION_ARG, current $CURRENT_RECOGNIZER_REVISION" >&2
+      exit 1
+    fi
+    ;;
+esac
 
 resolve_path() {
   python3 -c 'from pathlib import Path; import sys; print(Path(sys.argv[1]).expanduser().resolve())' "$1"
@@ -119,6 +134,7 @@ case "$PROFILE" in
     SUCCESS_MARKER="ExportOutsideFunctionCandidates: wrote "
     POST_SCRIPT="ExportOutsideFunctionCandidates.java"
     POST_ARGS=("$PRIMARY_OUT" "$ANALYSIS_TARGET" "$EXPECTED_SHA")
+    ASSERT_POSTS=(-postScript AssertFunctionDiscoveryFloor.java)
     ;;
   semantic-coverage)
     (($# <= 2)) || { usage >&2; exit 2; }
@@ -171,12 +187,18 @@ LOG="$BUILD_LOGS/$LOG_NAME"
   -process "$PROGRAM_NAME" \
   -noanalysis \
   -readOnly \
+  "${ASSERT_POSTS[@]}" \
   -postScript "$POST_SCRIPT" "${POST_ARGS[@]}"
 
 grep -Fq "$SUCCESS_MARKER" "$LOG" || {
   echo "$PROFILE exporter did not report success — see $LOG" >&2
   exit 1
 }
+if [[ "$PROFILE" == outside-functions ]] && \
+    ! grep -Fq 'ASSERT function-discovery-floor:' "$LOG"; then
+  echo "function-discovery assertion did not report success — see $LOG" >&2
+  exit 1
+fi
 
 case "$PROFILE" in
   application-tx-producers)
@@ -185,12 +207,13 @@ case "$PROFILE" in
       --output "$PRIMARY_OUT"
     ;;
   outside-functions)
-    python3 "$ROOT/tools/project/apply_function_discovery_adjudications.py" \
+    uv run --locked python "$ROOT/tools/project/apply_function_discovery_adjudications.py" \
       --candidates "$PRIMARY_OUT" \
       --reviews "$REVIEWS" \
       --firmware "$CODEFLASH"
-    python3 - "$PRIMARY_OUT" "$SECONDARY_OUT" <<'PY'
+    uv run --locked python - "$PRIMARY_OUT" "$SECONDARY_OUT" "$RECOGNIZER_REVISION_ARG" <<'PY'
 import csv
+import hashlib
 import json
 import sys
 from collections import Counter
@@ -198,12 +221,17 @@ from pathlib import Path
 
 csv_path = Path(sys.argv[1])
 summary_path = Path(sys.argv[2])
+recognizer_revision = sys.argv[3]
 with csv_path.open(newline="") as handle:
     rows = list(csv.DictReader(handle))
+with csv_path.open("rb") as handle:
+    ledger_sha256 = hashlib.file_digest(handle, "sha256").hexdigest()
 classes = Counter(row["candidate_class"] for row in rows)
 states = Counter(row["adjudication_state"] for row in rows)
 summary = {
-    "schema_version": 1,
+    "schema_version": 2,
+    "recognizer_revision": recognizer_revision,
+    "ledger_sha256": ledger_sha256,
     "candidate_count": len(rows),
     "candidate_class_counts": dict(sorted(classes.items())),
     "adjudication_state_counts": dict(sorted(states.items())),
@@ -216,11 +244,12 @@ print(json.dumps(summary, sort_keys=True))
 PY
     ;;
   semantic-coverage)
-    python3 "$ROOT/tools/project/apply_semantic_review_status.py" \
+    uv run --locked python "$ROOT/tools/project/apply_semantic_review_status.py" \
       --ledger "$PRIMARY_OUT" \
       --reviews "$REVIEWS"
-    python3 - "$PRIMARY_OUT" "$SECONDARY_OUT" <<'PY'
+    uv run --locked python - "$PRIMARY_OUT" "$SECONDARY_OUT" "$RECOGNIZER_REVISION_ARG" <<'PY'
 import csv
+import hashlib
 import json
 import sys
 from collections import Counter
@@ -228,6 +257,7 @@ from pathlib import Path
 
 csv_path = Path(sys.argv[1])
 summary_path = Path(sys.argv[2])
+recognizer_revision = sys.argv[3]
 expected = [
     "entry_addr", "body_bytes", "name", "discovery_source", "discovery_provenance",
     "name_source", "is_thunk", "calling_convention", "caller_count", "callee_count",
@@ -241,6 +271,8 @@ with csv_path.open(newline="") as fh:
     if reader.fieldnames != expected:
         raise SystemExit(f"unexpected CSV header: {reader.fieldnames}")
     rows = list(reader)
+with csv_path.open("rb") as handle:
+    ledger_sha256 = hashlib.file_digest(handle, "sha256").hexdigest()
 grades = Counter(r["evidence_grade"] for r in rows); grades.pop("", None)
 discovery = Counter(r["discovery_source"] for r in rows)
 review_states = Counter(r["review_state"] for r in rows)
@@ -251,7 +283,9 @@ conventions = Counter(r["calling_convention"] for r in rows)
 subsystems = Counter(r["subsystem"] for r in rows if r["subsystem"])
 roots = Counter(r["root_kind"] for r in rows if r["root_kind"])
 summary = {
-    "schema_version": 2,
+    "schema_version": 3,
+    "recognizer_revision": recognizer_revision,
+    "ledger_sha256": ledger_sha256,
     "function_count": len(rows),
     "discovered_function_count": len(rows),
     "reviewed_function_count": sum(count for state, count in review_states.items() if state != "unreviewed"),
@@ -278,6 +312,16 @@ PY
     python3 "$ROOT/tools/project/project_inventory.py" validate "$PRIMARY_OUT"
     ;;
 esac
+if [[ -n "$RECOGNIZER_REVISION_ARG" ]]; then
+  FINAL_RECOGNIZER_REVISION=$(
+    cd "$ROOT"
+    uv run --locked python -m tools.project.recognizer_revision
+  )
+  if [[ "$FINAL_RECOGNIZER_REVISION" != "$RECOGNIZER_REVISION_ARG" ]]; then
+    echo "recognizer inputs changed while producing $PROFILE: recorded $RECOGNIZER_REVISION_ARG, current $FINAL_RECOGNIZER_REVISION" >&2
+    exit 1
+  fi
+fi
 
 echo "Wrote: $PRIMARY_OUT"
 [[ -z "$SECONDARY_OUT" ]] || echo "Wrote: $SECONDARY_OUT"

@@ -323,6 +323,9 @@ definitive even though the generic manual does not publish peripheral names for
 these channel numbers. The two adapters are byte-identical and static analysis
 does not distinguish which one is completion versus error.
 
+The [Camry interrupt shared-range audit](../security/memory-safety-audit.md#camry-interrupt-shared-range-audit)
+covers EIC134 delivery during foreground dispatch.
+
 ## 5. Application CAN-routing overview
 
 ### 5.1 Physical channel and interrupt path

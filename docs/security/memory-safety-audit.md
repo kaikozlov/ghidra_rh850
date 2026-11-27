@@ -615,20 +615,34 @@ All configured ICU-S wrappers copy bounded results:
 Raw slot-4 key bytes do not become CPU-visible. CPU-visible values include CMAC
 output, verification status, and command-8 M4/M5 proof.
 
+## Camry interrupt shared-range audit
+
+`uv run --locked python -m tools.targets.camry.research.report_camry_f33_preemption_shared_ranges`
+replays the four exact-image preemption scenarios and intersects handler writes
+with accesses in the interrupted function invocation.
+
+| Scenario | Delivery | Shared range | Firmware protection | Disposition |
+|---|---|---|---|---|
+| CanTp receive during DCM cleanup | EIC187, `0x93CB2`, instruction 425 | none | PSW.ID=0, PMR=`0x0000` | no shared range |
+| CAN1 Tx completion after ownership publication | EIC188, `0x8024A`, instruction 35708 | none | PSW.ID=0, PMR=`0xFF00` | no shared range |
+| ICU-S completion before timeout-state load | EIC292, `0x88EDE`, instruction 243758 | none | PSW.ID=0, PMR=`0xFF00` | no shared range |
+| ICU-S completion after timeout-state load | EIC292, `0x88EE2`, instruction 243759 | `FEBF1190` | PSW.ID=0, PMR=`0xFF00` masks priority 8 | protected by PMR |
+| Scheduler CH1 publication | EIC134, `0x66062`, instruction 0 | none | PSW.ID=0, PMR=`0x0000` | no shared range |
+
+For the protected row, `service_tag_generation_completion_and_timeouts_88ec0`
+reads `FEBF1190` at `0x88EDE`; the EIC292 window writes that byte at
+`0x88D54` and `0x88CFC`; the interrupted invocation writes it at `0x88F5A`
+after return. The synthetic EIC292 delivery bypassed the active priority mask.
+
 ## Audit method
 
-Three parallel subagents audited independent attack surfaces using Ghidra
-decompilation, disassembly, x-ref, and raw CodeFlash bytes against
-`build/work/project` only:
+The Sienna `8965B4512000` audit used decompilation, disassembly, cross-references,
+and CodeFlash bytes for three subsystems:
 
 1. Application diagnostic receive path (ISO-TP → DCM → SID 0x22/0x2E/0x31/0xAB).
 2. Bootloader download/update path (SID 0x34/0x36/0x37, WDBI, RoutineControl
    0x10F0/0xFF00, payload decrypt/verify/execute).
 3. CAN COM/SecOC receive and ICU-S wrapper code.
-
-All primary-evidence findings were independently verified by the parent session
-against decompiled functions before documentation. The findings are scoped
-strictly to Sienna `8965B4512000`; no Corolla/Camry projection.
 
 ## Appendix: instruction-level evidence
 

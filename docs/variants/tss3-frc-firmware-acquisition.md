@@ -389,6 +389,8 @@ platform already uses R4/GCOMM services to mediate the serial NOR.
 
 For the exact Camry, a raw `8646C06091` camera NOR dump or a matching
 `8646F3315000` CUW/boot image is therefore the highest-value static acquisition.
+Use the [offline acquisition readiness check](../tooling/variant-acquisition-readiness.md#purpose)
+to triage the file before selecting an importer or load map.
 It should be searched first for:
 
 1. the fixed boot/R4 region **outside** the CUW-updated `0x08E80000..0x0E000000`

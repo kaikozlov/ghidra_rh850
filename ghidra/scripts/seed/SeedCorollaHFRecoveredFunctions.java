@@ -4,8 +4,56 @@
 import ghidra.app.script.GhidraScript;
 import ghidra.program.model.address.Address;
 import ghidra.program.model.listing.*;
+import ghidra.program.model.symbol.SourceType;
 import java.io.*;
+
 public class SeedCorollaHFRecoveredFunctions extends GhidraScript {
-  private void ensure(long v) throws Exception { Address a=toAddr(v); Listing l=currentProgram.getListing(); Instruction c=l.getInstructionContaining(a); if(c!=null&&!c.getMinAddress().equals(a)) l.clearCodeUnits(c.getMinAddress(),c.getMaxAddress(),false); CodeUnit u=l.getCodeUnitContaining(a); if(u!=null&&!(u instanceof Instruction)) l.clearCodeUnits(u.getMinAddress(),u.getMaxAddress(),false); if(l.getInstructionAt(a)==null&&!disassemble(a)) throw new IllegalStateException("disassembly failed "+a); Function f=currentProgram.getFunctionManager().getFunctionAt(a); if(f==null) f=createFunction(a,null); if(f==null) throw new IllegalStateException("function creation failed "+a); }
-  @Override public void run() throws Exception { String[] a=getScriptArgs(); if(a.length!=1) throw new IllegalArgumentException("expected function_seeds.csv path"); File f=new File(a[0]); if(!f.isFile()) throw new IllegalStateException("missing seed file "+f); int n=0; try(BufferedReader br=new BufferedReader(new FileReader(f))){ String h=br.readLine(); if(!"address,provenance,note".equals(h)) throw new IllegalStateException("seed CSV header drift"); String line; while((line=br.readLine())!=null){ if(line.isBlank()) continue; String[] p=line.split(",",3); if(p.length!=3||p[1].isBlank()) throw new IllegalStateException("invalid seed row: "+line); long v=Long.parseLong(p[0].replace("0x",""),16); if(v<0x20000L||v>=0x100000L) throw new IllegalStateException("non-application seed "+p[0]); ensure(v); n++; }} if(n!=143) throw new IllegalStateException("seed count drift "+n); println("SeedCorollaHFRecoveredFunctions: seeded "+n+" evidence-backed shared-application entries"); }
+  private Function ensure(long value) throws Exception {
+    Address address = toAddr(value);
+    Listing listing = currentProgram.getListing();
+    Instruction containing = listing.getInstructionContaining(address);
+    if (containing != null && !containing.getMinAddress().equals(address))
+      listing.clearCodeUnits(containing.getMinAddress(), containing.getMaxAddress(), false);
+    CodeUnit unit = listing.getCodeUnitContaining(address);
+    if (unit != null && !(unit instanceof Instruction))
+      listing.clearCodeUnits(unit.getMinAddress(), unit.getMaxAddress(), false);
+    if (listing.getInstructionAt(address) == null && !disassemble(address))
+      throw new IllegalStateException("disassembly failed " + address);
+    Function function = currentProgram.getFunctionManager().getFunctionAt(address);
+    if (function == null) function = createFunction(address, null);
+    if (function == null) throw new IllegalStateException("function creation failed " + address);
+    return function;
+  }
+
+  @Override public void run() throws Exception {
+    String[] args = getScriptArgs();
+    if (args.length != 1) throw new IllegalArgumentException("expected function_seeds.csv path");
+    File file = new File(args[0]);
+    if (!file.isFile()) throw new IllegalStateException("missing seed file " + file);
+    int count = 0;
+    try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+      if (!"address,provenance,note".equals(reader.readLine()))
+        throw new IllegalStateException("seed CSV header drift");
+      String line;
+      while ((line = reader.readLine()) != null) {
+        if (line.isBlank()) continue;
+        String[] fields = line.split(",", 3);
+        if (fields.length != 3 || fields[1].isBlank())
+          throw new IllegalStateException("invalid seed row: " + line);
+        long value = Long.parseLong(fields[0].replace("0x", ""), 16);
+        if (value < 0x20000L || value >= 0x100000L)
+          throw new IllegalStateException("non-application seed " + fields[0]);
+        Function function = ensure(value);
+        if (fields[2].startsWith("name=")) {
+          int end = fields[2].indexOf(';');
+          if (end < 6) throw new IllegalStateException("invalid named seed row: " + line);
+          function.setName(fields[2].substring(5, end), SourceType.USER_DEFINED);
+        }
+        count++;
+      }
+    }
+    if (count == 0) throw new IllegalStateException("empty seed file");
+    println("SeedCorollaHFRecoveredFunctions: seeded " + count +
+      " evidence-backed shared-application entries");
+  }
 }

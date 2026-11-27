@@ -1,0 +1,3049 @@
+{
+  "created_at": "2026-11-24T23:38:10+00:00",
+  "registry": "/Volumes/data/altdev/inspect/repos/ghidra_rh850_analysis/data/analysis_targets.json",
+  "schema": "variant-acquisition-readiness-catalog-v1",
+  "targets": {
+    "camry-8965F3307000": {
+      "readiness": {
+        "acquisition": {
+          "expected_size_bytes": 1048576,
+          "geometry_note": "exact bare 1 MiB RH850/P1M-E CodeFlash geometry",
+          "geometry_valid": true,
+          "path": "/Volumes/data/altdev/inspect/repos/ghidra_rh850_analysis/firmware/camry-8965F3307000/CodeFlash.bin",
+          "problems": [],
+          "run_record": null,
+          "sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+          "size_bytes": 1048576
+        },
+        "architecture": {
+          "alternatives_considered": [
+            "ARM-Thumb",
+            "PowerPC",
+            "RL78",
+            "older-V850",
+            "TriCore",
+            "compressed-or-encrypted",
+            "erased-or-sparse"
+          ],
+          "confidence": "high",
+          "decision": "RH850",
+          "observations": [
+            "15 of the first 16 vector slots decode as V850/RH850 jr/jmp forms",
+            "3 INTBP writes decoded; 1 have a nearby mov imm32 source",
+            "startup window contains 2 direct gp and 2 direct tp initializers"
+          ]
+        },
+        "ccp_xcp_candidates": {
+          "command_table_candidates": [
+            {
+              "address": "0x2B250",
+              "evidence": "selector + three zero bytes + in-image handler pointer rows",
+              "record_count": 7,
+              "seed_key_selectors": [],
+              "selectors": [
+                "0xFB",
+                "0xFA",
+                "0xF5",
+                "0xF3",
+                "0xEB",
+                "0xEA",
+                "0xE4"
+              ]
+            }
+          ],
+          "route_constant_hits": [
+            {
+              "address": "0x4CB28",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            },
+            {
+              "address": "0x7C75C",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            },
+            {
+              "address": "0xC369E",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            },
+            {
+              "address": "0xC37C8",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            },
+            {
+              "address": "0xC4502",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            }
+          ],
+          "searched_commands": {
+            "ccp": {
+              "CONNECT": "0x01",
+              "GET_SEED": "0x12",
+              "UNLOCK": "0x13",
+              "routes": [
+                "0xBE",
+                "0xBF"
+              ]
+            },
+            "xcp": {
+              "CONNECT": "0xFF",
+              "GET_DAQ_PROCESSOR_INFO": "0xDA",
+              "GET_SEED": "0xF8",
+              "UNLOCK": "0xF7"
+            }
+          }
+        },
+        "container_triage": {
+          "classification": "bare-codeflash",
+          "codeflash_file_offset": "0x0",
+          "regions": [
+            {
+              "entropy_bits_per_byte": 5.742791,
+              "erased_ff_fraction": 0.034227,
+              "file_end_exclusive": "0x100000",
+              "file_start": "0x0",
+              "name": "image",
+              "non_erased_end_inclusive": "0xFFF03",
+              "non_erased_start": "0x0",
+              "size_bytes": 1048576,
+              "zero_fraction": 0.248919
+            }
+          ]
+        },
+        "crc_table_constants": {
+          "hits": [],
+          "method": "exact standard table-prefix constants (findcrypt-style constant hit)"
+        },
+        "created_at": "2026-11-24T23:37:46+00:00",
+        "image_path": "/Volumes/data/altdev/inspect/repos/ghidra_rh850_analysis/firmware/camry-8965F3307000/CodeFlash.bin",
+        "load_address_vote": {
+          "confidence": "high",
+          "intbp_evidence": [
+            {
+              "candidates": [],
+              "instruction_offset": "0x274",
+              "intbp_value": null
+            },
+            {
+              "candidates": [],
+              "instruction_offset": "0x9F3E",
+              "intbp_value": null
+            },
+            {
+              "candidates": [
+                {
+                  "in_range_pointers_first_32": 32,
+                  "load_address": "0x0",
+                  "table_file_offset": "0x20200"
+                },
+                {
+                  "in_range_pointers_first_32": 4,
+                  "load_address": "0x10000",
+                  "table_file_offset": "0x10200"
+                }
+              ],
+              "instruction_offset": "0x715BC",
+              "intbp_value": "0x20200"
+            }
+          ],
+          "selected_load_address": "0x0",
+          "vote_spread_bytes": 0,
+          "votes": [
+            {
+              "evidence": "syncp; jmp 0x1B0[r0] reaches non-erased bytes inside the file",
+              "load_address": "0x0",
+              "source": "reset-vector-target"
+            },
+            {
+              "evidence": "INTBP 0x20200 maps to file 0x20200 with 32/32 in-range pointers",
+              "load_address": "0x0",
+              "source": "INTBP-pointer-table"
+            }
+          ]
+        },
+        "notes": "registered target camry-8965F3307000",
+        "ready": true,
+        "resolver_readiness": {
+          "geometry_gate": true,
+          "manifest": null,
+          "manifest_bound": null,
+          "next_step": "run: tools/security/resolve_secoc_patch_image.sh <image> - (disposable Ghidra import; zero/multiple semantic candidates fail closed)",
+          "ready": true,
+          "resolver": "tools/security/resolve_secoc_patch_image.sh"
+        },
+        "schema": "variant-acquisition-readiness-v1",
+        "structure_triage": {
+          "available": true,
+          "boot_trust": {
+            "crc_descriptor_count": 2,
+            "terminal_valid_descriptor_count": 2,
+            "validity_marker_count": 23
+          },
+          "disclaimer": "All matches are structural triage candidates recovered from the Sienna 8965B4512000 calibration; they are not transfer proof for any other image. Validate every mechanism against the target's own firmware.",
+          "geometry": "bare-codeflash-1m",
+          "image_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+          "ram_exec_gate": {
+            "download_window_immediate_count": 3,
+            "package_descriptor_pair_count": 1
+          },
+          "schema": "rh850-codeflash-structure-triage-v2",
+          "semantic_resolver_prefilter": {
+            "byte_load_then_cmov_site_count": 107
+          },
+          "xcp_surface": {
+            "command_map_window_count": 15,
+            "request_can_id_extended_descriptor_count": 2,
+            "request_can_id_immediate_count": 0,
+            "response_can_id_extended_descriptor_count": 1,
+            "response_can_id_immediate_count": 0
+          }
+        },
+        "uds_table_candidates": {
+          "nrc_compare_candidates": {
+            "compare_load_hits": [
+              {
+                "compare_address": "0x4C93A",
+                "constant": "0x35",
+                "evidence": "movea-imm16-r0 0x35 into r6; nearby cmp uses r6",
+                "load_address": "0x4C90E"
+              },
+              {
+                "compare_address": "0x4C93A",
+                "constant": "0x36",
+                "evidence": "movea-imm16-r0 0x36 into r6; nearby cmp uses r6",
+                "load_address": "0x4C926"
+              }
+            ],
+            "constants": [
+              "0x35",
+              "0x36",
+              "0x41"
+            ],
+            "raw_byte_counts": {
+              "0x35": 1109,
+              "0x36": 3118,
+              "0x41": 3121
+            }
+          },
+          "service_tables": [
+            {
+              "address": "0x25C54",
+              "file_offset": "0x25C54",
+              "handler_or_subfunction_pointer_count": 19,
+              "record_count": 23,
+              "schema": "denso-application-24-byte",
+              "sids": [
+                "0x10",
+                "0x11",
+                "0x14",
+                "0x19",
+                "0x22",
+                "0x23",
+                "0x27",
+                "0x28",
+                "0x2E",
+                "0x31",
+                "0x34",
+                "0x36",
+                "0x37",
+                "0x3E",
+                "0x85",
+                "0xAB",
+                "0xBA",
+                "0x10",
+                "0x10",
+                "0x19",
+                "0x22",
+                "0x3E",
+                "0xAB"
+              ]
+            },
+            {
+              "address": "0x8E54",
+              "file_offset": "0x8E54",
+              "handler_or_subfunction_pointer_count": 20,
+              "record_count": 20,
+              "schema": "sid-mask-handler-8-byte",
+              "sids": [
+                "0x10",
+                "0x11",
+                "0x27",
+                "0x28",
+                "0x3E",
+                "0x85",
+                "0x22",
+                "0x23",
+                "0x2C",
+                "0x2E",
+                "0x14",
+                "0x19",
+                "0x2F",
+                "0x31",
+                "0x34",
+                "0x36",
+                "0x37",
+                "0xAB",
+                "0xBA",
+                "0xBB"
+              ]
+            }
+          ]
+        },
+        "vector_entries": {
+          "classification_counts": {
+            "jump-instruction": 15,
+            "neither": 1
+          },
+          "decoder": "vendored-v850-sleigh-vector-subset",
+          "entries": [
+            {
+              "bytes": "1f00e006b0010000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1B0[r0]",
+              "file_offset": "0x0",
+              "target": "0x1B0",
+              "virtual_address": "0x0"
+            },
+            {
+              "bytes": "1f00e0061e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E1E[r0]",
+              "file_offset": "0x10",
+              "target": "0x1E1E",
+              "virtual_address": "0x10"
+            },
+            {
+              "bytes": "1f00e0062a1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E2A[r0]",
+              "file_offset": "0x20",
+              "target": "0x1E2A",
+              "virtual_address": "0x20"
+            },
+            {
+              "bytes": "1f00e0061e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E1E[r0]",
+              "file_offset": "0x30",
+              "target": "0x1E1E",
+              "virtual_address": "0x30"
+            },
+            {
+              "bytes": "1f00e0061e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E1E[r0]",
+              "file_offset": "0x40",
+              "target": "0x1E1E",
+              "virtual_address": "0x40"
+            },
+            {
+              "bytes": "1f00e0061e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E1E[r0]",
+              "file_offset": "0x50",
+              "target": "0x1E1E",
+              "virtual_address": "0x50"
+            },
+            {
+              "bytes": "1f00e0061e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E1E[r0]",
+              "file_offset": "0x60",
+              "target": "0x1E1E",
+              "virtual_address": "0x60"
+            },
+            {
+              "bytes": "1f00e0061e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E1E[r0]",
+              "file_offset": "0x70",
+              "target": "0x1E1E",
+              "virtual_address": "0x70"
+            },
+            {
+              "bytes": "1f00e0061e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E1E[r0]",
+              "file_offset": "0x80",
+              "target": "0x1E1E",
+              "virtual_address": "0x80"
+            },
+            {
+              "bytes": "1f00e0061e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E1E[r0]",
+              "file_offset": "0x90",
+              "target": "0x1E1E",
+              "virtual_address": "0x90"
+            },
+            {
+              "bytes": "1f00e0061e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E1E[r0]",
+              "file_offset": "0xA0",
+              "target": "0x1E1E",
+              "virtual_address": "0xA0"
+            },
+            {
+              "bytes": "1f00e0062a1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E2A[r0]",
+              "file_offset": "0xB0",
+              "target": "0x1E2A",
+              "virtual_address": "0xB0"
+            },
+            {
+              "bytes": "1f00e0061e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E1E[r0]",
+              "file_offset": "0xC0",
+              "target": "0x1E1E",
+              "virtual_address": "0xC0"
+            },
+            {
+              "bytes": "1f008007581d0000",
+              "classification": "neither",
+              "disassembly": "no supported vector form",
+              "file_offset": "0xD0",
+              "target": null,
+              "virtual_address": "0xD0"
+            },
+            {
+              "bytes": "1f00e006361e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E36[r0]",
+              "file_offset": "0xE0",
+              "target": "0x1E36",
+              "virtual_address": "0xE0"
+            },
+            {
+              "bytes": "1f00e0061e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E1E[r0]",
+              "file_offset": "0xF0",
+              "target": "0x1E1E",
+              "virtual_address": "0xF0"
+            }
+          ],
+          "entry_stride_bytes": 16,
+          "form": "jump-instruction"
+        }
+      },
+      "registered": {
+        "codeflash_base": "0x00000000",
+        "mcu": "R7F701381",
+        "processor": "v850e3:LE:32:default"
+      }
+    },
+    "corolla-8965F1208000": {
+      "readiness": {
+        "acquisition": {
+          "expected_size_bytes": 1048576,
+          "geometry_note": "exact bare 1 MiB RH850/P1M-E CodeFlash geometry",
+          "geometry_valid": true,
+          "path": "/Volumes/data/altdev/inspect/repos/ghidra_rh850_analysis/firmware/corolla-8965F1208000/CodeFlash.bin",
+          "problems": [],
+          "run_record": null,
+          "sha256": "fdb35b76891cf84a8b89e0a05c9c7c5cfcd27994cf85ccc01ff32828f53091f6",
+          "size_bytes": 1048576
+        },
+        "architecture": {
+          "alternatives_considered": [
+            "ARM-Thumb",
+            "PowerPC",
+            "RL78",
+            "older-V850",
+            "TriCore",
+            "compressed-or-encrypted",
+            "erased-or-sparse"
+          ],
+          "confidence": "high",
+          "decision": "RH850",
+          "observations": [
+            "15 of the first 16 vector slots decode as V850/RH850 jr/jmp forms",
+            "3 INTBP writes decoded; 1 have a nearby mov imm32 source",
+            "startup window contains 2 direct gp and 2 direct tp initializers"
+          ]
+        },
+        "ccp_xcp_candidates": {
+          "command_table_candidates": [
+            {
+              "address": "0x2AE38",
+              "evidence": "selector + three zero bytes + in-image handler pointer rows",
+              "record_count": 7,
+              "seed_key_selectors": [],
+              "selectors": [
+                "0xFB",
+                "0xFA",
+                "0xF5",
+                "0xF3",
+                "0xEB",
+                "0xEA",
+                "0xE4"
+              ]
+            }
+          ],
+          "route_constant_hits": [
+            {
+              "address": "0x4B8F0",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            },
+            {
+              "address": "0x75A6C",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            },
+            {
+              "address": "0xC7CB2",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            },
+            {
+              "address": "0xC87D6",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            },
+            {
+              "address": "0xC8CD8",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            },
+            {
+              "address": "0xCC126",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            }
+          ],
+          "searched_commands": {
+            "ccp": {
+              "CONNECT": "0x01",
+              "GET_SEED": "0x12",
+              "UNLOCK": "0x13",
+              "routes": [
+                "0xBE",
+                "0xBF"
+              ]
+            },
+            "xcp": {
+              "CONNECT": "0xFF",
+              "GET_DAQ_PROCESSOR_INFO": "0xDA",
+              "GET_SEED": "0xF8",
+              "UNLOCK": "0xF7"
+            }
+          }
+        },
+        "container_triage": {
+          "classification": "bare-codeflash",
+          "codeflash_file_offset": "0x0",
+          "regions": [
+            {
+              "entropy_bits_per_byte": 5.486785,
+              "erased_ff_fraction": 0.032042,
+              "file_end_exclusive": "0x100000",
+              "file_start": "0x0",
+              "name": "image",
+              "non_erased_end_inclusive": "0xFFF03",
+              "non_erased_start": "0x0",
+              "size_bytes": 1048576,
+              "zero_fraction": 0.258128
+            }
+          ]
+        },
+        "crc_table_constants": {
+          "hits": [],
+          "method": "exact standard table-prefix constants (findcrypt-style constant hit)"
+        },
+        "created_at": "2026-11-24T23:37:51+00:00",
+        "image_path": "/Volumes/data/altdev/inspect/repos/ghidra_rh850_analysis/firmware/corolla-8965F1208000/CodeFlash.bin",
+        "load_address_vote": {
+          "confidence": "high",
+          "intbp_evidence": [
+            {
+              "candidates": [],
+              "instruction_offset": "0x274",
+              "intbp_value": null
+            },
+            {
+              "candidates": [],
+              "instruction_offset": "0x9F3E",
+              "intbp_value": null
+            },
+            {
+              "candidates": [
+                {
+                  "in_range_pointers_first_32": 32,
+                  "load_address": "0x0",
+                  "table_file_offset": "0x20200"
+                }
+              ],
+              "instruction_offset": "0x6A8CC",
+              "intbp_value": "0x20200"
+            }
+          ],
+          "selected_load_address": "0x0",
+          "vote_spread_bytes": 0,
+          "votes": [
+            {
+              "evidence": "syncp; jmp 0x1B0[r0] reaches non-erased bytes inside the file",
+              "load_address": "0x0",
+              "source": "reset-vector-target"
+            },
+            {
+              "evidence": "INTBP 0x20200 maps to file 0x20200 with 32/32 in-range pointers",
+              "load_address": "0x0",
+              "source": "INTBP-pointer-table"
+            }
+          ]
+        },
+        "notes": "registered target corolla-8965F1208000",
+        "ready": true,
+        "resolver_readiness": {
+          "geometry_gate": true,
+          "manifest": null,
+          "manifest_bound": null,
+          "next_step": "run: tools/security/resolve_secoc_patch_image.sh <image> - (disposable Ghidra import; zero/multiple semantic candidates fail closed)",
+          "ready": true,
+          "resolver": "tools/security/resolve_secoc_patch_image.sh"
+        },
+        "schema": "variant-acquisition-readiness-v1",
+        "structure_triage": {
+          "available": true,
+          "boot_trust": {
+            "crc_descriptor_count": 2,
+            "terminal_valid_descriptor_count": 2,
+            "validity_marker_count": 20
+          },
+          "disclaimer": "All matches are structural triage candidates recovered from the Sienna 8965B4512000 calibration; they are not transfer proof for any other image. Validate every mechanism against the target's own firmware.",
+          "geometry": "bare-codeflash-1m",
+          "image_sha256": "fdb35b76891cf84a8b89e0a05c9c7c5cfcd27994cf85ccc01ff32828f53091f6",
+          "ram_exec_gate": {
+            "download_window_immediate_count": 4,
+            "package_descriptor_pair_count": 1
+          },
+          "schema": "rh850-codeflash-structure-triage-v2",
+          "semantic_resolver_prefilter": {
+            "byte_load_then_cmov_site_count": 90
+          },
+          "xcp_surface": {
+            "command_map_window_count": 18,
+            "request_can_id_extended_descriptor_count": 2,
+            "request_can_id_immediate_count": 0,
+            "response_can_id_extended_descriptor_count": 1,
+            "response_can_id_immediate_count": 0
+          }
+        },
+        "uds_table_candidates": {
+          "nrc_compare_candidates": {
+            "compare_load_hits": [],
+            "constants": [
+              "0x35",
+              "0x36",
+              "0x41"
+            ],
+            "raw_byte_counts": {
+              "0x35": 1013,
+              "0x36": 3121,
+              "0x41": 2788
+            }
+          },
+          "service_tables": [
+            {
+              "address": "0x25B38",
+              "file_offset": "0x25B38",
+              "handler_or_subfunction_pointer_count": 19,
+              "record_count": 23,
+              "schema": "denso-application-24-byte",
+              "sids": [
+                "0x10",
+                "0x11",
+                "0x14",
+                "0x19",
+                "0x22",
+                "0x23",
+                "0x27",
+                "0x28",
+                "0x2E",
+                "0x31",
+                "0x34",
+                "0x36",
+                "0x37",
+                "0x3E",
+                "0x85",
+                "0xAB",
+                "0xBA",
+                "0x10",
+                "0x10",
+                "0x19",
+                "0x22",
+                "0x3E",
+                "0xAB"
+              ]
+            },
+            {
+              "address": "0x8E34",
+              "file_offset": "0x8E34",
+              "handler_or_subfunction_pointer_count": 20,
+              "record_count": 20,
+              "schema": "sid-mask-handler-8-byte",
+              "sids": [
+                "0x10",
+                "0x11",
+                "0x27",
+                "0x28",
+                "0x3E",
+                "0x85",
+                "0x22",
+                "0x23",
+                "0x2C",
+                "0x2E",
+                "0x14",
+                "0x19",
+                "0x2F",
+                "0x31",
+                "0x34",
+                "0x36",
+                "0x37",
+                "0xAB",
+                "0xBA",
+                "0xBB"
+              ]
+            }
+          ]
+        },
+        "vector_entries": {
+          "classification_counts": {
+            "jump-instruction": 15,
+            "neither": 1
+          },
+          "decoder": "vendored-v850-sleigh-vector-subset",
+          "entries": [
+            {
+              "bytes": "1f00e006b0010000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1B0[r0]",
+              "file_offset": "0x0",
+              "target": "0x1B0",
+              "virtual_address": "0x0"
+            },
+            {
+              "bytes": "1f00e006021e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E02[r0]",
+              "file_offset": "0x10",
+              "target": "0x1E02",
+              "virtual_address": "0x10"
+            },
+            {
+              "bytes": "1f00e0060e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E0E[r0]",
+              "file_offset": "0x20",
+              "target": "0x1E0E",
+              "virtual_address": "0x20"
+            },
+            {
+              "bytes": "1f00e006021e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E02[r0]",
+              "file_offset": "0x30",
+              "target": "0x1E02",
+              "virtual_address": "0x30"
+            },
+            {
+              "bytes": "1f00e006021e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E02[r0]",
+              "file_offset": "0x40",
+              "target": "0x1E02",
+              "virtual_address": "0x40"
+            },
+            {
+              "bytes": "1f00e006021e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E02[r0]",
+              "file_offset": "0x50",
+              "target": "0x1E02",
+              "virtual_address": "0x50"
+            },
+            {
+              "bytes": "1f00e006021e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E02[r0]",
+              "file_offset": "0x60",
+              "target": "0x1E02",
+              "virtual_address": "0x60"
+            },
+            {
+              "bytes": "1f00e006021e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E02[r0]",
+              "file_offset": "0x70",
+              "target": "0x1E02",
+              "virtual_address": "0x70"
+            },
+            {
+              "bytes": "1f00e006021e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E02[r0]",
+              "file_offset": "0x80",
+              "target": "0x1E02",
+              "virtual_address": "0x80"
+            },
+            {
+              "bytes": "1f00e006021e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E02[r0]",
+              "file_offset": "0x90",
+              "target": "0x1E02",
+              "virtual_address": "0x90"
+            },
+            {
+              "bytes": "1f00e006021e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E02[r0]",
+              "file_offset": "0xA0",
+              "target": "0x1E02",
+              "virtual_address": "0xA0"
+            },
+            {
+              "bytes": "1f00e0060e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E0E[r0]",
+              "file_offset": "0xB0",
+              "target": "0x1E0E",
+              "virtual_address": "0xB0"
+            },
+            {
+              "bytes": "1f00e006021e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E02[r0]",
+              "file_offset": "0xC0",
+              "target": "0x1E02",
+              "virtual_address": "0xC0"
+            },
+            {
+              "bytes": "1f0080073c1d0000",
+              "classification": "neither",
+              "disassembly": "no supported vector form",
+              "file_offset": "0xD0",
+              "target": null,
+              "virtual_address": "0xD0"
+            },
+            {
+              "bytes": "1f00e0061a1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E1A[r0]",
+              "file_offset": "0xE0",
+              "target": "0x1E1A",
+              "virtual_address": "0xE0"
+            },
+            {
+              "bytes": "1f00e006021e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E02[r0]",
+              "file_offset": "0xF0",
+              "target": "0x1E02",
+              "virtual_address": "0xF0"
+            }
+          ],
+          "entry_stride_bytes": 16,
+          "form": "jump-instruction"
+        }
+      },
+      "registered": {
+        "codeflash_base": "0x00000000",
+        "mcu": "R7F701383",
+        "processor": "v850e3:LE:32:default"
+      }
+    },
+    "corolla-8965H1202000": {
+      "readiness": {
+        "acquisition": {
+          "expected_size_bytes": 1048576,
+          "geometry_note": "exact bare 1 MiB RH850/P1M-E CodeFlash geometry",
+          "geometry_valid": true,
+          "path": "/Volumes/data/altdev/inspect/repos/ghidra_rh850_analysis/firmware/corolla-8965H1202000/CodeFlash.bin",
+          "problems": [],
+          "run_record": null,
+          "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+          "size_bytes": 1048576
+        },
+        "architecture": {
+          "alternatives_considered": [
+            "ARM-Thumb",
+            "PowerPC",
+            "RL78",
+            "older-V850",
+            "TriCore",
+            "compressed-or-encrypted",
+            "erased-or-sparse"
+          ],
+          "confidence": "high",
+          "decision": "RH850",
+          "observations": [
+            "15 of the first 16 vector slots decode as V850/RH850 jr/jmp forms",
+            "3 INTBP writes decoded; 1 have a nearby mov imm32 source",
+            "startup window contains 2 direct gp and 2 direct tp initializers"
+          ]
+        },
+        "ccp_xcp_candidates": {
+          "command_table_candidates": [
+            {
+              "address": "0x2AE38",
+              "evidence": "selector + three zero bytes + in-image handler pointer rows",
+              "record_count": 7,
+              "seed_key_selectors": [],
+              "selectors": [
+                "0xFB",
+                "0xFA",
+                "0xF5",
+                "0xF3",
+                "0xEB",
+                "0xEA",
+                "0xE4"
+              ]
+            }
+          ],
+          "route_constant_hits": [
+            {
+              "address": "0x4B8F0",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            },
+            {
+              "address": "0x75A6C",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            },
+            {
+              "address": "0xC7CB2",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            },
+            {
+              "address": "0xC87D6",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            },
+            {
+              "address": "0xC8CD8",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            },
+            {
+              "address": "0xCC126",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            }
+          ],
+          "searched_commands": {
+            "ccp": {
+              "CONNECT": "0x01",
+              "GET_SEED": "0x12",
+              "UNLOCK": "0x13",
+              "routes": [
+                "0xBE",
+                "0xBF"
+              ]
+            },
+            "xcp": {
+              "CONNECT": "0xFF",
+              "GET_DAQ_PROCESSOR_INFO": "0xDA",
+              "GET_SEED": "0xF8",
+              "UNLOCK": "0xF7"
+            }
+          }
+        },
+        "container_triage": {
+          "classification": "bare-codeflash",
+          "codeflash_file_offset": "0x0",
+          "regions": [
+            {
+              "entropy_bits_per_byte": 5.486656,
+              "erased_ff_fraction": 0.032028,
+              "file_end_exclusive": "0x100000",
+              "file_start": "0x0",
+              "name": "image",
+              "non_erased_end_inclusive": "0xFFF03",
+              "non_erased_start": "0x0",
+              "size_bytes": 1048576,
+              "zero_fraction": 0.258137
+            }
+          ]
+        },
+        "crc_table_constants": {
+          "hits": [],
+          "method": "exact standard table-prefix constants (findcrypt-style constant hit)"
+        },
+        "created_at": "2026-11-24T23:37:54+00:00",
+        "image_path": "/Volumes/data/altdev/inspect/repos/ghidra_rh850_analysis/firmware/corolla-8965H1202000/CodeFlash.bin",
+        "load_address_vote": {
+          "confidence": "high",
+          "intbp_evidence": [
+            {
+              "candidates": [],
+              "instruction_offset": "0x274",
+              "intbp_value": null
+            },
+            {
+              "candidates": [],
+              "instruction_offset": "0x9F3E",
+              "intbp_value": null
+            },
+            {
+              "candidates": [
+                {
+                  "in_range_pointers_first_32": 32,
+                  "load_address": "0x0",
+                  "table_file_offset": "0x20200"
+                }
+              ],
+              "instruction_offset": "0x6A8CC",
+              "intbp_value": "0x20200"
+            }
+          ],
+          "selected_load_address": "0x0",
+          "vote_spread_bytes": 0,
+          "votes": [
+            {
+              "evidence": "syncp; jmp 0x1B0[r0] reaches non-erased bytes inside the file",
+              "load_address": "0x0",
+              "source": "reset-vector-target"
+            },
+            {
+              "evidence": "INTBP 0x20200 maps to file 0x20200 with 32/32 in-range pointers",
+              "load_address": "0x0",
+              "source": "INTBP-pointer-table"
+            }
+          ]
+        },
+        "notes": "registered target corolla-8965H1202000",
+        "ready": true,
+        "resolver_readiness": {
+          "geometry_gate": true,
+          "manifest": null,
+          "manifest_bound": null,
+          "next_step": "run: tools/security/resolve_secoc_patch_image.sh <image> - (disposable Ghidra import; zero/multiple semantic candidates fail closed)",
+          "ready": true,
+          "resolver": "tools/security/resolve_secoc_patch_image.sh"
+        },
+        "schema": "variant-acquisition-readiness-v1",
+        "structure_triage": {
+          "available": true,
+          "boot_trust": {
+            "crc_descriptor_count": 2,
+            "terminal_valid_descriptor_count": 2,
+            "validity_marker_count": 20
+          },
+          "disclaimer": "All matches are structural triage candidates recovered from the Sienna 8965B4512000 calibration; they are not transfer proof for any other image. Validate every mechanism against the target's own firmware.",
+          "geometry": "bare-codeflash-1m",
+          "image_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+          "ram_exec_gate": {
+            "download_window_immediate_count": 4,
+            "package_descriptor_pair_count": 1
+          },
+          "schema": "rh850-codeflash-structure-triage-v2",
+          "semantic_resolver_prefilter": {
+            "byte_load_then_cmov_site_count": 90
+          },
+          "xcp_surface": {
+            "command_map_window_count": 18,
+            "request_can_id_extended_descriptor_count": 2,
+            "request_can_id_immediate_count": 0,
+            "response_can_id_extended_descriptor_count": 1,
+            "response_can_id_immediate_count": 0
+          }
+        },
+        "uds_table_candidates": {
+          "nrc_compare_candidates": {
+            "compare_load_hits": [],
+            "constants": [
+              "0x35",
+              "0x36",
+              "0x41"
+            ],
+            "raw_byte_counts": {
+              "0x35": 1024,
+              "0x36": 3121,
+              "0x41": 2779
+            }
+          },
+          "service_tables": [
+            {
+              "address": "0x25B38",
+              "file_offset": "0x25B38",
+              "handler_or_subfunction_pointer_count": 19,
+              "record_count": 23,
+              "schema": "denso-application-24-byte",
+              "sids": [
+                "0x10",
+                "0x11",
+                "0x14",
+                "0x19",
+                "0x22",
+                "0x23",
+                "0x27",
+                "0x28",
+                "0x2E",
+                "0x31",
+                "0x34",
+                "0x36",
+                "0x37",
+                "0x3E",
+                "0x85",
+                "0xAB",
+                "0xBA",
+                "0x10",
+                "0x10",
+                "0x19",
+                "0x22",
+                "0x3E",
+                "0xAB"
+              ]
+            },
+            {
+              "address": "0x8E34",
+              "file_offset": "0x8E34",
+              "handler_or_subfunction_pointer_count": 20,
+              "record_count": 20,
+              "schema": "sid-mask-handler-8-byte",
+              "sids": [
+                "0x10",
+                "0x11",
+                "0x27",
+                "0x28",
+                "0x3E",
+                "0x85",
+                "0x22",
+                "0x23",
+                "0x2C",
+                "0x2E",
+                "0x14",
+                "0x19",
+                "0x2F",
+                "0x31",
+                "0x34",
+                "0x36",
+                "0x37",
+                "0xAB",
+                "0xBA",
+                "0xBB"
+              ]
+            }
+          ]
+        },
+        "vector_entries": {
+          "classification_counts": {
+            "jump-instruction": 15,
+            "neither": 1
+          },
+          "decoder": "vendored-v850-sleigh-vector-subset",
+          "entries": [
+            {
+              "bytes": "1f00e006b0010000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1B0[r0]",
+              "file_offset": "0x0",
+              "target": "0x1B0",
+              "virtual_address": "0x0"
+            },
+            {
+              "bytes": "1f00e006021e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E02[r0]",
+              "file_offset": "0x10",
+              "target": "0x1E02",
+              "virtual_address": "0x10"
+            },
+            {
+              "bytes": "1f00e0060e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E0E[r0]",
+              "file_offset": "0x20",
+              "target": "0x1E0E",
+              "virtual_address": "0x20"
+            },
+            {
+              "bytes": "1f00e006021e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E02[r0]",
+              "file_offset": "0x30",
+              "target": "0x1E02",
+              "virtual_address": "0x30"
+            },
+            {
+              "bytes": "1f00e006021e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E02[r0]",
+              "file_offset": "0x40",
+              "target": "0x1E02",
+              "virtual_address": "0x40"
+            },
+            {
+              "bytes": "1f00e006021e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E02[r0]",
+              "file_offset": "0x50",
+              "target": "0x1E02",
+              "virtual_address": "0x50"
+            },
+            {
+              "bytes": "1f00e006021e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E02[r0]",
+              "file_offset": "0x60",
+              "target": "0x1E02",
+              "virtual_address": "0x60"
+            },
+            {
+              "bytes": "1f00e006021e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E02[r0]",
+              "file_offset": "0x70",
+              "target": "0x1E02",
+              "virtual_address": "0x70"
+            },
+            {
+              "bytes": "1f00e006021e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E02[r0]",
+              "file_offset": "0x80",
+              "target": "0x1E02",
+              "virtual_address": "0x80"
+            },
+            {
+              "bytes": "1f00e006021e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E02[r0]",
+              "file_offset": "0x90",
+              "target": "0x1E02",
+              "virtual_address": "0x90"
+            },
+            {
+              "bytes": "1f00e006021e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E02[r0]",
+              "file_offset": "0xA0",
+              "target": "0x1E02",
+              "virtual_address": "0xA0"
+            },
+            {
+              "bytes": "1f00e0060e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E0E[r0]",
+              "file_offset": "0xB0",
+              "target": "0x1E0E",
+              "virtual_address": "0xB0"
+            },
+            {
+              "bytes": "1f00e006021e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E02[r0]",
+              "file_offset": "0xC0",
+              "target": "0x1E02",
+              "virtual_address": "0xC0"
+            },
+            {
+              "bytes": "1f0080073c1d0000",
+              "classification": "neither",
+              "disassembly": "no supported vector form",
+              "file_offset": "0xD0",
+              "target": null,
+              "virtual_address": "0xD0"
+            },
+            {
+              "bytes": "1f00e0061a1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E1A[r0]",
+              "file_offset": "0xE0",
+              "target": "0x1E1A",
+              "virtual_address": "0xE0"
+            },
+            {
+              "bytes": "1f00e006021e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E02[r0]",
+              "file_offset": "0xF0",
+              "target": "0x1E02",
+              "virtual_address": "0xF0"
+            }
+          ],
+          "entry_stride_bytes": 16,
+          "form": "jump-instruction"
+        }
+      },
+      "registered": {
+        "codeflash_base": "0x00000000",
+        "mcu": "R7F701383",
+        "processor": "v850e3:LE:32:default"
+      }
+    },
+    "crown-8965F3012000": {
+      "readiness": {
+        "acquisition": {
+          "expected_size_bytes": 1048576,
+          "geometry_note": "exact bare 1 MiB RH850/P1M-E CodeFlash geometry",
+          "geometry_valid": true,
+          "path": "/Volumes/data/altdev/inspect/repos/ghidra_rh850_analysis/firmware/crown-8965F3012000/CodeFlash.bin",
+          "problems": [],
+          "run_record": null,
+          "sha256": "5b89fdbc69edc2f66ef8a557f88b08c758e3146bd4e90067320d7966812b1273",
+          "size_bytes": 1048576
+        },
+        "architecture": {
+          "alternatives_considered": [
+            "ARM-Thumb",
+            "PowerPC",
+            "RL78",
+            "older-V850",
+            "TriCore",
+            "compressed-or-encrypted",
+            "erased-or-sparse"
+          ],
+          "confidence": "high",
+          "decision": "RH850",
+          "observations": [
+            "15 of the first 16 vector slots decode as V850/RH850 jr/jmp forms",
+            "3 INTBP writes decoded; 1 have a nearby mov imm32 source",
+            "startup window contains 2 direct gp and 2 direct tp initializers"
+          ]
+        },
+        "ccp_xcp_candidates": {
+          "command_table_candidates": [],
+          "route_constant_hits": [
+            {
+              "address": "0x7A16E",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            }
+          ],
+          "searched_commands": {
+            "ccp": {
+              "CONNECT": "0x01",
+              "GET_SEED": "0x12",
+              "UNLOCK": "0x13",
+              "routes": [
+                "0xBE",
+                "0xBF"
+              ]
+            },
+            "xcp": {
+              "CONNECT": "0xFF",
+              "GET_DAQ_PROCESSOR_INFO": "0xDA",
+              "GET_SEED": "0xF8",
+              "UNLOCK": "0xF7"
+            }
+          }
+        },
+        "container_triage": {
+          "classification": "bare-codeflash",
+          "codeflash_file_offset": "0x0",
+          "regions": [
+            {
+              "entropy_bits_per_byte": 5.604188,
+              "erased_ff_fraction": 0.033951,
+              "file_end_exclusive": "0x100000",
+              "file_start": "0x0",
+              "name": "image",
+              "non_erased_end_inclusive": "0xFFF03",
+              "non_erased_start": "0x0",
+              "size_bytes": 1048576,
+              "zero_fraction": 0.261066
+            }
+          ]
+        },
+        "crc_table_constants": {
+          "hits": [],
+          "method": "exact standard table-prefix constants (findcrypt-style constant hit)"
+        },
+        "created_at": "2026-11-24T23:37:49+00:00",
+        "image_path": "/Volumes/data/altdev/inspect/repos/ghidra_rh850_analysis/firmware/crown-8965F3012000/CodeFlash.bin",
+        "load_address_vote": {
+          "confidence": "high",
+          "intbp_evidence": [
+            {
+              "candidates": [],
+              "instruction_offset": "0x274",
+              "intbp_value": null
+            },
+            {
+              "candidates": [],
+              "instruction_offset": "0x9F3E",
+              "intbp_value": null
+            },
+            {
+              "candidates": [
+                {
+                  "in_range_pointers_first_32": 32,
+                  "load_address": "0x0",
+                  "table_file_offset": "0x20200"
+                }
+              ],
+              "instruction_offset": "0x709EC",
+              "intbp_value": "0x20200"
+            }
+          ],
+          "selected_load_address": "0x0",
+          "vote_spread_bytes": 0,
+          "votes": [
+            {
+              "evidence": "syncp; jmp 0x1B0[r0] reaches non-erased bytes inside the file",
+              "load_address": "0x0",
+              "source": "reset-vector-target"
+            },
+            {
+              "evidence": "INTBP 0x20200 maps to file 0x20200 with 32/32 in-range pointers",
+              "load_address": "0x0",
+              "source": "INTBP-pointer-table"
+            }
+          ]
+        },
+        "notes": "registered target crown-8965F3012000",
+        "ready": true,
+        "resolver_readiness": {
+          "geometry_gate": true,
+          "manifest": null,
+          "manifest_bound": null,
+          "next_step": "run: tools/security/resolve_secoc_patch_image.sh <image> - (disposable Ghidra import; zero/multiple semantic candidates fail closed)",
+          "ready": true,
+          "resolver": "tools/security/resolve_secoc_patch_image.sh"
+        },
+        "schema": "variant-acquisition-readiness-v1",
+        "structure_triage": {
+          "available": true,
+          "boot_trust": {
+            "crc_descriptor_count": 2,
+            "terminal_valid_descriptor_count": 2,
+            "validity_marker_count": 23
+          },
+          "disclaimer": "All matches are structural triage candidates recovered from the Sienna 8965B4512000 calibration; they are not transfer proof for any other image. Validate every mechanism against the target's own firmware.",
+          "geometry": "bare-codeflash-1m",
+          "image_sha256": "5b89fdbc69edc2f66ef8a557f88b08c758e3146bd4e90067320d7966812b1273",
+          "ram_exec_gate": {
+            "download_window_immediate_count": 3,
+            "package_descriptor_pair_count": 1
+          },
+          "schema": "rh850-codeflash-structure-triage-v2",
+          "semantic_resolver_prefilter": {
+            "byte_load_then_cmov_site_count": 96
+          },
+          "xcp_surface": {
+            "command_map_window_count": 15,
+            "request_can_id_extended_descriptor_count": 0,
+            "request_can_id_immediate_count": 0,
+            "response_can_id_extended_descriptor_count": 0,
+            "response_can_id_immediate_count": 0
+          }
+        },
+        "uds_table_candidates": {
+          "nrc_compare_candidates": {
+            "compare_load_hits": [],
+            "constants": [
+              "0x35",
+              "0x36",
+              "0x41"
+            ],
+            "raw_byte_counts": {
+              "0x35": 1112,
+              "0x36": 3122,
+              "0x41": 2826
+            }
+          },
+          "service_tables": [
+            {
+              "address": "0x25990",
+              "file_offset": "0x25990",
+              "handler_or_subfunction_pointer_count": 19,
+              "record_count": 23,
+              "schema": "denso-application-24-byte",
+              "sids": [
+                "0x10",
+                "0x11",
+                "0x14",
+                "0x19",
+                "0x22",
+                "0x23",
+                "0x27",
+                "0x28",
+                "0x2E",
+                "0x31",
+                "0x34",
+                "0x36",
+                "0x37",
+                "0x3E",
+                "0x85",
+                "0xAB",
+                "0xBA",
+                "0x10",
+                "0x10",
+                "0x19",
+                "0x22",
+                "0x3E",
+                "0xAB"
+              ]
+            },
+            {
+              "address": "0x8E54",
+              "file_offset": "0x8E54",
+              "handler_or_subfunction_pointer_count": 20,
+              "record_count": 20,
+              "schema": "sid-mask-handler-8-byte",
+              "sids": [
+                "0x10",
+                "0x11",
+                "0x27",
+                "0x28",
+                "0x3E",
+                "0x85",
+                "0x22",
+                "0x23",
+                "0x2C",
+                "0x2E",
+                "0x14",
+                "0x19",
+                "0x2F",
+                "0x31",
+                "0x34",
+                "0x36",
+                "0x37",
+                "0xAB",
+                "0xBA",
+                "0xBB"
+              ]
+            }
+          ]
+        },
+        "vector_entries": {
+          "classification_counts": {
+            "jump-instruction": 15,
+            "neither": 1
+          },
+          "decoder": "vendored-v850-sleigh-vector-subset",
+          "entries": [
+            {
+              "bytes": "1f00e006b0010000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1B0[r0]",
+              "file_offset": "0x0",
+              "target": "0x1B0",
+              "virtual_address": "0x0"
+            },
+            {
+              "bytes": "1f00e0061e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E1E[r0]",
+              "file_offset": "0x10",
+              "target": "0x1E1E",
+              "virtual_address": "0x10"
+            },
+            {
+              "bytes": "1f00e0062a1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E2A[r0]",
+              "file_offset": "0x20",
+              "target": "0x1E2A",
+              "virtual_address": "0x20"
+            },
+            {
+              "bytes": "1f00e0061e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E1E[r0]",
+              "file_offset": "0x30",
+              "target": "0x1E1E",
+              "virtual_address": "0x30"
+            },
+            {
+              "bytes": "1f00e0061e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E1E[r0]",
+              "file_offset": "0x40",
+              "target": "0x1E1E",
+              "virtual_address": "0x40"
+            },
+            {
+              "bytes": "1f00e0061e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E1E[r0]",
+              "file_offset": "0x50",
+              "target": "0x1E1E",
+              "virtual_address": "0x50"
+            },
+            {
+              "bytes": "1f00e0061e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E1E[r0]",
+              "file_offset": "0x60",
+              "target": "0x1E1E",
+              "virtual_address": "0x60"
+            },
+            {
+              "bytes": "1f00e0061e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E1E[r0]",
+              "file_offset": "0x70",
+              "target": "0x1E1E",
+              "virtual_address": "0x70"
+            },
+            {
+              "bytes": "1f00e0061e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E1E[r0]",
+              "file_offset": "0x80",
+              "target": "0x1E1E",
+              "virtual_address": "0x80"
+            },
+            {
+              "bytes": "1f00e0061e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E1E[r0]",
+              "file_offset": "0x90",
+              "target": "0x1E1E",
+              "virtual_address": "0x90"
+            },
+            {
+              "bytes": "1f00e0061e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E1E[r0]",
+              "file_offset": "0xA0",
+              "target": "0x1E1E",
+              "virtual_address": "0xA0"
+            },
+            {
+              "bytes": "1f00e0062a1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E2A[r0]",
+              "file_offset": "0xB0",
+              "target": "0x1E2A",
+              "virtual_address": "0xB0"
+            },
+            {
+              "bytes": "1f00e0061e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E1E[r0]",
+              "file_offset": "0xC0",
+              "target": "0x1E1E",
+              "virtual_address": "0xC0"
+            },
+            {
+              "bytes": "1f008007581d0000",
+              "classification": "neither",
+              "disassembly": "no supported vector form",
+              "file_offset": "0xD0",
+              "target": null,
+              "virtual_address": "0xD0"
+            },
+            {
+              "bytes": "1f00e006361e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E36[r0]",
+              "file_offset": "0xE0",
+              "target": "0x1E36",
+              "virtual_address": "0xE0"
+            },
+            {
+              "bytes": "1f00e0061e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E1E[r0]",
+              "file_offset": "0xF0",
+              "target": "0x1E1E",
+              "virtual_address": "0xF0"
+            }
+          ],
+          "entry_stride_bytes": 16,
+          "form": "jump-instruction"
+        }
+      },
+      "registered": {
+        "codeflash_base": "0x00000000",
+        "mcu": "R7F701381",
+        "processor": "v850e3:LE:32:default"
+      }
+    },
+    "r4p-838004AD91": {
+      "readiness": {
+        "acquisition": {
+          "expected_size_bytes": 1048576,
+          "geometry_note": "unexpected CodeFlash image geometry: 2097152 (0x200000) bytes; expected exactly 0x100000 (1 MiB) P1M-E user CodeFlash \u2014 reject truncated or oversized images",
+          "geometry_valid": false,
+          "path": "/Volumes/data/altdev/inspect/repos/ghidra_rh850_analysis/firmware/r4p-838004AD91/cflash.bin",
+          "problems": [
+            "image geometry is not resolver-ready"
+          ],
+          "run_record": null,
+          "sha256": "cc75cac2aaa4a648dadcad3d3d59d0c1bb293c53f1dbfcf9bc0fc88b4b6a4322",
+          "size_bytes": 2097152
+        },
+        "architecture": {
+          "alternatives_considered": [
+            "ARM-Thumb",
+            "PowerPC",
+            "RL78",
+            "older-V850",
+            "TriCore",
+            "compressed-or-encrypted",
+            "erased-or-sparse"
+          ],
+          "confidence": "high",
+          "decision": "RH850",
+          "observations": [
+            "16 of the first 16 vector slots decode as V850/RH850 jr/jmp forms",
+            "2 INTBP writes decoded; 0 have a nearby mov imm32 source",
+            "startup window contains 1 direct gp and 1 direct tp initializers"
+          ]
+        },
+        "ccp_xcp_candidates": {
+          "command_table_candidates": [
+            {
+              "address": "0xE6F4C",
+              "evidence": "selector + three zero bytes + in-image handler pointer rows",
+              "record_count": 31,
+              "seed_key_selectors": [
+                "0x12",
+                "0x13"
+              ],
+              "selectors": [
+                "0x01",
+                "0x02",
+                "0x03",
+                "0x04",
+                "0x05",
+                "0x06",
+                "0x07",
+                "0x08",
+                "0x09",
+                "0x0A",
+                "0x0B",
+                "0x0C",
+                "0x0D",
+                "0x0E",
+                "0x0F",
+                "0x10",
+                "0x11",
+                "0x12",
+                "0x13",
+                "0x14",
+                "0x15",
+                "0x16",
+                "0x17",
+                "0x18",
+                "0x19",
+                "0x1A",
+                "0x1B",
+                "0x1C",
+                "0x1D",
+                "0x1E",
+                "0x1F"
+              ]
+            },
+            {
+              "address": "0x15F4F4",
+              "evidence": "selector + three zero bytes + in-image handler pointer rows",
+              "record_count": 31,
+              "seed_key_selectors": [
+                "0x12",
+                "0x13"
+              ],
+              "selectors": [
+                "0x15",
+                "0x16",
+                "0x17",
+                "0x18",
+                "0x1A",
+                "0x1B",
+                "0x1C",
+                "0x1D",
+                "0x1E",
+                "0x01",
+                "0x02",
+                "0x03",
+                "0x04",
+                "0x05",
+                "0x06",
+                "0x07",
+                "0x09",
+                "0x08",
+                "0x0A",
+                "0x0B",
+                "0x0C",
+                "0x0D",
+                "0x0E",
+                "0x0F",
+                "0x19",
+                "0x14",
+                "0x10",
+                "0x11",
+                "0x12",
+                "0x13",
+                "0x1F"
+              ]
+            }
+          ],
+          "route_constant_hits": [
+            {
+              "address": "0x9158E",
+              "constant": "standard-request-0x7F7",
+              "width_bytes": 2
+            },
+            {
+              "address": "0x95F72",
+              "constant": "standard-request-0x7F7",
+              "width_bytes": 2
+            },
+            {
+              "address": "0x9609C",
+              "constant": "standard-request-0x7F7",
+              "width_bytes": 2
+            },
+            {
+              "address": "0x9610E",
+              "constant": "standard-request-0x7F7",
+              "width_bytes": 2
+            },
+            {
+              "address": "0xE229A",
+              "constant": "standard-request-0x7F7",
+              "width_bytes": 2
+            },
+            {
+              "address": "0xEAD92",
+              "constant": "standard-request-0x7F7",
+              "width_bytes": 2
+            },
+            {
+              "address": "0xEB1A4",
+              "constant": "standard-request-0x7F7",
+              "width_bytes": 2
+            },
+            {
+              "address": "0xECDCE",
+              "constant": "standard-request-0x7F7",
+              "width_bytes": 2
+            },
+            {
+              "address": "0xEE91E",
+              "constant": "standard-request-0x7F7",
+              "width_bytes": 2
+            },
+            {
+              "address": "0xEEA92",
+              "constant": "standard-request-0x7F7",
+              "width_bytes": 2
+            },
+            {
+              "address": "0xFDDA0",
+              "constant": "standard-request-0x7F7",
+              "width_bytes": 2
+            },
+            {
+              "address": "0x10277A",
+              "constant": "standard-request-0x7F7",
+              "width_bytes": 2
+            },
+            {
+              "address": "0x108CE8",
+              "constant": "standard-request-0x7F7",
+              "width_bytes": 2
+            },
+            {
+              "address": "0x10D734",
+              "constant": "standard-request-0x7F7",
+              "width_bytes": 2
+            },
+            {
+              "address": "0x118ADA",
+              "constant": "standard-request-0x7F7",
+              "width_bytes": 2
+            },
+            {
+              "address": "0x126052",
+              "constant": "standard-request-0x7F7",
+              "width_bytes": 2
+            },
+            {
+              "address": "0x13B274",
+              "constant": "standard-request-0x7F7",
+              "width_bytes": 2
+            },
+            {
+              "address": "0x13F8A6",
+              "constant": "standard-request-0x7F7",
+              "width_bytes": 2
+            },
+            {
+              "address": "0x1493BA",
+              "constant": "standard-request-0x7F7",
+              "width_bytes": 2
+            },
+            {
+              "address": "0x15D2DE",
+              "constant": "standard-request-0x7F7",
+              "width_bytes": 2
+            },
+            {
+              "address": "0x13F84",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            },
+            {
+              "address": "0x9FCAA",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            },
+            {
+              "address": "0xC824A",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            },
+            {
+              "address": "0xE2292",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            },
+            {
+              "address": "0xF405E",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            },
+            {
+              "address": "0x103620",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            },
+            {
+              "address": "0x10694E",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            },
+            {
+              "address": "0x10716E",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            },
+            {
+              "address": "0x1086B4",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            },
+            {
+              "address": "0x11F370",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            },
+            {
+              "address": "0x120300",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            },
+            {
+              "address": "0x122570",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            },
+            {
+              "address": "0x126894",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            },
+            {
+              "address": "0x12874A",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            }
+          ],
+          "searched_commands": {
+            "ccp": {
+              "CONNECT": "0x01",
+              "GET_SEED": "0x12",
+              "UNLOCK": "0x13",
+              "routes": [
+                "0xBE",
+                "0xBF"
+              ]
+            },
+            "xcp": {
+              "CONNECT": "0xFF",
+              "GET_DAQ_PROCESSOR_INFO": "0xDA",
+              "GET_SEED": "0xF8",
+              "UNLOCK": "0xF7"
+            }
+          }
+        },
+        "container_triage": {
+          "classification": "bare-codeflash",
+          "codeflash_file_offset": "0x0",
+          "regions": [
+            {
+              "entropy_bits_per_byte": 5.698669,
+              "erased_ff_fraction": 0.302916,
+              "file_end_exclusive": "0x200000",
+              "file_start": "0x0",
+              "name": "image",
+              "non_erased_end_inclusive": "0x1FFFEF",
+              "non_erased_start": "0x0",
+              "size_bytes": 2097152,
+              "zero_fraction": 0.105403
+            }
+          ]
+        },
+        "crc_table_constants": {
+          "hits": [
+            {
+              "polynomial": "CRC-32/ISO-HDLC reflected poly 0xEDB88320",
+              "signature_bytes": "00000000963007772c610eeeba510999",
+              "table_address": "0xD9B4"
+            },
+            {
+              "polynomial": "CRC-32/ISO-HDLC reflected poly 0xEDB88320",
+              "signature_bytes": "00000000963007772c610eeeba510999",
+              "table_address": "0x165270"
+            }
+          ],
+          "method": "exact standard table-prefix constants (findcrypt-style constant hit)"
+        },
+        "created_at": "2026-11-24T23:38:06+00:00",
+        "image_path": "/Volumes/data/altdev/inspect/repos/ghidra_rh850_analysis/firmware/r4p-838004AD91/cflash.bin",
+        "load_address_vote": {
+          "confidence": "medium",
+          "intbp_evidence": [
+            {
+              "candidates": [],
+              "instruction_offset": "0x106D4",
+              "intbp_value": null
+            },
+            {
+              "candidates": [],
+              "instruction_offset": "0x10884",
+              "intbp_value": null
+            }
+          ],
+          "selected_load_address": "0x0",
+          "vote_spread_bytes": 0,
+          "votes": [
+            {
+              "evidence": "jr 0xEE8 reaches non-erased bytes inside the file",
+              "load_address": "0x0",
+              "source": "reset-vector-target"
+            }
+          ]
+        },
+        "notes": "registered target r4p-838004AD91",
+        "ready": false,
+        "resolver_readiness": {
+          "geometry_gate": false,
+          "manifest": null,
+          "manifest_bound": null,
+          "next_step": "fix acquisition problems above before invoking the semantic resolver",
+          "ready": false,
+          "resolver": "tools/security/resolve_secoc_patch_image.sh"
+        },
+        "schema": "variant-acquisition-readiness-v1",
+        "structure_triage": {
+          "available": false,
+          "reason": "P1M-E structure scanner requires a bare 1 MiB CodeFlash region"
+        },
+        "uds_table_candidates": {
+          "nrc_compare_candidates": {
+            "compare_load_hits": [
+              {
+                "compare_address": "0xD4EEA",
+                "constant": "0x36",
+                "evidence": "movea-imm16-r0 0x36 into r1; nearby cmp uses r1",
+                "load_address": "0xD4ECC"
+              }
+            ],
+            "constants": [
+              "0x35",
+              "0x36",
+              "0x41"
+            ],
+            "raw_byte_counts": {
+              "0x35": 2609,
+              "0x36": 8453,
+              "0x41": 5307
+            }
+          },
+          "service_tables": [
+            {
+              "address": "0x1724E4",
+              "file_offset": "0x1724E4",
+              "handler_or_subfunction_pointer_count": 16,
+              "record_count": 19,
+              "schema": "denso-application-24-byte",
+              "sids": [
+                "0x10",
+                "0x14",
+                "0x19",
+                "0x22",
+                "0x23",
+                "0x28",
+                "0x2E",
+                "0x2F",
+                "0x31",
+                "0x3E",
+                "0x85",
+                "0xAB",
+                "0xBA",
+                "0x27",
+                "0x10",
+                "0x10",
+                "0x28",
+                "0x85",
+                "0x27"
+              ]
+            }
+          ]
+        },
+        "vector_entries": {
+          "classification_counts": {
+            "jump-instruction": 16
+          },
+          "decoder": "vendored-v850-sleigh-vector-subset",
+          "entries": [
+            {
+              "bytes": "e002e80e0000",
+              "classification": "jump-instruction",
+              "disassembly": "jr 0xEE8",
+              "file_offset": "0x0",
+              "target": "0xEE8",
+              "virtual_address": "0x0"
+            },
+            {
+              "bytes": "e00200000000",
+              "classification": "jump-instruction",
+              "disassembly": "jr 0x10",
+              "file_offset": "0x10",
+              "target": "0x10",
+              "virtual_address": "0x10"
+            },
+            {
+              "bytes": "e00200000000",
+              "classification": "jump-instruction",
+              "disassembly": "jr 0x20",
+              "file_offset": "0x20",
+              "target": "0x20",
+              "virtual_address": "0x20"
+            },
+            {
+              "bytes": "e00200000000",
+              "classification": "jump-instruction",
+              "disassembly": "jr 0x30",
+              "file_offset": "0x30",
+              "target": "0x30",
+              "virtual_address": "0x30"
+            },
+            {
+              "bytes": "e00200000000",
+              "classification": "jump-instruction",
+              "disassembly": "jr 0x40",
+              "file_offset": "0x40",
+              "target": "0x40",
+              "virtual_address": "0x40"
+            },
+            {
+              "bytes": "e00200000000",
+              "classification": "jump-instruction",
+              "disassembly": "jr 0x50",
+              "file_offset": "0x50",
+              "target": "0x50",
+              "virtual_address": "0x50"
+            },
+            {
+              "bytes": "e00200000000",
+              "classification": "jump-instruction",
+              "disassembly": "jr 0x60",
+              "file_offset": "0x60",
+              "target": "0x60",
+              "virtual_address": "0x60"
+            },
+            {
+              "bytes": "e00200000000",
+              "classification": "jump-instruction",
+              "disassembly": "jr 0x70",
+              "file_offset": "0x70",
+              "target": "0x70",
+              "virtual_address": "0x70"
+            },
+            {
+              "bytes": "e00200000000",
+              "classification": "jump-instruction",
+              "disassembly": "jr 0x80",
+              "file_offset": "0x80",
+              "target": "0x80",
+              "virtual_address": "0x80"
+            },
+            {
+              "bytes": "e00200000000",
+              "classification": "jump-instruction",
+              "disassembly": "jr 0x90",
+              "file_offset": "0x90",
+              "target": "0x90",
+              "virtual_address": "0x90"
+            },
+            {
+              "bytes": "e00200000000",
+              "classification": "jump-instruction",
+              "disassembly": "jr 0xA0",
+              "file_offset": "0xA0",
+              "target": "0xA0",
+              "virtual_address": "0xA0"
+            },
+            {
+              "bytes": "e00200000000",
+              "classification": "jump-instruction",
+              "disassembly": "jr 0xB0",
+              "file_offset": "0xB0",
+              "target": "0xB0",
+              "virtual_address": "0xB0"
+            },
+            {
+              "bytes": "e00200000000",
+              "classification": "jump-instruction",
+              "disassembly": "jr 0xC0",
+              "file_offset": "0xC0",
+              "target": "0xC0",
+              "virtual_address": "0xC0"
+            },
+            {
+              "bytes": "e00200000000",
+              "classification": "jump-instruction",
+              "disassembly": "jr 0xD0",
+              "file_offset": "0xD0",
+              "target": "0xD0",
+              "virtual_address": "0xD0"
+            },
+            {
+              "bytes": "e00200000000",
+              "classification": "jump-instruction",
+              "disassembly": "jr 0xE0",
+              "file_offset": "0xE0",
+              "target": "0xE0",
+              "virtual_address": "0xE0"
+            },
+            {
+              "bytes": "e00200000000",
+              "classification": "jump-instruction",
+              "disassembly": "jr 0xF0",
+              "file_offset": "0xF0",
+              "target": "0xF0",
+              "virtual_address": "0xF0"
+            }
+          ],
+          "entry_stride_bytes": 16,
+          "form": "jump-instruction"
+        }
+      },
+      "registered": {
+        "codeflash_base": "0x00000000",
+        "mcu": "unknown (RH850)",
+        "processor": "v850e3:LE:32:D1LD1M"
+      }
+    },
+    "sienna-8965B4512000": {
+      "readiness": {
+        "acquisition": {
+          "expected_size_bytes": 1048576,
+          "geometry_note": "exact bare 1 MiB RH850/P1M-E CodeFlash geometry",
+          "geometry_valid": true,
+          "path": "/Volumes/data/altdev/inspect/repos/ghidra_rh850_analysis/firmware/RH850_P1M-E_CodeFlash.bin",
+          "problems": [],
+          "run_record": null,
+          "sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde",
+          "size_bytes": 1048576
+        },
+        "architecture": {
+          "alternatives_considered": [
+            "ARM-Thumb",
+            "PowerPC",
+            "RL78",
+            "older-V850",
+            "TriCore",
+            "compressed-or-encrypted",
+            "erased-or-sparse"
+          ],
+          "confidence": "high",
+          "decision": "RH850",
+          "observations": [
+            "15 of the first 16 vector slots decode as V850/RH850 jr/jmp forms",
+            "3 INTBP writes decoded; 1 have a nearby mov imm32 source",
+            "startup window contains 2 direct gp and 2 direct tp initializers"
+          ]
+        },
+        "ccp_xcp_candidates": {
+          "command_table_candidates": [
+            {
+              "address": "0x2B3F0",
+              "evidence": "selector + three zero bytes + in-image handler pointer rows",
+              "record_count": 7,
+              "seed_key_selectors": [],
+              "selectors": [
+                "0xFB",
+                "0xFA",
+                "0xF5",
+                "0xF3",
+                "0xEB",
+                "0xEA",
+                "0xE4"
+              ]
+            }
+          ],
+          "route_constant_hits": [
+            {
+              "address": "0x21F70",
+              "constant": "standard-request-0x7F7",
+              "width_bytes": 2
+            },
+            {
+              "address": "0x234C0",
+              "constant": "standard-request-0x7F7",
+              "width_bytes": 2
+            },
+            {
+              "address": "0x21F68",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            },
+            {
+              "address": "0x7B6CC",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            }
+          ],
+          "searched_commands": {
+            "ccp": {
+              "CONNECT": "0x01",
+              "GET_SEED": "0x12",
+              "UNLOCK": "0x13",
+              "routes": [
+                "0xBE",
+                "0xBF"
+              ]
+            },
+            "xcp": {
+              "CONNECT": "0xFF",
+              "GET_DAQ_PROCESSOR_INFO": "0xDA",
+              "GET_SEED": "0xF8",
+              "UNLOCK": "0xF7"
+            }
+          }
+        },
+        "container_triage": {
+          "classification": "bare-codeflash",
+          "codeflash_file_offset": "0x0",
+          "regions": [
+            {
+              "entropy_bits_per_byte": 5.575491,
+              "erased_ff_fraction": 0.033039,
+              "file_end_exclusive": "0x100000",
+              "file_start": "0x0",
+              "name": "image",
+              "non_erased_end_inclusive": "0xFFF03",
+              "non_erased_start": "0x0",
+              "size_bytes": 1048576,
+              "zero_fraction": 0.254115
+            }
+          ]
+        },
+        "crc_table_constants": {
+          "hits": [],
+          "method": "exact standard table-prefix constants (findcrypt-style constant hit)"
+        },
+        "created_at": "2026-11-24T23:37:57+00:00",
+        "image_path": "/Volumes/data/altdev/inspect/repos/ghidra_rh850_analysis/firmware/RH850_P1M-E_CodeFlash.bin",
+        "load_address_vote": {
+          "confidence": "high",
+          "intbp_evidence": [
+            {
+              "candidates": [],
+              "instruction_offset": "0x274",
+              "intbp_value": null
+            },
+            {
+              "candidates": [],
+              "instruction_offset": "0x9F3E",
+              "intbp_value": null
+            },
+            {
+              "candidates": [
+                {
+                  "in_range_pointers_first_32": 32,
+                  "load_address": "0x0",
+                  "table_file_offset": "0x20200"
+                }
+              ],
+              "instruction_offset": "0x7052C",
+              "intbp_value": "0x20200"
+            }
+          ],
+          "selected_load_address": "0x0",
+          "vote_spread_bytes": 0,
+          "votes": [
+            {
+              "evidence": "syncp; jmp 0x1B0[r0] reaches non-erased bytes inside the file",
+              "load_address": "0x0",
+              "source": "reset-vector-target"
+            },
+            {
+              "evidence": "INTBP 0x20200 maps to file 0x20200 with 32/32 in-range pointers",
+              "load_address": "0x0",
+              "source": "INTBP-pointer-table"
+            }
+          ]
+        },
+        "notes": "registered target sienna-8965B4512000",
+        "ready": true,
+        "resolver_readiness": {
+          "geometry_gate": true,
+          "manifest": null,
+          "manifest_bound": null,
+          "next_step": "run: tools/security/resolve_secoc_patch_image.sh <image> - (disposable Ghidra import; zero/multiple semantic candidates fail closed)",
+          "ready": true,
+          "resolver": "tools/security/resolve_secoc_patch_image.sh"
+        },
+        "schema": "variant-acquisition-readiness-v1",
+        "structure_triage": {
+          "available": true,
+          "boot_trust": {
+            "crc_descriptor_count": 2,
+            "terminal_valid_descriptor_count": 1,
+            "validity_marker_count": 23
+          },
+          "disclaimer": "All matches are structural triage candidates recovered from the Sienna 8965B4512000 calibration; they are not transfer proof for any other image. Validate every mechanism against the target's own firmware.",
+          "geometry": "bare-codeflash-1m",
+          "image_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde",
+          "ram_exec_gate": {
+            "download_window_immediate_count": 3,
+            "package_descriptor_pair_count": 1
+          },
+          "schema": "rh850-codeflash-structure-triage-v2",
+          "semantic_resolver_prefilter": {
+            "byte_load_then_cmov_site_count": 101
+          },
+          "xcp_surface": {
+            "command_map_window_count": 13,
+            "request_can_id_extended_descriptor_count": 0,
+            "request_can_id_immediate_count": 2,
+            "response_can_id_extended_descriptor_count": 0,
+            "response_can_id_immediate_count": 1
+          }
+        },
+        "uds_table_candidates": {
+          "nrc_compare_candidates": {
+            "compare_load_hits": [],
+            "constants": [
+              "0x35",
+              "0x36",
+              "0x41"
+            ],
+            "raw_byte_counts": {
+              "0x35": 1169,
+              "0x36": 3092,
+              "0x41": 2866
+            }
+          },
+          "service_tables": [
+            {
+              "address": "0x25E28",
+              "file_offset": "0x25E28",
+              "handler_or_subfunction_pointer_count": 19,
+              "record_count": 23,
+              "schema": "denso-application-24-byte",
+              "sids": [
+                "0x10",
+                "0x11",
+                "0x14",
+                "0x19",
+                "0x22",
+                "0x23",
+                "0x27",
+                "0x28",
+                "0x2E",
+                "0x31",
+                "0x34",
+                "0x36",
+                "0x37",
+                "0x3E",
+                "0x85",
+                "0xAB",
+                "0xBA",
+                "0x10",
+                "0x10",
+                "0x19",
+                "0x22",
+                "0x3E",
+                "0xAB"
+              ]
+            },
+            {
+              "address": "0x8E54",
+              "file_offset": "0x8E54",
+              "handler_or_subfunction_pointer_count": 20,
+              "record_count": 20,
+              "schema": "sid-mask-handler-8-byte",
+              "sids": [
+                "0x10",
+                "0x11",
+                "0x27",
+                "0x28",
+                "0x3E",
+                "0x85",
+                "0x22",
+                "0x23",
+                "0x2C",
+                "0x2E",
+                "0x14",
+                "0x19",
+                "0x2F",
+                "0x31",
+                "0x34",
+                "0x36",
+                "0x37",
+                "0xAB",
+                "0xBA",
+                "0xBB"
+              ]
+            }
+          ]
+        },
+        "vector_entries": {
+          "classification_counts": {
+            "jump-instruction": 15,
+            "neither": 1
+          },
+          "decoder": "vendored-v850-sleigh-vector-subset",
+          "entries": [
+            {
+              "bytes": "1f00e006b0010000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1B0[r0]",
+              "file_offset": "0x0",
+              "target": "0x1B0",
+              "virtual_address": "0x0"
+            },
+            {
+              "bytes": "1f00e0061e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E1E[r0]",
+              "file_offset": "0x10",
+              "target": "0x1E1E",
+              "virtual_address": "0x10"
+            },
+            {
+              "bytes": "1f00e0062a1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E2A[r0]",
+              "file_offset": "0x20",
+              "target": "0x1E2A",
+              "virtual_address": "0x20"
+            },
+            {
+              "bytes": "1f00e0061e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E1E[r0]",
+              "file_offset": "0x30",
+              "target": "0x1E1E",
+              "virtual_address": "0x30"
+            },
+            {
+              "bytes": "1f00e0061e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E1E[r0]",
+              "file_offset": "0x40",
+              "target": "0x1E1E",
+              "virtual_address": "0x40"
+            },
+            {
+              "bytes": "1f00e0061e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E1E[r0]",
+              "file_offset": "0x50",
+              "target": "0x1E1E",
+              "virtual_address": "0x50"
+            },
+            {
+              "bytes": "1f00e0061e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E1E[r0]",
+              "file_offset": "0x60",
+              "target": "0x1E1E",
+              "virtual_address": "0x60"
+            },
+            {
+              "bytes": "1f00e0061e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E1E[r0]",
+              "file_offset": "0x70",
+              "target": "0x1E1E",
+              "virtual_address": "0x70"
+            },
+            {
+              "bytes": "1f00e0061e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E1E[r0]",
+              "file_offset": "0x80",
+              "target": "0x1E1E",
+              "virtual_address": "0x80"
+            },
+            {
+              "bytes": "1f00e0061e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E1E[r0]",
+              "file_offset": "0x90",
+              "target": "0x1E1E",
+              "virtual_address": "0x90"
+            },
+            {
+              "bytes": "1f00e0061e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E1E[r0]",
+              "file_offset": "0xA0",
+              "target": "0x1E1E",
+              "virtual_address": "0xA0"
+            },
+            {
+              "bytes": "1f00e0062a1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E2A[r0]",
+              "file_offset": "0xB0",
+              "target": "0x1E2A",
+              "virtual_address": "0xB0"
+            },
+            {
+              "bytes": "1f00e0061e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E1E[r0]",
+              "file_offset": "0xC0",
+              "target": "0x1E1E",
+              "virtual_address": "0xC0"
+            },
+            {
+              "bytes": "1f008007581d0000",
+              "classification": "neither",
+              "disassembly": "no supported vector form",
+              "file_offset": "0xD0",
+              "target": null,
+              "virtual_address": "0xD0"
+            },
+            {
+              "bytes": "1f00e006361e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E36[r0]",
+              "file_offset": "0xE0",
+              "target": "0x1E36",
+              "virtual_address": "0xE0"
+            },
+            {
+              "bytes": "1f00e0061e1e0000",
+              "classification": "jump-instruction",
+              "disassembly": "syncp; jmp 0x1E1E[r0]",
+              "file_offset": "0xF0",
+              "target": "0x1E1E",
+              "virtual_address": "0xF0"
+            }
+          ],
+          "entry_stride_bytes": 16,
+          "form": "jump-instruction"
+        }
+      },
+      "registered": {
+        "codeflash_base": "0x00000000",
+        "mcu": "R7F701381",
+        "processor": "v850e3:LE:32:default"
+      }
+    },
+    "venza-8917048E30": {
+      "readiness": {
+        "acquisition": {
+          "expected_size_bytes": 1048576,
+          "geometry_note": "unexpected CodeFlash image geometry: 3145728 (0x300000) bytes; expected exactly 0x100000 (1 MiB) P1M-E user CodeFlash \u2014 reject truncated or oversized images",
+          "geometry_valid": false,
+          "path": "/Volumes/data/altdev/inspect/repos/ghidra_rh850_analysis/firmware/venza-8917048E30/cflash.bin",
+          "problems": [
+            "image geometry is not resolver-ready"
+          ],
+          "run_record": null,
+          "sha256": "2dfaf7ce21cb04af1126192f574103f63802352f8717fa0f03986d5a11d067f9",
+          "size_bytes": 3145728
+        },
+        "architecture": {
+          "alternatives_considered": [
+            "ARM-Thumb",
+            "PowerPC",
+            "RL78",
+            "older-V850",
+            "TriCore",
+            "compressed-or-encrypted",
+            "erased-or-sparse"
+          ],
+          "confidence": "high",
+          "decision": "RH850",
+          "observations": [
+            "16 of the first 16 vector slots decode as V850/RH850 jr/jmp forms",
+            "6 INTBP writes decoded; 0 have a nearby mov imm32 source",
+            "startup window contains 2 direct gp and 1 direct tp initializers"
+          ]
+        },
+        "ccp_xcp_candidates": {
+          "command_table_candidates": [
+            {
+              "address": "0x36178",
+              "evidence": "selector + three zero bytes + in-image handler pointer rows",
+              "record_count": 13,
+              "seed_key_selectors": [
+                "0x12",
+                "0x13"
+              ],
+              "selectors": [
+                "0x01",
+                "0x0A",
+                "0x0B",
+                "0x0C",
+                "0x0D",
+                "0x0E",
+                "0x0F",
+                "0x10",
+                "0x11",
+                "0x12",
+                "0x13",
+                "0x14",
+                "0x20"
+              ]
+            }
+          ],
+          "route_constant_hits": [
+            {
+              "address": "0x177EFC",
+              "constant": "standard-request-0x7F7",
+              "width_bytes": 2
+            },
+            {
+              "address": "0x15964",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            },
+            {
+              "address": "0x6252A",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            },
+            {
+              "address": "0xAFDCC",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            },
+            {
+              "address": "0x13167C",
+              "constant": "standard-response-0x7F8",
+              "width_bytes": 2
+            },
+            {
+              "address": "0x13E05A",
+              "constant": "extended-request-0x1FDC0002",
+              "width_bytes": 4
+            }
+          ],
+          "searched_commands": {
+            "ccp": {
+              "CONNECT": "0x01",
+              "GET_SEED": "0x12",
+              "UNLOCK": "0x13",
+              "routes": [
+                "0xBE",
+                "0xBF"
+              ]
+            },
+            "xcp": {
+              "CONNECT": "0xFF",
+              "GET_DAQ_PROCESSOR_INFO": "0xDA",
+              "GET_SEED": "0xF8",
+              "UNLOCK": "0xF7"
+            }
+          }
+        },
+        "container_triage": {
+          "classification": "bare-codeflash",
+          "codeflash_file_offset": "0x0",
+          "regions": [
+            {
+              "entropy_bits_per_byte": 4.043777,
+              "erased_ff_fraction": 0.416192,
+              "file_end_exclusive": "0x300000",
+              "file_start": "0x0",
+              "name": "image",
+              "non_erased_end_inclusive": "0x2FFFFF",
+              "non_erased_start": "0x0",
+              "size_bytes": 3145728,
+              "zero_fraction": 0.202364
+            }
+          ]
+        },
+        "crc_table_constants": {
+          "hits": [
+            {
+              "polynomial": "CRC-32/ISO-HDLC reflected poly 0xEDB88320",
+              "signature_bytes": "00000000963007772c610eeeba510999",
+              "table_address": "0xCA10"
+            }
+          ],
+          "method": "exact standard table-prefix constants (findcrypt-style constant hit)"
+        },
+        "created_at": "2026-11-24T23:38:00+00:00",
+        "image_path": "/Volumes/data/altdev/inspect/repos/ghidra_rh850_analysis/firmware/venza-8917048E30/cflash.bin",
+        "load_address_vote": {
+          "confidence": "medium",
+          "intbp_evidence": [
+            {
+              "candidates": [],
+              "instruction_offset": "0x10F50",
+              "intbp_value": null
+            },
+            {
+              "candidates": [],
+              "instruction_offset": "0x17BEC",
+              "intbp_value": null
+            },
+            {
+              "candidates": [],
+              "instruction_offset": "0x17BF4",
+              "intbp_value": null
+            },
+            {
+              "candidates": [],
+              "instruction_offset": "0x17BFE",
+              "intbp_value": null
+            },
+            {
+              "candidates": [],
+              "instruction_offset": "0x17C08",
+              "intbp_value": null
+            },
+            {
+              "candidates": [],
+              "instruction_offset": "0xA983C",
+              "intbp_value": null
+            }
+          ],
+          "selected_load_address": "0x0",
+          "vote_spread_bytes": 0,
+          "votes": [
+            {
+              "evidence": "jr 0xAD6 reaches non-erased bytes inside the file",
+              "load_address": "0x0",
+              "source": "reset-vector-target"
+            }
+          ]
+        },
+        "notes": "registered target venza-8917048E30",
+        "ready": false,
+        "resolver_readiness": {
+          "geometry_gate": false,
+          "manifest": null,
+          "manifest_bound": null,
+          "next_step": "fix acquisition problems above before invoking the semantic resolver",
+          "ready": false,
+          "resolver": "tools/security/resolve_secoc_patch_image.sh"
+        },
+        "schema": "variant-acquisition-readiness-v1",
+        "structure_triage": {
+          "available": false,
+          "reason": "P1M-E structure scanner requires a bare 1 MiB CodeFlash region"
+        },
+        "uds_table_candidates": {
+          "nrc_compare_candidates": {
+            "compare_load_hits": [],
+            "constants": [
+              "0x35",
+              "0x36",
+              "0x41"
+            ],
+            "raw_byte_counts": {
+              "0x35": 1645,
+              "0x36": 4700,
+              "0x41": 5351
+            }
+          },
+          "service_tables": [
+            {
+              "address": "0x23AB0",
+              "file_offset": "0x23AB0",
+              "handler_or_subfunction_pointer_count": 23,
+              "record_count": 23,
+              "schema": "denso-application-24-byte",
+              "sids": [
+                "0x10",
+                "0x19",
+                "0x22",
+                "0x3E",
+                "0xAB",
+                "0x10",
+                "0x11",
+                "0x27",
+                "0x2E",
+                "0x31",
+                "0x10",
+                "0x14",
+                "0x28",
+                "0x31",
+                "0x85",
+                "0x10",
+                "0x19",
+                "0x23",
+                "0x27",
+                "0x2C",
+                "0x2E",
+                "0xAB",
+                "0xBA"
+              ]
+            }
+          ]
+        },
+        "vector_entries": {
+          "classification_counts": {
+            "jump-instruction": 16
+          },
+          "decoder": "vendored-v850-sleigh-vector-subset",
+          "entries": [
+            {
+              "bytes": "e002d60a0000",
+              "classification": "jump-instruction",
+              "disassembly": "jr 0xAD6",
+              "file_offset": "0x0",
+              "target": "0xAD6",
+              "virtual_address": "0x0"
+            },
+            {
+              "bytes": "e002c0060000",
+              "classification": "jump-instruction",
+              "disassembly": "jr 0x6D0",
+              "file_offset": "0x10",
+              "target": "0x6D0",
+              "virtual_address": "0x10"
+            },
+            {
+              "bytes": "e002b0060000",
+              "classification": "jump-instruction",
+              "disassembly": "jr 0x6D0",
+              "file_offset": "0x20",
+              "target": "0x6D0",
+              "virtual_address": "0x20"
+            },
+            {
+              "bytes": "e002a0060000",
+              "classification": "jump-instruction",
+              "disassembly": "jr 0x6D0",
+              "file_offset": "0x30",
+              "target": "0x6D0",
+              "virtual_address": "0x30"
+            },
+            {
+              "bytes": "e00290060000",
+              "classification": "jump-instruction",
+              "disassembly": "jr 0x6D0",
+              "file_offset": "0x40",
+              "target": "0x6D0",
+              "virtual_address": "0x40"
+            },
+            {
+              "bytes": "e00280060000",
+              "classification": "jump-instruction",
+              "disassembly": "jr 0x6D0",
+              "file_offset": "0x50",
+              "target": "0x6D0",
+              "virtual_address": "0x50"
+            },
+            {
+              "bytes": "e00270060000",
+              "classification": "jump-instruction",
+              "disassembly": "jr 0x6D0",
+              "file_offset": "0x60",
+              "target": "0x6D0",
+              "virtual_address": "0x60"
+            },
+            {
+              "bytes": "e00260060000",
+              "classification": "jump-instruction",
+              "disassembly": "jr 0x6D0",
+              "file_offset": "0x70",
+              "target": "0x6D0",
+              "virtual_address": "0x70"
+            },
+            {
+              "bytes": "e00250060000",
+              "classification": "jump-instruction",
+              "disassembly": "jr 0x6D0",
+              "file_offset": "0x80",
+              "target": "0x6D0",
+              "virtual_address": "0x80"
+            },
+            {
+              "bytes": "e00240060000",
+              "classification": "jump-instruction",
+              "disassembly": "jr 0x6D0",
+              "file_offset": "0x90",
+              "target": "0x6D0",
+              "virtual_address": "0x90"
+            },
+            {
+              "bytes": "e00230060000",
+              "classification": "jump-instruction",
+              "disassembly": "jr 0x6D0",
+              "file_offset": "0xA0",
+              "target": "0x6D0",
+              "virtual_address": "0xA0"
+            },
+            {
+              "bytes": "e00220060000",
+              "classification": "jump-instruction",
+              "disassembly": "jr 0x6D0",
+              "file_offset": "0xB0",
+              "target": "0x6D0",
+              "virtual_address": "0xB0"
+            },
+            {
+              "bytes": "e00210060000",
+              "classification": "jump-instruction",
+              "disassembly": "jr 0x6D0",
+              "file_offset": "0xC0",
+              "target": "0x6D0",
+              "virtual_address": "0xC0"
+            },
+            {
+              "bytes": "e00200060000",
+              "classification": "jump-instruction",
+              "disassembly": "jr 0x6D0",
+              "file_offset": "0xD0",
+              "target": "0x6D0",
+              "virtual_address": "0xD0"
+            },
+            {
+              "bytes": "e002f0050000",
+              "classification": "jump-instruction",
+              "disassembly": "jr 0x6D0",
+              "file_offset": "0xE0",
+              "target": "0x6D0",
+              "virtual_address": "0xE0"
+            },
+            {
+              "bytes": "e002e0050000",
+              "classification": "jump-instruction",
+              "disassembly": "jr 0x6D0",
+              "file_offset": "0xF0",
+              "target": "0x6D0",
+              "virtual_address": "0xF0"
+            }
+          ],
+          "entry_stride_bytes": 16,
+          "form": "jump-instruction"
+        }
+      },
+      "registered": {
+        "codeflash_base": "0x00000000",
+        "mcu": "unknown (RH850 P1x-C family)",
+        "processor": "v850e3:LE:32:P1xC"
+      }
+    }
+  }
+}

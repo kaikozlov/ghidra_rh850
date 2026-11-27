@@ -86,7 +86,9 @@ DCRA1_MODEL_ENTRY = 0xFEF00000
 DCRA1_MODEL_REGION = "0xFEF00000,0x1000"
 DCRA1_MODEL_NAME = "dcra1-crc-model.bin"
 DCRA1_MODEL_SOURCE = Path(__file__).with_name("dcra1_crc_model.c")
-SIM_MEMORY_REGIONS = (RAM_REGION, DCRA1_MODEL_REGION)
+TAUJ1CNT0 = 0xFFE51010
+TAUJ1_COUNTER_REGION = "0xFFE51000,0x1000"
+SIM_MEMORY_REGIONS = (RAM_REGION, DCRA1_MODEL_REGION, TAUJ1_COUNTER_REGION)
 
 # Handler-specific memory-copy and callback-dispatch sinks. The shared list
 # covers transport and generic DCM paths; these prove the direct service
@@ -1316,6 +1318,17 @@ def audit_response_extents(
         "first_pass_candidates": len(candidates),
         "poison_value_collisions": collisions,
         "findings": findings,
+        "incomplete": [
+            {
+                "did": record["did"],
+                "session": record["session"],
+                "pc": hex(record["pc"]),
+                "response_length": record["response_length"],
+                "prefix": record["prefix"],
+            }
+            for record in records
+            if record["kind"] == "incomplete"
+        ],
         "peripheral_blocked": [
             {
                 "did": record["did"],

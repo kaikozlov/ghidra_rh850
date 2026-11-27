@@ -3,7 +3,6 @@
 uint serialize_event_and_merge_selected_output_8e074(undefined4 param_1,uint *param_2,undefined4 param_3)
 
 {
-  uint8_t stack_record_5e[94];
   uint8_t stack_record_62[98];
   char cVar1;
   char cVar2;
@@ -93,10 +92,11 @@ uint serialize_event_and_merge_selected_output_8e074(undefined4 param_1,uint *pa
   }
 LAB_0008e14e:
   puStack_48 = (stack_record_62 + 2);
+  (*((uint32_t *)(stack_record_62 + 26))) = camry_host_addr(puStack_48);
   stack_record_62[46] = (undefined1)uVar9;
-  puStack_44 = ((uint8_t *)(stack_record_5e));
-  (*((uint32_t *)(stack_record_5e + 46))) = 0xfebf45e4u;
-  (*((uint32_t *)(stack_record_62 + 42))) = 0;
+  puStack_44 = ((uint8_t *)stack_record_62 + 4);
+  (*((uint32_t *)(stack_record_62 + 30))) = camry_host_addr(puStack_44);
+  (*((uint32_t *)(stack_record_62 + 50))) = 0xfebf45e4u;
   (*((uint32_t *)(stack_record_62 + 22))) = (*((uint32_t *)(stack_record_62 + 14)));
   (*((uint32_t *)(stack_record_62 + 34))) = (*((uint32_t *)(stack_record_62 + 18)));
   (*((uint16_t *)(stack_record_62 + 40))) = uVar6;

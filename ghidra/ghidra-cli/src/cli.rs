@@ -1410,6 +1410,9 @@ pub struct ScriptRunArgs {
     /// Persist successful script changes by clean bridge teardown (stops the bridge).
     #[arg(long)]
     pub save: bool,
+    /// Remove the script's source bundle after this invocation.
+    #[arg(long)]
+    pub transient_source: bool,
     /// Script arguments (after --)
     #[arg(last = true)]
     pub args: Vec<String>,

@@ -690,6 +690,11 @@ Level 1 SecurityAccess is non-functional: both seed and key handlers are
 as an error and emit a negative response. Programming-session access is
 therefore obtained via `DiagnosticSessionControl` (`10 02`).
 
+In the Camry emulator, `27 01` in programming session `2` at security level
+zero returned `7F 27 13`. The
+[Gallia reference comparison](../security/fuzz-oracle-methodology.md#gallia-reference-comparison)
+records the corresponding reference response.
+
 #### Level 2 seed generation (`0x8C734`)
 
 The level 2 seed worker stores the 16-byte request field to RAM

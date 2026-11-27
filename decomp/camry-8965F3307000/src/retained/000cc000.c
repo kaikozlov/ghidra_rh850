@@ -250,7 +250,7 @@ uint32_t map_signed_ae20_gain_into_c83c_cc3be(void)
   uint32_t camry_r10_result;
   int iVar1;
   uint uVar2;
-  undefined **ppuVar3;
+  uint32_t *ppuVar3;
   uint32_t puVar4;
   short sVar5;
   int iVar6;

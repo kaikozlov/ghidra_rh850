@@ -10,5 +10,7 @@
   "csv": "outside_function_candidates.csv",
   "decoded_byte_count": 18138,
   "decoded_instruction_count": 7186,
+  "ledger_sha256": "unbound",
+  "recognizer_revision": "unbound",
   "schema_version": 1
 }

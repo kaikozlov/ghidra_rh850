@@ -448,6 +448,49 @@ def _rewrite_loaded_pointer_words(code: str) -> str:
     return "".join(pieces)
 
 
+def _rewrite_firmware_pointer_table_aliases(code: str) -> str:
+    """Keep pointer-table slots four bytes wide on the host.
+
+    `undefined **slot = &PTR_DAT... + index` names a table of firmware
+    address words.  Ghidra's double pointer makes `*slot` an eight-byte host
+    load, concatenating two adjacent firmware words.
+    """
+    declarations = list(re.finditer(
+        r"^([ \t]*)([A-Za-z_][A-Za-z0-9_]*(?:[ \t]+[A-Za-z_][A-Za-z0-9_]*)*)"
+        r"[ \t]*\*[ \t]*\*[ \t]*([A-Za-z_][A-Za-z0-9_]*)[ \t]*;[ \t]*$",
+        code,
+        re.M,
+    ))
+    selected: list[tuple[int, int, str, str, str]] = []
+    for declaration in declarations:
+        indent, element, name = declaration.group(1, 2, 3)
+        assignments = list(re.finditer(
+            rf"\b{re.escape(name)}\s*=\s*([^;]+);",
+            code,
+        ))
+        if not assignments or any(
+            re.fullmatch(
+                r"&PTR_[A-Za-z_][A-Za-z0-9_]*(?:\s*\+\s*.+)?",
+                assignment.group(1).strip(),
+            ) is None
+            for assignment in assignments
+        ):
+            continue
+        if re.search(rf"(?<![\w*])\*\s*{re.escape(name)}\s*=(?!=)", code):
+            continue
+        selected.append((
+            declaration.start(), declaration.end(), indent, element.strip(), name,
+        ))
+    for start, end, indent, element, name in reversed(selected):
+        code = re.sub(
+            rf"(?<![\w*])(?:\(\s*)?\*\s*{re.escape(name)}\b(?:\s*\))?",
+            f"(({element} *)camry_host_ptr((uint32_t)(*{name})))",
+            code,
+        )
+        code = code[:start] + f"{indent}uint32_t *{name};" + code[end:]
+    return code
+
+
 def _retype_struct_address_words(code: str) -> str:
     """`(Struct *)uint32_table[index]` is the address word, and `+ 1` is one struct.
 
@@ -1341,6 +1384,23 @@ def _rewrite_numeric_record_types(code: str) -> str:
             f"(uVar5 & 1) ? {reset_first} : {current_first})",
         )
     elif name == "serialize_event_and_merge_selected_output_8e074":
+        # 8e154-8e17e make the result-length and NRC-byte pointers part of
+        # the merge descriptor.  Ghidra names the pointer locals but drops
+        # their aliased stack stores, so restore those two descriptor fields.
+        code = code.replace(
+            "  puStack_48 = (stack_record_62 + 2);",
+            "  puStack_48 = (stack_record_62 + 2);\n"
+            "  (*((uint32_t *)(stack_record_62 + 26))) = camry_host_addr(puStack_48);",
+        )
+        code = code.replace(
+            "  puStack_44 = ((uint8_t *)(stack_record_5e));",
+            "  puStack_44 = ((uint8_t *)stack_record_62 + 4);\n"
+            "  (*((uint32_t *)(stack_record_62 + 30))) = camry_host_addr(puStack_44);",
+        )
+        code = code.replace(
+            "(*((uint32_t *)(stack_record_5e + 46))) = 0xfebf45e4u;",
+            "(*((uint32_t *)(stack_record_62 + 50))) = 0xfebf45e4u;",
+        )
         # 8e1da stores the live r10 byte; the early path stores/returns 10.
         code = code.replace("void serialize_event_and_merge_selected_output_8e074(", "uint serialize_event_and_merge_selected_output_8e074(")
         code = re.sub(r"\breturn\s*;", "return DAT_febf45e3;", code)

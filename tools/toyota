@@ -2,4 +2,14 @@
 # tools/toyota — unified Toyota tool surface.
 set -eu
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+if [ "${1-}" = "eps-identity" ]; then
+    previous=
+    for argument in "$@"; do
+        if [ "$previous" = "--transport" ] && [ "$argument" = "bridge" ]; then
+            exec uv run --project "$ROOT" --locked --with python-can \
+                python -m tools.toyota_support.cli "$@"
+        fi
+        previous=$argument
+    done
+fi
 exec uv run --project "$ROOT" --locked python -m tools.toyota_support.cli "$@"

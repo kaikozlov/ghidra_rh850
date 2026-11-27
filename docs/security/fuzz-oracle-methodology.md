@@ -98,12 +98,6 @@ list:
 | Coarse reach accounting | Entry return says nothing about the intended copy/callback path | Required sink breakpoints and concrete liveness effects; branch/edge feedback remains open (§8) |
 | Peripheral wishful thinking | Fabricated MMIO values can unlock impossible paths or suppress real state | Classify the exact blocking instruction and leave the path blocked until a dataflow-faithful model exists |
 
-The audit also found malformed direct SID `0x22`/`0x23` payloads, incoherent
-synthetic queue/TX state, non-reused GDB breakpoint numbers, and a divergence
-pass that deleted its alternate dump before comparing it. Those were harness
-defects, not firmware findings. Each now has an executable liveness or
-self-test. No harness anomaly is downgraded merely because it is inconvenient.
-
 ## 2. Memory-safety class matrix
 
 “Covered” means the named dynamic property was exercised, not that the entire
@@ -111,19 +105,15 @@ image lacks that bug class.
 
 | CWE / class | Exact-image check now used | Status and residual risk |
 |---|---|---|
-| 787, 120, 121, 122 — OOB write / stack or object overflow | Whole-window diff, untouched-slot isolation, row invariants, four access-time fences, oversized transport/service matrices | Covered for named entries and modeled objects; no byte-granular shadow memory for every global/stack object |
+| 787, 120, 121, 122 — OOB write / stack or object overflow | Machine `memory_accesses` stores are checked at access time against Camry DCM/CanTp extents derived from `struct_layouts.json`, `data.jsonl`, and firmware receive-slot tables; stack bands have per-context watermarks; existing fences and oversized matrices remain | Covered only for selected typed objects and observed contexts; no write spanning a selected object edge occurred in the current machine batch, and this is not whole-image shadow memory |
 | 125 — OOB read / over-read | Exact request objects ending at unmapped RAM; SID `0x23` address/size matrix; poison propagation/divergence; response-byte extent audit | Direct WDBI/Routine/RDBI/RMEM parsers covered at request tail; in-bounds reads from the wrong object remain observable only if they affect control/output |
 | 131, 190 — wrong size, truncation, wraparound | FF 12-bit length, SID `0x23` nibble/size, response-capacity, `0/1/max/max±1`, u16 row underflow and pointer/capacity matrices | High-risk decoded lengths covered; not a general UBSan replacement for all arithmetic, shifts, alignment, or conversions |
-| 457 — uninitialized use / stale disclosure | Address-distinct whole-state markers, two-fill divergence, object-local two-salt response poison | Consumer-visible propagation covered in named state/output objects; no instruction-level definedness shadow |
-| 416, 415 — use-after-free / double free | No dynamic heap allocator was identified in these paths, but static slot reuse, stale callback, double completion, and use-after-return are still temporal classes; multi-frame lifecycle sequences exercise some | **Partial.** Absence of `malloc/free` does not close temporal safety; interrupt/task scheduling and systematic allocate-use-release-reuse sequences remain open |
+| 457 — uninitialized use / stale disclosure | Machine `uninitialized-read` faults stop at the reading instruction; response reach is recorded before publication, alongside the existing two-fill and response-poison checks | All 288 GNU-incomplete RDBI cases reached exact `dcm_read_did_service @ 0x962F2` through machine CAN ingress, but none completed a response; no absence conclusion extends beyond those executed prefixes |
+| 416, 415 — use-after-free / double free | No dynamic heap allocator was identified in these paths, but static slot reuse, stale callback, double completion, and use-after-return are still temporal classes; multi-frame lifecycle sequences exercise some | **Partial.** Absence of `malloc/free` does not close temporal safety; scheduling the [exact Camry execution contexts](../../data/generated/camry_8965F3307000_execution_contexts.json) and systematic allocate-use-release-reuse sequences remain open |
 | 476 — NULL/invalid pointer | Exact return-PC/fault classification, attacker-pointer sentinels, class-edge/callback dispatch probes | Covered where the named paths consume the pointer; not whole-image |
 | 843 / bad indirect target — type or callback confusion | Callback-table/class edges, exact active publication table, abnormal-PC and pointer materialization checks | Partial; no CFI/type metadata exists in the binary |
-| 362 — race / asynchronous lifetime corruption | None beyond ISR-band canaries | **Open:** interrupts, DMA, timer ordering, and task races are not scheduled |
+| 362 — race / asynchronous lifetime corruption | `report_camry_f33_preemption_shared_ranges.py` schedules six interrupt deliveries across four scenarios and compares shared ranges | The exact-image run found one shared byte, `0xFEBF1190`, in the crypto interrupt; the read at `0x88EDE` and write at `0x88F5A` execute with `PSW.ID=0`, `PMR=0xFF00`, so the observed access is priority-mask protected. Other interrupt/DMA schedules remain partial |
 | 401/770 — resource leak/exhaustion | Stateful transport sequences inspect retained channel/slot state | Partial; no long-duration reset/retry exhaustion campaign |
-
-The old statement “no allocator, therefore no UAF” is withdrawn. Firmware
-frequently encodes lifetimes in static pools, ownership flags, callback slots,
-and asynchronous completion state; those can fail temporally without a heap.
 
 ## 3. Fault-at-access-time: fences
 
@@ -218,6 +208,18 @@ pipeline:
 4. **Request-tail access.** The active DID `0x2030` writer is given destination
    one byte past mapped RAM. It must fault at the first escaping store
    (`0x4F9C6`), proving the simulator and collector preserve access faults.
+5. **Machine definedness.** A sim-only no-write producer (`jmp [lp]`) feeds
+   exact `memcpy_forward @ 0x89F2E` from uninitialized Global RAM
+   `0xFEEF9000` into the response object. The machine stops at the first
+   publication read, PC `0x89F86`, address `0xFEEF9000`, width four.
+6. **Object boundary.** With `MCTL.MA=1`, a sim-only exact `sst.h`
+   instruction starts at `0xFEBE5D1F`, the final byte of the 768-byte response
+   object. The checker reports PC `0xFEBE000C`, width two, crossing the
+   `0xFEBE5D20` end.
+7. **Stack watermark.** A sim-only entry at exact
+   `addi -64,sp,sp @ 0x65AC0` stops at `0x65AC4`. The trace arithmetic must
+   report initial `SP=0xFEBE2000`, low `SP=0xFEBE1FC0`, and 64 bytes used.
+
 
 Rule: a new oracle component ships with a deterministic positive control. A
 negative result from an unseeded oracle is not evidence.
@@ -255,26 +257,282 @@ The current checkout also contains
 exact branch tracing, a comparison dictionary, sequence mutation, edge-based
 retention/minimization, plateau detection, and multi-service producer-extent
 and request-tail audits. Its retained lifecycle-prefix result is in §9.
-The implementation alone does not establish a completed full campaign or its
-coverage. Its direct DCM injection still supplies synthetic context.
+Direct-entry GNU sim trials use synthetic DCM context. The
+[P1M-E machine](../tooling/rh850-build-and-sim.md#p-code-execution-engines)
+reports peripheral events for its modeled devices.
 
-The separate [P1M-E machine runtime](../tooling/rh850-build-and-sim.md#implementation-plan-and-tracked-status)
-now models functional timers, interrupt arbitration, DMA, selected CAN FIFO
-behavior, CRC and DataFlash operations, with explicit unsupported boundaries.
-The GNU sim harness also has a separately checked DCRA1 CRC helper. The nine
-blocked trials in each older pass below are historical results, not an
-inventory of the current machine model. These execution engines and their
-coverage are not interchangeable.
+### Typed-event P1M-E campaign
+
+[`fuzz_camry_f33_machine_typed_events.py`](../../tools/targets/camry/research/fuzz_camry_f33_machine_typed_events.py)
+executes exact-image machine scenarios whose identity is the tuple of four
+ordered streams: channel-1 CAN receive, TAUJ0 P-Bus clock ticks, interrupt
+offsets, and channel-1 CAN transmit completion. An offspring changes exactly
+one stream. CAN events carry identifier, payload length, service, subfunction,
+and record fields. The encoder regenerates ISO-TP SF/FF length and CF sequence
+for `identifier-coherent`, service/subfunction/record substitution,
+`integrity-break`, and `length-coherent` mutations. `length-broken` is the
+separate declared-length violation class. The selected lifecycle requests
+contain no recovered MAC or freshness field, so the campaign makes no claim
+that it can recompute either; opaque records are preserved unless their named
+mutation class changes them.
+
+The real-ingress corpus uses firmware-decoded receive rules 43 (`0x7A1`) and
+44 (`0x777`). The transmit-completion seed first lets the exact firmware emit
+its diagnostic response, then schedules completion of channel-1 buffer 22.
+Feedback combines consecutive-PC branch edges, machine peripheral-event kinds,
+branch-consuming compare operands, and input-derived table indices. Compare
+values and indices feed the next batch's substitution dictionary. New edges or
+event kinds retain the complete stream tuple under `corpus/`. `summary.json`
+records the edge set, every executed input, retained IDs, observation and
+dictionary sizes, and per-source executed, mutated, and retained-offspring
+counts. `--target-function` weights parents by static direct-call distance; the
+summary separately states whether the named target actually executed.
+
+Each case runs from the complete-machine checkpoint after the readiness
+prelude; tracing starts at the `normal-operation` checkpoint step
+(`instruction_trace_start_step`), so the prelude is not traced. Campaign cases
+run for two foreground cycles, which lets segmented input complete and dispatch.
+Every case is screened untraced first. A typed fault or a trial that does not
+reach its configured arrival stop is recorded as an outcome, not a runner
+error. Completed trial results are written atomically under `results/`; a valid
+result is reused on restart and a truncated result is discarded.
+
+The GNU-sim lifecycle corpus has 1,332 prefixes. Its 222 poll, 222 completion,
+222 timeout, and 222 reuse prefixes have external machine-event equivalents.
+The 222 direct-cancel prefixes and 222 pending-completion prefixes do not:
+cancel and the pending completion status are internal DCM callback arguments,
+not peripheral events. The campaign runs one distinct real-ingress
+representative for each reproducible event shape (five executed).
+
+The READY-state campaigns reuse capture-replay bring-up: the bootstrap plus 25
+empty cycles, checkpointed after 26 completed foreground cycles with live,
+desired, and active mode `0x0702`. Four 120-execution campaigns (6 seeds,
+114 mutations, batch size 8, seed 20261126) ran under
+`build/out/targets/camry-8965F3307000/typed-event-d4-final-20261127/`. Every
+input reached `stop-after-arrivals` with no typed fault:
+
+| Campaign | Edges | Retained | Inputs reaching target | Learned compare tokens | Mean traced rate |
+|---|---:|---:|---:|---:|---:|
+| `app_security_compare_key @ 0x8D91A`, directed | 34,258 | 31 | 25 | 3,177 | 3.80 M instructions/s |
+| `0x8D91A`, uniform parents | 34,295 | 48 | 3 | 3,184 | 3.71 M instructions/s |
+| `execute_write_did_payload_and_report_result @ 0x95674`, directed | 33,657 | 42 | 40 | 3,145 | 3.64 M instructions/s |
+| `0x95674`, uniform parents | 34,365 | 49 | 5 | 3,161 | 3.70 M instructions/s |
+
+The unmutated positive controls establish target reachability before mutation:
+segmented `27 04` reaches `0x8D91A` at absolute instruction 39,686,925, and
+single-frame `2E 20 12 01` reaches `0x95674` at 39,289,285 and transmits
+`6E 20 12`. The directed campaigns first reach their target at execution 4,
+which is the target-specific positive seed. Directed parent weighting finds 40
+target-reaching inputs versus 5 with uniform parents for `0x95674`, and 25
+versus 3 for `0x8D91A`. Each campaign observes 21–22 peripheral event kinds
+and 439–450 distinct input-derived table indices. Its 29 timer mutations all
+complete, retain 5–10 offspring, and contribute 82–150 new global edges.
+
+A typed timer event adds one P-Bus clock cycle; bulk additions are rejected.
+An earlier harness injected 400,000 P-Bus cycles at one instruction boundary,
+and every campaign then stopped its 29 timer mutations and one seed with
+`unsupported-csih-operation`. The first trigger launched the five-word
+CSIH2/3 transfers, and the same clock event reached the next trigger before
+the board fixture's relative `csih-word` input, 128 instructions after launch.
+The write is the firmware's own DMA trigger:
+`configure_enabled_serial_dma_descriptors @ 0x60E5A` programs DMAC0.1 from
+the descriptor at `0x314AC` (`0x31404` → `CSIH2MCTL2`) and DMAC1.1 from
+`0x314D4` (`0x31408` → `CSIH3MCTL2`); both source words are `0x80050005`.
+The table consumed by `load_indexed_serial_register_configuration @ 0x60D8C`
+sets `MCTL0.MMS=01` (dual buffer) and `BRS=0x000A`, which is 4 MHz: one
+16-bit word takes 4 µs and five words 20 µs, or 3,200 instruction periods at
+160 MHz (R01UH0585EJ0120 §§14.3.4, 14.3.11, and 14.3.16, pp. 540–563).
+TAUJ0 counts the undivided 80-MHz P-Bus, so its 16,000-tick shortest period
+is 200 µs (§24.3.2.1, pp. 1887–1889). The manual prohibits writing
+`CSIHnMCTL2` while `CSIHnSTR0.TSF=1` (§14.3.18, Table 14.34, p. 567); the
+device-model boundary was correct and the bulk clock advance was the defect.
+`write_serial_halfword_matrix_when_idle @ 0x60EFA` applies the same rule to
+buffer fills: it returns `0x5A` unless `TSF` (bit 7) is clear.
+
+A `register-write` row's `pc` is the CPU counter at the instruction boundary
+that delivered the write. In restored trials the writes to the six TSG3
+compare registers and both CSIH `MCTL2` registers are DMA transfers
+(`initiator` `DMAC0.5`/`DMAC1.5` and `DMAC0.1`/`DMAC1.1`), so their `pc` is
+wherever the CPU was: `0x80B9E`, an `ld.bu`, or the `0x66066`/`0x6606A` wait
+loop. CPU writes keep their store address, for example `CFSTS5` at `0x83D58`.
+The `unsupported-csih-operation` fault is raised on the DMA channel's `MCTL2`
+write and carries the same CPU position.
+
+All 13 configured WDBI records have one- or two-byte payloads and are therefore
+single-frame requests. A separate overlength segmented assertion from the
+operational checkpoint covers every configured DID: each request reaches the
+service dispatcher at `0x95978`, first reports its NRC through
+`check_write_did_length_and_security @ 0x95734`, stages `7F 2E 13`, and never
+reaches the write callback dispatcher at `0x95674`. The final-response
+coordinator clears the leading `7F` after completion; the end-state assertion
+therefore checks the retained service/NRC bytes `2E 13`.
+
+The independent RID `0x100F` compare-gate benchmark reaches its target. Raw
+substitution requires 28,572 executions, the former static dictionary 953, and
+the eight learned operands 18.
+
+### Cross-engine lifecycle replay
+
+[`compare_camry_f33_lifecycle_engines.py`](../../tools/targets/camry/research/compare_camry_f33_lifecycle_engines.py)
+runs every stateful-fuzzer seed plus five deterministic representatives from
+each machine-representable poll, completion, timeout, and reuse class. It
+records a checkpoint after every case step. GNU sim restores the same
+READY-derived image used by reconstructed C. Each machine batch reuses the
+firmware bring-up from the capture-replay producer, runs one bootstrap and 25
+empty foreground cycles until live, desired, and active mode all equal
+`0x0702`, then restores that complete checkpoint before each case. Requests are
+scheduled through native FIFO ingress, one foreground cycle per step. A
+segmented period takes two cycles after its frames: the first-frame step runs
+the full cycle whose communication phase transmits flow control, the ECU
+flow-control confirmation follows one wait-loop iteration later, and the last
+consecutive-frame step runs the full cycle in which CanTp processes the
+consecutive frames (`cantp_handle_consecutive_receive`), indicates the request
+to Dcm (`dcm_receive_indication`) and posts the dispatch after a delay; the
+period's native cycle is the dispatch cycle. With one cycle, that cycle only
+processes the consecutive frames and Dcm posts the dispatch after a delay, so
+the request is never dispatched inside the period; a 10,000-instruction gap
+before each consecutive frame does not change that.
+Each batch runs as one machine invocation with its scenario digest stored
+beside its report; a rerun reuses every batch whose digest matches. Machine
+registers are not compared with direct-call registers because the paths do
+not share an ABI checkpoint.
+
+```sh
+uv run --locked python \
+  -m tools.targets.camry.research.compare_camry_f33_lifecycle_engines \
+  --out build/out/targets/camry-8965F3307000/lifecycle-cross-engine-segmented-20261126 \
+  --timeout 120 --batch-size 16
+```
+
+`report.json` contains the compared ranges, first differing bytes, diagnoses,
+isolated native-host faults, and the generic native oracle result. The
+Dcm-contract state excludes the time-relative software-timer table
+`0xFEBE39C0..0xFEBE3DDF` and five path-only ranges: communication-cycle
+crypto-bank state `0xFEBE5060..0xFEBE50C0`, CanTp-owned active
+transaction/message context `0xFEBE5624..0xFEBE564D`, CanTp receive-slot
+payloads `0xFEBE5651..0xFEBE5950`, both CanTp channel banks
+`0xFEBE4EFC..0xFEBE4FB1`, and the direct harness's synthetic proprietary
+callback context `0xFEBE52BC..0xFEBE52D7`. Firmware creates the last range only
+in `snapshot_seven_word_context_and_call_4d4c2_8e672`; callbacks at `0x8E6BA`
+and `0x8E6D2` consume it. Generic DCM ingress does not execute that producer.
+The timer and crypto-bank ranges advance on the machine's full foreground
+communication cycle; direct calls have no corresponding boundary.
+
+The run materialized a fresh normal-operation LocalRAM image, executed 318
+seeds and 20 lifecycle representatives (338 cases, 392 checkpoints, 0 engine
+failures), and classified every machine checkpoint against GNU sim:
+
+| Class | Checkpoints | Equal | Foreground-cycle only | Contract-diverged |
+|---|---:|---:|---:|---:|
+| request | 306 | 269 | 31 | 6 |
+| poll | 12 | 3 | 7 | 2 |
+| completion | 10 | 1 | 4 | 5 |
+| timeout | 10 | 2 | 6 | 2 |
+| reuse | 54 | 13 | 22 | 19 |
+| **Total** | **392** | **288** | **70** | **34** |
+
+GNU sim equals reconstructed C at all 392 checkpoints. Foreground-cycle-only
+checkpoints differ solely in the excluded per-cycle ranges (the service's
+application work runs after the Dcm call on the machine; a segmented period
+adds a second cycle of that drift). The 34 contract-diverged checkpoints:
+
+| Class | Count | First differing row | Owning function |
+|---|---:|---|---|
+| ECUReset execution | 3 | `ecu_reset#1`: `0xFEBE5A20` GNU `51000000` / machine `00000000`, no `can-tx`, the return-to-wait step never reaches the wait point; `reset_reuse#2`, `#3`: `0xFEBE564E` GNU `000001` / machine `020001` | `dcm_dispatch_direct_service @ 0x91422` writes the response prefix, `dcm_reset_receive_slot_and_optionally_shared_response @ 0x93CA0` clears it 987 instructions later; the direct engines model the reset step as cleared session state while the machine answers `2E 20 12 01` with `6E 20 12` and keeps session `02` |
+| Response-buffer lifetime | 16 | `request_download#1`: `0xFEBE5A20` GNU `74000000` / machine `00000000`; also `transfer_data#1`, `transfer_exit#1`, four `truncated_*_routine_1010_completion#2`, two `truncated_*_routine_1010_timeout#2`, `truncated_35_routine_1010_poll#2`, `session_security_sequence#2..4` (GNU holds the ECU flow-control bytes `5003003201f4`), `rdbi_0102#1` (`0xFEBE5A28` GNU `67` / machine `62`) | same prefix write at `0x91422` and reset at `0x93CA0`; the direct engines retain the response bytes after the Dcm call, the machine hands the shared buffer to the next request |
+| Synthetic DCM callback action | 12 | `pending_poll_cancel_reuse#3`: `0xFEBE5D24` GNU `00000000` / machine `a5a5a5a5`; the six `three_slot_interleave#2..6` checkpoints hold the other slot's response (`7101100f…` / `6220304a…`) | the cancel, poll and completion callbacks the direct engines invoke have no external event on the machine |
+| Programming admission state | 2 | `programming_null_transfer_sequence#3`, `#4`: `0xFEBE5D4C` GNU zeros / machine `a107031002010001` | `dcm_programming_pending_response_join @ 0x95BD0` builds the constructed programming request only on the machine |
+| Security seed value | 1 | `security_seed#1`: `0xFEBE5A22` GNU `bdcd5f4d…` / machine `4ac14013…` | the seed bytes are not reproducible across engines |
+
+Segmented release is no longer a diverged class: `security_key#1`,
+`rmba_ram_16#1`, `routine_1010#1`, `rdbi_segmented_multi#1` and the
+`session_security_sequence` seed request are released to Dcm and dispatched.
+
+### Machine definedness, object boundaries, and stack watermarks
+
+[`audit_camry_f33_definedness_boundaries.py`](../../tools/targets/camry/research/audit_camry_f33_definedness_boundaries.py)
+has two distinct execution sets. The retained direct-call set restores the
+normal-operation LocalRAM image and calls the exact reset/init, session,
+communication, and DCM routines; it preserves the original 288
+GNU-incomplete-RDBI access-time observations.
+
+The transport-complete set restores the full 26-cycle machine checkpoint for
+each case and enters through FIFO5/GAFL rule 43. It executes all 242 configured
+RDBI DIDs in the operational session, all 13 configured WDBI DIDs with
+multi-frame records, all 19 configured RoutineControl RIDs with records longer
+than seven bytes, and seven directed ISO-TP shapes: undersupplied FF, CF
+overrun, FC Wait, FC Overflow, and block sizes zero, one, and two. ECU flow
+control, tester flow control, and channel-1 buffer-22 completions are scheduled
+as separate typed events. A response is complete only after its declared
+single-frame payload or its first frame and every required consecutive frame
+appear on `can-tx` rows.
+
+Machine `uninitialized-read` faults retain PC, address, width, and publication
+reach. Every `memory_accesses` store is checked against 98 selected Camry
+DCM/CanTp extents. Each case result is written atomically; valid results resume
+and truncated results rerun. The five Sienna `ApplyRamTypes` rows remain naming
+precedent only; no Sienna address is applied to Camry.
+
+```sh
+uv run --locked python \
+  -m tools.targets.camry.research.audit_camry_f33_definedness_boundaries \
+  --ingress-only \
+  --out build/out/targets/camry-8965F3307000/d5-ingress-final
+```
+The transport-complete run (281 executions, each ending at its instruction
+budget with no `MachineFault`) produced:
+
+| Corpus | Executions | Completed responses | Uninitialized reads | Crossing stores | Stores checked |
+|---|---:|---:|---:|---:|---:|
+| FIFO5 RDBI | 242 | 242 | 0 | 0 | 65,496,663 |
+| FIFO5 long WDBI | 13 | 13 | 0 | 0 | 3,541,395 |
+| FIFO5 long RoutineControl | 19 | 19 | 0 | 0 | 5,175,505 |
+| ISO-TP length/flow-control shapes | 7 | 5 | 0 | 0 | 1,902,658 |
+| **Transport-complete total** | **281** | **279** | **0** | **0** | **76,116,221** |
+| Direct-call RDBI cells (separate execution set; no transport) | 288 | 0 | 0 | 0 | 1,238,835 |
+
+The direct-call set is a different execution set, not a transport result: its
+288 cells reach `dcm_read_did_service @ 0x962F2` and write response bytes, but
+the direct sequencer publishes no `can-tx` row. Its figures stay separate from
+the 281 ingress executions.
+
+All service cases completed through `can-tx`. The two shapes without a
+complete response:
+
+| Case | Last observation |
+|---|---|
+| `shape-ff-declared-more-than-supplied` | FF `10402e2001000102` (64 declared) and CF `2103040506070809` popped; ECU flow control `5003003201f4` transmitted and confirmed; no service response or NRC through the 6,000,000-instruction budget |
+| `shape-response-fc-overflow` | response FF `102462f181023839` (36 declared) transmitted; tester FlowControl Overflow `3200000000000000` popped; no consecutive frame or NRC through the 4,000,000-instruction budget |
+
+Oracles on the transport-complete set: definedness 0 uninitialized reads;
+object boundary 0 crossing stores in 76,116,221 stores against the 98 selected
+extents; stack watermark not evaluated (the ingress runs carry no instruction
+trace). The three controls fired: the first uninitialized publication read is
+PC `0x89F86`, address `0xFEEF9000`, width four; the crossing store is PC
+`0xFEBE000C`, address `0xFEBE5D1F`, width two, one past the end of
+`dcm_shared_response_buffer`; the stack control uses 64 bytes from
+`0xFEBE2000`, lowest SP `0xFEBE1FC0`, 1,984 bytes of lower-edge margin, no
+finding.
+
+The execution-context artifact producer computes stack depth from exact
+instruction traces. A finding margin is 256 bytes from the lower edge of the
+named stack band.
+
+| Context trace | Initial SP | Lowest SP | Widest use | Lower-edge margin | Finding |
+|---|---:|---:|---:|---:|---|
+| TAUJ0 channel 0 / EIC133 | `FEBE2000` | `FEBE1FA4` | 92 | 1,956 | no |
+| TAUJ0 channel 1 / EIC134 | `FEBE2000` | `FEBE1FA4` | 92 | 1,956 | no |
+| TAUJ0 channel 2 / EIC135 | `FEBE2000` | `FEBE1FA4` | 92 | 1,956 | no |
+| native foreground at `0x66062` | `FEBE7800` | `FEBE77F8` | 8 | 2,040 | no |
 
 Remaining obligations:
 
 - Establish a retained, reproducible campaign baseline: covered branch edges,
   state transitions, semantic sinks, completed/blocked cases, and minimized
   seeds. Distinguish direct-entry tests from peripheral-to-consumer execution.
-- Compare the existing GNU sim campaign with modeled-machine scenarios for
-  equivalent reachable inputs before combining their results. Extend scheduled
-  coverage through actual modeled interrupts and peripheral completion events;
-  concurrency, resource ownership and asynchronous lifetime properties need
+- Extend cross-engine replay through all scheduled interrupts and peripheral
+  completion events in the [exact execution-context catalog](../../data/generated/camry_8965F3307000_execution_contexts.json);
+  concurrency, resource ownership, and asynchronous lifetime properties need
   their own checks.
 - Exact proprietary CodeFlash cannot be built with ASan/MSan/UBSan/CFI.
   Fences, redzones, poison, invariants and faults approximate selected
@@ -301,9 +559,10 @@ Remaining obligations:
 - The request-tail guard covers direct WDBI, RoutineControl, RDBI, and RMEM
   requests up to 0x100 bytes. It does not prove arbitrary parser reads that
   remain within a larger legitimate object or reads on unmodeled services.
-- Direct callback entry bypasses parser, transport, scheduler, and concurrent
-  state. Stateful CanTp frame chains and the full-dispatch RDBI pass reduce,
-  but do not eliminate, that reachability gap.
+- Direct callback entry bypasses parser, transport, the
+  [cataloged scheduler contexts](../../data/generated/camry_8965F3307000_execution_contexts.json),
+  and concurrent state. Stateful CanTp frame chains and the full-dispatch RDBI
+  pass reduce, but do not eliminate, that reachability gap.
 - Returned stack scratch `0xFEBE1800..1FFF` remains excluded from final-state
   divergence; edge watchpoints and escaped marker propagation still apply.
   Three retained context bytes (`0xFEBE5D96..5D97`, `0xFEBE5D9D`) remain
@@ -327,8 +586,13 @@ The 2026-10-25 campaigns execute exact CodeFlash SHA-256
 | Exact request-tail guard | 6,199 | 6,190 returns | 0 | 9 DCRA1 |
 | Full-dispatch RDBI response extent | 726 (242 DIDs × 3 sessions) | 429 completed positives; 288 incomplete | 0 unwritten published bytes | 9 DCRA1 |
 | Lifecycle-prefix memory-access audit | 1,554 | 1,554 lifecycle completions | 4 read mechanisms (218 events) | 0 |
+| Machine RDBI definedness | 288 | 288 service entries; 0 completed responses | 0 uninitialized reads | 288 incomplete responses |
+| Machine object boundaries | 315 | 1,347,615 stores compared | 0 crossings | 0 |
+| Context stack watermarks | 4 traces | 4 contexts compared | 0 within 256-byte margin | 0 |
+| Machine ingress definedness, transport-complete | 281 | 279 completed responses | 0 uninitialized reads | 2 shapes without a complete response |
+| Machine ingress object boundaries | 281 | 76,116,221 stores compared | 0 crossings | 0 |
 
-All required main-pass sinks were nonzero. All four positive controls in §5
+All required main-pass sinks were nonzero. All seven positive controls in §5
 fired. The response audit had zero first-pass poison candidates and zero
 poison-value collisions. The nine blockers in each new pass are the same three
 DIDs (`0x0105`, `0x010B`, `0xF18C`) in sessions 1, 2, and 3 at `0x67066`;
@@ -340,45 +604,63 @@ foreign conclusion: the Camry's exact 242-row active publication table at
 was overwritten. The Sienna `8965B4512000` no-write callback result remains a
 Sienna fact; it is not present on these completed Camry paths.
 
-The current durable artifact is
-`build/out/targets/camry-8965F3307000/dcm-handlers-fuzz/summary.json`, schema
-`camry-f33-dcm-handlers-original-rh850-fuzz-v5`. It is reproducible output, not
-committed evidence. The bounded conclusion is: no candidate surfaced under the
-named checks and completed paths. It is not an absence proof for the image.
+The DCM harness writes `summary.json` with schema
+`camry-f33-dcm-handlers-original-rh850-fuzz-v5`. The
+[Camry baseline](../variants/camry-2026-live-baseline.md) records the
+lifecycle-prefix findings.
 
-The lifecycle-prefix pass answers the "clean run" objection differently: its
-oracle sensitivity is proven by the real defects it found, not only by seeded
-controls. Strict truncation of every seed, paired with asynchronous and
-slot-reuse lifecycle actions, exposed four distinct declared-length read
-mechanisms — including a one-byte subfunction read reproduced through real
-CanTp ingress and a six-byte stale token consumption — while confirming zero
-writes outside the corrected object envelopes and zero hangs across 1,554
-cases in 292 s. Findings, exact sites, and consequence closures are recorded
-in [camry-2026-live-baseline §13.12](../variants/camry-2026-live-baseline.md).
+### Gallia reference comparison
+
+The reference is [Gallia 2.2.0](https://github.com/Fraunhofer-AISEC/gallia),
+called in process through `UDSServerTransport.handle_request`.
+
+```sh
+uv run --locked --with gallia==2.2.0 python -m tools.targets.camry.research.compare_camry_f33_uds_reference compare
+```
+
+The GNU-sim DCM harness supplies the firmware response for every cell in the
+eleven-service static policy: 23 `(service, session, security)` cells and three
+requests per cell, for 69 comparisons. Each cell receives a minimal
+well-formed request, that request truncated by one byte, and an unsupported
+subfunction, DID, memory identifier, or RID. SID `14`, which has no selector,
+uses an overlength request for the third case. The static table configures no
+current SecurityAccess gate, so every cell uses security level zero.
+
+The comparison covers response class, echoed response SID, echoed subfunction,
+DID or RID, NRC, and total response length. Record payload bytes unavailable
+to the reference are excluded. RDBI lengths come from the exact 242-row DID
+table; RoutineControl record lengths come from the recovered routine report;
+ReadMemoryByAddress uses the requested size. The seed requests `2703` and
+`2701` are both complete two-byte requestSeed messages; `2703` compares equal
+in class, echo, and length as `67 03 <16-byte seed>`.
+
+| SID | Cells | Compared | Equal | Class b | Class c |
+|---|---:|---:|---:|---:|---:|
+| `10` | 3 | 9 | 9 | 0 | 0 |
+| `14` | 2 | 6 | 6 | 0 | 0 |
+| `19` | 2 | 6 | 6 | 0 | 0 |
+| `22` | 3 | 9 | 9 | 0 | 0 |
+| `23` | 1 | 3 | 3 | 0 | 0 |
+| `27` | 2 | 6 | 5 | 0 | 1 |
+| `28` | 1 | 3 | 3 | 0 | 0 |
+| `2E` | 2 | 6 | 6 | 0 | 0 |
+| `31` | 3 | 9 | 9 | 0 | 0 |
+| `3E` | 3 | 9 | 9 | 0 | 0 |
+| `85` | 1 | 3 | 3 | 0 | 0 |
+| **Total** | **23** | **69** | **68** | **0** | **1** |
+
+There is no class **b** row. The one class **c** row is caused by a
+firmware-specific compiled stub that the reference model does not represent:
+
+| Request | Session / security | Firmware response | Reference response | Static row and handler cause | Source |
+|---|---|---|---|---|---|
+| `2701` | `2 / 0` | `7f2713` | `6701 (00×16)` | `0x25C30:01` admits level-1 requestSeed in programming session; `bne 0x9697A @ 0x9695C` enters the error path and `movea 19, r0, r7 @ 0x96982` selects NRC `0x13`; the level-1 handler is the compiled stub named by the diagnostics report | [diagnostics report](../diagnostics/application.md#level-dispatch-level-1-is-a-compiled-stub); [Gallia request model](https://github.com/Fraunhofer-AISEC/gallia/blob/v2.2.0/src/gallia/services/uds/core/service.py#L770-L814) |
+
+The JSON result is
+`build/out/targets/camry-8965F3307000/gallia-reference/report.json`.
 
 ## 10. Throughput and fail-fast contract
 
-Speed is a security property because a harness that falls into retry
-amplification stops exploring. Optimization may not remove the corpus, 128 KiB
-restore/dump, fences, sink breakpoints, or host oracles.
-
-The retained optimizations are:
-
-- equal checked spans take the C-level `bytes` fast path before bytewise
-  finding construction;
-- independent 512-trial batches run through four bounded workers;
-- sparse second-fill samples are packed into one dense batch; and
-- missing `TP_END` retries only unfinished indexes, caps each singleton at 10 s,
-  and aborts after the first still-incomplete singleton.
-
-The prior equivalent schema-v3 DCM main pass fell from about 683 s to 53.29 s
-(275 main launches plus 132 sparse launches became 26 plus 1). The v5 resumed
-run added 6,925 dedicated object-boundary executions while retaining the
-13,163-trial main corpus. It produced 45 batch logs, no singleton-retry logs,
-and 95.30 s from the first new batch-log timestamp to `summary.json`. That span
-is not represented as full process wall time; it is direct evidence that the
-45-minute retry-amplification failure is gone.
-
-Every batch remains completion-checked. Parallel execution cannot convert a
-missing trial record into a clean summary.
-
+Every batch requires a completion record. A missing `TP_END` retries only
+unfinished indexes; each singleton retry has a 10 s timeout. The first
+incomplete singleton aborts the run.

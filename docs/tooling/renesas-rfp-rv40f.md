@@ -456,3 +456,12 @@ Acceptance or rejection must be treated as target observation.
 
 Until those are observed, host support must not be promoted into a claim about
 P1M-E mask-ROM capabilities.
+
+### 7.1 Published target-side observations
+
+[Melching (P1M-E R7F701381)](https://icanhack.nl/blog/rh850-glitch/) and
+[FEV Secure Lab (RH850/F1L)](https://jerinsunny.github.io/blogs/2024/02/14/rh850-voltage-glitching.html)
+report target traffic consistent with the frame envelope in §2.1.
+[Quarkslab (F1KM-S4 and lab ECUs)](https://blog.quarkslab.com/bypassing-debug-password-protection-on-the-rh850-family-using-fault-injection.html)
+provides a separate target-side comparison. These reports do not establish
+command acceptance or lifecycle gating on the project targets.

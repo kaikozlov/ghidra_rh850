@@ -8,6 +8,16 @@ source "$ROOT/tools/lib/build_paths.sh"
 mkdir -p "$BUILD_CACHE" "$BUILD_WORK" "$BUILD_OUT" "$BUILD_LOGS" "$BUILD_TMP"
 TARGET="sienna-8965B4512000"
 TARGET_FIELD() { python3 "$ROOT/tools/project/analysis_target.py" "$TARGET" --field "$1"; }
+ANALYZER_IMPORT_ARGS=()
+ANALYZER_IMPORT_TEXT=$(python3 "$ROOT/tools/project/analysis_target.py" "$TARGET" --analyzer-headless-args post)
+if [[ -n "$ANALYZER_IMPORT_TEXT" ]]; then
+  while IFS= read -r arg; do ANALYZER_IMPORT_ARGS+=("$arg"); done <<< "$ANALYZER_IMPORT_TEXT"
+fi
+ANALYZER_ANALYSIS_ARGS=()
+ANALYZER_ANALYSIS_TEXT=$(python3 "$ROOT/tools/project/analysis_target.py" "$TARGET" --analyzer-headless-args pre)
+if [[ -n "$ANALYZER_ANALYSIS_TEXT" ]]; then
+  while IFS= read -r arg; do ANALYZER_ANALYSIS_ARGS+=("$arg"); done <<< "$ANALYZER_ANALYSIS_TEXT"
+fi
 PROJECT_DIR="$ROOT/$(TARGET_FIELD work_dir)"
 PROJECT_NAME=$(TARGET_FIELD project_name)
 PROGRAM_NAME=$(TARGET_FIELD program_name)
@@ -161,9 +171,7 @@ ANNOTATION_LEDGER="$ROOT/data/annotations/annotation_ledger.jsonl"
 # seeds are injected before its first pass; these four durable analysis commits
 # reproduce the checked-in project's exact function/instruction/symbol counts.
 # A separate -noanalysis convention finalizer follows (not a fifth analysis stage).
-# Note: the default analyzers (incl. Address Tables, Non-Returning Functions) are
-# left enabled deliberately. See docs/tooling/processor-module-audit.md "Why auto-analysis options
-# are left on defaults" for the measured rationale.
+# Analyzer settings are registry-owned and replayed before every analysis pass.
 echo "[1/4] Import mapped images without analysis"
 run_headless "import" "$PROJECT_DIR" "$PROJECT_NAME" \
   -import "$CODEFLASH" \
@@ -173,17 +181,20 @@ run_headless "import" "$PROJECT_DIR" "$PROJECT_NAME" \
   -postScript ApplyP1MDeviceProfile.java "$ROOT/data/p1m_sfr_labels.csv" \
   -postScript ApplyP1MSfrTypes.java \
   -postScript ApplyRamTypes.java "$ROOT/data/checkpoint_payload_map.csv" \
+  "${ANALYZER_IMPORT_ARGS[@]}" \
   -commit "Import mapped CodeFlash and DataFlash"
 
 echo "[2/4] Seed report entries and run base analysis"
 run_headless "seed-entries" "$PROJECT_DIR" "$PROJECT_NAME" \
   -process "$PROGRAM_NAME" \
+  "${ANALYZER_ANALYSIS_ARGS[@]}" \
   -preScript SeedEntries.java \
   -commit "Seed report entries and run base analysis"
 
 echo "[3/4] Seed the UDS table and re-run analysis"
 run_headless "seed-uds" "$PROJECT_DIR" "$PROJECT_NAME" \
   -process "$PROGRAM_NAME" \
+  "${ANALYZER_ANALYSIS_ARGS[@]}" \
   -preScript SeedUdsServiceTable.java \
   -commit "Seed UDS service table and handlers"
 
@@ -221,6 +232,7 @@ fi
 
 run_headless "annotate" "$PROJECT_DIR" "$PROJECT_NAME" \
   -process "$PROGRAM_NAME" \
+  "${ANALYZER_ANALYSIS_ARGS[@]}" \
   -preScript SeedCanTransportFunctions.java \
   -preScript SeedPayloadVerificationFunctions.java \
   -preScript SeedSecocNvmFunctions.java \
@@ -298,5 +310,17 @@ printf '%s\n' "$STATS_OUTPUT" | python3 "$ROOT/tools/testing/processor/verify_gh
 # Persist processor fingerprint beside the working project.
 cp "$PROCESSOR_MANIFEST" "$PROJECT_DIR/processor_manifest.json"
 echo "Wrote $PROJECT_DIR/processor_manifest.json"
+# Bind both recognizer ledgers to one tree revision after the durable project is
+# closed. Each exporter rechecks the revision before and after its read-only pass.
+RECOGNIZER_REVISION=$(
+  cd "$ROOT"
+  uv run --locked python -m tools.project.recognizer_revision
+)
+GHIDRA_ANALYSIS_TARGET="$TARGET" PROJECT_DIR="$PROJECT_DIR" \
+  RECOGNIZER_REVISION="$RECOGNIZER_REVISION" \
+  "$ROOT/tools/project/export_ghidra_project.sh" outside-functions
+GHIDRA_ANALYSIS_TARGET="$TARGET" PROJECT_DIR="$PROJECT_DIR" \
+  RECOGNIZER_REVISION="$RECOGNIZER_REVISION" \
+  "$ROOT/tools/project/export_ghidra_project.sh" semantic-coverage
 
 echo "Durable project rebuild verified: $PROJECT_DIR/$PROJECT_NAME.gpr"

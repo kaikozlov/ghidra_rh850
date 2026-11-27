@@ -110,6 +110,10 @@ PROGRAM_NAME=$(TARGET_FIELD program_name)
 SNAPSHOT_DIR="$ROOT/$(TARGET_FIELD snapshot_dir)"
 DEFAULT_PROJECT_DIR="$ROOT/$(TARGET_FIELD work_dir)"
 PROJECT_DIR="${GHIDRA_PROJECT:-$DEFAULT_PROJECT_DIR}"
+DAEMON_MAX_HEAP="$(TARGET_FIELD daemon_max_heap 2>/dev/null || true)"
+if [[ -n "$DAEMON_MAX_HEAP" ]]; then
+  export GHIDRA_HEADLESS_MAXMEM="$DAEMON_MAX_HEAP"
+fi
 
 # --- Canonicalize PROJECT_DIR -------------------------------------------------
 

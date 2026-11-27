@@ -183,6 +183,7 @@ with tempfile.TemporaryDirectory(prefix="artifact-directory-") as td:
     reader = "tools/targets/corolla/builders/build_corolla_h_reader_only.py"
     reader_only = "data/generated/corolla_8965H1202000_reader_only.json"
     ambiguous = "data/generated/shared.json"
+    pending = "data/generated/pending.json"
     tracked_outputs = [
         "data/generated/package.json",
         "data/generated/package.proofs/first.json",
@@ -202,12 +203,15 @@ with tempfile.TemporaryDirectory(prefix="artifact-directory-") as td:
         encoding="utf-8",
     )
     (fixture / reader).parent.mkdir(parents=True)
+    (fixture / "tools/pending.py").write_text(
+        f'OUTPUT = REPO_ROOT / "{pending}"\n', encoding="utf-8",
+    )
     (fixture / reader).write_text(
         f'LAYOUT_CSV = REPO_ROOT / "{reader_only}"\n'
         f'INPUT = REPO_ROOT / "{tracked_outputs[0]}"\n',
         encoding="utf-8",
     )
-    for relative in [*tracked_outputs, sibling, untracked, reader_only, ambiguous]:
+    for relative in [*tracked_outputs, sibling, untracked, reader_only, ambiguous, pending]:
         path = fixture / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text("{}\n", encoding="utf-8")
@@ -228,6 +232,11 @@ with tempfile.TemporaryDirectory(prefix="artifact-directory-") as td:
         for query in cached_queries:
             query.cache_clear()
         try:
+            check(
+                pending in artifact_catalog.tracked_artifacts()
+                and artifact_catalog.producer_candidates(pending) == ["tools/pending.py"],
+                "pending generator declares an existing output before either is staged",
+            )
             check(
                 all(artifact_catalog.producer_candidates(path) == [producer]
                     for path in tracked_outputs),
