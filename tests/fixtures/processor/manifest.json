@@ -287,7 +287,6 @@
       "bytes": "e6060500",
       "mnemonic_prefix": "loop",
       "must_pcode_ops": [
-        "INT_ADD",
         "CBRANCH"
       ]
     },

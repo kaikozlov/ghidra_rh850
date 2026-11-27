@@ -39,8 +39,6 @@ import ghidra.program.model.address.AddressSetView;
 import ghidra.program.model.address.AddressSpace;
 import ghidra.program.model.lang.InstructionPrototype;
 import ghidra.program.model.lang.Language;
-import ghidra.program.model.lang.LanguageID;
-import ghidra.program.util.DefaultLanguageService;
 import ghidra.program.model.lang.ProcessorContextImpl;
 import ghidra.program.model.lang.Register;
 import ghidra.program.model.lang.RegisterValue;
@@ -60,6 +58,8 @@ import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.lang.foreign.MemorySegment;
+import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
@@ -74,7 +74,6 @@ import java.lang.reflect.Array;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketTimeoutException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -89,31 +88,11 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
 public class RunP1MEMachine extends GhidraScript {
-    private static final Gson GSON = new GsonBuilder()
-        .registerTypeAdapter(new com.google.gson.reflect.TypeToken<List<ExternalEvent>>() {}.getType(),
-            (com.google.gson.JsonDeserializer<List<ExternalEvent>>) (json, type, context) -> {
-                List<ExternalEvent> events = new ArrayList<>(json.getAsJsonArray().size());
-                for (JsonElement element : json.getAsJsonArray()) {
-                    JsonObject row = element.getAsJsonObject();
-                    ExternalEvent first = context.deserialize(row, ExternalEvent.class);
-                    events.add(first);
-                    long repeat = row.has("repeat") ? row.get("repeat").getAsLong() : 1;
-                    if (repeat == 1) continue;
-                    if (first.after_transmit_words == null || repeat < 1)
-                        throw new IllegalArgumentException("repeat requires a CSIH transmit ordinal");
-                    long stride = row.has("stride_words") ? row.get("stride_words").getAsLong() : 1;
-                    long ordinal = first.after_transmit_words;
-                    for (long i = 1; i < repeat; i++) {
-                        ordinal = Math.addExact(ordinal, stride);
-                        events.add(first.atTransmitWord(ordinal));
-                    }
-                }
-                return events;
-            })
-        .setPrettyPrinting().create();
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final String CONTRACT_SCHEMA = "rh850-p1me-machine-run-v2";
     private static final String MODEL_SCHEMA = "rh850-p1me-machine-v2";
     private static final String SCENARIO_SCHEMA = "rh850-p1me-machine-scenario-v2";
@@ -180,6 +159,10 @@ public class RunP1MEMachine extends GhidraScript {
         String reset_policy;
         String evidence;
         String source_ref;
+        transient boolean directPageWrites;
+        transient boolean templateRam, templateReads, templateWrites;
+        transient RegionDef templateMirror;
+        transient long lookupEnd;
 
         boolean contains(long address, int width) {
             long end = address + Integer.toUnsignedLong(width);
@@ -188,10 +171,123 @@ public class RunP1MEMachine extends GhidraScript {
         }
     }
 
+    private enum WriteDevice {
+        TAUJ, TAUD, PIC_TAUD, TSG, PIC_TSG, PIC1_START, PDMA, ADC, RSENT, CSIH,
+        SEG, PEG, BUS_GUARD, GRAM_GUARD, PERIPHERAL_ECC, CVM, ECM, PORT_CONFIG,
+        NOISE_FILTER, INTC_EIC, IPG, GRAM_BUFFER, FLMD, DCRA, NONE;
+
+        static WriteDevice bind(String behavior) {
+            return switch (behavior == null ? "" : behavior) {
+                case "tauj" -> TAUJ;
+                case "taud" -> TAUD;
+                case "pic-taud" -> PIC_TAUD;
+                case "tsg" -> TSG;
+                case "pic-tsg" -> PIC_TSG;
+                case "pic1-start" -> PIC1_START;
+                case "pdma" -> PDMA;
+                case "adc", "adc-clock" -> ADC;
+                case "rsent" -> RSENT;
+                case "csih" -> CSIH;
+                case "seg" -> SEG;
+                case "peg" -> PEG;
+                case "bus-guard" -> BUS_GUARD;
+                case "gram-guard" -> GRAM_GUARD;
+                case "peripheral-ecc" -> PERIPHERAL_ECC;
+                case "cvm" -> CVM;
+                case "ecm" -> ECM;
+                case "port-config" -> PORT_CONFIG;
+                case "noise-filter" -> NOISE_FILTER;
+                case "intc_eic" -> INTC_EIC;
+                case "ipg" -> IPG;
+                case "gram-buffer" -> GRAM_BUFFER;
+                case "flmd" -> FLMD;
+                case "dcra" -> DCRA;
+                default -> NONE;
+            };
+        }
+    }
+
+    private enum WriteTrigger {
+        DMA_SELECT, TX, TX_HALF, PEG_MASK, GUARD_ERROR_CLEAR, PDMA_COMPARATOR,
+        RESET_FACTOR_CLEAR, PORT_MASKED_ALIAS, NOISE_CLOCK_SELECTOR, NOISE_FILTER_ENABLE,
+        PERIPHERAL_ECC_CONTROL, PERIPHERAL_ECC_TEST, BANKED_ECC_CLEAR, ECC_NOTIFICATION,
+        ECC_PROTECTED_CONTROL, CLOCK_DIVIDER, CLOCK_SELECTOR, FLMD_COMMAND, FLMD_CONTROL,
+        BIST_CONTROL, DCRA_CONTROL, DCRA_SEED, DCRA_INPUT, RSCFD_TRANSMIT,
+        RSCFD_TRANSMIT_STATUS, RSCFD_GLOBAL_CONTROL, RSCFD_CHANNEL_CONTROL,
+        RSCFD_FD_COUNTER_CLEAR, RSCFD_FD_STATUS, FACI_COMMAND, FACI_ACCESS_STATUS,
+        FACI_SETUP_INITIALIZE, FACI_AREA_SELECTOR, FACI_CLOCK_NOTIFY, FACI_ADDRESS,
+        FACI_DATAFLASH_MODE, FACI_NORMAL_EMULATION, FACI_ENABLE, DATAFLASH_READ_CYCLE,
+        ICUS_COMMAND, ICUS_CONTROL, NONE, OTHER;
+
+        static WriteTrigger bind(String trigger) {
+            if (trigger == null) return NONE;
+            return switch (trigger) {
+                case "dma-select" -> DMA_SELECT;
+                case "tx" -> TX;
+                case "tx-half" -> TX_HALF;
+                case "peg-mask" -> PEG_MASK;
+                case "guard-error-clear" -> GUARD_ERROR_CLEAR;
+                case "pdma-comparator" -> PDMA_COMPARATOR;
+                case "reset-factor-clear" -> RESET_FACTOR_CLEAR;
+                case "port-masked-alias" -> PORT_MASKED_ALIAS;
+                case "noise-clock-selector" -> NOISE_CLOCK_SELECTOR;
+                case "noise-filter-enable" -> NOISE_FILTER_ENABLE;
+                case "peripheral-ecc-control" -> PERIPHERAL_ECC_CONTROL;
+                case "peripheral-ecc-test" -> PERIPHERAL_ECC_TEST;
+                case "banked-ecc-clear" -> BANKED_ECC_CLEAR;
+                case "ecc-notification" -> ECC_NOTIFICATION;
+                case "ecc-protected-control" -> ECC_PROTECTED_CONTROL;
+                case "clock-divider" -> CLOCK_DIVIDER;
+                case "clock-selector" -> CLOCK_SELECTOR;
+                case "flmd-command" -> FLMD_COMMAND;
+                case "flmd-control" -> FLMD_CONTROL;
+                case "bist-control" -> BIST_CONTROL;
+                case "dcra-control" -> DCRA_CONTROL;
+                case "dcra-seed" -> DCRA_SEED;
+                case "dcra-input" -> DCRA_INPUT;
+                case "rscfd-transmit" -> RSCFD_TRANSMIT;
+                case "rscfd-transmit-status" -> RSCFD_TRANSMIT_STATUS;
+                case "rscfd-global-control" -> RSCFD_GLOBAL_CONTROL;
+                case "rscfd-channel-control" -> RSCFD_CHANNEL_CONTROL;
+                case "rscfd-fd-counter-clear" -> RSCFD_FD_COUNTER_CLEAR;
+                case "rscfd-fd-status" -> RSCFD_FD_STATUS;
+                case "faci-command" -> FACI_COMMAND;
+                case "faci-access-status" -> FACI_ACCESS_STATUS;
+                case "faci-setup-initialize" -> FACI_SETUP_INITIALIZE;
+                case "faci-area-selector" -> FACI_AREA_SELECTOR;
+                case "faci-clock-notify" -> FACI_CLOCK_NOTIFY;
+                case "faci-address" -> FACI_ADDRESS;
+                case "faci-dataflash-mode" -> FACI_DATAFLASH_MODE;
+                case "faci-normal-emulation" -> FACI_NORMAL_EMULATION;
+                case "faci-enable" -> FACI_ENABLE;
+                case "dataflash-read-cycle" -> DATAFLASH_READ_CYCLE;
+                case "icus-command" -> ICUS_COMMAND;
+                case "icus-control" -> ICUS_CONTROL;
+                default -> OTHER;
+            };
+        }
+    }
+
     static final class RegisterDef {
         String name;
         long address;
         int size;
+        transient int bindingIndex;
+        transient RegisterDef nameBinding, guardLockBinding;
+        transient int pendingBinding;
+        transient long lookupEnd;
+        transient JsonRows.RegisterWriteFields writeFields;
+        transient boolean changesClockSchedule;
+        transient WriteDevice writeDevice;
+        transient WriteTrigger writeTrigger;
+        transient boolean validateBusWrite, snapshotWriteBacking, busWritable, completesBusWrite;
+        transient boolean fifoBusWrite;
+        transient Model.Csih.Word csihWriteWord;
+        transient String csihSuffix;
+        transient int busReadEffects;
+        transient byte busReadCompletion;
+        transient short busWidths;
+        transient boolean busReadable, passiveBusRead, plainEicRead;
         List<Integer> access_widths;
         String access;
         Long reset;
@@ -246,10 +342,17 @@ public class RunP1MEMachine extends GhidraScript {
                 || (candidate == address && width > size && access_widths.contains(width));
         }
 
-        boolean allows(long candidate, int width) {
-            return contains(candidate, width)
-                && access_widths.contains(width)
-                && Long.remainderUnsigned(candidate - address, width) == 0;
+        // Bus ownership has already tested contains at this address and width.
+        boolean allowsOwnedBusAccess(long candidate, int width) {
+            if (busWidths >= 0 && width > 0 && width <= Long.BYTES && (width & (width - 1)) == 0) {
+                return (busWidths & (1 << width)) != 0
+                    && ((candidate - address) & (width - 1)) == 0;
+            }
+            return access_widths.contains(width) && Long.remainderUnsigned(candidate - address, width) == 0;
+        }
+
+        boolean permitsBusRead() {
+            return busReadable || access.contains("r");
         }
     }
 
@@ -365,23 +468,16 @@ public class RunP1MEMachine extends GhidraScript {
         }
     }
 
-    static final class ExternalEvent implements Cloneable {
-        // The expanded rows share their immutable payload but have independent wire ordinals.
-        ExternalEvent atTransmitWord(long ordinal) {
-            try {
-                ExternalEvent input = (ExternalEvent) super.clone();
-                input.after_transmit_words = ordinal;
-                return input;
-            }
-            catch (CloneNotSupportedException impossible) {
-                throw new AssertionError(impossible);
-            }
-        }
-
+    static final class ExternalEvent {
+        // Set on the rows of `reset_replay`; never read from scenario JSON.
+        boolean replayedAfterReset;
         String kind;
         Long after_instructions;
         Long after_transmit_words;
         Long delay_instructions;
+        Long repeat;
+        Long stride_words;
+        boolean repeat_forever;
         Long after_spc_triggers;
         Long after_reset_instructions;
         Long delay_hsb_cycles;
@@ -407,6 +503,7 @@ public class RunP1MEMachine extends GhidraScript {
         int label;
         int timestamp;
         boolean tolerate_no_pending;
+        Long socket_poll_instruction;
     }
 
     static final class IcusStartupResponse {
@@ -437,6 +534,7 @@ public class RunP1MEMachine extends GhidraScript {
         int port;
         String ready_address;
         StopArrival ready_after_arrivals;
+        boolean hold_when_ready;
     }
 
     static final class SnapshotOutput {
@@ -477,6 +575,7 @@ public class RunP1MEMachine extends GhidraScript {
         ResetReplay reset_replay;
         EventSocketConfig event_socket;
         List<SnapshotOutput> snapshot_outputs = new ArrayList<>();
+        String instruction_trace_start_step;
         List<ScenarioStep> steps = new ArrayList<>();
 
         boolean stubbed() {
@@ -500,6 +599,7 @@ public class RunP1MEMachine extends GhidraScript {
         List<ExternalEvent> events = new ArrayList<>();
         List<CheckDef> checks = new ArrayList<>();
         Boolean capture_rows;
+        List<String> capture_event_kinds;
     }
 
 
@@ -521,8 +621,7 @@ public class RunP1MEMachine extends GhidraScript {
     static final class JsonRows implements Closeable {
         final Path path;
         final FileChannel spool;
-        final BufferedWriter output;
-        final JsonWriter writer;
+        final Utf8JsonWriter writer;
         final Map<String, long[]> kindCounts;
         long count;
         boolean sealed;
@@ -531,28 +630,654 @@ public class RunP1MEMachine extends GhidraScript {
         private long trialStart = -1;
         Consumer<JsonObject> listener;
         boolean discard;
+        private Set<String> projectedKinds;
+        private Map<String, Long> trialKindBaseline;
+        private boolean includesAlias = true;
+        private String lastCountedKind;
+        private long[] lastKindCounter;
+        private final EventRow event = new EventRow();
+
+        private record EventKind(String name, byte[] head) {
+            EventKind(String name) {
+                this(name, Utf8JsonWriter.encodeTextField("kind", name, true));
+            }
+        }
+
+        private record EventField(String name, byte[] prefix) {
+            EventField(String name) {
+                this(name, Utf8JsonWriter.encodeNamePrefix(name, false));
+            }
+        }
+
+        private record EventText(EventField field, String value, byte[] encoded) {
+            EventText(EventField field, String value) {
+                this(field, value, value == null ? null :
+                    Utf8JsonWriter.encodeTextField(field.name, value, false));
+            }
+        }
+
+        private static final String ALIAS_WRITE = "alias-write";
+        private static final String INTERRUPT_REQUEST = "interrupt-request";
+        private static final EventKind REGISTER_WRITE = new EventKind("register-write");
+        private static final EventKind CSIH_TX = new EventKind("csih-tx");
+        private static final EventKind CSIH_FRAME = new EventKind("csih-frame");
+        private static final EventKind CSIH_WORD = new EventKind("csih-word");
+        private static final EventKind DMA_TRANSFER = new EventKind("dma-transfer");
+        private static final EventField PC = new EventField("pc");
+        private static final EventField REGISTER = new EventField("register");
+        private static final EventField BEHAVIOR = new EventField("behavior");
+        private static final EventField TRIGGER = new EventField("trigger");
+        private static final EventField VALUE = new EventField("value");
+        private static final EventField EVIDENCE = new EventField("evidence");
+        private static final EventField INITIATOR = new EventField("initiator");
+        private static final EventField UNIT = new EventField("unit");
+        private static final EventField SCHEDULER_TICK = new EventField("scheduler_tick");
+        private static final EventField WORD = new EventField("word");
+        private static final EventField CHIP_SELECT = new EventField("chip_select");
+        private static final EventField BITS = new EventField("bits");
+        private static final EventField LSB_FIRST = new EventField("lsb_first");
+        private static final EventField TRANSMIT_ORDINAL = new EventField("transmit_ordinal");
+        private static final EventField WORDS = new EventField("words");
+        private static final EventField INPUT_EVIDENCE = new EventField("input_evidence");
+        private static final EventField CHANNEL = new EventField("channel");
+        private static final EventField SOURCE = new EventField("source");
+        private static final EventField DESTINATION = new EventField("destination");
+        private static final EventField SIZE = new EventField("size");
+        private static final EventField REMAINING = new EventField("remaining");
+        private static final EventField ERROR = new EventField("error");
+        private static final EventField HSB_CYCLES = new EventField("hsb_cycles");
+        private static final EventText CSIH_EVIDENCE =
+            new EventText(EVIDENCE, "R01UH0585EJ0120 section14.3-14.5");
+        private static final EventText DMA_EVIDENCE =
+            new EventText(EVIDENCE, "R01UH0585EJ0120 Section7");
+
+        // Register metadata is immutable once the device model is constructed.
+        private record RegisterWriteFields(EventText name, EventText behavior, EventText trigger,
+                EventText evidence) {
+            RegisterWriteFields(RegisterDef register) {
+                this(new EventText(REGISTER, register.name), new EventText(BEHAVIOR, register.behavior),
+                    new EventText(TRIGGER, register.trigger), new EventText(EVIDENCE, register.evidence));
+            }
+        }
+
+        private final class EventRow {
+            private JsonObject tree;
+
+            void begin(EventKind kind) throws IOException {
+                if (listener != null) {
+                    tree = new JsonObject();
+                    tree.addProperty("kind", kind.name);
+                    return;
+                }
+                tree = null;
+                requireOpen();
+                writer.beforeRow();
+                writer.output.write(kind.head);
+            }
+
+            void text(EventField field, String value) throws IOException {
+                if (tree != null) tree.addProperty(field.name, value);
+                else if (value != null) {
+                    writer.output.write(field.prefix);
+                    writer.writeString(value);
+                }
+            }
+
+            void text(EventText text) throws IOException {
+                if (tree != null) tree.addProperty(text.field.name, text.value);
+                else if (text.encoded != null) writer.output.write(text.encoded);
+            }
+
+            void hex(EventField field, long value) throws IOException {
+                if (tree != null) tree.addProperty(field.name, hex32(value));
+                else {
+                    writer.output.write(field.prefix);
+                    writer.writeHexValue(value);
+                }
+            }
+
+            void number(EventField field, int value) throws IOException {
+                if (tree != null) tree.addProperty(field.name, value);
+                else writeNumber(field, value);
+            }
+
+            void number(EventField field, long value) throws IOException {
+                if (tree != null) tree.addProperty(field.name, value);
+                else writeNumber(field, value);
+            }
+
+            private void writeNumber(EventField field, long value) throws IOException {
+                writer.output.write(field.prefix);
+                writer.writeLong(value);
+            }
+
+            void bool(EventField field, boolean value) throws IOException {
+                if (tree != null) tree.addProperty(field.name, value);
+                else {
+                    writer.output.write(field.prefix);
+                    writer.output.write(value ? Utf8JsonWriter.TRUE : Utf8JsonWriter.FALSE);
+                }
+            }
+
+            void numbers(EventField field, List<Long> values) throws IOException {
+                if (tree != null) {
+                    tree.add(field.name, GSON.toJsonTree(values));
+                    return;
+                }
+                writer.output.write(field.prefix);
+                writer.output.write('[');
+                for (int i = 0; i < values.size(); i++) {
+                    if (i != 0) writer.output.write(',');
+                    Long value = values.get(i);
+                    if (value == null) writer.output.write(Utf8JsonWriter.NULL);
+                    else writer.writeLong(value);
+                }
+                writer.output.write(']');
+            }
+
+            void end(EventKind kind) throws IOException {
+                if (tree != null) {
+                    JsonObject row = tree;
+                    tree = null;
+                    add(row, kind.name, spoolsKind(kind.name));
+                }
+                else {
+                    writer.output.write('}');
+                    finishRow(null, kind.name, true);
+                }
+            }
+        }
+
+        /**
+         * Minimal tree writer for the trace spool. Gson's JsonWriter formats through UTF-16
+         * Writers; trace rows are already trees, so encoding directly into a byte buffer avoids
+         * that conversion and lets the report splice the same bytes without rebuilding them.
+         */
+        private static final class Utf8JsonWriter implements Closeable {
+            private static final byte[] ALIAS_PREFIX =
+                "{\"kind\":\"alias-write\",\"from\":\"0x".getBytes(StandardCharsets.US_ASCII);
+            private static final byte[] ALIAS_MIDDLE =
+                "\",\"to\":\"0x".getBytes(StandardCharsets.US_ASCII);
+            private static final byte[] ALIAS_SIZE =
+                "\",\"size\":".getBytes(StandardCharsets.US_ASCII);
+            private static final byte[] LONG_MIN =
+                "-9223372036854775808".getBytes(StandardCharsets.US_ASCII);
+            private static final byte[] TRUE = {'t', 'r', 'u', 'e'};
+            private static final byte[] FALSE = {'f', 'a', 'l', 's', 'e'};
+            private static final byte[] NULL = {'n', 'u', 'l', 'l'};
+            private static final byte[] HEX = "0123456789abcdef".getBytes(StandardCharsets.US_ASCII);
+            private static final byte[] ADDRESS_HEX =
+                "0123456789ABCDEF".getBytes(StandardCharsets.US_ASCII);
+
+            private static final class ByteSink implements Closeable {
+                private final FileChannel channel;
+                private final byte[] bytes = new byte[1048576];
+                private final ByteBuffer transfer = ByteBuffer.wrap(bytes);
+                private int size;
+
+                ByteSink(FileChannel channel) {
+                    this.channel = channel;
+                }
+
+                int remaining() {
+                    return bytes.length - size;
+                }
+
+                void write(int value) throws IOException {
+                    if (size == bytes.length) flush();
+                    bytes[size++] = (byte) value;
+                }
+
+                void write(byte[] source) throws IOException {
+                    write(source, 0, source.length);
+                }
+
+                void write(byte[] source, int offset, int length) throws IOException {
+                    while (length != 0) {
+                        if (size == bytes.length) flush();
+                        int copied = Math.min(length, bytes.length - size);
+                        System.arraycopy(source, offset, bytes, size, copied);
+                        size += copied;
+                        offset += copied;
+                        length -= copied;
+                    }
+                }
+                void writeAscii(String source, int start, int end) throws IOException {
+                    while (start < end) {
+                        if (size == bytes.length) flush();
+                        int copied = Math.min(end - start, bytes.length - size);
+                        for (int i = 0; i < copied; i++)
+                            bytes[size + i] = (byte) source.charAt(start + i);
+                        size += copied;
+                        start += copied;
+                    }
+                }
+
+                void flush() throws IOException {
+                    transfer.clear();
+                    transfer.limit(size);
+                    while (transfer.hasRemaining()) channel.write(transfer);
+                    size = 0;
+                }
+
+                @Override
+                public void close() throws IOException {
+                    try { flush(); }
+                    finally { channel.close(); }
+                }
+            }
+            private static final class RowSchema {
+                final String[] names;
+                final boolean[] omitted;
+                final byte[][] prefixes;
+                final String[] constantStrings;
+                final byte[][] constantValues;
+                final String[] lastStrings;
+                final byte[][] lastStringValues;
+
+                RowSchema(JsonObject row) {
+                    names = new String[row.size()];
+                    omitted = new boolean[names.length];
+                    prefixes = new byte[names.length][];
+                    constantStrings = new String[names.length];
+                    constantValues = new byte[names.length][];
+                    lastStrings = new String[names.length];
+                    lastStringValues = new byte[names.length][];
+                    boolean first = true;
+                    int index = 0;
+                    for (Map.Entry<String, JsonElement> field : row.entrySet()) {
+                        names[index] = field.getKey();
+                        JsonElement value = field.getValue();
+                        omitted[index] = value == null || value.isJsonNull();
+                        if (!omitted[index]) {
+                            prefixes[index] = encodeNamePrefix(field.getKey(), first);
+                            first = false;
+                            if ("kind".equals(field.getKey()) && value.isJsonPrimitive()
+                                    && value.getAsJsonPrimitive().isString()) {
+                                constantStrings[index] = value.getAsString();
+                                constantValues[index] = encodeStringValue(constantStrings[index]);
+                            }
+                        }
+                        index++;
+                    }
+                }
+
+                boolean matches(JsonObject row, JsonElement[] values) {
+                    if (row.size() != names.length) return false;
+                    int index = 0;
+                    for (Map.Entry<String, JsonElement> field : row.entrySet()) {
+                        JsonElement value = field.getValue();
+                        boolean fieldOmitted = value == null || value.isJsonNull();
+                        String constant = constantStrings[index];
+                        if (!names[index].equals(field.getKey())
+                                || omitted[index] != fieldOmitted
+                                || constant != null && (!value.isJsonPrimitive()
+                                    || !value.getAsJsonPrimitive().isString()
+                                    || !constant.equals(value.getAsString()))) return false;
+                        values[index++] = value;
+                    }
+                    return true;
+                }
+            }
+
+
+            private final ByteSink output;
+            private final byte[] numberBuffer = new byte[20];
+            private final byte[] hexBuffer = {'"', '0', 'x', 0, 0, 0, 0, 0, 0, 0, 0, '"'};
+            private static final byte[] INTERRUPT_PREFIX =
+                "{\"kind\":\"interrupt-request\",\"channel\":".getBytes(StandardCharsets.US_ASCII);
+            private static final byte[] TICK_FIELD =
+                ",\"scheduler_tick\":".getBytes(StandardCharsets.US_ASCII);
+            private final byte[] aliasBuffer =
+                new byte[ALIAS_PREFIX.length + 8 + ALIAS_MIDDLE.length + 8
+                    + ALIAS_SIZE.length + 2];
+            private final Map<String, List<RowSchema>> rowSchemas = new HashMap<>();
+            private JsonElement[] rowValues = new JsonElement[16];
+            private boolean firstRow = true;
+
+            Utf8JsonWriter(FileChannel channel) throws IOException {
+                output = new ByteSink(channel);
+                int offset = 0;
+                System.arraycopy(ALIAS_PREFIX, 0, aliasBuffer, offset, ALIAS_PREFIX.length);
+                offset += ALIAS_PREFIX.length + 8;
+                System.arraycopy(ALIAS_MIDDLE, 0, aliasBuffer, offset, ALIAS_MIDDLE.length);
+                offset += ALIAS_MIDDLE.length + 8;
+                System.arraycopy(ALIAS_SIZE, 0, aliasBuffer, offset, ALIAS_SIZE.length);
+                output.write('[');
+            }
+
+            private void beforeRow() throws IOException {
+                if (firstRow) firstRow = false;
+                else output.write(',');
+            }
+
+            void writeRow(JsonElement value) throws IOException {
+                beforeRow();
+                if (value.isJsonObject()) writeRowObject(value.getAsJsonObject());
+                else write(value);
+            }
+
+            void writeInterruptRequest(int channel, long tick) throws IOException {
+                beforeRow();
+                output.write(INTERRUPT_PREFIX);
+                writeLong(channel);
+                output.write(TICK_FIELD);
+                writeLong(tick);
+                output.write('}');
+            }
+
+            void writeAccess(String kind, String pc, long instruction, String address, int size,
+                    String evidence, String initiator) throws IOException {
+                beforeRow();
+                output.write('{');
+                writeName("kind", true);
+                writeString(kind);
+                writeName("pc", false);
+                writeString(pc);
+                writeName("instruction", false);
+                writeLong(instruction);
+                writeName("address", false);
+                writeString(address);
+                writeName("size", false);
+                writeLong(size);
+                writeName("evidence", false);
+                writeString(evidence);
+                if (initiator != null) {
+                    writeName("initiator", false);
+                    writeString(initiator);
+                }
+                output.write('}');
+            }
+
+            void writeAlias(long from, long to, int size) throws IOException {
+                beforeRow();
+                int firstAddress = ALIAS_PREFIX.length;
+                int secondAddress = firstAddress + 8 + ALIAS_MIDDLE.length;
+                writeHex32(aliasBuffer, firstAddress, (int) from);
+                writeHex32(aliasBuffer, secondAddress, (int) to);
+                int number = secondAddress + 8 + ALIAS_SIZE.length;
+                if (size >= 0 && size < 10) {
+                    aliasBuffer[number] = (byte) ('0' + size);
+                    aliasBuffer[number + 1] = '}';
+                    output.write(aliasBuffer);
+                }
+                else {
+                    output.write(aliasBuffer, 0, number);
+                    writeLong(size);
+                    output.write('}');
+                }
+            }
+
+            private void writeRowObject(JsonObject row) throws IOException {
+                if (row.size() > rowValues.length)
+                    rowValues = new JsonElement[Integer.highestOneBit(row.size() - 1) << 1];
+                JsonElement kindElement = row.get("kind");
+                String kind = kindElement != null && kindElement.isJsonPrimitive()
+                    ? kindElement.getAsString() : "";
+                List<RowSchema> schemas = rowSchemas.get(kind);
+                RowSchema schema = null;
+                if (schemas != null) {
+                    for (RowSchema candidate : schemas) {
+                        if (candidate.matches(row, rowValues)) {
+                            schema = candidate;
+                            break;
+                        }
+                    }
+                }
+                if (schema == null) {
+                    schema = new RowSchema(row);
+                    schema.matches(row, rowValues);
+                    if (schemas == null) {
+                        schemas = new ArrayList<>();
+                        rowSchemas.put(kind, schemas);
+                    }
+                    schemas.add(schema);
+                }
+                boolean wroteField = false;
+                for (int index = 0; index < schema.names.length; index++) {
+                    if (!schema.omitted[index]) {
+                        output.write(schema.prefixes[index]);
+                        byte[] constant = schema.constantValues[index];
+                        if (constant != null) output.write(constant);
+                        else {
+                            JsonElement value = rowValues[index];
+                            if (value.isJsonPrimitive()
+                                    && value.getAsJsonPrimitive().isString()) {
+                                String string = value.getAsString();
+                                if (!string.equals(schema.lastStrings[index])) {
+                                    schema.lastStrings[index] = string;
+                                    schema.lastStringValues[index] = encodeStringValue(string);
+                                }
+                                output.write(schema.lastStringValues[index]);
+                            }
+                            else write(value);
+                        }
+                        wroteField = true;
+                    }
+                }
+                if (!wroteField) output.write('{');
+                output.write('}');
+            }
+
+            private void write(JsonElement value) throws IOException {
+                if (value == null || value.isJsonNull()) {
+                    output.write(NULL);
+                }
+                else if (value.isJsonObject()) {
+                    output.write('{');
+                    boolean first = true;
+                    for (Map.Entry<String, JsonElement> field : value.getAsJsonObject().entrySet()) {
+                        if (field.getValue() == null || field.getValue().isJsonNull()) continue;
+                        writeName(field.getKey(), first);
+                        first = false;
+                        write(field.getValue());
+                    }
+                    output.write('}');
+                }
+                else if (value.isJsonArray()) {
+                    output.write('[');
+                    boolean first = true;
+                    for (JsonElement element : value.getAsJsonArray()) {
+                        if (first) first = false;
+                        else output.write(',');
+                        write(element);
+                    }
+                    output.write(']');
+                }
+                else {
+                    JsonPrimitive primitive = value.getAsJsonPrimitive();
+                    if (primitive.isString()) writeString(primitive.getAsString());
+                    else if (primitive.isBoolean())
+                        output.write(primitive.getAsBoolean() ? TRUE : FALSE);
+                    else {
+                        String number = primitive.getAsNumber().toString();
+                        if ("NaN".equals(number) || "Infinity".equals(number)
+                                || "-Infinity".equals(number)) {
+                            throw new IllegalArgumentException("JSON forbids non-finite numbers");
+                        }
+                        writeAscii(number);
+                    }
+                }
+            }
+
+            private void writeName(String name, boolean first) throws IOException {
+                if (!first) output.write(',');
+                writeString(name);
+                output.write(':');
+            }
+
+            private void writeAscii(String value) throws IOException {
+                output.writeAscii(value, 0, value.length());
+            }
+
+            private void writeLong(long value) throws IOException {
+                if (value == Long.MIN_VALUE) {
+                    output.write(LONG_MIN);
+                    return;
+                }
+                boolean negative = value < 0;
+                if (negative) value = -value;
+                int start = numberBuffer.length;
+                do {
+                    numberBuffer[--start] = (byte) ('0' + value % 10);
+                    value /= 10;
+                } while (value != 0);
+                if (negative) numberBuffer[--start] = '-';
+                output.write(numberBuffer, start, numberBuffer.length - start);
+            }
+
+            private static void writeHex32(byte[] destination, int offset, int value) {
+                for (int shift = 28; shift >= 0; shift -= 4)
+                    destination[offset++] = ADDRESS_HEX[(value >>> shift) & 15];
+            }
+
+            private void writeHexValue(long value) throws IOException {
+                writeHex32(hexBuffer, 3, (int) value);
+                output.write(hexBuffer);
+            }
+
+            private void writeUnicodeEscape(char value) throws IOException {
+                output.write('\\');
+                output.write('u');
+                output.write(HEX[(value >>> 12) & 15]);
+                output.write(HEX[(value >>> 8) & 15]);
+                output.write(HEX[(value >>> 4) & 15]);
+                output.write(HEX[value & 15]);
+            }
+
+            private void writeCodePoint(int value) throws IOException {
+                if (value < 0x800) {
+                    output.write(0xc0 | value >>> 6);
+                    output.write(0x80 | value & 0x3f);
+                }
+                else if (value < 0x10000) {
+                    output.write(0xe0 | value >>> 12);
+                    output.write(0x80 | value >>> 6 & 0x3f);
+                    output.write(0x80 | value & 0x3f);
+                }
+                else {
+                    output.write(0xf0 | value >>> 18);
+                    output.write(0x80 | value >>> 12 & 0x3f);
+                    output.write(0x80 | value >>> 6 & 0x3f);
+                    output.write(0x80 | value & 0x3f);
+                }
+            }
+
+            private void writeString(String value) throws IOException {
+                output.write('"');
+                for (int index = 0; index < value.length(); index++) {
+                    char ch = value.charAt(index);
+                    switch (ch) {
+                        case '"' -> { output.write('\\'); output.write('"'); }
+                        case '\\' -> { output.write('\\'); output.write('\\'); }
+                        case '\t' -> { output.write('\\'); output.write('t'); }
+                        case '\b' -> { output.write('\\'); output.write('b'); }
+                        case '\n' -> { output.write('\\'); output.write('n'); }
+                        case '\r' -> { output.write('\\'); output.write('r'); }
+                        case '\f' -> { output.write('\\'); output.write('f'); }
+                        case '<', '>', '&', '=', '\'', '\u2028', '\u2029' ->
+                            writeUnicodeEscape(ch);
+                        default -> {
+                            if (ch < 0x20) writeUnicodeEscape(ch);
+                            else if (ch < 0x80) output.write(ch);
+                            else if (Character.isHighSurrogate(ch) && index + 1 < value.length()
+                                    && Character.isLowSurrogate(value.charAt(index + 1))) {
+                                writeCodePoint(Character.toCodePoint(ch, value.charAt(++index)));
+                            }
+                            else if (Character.isSurrogate(ch)) writeCodePoint(0xfffd);
+                            else writeCodePoint(ch);
+                        }
+                    }
+                }
+                output.write('"');
+            }
+
+            private static byte[] encodeNamePrefix(String name, boolean first) {
+                StringBuilder encoded = new StringBuilder(name.length() + 4);
+                encoded.append(first ? '{' : ',').append('"');
+                appendEscaped(encoded, name);
+                encoded.append('"').append(':');
+                return encoded.toString().getBytes(StandardCharsets.UTF_8);
+            }
+
+            private static byte[] encodeTextField(String name, String value, boolean first) {
+                StringBuilder encoded = new StringBuilder(name.length() + value.length() + 6);
+                encoded.append(first ? '{' : ',').append('"');
+                appendEscaped(encoded, name);
+                encoded.append("\":\"");
+                appendEscaped(encoded, value);
+                encoded.append('"');
+                return encoded.toString().getBytes(StandardCharsets.UTF_8);
+            }
+
+            private static byte[] encodeStringValue(String value) {
+                StringBuilder encoded = new StringBuilder(value.length() + 2);
+                encoded.append('"');
+                appendEscaped(encoded, value);
+                encoded.append('"');
+                return encoded.toString().getBytes(StandardCharsets.UTF_8);
+            }
+
+            private static void appendEscaped(StringBuilder encoded, String value) {
+                for (int index = 0; index < value.length(); index++) {
+                    char ch = value.charAt(index);
+                    switch (ch) {
+                        case '"' -> encoded.append("\\\"");
+                        case '\\' -> encoded.append("\\\\");
+                        case '\t' -> encoded.append("\\t");
+                        case '\b' -> encoded.append("\\b");
+                        case '\n' -> encoded.append("\\n");
+                        case '\r' -> encoded.append("\\r");
+                        case '\f' -> encoded.append("\\f");
+                        case '<', '>', '&', '=', '\'', '\u2028', '\u2029' ->
+                            appendUnicodeEscape(encoded, ch);
+                        default -> {
+                            if (ch < 0x20) appendUnicodeEscape(encoded, ch);
+                            else if (Character.isHighSurrogate(ch) && index + 1 < value.length()
+                                    && Character.isLowSurrogate(value.charAt(index + 1))) {
+                                encoded.append(ch).append(value.charAt(++index));
+                            }
+                            else if (Character.isSurrogate(ch)) encoded.append('\ufffd');
+                            else encoded.append(ch);
+                        }
+                    }
+                }
+            }
+
+            private static void appendUnicodeEscape(StringBuilder destination, char value) {
+                destination.append("\\u")
+                    .append((char) HEX[(value >>> 12) & 15])
+                    .append((char) HEX[(value >>> 8) & 15])
+                    .append((char) HEX[(value >>> 4) & 15])
+                    .append((char) HEX[value & 15]);
+            }
+
+            void finish() throws IOException {
+                output.write(']');
+                output.flush();
+            }
+
+            void flush() throws IOException {
+                output.flush();
+            }
+
+            @Override
+            public void close() throws IOException {
+                output.close();
+            }
+        }
 
         JsonRows(Path directory, String prefix, boolean countKinds) throws IOException {
             path = Files.createTempFile(directory, prefix, ".json");
             try {
                 spool = FileChannel.open(path, StandardOpenOption.READ, StandardOpenOption.WRITE);
-                output = new BufferedWriter(Channels.newWriter(spool, StandardCharsets.UTF_8), 65536);
+                writer = new Utf8JsonWriter(spool);
             }
             catch (IOException exception) {
                 Files.deleteIfExists(path);
                 throw exception;
             }
-            writer = new JsonWriter(output);
-            writer.setHtmlSafe(true);
-            writer.setSerializeNulls(false);
             kindCounts = countKinds ? new HashMap<>() : null;
-            try {
-                writer.beginArray();
-            }
-            catch (IOException exception) {
-                try { close(); } catch (IOException cleanup) { exception.addSuppressed(cleanup); }
-                throw exception;
-            }
         }
 
         void add(JsonObject row) {
@@ -560,52 +1285,174 @@ public class RunP1MEMachine extends GhidraScript {
                 if (listener != null) listener.accept(row);
                 return;
             }
-            if (sealed) throw new IllegalStateException("cannot append to a sealed trace");
-            GSON.toJson(row, writer);
-            count++;
-            if (kindCounts != null && row.has("kind")) incrementKind(row.get("kind").getAsString());
-            if (listener != null) listener.accept(row);
+            JsonElement kindValue = kindCounts == null ? null : row.get("kind");
+            String kind = kindValue == null ? null : kindValue.getAsString();
+            add(row, kind, spoolsKind(kind));
+        }
+
+        private void add(JsonObject row, String kind, boolean stored) {
+            if (stored) {
+                requireOpen();
+                try {
+                    writer.writeRow(row);
+                }
+                catch (IOException e) {
+                    throw new JsonIOException(e);
+                }
+            }
+            finishRow(row, kind, stored);
         }
 
         private void incrementKind(String kind) {
-            long[] counter = kindCounts.get(kind);
-            if (counter == null) {
-                counter = new long[1];
-                kindCounts.put(kind, counter);
+            incrementKind(kind, 1);
+        }
+
+        private void incrementKind(String kind, long count) {
+            long[] counter = lastKindCounter;
+            if (counter == null || !kind.equals(lastCountedKind)) {
+                counter = kindCounts.get(kind);
+                if (counter == null) {
+                    counter = new long[1];
+                    kindCounts.put(kind, counter);
+                }
+                lastCountedKind = kind;
+                lastKindCounter = counter;
             }
-            counter[0]++;
+            counter[0] += count;
         }
 
         private void requireOpen() {
             if (sealed) throw new IllegalStateException("cannot append to a sealed trace");
         }
 
-        private void finishTypedRow(JsonObject row, String kind) {
-            if (!discard) {
-                count++;
-                if (kindCounts != null) incrementKind(kind);
-            }
+        private boolean spoolsKind(String kind) {
+            return !discard && (projectedKinds == null
+                || kind != null && projectedKinds.contains(kind));
+        }
+
+        private boolean spoolsAlias() {
+            return !discard && includesAlias;
+        }
+
+        // Call once before computing an optional typed payload. If it is omitted, account for
+        // the event here; otherwise the typed writer will account for it when the row is ready.
+        private boolean omitsEventPayload(String kind) {
+            if (spoolsKind(kind) || listener != null) return false;
+            if (projectedKinds != null) incrementKind(kind);
+            return true;
+        }
+
+        private void finishRow(JsonObject row, String kind, boolean stored) {
+            if (stored) count++;
+            if (kindCounts != null && kind != null && (stored || projectedKinds != null))
+                incrementKind(kind);
             if (listener != null) listener.accept(row);
+        }
+
+        private void addRegisterWrite(long pc, RegisterDef register, long value, String initiator) {
+            RegisterWriteFields fields = register.writeFields;
+            if (fields == null) register.writeFields = fields = new RegisterWriteFields(register);
+            try {
+                event.begin(REGISTER_WRITE);
+                event.hex(PC, pc);
+                event.text(fields.name);
+                event.text(fields.behavior);
+                event.text(fields.trigger);
+                event.hex(VALUE, value);
+                event.text(fields.evidence);
+                if (initiator != null) event.text(INITIATOR, initiator);
+                event.end(REGISTER_WRITE);
+            }
+            catch (IOException e) {
+                throw new JsonIOException(e);
+            }
+        }
+
+        private void beginCsih(EventKind kind, int unit, long tick) throws IOException {
+            event.begin(kind);
+            event.number(UNIT, unit);
+            event.number(SCHEDULER_TICK, tick);
+            event.text(CSIH_EVIDENCE);
+        }
+
+        private void addCsihTx(int unit, long tick, long word, int bits, boolean lsbFirst,
+                long ordinal) {
+            try {
+                beginCsih(CSIH_TX, unit, tick);
+                event.hex(WORD, word);
+                event.hex(VALUE, word & ((1L << bits) - 1));
+                event.number(CHIP_SELECT, (word >> 16) & 255);
+                event.number(BITS, bits);
+                event.bool(LSB_FIRST, lsbFirst);
+                event.number(TRANSMIT_ORDINAL, ordinal);
+                event.end(CSIH_TX);
+            }
+            catch (IOException e) {
+                throw new JsonIOException(e);
+            }
+        }
+
+        private void addCsihFrame(int unit, long tick, List<Long> words) {
+            try {
+                beginCsih(CSIH_FRAME, unit, tick);
+                event.numbers(WORDS, words);
+                event.end(CSIH_FRAME);
+            }
+            catch (IOException e) {
+                throw new JsonIOException(e);
+            }
+        }
+
+        private void addCsihWord(int unit, long tick, String value, String evidence) {
+            try {
+                beginCsih(CSIH_WORD, unit, tick);
+                if (value != null) event.text(VALUE, value);
+                event.text(INPUT_EVIDENCE, evidence);
+                event.end(CSIH_WORD);
+            }
+            catch (IOException e) {
+                throw new JsonIOException(e);
+            }
+        }
+
+        private void addDmaTransfer(int channel, long source, long destination, int size,
+                long remaining, boolean error, long tick, long cycles) {
+            if (omitsEventPayload(DMA_TRANSFER.name)) return;
+            try {
+                event.begin(DMA_TRANSFER);
+                event.number(CHANNEL, channel);
+                event.hex(SOURCE, source);
+                event.hex(DESTINATION, destination);
+                event.number(SIZE, size);
+                event.number(REMAINING, remaining);
+                event.bool(ERROR, error);
+                event.number(SCHEDULER_TICK, tick);
+                event.number(HSB_CYCLES, cycles);
+                event.text(DMA_EVIDENCE);
+                event.end(DMA_TRANSFER);
+            }
+            catch (IOException e) {
+                throw new JsonIOException(e);
+            }
+        }
+
+        private void writeAccess(String kind, JsonPrimitive pc, long instruction,
+                                 JsonPrimitive address, int size, String evidence,
+                                 String initiator) {
+            try {
+                writer.writeAccess(kind, pc.getAsString(), instruction, address.getAsString(),
+                    size, evidence, initiator);
+            }
+            catch (IOException e) {
+                throw new JsonIOException(e);
+            }
         }
 
         private void addAccess(String kind, JsonPrimitive pc, long instruction,
                                JsonPrimitive address, int size, String evidence, String initiator) {
             if (!discard) {
                 requireOpen();
-                try {
-                    writer.beginObject()
-                        .name("kind").value(kind)
-                        .name("pc").value(pc.getAsString())
-                        .name("instruction").value(instruction)
-                        .name("address").value(address.getAsString())
-                        .name("size").value(size)
-                        .name("evidence").value(evidence);
-                    if (initiator != null) writer.name("initiator").value(initiator);
-                    writer.endObject();
-                }
-                catch (IOException e) {
-                    throw new JsonIOException(e);
-                }
+                writeAccess(kind, pc, instruction, address, size, evidence, initiator);
             }
             JsonObject row = null;
             if (listener != null) {
@@ -618,34 +1465,61 @@ public class RunP1MEMachine extends GhidraScript {
                 row.addProperty("evidence", evidence);
                 if (initiator != null) row.addProperty("initiator", initiator);
             }
-            finishTypedRow(row, kind);
+            finishRow(row, kind, !discard);
         }
 
-        private void addAlias(JsonPrimitive from, JsonPrimitive to, int size) {
-            String kind = "alias-write";
-            if (!discard) {
+        private void writeAlias(long from, long to, int size) {
+            try {
+                writer.writeAlias(from, to, size);
+            }
+            catch (IOException e) {
+                throw new JsonIOException(e);
+            }
+        }
+
+        private void addAlias(long from, long to, int size) {
+            boolean stored = spoolsAlias();
+            if (stored) {
+                requireOpen();
+                writeAlias(from, to, size);
+            }
+            JsonObject row = null;
+            if (listener != null) {
+                row = new JsonObject();
+                row.addProperty("kind", ALIAS_WRITE);
+                row.addProperty("from", hex32(from));
+                row.addProperty("to", hex32(to));
+                row.addProperty("size", size);
+            }
+            finishRow(row, ALIAS_WRITE, stored);
+        }
+
+        boolean wantsRows() {
+            return !discard || listener != null;
+        }
+
+        void addInterruptRequest(int channel, long tick, boolean firmwareOnly, long control) {
+            boolean stored = spoolsKind(INTERRUPT_REQUEST);
+            if (listener != null || (stored && firmwareOnly)) {
+                JsonObject event = new JsonObject();
+                event.addProperty("kind", INTERRUPT_REQUEST);
+                event.addProperty("channel", channel);
+                if (firmwareOnly)
+                    event.addProperty("firmware_control", String.format("0x%04X", control & 0xffff));
+                event.addProperty("scheduler_tick", tick);
+                add(event, INTERRUPT_REQUEST, stored);
+                return;
+            }
+            if (stored) {
                 requireOpen();
                 try {
-                    writer.beginObject()
-                        .name("kind").value(kind)
-                        .name("from").value(from.getAsString())
-                        .name("to").value(to.getAsString())
-                        .name("size").value(size)
-                        .endObject();
+                    writer.writeInterruptRequest(channel, tick);
                 }
                 catch (IOException e) {
                     throw new JsonIOException(e);
                 }
             }
-            JsonObject row = null;
-            if (listener != null) {
-                row = new JsonObject();
-                row.addProperty("kind", kind);
-                row.add("from", from);
-                row.add("to", to);
-                row.addProperty("size", size);
-            }
-            finishTypedRow(row, kind);
+            finishRow(null, INTERRUPT_REQUEST, stored);
         }
 
         long size() { return count; }
@@ -656,17 +1530,23 @@ public class RunP1MEMachine extends GhidraScript {
         }
         record Counters(long count, Map<String, Long> kinds) {}
 
-        Counters checkpointCounters() {
+        private Map<String, Long> snapshotKindCounts() {
             Map<String, Long> kinds = new LinkedHashMap<>();
             if (kindCounts != null) {
                 for (Map.Entry<String, long[]> entry : kindCounts.entrySet())
                     kinds.put(entry.getKey(), entry.getValue()[0]);
             }
-            return new Counters(count, kinds);
+            return kinds;
+        }
+
+        Counters checkpointCounters() {
+            return new Counters(count, snapshotKindCounts());
         }
 
         void restoreCounters(Counters counters) {
             count = counters.count();
+            lastCountedKind = null;
+            lastKindCounter = null;
             if (kindCounts != null) {
                 kindCounts.clear();
                 for (Map.Entry<String, Long> entry : counters.kinds().entrySet())
@@ -679,13 +1559,20 @@ public class RunP1MEMachine extends GhidraScript {
             return spool.position();
         }
 
-        void beginTrial(boolean capture) throws IOException {
+        void beginTrial(boolean capture, List<String> eventKinds) throws IOException {
             if (trialStart != -1 || discard) throw new IllegalStateException("trial already active");
             discard = !capture;
             if (capture) trialStart = position();
+            if (eventKinds != null) {
+                projectedKinds = Set.copyOf(eventKinds);
+                includesAlias = projectedKinds.contains(ALIAS_WRITE);
+                // Checks still use the cumulative, checkpointed counts. Report only the
+                // events since this trial began, even when no restore preceded it.
+                trialKindBaseline = snapshotKindCounts();
+            }
         }
 
-        void endTrial() throws IOException {
+        JsonObject endTrial() throws IOException {
             if (discard) trials.add(new Span(0, 0));
             else {
                 if (trialStart < 0) throw new IllegalStateException("trial not active");
@@ -696,14 +1583,23 @@ public class RunP1MEMachine extends GhidraScript {
             }
             trialStart = -1;
             discard = false;
+            if (projectedKinds == null) return null;
+            JsonObject counts = new JsonObject();
+            for (Map.Entry<String, long[]> entry : kindCounts.entrySet()) {
+                String kind = entry.getKey();
+                long delta = entry.getValue()[0] - trialKindBaseline.getOrDefault(kind, 0L);
+                if (delta != 0) counts.addProperty(kind, delta);
+            }
+            projectedKinds = null;
+            trialKindBaseline = null;
+            includesAlias = true;
+            return counts;
         }
 
-        // Gson owns the array delimiters. Its elements are already UTF-8 JSON:
-        // splice the complete row range without parsing or building it again.
+        // Copy the encoded rows between the destination's array delimiters.
         void writeTo(JsonWriter destination, FileChannel report, int trial) throws IOException {
             if (!sealed) {
-                writer.endArray();
-                writer.flush();
+                writer.finish();
                 sealed = true;
             }
             Span span = trial < 0 ? new Span(1, spool.size() - 1) : trials.get(trial);
@@ -721,29 +1617,27 @@ public class RunP1MEMachine extends GhidraScript {
 
         @Override
         public void close() throws IOException {
-            // Cleanup also accepts a partial trace after a runner error.
-            try { output.close(); }
+            try { writer.close(); }
             finally { Files.deleteIfExists(path); }
         }
     }
 
     static final class Trace implements Closeable {
-        private static final int TRACE_CHUNK_SIZE = 16384;
         private static final int MAX_TRACE_ENTRIES = 16777216;
-        private static final int RECENT_PC_COUNT = 16;
+        static final int RECENT_PC_COUNT = 16;
+        private static final int INSTRUCTION_RECORD_SIZE = Integer.BYTES + Byte.BYTES + Long.BYTES;
         final boolean instructionTraceEnabled;
-        private final List<InstructionChunk> instructionChunks = new ArrayList<>();
-        private final List<InstructionRange> trialInstructions = new ArrayList<>();
-        private boolean instructionTailShared;
+        private boolean instructionRecordingActive = true;
+        private final InstructionRows instructionRows;
         final List<JsonObject> instructionShortcuts = new ArrayList<>();
         private final ObservationRows compareOperands;
         private final ObservationRows tableIndices;
         private TupleKeys compareKeys = new TupleKeys();
         private TupleKeys indexKeys = new TupleKeys();
-        private int trialInstructionStart;
         int instructionTraceSize;
         long instructions;
-        private final long[] recentPcs = new long[RECENT_PC_COUNT];
+        private long[] recentPcs = new long[RECENT_PC_COUNT];
+        private int recentOffset;
         private int recentNext;
         private int recentSize;
         ExecutedPcs executed = new ExecutedPcs();
@@ -755,18 +1649,180 @@ public class RunP1MEMachine extends GhidraScript {
         private final int[] hexKeys = new int[1 << HEX_CACHE_BITS];
         private final JsonPrimitive[] hexValues = new JsonPrimitive[hexKeys.length];
         boolean traceLostAddress;
+        boolean unobservedWrites;
         String busInitiator;
 
+        private record InstructionSpan(long start, long end) {}
+        private record InstructionSegment(InstructionSegment previous, InstructionSpan range) {}
+
+        /** Append-only binary trace with logical checkpoint branches and per-trial ranges. */
+        private static final class InstructionRows implements Closeable {
+            private static final int BUFFER_RECORDS = 4096;
+            private final Path path;
+            private final FileChannel spool;
+            private final ByteBuffer output =
+                ByteBuffer.allocate(BUFFER_RECORDS * INSTRUCTION_RECORD_SIZE);
+            // Export is synchronous and starts after flush(); the read cursor shares its storage.
+            private final ByteBuffer input = output.duplicate();
+            private final List<InstructionSpan> trials = new ArrayList<>();
+            private long count;
+            private long segmentStart;
+            private long trialStart;
+            private InstructionSegment segments;
+
+            InstructionRows(Path directory) throws IOException {
+                path = Files.createTempFile(directory, ".p1me-instructions-", ".bin");
+                try {
+                    spool = FileChannel.open(path,
+                        StandardOpenOption.READ, StandardOpenOption.WRITE);
+                }
+                catch (IOException exception) {
+                    Files.deleteIfExists(path);
+                    throw exception;
+                }
+            }
+
+            void add(long pc, int size, long tick) {
+                try {
+                    if (output.remaining() < INSTRUCTION_RECORD_SIZE) flush();
+                    output.putInt((int) pc).put((byte) size).putLong(tick);
+                    count++;
+                }
+                catch (IOException exception) {
+                    throw new JsonIOException(exception);
+                }
+            }
+
+            private void flush() throws IOException {
+                output.flip();
+                while (output.hasRemaining()) spool.write(output);
+                output.clear();
+            }
+
+            InstructionSegment checkpoint() {
+                if (segmentStart != count) {
+                    InstructionSpan appended = new InstructionSpan(segmentStart, count);
+                    if (segments != null && segments.range.end == appended.start) {
+                        segments = new InstructionSegment(
+                            segments.previous,
+                            new InstructionSpan(segments.range.start, appended.end));
+                    }
+                    else segments = new InstructionSegment(segments, appended);
+                    segmentStart = count;
+                }
+                return segments;
+            }
+
+            void restore(InstructionSegment snapshot) {
+                segments = snapshot;
+                segmentStart = count;
+            }
+
+            void beginTrial() {
+                trialStart = count;
+            }
+
+            void endTrial() {
+                trials.add(new InstructionSpan(trialStart, count));
+            }
+
+            private ArrayDeque<InstructionSpan> logicalSpans() {
+                InstructionSegment segment = checkpoint();
+                ArrayDeque<InstructionSpan> reversed = new ArrayDeque<>();
+                while (segment != null) {
+                    reversed.push(segment.range);
+                    segment = segment.previous;
+                }
+                return reversed;
+            }
+
+            private int readChunk(long at, long end) throws IOException {
+                int records = (int) Math.min(BUFFER_RECORDS, end - at);
+                long byteOffset = Math.multiplyExact(at, INSTRUCTION_RECORD_SIZE);
+                input.clear().limit(records * INSTRUCTION_RECORD_SIZE);
+                while (input.hasRemaining()) {
+                    int read = spool.read(input, byteOffset);
+                    if (read <= 0)
+                        throw new IOException("incomplete instruction spool: " + path);
+                    byteOffset += read;
+                }
+                input.flip();
+                return records;
+            }
+
+            private void writeJsonSpan(JsonWriter writer, InstructionSpan span) throws IOException {
+                long at = span.start;
+                while (at < span.end) {
+                    int records = readChunk(at, span.end);
+                    for (int index = 0; index < records; index++) {
+                        int pc = input.getInt();
+                        int size = Byte.toUnsignedInt(input.get());
+                        long tick = input.getLong();
+                        writer.beginObject()
+                            .name("pc").value(hex32(pc))
+                            .name("size").value(size)
+                            .name("instruction").value(tick)
+                            .endObject();
+                    }
+                    at += records;
+                }
+            }
+
+            void writeTo(JsonWriter writer, int trial) throws IOException {
+                flush();
+                writer.beginArray();
+                if (trial < 0) {
+                    for (InstructionSpan span : logicalSpans())
+                        writeJsonSpan(writer, span);
+                }
+                else writeJsonSpan(writer, trials.get(trial));
+                writer.endArray();
+            }
+
+            void writeCompact(Path destination) throws IOException {
+                flush();
+                try (DataOutputStream stream = new DataOutputStream(
+                        new BufferedOutputStream(Files.newOutputStream(destination), 65536))) {
+                    for (InstructionSpan span : logicalSpans()) {
+                        long at = span.start;
+                        while (at < span.end) {
+                            int records = readChunk(at, span.end);
+                            for (int index = 0; index < records; index++) {
+                                stream.writeInt(input.getInt());
+                                stream.writeByte(input.get());
+                                input.getLong();
+                            }
+                            at += records;
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void close() throws IOException {
+                trials.clear();
+                try { spool.close(); }
+                finally { Files.deleteIfExists(path); }
+            }
+        }
         Trace(boolean instructionTraceEnabled, Path directory) throws IOException {
-            memoryAccesses = new JsonRows(directory, ".p1me-memory-", false);
+            JsonRows memory = new JsonRows(directory, ".p1me-memory-", false);
+            JsonRows events = null;
             try {
-                deviceEvents = new JsonRows(directory, ".p1me-events-", true);
+                events = new JsonRows(directory, ".p1me-events-", true);
+                this.instructionRows = new InstructionRows(directory);
             }
             catch (IOException | RuntimeException exception) {
-                try { memoryAccesses.close(); }
+                if (events != null) {
+                    try { events.close(); }
+                    catch (IOException cleanup) { exception.addSuppressed(cleanup); }
+                }
+                try { memory.close(); }
                 catch (IOException cleanup) { exception.addSuppressed(cleanup); }
                 throw exception;
             }
+            memoryAccesses = memory;
+            deviceEvents = events;
             compareOperands = new ObservationRows(directory, ".p1me-compares-");
             tableIndices = new ObservationRows(directory, ".p1me-indices-");
             this.instructionTraceEnabled = instructionTraceEnabled;
@@ -776,16 +1832,49 @@ public class RunP1MEMachine extends GhidraScript {
             syncCounts.put("SYNCI", 0L);
         }
 
+        void deferInstructionRecording() {
+            if (instructions != 0 || instructionTraceSize != 0)
+                throw new IllegalStateException("instruction recording must be deferred before execution");
+            instructionRecordingActive = false;
+        }
+
+        void startInstructionRecording() {
+            instructionRecordingActive = true;
+        }
+
+        boolean recordsInstructionTrace() {
+            return instructionTraceEnabled && instructionRecordingActive;
+        }
+
+        boolean recordsInstructionMetadata() {
+            return instructionRecordingActive;
+        }
+
+        void recordExecutedPc(long pc) {
+            if (instructionRecordingActive) executed.add(pc);
+        }
+
         @Override
         public void close() throws IOException {
-            try (JsonRows memory = memoryAccesses; JsonRows events = deviceEvents;
+            try (InstructionRows instructions = instructionRows;
+                 JsonRows memory = memoryAccesses; JsonRows events = deviceEvents;
                  ObservationRows compares = compareOperands; ObservationRows indices = tableIndices) {
                 // Close every spool even if one cleanup fails.
+            }
+            finally {
+                instructionShortcuts.clear();
+                instructionTraceSize = 0;
+                compareKeys = new TupleKeys();
+                indexKeys = new TupleKeys();
+                executed = new ExecutedPcs();
+                syncCounts.clear();
+                writtenBytes.clear();
+                Arrays.fill(hexValues, null);
             }
         }
 
         void enterInstruction(long pc, int size) {
-            if (!instructionTraceEnabled) return;
+            if (!recordsInstructionTrace()) return;
             if (instructionTraceSize >= MAX_TRACE_ENTRIES) {
                 throw new IllegalStateException(
                     "complete instruction trace exceeds " + MAX_TRACE_ENTRIES + " entries");
@@ -793,92 +1882,66 @@ public class RunP1MEMachine extends GhidraScript {
             if (size <= 0 || size > 0xff) {
                 throw new IllegalStateException("instruction trace size outside 1..255");
             }
-            int chunk = instructionTraceSize / TRACE_CHUNK_SIZE;
-            int offset = instructionTraceSize % TRACE_CHUNK_SIZE;
-            try {
-                if (offset == 0) {
-                    instructionChunks.add(new InstructionChunk());
-                    instructionTailShared = false;
-                }
-                else if (instructionTailShared) {
-                    // Checkpoints and finished trials retain the old chunk even when
-                    // a restore makes its tail available for new execution.
-                    instructionChunks.set(chunk, instructionChunks.get(chunk).copy());
-                    instructionTailShared = false;
-                }
-            }
-            catch (OutOfMemoryError error) {
-                throw new IllegalStateException("cannot allocate complete instruction trace", error);
-            }
             if ((pc & ~0xffffffffL) != 0) {
                 throw new IllegalStateException("instruction trace PC outside 32-bit address space");
             }
-            InstructionChunk entries = instructionChunks.get(chunk);
-            entries.pcs[offset] = (int) pc;
-            entries.sizes[offset] = (byte) size;
-            entries.ticks[offset] = instructions;
+            instructionRows.add(pc, size, instructions);
             instructionTraceSize++;
         }
-        private record InstructionChunk(int[] pcs, byte[] sizes, long[] ticks) {
-            InstructionChunk() {
-                this(new int[TRACE_CHUNK_SIZE], new byte[TRACE_CHUNK_SIZE], new long[TRACE_CHUNK_SIZE]);
-            }
-
-            InstructionChunk copy() {
-                return new InstructionChunk(pcs.clone(), sizes.clone(), ticks.clone());
-            }
-        }
-
-        private record InstructionRange(List<InstructionChunk> chunks, int start, int count) {
-            long pc(int index) {
-                int offset = start + index;
-                return Integer.toUnsignedLong(chunks.get(offset / TRACE_CHUNK_SIZE)
-                    .pcs[offset % TRACE_CHUNK_SIZE]);
-            }
-
-            int size(int index) {
-                int offset = start + index;
-                return Byte.toUnsignedInt(chunks.get(offset / TRACE_CHUNK_SIZE)
-                    .sizes[offset % TRACE_CHUNK_SIZE]);
-            }
-        }
-
-        long instructionPc(int index) {
-            return Integer.toUnsignedLong(instructionChunks.get(index / TRACE_CHUNK_SIZE)
-                .pcs[index % TRACE_CHUNK_SIZE]);
-        }
-
-        int instructionSize(int index) {
-            return Byte.toUnsignedInt(instructionChunks.get(index / TRACE_CHUNK_SIZE)
-                .sizes[index % TRACE_CHUNK_SIZE]);
-        }
-
-        int trialInstructionCount(int trial) { return trialInstructions.get(trial).count; }
-        long trialInstructionPc(int trial, int index) { return trialInstructions.get(trial).pc(index); }
-        int trialInstructionSize(int trial, int index) { return trialInstructions.get(trial).size(index); }
 
         void noteRecentPc(long pc) {
-            recentPcs[recentNext] = pc;
+            recentPcs[recentOffset + recentNext] = pc;
             recentNext = (recentNext + 1) & (RECENT_PC_COUNT - 1);
             if (recentSize < RECENT_PC_COUNT) recentSize++;
+        }
+
+        // Use the controls array itself, not a second ring to merge after each batch.
+        // The trace only borrows primitive storage; it never holds a thread or machine.
+        int bindNativeHistory(long[] controls, int offset) {
+            if (recentPcs != controls) {
+                System.arraycopy(recentPcs, recentOffset, controls, offset, RECENT_PC_COUNT);
+                recentPcs = controls;
+                recentOffset = offset;
+            }
+            return recentNext;
+        }
+
+        void unbindNativeHistory(long[] controls) {
+            if (recentPcs == controls) {
+                recentPcs = copyRecentPcs();
+                recentOffset = 0;
+            }
+        }
+
+        private long[] copyRecentPcs() {
+            return Arrays.copyOfRange(recentPcs, recentOffset, recentOffset + RECENT_PC_COUNT);
+        }
+
+        long retireNativePcs(int count) {
+            // Native already wrote these slots. Publish only the retired prefix.
+            recentNext = (recentNext + count) & (RECENT_PC_COUNT - 1);
+            recentSize = Math.min(recentSize + count, RECENT_PC_COUNT);
+            return recentPcs[recentOffset + ((recentNext - 1) & (RECENT_PC_COUNT - 1))];
         }
 
         JsonArray recentPcs() {
             JsonArray rows = new JsonArray();
             int start = recentNext - recentSize;
             for (int i = 0; i < recentSize; i++) {
-                rows.add(hex32(recentPcs[(start + i) & (RECENT_PC_COUNT - 1)]));
+                rows.add(hex32(recentPcs[recentOffset + ((start + i) & (RECENT_PC_COUNT - 1))]));
             }
             return rows;
         }
 
         void compare(long pc, long branch, String mnemonic, int width, long left, long right) {
+            if (!instructionRecordingActive) return;
             if (compareKeys.add(pc, left, right)) {
                 compareOperands.addCompare(pc, branch, mnemonic, width, left, right);
             }
         }
 
         void tableIndex(long pc, long base, long index, int scale, long effective, int width, String access) {
+            if (!instructionRecordingActive) return;
             if (indexKeys.add(pc, index, effective)) {
                 tableIndices.addIndex(pc, base, index, scale, effective, width, access);
             }
@@ -893,7 +1956,7 @@ public class RunP1MEMachine extends GhidraScript {
         }
 
         void shortcut(String kind, long pc, long resumePc) {
-            if (!instructionTraceEnabled) return;
+            if (!recordsInstructionTrace()) return;
             if (instructionShortcuts.size() >= 16384) {
                 throw new IllegalStateException("complete instruction shortcut trace exceeds 16384 entries");
             }
@@ -906,28 +1969,15 @@ public class RunP1MEMachine extends GhidraScript {
         }
 
         void writeInstructionTrace(JsonWriter writer, int trial) throws IOException {
-            InstructionRange range = trial < 0
-                ? new InstructionRange(instructionChunks, 0, instructionTraceSize)
-                : trialInstructions.get(trial);
-            writer.beginArray();
-            int index = range.start;
-            int stop = index + range.count;
-            for (InstructionChunk chunk : range.chunks) {
-                int end = Math.min(stop, (index / TRACE_CHUNK_SIZE + 1) * TRACE_CHUNK_SIZE);
-                for (; index < end; index++) {
-                    int offset = index % TRACE_CHUNK_SIZE;
-                    writer.beginObject()
-                        .name("pc").value(hex32(chunk.pcs[offset]))
-                        .name("size").value(Byte.toUnsignedInt(chunk.sizes[offset]))
-                        .name("instruction").value(chunk.ticks[offset])
-                        .endObject();
-                }
-            }
-            writer.endArray();
+            instructionRows.writeTo(writer, trial);
         }
 
         void sync(String operation) {
-            syncCounts.put(operation, syncCounts.get(operation) + 1);
+            if (instructionRecordingActive) addNativeSync(operation, 1);
+        }
+
+        void addNativeSync(String operation, long count) {
+            syncCounts.put(operation, syncCounts.get(operation) + count);
         }
 
         // Only immutable values are cached. No cached value depends on a checkpoint.
@@ -943,24 +1993,65 @@ public class RunP1MEMachine extends GhidraScript {
             return cached;
         }
 
-        void access(String kind, long pc, long address, int size, String evidence) {
-            boolean write = "write".equals(kind);
-            if (memoryAccesses.size() >= 1048576) {
-                // A poll that rewrites the same slots does not hide a later
-                // store. A write to an address the trace never recorded does.
-                if (write && !writtenBytes.markOrCovers(address, size, false))
-                    traceLostAddress = true;
-                return;
+        private static final int MAX_MEMORY_ROWS = 1 << 20;
+
+        boolean retainsRead() {
+            return memoryAccesses.size() < MAX_MEMORY_ROWS
+                && (!memoryAccesses.discard || memoryAccesses.listener != null);
+        }
+        boolean canDeferNativeBus(){
+            return !memoryAccesses.wantsRows() && memoryAccesses.listener==null &&
+                deviceEvents.listener==null && !deviceEvents.spoolsAlias();
+        }
+
+        // ABI flags shared with windowgraph-abi.h. Omitted rows do not imply omitted
+        // coverage, and unprojected discarded aliases have no kind count.
+        static final int NATIVE_ALIAS = 2, NATIVE_MARK = 4,
+            NATIVE_COVER = 8, NATIVE_SYNC = 16;
+
+        int nativeRetirementFlags() {
+            int flags = instructionRecordingActive ? NATIVE_SYNC : 0;
+            boolean projected = deviceEvents.projectedKinds != null;
+            if (projected) flags |= NATIVE_ALIAS;
+            if (unobservedWrites) return flags;
+            if (!projected && memoryAccesses.size() < MAX_MEMORY_ROWS) flags |= NATIVE_MARK;
+            else if (!traceLostAddress) flags |= NATIVE_COVER;
+            return flags;
+        }
+
+        MemorySegment nativeWrittenBytes() {
+            return writtenBytes.segment;
+        }
+
+        void finishNativeWrites(long aliases, boolean lost, long[] state, int from, int count) {
+            if (aliases != 0) deviceEvents.incrementKind(JsonRows.ALIAS_WRITE, aliases);
+            traceLostAddress |= lost;
+            for (int i = from, end = from + count; i < end; i++) {
+                long event = state[i];
+                writtenBytes.markOrCovers(event & 0xffff_ffffL, (int) (event >>> 32) & 255, true);
             }
-            if (write) writtenBytes.markOrCovers(address, size, true);
-            if (memoryAccesses.discard && memoryAccesses.listener == null) return;
+        }
+
+        private boolean markBusWrite(long address, int size) {
+            boolean full = memoryAccesses.size() >= MAX_MEMORY_ROWS;
+            if (!unobservedWrites) {
+                if (!full && deviceEvents.projectedKinds == null) {
+                    writtenBytes.markOrCovers(address, size, true);
+                }
+                else if (!traceLostAddress && !writtenBytes.markOrCovers(address, size, false)) {
+                    traceLostAddress = true;
+                }
+            }
+            return !full && memoryAccesses.wantsRows();
+        }
+
+        private void addBusAccess(String kind, long pc, long address, int size, String evidence) {
             memoryAccesses.addAccess(kind, hexAddress(pc), instructions,
                 hexAddress(address), size, evidence, busInitiator);
         }
 
         void aliasWrite(long from, long to, int size) {
-            if (deviceEvents.discard && deviceEvents.listener == null) return;
-            deviceEvents.addAlias(hexAddress(from), hexAddress(to), size);
+            deviceEvents.addAlias(from, to, size);
         }
 
         // Store the exact tuples, not just their hashes. PC is a 32-bit address,
@@ -1055,17 +2146,16 @@ public class RunP1MEMachine extends GhidraScript {
             }
 
             void add(long pc) {
-                int address = (int) pc;
-                int number = address >>> PAGE_BITS;
+                int addressWord = (int) pc >>> 6;
+                int number = addressWord >>> (PAGE_BITS - 6);
                 if (number != lastPageNumber) {
                     lastPage = page(number, true);
                     lastPageNumber = number;
                 }
-                int word = (address >>> 6) & WORD_MASK;
-                long mask = 1L << address;
-                long before = lastPage[word];
-                if ((before & mask) == 0) {
-                    lastPage[word] = before | mask;
+                int word = addressWord & WORD_MASK;
+                long mask = 1L << pc;
+                if ((lastPage[word] & mask) == 0) {
+                    lastPage[word] |= mask;
                     size++;
                 }
             }
@@ -1073,16 +2163,19 @@ public class RunP1MEMachine extends GhidraScript {
             boolean contains(long pc) {
                 if ((pc & ~0xffffffffL) != 0) return false;
                 int address = (int) pc;
+                int addressWord = address >>> 6;
                 long[] page = page(address >>> PAGE_BITS, false);
-                return page != null && (page[(address >>> 6) & WORD_MASK] & (1L << address)) != 0;
+                return page != null && (page[addressWord & WORD_MASK] & (1L << address)) != 0;
             }
 
-            int size() { return size; }
+            int size() {
+                return size;
+            }
 
             ExecutedPcs copy() {
                 ExecutedPcs result = new ExecutedPcs();
-                if (groups == null) return result;
                 result.size = size;
+                if (groups == null) return result;
                 result.groups = groups.clone();
                 for (int i = 0; i < groups.length; i++) {
                     if (groups[i] == null) continue;
@@ -1096,11 +2189,7 @@ public class RunP1MEMachine extends GhidraScript {
             }
         }
 
-        /**
-         * Comparisons and indexed accesses share one physical copy of each row
-         * between the scenario and its trials. A restore changes the logical
-         * prefix, not the file, so earlier trials keep their immutable ranges.
-         */
+        /** Restores select a logical prefix; completed trials keep their original spool ranges. */
         private static final class ObservationRows implements Closeable {
             private static final String HEX = "0123456789ABCDEF";
             private record Segment(Segment previous, JsonRows.Span range) {}
@@ -1294,41 +2383,85 @@ public class RunP1MEMachine extends GhidraScript {
         }
 
         private static final class WrittenBytes {
-            private static final int PAGE_BITS = 12;
-            private static final int PAGE_SIZE = 1 << PAGE_BITS;
-            private final Map<Long, BitSet> pages = new HashMap<>();
+            // All scalar and native accesses share this exact byte coverage.
+            // Slot zero is the hash mask; each entry is a 64-byte word key + bits.
+            // Zero keys are vacant. Native can update existing words; only Java
+            // inserts and resizes, after a downcall.
+            private static final long HASH_MULTIPLIER = 0x9e3779b97f4a7c15L;
+            private long[] cells;
+            private MemorySegment segment;
+            private int words;
+
+            WrittenBytes() {
+                reset(new long[1 + 2 * 16], 0);
+            }
+
+            private void reset(long[] storage, int count) {
+                cells = storage;
+                cells[0] = (cells.length >>> 1) - 1;
+                segment = MemorySegment.ofArray(cells);
+                words = count;
+            }
+
+            private int slot(long key) {
+                int mask = (int) cells[0];
+                int i = (int) ((key * HASH_MULTIPLIER) >>> 32) & mask;
+                for (;; i = (i + 1) & mask) {
+                    int slot = 1 + 2 * i;
+                    long old = cells[slot];
+                    if (old == 0 || old == key) return slot;
+                }
+            }
+
+            private void grow() {
+                long[] old = cells;
+                reset(new long[2 * old.length - 1], words);
+                for (int i = 1; i < old.length; i += 2) {
+                    long key = old[i];
+                    if (key == 0) continue;
+                    int slot = slot(key);
+                    cells[slot] = key;
+                    cells[slot + 1] = old[i + 1];
+                }
+            }
 
             boolean markOrCovers(long address, int size, boolean mark) {
                 while (size > 0) {
-                    long pageNumber = address >>> PAGE_BITS;
-                    int first = (int) address & (PAGE_SIZE - 1);
-                    int length = Math.min(size, PAGE_SIZE - first);
-                    BitSet page = pages.get(pageNumber);
+                    long key = (address >>> 6) + 1;
+                    int first = (int) address & 63;
+                    int length = Math.min(size, Long.SIZE - first);
+                    long bits = length == Long.SIZE ? -1L : ((1L << length) - 1) << first;
+                    int slot = slot(key);
                     if (mark) {
-                        if (page == null) {
-                            page = new BitSet(PAGE_SIZE);
-                            pages.put(pageNumber, page);
+                        if (cells[slot] == 0) {
+                            if (words > (int) cells[0] / 2) {
+                                grow();
+                                slot = slot(key);
+                            }
+                            cells[slot] = key;
+                            words++;
                         }
-                        page.set(first, first + length);
+                        cells[slot + 1] |= bits;
                     }
-                    else if (page == null || page.nextClearBit(first) < first + length) {
-                        return false;
-                    }
+                    else if ((cells[slot + 1] & bits) != bits) return false;
                     address += length;
                     size -= length;
                 }
                 return true;
             }
 
-            void restore(WrittenBytes source) {
-                pages.clear();
-                source.pages.forEach((number, page) -> pages.put(number, (BitSet) page.clone()));
+            void restore(long[] snapshot, int count) {
+                reset(snapshot.clone(), count);
+            }
+
+            void clear() {
+                reset(new long[1 + 2 * 16], 0);
             }
         }
         static final class Checkpoint {
             final long instructions;
             final int instructionTraceSize;
-            final List<InstructionChunk> instructionChunks;
+            final InstructionSegment instructionSegments;
             final List<JsonObject> instructionShortcuts;
             final ObservationRows.Segment compareRows;
             final ObservationRows.Segment indexRows;
@@ -1339,7 +2472,8 @@ public class RunP1MEMachine extends GhidraScript {
             final int recentSize;
             final ExecutedPcs executed;
             final Map<String, Long> syncCounts;
-            final WrittenBytes writtenBytes = new WrittenBytes();
+            final long[] writtenCells;
+            final int writtenWords;
             final boolean traceLostAddress;
             final String busInitiator;
             final JsonRows.Counters memoryCounters;
@@ -1347,10 +2481,9 @@ public class RunP1MEMachine extends GhidraScript {
             Checkpoint(Trace trace) throws IOException {
                 instructions = trace.instructions;
                 instructionTraceSize = trace.instructionTraceSize;
-                instructionChunks = List.copyOf(trace.instructionChunks);
-                trace.instructionTailShared = true;
+                instructionSegments = trace.instructionRows.checkpoint();
                 instructionShortcuts = List.copyOf(trace.instructionShortcuts);
-                recentPcs = trace.recentPcs.clone();
+                recentPcs = trace.copyRecentPcs();
                 recentNext = trace.recentNext;
                 recentSize = trace.recentSize;
                 executed = trace.executed.copy();
@@ -1359,7 +2492,8 @@ public class RunP1MEMachine extends GhidraScript {
                 compareKeys = trace.compareKeys.copy();
                 indexKeys = trace.indexKeys.copy();
                 syncCounts = new LinkedHashMap<>(trace.syncCounts);
-                writtenBytes.restore(trace.writtenBytes);
+                writtenCells = trace.writtenBytes.cells.clone();
+                writtenWords = trace.writtenBytes.words;
                 traceLostAddress = trace.traceLostAddress;
                 busInitiator = trace.busInitiator;
                 memoryCounters = trace.memoryAccesses.checkpointCounters();
@@ -1374,65 +2508,72 @@ public class RunP1MEMachine extends GhidraScript {
         void restore(Checkpoint checkpoint) throws IOException {
             instructions = checkpoint.instructions;
             instructionTraceSize = checkpoint.instructionTraceSize;
-            instructionChunks.clear();
-            instructionChunks.addAll(checkpoint.instructionChunks);
-            instructionTailShared = true;
+            instructionRows.restore(checkpoint.instructionSegments);
             instructionShortcuts.clear();
             instructionShortcuts.addAll(checkpoint.instructionShortcuts);
             compareOperands.restore(checkpoint.compareRows);
             tableIndices.restore(checkpoint.indexRows);
             compareKeys = checkpoint.compareKeys.copy();
             indexKeys = checkpoint.indexKeys.copy();
-            System.arraycopy(checkpoint.recentPcs, 0, recentPcs, 0, RECENT_PC_COUNT);
+            System.arraycopy(checkpoint.recentPcs, 0, recentPcs, recentOffset, RECENT_PC_COUNT);
             recentNext = checkpoint.recentNext;
             recentSize = checkpoint.recentSize;
             executed = checkpoint.executed.copy();
             syncCounts.clear();
             syncCounts.putAll(checkpoint.syncCounts);
-            writtenBytes.restore(checkpoint.writtenBytes);
+            writtenBytes.restore(checkpoint.writtenCells, checkpoint.writtenWords);
             traceLostAddress = checkpoint.traceLostAddress;
             busInitiator = checkpoint.busInitiator;
             memoryAccesses.restoreCounters(checkpoint.memoryCounters);
             deviceEvents.restoreCounters(checkpoint.eventCounters);
         }
 
-        void beginTrial(boolean captureRows) throws IOException {
-            memoryAccesses.beginTrial(captureRows);
-            deviceEvents.beginTrial(captureRows);
-            trialInstructionStart = instructionTraceSize;
+        void beginTrial(boolean captureRows, List<String> eventKinds) throws IOException {
+            memoryAccesses.beginTrial(captureRows && eventKinds == null, null);
+            deviceEvents.beginTrial(captureRows, eventKinds);
+            instructionRows.beginTrial();
             compareOperands.beginTrial();
             tableIndices.beginTrial();
         }
 
-        void endTrial() throws IOException {
+        JsonObject endTrial() throws IOException {
             memoryAccesses.endTrial();
-            deviceEvents.endTrial();
+            JsonObject eventKindCounts = deviceEvents.endTrial();
+            instructionRows.endTrial();
             compareOperands.endTrial();
             tableIndices.endTrial();
-            if (instructionTraceEnabled) {
-                int first = trialInstructionStart;
-                int count = instructionTraceSize - first;
-                List<InstructionChunk> chunks = count == 0 ? List.of()
-                    : List.copyOf(instructionChunks.subList(first / TRACE_CHUNK_SIZE,
-                        (instructionTraceSize - 1) / TRACE_CHUNK_SIZE + 1));
-                trialInstructions.add(new InstructionRange(chunks, first % TRACE_CHUNK_SIZE, count));
-                if (count != 0) instructionTailShared = true;
-            }
+            return eventKindCounts;
         }
     }
 
     // The payload is immutable after deserialization. Keep scheduling state in
     // the queue instead of cloning or modifying every scenario event on restore.
-    record WireInput(long trigger, long ordinal, ExternalEvent payload) {}
+    record WireInput(long trigger, long ordinal, ExternalEvent payload, long repeat, long stride) {}
 
     static final class WireInputs {
         final List<WireInput> rows = new ArrayList<>();
+        final List<WireInput> patterns = new ArrayList<>();
         int next;
         boolean unordered;
 
         void add(long trigger, long ordinal, ExternalEvent payload) {
+            long repeat = payload.repeat == null ? 1 : payload.repeat;
+            long stride = payload.stride_words == null ? 1 : payload.stride_words;
+            if (payload.repeat_forever || repeat != 1) {
+                patterns.add(new WireInput(
+                    trigger, ordinal, payload, payload.repeat_forever ? Long.MAX_VALUE : repeat, stride));
+                return;
+            }
             if (next < rows.size() && trigger < rows.getLast().trigger) unordered = true;
-            rows.add(new WireInput(trigger, ordinal, payload));
+            rows.add(new WireInput(trigger, ordinal, payload, 1, 1));
+        }
+
+        // A reset restarts the serial timeline the words are counted against.
+        void clear() {
+            rows.clear();
+            patterns.clear();
+            next = 0;
+            unordered = false;
         }
 
         WireInput take(long trigger) {
@@ -1440,8 +2581,18 @@ public class RunP1MEMachine extends GhidraScript {
                 rows.subList(next, rows.size()).sort(Comparator.comparingLong(WireInput::trigger));
                 unordered = false;
             }
-            if (next == rows.size() || rows.get(next).trigger != trigger) return null;
-            return rows.get(next++);
+            if (next != rows.size() && rows.get(next).trigger == trigger) return rows.get(next++);
+            WireInput match = null;
+            for (int i = 0; i < patterns.size(); i++) {
+                WireInput pattern = patterns.get(i);
+                if (trigger < pattern.trigger) continue;
+                long delta = trigger - pattern.trigger;
+                if (delta % pattern.stride != 0 || delta / pattern.stride >= pattern.repeat) continue;
+                if (match != null)
+                    throw new IllegalStateException("multiple CSIH wire inputs at transmit word " + trigger);
+                match = pattern;
+            }
+            return match;
         }
     }
 
@@ -1494,6 +2645,7 @@ public class RunP1MEMachine extends GhidraScript {
         static final long RSCFD_RAM_INITIALIZATION_CYCLES = 3794;
 
         final SleighLanguage language;
+        final boolean bigEndian;
         final MachineSpec spec;
         final Trace trace;
         // Shared-memory callbacks have no thread; retain PE1 for fault provenance.
@@ -1502,18 +2654,40 @@ public class RunP1MEMachine extends GhidraScript {
         final List<RegisterDef> registers;
         // Immutable address definitions; lookaside entries hold no guest state.
         final RegionDef[] regionCache = new RegionDef[64];
-        final RegisterDef[] registerCache = new RegisterDef[64];
-        record MpuDescriptor(java.util.function.LongSupplier attributes, java.util.function.LongSupplier lower,
-                             java.util.function.LongSupplier upper) {}
+        // Sparse byte-lane decode for the immutable, address-sorted SFR catalog.
+        final RegisterDef[][][] registerPages = new RegisterDef[256][][];
+        final int[] registerPageBase = new int[256];
+        interface MpuDescriptor {
+            long attributes();
+            // Low word is MPLA, high word is MPUA; inspect in that order.
+            long bounds();
+        }
+
+        private record StateMpuDescriptor(Model model, PcodeThread<byte[]> thread,
+                Register attributeRegister, Register lowerRegister, Register upperRegister)
+                implements MpuDescriptor {
+            @Override
+            public long attributes() {
+                return model.processorRegister(thread, attributeRegister);
+            }
+
+            @Override
+            public long bounds() {
+                return model.processorRegister(thread, lowerRegister)
+                    | (model.processorRegister(thread, upperRegister) << 32);
+            }
+        }
         final MpuDescriptor[] mpu = new MpuDescriptor[16];
         final int[] mpuHints = new int[64];
         final Map<String, RegisterDef> registersByName = new HashMap<>();
+        final RegisterDef segFlagRegister, ipgEnableRegister;
         final Map<Integer, RegisterDef> interruptRegisters = new LinkedHashMap<>();
         final RegisterDef[] interruptRegistersByAddress;
         final BitSet pendingInterrupts;
         final byte[] pendingPriorities; // -1 if masked or no longer asserted; indexed by EIC
         final BitSet[] channelsByPriority = new BitSet[16];
         int pendingPriorityMask;
+        final ArrayDeque<Integer> activeInterruptChannels = new ArrayDeque<>();
         final Map<Integer, ReceiveFifo> receiveFifos = new HashMap<>();
         final Map<Long, RegisterDef> pendingRscfdTransmits = new HashMap<>();
         // R01UH0585EJ0120 Table 17.132: CFDC and CFPLS encodings.
@@ -1526,9 +2700,13 @@ public class RunP1MEMachine extends GhidraScript {
         static final int[] PORT_PIN_BITS = {
             0, 1, 2, 4, 5, 6, 8, 12, 16, 17, 18, 19, 22, 24, 25, 27, 28, 30
         };
-        record PortAliasField(RegisterDef source, long aliasMask, long pinMask) {}
-        final Map<RegisterDef, List<PortAliasField>> portAliasFields = new HashMap<>();
-        final Map<RegisterDef, List<RegisterDef>> portAliasDependents = new HashMap<>();
+        record PortPinField(RegisterDef source, int column, int aliasMask, long pins) {}
+        record PortPinAlias(RegisterDef register, long pinMask, PortPinField[] fields,
+                int overwrittenColumns) {}
+        record PortBindings(PortPinAlias[] pinAliases, PortPinAlias[][] dependents,
+                RegisterDef[] maskedTargets) {}
+        final PortBindings portBindings;
+        final long[] portColumnValues = new long[PORT_PIN_BITS.length];
         static final String[][] ECM_STATUS_REGISTERS = {
             {"ECMMESSTR0", "ECMMESSTR1", "ECMMESSTR2"},
             {"ECMCESSTR0", "ECMCESSTR1", "ECMCESSTR2"}
@@ -1540,6 +2718,10 @@ public class RunP1MEMachine extends GhidraScript {
             {"ECMIRCFG0", "ECMIRCFG1", "ECMIRCFG2"},
             {"ECMDTMCFG0", "ECMDTMCFG1", "ECMDTMCFG2"}
         };
+        final RegisterDef[][] ecmStatus, ecmNotification;
+        final RegisterDef[] ecmErrorMask;
+        final RegisterDef checkerPmc, checkerPm, checkerPipc, checkerPfcae,
+            checkerPfce, checkerPfc, checkerPbdc, checkerPibc, checkerPinv;
         final Tauj tauj;
         final Taud taud;
         final Tsg tsg;
@@ -1551,12 +2733,23 @@ public class RunP1MEMachine extends GhidraScript {
         final List<ExternalEvent> resetRelativeEvents = new ArrayList<>();
         ResetReplay resetReplay;
         EventSocket eventSocket;
-        final Map<RegisterDef, Csih> csihBindings = new HashMap<>();
+        final Csih[] csihBindings;
         long registerBeforeWrite;
         boolean guardWriteIgnored;
         final RegisterDef[][] gramGuards = new RegisterDef[8][4];
-        final Map<RegisterDef, String> peripheralGuards = new HashMap<>();
-        final Map<String, GuardCapture> busGuardCaptures = new HashMap<>();
+        private record BusGuard(String name, RegisterDef read, RegisterDef readSpid,
+                RegisterDef write, RegisterDef writeSpid, GuardCapture capture) {}
+        final BusGuard[] peripheralGuards;
+        final BusGuard dataFlashGuard;
+        // Action bits are ordered by the device effects of a single bus read.
+        private static final int READ_FACI_COMMAND = 1, READ_CSIH_BIND = 1 << 1,
+            READ_CSIH_RX = 1 << 2, READ_CSIH_TX = 1 << 3, READ_ADC = 1 << 4,
+            READ_ADC_SELECTOR = 1 << 5, READ_TAUJ = 1 << 6, READ_TAUD = 1 << 7,
+            READ_TSG = 1 << 8, READ_RSENT = 1 << 9, READ_FACI_STATUS = 1 << 10,
+            READ_PORT_PIN = 1 << 11, READ_PORT_MASKED = 1 << 12, READ_CVM = 1 << 13,
+            READ_PORT_INPUT = 1 << 14, READ_MODE_LATCH = 1 << 15, READ_ECMPS = 1 << 16,
+            READ_DCRA_SEED = 1 << 17, READ_PRIVILEGED = 1 << 18;
+        private static final int COMPLETE_ADC_READ = 1, COMPLETE_RSENT_READ = 2;
         final GuardCapture pegCapture;
         final GuardCapture gramDmaCapture;
         final Dma dma;
@@ -1564,10 +2757,30 @@ public class RunP1MEMachine extends GhidraScript {
         final Rsent rsent;
         long hsbCyclesPerInstruction;
         long hsbCycles;
-        // Clock state is materialized at hsbCycles. The budget covers only ticks
-        // strictly before the next observable edge, excluding those already deferred.
-        private long deferredClockCycles;
-        private long quietClockBudget;
+        // Exclusive absolute endpoint of the proven quiet span; zero invalidates the proof.
+        private long quietUntil;
+        private int quietClockEvents;
+        private static final int QUIET_ADC_DUE = 1;
+        private static final int QUIET_RSENT_DUE = 2;
+        private static final int QUIET_TSG_KNOWN = 4;
+        private static final int QUIET_TSG_DUE = 8;
+        // Cached deadlines: zero is unknown, -1 is no edge. A finite
+        // deadline may wrap past MAX: subtracting the current HSB tick recovers
+        // the remaining span without conflating a real edge at MAX with "never".
+        private static final long NO_CLOCK_EDGE = -1;
+        private long taudClockTick, taujClockTick, rsentClockTick;
+        private long taudClockDue, taujClockDue, rsentClockDue = -1;
+        // An asynchronous mutation must cross one ordinary instruction boundary before
+        // decoded instructions can retire without their model callbacks.
+        private boolean idleBatchBarrier = true;
+        private long lastRetiredPc = -1;
+        private Instruction pollTest;
+        private long pollReadTick, pollReadAddress;
+
+        private void invalidateBatchProof() {
+            idleBatchBarrier = true;
+            pollTest = null;
+        }
         boolean compareOperands;
         boolean inputDerivedTableIndices;
         boolean discardBusStore;
@@ -1601,23 +2814,27 @@ public class RunP1MEMachine extends GhidraScript {
         // No declared drive means legacy sampled bit31 is authoritative.
         final String[] ecmExternalDrive = new String[2];
         final boolean[] ecmOutputLow = {true, true};
-        final Set<String> initializedDeviceRegisters = new HashSet<>();
-        final Set<String> missingResetInputs = new HashSet<>();
+        static final int MISSING_RESET_INPUT = 1;
+        static final int DEVICE_REGISTER_INITIALIZED = 2;
+        final byte[] registerState;
+        int missingResetInputCount;
+        Dma.WordIndex dmaWordIndex;
         // Scenario-supplied bus data is not command storage or effective device state.
         Map<String, Long> readInputResponses;
         boolean fieldBistExecuted;
         long resetFactorKnownMask;
         long unresolvedResetCauses;
         final Map<String, List<RegionDef>> aliases = new HashMap<>();
+        long nextScheduledTick = Long.MAX_VALUE;
         final PriorityQueue<ScheduledEvent> scheduledEvents = new PriorityQueue<>(ScheduledEvent.ORDER);
         long nextEventOrdinal;
         PcodeMachine<byte[]> emulator;
         AddressSpace memorySpace;
         boolean peripheralFile;
+        private P1MEJitMachine.MachineState deviceState;
         boolean peripheralPollBusy;
-        // Same threshold as tools/camry_oracle.py PERIPHERAL_POLL_READS.
         static final int PERIPHERAL_POLL_READS = 4096;
-        // Legacy peripheral-file exploration only; strict completion never counts reads.
+        // Peripheral-file mode advances ICCTRL on reads.
         static final int ICCTRL_BUSY_READS = 4;
         int icctrlBusyReads;
         final Map<Long, Integer> peripheralPolls = new HashMap<>();
@@ -1633,12 +2850,15 @@ public class RunP1MEMachine extends GhidraScript {
 
         Model(SleighLanguage language, MachineSpec spec, Trace trace, String productId) {
             this.language = language;
+            this.bigEndian = language.isBigEndian();
             this.spec = spec;
             this.trace = trace;
             this.regions = new ArrayList<>(spec.manual.regions);
             this.registers = new ArrayList<>(spec.manual.registers);
             this.registers.addAll(spec.target_derived.registers);
             regions.sort(Comparator.comparingLong(row -> row.start));
+            for (int i = 0; i < regions.size(); i++)
+                regions.get(i).lookupEnd = i + 1 < regions.size() ? regions.get(i + 1).start : 1L << 32;
             for (RegisterDef register : registers) {
                 registersByName.put(register.name, register);
                 if ("intc_eic".equals(register.behavior)) {
@@ -1654,21 +2874,91 @@ public class RunP1MEMachine extends GhidraScript {
             pendingPriorities = new byte[interruptRegistersByAddress.length];
             Arrays.fill(pendingPriorities, (byte) -1);
             Arrays.setAll(channelsByPriority, ignored -> new BitSet());
+            segFlagRegister = registersByName.get("SEGFLAG");
+            ipgEnableRegister = registersByName.get("IPGENUM");
             resetFactorKnownMask = requiredRegister("reset controller", "status", "RESF").reset_mask;
-            bindPortAliases();
             registers.sort(Comparator.comparingLong(row -> row.address));
+            csihBindings = new Csih[registers.size()];
+            for (int i = 0; i < registers.size(); i++) {
+                RegisterDef register = registers.get(i);
+                register.bindingIndex = i;
+                register.nameBinding = registersByName.get(register.name);
+                register.lookupEnd = i + 1 < registers.size() ? registers.get(i + 1).address : 1L << 32;
+                bindBusWrite(register);
+            }
+            int irq = 0;
+            for (RegisterDef register : registers) {
+                while (irq < interruptRegistersByAddress.length &&
+                        interruptRegistersByAddress[irq].address + interruptRegistersByAddress[irq].size <= register.address) irq++;
+                register.pendingBinding = -1;
+                if (irq < interruptRegistersByAddress.length) {
+                    RegisterDef eic = interruptRegistersByAddress[irq];
+                    long end = register.address + register.size;
+                    if (eic.address < end) register.pendingBinding = eic == register &&
+                        (irq + 1 == interruptRegistersByAddress.length || interruptRegistersByAddress[irq+1].address >= end) ? irq : -2;
+                }
+            }
+            bindRegisterPages();
+            registerState = new byte[registers.size()];
+            portBindings = bindPortAliases();
+            // A missing optional definition must still fail at its original use.
+            ecmStatus = bindRegisterRows(ECM_STATUS_REGISTERS);
+            ecmNotification = bindRegisterRows(ECM_NOTIFICATION_REGISTERS);
+            ecmErrorMask = bindRegisterNames(ECM_ERROR_MASK_REGISTERS);
+            checkerPmc = registersByName.get("PMC3");
+            checkerPm = registersByName.get("PM3");
+            checkerPipc = registersByName.get("PIPC3");
+            checkerPfcae = registersByName.get("PFCAE3");
+            checkerPfce = registersByName.get("PFCE3");
+            checkerPfc = registersByName.get("PFC3");
+            checkerPbdc = registersByName.get("PBDC3");
+            checkerPibc = registersByName.get("PIBC3");
+            checkerPinv = registersByName.get("PINV3");
+            int registerIndex = 0;
             for (RegionDef region : regions) {
+                while (registerIndex < registers.size()
+                        && registers.get(registerIndex).address
+                            + registers.get(registerIndex).size <= region.start) {
+                    registerIndex++;
+                }
+                boolean registerOverlap = registerIndex < registers.size()
+                    && registers.get(registerIndex).address < region.end_exclusive;
+                region.directPageWrites = region.access.contains("w") && !registerOverlap
+                    && !"pbg0_unimplemented_channels8_9".equals(region.name)
+                    && !region.name.startsWith("codeflash") && !"dataflash".equals(region.name);
+                boolean ram = "local_ram".equals(region.alias_group) || "global_ram".equals(region.name);
+                region.templateRam = ram;
+                region.templateReads = !registerOverlap && region.access.contains("r") &&
+                    (ram || region.name.startsWith("codeflash"));
+                region.templateWrites = ram && region.directPageWrites;
                 if ("dataflash".equals(region.name)) dataFlash = region;
                 if (region.alias_group != null) {
                     aliases.computeIfAbsent(region.alias_group, ignored -> new ArrayList<>()).add(region);
                 }
             }
+            for (List<RegionDef> group : aliases.values()) {
+                if (group.size() == 2 && group.get(0).templateWrites && group.get(1).templateWrites) {
+                    group.get(0).templateMirror = group.get(1);
+                    group.get(1).templateMirror = group.get(0);
+                }
+                else if (group.size() > 1) {
+                    for (RegionDef region : group) region.templateWrites = false;
+                }
+            }
+            String[] guardNames = new String[registers.size()];
             for (RegisterDef register : registers) {
+                // These handlers can change the next HSB edge or synthesize a PIC edge.
+                // CSIH can arm DMA indirectly; DMA's idle-to-armed transition invalidates
+                // the proof itself. Other scheduler events are bounded separately.
+                register.changesClockSchedule = switch (register.writeDevice) {
+                    case TAUJ, TAUD, TSG, PIC_TAUD, PIC_TSG, PIC1_START, PDMA, ADC, RSENT -> true;
+                    default -> register.writeTrigger == WriteTrigger.FACI_COMMAND
+                        || register.writeTrigger == WriteTrigger.ICUS_COMMAND;
+                };
                 if (register.window_register != null) {
                     receiveFifos.put(register.fifo_index, new ReceiveFifo(this, register));
                 }
-                String guard = peripheralReadGuard(register);
-                if (guard != null) peripheralGuards.put(register, guard);
+                guardNames[register.bindingIndex] = peripheralReadGuard(register);
             }
             for (int index = 0; index < gramGuards.length; index++) {
                 gramGuards[index][0] = requiredRegister("GRAM guard", "protection", "MGDGRPROT" + index);
@@ -1684,7 +2974,16 @@ public class RunP1MEMachine extends GhidraScript {
             GuardCapture pbg1 = new GuardCapture("ERRSLV1STAT", "ERRSLV1TYPE", 67);
             GuardCapture pbg2 = new GuardCapture("ERRSLV2STAT", "ERRSLV2TYPE", 67);
             GuardCapture pbg5 = new GuardCapture("ERRSLV5STAT", "ERRSLV5TYPE", 67);
-            for (String guard : peripheralGuards.values()) {
+            peripheralGuards = new BusGuard[registers.size()];
+            Map<String, BusGuard> guardBindings = new HashMap<>();
+            for (int i = 0; i < guardNames.length; i++) {
+                String guard = guardNames[i];
+                if (guard == null) continue;
+                BusGuard binding = guardBindings.get(guard);
+                if (binding != null) {
+                    peripheralGuards[i] = binding;
+                    continue;
+                }
                 GuardCapture capture;
                 if (guard.startsWith("APBFSGD"))
                     capture = guard.contains("PDMA") || guard.contains("INTC2") ? pfss0 : pfss1;
@@ -1693,9 +2992,10 @@ public class RunP1MEMachine extends GhidraScript {
                 else if (guard.startsWith("FSGD2")) capture = pbg2;
                 else if (guard.startsWith("FSGD5")) capture = pbg5;
                 else throw new IllegalStateException("unmapped guard capture bank: " + guard);
-                busGuardCaptures.put(guard, capture);
+                peripheralGuards[i] = binding = bindBusGuard(guard, capture);
+                guardBindings.put(guard, binding);
             }
-            busGuardCaptures.put("FSGD0PROT04", pbg0);
+            dataFlashGuard = guardBindings.computeIfAbsent("FSGD0PROT04", name -> bindBusGuard(name, pbg0));
             dma = new Dma();
             adc = new Adc(productId);
             taud = new Taud();
@@ -1703,33 +3003,334 @@ public class RunP1MEMachine extends GhidraScript {
             tsg = new Tsg();
             pic1 = new Pic1();
             rsent = new Rsent();
+            for (RegisterDef register : registers) bindBusRead(register);
+            for (RegisterDef register : registers) bindBusWriteCompletion(register);
+        }
+
+        private static void bindBusWrite(RegisterDef register) {
+            // These are independent: behavior supplies the device, while a trigger
+            // may impose an additional check, snapshot, or effect (e.g. FACI/ECC).
+            WriteDevice device = register.writeDevice = WriteDevice.bind(register.behavior);
+            WriteTrigger trigger = register.writeTrigger = WriteTrigger.bind(register.trigger);
+            register.busWritable = register.access != null && register.access.contains("w");
+            register.validateBusWrite = switch (device) {
+                case TAUJ, TAUD, PIC_TAUD, TSG, PIC_TSG, PIC1_START,
+                        IPG, GRAM_BUFFER, PERIPHERAL_ECC, NOISE_FILTER, FLMD, DCRA -> true;
+                default -> switch (trigger) {
+                    case PDMA_COMPARATOR, BIST_CONTROL, CLOCK_DIVIDER, CLOCK_SELECTOR,
+                            FACI_COMMAND, FACI_ENABLE, FACI_ADDRESS, FACI_DATAFLASH_MODE,
+                            FACI_NORMAL_EMULATION, DATAFLASH_READ_CYCLE, ICUS_COMMAND,
+                            ICUS_CONTROL, RSCFD_TRANSMIT -> true;
+                    default -> false;
+                };
+            };
+            register.snapshotWriteBacking = (device == WriteDevice.INTC_EIC && register.reset != null)
+                || switch (trigger) {
+                    case FACI_ADDRESS, FACI_DATAFLASH_MODE, FACI_ACCESS_STATUS, FACI_SETUP_INITIALIZE,
+                            FACI_AREA_SELECTOR, FACI_CLOCK_NOTIFY, ECC_PROTECTED_CONTROL,
+                            RSCFD_FD_STATUS, FLMD_CONTROL -> true;
+                    default -> false;
+                };
+        }
+
+        private void bindBusWriteCompletion(RegisterDef register) {
+            if (isGuard(register)) {
+                long address = switch (register.writeDevice) {
+                    case PEG -> (register.address & ~15L) + 4;
+                    case GRAM_GUARD -> register.address & ~15L;
+                    default -> register.address & ~7L;
+                };
+                RegisterDef lock = register(address, 4);
+                register.guardLockBinding = lock != null && isGuard(lock) ? lock : null;
+            }
+            ReceiveFifo fifo = register.fifo_index == null ? null : receiveFifos.get(register.fifo_index);
+            register.fifoBusWrite = fifo != null &&
+                (register == fifo.status || register == fifo.control || register == fifo.pointer);
+            register.snapshotWriteBacking |= fifo != null && register == fifo.status;
+            register.completesBusWrite = register.fifoBusWrite || register.writeTrigger != WriteTrigger.NONE
+                || switch (register.writeDevice) {
+                    case IPG, GRAM_BUFFER, FLMD, DCRA, NONE -> false;
+                    default -> true;
+                };
+        }
+
+        private void bindBusRead(RegisterDef register) {
+            String behavior = register.behavior == null ? "" : register.behavior;
+            String trigger = register.trigger == null ? "" : register.trigger;
+            int effects = switch (behavior) {
+                case "csih" -> switch (trigger) {
+                    case "dma-select" -> 0;
+                    case "rx" -> READ_CSIH_RX;
+                    case "tx", "tx-half" -> READ_CSIH_TX;
+                    default -> READ_CSIH_BIND;
+                };
+                case "adc", "adc-clock" -> "adc-clock".equals(behavior) && register == adc.selectorStatus
+                    ? READ_ADC_SELECTOR : READ_ADC;
+                case "tauj" -> READ_TAUJ;
+                case "taud" -> READ_TAUD;
+                case "tsg" -> READ_TSG;
+                case "rsent" -> READ_RSENT;
+                case "cvm" -> register.active_mask != null && !"CVMDE".equals(register.name)
+                    ? READ_CVM : 0;
+                case "port-input" -> READ_PORT_INPUT;
+                case "mode-latch" -> READ_MODE_LATCH;
+                case "ipg" -> READ_PRIVILEGED;
+                default -> 0;
+            };
+            effects |= switch (trigger) {
+                case "faci-command" -> READ_FACI_COMMAND;
+                case "faci-access-status" -> READ_FACI_STATUS;
+                case "port-pin-alias" -> READ_PORT_PIN;
+                case "port-masked-alias" -> READ_PORT_MASKED;
+                case "dcra-seed" -> READ_DCRA_SEED;
+                default -> 0;
+            };
+            if ("ECMPS".equals(register.name)) effects |= READ_ECMPS;
+            register.busReadEffects = effects;
+            register.busReadable = register.access != null && register.access.contains("r");
+            boolean hardwareBacking = register.read_value == null && !register.read_input;
+            register.passiveBusRead = hardwareBacking && register.busReadable
+                && (effects & ~READ_CSIH_BIND) == 0;
+            register.plainEicRead = hardwareBacking && "intc_eic".equals(behavior)
+                && register.trigger == null;
+            short widths = 0;
+            if (register.access_widths == null) widths = -1; // Keep the metadata fault at use.
+            else {
+                for (int width = 1; width <= Long.BYTES; width <<= 1)
+                    if (register.access_widths.contains(width)) widths |= 1 << width;
+            }
+            register.busWidths = widths;
+            register.busReadCompletion = readCompletion(register.address,
+                register.address + Math.max(0, register.size - 1));
+        }
+
+        private static byte readCompletion(long first, long last) {
+            // Ownership supplies a whole register at bind time. Mark any possible
+            // access start, including narrow lanes, regardless of behavior or alias name.
+            if (last < Rsent.FIRST_RX_DATA) return 0;
+            int effects = 0;
+            if (first < Adc.END_ADDRESS && last >= Adc.FIRST_ADDRESS)
+                effects |= COMPLETE_ADC_READ;
+            if ((first <= Rsent.FIRST_RX_DATA && last >= Rsent.FIRST_RX_DATA)
+                    || (first <= Rsent.SECOND_RX_DATA && last >= Rsent.SECOND_RX_DATA))
+                effects |= COMPLETE_RSENT_READ;
+            return (byte) effects;
+        }
+
+        private void completeBusRead(PcodeThread<byte[]> thread, RegisterDef register, long address, int size) {
+            int effects = register == null ? readCompletion(address, address) : register.busReadCompletion;
+            if ((effects & COMPLETE_ADC_READ) != 0) adc.readCompleted(thread, address, size);
+            if ((effects & COMPLETE_RSENT_READ) != 0) rsent.readCompleted(thread, address, size);
         }
 
         void attach(PcodeMachine<byte[]> emulator) {
             this.emulator = emulator;
             this.memorySpace = language.getDefaultSpace();
+            if (emulator.getSharedState() instanceof P1MEJitMachine.MachineState state) {
+                deviceState = state;
+                dmaWordIndex = dma.watchWords(state);
+            }
         }
 
         long scheduleNextTick(Runnable action) {
-            long tick = trace.instructions + 1;
+            return scheduleAt(trace.instructions + 1, action);
+        }
+
+        long scheduleAt(long tick, Runnable action) {
             scheduledEvents.add(new ScheduledEvent(tick, nextEventOrdinal++, action));
+            nextScheduledTick = Math.min(nextScheduledTick, tick);
             return tick;
         }
 
         void dispatchDueEvents() {
+            if (trace.instructions < nextScheduledTick) return;
             ScheduledEvent next = scheduledEvents.peek();
             if (next == null || next.tick > trace.instructions) return;
-            prepareClockMutation(executionThread);
+            invalidateBatchProof();
+            invalidateClockHorizon();
             do {
-                scheduledEvents.remove().action.run();
+                Runnable action = scheduledEvents.remove().action;
+                next = scheduledEvents.peek();
+                nextScheduledTick = next == null ? Long.MAX_VALUE : next.tick;
+                action.run();
                 next = scheduledEvents.peek();
             } while (next != null && next.tick <= trace.instructions);
+        }
+
+        private static long instructionsBefore(PriorityQueue<ScheduledEvent> events, long tick) {
+            ScheduledEvent next = events.peek();
+            if (next == null) return Long.MAX_VALUE;
+            if (next.tick <= tick) return 0;
+            return next.tick - tick - 1;
+        }
+
+        private long quietBatchLimit(long instructionLimit, long maximum) {
+            return batchLimit(instructionLimit, maximum, false, false);
+        }
+
+        private long nextBusClockEdge(long adcDeadline, long rsentDeadline) {
+            long next = Math.min(adcDeadline, Math.min(rsentDeadline, dma.cyclesUntilEvent()));
+            if (faciDeadline != Long.MAX_VALUE) next = Math.min(next, faciDeadline - hsbCycles);
+            if (icusStartupStub != null && icusStartupStub.deadline != Long.MAX_VALUE)
+                next = Math.min(next, icusStartupStub.deadline - hsbCycles);
+            if (rscfdRamInitDeadline != Long.MAX_VALUE) next = Math.min(next, rscfdRamInitDeadline - hsbCycles);
+            return next;
+        }
+
+        private void setClockHorizon(long bound, long adc, long rsent, long tsg) {
+            quietUntil = hsbCycles + bound;
+            if (quietUntil != Long.MAX_VALUE) quietClockEvents = clockEventMask(bound, adc, rsent, tsg);
+        }
+
+        private void openClockLease() {
+            if (quietUntil != 0 || taudClockDue == 0 || taujClockDue == 0 ||
+                    taud.picDirty || tsg.picDirty || tsg.picRoutingDeferred || tsg.clockHorizonDirty || rsentClockDue < 0) return;
+            long adcDeadline;
+            try { adcDeadline = adc.cyclesUntilEvent(); }
+            catch (ArithmeticException overflow) { return; }
+            long rsentDeadline = rsentCyclesUntilEvent();
+            long tsgDeadline = tsg.cyclesUntilEvent(hsbCycles);
+            long next = nextBusClockEdge(adcDeadline, rsentDeadline);
+            next = Math.min(next, Math.min(tsgDeadline, Math.min(taujCyclesUntilEvent(), taudCyclesUntilEvent())));
+            long bound = Math.min(next, Long.MAX_VALUE - hsbCycles);
+            if (bound <= 1 || hsbCyclesPerInstruction > (bound - 1) / 2) return;
+            setClockHorizon(bound, adcDeadline, rsentDeadline, tsgDeadline);
+        }
+
+        private long batchLimit(long instructionLimit, long maximum, boolean freshFetch, boolean retireEdge) {
+            if ((!freshFetch && idleBatchBarrier) || segNotificationPending || eventSocket != null
+                    || trace.recordsInstructionTrace()) return 0;
+            long tick = trace.instructions;
+            long remaining = instructionLimit - tick;
+            if (remaining <= 1) return 0;
+            // Leave the final budget boundary to the ordinary callback path. It
+            // performs scheduled-event and fault ordering exactly once.
+            long limit = Math.min(remaining - 1, maximum);
+            limit = Math.min(limit, instructionsBefore(scheduledEvents, tick));
+            limit = Math.min(limit, instructionsBefore(externalEvents, tick));
+            if (hsbCyclesPerInstruction < 0)
+                throw new IllegalStateException("negative CLK_HSB cycles per instruction");
+            if (hsbCyclesPerInstruction != 0) {
+                if ((freshFetch || retireEdge) && limit >= 2 && quietUntil == 0) openClockLease();
+                long quiet = quietRemaining() / hsbCyclesPerInstruction;
+                if (retireEdge && quiet < limit) quiet++;
+                limit = Math.min(limit, quiet);
+            }
+            return Math.max(limit, 0);
+        }
+
+        long idleBatchLimit(long instructionLimit, long pc) {
+            return pc == lastRetiredPc ? quietBatchLimit(instructionLimit, 1L << 20) : 0;
+        }
+
+        int instructionBatchLimit(long instructionLimit) {
+            if ((trace.recordsInstructionMetadata()
+                        && (compareOperands || inputDerivedTableIndices))
+                    || peripheralFile || !boundedEdges.isEmpty()) return 0;
+            return (int) batchLimit(instructionLimit, 256, true, true);
+        }
+
+        RegionDef templateData(PcodeThread<byte[]> thread, long address, int size,
+                boolean write, int mode, MpuWindow mpu, MpuWindow transfer) {
+            RegionDef region = region(address, size);
+            if (region == null || !(write ? region.templateWrites : region.templateReads)) return null;
+            if (mpuGrant(thread, address, size, write ? CpuAccess.WRITE : CpuAccess.READ, mode, mpu) <= 0)
+                return null;
+            transfer.set(Math.max(region.start, mpu.start),
+                Math.min(Math.min(region.end_exclusive, region.lookupEnd), mpu.end));
+            if (!transfer.covers(address, size)) return null;
+            if (write && "global_ram".equals(region.name) &&
+                    !templateGramWriteBounds(thread, address, size, transfer)) return null;
+            return (mode & CPU_USER_MODE) != 0 && !userIpgAllows(region) ? null : region;
+        }
+
+        private boolean templateGramWriteBounds(PcodeThread<byte[]> thread, long address,
+                int size, MpuWindow transfer) {
+            int spid = cpuSpid(thread);
+            for (RegisterDef[] guard : gramGuards) {
+                long protection = guardValue(guard[0], true);
+                if (protection < 0) return false;
+                if ((protection & 0x40000000L) == 0) continue;
+                long allowed = guardValue(guard[1], true);
+                long base = guardValue(guard[2], true);
+                long valid = guardValue(guard[3], true);
+                if ((allowed | base | valid) < 0) return false;
+                if ((allowed & (1L << spid)) != 0) continue;
+
+                // Native admission checks natural alignment. A mismatched
+                // masked bit above the lane index excludes every byte in its block.
+                // If none differs, some lane of this transaction matches the guard.
+                long bit = Long.highestOneBit((address ^ base) & valid & -((long) size));
+                if (bit == 0) return false;
+                long block = address & -bit;
+                transfer.set(Math.max(transfer.start, block), Math.min(transfer.end, block + bit));
+            }
+            return true;
+        }
+
+        private void retireBatchClock(long instructions) {
+            long cycles = Math.multiplyExact(instructions, hsbCyclesPerInstruction);
+            if (cycles > quietRemaining())
+                throw new IllegalStateException("batch crosses observable clock edge");
+            hsbCycles = Math.addExact(hsbCycles, cycles);
+        }
+
+        // An instruction's bus effects precede its retirement clock. Only the final
+        // guest may reach an edge; commit every earlier tick before that edge can fault.
+        private void retireThroughEdge(long instructions) {
+            if (hsbCyclesPerInstruction == 0 || instructions <= quietRemaining() / hsbCyclesPerInstruction) {
+                retireBatchClock(instructions);
+                return;
+            }
+            retireBatchClock(instructions - 1);
+            retireClock(executionThread);
+            dispatchDueEvents();
+            deliverSystemError(executionThread);
+        }
+
+        void retireIdleBatch(long pc, long instructions) {
+            if (instructions <= 0 || instructions > idleBatchLimit(Long.MAX_VALUE, pc))
+                throw new IllegalStateException("idle batch exceeds scheduler boundary");
+            trace.instructions = Math.addExact(trace.instructions, instructions);
+            trace.recordExecutedPc(pc);
+            int recent = (int) Math.min(instructions, 16);
+            for (int i = 0; i < recent; i++) trace.noteRecentPc(pc);
+            retireBatchClock(instructions);
+        }
+
+        private boolean repeatPoll(P1MEJitMachine.MachineThread thread, long instructionLimit,
+                P1MEJitMachine.StopIndex stops, P1MEJitMachine.PolledBitLoop loop) {
+            long pc = loop.testPc(), branchPc = loop.branchPc();
+            if (stops.contains(pc) || stops.contains(branchPc) ||
+                    (trace.recordsInstructionMetadata()
+                        && (compareOperands || inputDerivedTableIndices)) || trace.retainsRead() ||
+                    !((pendingPriorityMask == 0 && thread.interruptStatusAlreadyClear()) ||
+                        thread.interruptDisabledAtBusBoundary())) return false;
+            long limit = batchLimit(instructionLimit, 1L << 16, false, true);
+            if (limit < 2) return false;
+            long retired = thread.batchPolledBit(limit, loop, pollReadAddress);
+            if (retired == 0) return false;
+            trace.instructions = Math.addExact(trace.instructions, retired);
+            for (int i = 0; i < Math.min(retired, Trace.RECENT_PC_COUNT); i += 2) {
+                trace.noteRecentPc(pc);
+                trace.noteRecentPc(branchPc);
+            }
+            retireThroughEdge(retired);
+            return true;
+        }
+
+        void retireNativeBatch(int instructions) {
+            idleBatchBarrier = false;
+            trace.instructions = Math.addExact(trace.instructions, instructions);
+            lastRetiredPc = trace.retireNativePcs(instructions);
+            retireThroughEdge(instructions);
         }
 
         RegionDef region(long address, int size) {
             int slot = (int) (address >>> 12 ^ address >>> 20) & (regionCache.length - 1);
             RegionDef hit = regionCache[slot];
-            if (hit != null && size > 0 && hit.contains(address, size)) return hit;
+            if (hit != null && address >= hit.start && address < hit.lookupEnd)
+                return hit.contains(address, size) ? hit : null;
             int low = 0;
             int high = regions.size() - 1;
             int candidate = -1;
@@ -1745,18 +3346,52 @@ public class RunP1MEMachine extends GhidraScript {
             }
             if (candidate < 0) return null;
             RegionDef region = regions.get(candidate);
-            if (candidate + 1 == regions.size() ||
-                    region.end_exclusive <= regions.get(candidate + 1).start)
-                regionCache[slot] = region;
+            regionCache[slot] = region;
             return region.contains(address, size) ? region : null;
         }
 
+        private void bindRegisterPages() {
+            int[] last = new int[256];
+            Arrays.fill(registerPageBase, 1 << 16);
+            for (RegisterDef reg : registers) {
+                long end = Math.min(reg.lookupEnd, reg.address + reg.size);
+                for (long page = reg.address >>> 8; (page << 8) < end; page++) {
+                    int bank = (int)(page >>> 16), slot = (int)page & 0xffff;
+                    registerPageBase[bank] = Math.min(registerPageBase[bank], slot);
+                    last[bank] = Math.max(last[bank], slot);
+                }
+            }
+            for (int bank = 0; bank < 256; bank++) {
+                if (last[bank] >= registerPageBase[bank])
+                    registerPages[bank] = new RegisterDef[last[bank] - registerPageBase[bank] + 1][];
+            }
+            for (RegisterDef reg : registers) {
+                long end = Math.min(reg.lookupEnd, reg.address + reg.size);
+                for (long address = reg.address; address < end;) {
+                    int bank = (int)(address >>> 24);
+                    int slot = ((int)(address >>> 8) & 0xffff) - registerPageBase[bank];
+                    RegisterDef[] lanes = registerPages[bank][slot];
+                    if (lanes == null) registerPages[bank][slot] = lanes = new RegisterDef[256];
+                    int lane = (int)address & 255;
+                    int count = (int)Math.min(end - address, 256 - lane);
+                    Arrays.fill(lanes, lane, lane + count, reg);
+                    address += count;
+                }
+            }
+        }
+
         RegisterDef register(long address, int size) {
-            if (registers.isEmpty() || address < registers.get(0).address) return null;
-            int slot = (int) (address >>> 1) & (registerCache.length - 1);
-            RegisterDef hit = registerCache[slot];
-            if (hit != null && hit.address == address)
-                return hit.contains(address, size) ? hit : null;
+            if ((address >>> 32) != 0 || size <= 0) return registerByPredecessor(address, size);
+            int bank = (int)(address >>> 24);
+            RegisterDef[][] pages = registerPages[bank];
+            if (pages == null) return null;
+            int slot = ((int)(address >>> 8) & 0xffff) - registerPageBase[bank];
+            if (slot < 0 || slot >= pages.length || pages[slot] == null) return null;
+            RegisterDef reg = pages[slot][(int)address & 255];
+            return reg != null && reg.contains(address, size) ? reg : null;
+        }
+
+        private RegisterDef registerByPredecessor(long address, int size) {
             int low = 0;
             int high = registers.size() - 1;
             int candidate = -1;
@@ -1772,7 +3407,6 @@ public class RunP1MEMachine extends GhidraScript {
             }
             if (candidate < 0) return null;
             RegisterDef register = registers.get(candidate);
-            registerCache[slot] = register;
             return register.contains(address, size) ? register : null;
         }
 
@@ -1797,16 +3431,15 @@ public class RunP1MEMachine extends GhidraScript {
             return Utils.bytesToLong(value, value.length, language.isBigEndian()) & 0xffffffffL;
         }
 
-        java.util.function.LongSupplier registerReader(PcodeThread<byte[]> thread, String name) {
-            Register register = language.getRegister(name);
-            if (thread instanceof P1MEJitMachine.MachineThread jit)
-                return jit.bindProcessorRegister(register)::read;
-            return () -> processorRegister(thread, register);
-        }
-
         void bindMpu(PcodeThread<byte[]> thread) {
-            Arrays.setAll(mpu, i -> new MpuDescriptor(registerReader(thread, "MPAT" + i),
-                registerReader(thread, "MPLA" + i), registerReader(thread, "MPUA" + i)));
+            for (int i = 0; i < mpu.length; i++) {
+                Register attributes = language.getRegister("MPAT" + i);
+                Register lower = language.getRegister("MPLA" + i);
+                Register upper = language.getRegister("MPUA" + i);
+                mpu[i] = thread instanceof P1MEJitMachine.MachineThread jit
+                    ? jit.bindMpuDescriptor(attributes, lower, upper)
+                    : new StateMpuDescriptor(this, thread, attributes, lower, upper);
+            }
         }
 
         void processorRegister(PcodeThread<byte[]> thread, String name, long value) {
@@ -1862,19 +3495,14 @@ public class RunP1MEMachine extends GhidraScript {
             }
             long control = eic.reset == null
                 ? parseUnsigned(firmwareControl)
-                : unsigned(memory(eic.address, eic.size));
-            setRegisterValue(eic.name, control | 0x1000);
-            JsonObject event = new JsonObject();
-            event.addProperty("kind", "interrupt-request");
-            event.addProperty("channel", channel);
-            if (eic.reset == null) {
-                event.addProperty("firmware_control", String.format("0x%04X", control & 0xffff));
-            }
-            event.addProperty("scheduler_tick", trace.instructions);
-            trace.deviceEvents.add(event);
+                : registerValue(eic);
+            setRegisterValue(eic.nameBinding, control | 0x1000);
+            trace.deviceEvents.addInterruptRequest(channel, trace.instructions, eic.reset == null, control);
         }
 
         void deliverInterrupt(PcodeThread<byte[]> thread) {
+            if (pendingPriorityMask == 0 && thread instanceof P1MEJitMachine.MachineThread jit
+                    && jit.interruptStatusAlreadyClear()) return;
             long psw = processorRegister(thread, "PSW");
             if ((psw & 0xa0) != 0) return;
             int eligible = pendingPriorityMask;
@@ -1890,11 +3518,10 @@ public class RunP1MEMachine extends GhidraScript {
                 processorRegister(thread, "ICSR", icsr ^ 1);
             eligible &= ~pmr;
             if (eligible == 0) return;
-            materializeClock(thread);
             int priority = Integer.numberOfTrailingZeros(eligible);
             int channel = channelsByPriority[priority].nextSetBit(0);
             RegisterDef selected = interruptRegisters.get(channel);
-            long control = unsigned(memory(selected.address, selected.size));
+            long control = registerValue(selected);
             long base = processorRegister(thread, (psw & 0x8000) == 0 ? "RBASE" : "EBASE");
             long handler;
             if ((control & 0x40) != 0 && (base & 1) == 0) {
@@ -1916,16 +3543,20 @@ public class RunP1MEMachine extends GhidraScript {
                 processorRegister(thread, "ISPR", serviced | (1L << priority));
             }
             // Edge requests clear on acceptance; level requests remain until their source clears.
-            if ((control & 0x8000) == 0) setRegisterValue(selected.name, control & ~0x1000L);
+            if ((control & 0x8000) == 0) setRegisterValue(selected.nameBinding, control & ~0x1000L);
+            invalidateBatchProof();
             thread.overrideCounter(memorySpace.getAddress(handler));
-            JsonObject event = new JsonObject();
-            event.addProperty("kind", "interrupt-enter");
-            event.addProperty("channel", selected.interrupt_channel);
-            event.addProperty("priority", priority);
-            event.addProperty("return_pc", hex32(returnPc));
-            event.addProperty("handler", hex32(handler));
-            event.addProperty("scheduler_tick", trace.instructions);
-            trace.deviceEvents.add(event);
+            if (!trace.deviceEvents.omitsEventPayload("interrupt-enter")) {
+                JsonObject event = new JsonObject();
+                event.addProperty("kind", "interrupt-enter");
+                event.addProperty("channel", selected.interrupt_channel);
+                event.addProperty("priority", priority);
+                event.addProperty("return_pc", hex32(returnPc));
+                event.addProperty("handler", hex32(handler));
+                event.addProperty("scheduler_tick", trace.instructions);
+                trace.deviceEvents.add(event);
+            }
+            activeInterruptChannels.addLast(selected.interrupt_channel);
         }
 
         void initializeProcessorReset(PcodeThread<byte[]> thread) {
@@ -1980,56 +3611,126 @@ public class RunP1MEMachine extends GhidraScript {
             }
         }
 
-        // The successful descriptor covers through this exclusive address.
-        long requireMpu(PcodeThread<byte[]> thread, long address, int size,
-                        String access, boolean user) {
-            long mpm = processorRegister(thread, "MPM");
-            if ((mpm & 1) == 0 || (!user && (mpm & 2) == 0)) return 0x1_0000_0000L;
+        /** A grant for one access kind and CPU mode, valid only during a quiet batch. */
+        static final class MpuWindow {
+            long start, end;
+
+            void clear() {
+                end = 0;
+            }
+
+            boolean covers(long address, int size) {
+                return address >= start && address + size <= end;
+            }
+
+            void set(long start, long end) {
+                this.start = start;
+                this.end = end;
+            }
+        }
+
+        // Mode packs PSW.UM in its high-byte position and MPM.MPE/SVP in bits 0/1.
+        static final int CPU_USER_MODE = 0x40;
+        private static final long MPU_ADDRESS_END = 0x1_0000_0000L;
+
+        enum CpuAccess {
+            READ("read", 0), WRITE("write", 1), EXECUTE("execute", 2);
+
+            final String name;
+            final int userPermission;
+
+            CpuAccess(String name, int userPermission) {
+                this.name = name;
+                this.userPermission = userPermission;
+            }
+        }
+
+        private boolean userMode(PcodeThread<byte[]> thread) {
+            return thread instanceof P1MEJitMachine.MachineThread jit ? jit.processorUserMode() != 0
+                : (processorRegister(thread, "PSW") & (1L << 30)) != 0;
+        }
+
+        private int protectionMode(PcodeThread<byte[]> thread) {
+            if (thread instanceof P1MEJitMachine.MachineThread jit) return jit.processorProtectionMode();
+            int user = userMode(thread) ? CPU_USER_MODE : 0;
+            return user | ((int) processorRegister(thread, "MPM") & 3);
+        }
+
+        private long requireMpu(PcodeThread<byte[]> thread, long address, int size,
+                CpuAccess access, int mode, MpuWindow window) {
+            long grant = mpuGrant(thread, address, size, access, mode, window);
+            if (grant > 0) return grant;
+            throw mpuFault(thread, address, size, access.name, grant);
+        }
+
+        private MachineFault mpuFault(PcodeThread<byte[]> thread, long address, int size,
+                String access, long grant) {
+            return fault("mpu-" + access, thread, address, size, access,
+                "manual:R01US0123EJ0140 sections 3.5 and 5.1",
+                grant < 0 ? "all matching MPU regions deny " + access
+                    : "MPU has no matching enabled region and G3M defaults deny access");
+        }
+
+        long mpuGrant(PcodeThread<byte[]> thread, long address, int size,
+                CpuAccess access, int mode, MpuWindow window) {
+            if (window != null && window.covers(address, size)) return window.end;
+            if (!descriptorMpuEnabled(mode)) {
+                if (window != null) window.set(0, MPU_ADDRESS_END);
+                return MPU_ADDRESS_END;
+            }
+            int permission = access.userPermission + ((mode & CPU_USER_MODE) == 0 ? 3 : 0);
+            return descriptorGrant(thread, address, size, permission, window);
+        }
+
+        static boolean descriptorMpuEnabled(int mode) {
+            return (mode & 1) != 0 && (mode & (CPU_USER_MODE | 2)) != 0;
+        }
+
+        private long descriptorGrant(PcodeThread<byte[]> thread, long address, int size,
+                int permission, MpuWindow window) {
             long last = address + Integer.toUnsignedLong(size) - 1;
-            long asid = -1;
-            int permission = access.equals("execute") ? (user ? 2 : 5)
-                : access.equals("write") ? (user ? 1 : 4) : (user ? 0 : 3);
+            int asid = -1;
+            int mask = 1 << permission;
             boolean matched = false;
-            // Permission is the union of matching descriptors. Try the last
-            // grant for this page first, but always read its live registers.
+            // Permission is the union of matching descriptors. A hint is only
+            // an index: attributes, ASID, and bounds still come from live bytes.
             int slot = (int) (address >>> 12 ^ address >>> 20 ^ permission) & (mpuHints.length - 1);
             int first = mpuHints[slot];
             for (int i = 0; i < mpu.length; i++) {
                 int index = (first + i) & 15;
                 MpuDescriptor descriptor = mpu[index];
-                long attributes = descriptor.attributes.getAsLong();
+                long attributes = descriptor.attributes();
                 if ((attributes & 0x80) == 0) continue;
                 if ((attributes & 0x40) == 0) {
-                    if (asid < 0) asid = processorRegister(thread, "ASID") & 0x3ff;
+                    if (asid < 0) asid = thread instanceof P1MEJitMachine.MachineThread jit
+                        ? jit.processorAsid() : (int) processorRegister(thread, "ASID") & 0x3ff;
                     if (((attributes >>> 16) & 0x3ff) != asid) continue;
                 }
-                long lower = descriptor.lower.getAsLong() & 0xfffffffcL;
-                long upper = descriptor.upper.getAsLong() | 3L;
+                long bounds = descriptor.bounds();
+                long lower = bounds & 0xfffffffcL;
+                long upper = (bounds >>> 32) | 3L;
                 if (Long.compareUnsigned(address, lower) < 0
                         || Long.compareUnsigned(last, upper) > 0) continue;
                 matched = true;
-                if ((attributes & (1L << permission)) != 0) {
+                if ((attributes & mask) != 0) {
                     mpuHints[slot] = index;
+                    if (window != null) window.set(lower, upper + 1);
                     return upper + 1;
                 }
             }
-            throw fault("mpu-" + access, thread, address, size, access,
-                "manual:R01US0123EJ0140 sections 3.5 and 5.1",
-                matched ? "all matching MPU regions deny " + access
-                    : "MPU has no matching enabled region and G3M defaults deny access");
+            return matched ? -1 : 0;
         }
 
         boolean isGuard(RegisterDef register) {
-            return "peg".equals(register.behavior) || "bus-guard".equals(register.behavior)
-                || "gram-guard".equals(register.behavior);
+            return switch (register.writeDevice) {
+                case PEG, BUS_GUARD, GRAM_GUARD -> true;
+                default -> false;
+            };
         }
 
-        RegisterDef guardLock(RegisterDef register) {
-            long address = "peg".equals(register.behavior) ? (register.address & ~15L) + 4
-                : "gram-guard".equals(register.behavior) ? register.address & ~15L
-                : register.address & ~7L;
-            RegisterDef lock = register(address, 4);
-            if (lock == null || !isGuard(lock)) {
+        private RegisterDef guardLock(RegisterDef register) {
+            RegisterDef lock = register.guardLockBinding;
+            if (lock == null) {
                 throw new IllegalStateException(register.name + " lacks guard LOCK register");
             }
             return lock;
@@ -2110,12 +3811,31 @@ public class RunP1MEMachine extends GhidraScript {
             return null;
         }
 
-        void requireBusGuard(PcodeThread<byte[]> thread, String readGuard,
-                             long address, int size, String access) {
-            boolean write = access.equals("write");
-            RegisterDef read = requiredRegister("P1M-E", "read guard", readGuard);
-            RegisterDef protection = write ? register(read.address + 8, 4) : read;
-            RegisterDef spid = register(protection.address + 4, 4);
+        private BusGuard bindBusGuard(String name, GuardCapture capture) {
+            RegisterDef read = registersByName.get(name);
+            RegisterDef write = read == null ? null : register(read.address + 8, 4);
+            return new BusGuard(name, read, read == null ? null : register(read.address + 4, 4),
+                write, write == null ? null : register(write.address + 4, 4), capture);
+        }
+
+        private RegisterDef guardProtection(BusGuard guard, boolean write, String owner, String relation) {
+            RegisterDef protection = write ? guard.write : guard.read;
+            if (protection != null) return protection;
+            // Preserve the original fault at access time for absent metadata.
+            RegisterDef read = requiredRegister(owner, relation, guard.name);
+            return write ? register(read.address + 8, 4) : read;
+        }
+
+        private RegisterDef guardSpid(BusGuard guard, RegisterDef protection, boolean write) {
+            RegisterDef spid = write ? guard.writeSpid : guard.readSpid;
+            return spid != null ? spid : register(protection.address + 4, 4);
+        }
+
+        void requireBusGuard(PcodeThread<byte[]> thread, BusGuard guard,
+                             long address, int size, CpuAccess access) {
+            boolean write = access == CpuAccess.WRITE;
+            RegisterDef protection = guardProtection(guard, write, "P1M-E", "read guard");
+            RegisterDef spid = guardSpid(guard, protection, write);
             // Table31.147: CPU is PEID1. PEID4 denotes DMA/DTS/FlexRay,
             // not a CPU privilege mode; this path never impersonates a master.
             if ((registerValue(protection) & (1L << 18)) == 0
@@ -2125,53 +3845,64 @@ public class RunP1MEMachine extends GhidraScript {
                     discardBusStore = true;
                     return;
                 }
-                throw fault("unsupported-bus-guard-read", thread, address, size, access,
+                throw fault("unsupported-bus-guard-read", thread, address, size, access.name,
                     protection.evidence,
                     protection.name + " blocks access; error-response read data is unspecified");
             }
         }
 
+        private long guardValue(RegisterDef register, boolean probe) {
+            if (!probe) return registerValue(register);
+            if (register == null || missingResetInput(register)) return -1;
+            return deviceState.inspectInitializedDevice(register, bigEndian);
+        }
+
+        private boolean gramWriteAllowed(PcodeThread<byte[]> thread, long address, int size,
+                boolean probe) {
+            int spid = cpuSpid(thread);
+            // Table31.153: every matching enabled region must permit every lane.
+            for (RegisterDef[] guard : gramGuards) {
+                long protection = guardValue(guard[0], probe);
+                if (protection < 0) return false;
+                if ((protection & 0x40000000L) == 0) continue;
+                long valid = guardValue(guard[3], probe);
+                long base = guardValue(guard[2], probe);
+                long allowed = guardValue(guard[1], probe);
+                if ((valid | base | allowed) < 0) return false;
+                if ((allowed & (1L << spid)) != 0) continue;
+                for (int lane = 0; lane < size; lane++) {
+                    if (((address + lane) & valid) == (base & valid)) return false;
+                }
+            }
+            return true;
+        }
+
         // True means the entire mapped region is guard-free for this kind of access.
-        boolean requireGuards(PcodeThread<byte[]> thread, long address, int size, String access,
-                              RegionDef region) {
-            if (region != null && "global_ram".equals(region.name) && access.equals("write")) {
-                int spid = cpuSpid(thread);
-                // Table31.153: every matching enabled region must permit a write.
-                // All byte lanes are checked, including a 512-byte boundary crossing.
-                for (RegisterDef[] guard : gramGuards) {
-                    RegisterDef protection = guard[0];
-                    if ((registerValue(protection) & 0x40000000L) == 0) continue;
-                    long valid = registerValue(guard[3]);
-                    long base = registerValue(guard[2]);
-                    if ((registerValue(guard[1]) & (1L << spid)) != 0)
-                        continue;
-                    for (int lane = 0; lane < size; lane++) {
-                        if (((address + lane) & valid) == (base & valid)) {
-                            segError(thread, address, 0x10L);
-                            discardBusStore = true;
-                            return false;
-                        }
-                    }
+        boolean requireGuards(PcodeThread<byte[]> thread, long address, int size, CpuAccess access,
+                              RegionDef region, RegisterDef target) {
+            if (region != null && "global_ram".equals(region.name) && access == CpuAccess.WRITE) {
+                if (!gramWriteAllowed(thread, address, size, false)) {
+                    segError(thread, address, 0x10L);
+                    discardBusStore = true;
                 }
                 return false;
             }
             if (region != null) {
                 if ("dataflash".equals(region.name)) {
-                    requireBusGuard(thread, "FSGD0PROT04", address, size, access);
+                    requireBusGuard(thread, dataFlashGuard, address, size, access);
                     return false;
                 }
                 return true;
             }
-            RegisterDef target = register(address, size);
             if (target == null) return false; // Preserve the precise unmapped/width boundary.
-            String guard = peripheralGuards.get(target);
+            BusGuard guard = peripheralGuards[target.bindingIndex];
             if (guard != null) requireBusGuard(thread, guard, address, size, access);
             return false;
         }
 
         long segFlagValue() {
-            return initializedDeviceRegisters.contains("SEGFLAG")
-                ? registerValue(registersByName.get("SEGFLAG")) & 0x354L : segFlags;
+            return deviceRegisterInitialized(segFlagRegister)
+                ? registerValue(segFlagRegister) & 0x354L : segFlags;
         }
 
         long enabledSegFlags() {
@@ -2180,10 +3911,10 @@ public class RunP1MEMachine extends GhidraScript {
 
         void setSegFlags(long flags) {
             segFlags = flags & 0x354L;
-            RegisterDef register = registersByName.get("SEGFLAG");
-            if (initializedDeviceRegisters.contains("SEGFLAG")) {
+            RegisterDef register = segFlagRegister;
+            if (deviceRegisterInitialized(register)) {
                 long reserved = registerValue(register) & ~0x354L;
-                setRegisterValue("SEGFLAG", reserved | segFlags);
+                setRegisterValue(register, reserved | segFlags);
             }
             else {
                 // Table3.79 bit5 is undefined. Never resolve a whole-word read
@@ -2212,7 +3943,6 @@ public class RunP1MEMachine extends GhidraScript {
 
         void deliverSystemError(PcodeThread<byte[]> thread) {
             if (!segNotificationPending) return;
-            materializeClock(thread);
             segNotificationPending = false;
             long flags = enabledSegFlags();
             if (flags == 0) return;
@@ -2227,6 +3957,7 @@ public class RunP1MEMachine extends GhidraScript {
             processorRegister(thread, "FEPSW", psw);
             processorRegister(thread, "FEIC", cause);
             processorRegister(thread, "PSW", (psw & ~0x40000000L) | 0xe0L);
+            invalidateBatchProof();
             thread.overrideCounter(memorySpace.getAddress(handler));
             JsonObject event = new JsonObject();
             event.addProperty("kind", "syserr-enter");
@@ -2237,29 +3968,39 @@ public class RunP1MEMachine extends GhidraScript {
             trace.deviceEvents.add(event);
         }
 
-        void requireAccessProtection(PcodeThread<byte[]> thread, long address, int size, String access) {
-            boolean user = (processorRegister(thread, "PSW") & (1L << 30)) != 0;
-            requireMpu(thread, address, size, access, user);
-            if (peripheralFile) return;
-            RegionDef region = region(address, size);
-            requireGuards(thread, address, size, access, region);
-            if (discardBusStore && access.equals("write")) return;
-            if (user) requireUserIpg(thread, address, size, access, region);
+        private RegisterDef requireAccessProtection(PcodeThread<byte[]> thread, long address, int size,
+                CpuAccess access, RegionDef region) {
+            int mode = protectionMode(thread);
+            if (descriptorMpuEnabled(mode)) requireMpu(thread, address, size, access, mode, null);
+            if (peripheralFile) return null;
+            RegisterDef target = region == null ? register(address, size) : null;
+            requireGuards(thread, address, size, access, region, target);
+            if (discardBusStore && access == CpuAccess.WRITE) return null;
+            if ((mode & CPU_USER_MODE) != 0) requireUserIpg(thread, address, size, access.name, region);
+            return target;
+        }
+
+        private static boolean userIpgExempt(RegionDef region) {
+            return region != null &&
+                (region.name.startsWith("codeflash") || "local_ram".equals(region.alias_group));
+        }
+
+        private boolean userIpgAllows(RegionDef region) {
+            long value = guardValue(ipgEnableRegister, true);
+            return value >= 0 && ((value & 1) == 0 || userIpgExempt(region));
         }
 
         void requireUserIpg(PcodeThread<byte[]> thread, long address, int size, String access,
                             RegionDef region) {
-            RegisterDef ipg = requiredRegister("P1M-E", "IPG enable", "IPGENUM");
-            if ((registerValue(ipg) & 1) == 0) return;
-            if (region != null && (region.name.startsWith("codeflash")
-                    || "local_ram".equals(region.alias_group))) return;
+            RegisterDef ipg = ipgEnableRegister;
+            if (ipg == null) ipg = requiredRegister("P1M-E", "IPG enable", "IPGENUM");
+            if ((registerValue(ipg) & 1) == 0 || userIpgExempt(region)) return;
             throw fault("unsupported-ipg-user-access", thread, address, size, access,
                 ipg.evidence, "enabled IPG user-mode peripheral protection requires its group/violation model");
         }
 
-        void requireRegisterPrivilege(PcodeThread<byte[]> thread, RegisterDef register, String access) {
-            if ("ipg".equals(register.behavior)
-                    && (processorRegister(thread, "PSW") & (1L << 30)) != 0) {
+        private void requireIpgRegisterPrivilege(PcodeThread<byte[]> thread, RegisterDef register, String access) {
+            if (userMode(thread)) {
                 throw fault("privileged-register-access", thread, register.address,
                     register.size, access, register.evidence, "IPG configuration requires supervisor mode");
             }
@@ -2267,11 +4008,17 @@ public class RunP1MEMachine extends GhidraScript {
 
 
         long requireExecute(PcodeThread<byte[]> thread, long address, int size) {
-            boolean user = (processorRegister(thread, "PSW") & (1L << 30)) != 0;
-            long mpuEnd = requireMpu(thread, address, size, "execute", user);
+            return requireExecute(thread, address, size, protectionMode(thread), null);
+        }
+
+        long requireExecute(PcodeThread<byte[]> thread, long address, int size,
+                int mode, MpuWindow window) {
+            long mpuEnd = requireMpu(thread, address, size, CpuAccess.EXECUTE, mode, window);
             RegionDef region = region(address, size);
-            boolean guardFree = peripheralFile || requireGuards(thread, address, size, "execute", region);
-            if (user && !peripheralFile) requireUserIpg(thread, address, size, "execute", region);
+            boolean guardFree = peripheralFile || requireGuards(thread, address, size, CpuAccess.EXECUTE,
+                region, region == null ? register(address, size) : null);
+            if ((mode & CPU_USER_MODE) != 0 && !peripheralFile)
+                requireUserIpg(thread, address, size, "execute", region);
             if (region == null || !region.executable) {
                 throw fault("execute-unmapped", thread, address, size, "execute",
                     region == null ? "unknown" : region.evidence,
@@ -2294,23 +4041,20 @@ public class RunP1MEMachine extends GhidraScript {
 
             void record(PcodeThread<byte[]> thread, long context) {
                 long previous = registerValue(status);
-                if ((previous & 1) == 0) setRegisterValue(information.name, context);
-                setRegisterValue(status.name, previous | 1 | ((previous & 1) != 0 ? 2 : 0));
+                if ((previous & 1) == 0) setRegisterValue(information, context);
+                setRegisterValue(status, previous | 1 | ((previous & 1) != 0 ? 2 : 0));
                 latchEcmError(thread, source);
             }
         }
 
-        boolean dmaBusGuard(PcodeThread<byte[]> thread, String readGuard, int spid, boolean write) {
-            RegisterDef read = requiredRegister("DMAC", "bus guard", readGuard);
-            RegisterDef protection = write ? register(read.address + 8, 4) : read;
-            RegisterDef identities = register(protection.address + 4, 4);
+        boolean dmaBusGuard(PcodeThread<byte[]> thread, BusGuard guard, int spid, boolean write) {
+            RegisterDef protection = guardProtection(guard, write, "DMAC", "bus guard");
+            RegisterDef identities = guardSpid(guard, protection, write);
             // Tables31.159,31.166: the DMAC master is PEID4, independent
             // of both the CPU MPU and the channel owner's assigned PEID.
             if ((registerValue(protection) & (1L << 21)) != 0
                     && (registerValue(identities) & (1L << spid)) != 0) return true;
-            GuardCapture capture = busGuardCaptures.get(readGuard);
-            if (capture == null) throw new IllegalStateException("missing bus guard error bank: " + readGuard);
-            capture.record(thread, ((long) spid << 16) | 0x8000 | (write ? 1 : 0));
+            guard.capture.record(thread, ((long) spid << 16) | 0x8000 | (write ? 1 : 0));
             return false;
         }
 
@@ -2354,19 +4098,29 @@ public class RunP1MEMachine extends GhidraScript {
                 if (write && (region.name.startsWith("codeflash") || "dataflash".equals(region.name)))
                     return false;
                 return !"dataflash".equals(region.name)
-                    || dmaBusGuard(thread, "FSGD0PROT04", spid, write);
+                    || dmaBusGuard(thread, dataFlashGuard, spid, write);
             }
             RegisterDef target = register(address, size);
             // Unknown peripheral behavior remains a precise model fault below;
             // it is not converted into a fabricated hardware transfer error.
-            String guard = target == null ? null : peripheralGuards.get(target);
+            BusGuard guard = target == null ? null : peripheralGuards[target.bindingIndex];
             return guard == null || dmaBusGuard(thread, guard, spid, write);
         }
 
-        byte[] readInputLanes(RegisterDef register, long address, int size) {
+        private long readInputBits(RegisterDef register, long address, int size) {
             int lane = Math.toIntExact(address - register.address);
-            int shift = 8 * (language.isBigEndian() ? register.size - lane - size : lane);
-            return bytes(readInputResponses.get(register.name) >>> shift, size, language.isBigEndian());
+            int shift = 8 * (bigEndian ? register.size - lane - size : lane);
+            return readInputResponses.get(register.name) >>> shift;
+        }
+
+        byte[] readInputLanes(RegisterDef register, long address, int size) {
+            return bytes(readInputBits(register, address, size), size, bigEndian);
+        }
+
+        long readInputNumber(RegisterDef register, long address, int size) {
+            if (size <= 0 || size > Long.BYTES)
+                return Utils.bytesToLong(readInputLanes(register, address, size), size, bigEndian);
+            return readInputBits(register, address, size) & (-1L >>> (Byte.SIZE * (Long.BYTES - size)));
         }
 
         byte[] dmaRead(PcodeThread<byte[]> thread, Dma.Channel channel, long address, int size) {
@@ -2376,9 +4130,16 @@ public class RunP1MEMachine extends GhidraScript {
                 if (!dmaAccessAllowed(thread, channel, address, size, false)) return null;
                 RegisterDef register = beforeRead(thread, address, size, false);
                 if (register != null && register.read_input) return readInputLanes(register, address, size);
-                byte[] result = memory(thread, address, size);
-                adc.readCompleted(thread, address, size);
-                rsent.readCompleted(thread, address, size);
+                byte[] result;
+                if (size <= Long.BYTES && deviceState != null) {
+                    long value = deviceState.readBusBacking(register, address, size, bigEndian, Reason.INSPECT);
+                    if (channel.transferBuffer == null || channel.transferBuffer.length != size)
+                        channel.transferBuffer = new byte[size];
+                    result = channel.transferBuffer;
+                    P1MEJitMachine.writeNumber(result, 0, size, bigEndian, value);
+                }
+                else result = memory(thread, address, size);
+                completeBusRead(thread, register, address, size);
                 return result;
             } finally {
                 trace.busInitiator = previous;
@@ -2390,30 +4151,26 @@ public class RunP1MEMachine extends GhidraScript {
             trace.busInitiator = channel.initiator;
             try {
                 if (!dmaAccessAllowed(thread, channel, address, value.length, true)) return false;
-                beforeWrite(thread, address, value.length, value, false);
-                if (discardBusStore) {
-                    discardBusStore = false;
-                    return false;
-                }
-                setMemory(address, value);
-                afterWrite(thread, address, value.length, value);
-                return true;
+                return storeBus(thread, address, value.length, 0, value, false);
             } finally {
                 trace.busInitiator = previous;
             }
         }
 
         long ecmLatchedStatus(RegisterDef status) {
-            long value = unsigned(emulator.getSharedState().getVar(
-                memorySpace, status.address, status.size, true, Reason.INSPECT));
-            return missingResetInputs.contains(status.name) ? value & status.reset_mask : value;
+            // Internal latches can inspect backing bits before the external pin is known.
+            long value = deviceState != null && status.size <= Long.BYTES
+                ? deviceState.inspectDevice(status, bigEndian) & 0xffffffffL
+                : unsigned(emulator.getSharedState().getVar(
+                    memorySpace, status.address, status.size, true, Reason.INSPECT));
+            return missingResetInput(status) ? value & status.reset_mask : value;
         }
 
         void latchEcmError(PcodeThread<byte[]> thread, int source) {
             int index = source / 32;
             long bit = 1L << (source % 32);
-            for (int route = 1; route < ECM_NOTIFICATION_REGISTERS.length; route++) {
-                RegisterDef configuration = registersByName.get(ECM_NOTIFICATION_REGISTERS[route][index]);
+            for (int route = 1; route < ecmNotification.length; route++) {
+                RegisterDef configuration = ecmNotification[route][index];
                 if ((registerValue(configuration) & bit) != 0)
                     throw fault("unsupported-ecm-notification", thread, configuration.address,
                         configuration.size, "device", configuration.evidence,
@@ -2421,17 +4178,16 @@ public class RunP1MEMachine extends GhidraScript {
             }
             boolean newlyLatched = false;
             for (int domain = 0; domain < 2; domain++) {
-                RegisterDef status = registersByName.get(ECM_STATUS_REGISTERS[domain][index]);
-                boolean missing = missingResetInputs.contains(status.name);
+                RegisterDef status = ecmStatus[domain][index];
+                boolean missing = missingResetInput(status);
                 long previous = ecmLatchedStatus(status);
                 newlyLatched |= (previous & bit) == 0;
-                setRegisterValue(status.name, previous | bit);
+                setRegisterValue(status, previous | bit);
                 // Internal errors do not identify the external ERROROUT pin.
-                if (missing) missingResetInputs.add(status.name);
+                if (missing) updateRegisterState(status, 0, MISSING_RESET_INPUT);
             }
             refreshEcmFeedback();
-            if (newlyLatched && (registerValue(registersByName.get(
-                    ECM_NOTIFICATION_REGISTERS[0][index])) & bit) != 0)
+            if (newlyLatched && (registerValue(ecmNotification[0][index]) & bit) != 0)
                 requestInterrupt(thread, 8);
         }
 
@@ -2441,8 +4197,9 @@ public class RunP1MEMachine extends GhidraScript {
 
         RegisterDef beforeRead(PcodeThread<byte[]> thread, long address, int size, boolean cpu) {
             requireAlignment(thread, address, size, "read");
-            if (cpu) requireAccessProtection(thread, address, size, "read");
             RegionDef region = region(address, size);
+            RegisterDef register = cpu ? requireAccessProtection(thread, address, size, CpuAccess.READ, region)
+                : region == null && !peripheralFile ? register(address, size) : null;
             if (region != null) {
                 if ("pbg0_unimplemented_channels8_9".equals(region.name)) {
                     segError(thread, address, 0x10L);
@@ -2461,40 +4218,52 @@ public class RunP1MEMachine extends GhidraScript {
                         "DataFlash payload reads are modeled only with normal ECC enabled and test mode disabled");
                 }
                 if ("dataflash".equals(region.name)) validateDataFlashRead(thread, address, size);
-                trace.access("read", pc(thread), address, size, region.evidence);
+                traceBusRead(thread, address, size, region.evidence);
                 return null;
             }
             if (peripheralFile) {
-                prepareClockMutation(thread);
+                invalidateClockHorizon();
                 // Scenario checks compare these bytes. Keeping them out of the
                 // access trace reserves its capacity for RAM traffic.
                 scriptPeripheralPoll(thread, address, size);
                 return null;
             }
-            RegisterDef register = register(address, size);
             if (register == null) {
                 throw fault("unmapped-read", thread, address, size, "read", "unknown",
                     "no SystemRDL memory region or register covers this read");
             }
-            materializeClock(thread);
+            boolean missing = missingResetInput(register);
+            boolean widthAllowed = register.allowsOwnedBusAccess(address, size);
+            int effects = register.busReadEffects;
+            if (register.passiveBusRead && widthAllowed && !missing && size <= register.size
+                    && (effects == 0 || csihBindings[register.bindingIndex] != null)) {
+                traceBusRead(thread, address, size, register.evidence);
+                return register;
+            }
+            finishBusRead(thread, register, address, size, effects, widthAllowed, missing);
+            return register;
+        }
+
+        private void finishBusRead(PcodeThread<byte[]> thread, RegisterDef register, long address, int size,
+                int effects, boolean widthAllowed, boolean missing) {
             // Consuming RSENT's receive buffer can promote a frame and request DMA.
-            if ("rsent".equals(register.behavior)) quietClockBudget = 0;
-            requireRegisterPrivilege(thread, register, "read");
-            if (!register.allows(address, size)) {
+            if ((effects & READ_RSENT) != 0) invalidateClockHorizon();
+            if ((effects & READ_PRIVILEGED) != 0) requireIpgRegisterPrivilege(thread, register, "read");
+            if (!widthAllowed) {
                 throw fault("mmio-width", thread, address, size, "read",
                     register.evidence, "illegal access width/alignment for register " + register.name);
             }
-            if (missingResetInputs.contains(register.name)) {
+            if (missing) {
                 throw fault("missing-reset-input", thread, address, size, "read",
                     register.evidence, "reset invalidated opaque hardware result "
                         + register.name + "; supply an explicit post-reset scenario input");
             }
-            if ("faci-command".equals(register.trigger)
+            if ((effects & READ_FACI_COMMAND) != 0
                     && (registerValue(requiredRegister(register.name, "control", register.control_register)) & 0x81) != 0x80)
                 throw fault("read-prohibited", thread, address, size, "read", register.evidence,
                     "command-area read side effects are supported only in DataFlash P/E mode");
             if (register.read_value != null) {
-                setRegisterValue(register.name, register.read_value);
+                setRegisterValue(register.nameBinding, register.read_value);
             }
             else if (register.read_input) {
                 if (readInputResponses == null || !readInputResponses.containsKey(register.name)) {
@@ -2503,87 +4272,94 @@ public class RunP1MEMachine extends GhidraScript {
                             + register.name + "; supply an explicit register-input bus response");
                 }
             }
-            else if (!register.access.contains("r")) {
+            else if (!register.permitsBusRead()) {
                 throw fault("read-prohibited", thread, address, size, "read",
                     register.evidence, "register is not software-readable: " + register.name);
             }
-            if ("faci-command".equals(register.trigger)) {
-                // R01UH0615EJ0120 section6.3.14.1 and Table8.1: reads cause
-                // command lock, without terminating the command in progress (8.3).
-                RegisterDef status = requiredRegister(register.name, "status", register.status_register);
-                RegisterDef access = requiredRegister(register.name, "access-status", register.access_register);
-                setRegisterValue(status.name, registerValue(status) | 0x4000);
-                setRegisterValue(access.name, registerValue(access) | FASTAT_CMDLK);
-                // A read breaks an incomplete command-issuance sequence so
-                // the subsequent forced stop is a command, not program data.
-                faciPendingCommand = 0;
-                faciProgramStage = 0;
-            }
-            if ("csih".equals(register.behavior) && !"dma-select".equals(register.trigger)) {
-                csih(register).read(thread, register);
-            }
-            if ("adc".equals(register.behavior) || "adc-clock".equals(register.behavior))
-                adc.beforeRead(thread, register);
-            if ("tauj".equals(register.behavior)) tauj.read(thread, register);
-            if ("taud".equals(register.behavior)) taud.read(register);
-            if ("tsg".equals(register.behavior)) tsg.read(thread, register);
-            if ("rsent".equals(register.behavior)) rsent.beforeRead(thread, register);
-            if ("faci-access-status".equals(register.trigger))
-                faciReadErrors |= registerValue(register) & FASTAT_ACCESS_ERROR_MASK;
-            if ("port-pin-alias".equals(register.trigger)) refreshPortAlias(register);
-            if ("port-masked-alias".equals(register.trigger)) {
-                RegisterDef target = requiredRegister(register.name, "control", register.control_register);
-                setRegisterValue(register.name, registerValue(target));
-            }
-            if ("cvm".equals(register.behavior) && register.active_mask != null
-                    && !"CVMDE".equals(register.name)) {
-                setRegisterValue(register.name, registerValue(register) & register.active_mask);
-            }
-            if ("port-input".equals(register.behavior)) {
-                setRegisterValue(register.name, registerValue(register) & register.active_mask);
-            }
-            if ("mode-latch".equals(register.behavior)) {
-                long latched = registerValue(register);
-                setRegisterValue(register.name, (latched & 1) == 0 ? 0 : latched & register.active_mask);
-            }
-            if ("ECMPS".equals(register.name)) {
-                setRegisterValue(register.name, registerValue(register) & 1);
-            }
-            if ("dcra-seed".equals(register.trigger)) {
-                RegisterDef control = requiredRegister(register.name, "mode", register.mode_register);
-                long mode = registerValue(control);
-                if (mode != 0 && !("DCRA0CTL".equals(control.name) && mode == 0x22)) {
-                    throw fault("unsupported-dcra-mode", thread, control.address,
-                        control.size, "read", control.evidence,
-                        "supported DCRA modes are Ethernet/32-bit and DCRA0 SAEJ1850/8-bit");
-                }
-            }
+            if ((effects & ~READ_PRIVILEGED) != 0)
+                applyBusReadEffects(thread, register, effects & ~READ_PRIVILEGED);
             if (size > register.size) {
                 // Only a width explicitly declared in RDL reaches this point.
                 // Preserve the native register/physical SFR width and normalize
                 // the containing transaction's reserved lanes, not all MMIO holes.
                 setMemory(address, bytes(registerValue(register), size, language.isBigEndian()));
             }
-            trace.access("read", pc(thread), address, size, register.evidence);
-            return register;
+            traceBusRead(thread, address, size, register.evidence);
         }
 
-        void beforeWrite(PcodeThread<byte[]> thread, long address, int size, byte[] value) {
-            beforeWrite(thread, address, size, value, true);
+        private void traceBusRead(PcodeThread<byte[]> thread, long address, int size, String evidence) {
+            if (trace.retainsRead()) trace.addBusAccess("read", pc(thread), address, size, evidence);
         }
 
-        void beforeWrite(PcodeThread<byte[]> thread, long address, int size, byte[] value, boolean cpu) {
+        private void traceBusWrite(PcodeThread<byte[]> thread, long address, int size, String evidence) {
+            if (trace.markBusWrite(address, size)) trace.addBusAccess("write", pc(thread), address, size, evidence);
+        }
+
+        private void applyBusReadEffects(PcodeThread<byte[]> thread, RegisterDef register, int effects) {
+            // A register can carry both a behavior and a trigger. Apply every
+            // bound action in the same order, not just the most specific one.
+            for (; effects != 0; effects &= effects - 1) {
+                int effect = Integer.lowestOneBit(effects);
+                switch (effect) {
+                    case READ_FACI_COMMAND -> {
+                        // R01UH0615EJ0120 section6.3.14.1 and Table8.1: reads cause
+                        // command lock, without terminating the command in progress (8.3).
+                        RegisterDef status = requiredRegister(register.name, "status", register.status_register);
+                        RegisterDef access = requiredRegister(register.name, "access-status", register.access_register);
+                        setRegisterValue(status, registerValue(status) | 0x4000);
+                        setRegisterValue(access, registerValue(access) | FASTAT_CMDLK);
+                        // A read breaks an incomplete command-issuance sequence so
+                        // the subsequent forced stop is a command, not program data.
+                        faciPendingCommand = 0;
+                        faciProgramStage = 0;
+                    }
+                    case READ_CSIH_BIND -> csih(register);
+                    case READ_CSIH_RX, READ_CSIH_TX -> csih(register).read(thread, register, effect == READ_CSIH_RX);
+                    case READ_ADC, READ_ADC_SELECTOR -> adc.beforeRead(effect == READ_ADC_SELECTOR);
+                    case READ_TAUJ -> tauj.read(thread, register);
+                    case READ_TAUD -> taud.read(register);
+                    case READ_TSG -> tsg.read(thread, register);
+                    case READ_RSENT -> rsent.beforeRead(thread, register);
+                    case READ_FACI_STATUS -> faciReadErrors |= registerValue(register) & FASTAT_ACCESS_ERROR_MASK;
+                    case READ_PORT_PIN -> refreshPortAlias(portBindings.pinAliases[register.bindingIndex], 0);
+                    case READ_PORT_MASKED -> {
+                        RegisterDef target = maskedPortTarget(register);
+                        setRegisterValue(register, registerValue(target));
+                    }
+                    case READ_CVM, READ_PORT_INPUT ->
+                        setRegisterValue(register.nameBinding, registerValue(register) & register.active_mask);
+                    case READ_MODE_LATCH -> {
+                        long latched = registerValue(register);
+                        setRegisterValue(register.nameBinding, (latched & 1) == 0 ? 0 : latched & register.active_mask);
+                    }
+                    case READ_ECMPS -> setRegisterValue(register.nameBinding, registerValue(register) & 1);
+                    case READ_DCRA_SEED -> {
+                        RegisterDef control = requiredRegister(register.name, "mode", register.mode_register);
+                        long mode = registerValue(control);
+                        if (mode != 0 && !("DCRA0CTL".equals(control.name) && mode == 0x22)) {
+                            throw fault("unsupported-dcra-mode", thread, control.address,
+                                control.size, "read", control.evidence,
+                                "supported DCRA modes are Ethernet/32-bit and DCRA0 SAEJ1850/8-bit");
+                        }
+                    }
+                    default -> throw new AssertionError("unknown bus-read effect: " + effect);
+                }
+            }
+        }
+
+        RegisterDef beforeWrite(PcodeThread<byte[]> thread, long address, int size, long value,
+                boolean cpu, RegionDef region) {
             discardBusStore = false;
             requireAlignment(thread, address, size, "write");
-            if (cpu) requireAccessProtection(thread, address, size, "write");
-            if (discardBusStore) return;
-            RegionDef region = region(address, size);
+            RegisterDef register = cpu ? requireAccessProtection(thread, address, size, CpuAccess.WRITE, region)
+                : region == null && !peripheralFile ? register(address, size) : null;
+            if (discardBusStore) return null;
             if (region != null) {
                 if ("pbg0_unimplemented_channels8_9".equals(region.name)) {
                     segError(thread, address, 0x200L);
                     discardBusStore = true;
-                    trace.access("write", pc(thread), address, size, region.evidence);
-                    return;
+                    traceBusWrite(thread, address, size, region.evidence);
+                    return null;
                 }
                 if (!region.access.contains("w") || region.name.startsWith("codeflash")
                         || region.name.equals("dataflash")) {
@@ -2592,61 +4368,60 @@ public class RunP1MEMachine extends GhidraScript {
                     if (peripheralFile && region.name.startsWith("codeflash")
                             && size == 2 && (address & 1) == 0
                             && unsigned(memory(thread, address, 2)) == 0x7fL) {
-                        trace.access("write", pc(thread), address, size, region.evidence);
-                        return;
+                        traceBusWrite(thread, address, size, region.evidence);
+                        return null;
                     }
                     throw fault("write-prohibited", thread, address, size, "write",
                         region.evidence, "direct write prohibited for region: " + region.name);
                 }
-                trace.access("write", pc(thread), address, size, region.evidence);
-                return;
+                traceBusWrite(thread, address, size, region.evidence);
+                return null;
             }
             if (peripheralFile) {
-                prepareClockMutation(thread);
-                return;
+                invalidateClockHorizon();
+                return null;
             }
-            RegisterDef register = register(address, size);
             if (register == null) {
                 throw fault("unmapped-write", thread, address, size, "write", "unknown",
                     "no SystemRDL memory region or register covers this write");
             }
-            prepareClockMutation(thread);
-            if (size > register.size || !register.allows(address, size)) {
+            if (register.changesClockSchedule) invalidateClockHorizon();
+            if (size > register.size || !register.allowsOwnedBusAccess(address, size)) {
                 throw fault("mmio-width", thread, address, size, "write",
                     register.evidence, "illegal access width/alignment for register " + register.name);
             }
-            if ("pdma".equals(register.behavior) && !dma.authorizeCpuWrite(thread, register)) {
+            WriteDevice device = register.writeDevice;
+            WriteTrigger trigger = register.writeTrigger;
+            if (device == WriteDevice.PDMA && !dma.authorizeCpuWrite(thread, register)) {
                 discardBusStore = true;
-                return;
+                return null;
             }
-            if (!register.access.contains("w")) {
+            if (!register.busWritable && !register.access.contains("w")) {
                 throw fault("write-prohibited", thread, address, size, "write",
                     register.evidence, "register is not software-writable: " + register.name);
             }
-            if ("seg".equals(register.behavior)
-                    && (processorRegister(thread, "PSW") & 0x40000000L) != 0) {
-                segError(thread, address, 0x10L);
-                discardBusStore = true;
-                return;
-            }
-            if ("seg".equals(register.behavior)) {
+            if (device == WriteDevice.SEG) {
+                if (userMode(thread)) {
+                    segError(thread, address, 0x10L);
+                    discardBusStore = true;
+                    return null;
+                }
                 if (!"SEGADDR".equals(register.name)) {
-                    if ((unsigned(value) & ~register.writable_mask) != 0) {
+                    if ((value & ~register.writable_mask) != 0) {
                         throw fault("prohibited-register-reserved-bits", thread, address, size,
                             "write", register.evidence, "SEG reserved bits must be written as zero");
                     }
                     registerBeforeWrite = "SEGFLAG".equals(register.name)
-                            && !initializedDeviceRegisters.contains("SEGFLAG")
+                            && !deviceRegisterInitialized(segFlagRegister)
                         ? segFlagValue() : registerValue(register);
                 }
                 else if (enabledSegFlags() != 0) {
                     discardBusStore = true;
-                    return;
+                    return null;
                 }
             }
-            if (("banked-ecc-clear".equals(register.trigger)
-                    || "ecc-notification".equals(register.trigger))
-                    && ((unsigned(value) << (8 * (address - register.address)))
+            if ((trigger == WriteTrigger.BANKED_ECC_CLEAR || trigger == WriteTrigger.ECC_NOTIFICATION)
+                    && ((value << (8 * (address - register.address)))
                         & ~register.writable_mask) != 0) {
                 throw fault("prohibited-register-reserved-bits", thread, address, size,
                     "write", register.evidence,
@@ -2655,11 +4430,11 @@ public class RunP1MEMachine extends GhidraScript {
             if (isGuard(register)) {
                 registerBeforeWrite = registerValue(register);
                 RegisterDef lock = guardLock(register);
-                long lockMask = "peg".equals(register.behavior) ? 0x10L : 0x80000000L;
+                long lockMask = device == WriteDevice.PEG ? 0x10L : 0x80000000L;
                 guardWriteIgnored = (registerValue(lock) & lockMask) != 0;
                 if (!guardWriteIgnored) {
                     long laneMask = ((1L << (8 * size)) - 1) << (8 * (address - register.address));
-                    long incoming = unsigned(value) << (8 * (address - register.address));
+                    long incoming = value << (8 * (address - register.address));
                     if (((incoming ^ register.reset) & laneMask & ~register.writable_mask) != 0) {
                         throw fault("prohibited-register-reserved-bits", thread, address, size,
                             "write", register.evidence,
@@ -2667,57 +4442,46 @@ public class RunP1MEMachine extends GhidraScript {
                     }
                 }
             }
-            if ("pdma".equals(register.behavior)) dma.validateWrite(thread, register, unsigned(value));
-            if ("guard-error-clear".equals(register.trigger)
-                    && ((unsigned(value) << (8 * (address - register.address))) & ~register.writable_mask) != 0)
+            if (device == WriteDevice.PDMA) dma.validateWrite(thread, register, value);
+            if (trigger == WriteTrigger.GUARD_ERROR_CLEAR
+                    && ((value << (8 * (address - register.address))) & ~register.writable_mask) != 0)
                 throw fault("prohibited-register-reserved-bits", thread, address, size,
                     "write", register.evidence, "guard clear reserved bits must be zero");
-            if ("csih".equals(register.behavior)) {
-                if (!"dma-select".equals(register.trigger)) csih(register).validateWrite(thread, register, unsigned(value));
-                else if ((unsigned(value) & ~register.writable_mask) != 0)
-                    throw fault("prohibited-csih-register", thread, address, size, "write",
-                        register.evidence, "SELCSIHDMA reserved bits must be zero");
+            switch (device) {
+                case CSIH -> {
+                    if (trigger != WriteTrigger.DMA_SELECT) csih(register).validateWrite(thread, register, value);
+                    else if ((value & ~register.writable_mask) != 0)
+                        throw fault("prohibited-csih-register", thread, address, size, "write",
+                            register.evidence, "SELCSIHDMA reserved bits must be zero");
+                    registerBeforeWrite = register.reset == null ? 0 : registerValue(register);
+                }
+                case ADC -> {
+                    adc.validateWrite(thread, register, value);
+                    registerBeforeWrite = registerValue(register);
+                }
+                case RSENT -> rsent.validateWrite(thread, register, value);
+                case TAUD -> registerBeforeWrite = registerValue(register);
+                default -> { }
+            }
+            if (trigger == WriteTrigger.DCRA_CONTROL || trigger == WriteTrigger.CLOCK_SELECTOR
+                    || trigger == WriteTrigger.PDMA_COMPARATOR)
+                registerBeforeWrite = registerValue(register);
+            if (register.validateBusWrite) validateDeviceWrite(thread, register, size, value);
+            if (device == WriteDevice.ECM) {
                 registerBeforeWrite = register.reset == null ? 0 : registerValue(register);
             }
-            if ("adc".equals(register.behavior) || "adc-clock".equals(register.behavior)) {
-                adc.validateWrite(thread, register, unsigned(value));
+            if (device == WriteDevice.CVM && register.permitsBusRead()) {
                 registerBeforeWrite = registerValue(register);
             }
-            if ("rsent".equals(register.behavior)) rsent.validateWrite(thread, register, unsigned(value));
-            if ("taud".equals(register.behavior)) registerBeforeWrite = registerValue(register);
-            if ("dcra-control".equals(register.trigger) || "clock-selector".equals(register.trigger)
-                    || "pdma-comparator".equals(register.trigger))
-                registerBeforeWrite = registerValue(register);
-            validateDeviceWrite(thread, register, value);
-            if ("ecm".equals(register.behavior)) {
-                registerBeforeWrite = register.reset == null ? 0 : registerValue(register);
-            }
-            if ("cvm".equals(register.behavior) && register.access.contains("r")) {
+            if (trigger == WriteTrigger.NOISE_CLOCK_SELECTOR) {
                 registerBeforeWrite = registerValue(register);
             }
-            if ("noise-clock-selector".equals(register.trigger)) {
-                registerBeforeWrite = registerValue(register);
+            if (device == WriteDevice.PERIPHERAL_ECC || register.snapshotWriteBacking) {
+                // Backing snapshots do not resolve unknown reset inputs.
+                registerBeforeWrite = inspectBusBacking(thread, register);
             }
-            if ("peripheral-ecc".equals(register.behavior)) {
-                // Internal RMW uses the stored known bits; ECEMF remains
-                // unknown to CPU reads until an explicit input supplies it.
-                registerBeforeWrite = unsigned(memory(thread, register.address, register.size));
-            }
-            if ((register.fifo_index != null && receiveFifos.containsKey(register.fifo_index)
-                    && receiveFifos.get(register.fifo_index).status == register)
-                    || ("intc_eic".equals(register.behavior) && register.reset != null)
-                    || "faci-address".equals(register.trigger)
-                    || "faci-dataflash-mode".equals(register.trigger)
-                    || "faci-access-status".equals(register.trigger)
-                    || "faci-setup-initialize".equals(register.trigger)
-                    || "faci-area-selector".equals(register.trigger)
-                    || "faci-clock-notify".equals(register.trigger)
-                    || "ecc-protected-control".equals(register.trigger)
-                    || "rscfd-fd-status".equals(register.trigger)
-                    || "flmd-control".equals(register.trigger)) {
-                registerBeforeWrite = unsigned(memory(thread, register.address, register.size));
-            }
-            trace.access("write", pc(thread), address, size, register.evidence);
+            traceBusWrite(thread, address, size, register.evidence);
+            return register;
         }
 
         void scriptIcctrl(PcodeThread<byte[]> thread) {
@@ -2823,10 +4587,10 @@ public class RunP1MEMachine extends GhidraScript {
         }
 
         void storeResetFactors(long value) {
-            setRegisterValue("RESF", value);
+            RegisterDef status = registersByName.get("RESF");
+            setRegisterValue(status, value);
             if (resetFactorKnownMask != 0xffffffffL) {
-                initializedDeviceRegisters.remove("RESF");
-                missingResetInputs.add("RESF");
+                updateRegisterState(status, DEVICE_REGISTER_INITIALIZED, MISSING_RESET_INPUT);
             }
         }
 
@@ -2895,6 +4659,15 @@ public class RunP1MEMachine extends GhidraScript {
             unresolvedResetCauses = 0;
         }
 
+        // A replayed RESF observation was taken at the reset of its own scenario.
+        // Later resets keep the flags the controller derived and the firmware
+        // cleared; the row resolves only what the new reset left unknown.
+        void resolveReplayedResetFactors(long value) {
+            long known = resetFactorKnownMask;
+            validateResetFactorInput(
+                (resetFactorValue() & known) | (value & (~known & 0xffffffffL)));
+        }
+
         void clearResetFactors(long value) {
             RegisterDef command = registersByName.get("RESFC");
             long clear = value & command.writable_mask;
@@ -2904,12 +4677,12 @@ public class RunP1MEMachine extends GhidraScript {
             if ((clear & 0x28) != 0) unresolvedResetCauses &= ~0x28L;
             if ((clear & 0x280) != 0) unresolvedResetCauses &= ~0x280L;
             storeResetFactors(previous & ~clear);
-            setRegisterValue(command.name, 0);
+            setRegisterValue(command.nameBinding, 0);
         }
 
         void applyReset(String resetClass) {
             if (resetClass == null || resetClass.equals("none")) return;
-            prepareClockMutation(executionThread);
+            invalidateClockHorizon();
             if (registersByName.get("FSTATR").reset_classes.contains(resetClass)) resetFaci();
             for (Csih controller : csihControllers.values()) controller.reset();
             dma.reset();
@@ -2964,16 +4737,15 @@ public class RunP1MEMachine extends GhidraScript {
                     continue;
                 }
                 if (register.reset != null && register.reset_mask == null) {
-                    setRegisterValue(register.name, register.reset);
+                    setRegisterValue(register.nameBinding, register.reset);
                 }
                 else if (register.reset != null
-                        && initializedDeviceRegisters.contains(register.name)) {
+                        && deviceRegisterInitialized(register)) {
                     long retained = registerValue(register) & ~register.reset_mask;
-                    setRegisterValue(register.name, retained | (register.reset & register.reset_mask));
+                    setRegisterValue(register.nameBinding, retained | (register.reset & register.reset_mask));
                 }
                 else {
-                    initializedDeviceRegisters.remove(register.name);
-                    missingResetInputs.add(register.name);
+                    updateRegisterState(register, DEVICE_REGISTER_INITIALIZED, MISSING_RESET_INPUT);
                 }
             }
             if (tauj.units[0].te.reset_classes.contains(resetClass)) tauj.reset();
@@ -2989,7 +4761,7 @@ public class RunP1MEMachine extends GhidraScript {
                 for (RegisterDef register : registers) {
                     if (!"bist".equals(register.behavior) || register.skipped_value == null) continue;
                     if (!fieldBistExecuted) {
-                        setRegisterValue(register.name, register.skipped_value);
+                        setRegisterValue(register.nameBinding, register.skipped_value);
                     }
                 }
                 JsonObject event = new JsonObject();
@@ -3002,8 +4774,8 @@ public class RunP1MEMachine extends GhidraScript {
             if (fieldBistExecuted) {
                 for (RegisterDef register : registers) {
                     if ("ecm-bist-status".equals(register.trigger)
-                            && initializedDeviceRegisters.contains(register.name)) {
-                        setRegisterValue(register.name, registerValue(register) | (1L << 27));
+                            && deviceRegisterInitialized(register)) {
+                        setRegisterValue(register.nameBinding, registerValue(register) | (1L << 27));
                     }
                 }
             }
@@ -3012,13 +4784,13 @@ public class RunP1MEMachine extends GhidraScript {
         }
 
         long unsigned(byte[] value) {
-            return Utils.bytesToLong(value, value.length, language.isBigEndian()) & 0xffffffffL;
+            return Utils.bytesToLong(value, value.length, bigEndian) & 0xffffffffL;
         }
 
         byte[] memory(long address, int size) {
-            if (!missingResetInputs.isEmpty()) {
+            if (missingResetInputCount != 0) {
                 RegisterDef register = register(address, size);
-                if (register != null && missingResetInputs.contains(register.name)) {
+                if (register != null && missingResetInput(register)) {
                     throw new IllegalArgumentException("missing post-reset input for " + register.name);
                 }
             }
@@ -3031,6 +4803,24 @@ public class RunP1MEMachine extends GhidraScript {
                 memorySpace, address, size, true, Reason.INSPECT);
         }
 
+        private long inspectBusBacking(PcodeThread<byte[]> thread, RegisterDef register) {
+            if (deviceState != null && register.size > 0 && register.size <= Long.BYTES)
+                return deviceState.inspectDevice(register, bigEndian) & 0xffff_ffffL;
+            return unsigned(memory(thread, register.address, register.size));
+        }
+
+        private RegisterDef[] bindRegisterNames(String[] names) {
+            RegisterDef[] result = new RegisterDef[names.length];
+            for (int i = 0; i < names.length; i++) result[i] = registersByName.get(names[i]);
+            return result;
+        }
+
+        private RegisterDef[][] bindRegisterRows(String[][] names) {
+            RegisterDef[][] result = new RegisterDef[names.length][];
+            for (int i = 0; i < names.length; i++) result[i] = bindRegisterNames(names[i]);
+            return result;
+        }
+
         RegisterDef requiredRegister(String owner, String relation, String name) {
             RegisterDef register = name == null ? null : registersByName.get(name);
             if (register == null) {
@@ -3040,126 +4830,124 @@ public class RunP1MEMachine extends GhidraScript {
         }
 
         void validateDeviceWrite(PcodeThread<byte[]> thread, RegisterDef register,
-                                 byte[] value) {
-            requireRegisterPrivilege(thread, register, "write");
-            if ("tauj".equals(register.behavior)) {
-                tauj.validate(thread, register, unsigned(value)); return;
+                                 int size, long value) {
+            WriteDevice device = register.writeDevice;
+            WriteTrigger trigger = register.writeTrigger;
+            if (device == WriteDevice.IPG) requireIpgRegisterPrivilege(thread, register, "write");
+            // Timer/PIC handlers own their entire validation, even if a trigger is also present.
+            switch (device) {
+                case TAUJ -> { tauj.validate(thread, register, value); return; }
+                case TAUD, PIC_TAUD -> { taud.validate(thread, register, value); return; }
+                case TSG, PIC_TSG -> { tsg.validate(thread, register, value); return; }
+                case PIC1_START -> { pic1.validate(thread, register, value); return; }
+                default -> { }
             }
-            if ("taud".equals(register.behavior) || "pic-taud".equals(register.behavior)) {
-                taud.validate(thread, register, unsigned(value)); return;
-            }
-            if ("tsg".equals(register.behavior) || "pic-tsg".equals(register.behavior)) {
-                tsg.validate(thread, register, unsigned(value)); return;
-            }
-            if ("pic1-start".equals(register.behavior)) {
-                pic1.validate(thread, register, unsigned(value)); return;
-            }
-            if ("pdma-comparator".equals(register.trigger)) {
-                long incoming = unsigned(value);
+            if (trigger == WriteTrigger.PDMA_COMPARATOR) {
+                long incoming = value;
                 if ((incoming & register.protection_mask) == register.protection_value) {
                     long selection = incoming & register.writable_mask;
                     if (selection != 0 && selection != 0x3fff7f7fL) {
                         throw fault("unsupported-pdma-comparator-selection", thread,
-                            register.address, value.length, "write", register.evidence,
+                            register.address, size, "write", register.evidence,
                             "only the documented mismatch-injection pattern and its cleared state are modeled");
                     }
                     if (selection != 0
-                            && ((registerValue(registersByName.get("ECMNMICFG0"))
-                                | registerValue(registersByName.get("ECMIRCFG0"))
-                                | registerValue(registersByName.get("ECMDTMCFG0"))) & 4) != 0) {
+                            && ((registerValue(ecmNotification[1][0])
+                                | registerValue(ecmNotification[2][0])
+                                | registerValue(ecmNotification[3][0])) & 4) != 0) {
                         throw fault("unsupported-ecm-notification", thread,
-                            register.address, value.length, "write", register.evidence,
+                            register.address, size, "write", register.evidence,
                             "source2 FENMI, internal reset or delay-timer routing requires the corresponding execution model");
                     }
                 }
             }
-            if ("peripheral-ecc".equals(register.behavior)) {
-                long incoming = unsigned(value);
-                long readOnly = "peripheral-ecc-control".equals(register.trigger)
+            if (device == WriteDevice.PERIPHERAL_ECC) {
+                long incoming = value;
+                long readOnly = trigger == WriteTrigger.PERIPHERAL_ECC_CONTROL
                     ? 0x30807L : 0;
                 if ((incoming & ~(register.writable_mask | readOnly)) != 0) {
                     throw fault("prohibited-register-reserved-bits", thread,
-                        register.address, value.length, "write", register.evidence,
+                        register.address, size, "write", register.evidence,
                         "reserved peripheral ECC bits must be written as zero");
                 }
-                if ("peripheral-ecc-test".equals(register.trigger)) {
+                if (trigger == WriteTrigger.PERIPHERAL_ECC_TEST) {
                     long mode = (incoming & 0xc000L) == 0x8000L
                         ? incoming & 0x80L : registerValue(register) & 0x80L;
                     if (mode != 0) {
                         throw fault("unsupported-peripheral-ecc-test", thread,
-                            register.address, value.length, "write", register.evidence,
+                            register.address, size, "write", register.evidence,
                             "active test mode requires ECC encoder/decoder and peripheral RAM substitution");
                     }
                 }
             }
-            if ("noise-filter".equals(register.behavior)) {
-                long incoming = unsigned(value);
+            if (device == WriteDevice.NOISE_FILTER) {
+                long incoming = value;
                 if ((incoming & ~register.writable_mask) != 0) {
                     throw fault("prohibited-register-reserved-bits", thread, register.address,
-                        value.length, "write", register.evidence,
+                        size, "write", register.evidence,
                         "noise-filter reserved bits must remain at reset: " + register.name);
                 }
-                if ("noise-filter-enable".equals(register.trigger) && incoming != 0) {
+                if (trigger == WriteTrigger.NOISE_FILTER_ENABLE && incoming != 0) {
                     throw fault("unsupported-noise-filter-operation", thread, register.address,
-                        value.length, "write", register.evidence,
+                        size, "write", register.evidence,
                         "enabled filtering requires external signal and sampling-clock behavior");
                 }
-                if ("noise-clock-selector".equals(register.trigger)
+                if (trigger == WriteTrigger.NOISE_CLOCK_SELECTOR
                         && !register.allowed_values.contains(incoming)) {
                     throw fault("prohibited-clock-source", thread, register.address,
-                        value.length, "write", register.evidence,
+                        size, "write", register.evidence,
                         "DNF sampling source code is prohibited: " + incoming);
                 }
                 if (register.enable_register != null) {
                     RegisterDef enable = requiredRegister(register.name, "enable", register.enable_register);
                     if (registerValue(enable) != 0) {
                         throw fault("prohibited-noise-filter-enabled", thread, register.address,
-                            value.length, "write", register.evidence,
+                            size, "write", register.evidence,
                             "configuration may change only while the related filter is disabled");
                     }
                 }
-                if ("noise-clock-selector".equals(register.trigger)) {
+                if (trigger == WriteTrigger.NOISE_CLOCK_SELECTOR) {
                     for (String name : register.capture_registers) {
                         RegisterDef enable = requiredRegister(register.name, "enable", name);
                         if (registerValue(enable) != 0) {
                             throw fault("prohibited-noise-filter-enabled", thread, register.address,
-                                value.length, "write", register.evidence,
+                                size, "write", register.evidence,
                                 "sampling source may change only while all related filters are disabled");
                         }
                     }
                 }
             }
-            if (("ipg".equals(register.behavior) || "gram-buffer".equals(register.behavior))
-                    && (unsigned(value) & ~register.writable_mask) != 0) {
+            if ((device == WriteDevice.IPG || device == WriteDevice.GRAM_BUFFER)
+                    && (value & ~register.writable_mask) != 0) {
                 throw fault("prohibited-register-reserved-bits", thread, register.address,
-                    value.length, "write", register.evidence,
+                    size, "write", register.evidence,
                     "reserved bits must be written as zero: " + register.name);
             }
-            if ("bist-control".equals(register.trigger)
-                    && (unsigned(value) & ~register.active_mask) != 0) {
+            if (trigger == WriteTrigger.BIST_CONTROL
+                    && (value & ~register.active_mask) != 0) {
                 throw fault("prohibited-bist-reserved-bits", thread, register.address,
-                    value.length, "write", register.evidence,
+                    size, "write", register.evidence,
                     "BSEQ0CTL reserved bits must be zero");
             }
-            if ("clock-divider".equals(register.trigger) || "clock-selector".equals(register.trigger)) {
-                long incoming = unsigned(value);
+            if (trigger == WriteTrigger.CLOCK_DIVIDER || trigger == WriteTrigger.CLOCK_SELECTOR) {
+                long incoming = value;
                 if ((incoming & ~register.writable_mask) != 0) {
                     throw fault("prohibited-clock-reserved-bits", thread, register.address,
-                        value.length, "write", register.evidence,
+                        size, "write", register.evidence,
                         "reserved clock register bits must be written as zero: " + register.name);
                 }
-                if ("clock-divider".equals(register.trigger)) {
+                if (trigger == WriteTrigger.CLOCK_DIVIDER) {
                     RegisterDef status = requiredRegister(register.name, "status", register.status_register);
                     if ((registerValue(status) & register.sync_mask) != register.sync_mask) {
                         throw fault("prohibited-clock-divider-unsynchronized", thread, register.address,
-                            value.length, "write", register.evidence,
+                            size, "write", register.evidence,
                             "divider must not be written while SYNC is zero");
                     }
                 }
                 else {
                     if (!register.allowed_values.contains(incoming)) {
                         throw fault("prohibited-clock-source", thread, register.address,
-                            value.length, "write", register.evidence,
+                            size, "write", register.evidence,
                             "clock source ID is prohibited: " + incoming);
                     }
                     RegisterDef divider = requiredRegister(register.name, "control", register.control_register);
@@ -3168,130 +4956,160 @@ public class RunP1MEMachine extends GhidraScript {
                     if (incoming != registerValue(register) && (registerValue(divider) != 0
                             || registerValue(status) != register.completion_value)) {
                         throw fault("prohibited-clock-selector-running", thread, register.address,
-                            value.length, "write", register.evidence,
+                            size, "write", register.evidence,
                             "clock source may change only with divider zero and stopped synchronized status");
                     }
                 }
             }
-            if ("flmd".equals(register.behavior)) {
-                long incoming = unsigned(value);
-                boolean valid = "flmd-command".equals(register.trigger)
+            if (device == WriteDevice.FLMD) {
+                long incoming = value;
+                boolean valid = trigger == WriteTrigger.FLMD_COMMAND
                     ? flmdStage == 0 && incoming == 0xa5
-                    : "flmd-control".equals(register.trigger)
+                    : trigger == WriteTrigger.FLMD_CONTROL
                         && (flmdStage == 1 && incoming <= 1
                             || flmdStage == 2 && incoming == (flmdDesired ^ 0xffffffffL)
                             || flmdStage == 3 && incoming == flmdDesired);
                 if (!valid) {
                     throw fault("unsupported-flmd-sequence", thread, register.address,
-                        value.length, "write", register.evidence,
+                        size, "write", register.evidence,
                         "only uninterrupted A5/value/full-word-inverse/value writes are modeled; malformed-sequence error timing is not modeled");
                 }
             }
-            if ("dcra".equals(register.behavior)) {
-                RegisterDef control = "dcra-control".equals(register.trigger) ? register
+            if (device == WriteDevice.DCRA) {
+                RegisterDef control = trigger == WriteTrigger.DCRA_CONTROL ? register
                     : requiredRegister(register.name, "mode", register.mode_register);
-                long mode = control == register ? unsigned(value) : registerValue(control);
+                long mode = control == register ? value : registerValue(control);
                 if (mode != 0 && !("DCRA0CTL".equals(control.name) && mode == 0x22)) {
                     throw fault("unsupported-dcra-mode", thread, control.address,
                         control.size, "write", control.evidence,
                         "supported DCRA modes are Ethernet/32-bit and DCRA0 SAEJ1850/8-bit; reserved bits must be zero");
                 }
-                if ("dcra-input".equals(register.trigger)) {
+                if (trigger == WriteTrigger.DCRA_INPUT) {
                     if (!dcraSeeded.contains(control.name)) {
                         throw fault("uninitialized-dcra-seed", thread, register.address,
-                            value.length, "write", register.evidence,
+                            size, "write", register.evidence,
                             "DCRAnCOUT must be explicitly seeded before the first input word");
                     }
                     RegisterDef output = requiredRegister(register.name, "status", register.status_register);
                     memory(thread, output.address, output.size);
                 }
             }
-            if ("faci-command".equals(register.trigger)) {
-                validateFaciWrite(thread, register, value);
-            }
-            if ("faci-enable".equals(register.trigger)
-                    && (registerValue(registersByName.get("FSTATR")) & FSTATR_FRDY) == 0
-                    && (unsigned(value) & 1) != registerValue(register))
-                throw fault("prohibited-faci-enable-change", thread, register.address, value.length,
-                    "write", register.evidence, "FHVE enables must not change during command processing");
-            if ("faci-address".equals(register.trigger)) {
-                RegisterDef status = requiredRegister(register.name, "status", register.status_register);
-                memory(thread, status.address, status.size);
-            }
-            if ("faci-dataflash-mode".equals(register.trigger)) {
-                RegisterDef status = requiredRegister(register.name, "status", register.status_register);
-                long previous = unsigned(memory(thread, register.address, register.size));
-                long incoming = unsigned(value);
-                if ((unsigned(memory(thread, status.address, status.size)) & FSTATR_FRDY) != 0
-                        && (previous != 0 && previous != 0x80
-                            || (incoming >>> 8) == 0xaa
-                                && (incoming & 0xff) != 0 && (incoming & 0xff) != 0x80)) {
-                    throw fault("unsupported-faci-mode", thread, register.address,
-                        value.length, "write", register.evidence,
-                        "mode transitions are bounded to read/DataFlash P/E; CodeFlash/FWE and illegal-mode errors are not modeled");
+            switch (trigger) {
+                case FACI_COMMAND -> validateFaciWrite(thread, register, size, value);
+                case FACI_ENABLE -> {
+                    if ((registerValue(registersByName.get("FSTATR")) & FSTATR_FRDY) == 0
+                            && (value & 1) != registerValue(register))
+                        throw fault("prohibited-faci-enable-change", thread, register.address, size,
+                            "write", register.evidence, "FHVE enables must not change during command processing");
                 }
-            }
-            if ("faci-normal-emulation".equals(register.trigger)
-                    && (unsigned(value) != 0 || unsigned(memory(thread, register.address, register.size)) != 0)) {
-                throw fault("unsupported-faci-emulation", thread, register.address,
-                    value.length, "write", register.evidence,
-                    "only unchanged normal FLEMU mode is modeled; OCD write permission is not inferred");
-            }
-            if ("dataflash-read-cycle".equals(register.trigger) && (unsigned(value) & 0xf) < 3) {
-                throw fault("prohibited-dataflash-read-cycle", thread, register.address,
-                    value.length, "write", register.evidence,
-                    "EEPRDCYCL codes0..2 are prohibited; no timing behavior is synthesized");
-            }
-            if ("icus-command".equals(register.trigger)) {
-                long word = unsigned(value);
-                if (icusStartupStub != null && icusStartupStub.handles(word)) {
-                    icusStartupStub.validateCommand(thread, register, word);
+                case FACI_ADDRESS -> {
+                    RegisterDef status = requiredRegister(register.name, "status", register.status_register);
+                    memory(thread, status.address, status.size);
                 }
-                // Exact F33 8A8E4 issues (slot<<16)|7 for slots0..14;
-                // 8ACA8 issues the bare abort word3F. Accept writes only:
-                // neither operation has a simulated hardware reply.
-                else if ((word & 0xffff) != 5
-                        && !((word & 0xffff) == 7 && (word >>> 16) < 15)
-                        && word != 0x3f) {
-                    throw fault("unsupported-icus-command", thread, register.address,
-                        value.length, "write", register.evidence,
-                        String.format("ICU-S command 0x%04X has no recovered state transition",
-                            word & 0xffff));
+                case FACI_DATAFLASH_MODE -> {
+                    RegisterDef status = requiredRegister(register.name, "status", register.status_register);
+                    long previous = unsigned(memory(thread, register.address, register.size));
+                    if ((unsigned(memory(thread, status.address, status.size)) & FSTATR_FRDY) != 0
+                            && (previous != 0 && previous != 0x80
+                                || (value >>> 8) == 0xaa
+                                    && (value & 0xff) != 0 && (value & 0xff) != 0x80)) {
+                        throw fault("unsupported-faci-mode", thread, register.address,
+                            size, "write", register.evidence,
+                            "mode transitions are bounded to read/DataFlash P/E; CodeFlash/FWE and illegal-mode errors are not modeled");
+                    }
                 }
-            }
-            if (icusStartupStub != null && "icus-control".equals(register.trigger))
-                icusStartupStub.validateAck(thread, register, unsigned(value));
-            if ("rscfd-transmit".equals(register.trigger) && (unsigned(value) & 1) != 0) {
-                if (register.payload_address == null) {
-                    throw new IllegalStateException(register.name + " lacks payload_address metadata");
+                case FACI_NORMAL_EMULATION -> {
+                    if (value != 0 || unsigned(memory(thread, register.address, register.size)) != 0)
+                        throw fault("unsupported-faci-emulation", thread, register.address,
+                            size, "write", register.evidence,
+                            "only unchanged normal FLEMU mode is modeled; OCD write permission is not inferred");
                 }
-                long base = register.payload_address;
-                memory(thread, base, 4);
-                memory(thread, base + 4, 4);
-                memory(thread, base + 12, 4);
-                memory(thread, base + 16, 4);
+                case DATAFLASH_READ_CYCLE -> {
+                    if ((value & 0xf) < 3)
+                        throw fault("prohibited-dataflash-read-cycle", thread, register.address,
+                            size, "write", register.evidence,
+                            "EEPRDCYCL codes0..2 are prohibited; no timing behavior is synthesized");
+                }
+                case ICUS_COMMAND -> {
+                    if (icusStartupStub != null && icusStartupStub.handles(value)) {
+                        icusStartupStub.validateCommand(thread, register, value);
+                    }
+                    // Exact F33 8A8E4 issues (slot<<16)|7 for slots0..14;
+                    // 8ACA8 issues the bare abort word3F. Accept writes only:
+                    // neither operation has a simulated hardware reply.
+                    else if ((value & 0xffff) != 5
+                            && !((value & 0xffff) == 7 && (value >>> 16) < 15)
+                            && value != 0x3f) {
+                        throw fault("unsupported-icus-command", thread, register.address,
+                            size, "write", register.evidence,
+                            String.format("ICU-S command 0x%04X has no recovered state transition",
+                                value & 0xffff));
+                    }
+                }
+                case ICUS_CONTROL -> {
+                    if (icusStartupStub != null) icusStartupStub.validateAck(thread, register, value);
+                }
+                case RSCFD_TRANSMIT -> {
+                    if ((value & 1) == 0) return;
+                    if (register.payload_address == null) {
+                        throw new IllegalStateException(register.name + " lacks payload_address metadata");
+                    }
+                    long base = register.payload_address;
+                    memory(thread, base, 4);
+                    memory(thread, base + 4, 4);
+                    memory(thread, base + 12, 4);
+                    memory(thread, base + 16, 4);
+                }
+                default -> { }
             }
+        }
+
+        private boolean missingResetInput(RegisterDef register) {
+            return (registerState[register.bindingIndex] & MISSING_RESET_INPUT) != 0;
+        }
+
+        private boolean deviceRegisterInitialized(RegisterDef register) {
+            return register != null
+                && (registerState[register.bindingIndex] & DEVICE_REGISTER_INITIALIZED) != 0;
+        }
+
+        private void updateRegisterState(RegisterDef register, int clear, int set) {
+            int index = register.bindingIndex;
+            int previous = registerState[index];
+            int next = (previous & ~clear) | set;
+            if (next == previous) return;
+            registerState[index] = (byte) next;
+            missingResetInputCount += (next & MISSING_RESET_INPUT) - (previous & MISSING_RESET_INPUT);
+            if (((next ^ previous) & MISSING_RESET_INPUT) != 0 && dmaWordIndex != null)
+                deviceState.invalidateDeviceWord(register);
+        }
+
+        private void resolveRegisterInput(RegisterDef register) {
+            updateRegisterState(register, MISSING_RESET_INPUT,
+                register.reset_mask != null ? DEVICE_REGISTER_INITIALIZED : 0);
         }
 
         void setRegisterValue(String name, long value) {
             RegisterDef register = registersByName.get(name);
             if (register == null) throw new IllegalStateException("machine model lacks register " + name);
-            setMemory(register.address, bytes(value, register.size, language.isBigEndian()));
-            if (register.reset_mask != null) initializedDeviceRegisters.add(register.name);
-            missingResetInputs.remove(register.name);
+            setRegisterValue(register, value);
         }
 
-        void registerWriteEvent(PcodeThread<byte[]> thread, RegisterDef register, byte[] value) {
-            JsonObject event = new JsonObject();
-            event.addProperty("kind", "register-write");
-            event.addProperty("pc", hex32(pc(thread)));
-            event.addProperty("register", register.name);
-            event.addProperty("behavior", register.behavior);
-            event.addProperty("trigger", register.trigger);
-            event.addProperty("value", hex32(unsigned(value)));
-            event.addProperty("evidence", register.evidence);
-            if (trace.busInitiator != null) event.addProperty("initiator", trace.busInitiator);
-            trace.deviceEvents.add(event);
+        void setRegisterValue(RegisterDef register, long value) {
+            if (register.size <= Long.BYTES
+                    && deviceState != null && deviceState.writeDevice(register, value, bigEndian)) {
+                int pending = register.pendingBinding;
+                if (pending >= 0 && !missingResetInput(register))
+                    updatePendingInterrupt(pending, register, value, true);
+                else if (pending != -1) refreshPendingInterrupts(register.address, register.size, true);
+            }
+            else setMemory(register.address, bytes(value, register.size, bigEndian));
+            resolveRegisterInput(register);
+        }
+
+        void registerWriteEvent(PcodeThread<byte[]> thread, RegisterDef register, long value) {
+            if (trace.deviceEvents.omitsEventPayload(JsonRows.REGISTER_WRITE.name)) return;
+            trace.deviceEvents.addRegisterWrite(pc(thread), register, value, trace.busInitiator);
         }
 
         RegisterDef rscfdTransmitResultSummary(long buffer) {
@@ -3302,19 +5120,19 @@ public class RunP1MEMachine extends GhidraScript {
                 "CFDTMTCSTS" + (buffer / 32));
         }
 
+        // R01UH0585EJ0120 section 17.4.11.7 Table 17.153: TMIEp is bit p % 32 of TMIEC(p / 32).
         RegisterDef rscfdTransmitInterruptEnable(long buffer) {
-            long channel = buffer / 16;
-            if (channel < 0 || channel > 2) {
-                throw new IllegalStateException("RSCFD transmit buffer is outside channels0..2");
+            if (buffer < 0 || buffer > 47) {
+                throw new IllegalStateException("RSCFD transmit buffer is outside 0..47");
             }
-            return requiredRegister("RSCFD", "transmit-interrupt-enable", "TMIEC" + channel);
+            return requiredRegister("RSCFD", "transmit-interrupt-enable", "TMIEC" + (buffer / 32));
         }
 
         void setRscfdTransmitRequest(long buffer, boolean present) {
             RegisterDef status = requiredRegister(
                 "RSCFD", "transmit-request-status", "CFDTMTRSTS" + (buffer / 32));
             long bit = 1L << (buffer & 31);
-            setRegisterValue(status.name,
+            setRegisterValue(status.nameBinding,
                 present ? registerValue(status) | bit : registerValue(status) & ~bit);
         }
 
@@ -3322,7 +5140,7 @@ public class RunP1MEMachine extends GhidraScript {
             RegisterDef status = requiredRegister(
                 "RSCFD", "transmit-abort-status", "CFDTMTARSTS" + (buffer / 32));
             long bit = 1L << (buffer & 31);
-            setRegisterValue(status.name,
+            setRegisterValue(status.nameBinding,
                 present ? registerValue(status) | bit : registerValue(status) & ~bit);
         }
 
@@ -3346,13 +5164,14 @@ public class RunP1MEMachine extends GhidraScript {
             long next = present
                 ? registerValue(summary) | summaryBit
                 : registerValue(summary) & ~summaryBit;
-            setRegisterValue(summary.name, next);
-            long enabled = registerValue(rscfdTransmitInterruptEnable(buffer));
+            setRegisterValue(summary.nameBinding, next);
+            long enabled = registerValue(rscfdTransmitInterruptEnable(buffer))
+                >>> ((buffer / 16 & 1) * 16);
             long channelResults = next >>> ((buffer / 16 & 1) * 16);
             if (channel == 1 && (channelResults & enabled) == 0) {
                 RegisterDef eic = interruptRegisters.get(188);
                 if (eic != null) {
-                    setRegisterValue(eic.name, registerValue(eic) & ~0x1000L);
+                    setRegisterValue(eic.nameBinding, registerValue(eic) & ~0x1000L);
                 }
             }
         }
@@ -3387,12 +5206,12 @@ public class RunP1MEMachine extends GhidraScript {
             pendingRscfdTransmits.clear();
             for (ReceiveFifo fifo : receiveFifos.values()) {
                 fifo.messages.clear();
-                setRegisterValue(fifo.status.name, 1);
+                setRegisterValue(fifo.status.nameBinding, 1);
                 refreshReceiveFifo(fifo);
             }
             for (RegisterDef register : registers) {
                 if ("rscfd-transmit-status".equals(register.trigger)) {
-                    setRegisterValue(register.name, 0);
+                    setRegisterValue(register.nameBinding, 0);
                 }
             }
         }
@@ -3409,7 +5228,7 @@ public class RunP1MEMachine extends GhidraScript {
                     register.name + " requests reserved RSCFD mode 3");
             };
             if ((value & 4) != 0) state |= 4;
-            setRegisterValue(status.name, (registerValue(status) & ~0xfL) | state);
+            setRegisterValue(status.nameBinding, (registerValue(status) & ~0xfL) | state);
             if ("rscfd-global-control".equals(register.trigger) && mode == 1) {
                 // Tables 17.107-17.108: entering global reset initializes the
                 // controller RAM/FIFO state; GRAMINIT is complete at this
@@ -3419,22 +5238,21 @@ public class RunP1MEMachine extends GhidraScript {
         }
 
 
-        void handleRscfdWrite(PcodeThread<byte[]> thread, RegisterDef register, byte[] value,
+        void handleRscfdWrite(PcodeThread<byte[]> thread, RegisterDef register, long command,
                               long registerBeforeWrite) {
-            long command = unsigned(value);
             long buffer = rscfdTransmitBuffer(register);
             if ((command & 2) != 0) {
                 if (pendingRscfdTransmits.containsKey(buffer)) {
-                    setRegisterValue(register.name, registerBeforeWrite | 2);
+                    setRegisterValue(register.nameBinding, registerBeforeWrite | 2);
                     setRscfdTransmitAbortRequest(buffer, true);
                 }
                 else {
-                    setRegisterValue(register.name, registerBeforeWrite);
+                    setRegisterValue(register.nameBinding, registerBeforeWrite);
                 }
                 return;
             }
             if ((command & 1) == 0) {
-                setRegisterValue(register.name, registerBeforeWrite);
+                setRegisterValue(register.nameBinding, registerBeforeWrite);
                 return;
             }
             if (register.completion_value == null) {
@@ -3505,10 +5323,10 @@ public class RunP1MEMachine extends GhidraScript {
             setRscfdTransmitResult(buffer, true);
             setRscfdTransmitRequest(buffer, false);
             setRscfdTransmitAbortRequest(buffer, false);
-            setRegisterValue(control.name, 0);
+            setRegisterValue(control.nameBinding, 0);
 
             long enabled = registerValue(rscfdTransmitInterruptEnable(buffer));
-            boolean interrupt = (enabled & (1L << (buffer & 15))) != 0;
+            boolean interrupt = (enabled & (1L << (buffer & 31))) != 0;
             if (interrupt) {
                 long channel = buffer / 16;
                 if (channel != 1) {
@@ -3528,6 +5346,9 @@ public class RunP1MEMachine extends GhidraScript {
         }
 
         long registerValue(RegisterDef register) {
+            if (deviceState != null && !missingResetInput(register) && register.size <= Long.BYTES) {
+                return deviceState.inspectDevice(register, bigEndian) & 0xffff_ffffL;
+            }
             return unsigned(memory(register.address, register.size));
         }
 
@@ -3538,7 +5359,7 @@ public class RunP1MEMachine extends GhidraScript {
             long status = registerValue(fifo.status) & 0x1c;
             status |= ((long) count << 8) | (count == 0 ? 1 : 0)
                 | (depth != 0 && count == depth ? 2 : 0);
-            setRegisterValue(fifo.status.name, status);
+            setRegisterValue(fifo.status.nameBinding, status);
             if (count != 0) setMemory(fifo.window.address, fifo.messages.peek());
             refreshReceiveInterrupt(fifo);
         }
@@ -3553,7 +5374,7 @@ public class RunP1MEMachine extends GhidraScript {
                     break;
                 }
             }
-            setRegisterValue(fifo.interrupt.name, (old & ~0x1000L) | (requested ? 0x1000 : 0));
+            setRegisterValue(fifo.interrupt.nameBinding, (old & ~0x1000L) | (requested ? 0x1000 : 0));
         }
 
         void receiveFrame(PcodeThread<byte[]> thread, ExternalEvent input) {
@@ -3578,7 +5399,7 @@ public class RunP1MEMachine extends GhidraScript {
             else if ((control & 1) == 0 || depth == 0) discarded = "fifo-disabled";
             else if (payload.length > capacity && (config & 0x20) == 0) discarded = "payload-capacity";
             else if (fifo.messages.size() == depth) {
-                setRegisterValue(fifo.status.name, registerValue(fifo.status) | 4);
+                setRegisterValue(fifo.status.nameBinding, registerValue(fifo.status) | 4);
                 discarded = "fifo-full";
             }
             if (discarded == null) {
@@ -3590,31 +5411,32 @@ public class RunP1MEMachine extends GhidraScript {
                 byte[] window = new byte[76];
                 int dlc = payload.length <= 8 ? payload.length : 9;
                 while (dlc > 8 && PAYLOAD_LENGTHS[dlc - 8] != payload.length) dlc++;
-                System.arraycopy(bytes(parseUnsigned(input.can_id) | (input.extended ? 0x80000000L : 0),
-                    4, false), 0, window, 0, 4);
-                System.arraycopy(bytes(((long) dlc << 28) | ((long) input.label << 16) | input.timestamp,
-                    4, false), 0, window, 4, 4);
+                P1MEJitMachine.writeNumber(window, 0, 4, false,
+                    parseUnsigned(input.can_id) | (input.extended ? 0x80000000L : 0));
+                P1MEJitMachine.writeNumber(window, 4, 4, false,
+                    ((long) dlc << 28) | ((long) input.label << 16) | input.timestamp);
                 window[8] = (byte) (input.fd ? 4 : 0);
                 System.arraycopy(payload, 0, window, 12, Math.min(payload.length, capacity));
                 fifo.messages.add(window);
                 if ((control & 0x1000) != 0 || fifo.messages.size() * 8 >= depth * thresholdEighths) {
-                    setRegisterValue(fifo.status.name, registerValue(fifo.status) | 8);
+                    setRegisterValue(fifo.status.nameBinding, registerValue(fifo.status) | 8);
                 }
                 refreshReceiveFifo(fifo);
             }
+            String kind = discarded == null ? "can-rx" : "can-rx-discard";
+            if (trace.deviceEvents.omitsEventPayload(kind)) return;
             JsonObject event = GSON.toJsonTree(input).getAsJsonObject();
-            event.addProperty("kind", discarded == null ? "can-rx" : "can-rx-discard");
+            event.addProperty("kind", kind);
             if (discarded != null) event.addProperty("reason", discarded);
             event.addProperty("scheduler_tick", trace.instructions);
             trace.deviceEvents.add(event);
         }
 
-        void handleReceiveWrite(PcodeThread<byte[]> thread, RegisterDef register, byte[] value) {
-            ReceiveFifo fifo = register.fifo_index == null ? null : receiveFifos.get(register.fifo_index);
-            if (fifo == null) return;
+        void handleReceiveWrite(PcodeThread<byte[]> thread, RegisterDef register, int size, long value) {
+            ReceiveFifo fifo = receiveFifos.get(register.fifo_index);
             if (register == fifo.status) {
                 // CFMC/CFEMP/CFFLL are read-only; the three sticky flags clear by writing zero.
-                setRegisterValue(register.name, registerBeforeWrite & (registerValue(register) | ~0x1cL));
+                setRegisterValue(register.nameBinding, registerBeforeWrite & (registerValue(register) | ~0x1cL));
                 refreshReceiveInterrupt(fifo);
             }
             else if (register == fifo.control) {
@@ -3625,13 +5447,14 @@ public class RunP1MEMachine extends GhidraScript {
                 else refreshReceiveInterrupt(fifo);
             }
             else if (register == fifo.pointer) {
-                if ((unsigned(value) & 0xff) != 0xff || (registerValue(fifo.control) & 1) == 0
+                if ((value & 0xff) != 0xff || (registerValue(fifo.control) & 1) == 0
                         || fifo.messages.isEmpty()) {
-                    throw fault("invalid-fifo-pop", thread, register.address, value.length,
+                    throw fault("invalid-fifo-pop", thread, register.address, size,
                         "write", "manual", "receive FIFO pop requires CFE=1, unread data, and CFPC=0xFF");
                 }
                 fifo.messages.remove();
                 refreshReceiveFifo(fifo);
+                if (trace.deviceEvents.omitsEventPayload("can-rx-pop")) return;
                 JsonObject event = new JsonObject();
                 event.addProperty("kind", "can-rx-pop");
                 event.addProperty("fifo", register.fifo_index);
@@ -3652,87 +5475,197 @@ public class RunP1MEMachine extends GhidraScript {
         void retireClock(PcodeThread<byte[]> thread) {
             long cycles = hsbCyclesPerInstruction;
             if (cycles == 0) return;
-            if (cycles > 0 && cycles <= quietClockBudget) {
-                deferredClockCycles += cycles;
-                quietClockBudget -= cycles;
+            if (cycles > 0 && cycles <= quietRemaining()) {
+                hsbCycles += cycles;
                 return;
             }
-            // Commit prior ticks to every device before an edge can fault partway through this tick.
-            prepareClockMutation(thread);
+            if (cycles > 0 && quietUntil != 0 && quietUntil != Long.MAX_VALUE
+                    && cycles == quietUntil - hsbCycles) {
+                int events = quietClockEvents;
+                invalidateClockHorizon();
+                invalidateBatchProof();
+                advanceClockSpan(thread, cycles, events);
+                return;
+            }
+            invalidateClockHorizon();
             advanceClock(thread, cycles, true);
         }
 
-        void materializeClock(PcodeThread<byte[]> thread) {
-            long span = deferredClockCycles;
+        private long quietRemaining() {
+            return quietUntil > hsbCycles ? quietUntil - hsbCycles - 1 : 0;
+        }
+
+        private void invalidateClockHorizon() {
+            quietUntil = 0;
+        }
+
+        private static long timerDeadline(long tick, long remaining) {
+            return remaining == Long.MAX_VALUE ? NO_CLOCK_EDGE : tick + remaining;
+        }
+
+        private long taudCyclesUntilEvent() {
+            if (taudClockDue == 0) {
+                long remaining = taud.cyclesUntilEvent();
+                // A fault can leave another unit's emitted edges pending.
+                if (taud.units[0].emitted != 0 || taud.units[1].emitted != 0) return remaining;
+                taudClockDue = timerDeadline(taudClockTick, remaining);
+            }
+            return taudClockDue == NO_CLOCK_EDGE ? Long.MAX_VALUE : taudClockDue - hsbCycles;
+        }
+
+        private long taujCyclesUntilEvent() {
+            if (taujClockDue == 0)
+                taujClockDue = timerDeadline(taujClockTick, tauj.cyclesUntilEvent());
+            return taujClockDue == NO_CLOCK_EDGE ? Long.MAX_VALUE : taujClockDue - hsbCycles;
+        }
+
+        private long rsentCyclesUntilEvent() {
+            if (rsentClockDue < 0) rsentClockDue = rsent.nextEventTick();
+            // After an earlier clock stage faults, RSENT's local time can be
+            // behind HSB even when it has caught up with every committed span.
+            return rsentClockDue == Long.MAX_VALUE ? Long.MAX_VALUE
+                : Math.max(0, rsentClockDue - rsent.now - (hsbCycles - rsentClockTick));
+        }
+
+        private void syncTaudClock(long tick) {
+            long span = tick - taudClockTick;
             if (span == 0) return;
-            deferredClockCycles = 0;
-            advanceClockSpan(thread, span, false, false);
+            for (Taud.Unit unit : taud.units) unit.advance(span);
+            taudClockTick = tick;
         }
 
-        private void prepareClockMutation(PcodeThread<byte[]> thread) {
-            materializeClock(thread);
-            quietClockBudget = 0;
+        private void syncTaujClock(long tick) {
+            long span = tick - taujClockTick;
+            if (span == 0) return;
+            for (Tauj.Unit unit : tauj.units) unit.move(span);
+            taujClockTick = tick;
         }
 
-        private void advanceClock(PcodeThread<byte[]> thread, long cycles, boolean deferQuietTail) {
+        private void syncRsentClock(long tick) {
+            long span = tick - rsentClockTick;
+            if (span == 0) return;
+            rsent.moveClock(span);
+            rsentClockTick = tick;
+        }
+
+        private void drainDeviceClocks() {
+            adc.syncClock();
+            tsg.syncClock(hsbCycles);
+            syncTaudClock(hsbCycles);
+            syncTaujClock(hsbCycles);
+            syncRsentClock(hsbCycles);
+        }
+
+        private void rebaseDeviceClocks() {
+            taudClockTick = taujClockTick = rsentClockTick = hsbCycles;
+            taudClockDue = taujClockDue = 0;
+            rsentClockDue = -1;
+        }
+
+        private void advanceClock(PcodeThread<byte[]> thread, long cycles, boolean fromRetirement) {
             if (cycles < 0) throw new IllegalArgumentException("negative CLK_HSB advance");
             while (cycles != 0) {
-                long adcDeadline = adc.hsbCyclesUntilEvent();
-                long rsentDeadline = rsent.cyclesUntilEvent();
-                long next = Math.min(adcDeadline, Math.min(rsentDeadline, dma.cyclesUntilEvent()));
-                if (faciDeadline != Long.MAX_VALUE)
-                    next = Math.min(next, faciDeadline - hsbCycles);
-                if (icusStartupStub != null && icusStartupStub.deadline != Long.MAX_VALUE)
-                    next = Math.min(next, icusStartupStub.deadline - hsbCycles);
-                if (rscfdRamInitDeadline != Long.MAX_VALUE)
-                    next = Math.min(next, rscfdRamInitDeadline - hsbCycles);
-                // A one-tick span cannot cross a timer edge. When deferring,
-                // however, we need every deadline to bound future retirements.
-                if (next > 1 && (deferQuietTail || cycles > 1))
-                    next = Math.min(next, Math.min(tauj.cyclesUntilEvent(),
-                        Math.min(taud.cyclesUntilEvent(), tsg.cyclesUntilEvent())));
-                if (deferQuietTail && !taud.picDirty && !tsg.picDirty && !tsg.picRoutingDeferred) {
+                long adcDeadline = adc.cyclesUntilEvent();
+                long rsentDeadline = rsentCyclesUntilEvent();
+                long next = nextBusClockEdge(adcDeadline, rsentDeadline);
+                // A one-tick external advance cannot cross a timer edge. Retirement
+                // also needs the next edge to bound subsequent instructions.
+                long tsgDeadline = 0; // Unprobed; defer the lookup to its ordered stage.
+                if (next > 1 && (fromRetirement || cycles > 1)) {
+                    long timer = Math.min(taujCyclesUntilEvent(), taudCyclesUntilEvent());
+                    tsgDeadline = tsg.cyclesUntilEvent(hsbCycles);
+                    next = Math.min(next, Math.min(timer, tsgDeadline));
+                }
+                if (fromRetirement && cycles < next && taudClockDue != 0 && taujClockDue != 0
+                        && !taud.picDirty && !tsg.picDirty && !tsg.picRoutingDeferred) {
                     long bound = Math.min(next, Long.MAX_VALUE - hsbCycles);
                     if (cycles < bound) {
-                        deferredClockCycles = cycles;
-                        quietClockBudget = bound - cycles - 1;
+                        setClockHorizon(bound, adcDeadline, rsentDeadline, tsgDeadline);
+                        hsbCycles += cycles;
                         return;
                     }
                 }
                 long span = Math.min(cycles, next);
                 if (span <= 0) throw new IllegalStateException("non-advancing peripheral clock");
-                advanceClockSpan(thread, span, span == adcDeadline && adcDeadline != Long.MAX_VALUE,
-                    span == rsentDeadline);
+                if (fromRetirement && span == next) invalidateBatchProof();
+                advanceClockSpan(thread, span, clockEventMask(span, adcDeadline, rsentDeadline, tsgDeadline));
                 cycles -= span;
             }
         }
 
-        private void advanceClockSpan(PcodeThread<byte[]> thread, long span,
-                boolean adcEvent, boolean rsentEvent) {
-            hsbCycles = Math.addExact(hsbCycles, span);
+        private static int clockEventMask(long span, long adcDeadline, long rsentDeadline, long tsgDeadline) {
+            return (span == adcDeadline && adcDeadline != Long.MAX_VALUE ? QUIET_ADC_DUE : 0)
+                | (span == rsentDeadline ? QUIET_RSENT_DUE : 0)
+                | (tsgDeadline != 0 ? QUIET_TSG_KNOWN | (span >= tsgDeadline ? QUIET_TSG_DUE : 0) : 0);
+        }
+
+        private void advanceClockSpan(PcodeThread<byte[]> thread, long span, int events) {
+            long start = hsbCycles;
+            hsbCycles = Math.addExact(start, span);
             tsg.deferPicRouting();
-            // Commit ADC results before qualifying coincident new triggers.
-            // Bus reads see the committed peripheral state at this HSB edge.
-            adc.advanceHsbSpan(thread, span, adcEvent);
-            taud.advanceSpan(thread, span);
-            tauj.advanceSpan(thread, span);
-            tsg.advanceSpan(thread, span);
-            rsent.advanceSpan(thread, span, rsentEvent);
+            int stage = 0;
+            try {
+                // Commit ADC results before coincident triggers. Keep the
+                // original span for edge delivery (including TAUJ trace rows).
+                if ((events & QUIET_ADC_DUE) != 0) adc.advanceAtDeadline(thread);
+                stage = 1;
+                // A DMA beat can determine the next span without probing the
+                // timers. Fill any missing slot here, in its ordered stage.
+                if (taudClockDue == 0) taudCyclesUntilEvent();
+                if (taudClockDue == 0 || taudClockDue == hsbCycles) {
+                    syncTaudClock(start);
+                    taudClockTick = hsbCycles;
+                    taudClockDue = 0;
+                    taud.advanceSpan(thread, span);
+                }
+                stage = 2;
+                if (taujClockDue == 0) taujCyclesUntilEvent();
+                if (taujClockDue == 0 || taujClockDue == hsbCycles) {
+                    syncTaujClock(start);
+                    taujClockTick = hsbCycles;
+                    taujClockDue = 0;
+                    tauj.advanceSpan(thread, span);
+                }
+                stage = 3;
+                boolean tsgEvent = (events & QUIET_TSG_KNOWN) != 0
+                    ? (events & QUIET_TSG_DUE) != 0 : span >= tsg.cyclesUntilEvent(start);
+                if (tsgEvent) tsg.advanceSpan(thread, start, span);
+                stage = 4;
+                // At saturation, RSENT must process its final edge before later devices.
+                boolean rsentEvent = (events & QUIET_RSENT_DUE) != 0;
+                if (rsentEvent || hsbCycles == Long.MAX_VALUE) {
+                    syncRsentClock(start);
+                    rsentClockTick = hsbCycles;
+                    rsentClockDue = -1;
+                    rsent.advanceSpan(thread, span, rsentEvent);
+                }
+            }
+            catch (RuntimeException | Error failure) {
+                // Earlier stages reached this edge; later stages reached only
+                // its start. Commit any skipped quiet work, not the missed span.
+                adc.syncClock();
+                syncTaudClock(stage >= 1 ? hsbCycles : start);
+                syncTaujClock(stage >= 2 ? hsbCycles : start);
+                syncRsentClock(stage >= 4 ? hsbCycles : start);
+                if (stage < 4) tsg.recoverClock(start);
+                rebaseDeviceClocks();
+                throw failure;
+            }
             finishPicRouting(thread);
             if (hsbCycles == faciDeadline) completeFaciOperation();
             if (hsbCycles == rscfdRamInitDeadline) {
                 RegisterDef status = requiredRegister("RSCFD", "status", "GSTS");
-                setRegisterValue(status.name, registerValue(status) & ~8L);
+                setRegisterValue(status.nameBinding, registerValue(status) & ~8L);
                 rscfdRamInitDeadline = Long.MAX_VALUE;
             }
             if (icusStartupStub != null && icusStartupStub.deadline != Long.MAX_VALUE
                     && hsbCycles == icusStartupStub.deadline)
                 icusStartupStub.complete();
-            dma.advanceClock(thread);
+            if (dma.nextService <= hsbCycles) dma.advanceClock(thread);
         }
 
         Csih csih(RegisterDef register) {
-            Csih bound = csihBindings.get(register);
+            Csih bound = csihBindings[register.bindingIndex];
             if (bound != null) return bound;
             String prefix = register.name.substring(0, 5);
             return csihControllers.computeIfAbsent(prefix, Csih::new);
@@ -3741,12 +5674,17 @@ public class RunP1MEMachine extends GhidraScript {
         // Section14 word-level wire boundary: no synthetic baud clock or ASIC.
         // FIFO shares 128 entries; dual buffer has separate 64-entry banks.
         final class Csih {
+            private enum Word { CTL0, CTL1, CTL2, MCTL0, MCTL1, MCTL2, MRWP0,
+                STR0, STCR0, TX0W, TX0H, RX0W, RX0H }
+
             final String prefix;
+            private Integer unit;
             final RegisterDef control;
             final Map<String, RegisterDef> bank = new HashMap<>();
-            final Map<RegisterDef, String> suffixes = new HashMap<>();
             final RegisterDef[] configurations = new RegisterDef[8];
             final RegisterDef[] baudRates = new RegisterDef[4];
+            private final RegisterDef[] words;
+            private final RegisterDef dmaSelector;
             final long[] tx = new long[128];
             final long[] rx = new long[128];
             final boolean[] txValid = new boolean[128];
@@ -3772,28 +5710,48 @@ public class RunP1MEMachine extends GhidraScript {
                 if (!control.name.equals(control.control_register) || control.interrupt_channel_base == null)
                     throw new IllegalStateException(prefix + " lacks CSIH controller/IRQ metadata");
                 for (RegisterDef register : registers) {
-                    if (!"csih".equals(register.behavior) || !register.name.startsWith(prefix)) continue;
-                    String suffix = register.name.substring(prefix.length());
+                    if (register.writeDevice != WriteDevice.CSIH || !register.name.startsWith(prefix)) continue;
+                    String suffix = register.csihSuffix = register.name.substring(prefix.length());
                     bank.put(suffix, register);
-                    suffixes.put(register, suffix);
-                    csihBindings.put(register, this);
+                    register.csihWriteWord = switch (suffix) {
+                        case "CTL0" -> Word.CTL0;
+                        case "MCTL0" -> Word.MCTL0;
+                        case "MCTL1" -> Word.MCTL1;
+                        case "MCTL2" -> Word.MCTL2;
+                        case "MRWP0" -> Word.MRWP0;
+                        case "STCR0" -> Word.STCR0;
+                        default -> null;
+                    };
+                    csihBindings[register.bindingIndex] = this;
                 }
                 for (int index = 0; index < configurations.length; index++) configurations[index] = reg("CFG" + index);
                 for (int index = 0; index < baudRates.length; index++) baudRates[index] = reg("BRS" + index);
+                Word[] slots = Word.values();
+                words = new RegisterDef[slots.length];
+                for (Word slot : slots) words[slot.ordinal()] = bank.get(slot.name());
+                dmaSelector = registersByName.get("SELCSIHDMA");
             }
             RegisterDef reg(String suffix) {
                 RegisterDef register = bank.get(suffix);
                 if (register == null) throw new IllegalStateException(prefix + " lacks " + suffix + " metadata");
                 return register;
             }
+            RegisterDef reg(Word slot) {
+                RegisterDef register = words[slot.ordinal()];
+                return register != null ? register : reg(slot.name());
+            }
             long cfg(int index) { return registerValue(configurations[index]); }
             long get(String suffix) { return registerValue(reg(suffix)); }
-            void put(String suffix, long value) { setRegisterValue(reg(suffix).name, value); }
-            int mode() { return (get("CTL0") & 1) != 0 ? -1 : (int) (get("MCTL0") >> 8) & 3; }
-            int capacity() { return mode() == 1 ? 64 : 128; }
-            int pointer(String suffix, int shift) { return (int) (get(suffix) >> shift) & 127; }
-            void pointer(String suffix, int shift, int value) {
-                put(suffix, (get(suffix) & ~(127L << shift)) | ((long) value << shift));
+            long get(Word slot) { return registerValue(reg(slot)); }
+            void put(Word slot, long value) { setRegisterValue(reg(slot), value); }
+            int mode(long controlValue) {
+                return (controlValue & 1) != 0 ? -1 : (int) (get(Word.MCTL0) >> 8) & 3;
+            }
+            int mode() { return mode(get(Word.CTL0)); }
+            static int capacity(int mode) { return mode == 1 ? 64 : 128; }
+            int pointer(Word slot, int shift) { return (int) (get(slot) >> shift) & 127; }
+            void pointer(Word slot, int shift, int value) {
+                put(slot, (get(slot) & ~(127L << shift)) | ((long) value << shift));
             }
             void reset() {
                 generation++;
@@ -3807,20 +5765,20 @@ public class RunP1MEMachine extends GhidraScript {
                 generation++;
                 queued = received = 0;
                 active = launched = bufferStarted = directRxUnread = false;
-                put("MRWP0", 0);
-                put("MCTL2", 0);
+                put(Word.MRWP0, 0);
+                put(Word.MCTL2, 0);
                 frame.clear();
                 status();
             }
             void status() {
-                long flags = get("STR0") & 0xC10BL;
+                long flags = get(Word.STR0) & 0xC10BL;
                 if (active || queued != 0 || bufferStarted) flags |= 0x80;
                 if (mode() == 0) {
                     flags |= (long) queued << 16 | (long) received << 24;
                     if (queued + received == 0) flags |= 0x10;
                     if (queued + received >= 128) flags |= 0x20;
                 } else flags |= 0x10;
-                put("STR0", flags);
+                put(Word.STR0, flags);
             }
             RuntimeException boundary(PcodeThread<byte[]> thread, RegisterDef register, String detail) {
                 return fault("unsupported-csih-operation", thread, register.address, register.size,
@@ -3828,117 +5786,127 @@ public class RunP1MEMachine extends GhidraScript {
             }
             long mask(RegisterDef register) {
                 if (register.writable_mask != null) return register.writable_mask;
-                if (register.name.startsWith(prefix + "CFG")) return 0xFF0FFFFFL;
-                if (register.name.startsWith(prefix + "BRS")) return 0xFFFL;
+                if (register.csihSuffix.startsWith("CFG")) return 0xFF0FFFFFL;
+                if (register.csihSuffix.startsWith("BRS")) return 0xFFFL;
                 throw new IllegalStateException("CSIH writable mask missing: " + register.name);
             }
             void validateWrite(PcodeThread<byte[]> thread, RegisterDef register, long value) {
                 if ((value & ~mask(register)) != 0)
                     throw boundary(thread, register, "reserved bits must be zero");
-                String name = suffixes.get(register);
-                if ("MCTL0".equals(name) && (value & 0x300) == 0x300)
+                Word word = register.csihWriteWord;
+                WriteTrigger trigger = register.writeTrigger;
+                if (word == Word.MCTL0 && (value & 0x300) == 0x300)
                     throw boundary(thread, register, "MMS=11 is prohibited");
-                if (!"CTL0".equals(name) && !"STCR0".equals(name)
-                        && !"MRWP0".equals(name) && !"MCTL1".equals(name)
-                        && !"MCTL2".equals(name) && !"tx".equals(register.trigger)
-                        && !"tx-half".equals(register.trigger)
-                        && (get("CTL0") & 0x80) != 0 && value != get(name))
+                if (trigger != WriteTrigger.TX && trigger != WriteTrigger.TX_HALF
+                        && word != Word.CTL0 && word != Word.STCR0 && word != Word.MRWP0
+                        && word != Word.MCTL1 && word != Word.MCTL2
+                        && (get(Word.CTL0) & 0x80) != 0 && value != get(register.csihSuffix))
                     throw boundary(thread, register, "configuration changes require PWR=0");
-                if ("CTL0".equals(name) && active && (value & 0x80) != 0
-                        && ((value ^ get("CTL0")) & 0x61) != 0)
+                if (word == Word.CTL0 && active && (value & 0x80) != 0
+                        && ((value ^ get(Word.CTL0)) & 0x61) != 0)
                     throw boundary(thread, register, "TXE/RXE/MBS changes during active transfer");
-                if ("MRWP0".equals(name) && mode() == 1
+                if (word == Word.MRWP0 && mode() == 1
                         && ((value & 127) >= 64 || ((value >> 16) & 127) >= 64))
                     throw boundary(thread, register, "dual-buffer pointer exceeds 63");
-                if ("MCTL2".equals(name) && active && (value & 0xFF007F) != get("MCTL2"))
-                    throw boundary(thread, register, "ND/SOP must not change during a buffer transfer");
-                if ("MCTL2".equals(name) && mode() != 0 && mode() != -1
-                        && (((value >> 16) & 255) > capacity() || (value & 127) >= capacity()))
-                    throw boundary(thread, register, "buffer count/start exceeds implemented bank");
-                if ("MCTL2".equals(name) && (value & 0x80000000L) != 0
-                        && (mode() == 0 || mode() == -1 || active))
-                    throw boundary(thread, register, "BTST requires idle dual/transmit-only buffer mode");
-                if ("tx-half".equals(register.trigger) && !txHeaderKnown)
+                if (word == Word.MCTL2) {
+                    if (active && (value & 0xFF007F) != get(Word.MCTL2))
+                        throw boundary(thread, register, "ND/SOP must not change during a buffer transfer");
+                    int mode = mode();
+                    int capacity = capacity(mode);
+                    if (mode > 0 && (((value >> 16) & 255) > capacity || (value & 127) >= capacity))
+                        throw boundary(thread, register, "buffer count/start exceeds implemented bank");
+                    if ((value & 0x80000000L) != 0 && (mode <= 0 || active))
+                        throw boundary(thread, register, "BTST requires idle dual/transmit-only buffer mode");
+                }
+                if (trigger == WriteTrigger.TX_HALF && !txHeaderKnown)
                     throw boundary(thread, register, "TX0H requires an earlier TX0W header");
-                if ("tx".equals(register.trigger) && (value & 0xFF0000) == 0xFF0000)
+                if (trigger == WriteTrigger.TX && (value & 0xFF0000) == 0xFF0000)
                     throw boundary(thread, register, "all chip selects inactive is prohibited");
             }
             void write(PcodeThread<byte[]> thread, RegisterDef register, long value) {
-                String name = suffixes.get(register);
-                if ("CTL0".equals(name)) {
-                    put("CTL0", value & ~2L);
+                Word word = register.csihWriteWord;
+                WriteTrigger trigger = register.writeTrigger;
+                if (word == Word.CTL0) {
+                    put(Word.CTL0, value & ~2L);
                     if ((registerBeforeWrite & 0x80) != 0 && (value & 0x80) == 0) {
                         clearPointers();
                     }
-                    if (((registerBeforeWrite ^ value) & 0x80) != 0) put("STR0", get("STR0") & ~0xC00BL);
-                    start(thread);
-                } else if ("STCR0".equals(name)) {
-                    put("STR0", get("STR0") & ~(value & 0xC00B));
+                    if (((registerBeforeWrite ^ value) & 0x80) != 0) put(Word.STR0, get(Word.STR0) & ~0xC00BL);
+                    if (start(thread)) return;
+                } else if (word == Word.STCR0) {
+                    put(Word.STR0, get(Word.STR0) & ~(value & 0xC00B));
                     if ((value & 0x100) != 0) clearPointers();
-                    put("STCR0", 0);
-                } else if ("MCTL2".equals(name)) {
-                    put("MCTL2", value & 0xFF007F);
+                    put(Word.STCR0, 0);
+                } else if (word == Word.MCTL2) {
+                    put(Word.MCTL2, value & 0xFF007F);
                     if ((value & 0x80000000L) != 0) {
                         bufferStarted = ((value >> 16) & 255) != 0;
-                        start(thread);
+                        if (start(thread)) return;
                     }
-                } else if ("tx".equals(register.trigger) || "tx-half".equals(register.trigger)) {
-                    if ("tx".equals(register.trigger)) {
+                } else if (trigger == WriteTrigger.TX || trigger == WriteTrigger.TX_HALF) {
+                    if (trigger == WriteTrigger.TX) {
                         txHeaderKnown = true;
                         txHeader = value & 0xFFFF0000L;
                     } else value |= txHeader;
-                    if (mode() == 0 && queued + received >= 128) {
-                        put("STR0", get("STR0") | 0x4000);
+                    int mode = mode();
+                    if (mode == 0 && queued + received >= 128) {
+                        put(Word.STR0, get(Word.STR0) | 0x4000);
                         interrupt(thread, 0, value);
-                    } else if (mode() == -1 && queued >= 2) {
+                    } else if (mode == -1 && queued >= 2) {
                         throw boundary(thread, register, "direct shift/data register already occupied");
                     } else {
-                        int index = mode() == -1 ? queued : pointer("MRWP0", 0);
+                        int index = mode == -1 ? queued : pointer(Word.MRWP0, 0);
                         tx[index] = value;
                         txValid[index] = true;
-                        put("TX0W", value);
-                        put("TX0H", value & 0xFFFF);
-                        if (mode() == 0 || mode() == -1) queued++;
-                        if (mode() != -1) pointer("MRWP0", 0, (index + 1) % capacity());
-                        start(thread);
+                        put(Word.TX0W, value);
+                        put(Word.TX0H, value & 0xFFFF);
+                        if (mode <= 0) queued++;
+                        if (mode != -1) pointer(Word.MRWP0, 0, (index + 1) % capacity(mode));
+                        if (start(thread)) return;
                     }
                 }
                 status();
             }
-            void requireNormal(PcodeThread<byte[]> thread) {
-                if (mode() == 3)
-                    throw boundary(thread, reg("MCTL0"), "MMS=11 is prohibited");
-                if ((get("CTL1") & 0x4006BL) != 0)
-                    throw boundary(thread, reg("CTL1"), "job, priority, data-consistency, loopback, handshake and slave-select pin modes are not modeled");
-                if ((get("MCTL0") & 31) != 0)
-                    throw boundary(thread, reg("MCTL0"), "FIFO timeout needs serial-clock elapsed-time input");
-                if ((get("CTL0") & 0x60) == 0x20)
+            // A successful start publishes the new status before enqueueing the launch.
+            boolean start(PcodeThread<byte[]> thread) {
+                if (active) return false;
+                long controlValue = get(Word.CTL0);
+                if ((controlValue & 0x80) == 0 || (controlValue & 0x60) == 0) return false;
+                // Direct mode does not inspect MCTL0 until after CTL1.
+                boolean direct = (controlValue & 1) != 0;
+                long memoryControl = direct ? 0 : get(Word.MCTL0);
+                int mode = direct ? -1 : (int) (memoryControl >> 8) & 3;
+                if (mode <= 0 ? queued == 0 : !bufferStarted) return false;
+                if (mode == 3)
+                    throw boundary(thread, reg(Word.MCTL0), "MMS=11 is prohibited");
+                if ((get(Word.CTL1) & 0x4006BL) != 0)
+                    throw boundary(thread, reg(Word.CTL1), "job, priority, data-consistency, loopback, handshake and slave-select pin modes are not modeled");
+                if (((direct ? get(Word.MCTL0) : memoryControl) & 31) != 0)
+                    throw boundary(thread, reg(Word.MCTL0), "FIFO timeout needs serial-clock elapsed-time input");
+                if ((controlValue & 0x60) == 0x20)
                     throw boundary(thread, control, "receive-only clock generation requires explicit pin/clock mode");
-            }
-            void start(PcodeThread<byte[]> thread) {
-                if (active || (get("CTL0") & 0x80) == 0 || (get("CTL0") & 0x60) == 0) return;
-                if (mode() <= 0 ? queued == 0 : !bufferStarted) return;
-                requireNormal(thread);
-                int index = mode() == -1 ? 0 : pointer("MCTL2", 0);
-                if (!txValid[index]) throw boundary(thread, reg("TX0W"), "transfer reads unwritten transmit buffer entry " + index);
-                int selected = selected(tx[index]);
+                int index = direct ? 0 : pointer(Word.MCTL2, 0);
+                if (!txValid[index]) throw boundary(thread, reg(Word.TX0W), "transfer reads unwritten transmit buffer entry " + index);
+                long transmitWord = tx[index];
+                int selectedLines = selectedLines(transmitWord);
+                int selected = selected(selectedLines);
                 long configuration = cfg(selected);
                 // Section14.5.3.1: RCB priority applies only to simultaneous CS lines.
-                int selectedLines = (int) (~(tx[index] >>> 16)) & 255;
                 boolean broadcast = (selectedLines & (selectedLines - 1)) != 0;
                 if (broadcast && (configuration & 0x80000) != 0)
-                    throw boundary(thread, reg("TX0W"), "broadcast has no dominant chip-select configuration");
+                    throw boundary(thread, reg(Word.TX0W), "broadcast has no dominant chip-select configuration");
                 for (int cs = 0; cs < 8; cs++) {
-                    long other = cfg(cs);
-                    if ((tx[index] & (1L << (16 + cs))) == 0 && (other & 0x80000) == 0
+                    // Still inspect unselected entries in their original order.
+                    long other = cs == selected ? configuration : cfg(cs);
+                    if ((selectedLines & (1 << cs)) != 0 && (other & 0x80000) == 0
                             && other != configuration)
-                        throw boundary(thread, reg("TX0W"), "dominant broadcast configurations disagree");
+                        throw boundary(thread, reg(Word.TX0W), "dominant broadcast configurations disagree");
                 }
-                if ((get("CTL2") & 0xE000) != 0xE000
-                        && registerValue(baudRates[(int) (configuration >> 30) & 3]) == 0) return;
-                if (!frame.isEmpty() && (frame.get(0) & 0xFF0000) != (tx[index] & 0xFF0000))
-                    throw boundary(thread, reg("TX0W"), "EDL continuation changes chip select");
-                activeWord = tx[index];
+                if ((get(Word.CTL2) & 0xE000) != 0xE000
+                        && registerValue(baudRates[(int) (configuration >> 30) & 3]) == 0) return false;
+                if (!frame.isEmpty() && (frame.get(0) & 0xFF0000) != (transmitWord & 0xFF0000))
+                    throw boundary(thread, reg(Word.TX0W), "EDL continuation changes chip select");
+                activeWord = transmitWord;
                 active = true;
                 launched = false;
                 status();
@@ -3946,18 +5914,14 @@ public class RunP1MEMachine extends GhidraScript {
                 scheduleNextTick(() -> {
                     if (epoch != generation || !active) return;
                     launched = true;
-                    JsonObject event = event("csih-tx");
-                    event.addProperty("word", hex32(activeWord));
-                    int bits = dataBits(activeWord);
-                    event.addProperty("value", hex32(activeWord & ((1L << bits) - 1)));
-                    event.addProperty("chip_select", (activeWord >> 16) & 255);
-                    int cs = selected(activeWord);
-                    long cfg = cfg(cs);
-                    event.addProperty("bits", bits);
-                    event.addProperty("lsb_first", (cfg & 0x40000) != 0);
+                    long word = activeWord;
+                    long configurationAtLaunch = cfg(selected(selectedLines(word)));
+                    int bits = dataBits(word, configurationAtLaunch);
                     long wordOrdinal = ++transmittedWords;
-                    event.addProperty("transmit_ordinal", wordOrdinal);
-                    trace.deviceEvents.add(event);
+                    if (!trace.deviceEvents.omitsEventPayload(JsonRows.CSIH_TX.name)) {
+                        trace.deviceEvents.addCsihTx(unit(), trace.instructions, activeWord, bits,
+                            (configurationAtLaunch & 0x40000) != 0, wordOrdinal);
+                    }
                     WireInput wire = relativeInputs.take(wordOrdinal);
                     if (wire != null) {
                         ExternalEvent input = wire.payload;
@@ -3969,28 +5933,34 @@ public class RunP1MEMachine extends GhidraScript {
                             complete(thread, input);
                         }));
                     }
-                    boolean early = mode() == -1 || mode() == 2;
-                    boolean request = mode() == -1 || ((get("MCTL2") >> 16) & 255) == 1;
-                    if (early && request && (get("CTL1") & 0x10000) != 0) interrupt(thread, 2, activeWord);
+                    int launchMode = mode();
+                    boolean early = launchMode == -1 || launchMode == 2;
+                    boolean request = launchMode == -1 || ((get(Word.MCTL2) >> 16) & 255) == 1;
+                    if (early && request && (get(Word.CTL1) & 0x10000) != 0) interrupt(thread, 2, activeWord);
                 });
+                return true;
             }
             int dataBits(long word) {
-                int bits = (int) (cfg(selected(word)) >> 24) & 15;
-                return bits == 0 || ((get("CTL1") & 0x80) != 0 && (word & 0x20000000L) != 0) ? 16 : bits;
+                return dataBits(word, cfg(selected(selectedLines(word))));
             }
-            int selected(long word) {
-                int selected = (int) (~word >> 16) & 255;
-                for (int cs = 0; cs < 8; cs++)
-                    if ((selected & (1 << cs)) != 0 && (cfg(cs) & 0x80000) == 0) return cs;
-                return Integer.numberOfTrailingZeros(selected);
+            int dataBits(long word, long configuration) {
+                int bits = (int) (configuration >> 24) & 15;
+                return bits == 0 || ((get(Word.CTL1) & 0x80) != 0 && (word & 0x20000000L) != 0) ? 16 : bits;
             }
-            JsonObject event(String kind) {
-                JsonObject event = new JsonObject();
-                event.addProperty("kind", kind);
-                event.addProperty("unit", Integer.parseInt(prefix.substring(4)));
-                event.addProperty("scheduler_tick", trace.instructions);
-                event.addProperty("evidence", "R01UH0585EJ0120 section14.3-14.5");
-                return event;
+            static int selectedLines(long word) { return (int) (~word >> 16) & 255; }
+            int selected(int lines) {
+                int first = Integer.numberOfTrailingZeros(lines);
+                // One asserted line wins even when recessive; the caller still reads its CFG.
+                if ((lines & (lines - 1)) == 0) return first;
+                for (int remaining = lines; remaining != 0; remaining &= remaining - 1) {
+                    int cs = Integer.numberOfTrailingZeros(remaining);
+                    if ((cfg(cs) & 0x80000) == 0) return cs;
+                }
+                return first;
+            }
+            int unit() {
+                if (unit == null) unit = Integer.parseInt(prefix.substring(4));
+                return unit;
             }
             void interruptSource(PcodeThread<byte[]> thread, int kind) {
                 int base = control.interrupt_channel_base;
@@ -4006,7 +5976,8 @@ public class RunP1MEMachine extends GhidraScript {
                 if (base == 82 || base == 90) {
                     if (kind == 3) kind = 7;
                     else if (kind == 1 || kind == 2) {
-                        int select = (int) registerValue(requiredRegister(prefix, "DMA selector", "SELCSIHDMA"));
+                        int select = (int) registerValue(dmaSelector != null ? dmaSelector
+                            : requiredRegister(prefix, "DMA selector", "SELCSIHDMA"));
                         int shift = base == 82 ? 0 : 2;
                         int bit = kind == 1 ? shift + 1 : shift;
                         if ((select & (1 << bit)) == 0 || (word & 0x10000) == 0)
@@ -4021,12 +5992,13 @@ public class RunP1MEMachine extends GhidraScript {
             void complete(PcodeThread<byte[]> thread, ExternalEvent input) {
                 if (!active || !launched)
                     throw boundary(thread, control, "csih-word has no launched transfer to complete");
-                boolean receive = (get("CTL0") & 0x20) != 0;
+                long controlValue = get(Word.CTL0);
+                boolean receive = (controlValue & 0x20) != 0;
                 if (receive != (input.value != null))
                     throw boundary(thread, control, "RXE requires explicit wire value; TX-only completion omits value");
                 long word = activeWord;
-                int memoryMode = mode();
-                int index = memoryMode == -1 ? 0 : pointer("MCTL2", 0);
+                int memoryMode = mode(controlValue);
+                int index = memoryMode == -1 ? 0 : pointer(Word.MCTL2, 0);
                 if (receive) {
                     long receivedWord = (word & 0xFF0000) | (parseUnsigned(input.value) & ((1L << dataBits(word)) - 1));
                     if (memoryMode == 1 || memoryMode == 0) {
@@ -4036,67 +6008,70 @@ public class RunP1MEMachine extends GhidraScript {
                         if (memoryMode == 0) received++;
                     } else {
                         if (directRxUnread) {
-                            put("STR0", get("STR0") | 1);
+                            put(Word.STR0, get(Word.STR0) | 1);
                             interrupt(thread, 0, word);
                         }
                         rx[0] = receivedWord;
                         rxValid[0] = directRxUnread = true;
                     }
-                    put("RX0W", receivedWord);
-                    put("RX0H", receivedWord & 0xFFFF);
+                    put(Word.RX0W, receivedWord);
+                    put(Word.RX0H, receivedWord & 0xFFFF);
                 }
                 active = launched = false;
                 if (memoryMode <= 0) {
                     queued--;
                     if (memoryMode == -1 && queued != 0) { tx[0] = tx[1]; txValid[0] = txValid[1]; }
                 } else {
-                    int remaining = (int) (get("MCTL2") >> 16) & 255;
-                    put("MCTL2", ((long) (remaining - 1) << 16) | ((index + 1) % capacity()));
+                    int remaining = (int) (get(Word.MCTL2) >> 16) & 255;
+                    put(Word.MCTL2, ((long) (remaining - 1) << 16) | ((index + 1) % capacity(memoryMode)));
                     bufferStarted = remaining > 1;
                 }
-                if (memoryMode == 0) pointer("MCTL2", 0, (index + 1) % 128);
+                if (memoryMode == 0) pointer(Word.MCTL2, 0, (index + 1) % 128);
                 boolean last = memoryMode <= 0 ? queued == 0 : !bufferStarted;
-                if (receive && (memoryMode == 0 ? received == 128 - (get("MCTL1") & 127)
+                if (receive && (memoryMode == 0 ? received == 128 - (get(Word.MCTL1) & 127)
                         : memoryMode != 1 || last)) interrupt(thread, 1, word);
-                boolean communicate = memoryMode == 0 ? queued == ((get("MCTL1") >> 16) & 127)
-                    : memoryMode == -1 ? (get("CTL1") & 0x10000) == 0
-                    : last;
-                if (communicate && !((memoryMode == -1 || memoryMode == 2)
-                        && (get("CTL1") & 0x10000) != 0)) interrupt(thread, 2, word);
+                boolean communicate = switch (memoryMode) {
+                    case 0 -> queued == ((get(Word.MCTL1) >> 16) & 127);
+                    case -1 -> (get(Word.CTL1) & 0x10000) == 0;
+                    case 2 -> last && (get(Word.CTL1) & 0x10000) == 0;
+                    default -> last;
+                };
+                if (communicate) interrupt(thread, 2, word);
                 frame.add(word);
-                boolean continued = (get("CTL1") & 0x80) != 0 && (word & 0x20000000L) != 0;
+                boolean continued = (get(Word.CTL1) & 0x80) != 0 && (word & 0x20000000L) != 0;
                 if (!continued) {
-                    JsonObject evidence = event("csih-frame");
-                    evidence.add("words", GSON.toJsonTree(frame));
-                    trace.deviceEvents.add(evidence);
+                    if (!trace.deviceEvents.omitsEventPayload(JsonRows.CSIH_FRAME.name)) {
+                        trace.deviceEvents.addCsihFrame(unit(), trace.instructions, frame);
+                    }
                     frame.clear();
                 }
-                JsonObject evidence = event("csih-word");
-                if (receive) evidence.addProperty("value", input.value);
-                evidence.addProperty("input_evidence", input.evidence);
-                trace.deviceEvents.add(evidence);
+                if (!trace.deviceEvents.omitsEventPayload(JsonRows.CSIH_WORD.name)) {
+                    trace.deviceEvents.addCsihWord(unit(), trace.instructions,
+                        receive ? input.value : null, input.evidence);
+                }
                 status();
                 start(thread);
             }
-            void read(PcodeThread<byte[]> thread, RegisterDef register) {
-                if ("rx".equals(register.trigger)) {
-                    int index = mode() == -1 || mode() == 2 ? 0 : pointer("MRWP0", 16);
-                    if (!rxValid[index] || (mode() == 0 && received == 0))
+            void read(PcodeThread<byte[]> thread, RegisterDef register, boolean receive) {
+                int mode = mode();
+                if (receive) {
+                    int index = mode == -1 || mode == 2 ? 0 : pointer(Word.MRWP0, 16);
+                    if (!rxValid[index] || (mode == 0 && received == 0))
                         throw boundary(thread, register, "receive data is not supplied at buffer entry " + index);
-                    setRegisterValue(register.name, register.size == 2 ? rx[index] & 0xFFFF : rx[index]);
+                    setRegisterValue(register.nameBinding, register.size == 2 ? rx[index] & 0xFFFF : rx[index]);
                     directRxUnread = false;
-                    if (mode() == 0) received--;
-                    if (mode() == 0 || mode() == 1) pointer("MRWP0", 16, (index + 1) % capacity());
+                    if (mode == 0) received--;
+                    if (mode == 0 || mode == 1) pointer(Word.MRWP0, 16, (index + 1) % capacity(mode));
                     status();
-                } else if ("tx".equals(register.trigger) || "tx-half".equals(register.trigger)) {
-                    if (mode() == -1) {
+                } else {
+                    if (mode == -1) {
                         if (!txHeaderKnown) throw boundary(thread, register, "direct transmit register is unwritten");
                         return;
                     }
-                    int index = mode() == -1 ? 0 : pointer("MRWP0", 0);
+                    int index = pointer(Word.MRWP0, 0);
                     if (!txValid[index]) throw boundary(thread, register, "transmit buffer entry is unwritten");
-                    setRegisterValue(register.name, register.size == 2 ? tx[index] & 0xFFFF : tx[index]);
-                    if (mode() != -1) pointer("MRWP0", 0, (index + 1) % capacity());
+                    setRegisterValue(register.nameBinding, register.size == 2 ? tx[index] & 0xFFFF : tx[index]);
+                    pointer(Word.MRWP0, 0, (index + 1) % capacity(mode));
                 }
             }
         }
@@ -4117,7 +6092,7 @@ public class RunP1MEMachine extends GhidraScript {
             final int[] picEdges = new int[2];
             long picTsgSources, picOtherSources, nextSources;
             boolean picRoutingDeferred, picDirty, clockHorizonDirty = true;
-            long clockHorizon = Long.MAX_VALUE;
+            long clockTick, clockHorizon = Long.MAX_VALUE;
 
             Tsg() {
                 for (int n = 0; n < 2; n++) {
@@ -4129,11 +6104,12 @@ public class RunP1MEMachine extends GhidraScript {
             Unit unit(RegisterDef register) {
                 return units[register.name.charAt(4) - '0'];
             }
-            boolean isTimer(RegisterDef register) { return "tsg".equals(register.behavior); }
+            boolean isTimer(RegisterDef register) { return register.writeDevice == WriteDevice.TSG; }
             void reset() {
                 for (Unit u : units) u.reset();
                 picTsgSources = picOtherSources = nextSources = 0;
                 picRoutingDeferred = picDirty = false;
+                clockTick = hsbCycles;
                 clockHorizonDirty = true; clockHorizon = Long.MAX_VALUE;
                 Arrays.fill(picEdges, 0);
                 for (int n = 0; n < 2; n++) {
@@ -4144,6 +6120,7 @@ public class RunP1MEMachine extends GhidraScript {
             void initializeFromDeclaredState(PcodeThread<byte[]> thread, Set<String> declaredRegisters) {
                 if (declaredRegisters == null) throw new IllegalArgumentException("initial register declarations required");
                 for (Unit u : units) u.initializeFromDeclaredState(thread, declaredRegisters);
+                clockTick = hsbCycles;
                 clockHorizonDirty = true;
                 for (int n = 0; n < 2; n++) {
                     picEdges[n] = (int) registerValue(edgeSelect[n]);
@@ -4172,14 +6149,17 @@ public class RunP1MEMachine extends GhidraScript {
             }
             void read(PcodeThread<byte[]> thread, RegisterDef register) {
                 Unit u = unit(register);
+                syncClock(hsbCycles);
                 if (u.offset(register) == 0x014) throw unsupported(thread, register,
                     "STR1 includes output/input pattern observations; no pin feedback is synthesized");
                 u.materialize(register);
             }
             void write(PcodeThread<byte[]> thread, RegisterDef register, long value) {
                 if (isTimer(register)) {
+                    syncClock(hsbCycles);
                     unit(register).write(thread, register, value);
-                    clockHorizonDirty = true;
+                    // Preserve the refresh on a write after a partial edge fault.
+                    if (units[0].clockDue == 0 || units[1].clockDue == 0) clockHorizonDirty = true;
                     return;
                 }
                 boolean changed = false;
@@ -4240,26 +6220,49 @@ public class RunP1MEMachine extends GhidraScript {
                     }
                 }
             }
-            long cyclesUntilEvent() {
+            long cyclesUntilEvent(long tick) {
                 if (clockHorizonDirty) {
                     clockHorizon = picTsgSources != 0 ? 1
-                        : Math.min(units[0].cyclesUntilEvent(), units[1].cyclesUntilEvent());
+                        : Math.min(units[0].remaining(clockTick), units[1].remaining(clockTick));
                     clockHorizonDirty = false;
                 }
-                return clockHorizon;
+                return clockHorizon == Long.MAX_VALUE ? Long.MAX_VALUE
+                    : clockHorizon - (tick - clockTick);
             }
-            // The HSB coordinator has already bounded the span to our next edge.
-            void advanceSpan(PcodeThread<byte[]> thread, long span) {
-                if (span < cyclesUntilEvent()) {
-                    for (Unit u : units) u.moveQuiet(span);
-                    if (clockHorizon != Long.MAX_VALUE) clockHorizon -= span;
-                    return;
+            void syncClock(long tick) {
+                // No compare, pulse fall, or counter turn occurs during this
+                // span. The counters do not have to move at another device's edge.
+                long span = tick - clockTick;
+                if (span == 0) return;
+                if (units[0].enabled) units[0].moveQuiet(span);
+                if (units[1].enabled) units[1].moveQuiet(span);
+                if (clockHorizon != Long.MAX_VALUE) clockHorizon -= span;
+                clockTick = tick;
+            }
+            void recoverClock(long start) {
+                // An earlier stage may have faulted before we saw this span;
+                // or one TSG unit may have faulted before the other ran its edge.
+                // Keep the counters/horizon the ordered stages left behind.
+                if (clockTick != hsbCycles) syncClock(start);
+                clockTick = hsbCycles;
+                units[0].clockDue = units[1].clockDue = 0;
+            }
+            void advanceSpan(PcodeThread<byte[]> thread, long start, long span) {
+                syncClock(start);
+                Unit first = units[0], second = units[1];
+                boolean firstDue = first.remaining(start) <= span;
+                boolean secondDue = second.remaining(start) <= span;
+                if (span > 1) {
+                    first.moveQuiet(span - 1);
+                    second.moveQuiet(span - 1);
                 }
-                if (span > 1) for (Unit u : units) u.moveQuiet(span - 1);
+                clockTick = hsbCycles;
                 nextSources = 0;
                 // Commit every timer's clock edge before DMA can write any timer's shadow bank.
-                for (Unit u : units) u.edge(thread);
-                for (Unit u : units) u.deliver(thread);
+                first.advanceEdge(thread, firstDue);
+                second.advanceEdge(thread, secondDue);
+                if (first.interrupts != 0) first.deliver(thread);
+                if (second.interrupts != 0) second.deliver(thread);
                 if (picTsgSources != nextSources) {
                     picTsgSources = nextSources;
                     picSourcesChanged(thread);
@@ -4280,6 +6283,7 @@ public class RunP1MEMachine extends GhidraScript {
                 boolean enabled, down, subDown, pending, ctl4Dirty, ioc3Dirty, initialSub;
                 boolean activeKnown;
                 long counter, subCounter;
+                long clockDue;
                 int irqSkip, interrupts;
                 Unit(int index) {
                     this.index = index;
@@ -4298,7 +6302,7 @@ public class RunP1MEMachine extends GhidraScript {
                 void put(int offset, long value) {
                     RegisterDef r = bank[offset >>> 2];
                     if (r == null) throw new IllegalStateException("TSG metadata missing offset " + offset);
-                    setRegisterValue(r.name, value);
+                    setRegisterValue(r.nameBinding, value);
                 }
                 void store(int offset, long value) { desired[offset >>> 2] = value; put(offset, value); }
                 boolean reloadable(int offset) {
@@ -4315,6 +6319,7 @@ public class RunP1MEMachine extends GhidraScript {
                     enabled = down = subDown = pending = ctl4Dirty = ioc3Dirty = initialSub = false;
                     counter = subCounter = 0;
                     irqSkip = interrupts = 0;
+                    clockDue = 0;
                     activeKnown = true;
                 }
                 RuntimeException initialFault(PcodeThread<byte[]> thread, int offset, String detail) {
@@ -4449,7 +6454,12 @@ public class RunP1MEMachine extends GhidraScript {
                         put(o, 0);
                         if ((value & 1) != 0) {
                             if (o == 0x030) start(thread);
-                            else if (o == 0x034) { enabled = false; publishStatus(); }
+                            else if (o == 0x034) {
+                                enabled = false;
+                                clockDue = NO_CLOCK_EDGE;
+                                clockHorizonDirty = true;
+                                publishStatus();
+                            }
                         }
                         return;
                     }
@@ -4478,6 +6488,8 @@ public class RunP1MEMachine extends GhidraScript {
                 }
                 void start(PcodeThread<byte[]> thread) {
                     validateStart(thread);
+                    syncClock(hsbCycles);
+                    clockDue = 0;
                     clockHorizonDirty = true;
                     for (int o : RELOAD) active[o >>> 2] = v(o);
                     active[0x07c >>> 2] = v(0x07c); active[0x074 >>> 2] = v(0x074);
@@ -4512,6 +6524,19 @@ public class RunP1MEMachine extends GhidraScript {
                 long until(long value, long target, boolean decrement) {
                     long distance = decrement ? value - target : target - value;
                     return distance < 0 || (distance & 1) != 0 ? Long.MAX_VALUE : distance / 2 + 1;
+                }
+                long remaining(long tick) {
+                    if (clockDue == 0) clockDue = timerDeadline(tick, cyclesUntilEvent());
+                    return clockDue == NO_CLOCK_EDGE ? Long.MAX_VALUE : clockDue - tick;
+                }
+                void advanceEdge(PcodeThread<byte[]> thread, boolean due) {
+                    if (due) {
+                        clockDue = 0;
+                        edge(thread);
+                    } else {
+                        interrupts = 0;
+                        moveQuiet(1);
+                    }
                 }
                 long cyclesUntilEvent() {
                     if (!enabled) return Long.MAX_VALUE;
@@ -4627,6 +6652,8 @@ public class RunP1MEMachine extends GhidraScript {
                     "peripheral", r.source_ref, detail);
             }
             void reset() {
+                syncTaudClock(hsbCycles);
+                taudClockDue = 0;
                 for (Unit u : units) u.reset();
                 for (int n = 0; n < 2; n++) for (int g = 0; g < 5; g++)
                     adcMasks[n][g] = (int)registerValue(adcEnable[n][g]);
@@ -4634,19 +6661,24 @@ public class RunP1MEMachine extends GhidraScript {
             }
             void read(RegisterDef r) {
                 Unit u = unit(r); int o = u.offset(r);
-                if (o >= 0x80 && o < 0xc0) setRegisterValue(r.name, u.counters[(o - 0x80) / 4]);
+                if (o >= 0x80 && o < 0xc0) {
+                    syncTaudClock(hsbCycles);
+                    setRegisterValue(r.nameBinding, u.counters[(o - 0x80) / 4]);
+                }
             }
             void flush() {
                 for (Unit u : units) for (int c = 0; c < 16; c++)
-                    setRegisterValue(u.count[c].name, u.counters[c]);
+                    setRegisterValue(u.count[c].nameBinding, u.counters[c]);
             }
             void validate(PcodeThread<byte[]> t, RegisterDef r, long v) {
                 long mask = r.writable_mask == null ? 0xffffL : r.writable_mask;
                 if ((v & ~mask) != 0) throw unsupported(t, r, "reserved bits must retain reset value");
-                if ("taud".equals(r.behavior)) unit(r).validate(t, r, v);
+                if (r.writeDevice == WriteDevice.TAUD) unit(r).validate(t, r, v);
             }
             void write(PcodeThread<byte[]> t, RegisterDef r, long v) {
-                if ("taud".equals(r.behavior)) {
+                if (r.writeDevice == WriteDevice.TAUD) {
+                    syncTaudClock(hsbCycles);
+                    taudClockDue = 0;
                     unit(r).write(t, r, (int)v);
                     finishEdges(t);
                 } else {
@@ -4660,6 +6692,8 @@ public class RunP1MEMachine extends GhidraScript {
             }
             void simultaneousStart(PcodeThread<byte[]> t, long sser0, long sser1) {
                 validateSimultaneousStart(t, sser0, sser1);
+                syncTaudClock(hsbCycles);
+                taudClockDue = 0;
                 units[0].start((int)sser0 & 0xffff);
                 units[1].start((int)sser1 & 0xffff);
                 finishEdges(t);
@@ -4673,6 +6707,9 @@ public class RunP1MEMachine extends GhidraScript {
             void driveInput(PcodeThread<byte[]> t, int number, int channel, boolean high) {
                 if (number < 0 || number >= 2 || channel < 0 || channel >= 16)
                     throw new IllegalArgumentException("TAUD input unit/channel out of range");
+                invalidateClockHorizon();
+                syncTaudClock(hsbCycles);
+                taudClockDue = 0;
                 Unit u = units[number];
                 if (!u.known[channel] || !u.enabled(channel)) {
                     u.known[channel] = true; u.sampled[channel] = high;
@@ -4828,7 +6865,7 @@ public class RunP1MEMachine extends GhidraScript {
                     if ((k == 0 || k == 4) && (m(c) & 1) != 0) emit(c);
                 }
                 void start(int mask) {
-                    enabledMask |= mask; setRegisterValue(enable.name, enabledMask);
+                    enabledMask |= mask; setRegisterValue(enable.nameBinding, enabledMask);
                     for (int c = 0; c < 16; c++) if ((mask & (1 << c)) != 0) {
                         clockChannels[cks(c)] |= 1 << c;
                         running[c] = false; overflow[c] = false;
@@ -4839,24 +6876,24 @@ public class RunP1MEMachine extends GhidraScript {
                     int o = offset(r);
                     if (o < 0x40) {
                         int c = o / 4;
-                        if (capture(c)) setRegisterValue(r.name, registerBeforeWrite);
+                        if (capture(c)) setRegisterValue(r.nameBinding, registerBeforeWrite);
                         else reloads[c] = v;
                     }
                     else if (o >= 0xc0 && o < 0x100) edges[(o - 0xc0) / 4] = v & 3;
-                    else if (o == 0x58) setRegisterValue(r.name,
+                    else if (o == 0x58) setRegisterValue(r.nameBinding,
                         (registerBeforeWrite & registerValue(outputEnable)) | (v & ~registerValue(outputEnable)));
-                    else if (o == 0x1c4) { start(v); setRegisterValue(r.name, 0); }
+                    else if (o == 0x1c4) { start(v); setRegisterValue(r.nameBinding, 0); }
                     else if (o == 0x1c8) {
-                        enabledMask &= ~v; setRegisterValue(enable.name, enabledMask);
+                        enabledMask &= ~v; setRegisterValue(enable.nameBinding, enabledMask);
                         for (int c = 0; c < 16; c++) if ((v & (1 << c)) != 0) {
                             clockChannels[cks(c)] &= ~(1 << c);
                             running[c] = false;
                         }
-                        setRegisterValue(r.name, 0);
+                        setRegisterValue(r.nameBinding, 0);
                     } else if (o >= 0x180 && o < 0x1c0) {
                         int c = (o - 0x180) / 4;
-                        if ((v & 1) != 0) setRegisterValue(status[c].name, registerValue(status[c]) & ~1L);
-                        setRegisterValue(r.name, 0);
+                        if ((v & 1) != 0) setRegisterValue(status[c].nameBinding, registerValue(status[c]) & ~1L);
+                        setRegisterValue(r.nameBinding, 0);
                     } else if (o >= 0x200 && o < 0x240) {
                         int c = (o - 0x200) / 4;
                         modes[c] = v;
@@ -4867,12 +6904,12 @@ public class RunP1MEMachine extends GhidraScript {
                         for (int ck = 0; ck < 4; ck++) if ((((registerBeforeWrite ^ v) >>> (4 * ck)) & 15) != 0)
                             phase[ck] = 0;
                     } else if (o == 0x244) { brsValue = v; updateDivisors(); phase[3] = 0; }
-                    else if (o == 0x44) setRegisterValue(r.name, 0);
+                    else if (o == 0x44) setRegisterValue(r.nameBinding, 0);
                 }
                 void emit(int c) {
                     emitted |= 1 << c;
                     if ((registerValue(outputEnable) & (1 << c)) != 0 && !capture(c))
-                        setRegisterValue(output.name, registerValue(output) ^ (1 << c));
+                        setRegisterValue(output.nameBinding, registerValue(output) ^ (1 << c));
                 }
                 void down(int c, long amount) {
                     long current = counters[c];
@@ -4895,8 +6932,8 @@ public class RunP1MEMachine extends GhidraScript {
                 }
                 void captureValue(int c) {
                     int cos = (m(c) >>> 6) & 3;
-                    if ((cos & 2) == 0 || !overflow[c]) setRegisterValue(data[c].name, counters[c]);
-                    if (cos == 0) setRegisterValue(status[c].name, overflow[c] ? 1 : 0);
+                    if ((cos & 2) == 0 || !overflow[c]) setRegisterValue(data[c].nameBinding, counters[c]);
+                    if (cos == 0) setRegisterValue(status[c].nameBinding, overflow[c] ? 1 : 0);
                     overflow[c] = false;
                     emit(c);
                 }
@@ -4943,21 +6980,20 @@ public class RunP1MEMachine extends GhidraScript {
                     int dueChannels = 0;
                     for (int ck = 0; ck < 4; ck++) {
                         long div = divisor(ck);
-                        if (span == 1) {
-                            if (div != 1) {
-                                long next = phase[ck] + 1;
-                                if (next < div) {
-                                    phase[ck] = next;
-                                    continue;
-                                }
-                                phase[ck] = 0;
-                            }
+                        if (div == 1) {
+                            if (span != 1 && clockChannels[ck] != 0) ticks[ck] = span;
+                        } else if (span == 1) {
+                            if (++phase[ck] < div) continue;
+                            phase[ck] = 0;
                         } else {
-                            long rest = span % div + phase[ck];
+                            long mask = div - 1;
+                            boolean binary = (div & mask) == 0;
+                            long rest = (binary ? span & mask : span % div) + phase[ck];
                             boolean wraps = rest >= div;
                             phase[ck] = wraps ? rest - div : rest;
                             if (clockChannels[ck] == 0) continue;
-                            long amount = span / div + (wraps ? 1 : 0);
+                            long whole = binary ? span >>> Long.numberOfTrailingZeros(div) : span / div;
+                            long amount = whole + (wraps ? 1 : 0);
                             if (amount == 0) continue;
                             ticks[ck] = amount;
                         }
@@ -4974,8 +7010,8 @@ public class RunP1MEMachine extends GhidraScript {
                             if (sum >= 0x10000) {
                                 overflow[c] = true;
                                 int cos = (m(c) >>> 6) & 3;
-                                if ((cos & 1) != 0) setRegisterValue(status[c].name, registerValue(status[c]) | 1);
-                                if ((cos & 2) != 0) setRegisterValue(data[c].name, 0xffff);
+                                if ((cos & 1) != 0) setRegisterValue(status[c].nameBinding, registerValue(status[c]) | 1);
+                                if ((cos & 2) != 0) setRegisterValue(data[c].nameBinding, 0xffff);
                             }
                             setCount(c, sum);
                         }
@@ -4997,13 +7033,24 @@ public class RunP1MEMachine extends GhidraScript {
                 return fault("unsupported-tauj-operation", thread, register.address, register.size,
                     "peripheral", register.source_ref, detail);
             }
-            void reset() { for (Unit u : units) u.reset(); }
+            void reset() {
+                syncTaujClock(hsbCycles);
+                taujClockDue = 0;
+                for (Unit u : units) u.reset();
+            }
             // Once after explicit scenario register seeding, not on ordinary clock advancement.
-            void loadRegisters() { for (Unit u : units) u.loadRegisters(); }
+            void loadRegisters() {
+                syncTaujClock(hsbCycles);
+                taujClockDue = 0;
+                for (Unit u : units) u.loadRegisters();
+            }
             void read(PcodeThread<byte[]> thread, RegisterDef register) {
                 Unit u = unit(register);
                 int offset = (int) (register.address - u.base);
-                if (offset >= 0x10 && offset <= 0x1c) u.materialize((offset - 0x10) >>> 2);
+                if (offset >= 0x10 && offset <= 0x1c) {
+                    syncTaujClock(hsbCycles);
+                    u.materialize((offset - 0x10) >>> 2);
+                }
             }
             void flush() { for (Unit u : units) u.flush(); }
             void validate(PcodeThread<byte[]> thread, RegisterDef register, long value) {
@@ -5013,6 +7060,8 @@ public class RunP1MEMachine extends GhidraScript {
                 unit(register).validate(thread, register, value);
             }
             void write(PcodeThread<byte[]> thread, RegisterDef register, long value) {
+                syncTaujClock(hsbCycles);
+                taujClockDue = 0;
                 unit(register).write(thread, register, value);
             }
             void validateSimultaneousStart(PcodeThread<byte[]> thread, long sser2) {
@@ -5020,6 +7069,8 @@ public class RunP1MEMachine extends GhidraScript {
             }
             void simultaneousStart(PcodeThread<byte[]> thread, long sser2) {
                 validateSimultaneousStart(thread, sser2);
+                syncTaujClock(hsbCycles);
+                taujClockDue = 0;
                 for (int n = 0; n < 2; n++) units[n].start((int) (sser2 >>> (4 * n)) & 15);
             }
             long cyclesUntilEvent() {
@@ -5069,7 +7120,7 @@ public class RunP1MEMachine extends GhidraScript {
                 long v(RegisterDef r) { return state[slot(r)]; }
                 void put(RegisterDef r, long value) {
                     state[slot(r)] = value;
-                    setRegisterValue(r.name, value);
+                    setRegisterValue(r.nameBinding, value);
                 }
                 void count(int c, long value) {
                     if (state[4 + c] == value) return;
@@ -5078,7 +7129,7 @@ public class RunP1MEMachine extends GhidraScript {
                 }
                 void materialize(int c) {
                     if ((dirtyCounters & (1 << c)) == 0) return;
-                    setRegisterValue(counter[c].name, state[4 + c]);
+                    setRegisterValue(counter[c].nameBinding, state[4 + c]);
                     dirtyCounters &= ~(1 << c);
                 }
                 void flush() {
@@ -5253,7 +7304,7 @@ public class RunP1MEMachine extends GhidraScript {
                     int events = startMask | underflowMask;
                     for (int mask = events | requestMask; mask != 0; mask &= mask - 1) {
                         int c = Integer.numberOfTrailingZeros(mask);
-                        if ((events & (1 << c)) != 0) {
+                        if ((events & (1 << c)) != 0 && !trace.deviceEvents.omitsEventPayload("tauj-clock")) {
                             JsonObject event = new JsonObject();
                             event.addProperty("kind", "tauj-clock");
                             event.addProperty("unit", index);
@@ -5316,18 +7367,20 @@ public class RunP1MEMachine extends GhidraScript {
                     tauj.simultaneousStart(thread, selected2);
                     tsg.simultaneousStart(thread, selected2);
                 }
-                setRegisterValue(start.name, 0);
+                setRegisterValue(start.nameBinding, 0);
             }
         }
 
         final class Adc {
             static final long NEVER = Long.MAX_VALUE;
+            static final long FIRST_ADDRESS = 0xfff91000L, END_ADDRESS = FIRST_ADDRESS + 0x2000;
             final Unit[] units;
             final boolean fullPinPackage;
             final RegisterDef selector = requiredRegister("ADCG", "clock", "CKSC8C");
             final RegisterDef selectorStatus = requiredRegister("ADCG", "clock status", "CKSC8S");
             long now;
             long hsbRemainder;
+            private long clockTick, clockDue;
             int clockSelection = 2;
 
             Adc(String productId) {
@@ -5367,7 +7420,7 @@ public class RunP1MEMachine extends GhidraScript {
 
                 Unit(int number) {
                     this.number = number;
-                    base = 0xfff91000L + number * 0x1000L;
+                    base = FIRST_ADDRESS + number * 0x1000L;
                     for (RegisterDef reg : registers) {
                         if ("adc".equals(reg.behavior) && reg.address >= base
                                 && reg.address <= base + 0x800) {
@@ -5386,7 +7439,7 @@ public class RunP1MEMachine extends GhidraScript {
                     return result;
                 }
                 long get(int offset) { return registerValue(reg(offset)); }
-                void put(int offset, long value) { setRegisterValue(reg(offset).name, value); }
+                void put(int offset, long value) { setRegisterValue(reg(offset).nameBinding, value); }
                 int sg(int group) { return 0x480 + group * 0x80; }
                 int thCount() { return number == 0 ? 6 : 4; }
                 int physicalCount() { return fullPinPackage ? 12 : number == 0 ? 9 : 10; }
@@ -5405,7 +7458,7 @@ public class RunP1MEMachine extends GhidraScript {
                 }
                 void halt() {
                     current = -1;
-                    conversionDue = NEVER;
+                    setConversionDeadline(NEVER);
                     Arrays.fill(active, false);
                     Arrays.fill(timerDue, NEVER);
                     Arrays.fill(irqDue, NEVER);
@@ -5443,7 +7496,7 @@ public class RunP1MEMachine extends GhidraScript {
                         int suspend = (int) get(0x384);
                         if (suspend == 2 || (suspend == 1 && current == 0)) {
                             current = -1;
-                            conversionDue = NEVER;
+                            setConversionDeadline(NEVER);
                         }
                     }
                     choose(thread);
@@ -5480,7 +7533,7 @@ public class RunP1MEMachine extends GhidraScript {
                     additions = type == 4 ? ((get(0x398) & 1) == 0 ? 2 : 4) : 1;
                     accumulated = completed = 0;
                     phase = 1;
-                    conversionDue = Math.addExact(now, sampleCycles());
+                    setConversionDeadline(Math.addExact(now, sampleCycles()));
                 }
                 int samplePin(PcodeThread<byte[]> thread, int pin, long vcr) {
                     long tdcr = get(0x3c4);
@@ -5524,7 +7577,7 @@ public class RunP1MEMachine extends GhidraScript {
                     } else code = samplePin(thread, id, channelControl);
                     accumulated += code;
                     phase = 2;
-                    conversionDue = Math.addExact(now, 22);
+                    setConversionDeadline(Math.addExact(now, 22));
                 }
                 void captureError(PcodeThread<byte[]> thread, int offset, int vc) {
                     if ((get(offset) & 0x80) == 0) put(offset, 0x80 | vc);
@@ -5548,7 +7601,7 @@ public class RunP1MEMachine extends GhidraScript {
                     completed++;
                     if (completed < additions) {
                         phase = 1;
-                        conversionDue = Math.addExact(now, sampleCycles());
+                        setConversionDeadline(Math.addExact(now, sampleCycles()));
                         return;
                     }
                     int group = current;
@@ -5582,7 +7635,7 @@ public class RunP1MEMachine extends GhidraScript {
                         } else pointer[group] = (int) get(sg(group) + 0x14);
                     } else pointer[group]++;
                     current = -1;
-                    conversionDue = NEVER;
+                    setConversionDeadline(NEVER);
                     choose(thread);
                 }
                 void hold(PcodeThread<byte[]> thread, int bank) {
@@ -5604,7 +7657,7 @@ public class RunP1MEMachine extends GhidraScript {
                     }
                     // Hold force-suspends any ongoing VC, irrespective of SG priority.
                     current = -1;
-                    conversionDue = NEVER;
+                    setConversionDeadline(NEVER);
                     request(thread, group);
                 }
                 void startTimer(PcodeThread<byte[]> thread, int group) {
@@ -5618,13 +7671,19 @@ public class RunP1MEMachine extends GhidraScript {
                     setTimerDeadline(group, Math.addExact(now, get(sg(group) + 0x2c) + 1));
                     if ((get(sg(group) + 0x10) & 3) >= 2) request(thread, group);
                 }
+                void setConversionDeadline(long due) {
+                    conversionDue = due;
+                    clockDue = 0;
+                }
                 void setTimerDeadline(int group, long due) {
                     timerDue[group] = due;
                     auxiliaryDeadlineDirty = true;
+                    clockDue = 0;
                 }
                 void setIrqDeadline(int group, long due) {
                     irqDue[group] = due;
                     auxiliaryDeadlineDirty = true;
+                    clockDue = 0;
                 }
                 long nextDeadline() {
                     if (auxiliaryDeadlineDirty) {
@@ -5638,9 +7697,11 @@ public class RunP1MEMachine extends GhidraScript {
                 }
                 void advance(PcodeThread<byte[]> thread) {
                     // Stable ordering for coincident timer/results: result commits before a new edge.
+                    boolean auxiliaryDue = auxiliaryDeadline == now;
                     if (conversionDue == now) {
                         if (phase == 1) sample(thread); else result(thread);
                     }
+                    if (!auxiliaryDue) return;
                     for (int group = 0; group < 5; group++) {
                         if (timerDue[group] == now) timer(thread, group);
                         if (irqDue[group] == now) {
@@ -5702,6 +7763,8 @@ public class RunP1MEMachine extends GhidraScript {
                 long control = registerValue(selector);
                 if (control != 2 && control != 4)
                     throw new IllegalArgumentException("CKSC8C requires 2 or 4");
+                syncClock();
+                clockDue = 0;
                 clockSelection = (int) control;
             }
             int clockDivisor() { return clockSelection >>> 1; }
@@ -5713,25 +7776,35 @@ public class RunP1MEMachine extends GhidraScript {
                 if (address >= 0xfff92000L && address <= 0xfff92800L) return units[1];
                 throw new IllegalArgumentException("not an ADC unit address: " + hex32(address));
             }
-            void advanceHsbSpan(PcodeThread<byte[]> thread, long span, boolean atEvent) {
-                // CKSC8C is 2 or 4: one ADC tick per two or four HSB cycles.
+            void syncClock() {
+                long span = hsbCycles - clockTick;
+                if (span == 0) return;
+                // The ADC advances at no more than half the HSB rate, and
+                // the remainder never exceeds the already elapsed HSB time.
                 long total = Math.addExact(hsbRemainder, span);
                 long cycles = total >>> clockDivisor();
                 hsbRemainder = total & (clockSelection - 1);
                 now = Math.addExact(now, cycles);
-                if (atEvent) {
-                    do {
-                        units[0].advance(thread);
-                        units[1].advance(thread);
-                    } while (Math.min(units[0].nextDeadline(), units[1].nextDeadline()) == now);
+                clockTick = hsbCycles;
+            }
+            void advanceAtDeadline(PcodeThread<byte[]> thread) {
+                syncClock();
+                clockDue = 0;
+                for (;;) {
+                    boolean first = units[0].nextDeadline() == now;
+                    boolean second = units[1].nextDeadline() == now;
+                    if (!first && !second) return;
+                    if (first) units[0].advance(thread);
+                    if (second) units[1].advance(thread);
                 }
             }
             void hardwareTrigger(PcodeThread<byte[]> thread, int unit, int group) {
                 if (unit < 0 || unit > 1 || group < 0 || group > 4) throw new IllegalArgumentException("invalid ADC hardware trigger");
                 Unit adc = units[unit];
                 int mode = (int) adc.get(adc.sg(group) + 0x10) & 3;
-                if (group >= 3 && mode == 3) { adc.startTimer(thread, group); return; }
+                if (group >= 3 && mode == 3) { syncClock(); adc.startTimer(thread, group); return; }
                 if (mode != 1) return;
+                syncClock();
                 for (int bank = 0; bank < 2; bank++) {
                     long control = adc.get(bank == 0 ? 0x420 : 0x424);
                     if ((control & 0x30) == 0x30 && ((control & 3) + 1) == group) {
@@ -5742,33 +7815,43 @@ public class RunP1MEMachine extends GhidraScript {
                 adc.request(thread, group);
             }
             void synchronizationStart(PcodeThread<byte[]> thread, boolean timerStart) {
+                syncClock();
                 for (Unit adc : units) for (int group = timerStart ? 3 : 0; group < 5; group++) {
                     long control = adc.get(adc.sg(group) + 0x10);
                     if ((control & (timerStart ? 0x80 : 0x40)) == 0) continue;
                     if (timerStart) adc.startTimer(thread, group); else adc.request(thread, group);
                 }
             }
-            long hsbCyclesUntilEvent() {
+            long cyclesUntilEvent() {
+                if (clockDue != 0)
+                    return clockDue == NO_CLOCK_EDGE ? NEVER : clockDue - hsbCycles;
+                syncClock();
                 long next = Math.min(units[0].nextDeadline(), units[1].nextDeadline());
-                return next == NEVER ? NEVER
+                long remaining = next == NEVER ? NEVER
                     : Math.subtractExact(Math.multiplyExact(next - now, 2L * clockDivisor()), hsbRemainder);
+                if (remaining > 0) clockDue = timerDeadline(hsbCycles, remaining);
+                return remaining;
             }
             void reset() {
+                syncClock();
+                clockDue = 0;
                 for (Unit adc : units) adc.reset();
                 hsbRemainder = 0;
                 clockSelection = 2;
                 // Keep monotonic named-domain time; reset invalidates all live deadlines.
             }
-            void beforeRead(PcodeThread<byte[]> thread, RegisterDef register) {
+            void beforeRead(boolean reflectSelector) {
                 // Results and busy flags are committed only by named clock progress, not polling.
-                if ("adc-clock".equals(register.behavior) && register == selectorStatus)
-                    setRegisterValue(selectorStatus.name, clockSelection | 1);
+                syncClock();
+                if (reflectSelector)
+                    setRegisterValue(selectorStatus, clockSelection | 1);
             }
             void readCompleted(PcodeThread<byte[]> thread, long address, int size) {
-                if (!((address >= 0xfff91100L && address < 0xfff91260L)
-                        || (address >= 0xfff92100L && address < 0xfff92260L))) return;
-                Unit adc = unit(address);
-                int offset = (int) (address - adc.base);
+                long relative = address - units[0].base;
+                long unit = relative >>> 12;
+                if (unit >= units.length) return;
+                int offset = (int) relative & 0xfff;
+                Unit adc = units[(int) unit];
                 if (offset >= 0x200 && offset < 0x260 && size == 4 && (offset & 3) == 0)
                     adc.readOne(thread, (offset - 0x200) / 4);
                 else if (offset >= 0x100 && offset < 0x130) {
@@ -5817,10 +7900,12 @@ public class RunP1MEMachine extends GhidraScript {
                 }
             }
             void handleWrite(PcodeThread<byte[]> thread, RegisterDef register, long value) {
+                syncClock();
                 if ("adc-clock".equals(register.behavior)) {
                     if (value != registerBeforeWrite) hsbRemainder %= 2; // Preserve HSB-to-LSB half-cycle phase.
+                    clockDue = 0;
                     clockSelection = (int) value;
-                    setRegisterValue(selectorStatus.name, value | 1);
+                    setRegisterValue(selectorStatus, value | 1);
                     return;
                 }
                 Unit adc = unit(register.address);
@@ -5842,6 +7927,8 @@ public class RunP1MEMachine extends GhidraScript {
                 long code = parseUnsigned(input.value);
                 if (code < 0 || code > 4095) throw new IllegalArgumentException("adc-sample must be12-bit unsigned");
                 adc.external[boundary][pin] = (int) code;
+                syncClock();
+                if (trace.deviceEvents.omitsEventPayload("external-adc-sample")) return;
                 JsonObject event = GSON.toJsonTree(input).getAsJsonObject();
                 event.addProperty("kind", "external-adc-sample");
                 event.addProperty("adc_clock", now);
@@ -5855,6 +7942,8 @@ public class RunP1MEMachine extends GhidraScript {
             static final int TSPC=0, TSC=1, CC=4, BRP=5, IDE=6, MDC=7,
                 SPCT=8, MST=9, CS=10, CSC=11, SRTS=12, SRXD=13,
                 CPL=14, ML=15, FRTS=16, FRXD=17;
+            static final long FIRST_ADDRESS = 0xffe05000L;
+            static final long FIRST_RX_DATA = FIRST_ADDRESS + 4 * FRXD, SECOND_RX_DATA = FIRST_RX_DATA + 0x1000;
             final String evidence = "manual:R01UH0585EJ0120 section19";
             final String[] suffix = {"TSPC","TSC",null,null,"CC","BRP","IDE","MDC",
                 "SPCT","MST","CS","CSC","SRTS","SRXD","CPL","ML","FRTS","FRXD"};
@@ -5883,7 +7972,7 @@ public class RunP1MEMachine extends GhidraScript {
                 String inputEvidence;
                 Unit(int number) {
                     this.number=number;
-                    base=0xffe05000L+number*0x1000L;
+                    base=FIRST_ADDRESS+number*0x1000L;
                     statusInterrupt=requiredRegister("RSENT"+number,"level status interrupt","EIC"+(232+2*number));
                     for (int i=0;i<regs.length;i++) if (suffix[i]!=null)
                         regs[i]=requiredRegister("RSENT"+number,"native register","RSENT"+number+suffix[i]);
@@ -5895,14 +7984,14 @@ public class RunP1MEMachine extends GhidraScript {
                 int dataCount() { return (int)((v[CC]>>>1)&7)+1; }
                 void put(int index,long value) {
                     v[index]=value&0xffffffffL;
-                    setRegisterValue(regs[index].name,v[index]);
+                    setRegisterValue(regs[index].nameBinding,v[index]);
                 }
                 void driveStatus(boolean asserted) {
                     // Table6.11: this source is a level, unlike the receive IRQ.
                     // Follow existing CAN level-source convention; preserve EIMK/EIP/EITB.
                     long old=registerValue(statusInterrupt);
                     long next=(old&~0x1000L)|(asserted ? 0x1000L : 0);
-                    if(next!=old) setRegisterValue(statusInterrupt.name,next);
+                    if(next!=old) setRegisterValue(statusInterrupt.nameBinding,next);
                 }
                 void signals(PcodeThread<byte[]> thread) {
                     boolean r=(v[CS]&v[IDE]&1)!=0;
@@ -6078,6 +8167,7 @@ public class RunP1MEMachine extends GhidraScript {
                 throw fault(kind,thread,reg.address,reg.size,"write",reg.evidence,detail);
             }
             void event(String kind,Unit u,String detail) {
+                if (trace.deviceEvents.omitsEventPayload(kind)) return;
                 JsonObject event=new JsonObject();
                 event.addProperty("kind",kind);
                 event.addProperty("unit",u.number);
@@ -6127,6 +8217,8 @@ public class RunP1MEMachine extends GhidraScript {
                     fail(thread,reg,"prohibited-rsent-spc-write","SPCT requires active SPC operation");
             }
             void handleWrite(PcodeThread<byte[]> thread,RegisterDef reg,long value) {
+                syncRsentClock(hsbCycles);
+                rsentClockDue = -1;
                 if(reg==selector) { masterSelect=value; return; }
                 Unit u=unit(reg);
                 int i=(int)((reg.address-u.base)/4);
@@ -6155,14 +8247,19 @@ public class RunP1MEMachine extends GhidraScript {
                 Unit u=unit(reg);
                 int i=(int)((reg.address-u.base)/4);
                 // Only TSC backing is lazy; no reads alter time or synthesize frames.
-                if(i==TSC) u.put(TSC,u.v[TSC]);
+                if(i==TSC) {
+                    syncRsentClock(hsbCycles);
+                    u.put(TSC,u.v[TSC]);
+                }
             }
             void readCompleted(PcodeThread<byte[]> thread,long address,int size) {
                 if(size!=4) return;
-                if(address==0xffe05044L) units[0].promote(thread);
-                else if(address==0xffe06044L) units[1].promote(thread);
+                if(address==FIRST_RX_DATA) units[0].promote(thread);
+                else if(address==SECOND_RX_DATA) units[1].promote(thread);
             }
             boolean receive(PcodeThread<byte[]> thread,int number,int[] pulseSamples,String source) {
+                syncRsentClock(hsbCycles);
+                rsentClockDue = -1;
                 Unit u=unit(number);
                 if(source==null || source.isBlank() || pulseSamples==null
                         || pulseSamples.length<4 || pulseSamples.length>9)
@@ -6191,13 +8288,13 @@ public class RunP1MEMachine extends GhidraScript {
                 event("rsent-frame-start",u,source);
                 return true;
             }
-            long cyclesUntilEvent() {
+            long nextEventTick() {
                 ScheduledEvent wire = wireEvents.peek();
                 long due = wire == null ? NEVER : wire.tick;
                 for(Unit u:units) due=Math.min(due,Math.min(u.spcDue,u.pulseDue));
-                return due==NEVER ? NEVER : Math.max(0,due-now);
+                return due;
             }
-            void advanceSpan(PcodeThread<byte[]> thread, long span, boolean atEvent) {
+            void moveClock(long span) {
                 long end = Math.addExact(now, span);
                 for (Unit u : units) if (u.running()) {
                     long divisor = u.timestampDivisor();
@@ -6217,7 +8314,11 @@ public class RunP1MEMachine extends GhidraScript {
                     }
                 }
                 now = end;
+            }
+            void advanceSpan(PcodeThread<byte[]> thread, long span, boolean atEvent) {
+                moveClock(span);
                 if (!atEvent && now != NEVER) return;
+                long next;
                 do {
                     for (Unit u : units) {
                         if (u.spcDue == now) {
@@ -6228,16 +8329,20 @@ public class RunP1MEMachine extends GhidraScript {
                     }
                     while (!wireEvents.isEmpty() && wireEvents.peek().tick <= now)
                         wireEvents.remove().action.run();
-                } while (cyclesUntilEvent() == 0);
+                } while ((next = nextEventTick()) != NEVER && next <= now);
             }
             void flush() { for(Unit u:units) u.put(TSC,u.v[TSC]); }
             void reset() {
                 // Keep monotonic HSB time, invalidate every live deadline and frame.
-                masterSelect=0; setRegisterValue(selector.name,0);
+                syncRsentClock(hsbCycles);
+                rsentClockDue = -1;
+                masterSelect=0; setRegisterValue(selector.nameBinding,0);
                 for(Unit u:units) u.resetUnit();
             }
             void loadInitialState(PcodeThread<byte[]> thread) {
                 // Call ONCE after reset plus scenario register initialization. Do not call on every read.
+                syncRsentClock(hsbCycles);
+                rsentClockDue = -1;
                 masterSelect=registerValue(selector);
                 for(Unit u:units) {
                     for(int i=0;i<u.regs.length;i++) if(u.regs[i]!=null) u.v[i]=registerValue(u.regs[i]);
@@ -6257,6 +8362,9 @@ public class RunP1MEMachine extends GhidraScript {
             static final int DSA = 0, DDA = 1, DTC = 2, DTCT = 3, DRSA = 4,
                 DRDA = 5, DRTC = 6, DTCC = 7, DCEN = 8, DCST = 9,
                 DCSTS = 10, DCSTC = 11, DTFR = 12, DTFRRQ = 13, DTFRRQC = 14;
+            private static final long CHANNEL_BASE = 0xffff8400L;
+            private static final int CHANNEL_MASK = 0xffff;
+            private static final int SELECTORS = 128; // DTFR.REQSEL is seven bits.
             final Channel[] channels = new Channel[16];
             final Channel[] active = new Channel[2];
             final Channel[] blockOwner = new Channel[2];
@@ -6283,6 +8391,102 @@ public class RunP1MEMachine extends GhidraScript {
                 }
             }
 
+            WordIndex watchWords(P1MEJitMachine.MachineState state) {
+                RegisterDef[][] groups = new RegisterDef[channels.length * 2][];
+                for (Channel channel : channels) {
+                    int n = channel.number;
+                    long base = CHANNEL_BASE + n * 64L;
+                    RegisterDef[] bank = channel.bank;
+                    if (bank[DTCT].address != base + DTCT * 4L ||
+                            bank[DCST].address != base + DCST * 4L ||
+                            bank[DCEN].address != base + DCEN * 4L ||
+                            bank[DTFR].address != base + DTFR * 4L ||
+                            bank[DTFRRQ].address != base + DTFRRQ * 4L ||
+                            bank[DTFRRQ].size != Integer.BYTES) return null;
+                    groups[n] = new RegisterDef[] {bank[DTCT], bank[DCST], bank[DCEN]};
+                    groups[n + channels.length] = new RegisterDef[] {bank[DTFR]};
+                }
+                var words = state.watchDeviceWords(groups);
+                return words == null ? null : new WordIndex(state, words);
+            }
+
+            // Derived only from fully populated physical words. An unavailable
+            // input never performs an inspect callback here; callers use the
+            // original ordered scans when the relevant mask is incomplete.
+            final class WordIndex {
+                final P1MEJitMachine.MachineState state;
+                final P1MEJitMachine.DeviceWordIndex words;
+                final boolean bigEndian = language.isBigEndian();
+                final int[] selectors = new int[channels.length];
+                final int[] requestChannels = new int[SELECTORS];
+                int arbitrationKnown, ready, enabled, selectorsKnown;
+
+                WordIndex(P1MEJitMachine.MachineState state, P1MEJitMachine.DeviceWordIndex words) {
+                    this.state = state;
+                    this.words = words;
+                    Arrays.fill(selectors, -1);
+                }
+
+                private long inspect(RegisterDef register) {
+                    return missingResetInput(register) ? -1
+                        : state.inspectInitializedDevice(register, bigEndian);
+                }
+
+                long readiness(int mask) {
+                    int dirty = (int) words.takeDirty(mask);
+                    arbitrationKnown &= ~dirty;
+                    enabled &= ~dirty;
+                    ready &= ~dirty;
+                    while (dirty != 0) {
+                        int n = Integer.numberOfTrailingZeros(dirty);
+                        int bit = 1 << n;
+                        dirty ^= bit;
+                        RegisterDef[] bank = channels[n].bank;
+                        long configuration = inspect(bank[DTCT]);
+                        long status = inspect(bank[DCST]);
+                        long enable = inspect(bank[DCEN]);
+                        if ((configuration | status | enable) < 0) continue;
+                        arbitrationKnown |= bit;
+                        if (!channelEnabled(configuration, status, enable)) continue;
+                        enabled |= bit;
+                        if (channelRequested(configuration, status)) ready |= bit;
+                    }
+                    return (arbitrationKnown & mask) == mask ? ((long) enabled << 16) | ready : -1;
+                }
+
+                int requesting(int source) {
+                    if (source < 0 || source >= requestChannels.length) return -1;
+                    int dirty = (int) (words.takeDirty((long) CHANNEL_MASK << 16) >>> 16);
+                    selectorsKnown &= ~dirty;
+                    while (dirty != 0) {
+                        int n = Integer.numberOfTrailingZeros(dirty);
+                        int bit = 1 << n;
+                        dirty ^= bit;
+                        int oldSource = selectors[n];
+                        if (oldSource >= 0) requestChannels[oldSource] &= ~bit;
+                        selectors[n] = -1;
+                        long word = inspect(channels[n].bank[DTFR]);
+                        if (word < 0) continue;
+                        selectorsKnown |= bit;
+                        int newSource = (int) (word >>> 1);
+                        if (newSource >= requestChannels.length) continue;
+                        selectors[n] = newSource;
+                        requestChannels[newSource] |= bit;
+                    }
+                    return selectorsKnown == CHANNEL_MASK ? requestChannels[source] : -1;
+                }
+            }
+
+            private static boolean channelEnabled(long configuration, long status, long enable) {
+                return (enable & 1) != 0
+                    && ((configuration & 0x2000) != 0 || (status & 0x10) == 0)
+                    && ((configuration & 0x08000000L) == 0 || (status & 0x80) == 0);
+            }
+
+            private static boolean channelRequested(long configuration, long status) {
+                return (status & ((configuration & 0x04000000L) != 0 ? 2 : 1)) != 0;
+            }
+
             final class Channel {
                 final int number;
                 final String initiator;
@@ -6290,14 +8494,14 @@ public class RunP1MEMachine extends GhidraScript {
                 final RegisterDef master;
                 long source, destination, count, control;
                 int size;
-                byte[] data;
+                byte[] data, transferBuffer;
                 boolean readDone;
 
                 Channel(int number) {
                     this.number = number;
                     initiator = "DMAC" + (number / 8) + "." + (number % 8);
                     for (int n = 0; n < bank.length; n++) {
-                        bank[n] = register(0xffff8400L + number * 64L + n * 4L, 4);
+                        bank[n] = register(CHANNEL_BASE + number * 64L + n * 4L, 4);
                         if (bank[n] == null)
                             throw new IllegalStateException("DMAC channel register missing: " + number + "/" + n);
                     }
@@ -6306,25 +8510,31 @@ public class RunP1MEMachine extends GhidraScript {
                 }
 
                 long get(int index) { return registerValue(bank[index]); }
-                void put(int index, long value) { setRegisterValue(bank[index].name, value); }
+                void put(int index, long value) { setRegisterValue(bank[index], value); }
                 int spid() { return Math.max(2, (int) (registerValue(master) >>> 2) & 31); }
 
+                private boolean hardwareRequested(long configuration) {
+                    return (configuration & 0x04000000L) != 0 && (get(DTFR) & get(DTFRRQ) & 1) != 0;
+                }
+
+                private void updateRequestStatus(long status, boolean requested) {
+                    put(DCST, (status & ~2L) | (requested ? 2 : 0));
+                }
+
                 void refreshRequest() {
-                    boolean hardware = (get(DTCT) & 0x04000000L) != 0;
-                    boolean requested = hardware && (get(DTFR) & get(DTFRRQ) & 1) != 0;
-                    put(DCST, (get(DCST) & ~2L) | (requested ? 2 : 0));
+                    boolean requested = hardwareRequested(get(DTCT));
+                    updateRequestStatus(get(DCST), requested);
                 }
 
                 boolean enabled() {
                     long configuration = get(DTCT), status = get(DCST);
-                    return (get(DCEN) & 1) != 0
-                        && ((configuration & 0x2000) != 0 || (status & 0x10) == 0)
-                        && ((configuration & 0x08000000L) == 0 || (status & 0x80) == 0);
+                    return channelEnabled(configuration, status, get(DCEN));
                 }
 
                 boolean ready() {
-                    return enabled()
-                        && (get(DCST) & ((get(DTCT) & 0x04000000L) != 0 ? 2 : 1)) != 0;
+                    long configuration = get(DTCT), status = get(DCST);
+                    return channelEnabled(configuration, status, get(DCEN))
+                        && channelRequested(configuration, status);
                 }
 
                 boolean continuesBlock() {
@@ -6355,8 +8565,9 @@ public class RunP1MEMachine extends GhidraScript {
                         else status &= ~1L;
                     }
                     put(DCST, status);
-                    refreshRequest();
-                    setRegisterValue(cycles.name, registerValue(cycles) | (1L << number));
+                    // Publish BUSY before inspecting the hardware request inputs.
+                    updateRequestStatus(status, hardwareRequested(control));
+                    setRegisterValue(cycles, registerValue(cycles) | (1L << number));
                 }
 
                 void read() {
@@ -6375,7 +8586,7 @@ public class RunP1MEMachine extends GhidraScript {
                     if (error) {
                         if ((status & 0x80) == 0)
                             status = (status & ~0x800L) | 0x80 | (writeError ? 0x800 : 0);
-                        setRegisterValue(errors.name, registerValue(errors) | (1L << number));
+                        setRegisterValue(errors, registerValue(errors) | (1L << number));
                         latchEcmError(thread, 80);
                     }
                     boolean last = (count & 0xffff) == 1;
@@ -6394,14 +8605,15 @@ public class RunP1MEMachine extends GhidraScript {
                     if (reloadAddress || (last && reload1 != 0 && reload2 != 0))
                         addressCount = get(DRTC) >>> 16;
                     put(DTC, remaining | (addressCount << 16));
-                    boolean match = get(DTCC) != 0 && (count & 0xffff) == get(DTCC);
+                    long compare = get(DTCC);
+                    boolean match = compare != 0 && (count & 0xffff) == compare;
                     if (last) {
                         status |= 0x10;
                         if ((control & 0x2000) == 0) put(DCEN, 0);
                     }
                     if (match) status |= 0x20;
                     put(DCST, status);
-                    setRegisterValue(cycles.name, registerValue(cycles) & ~(1L << number));
+                    setRegisterValue(cycles, registerValue(cycles) & ~(1L << number));
                     if ((last && (control & 0x4000) != 0) || (match && (control & 0x8000) != 0))
                         requestInterrupt(thread, 16 + number);
                     int chain = (int) (control >>> 16) & 3;
@@ -6411,18 +8623,8 @@ public class RunP1MEMachine extends GhidraScript {
                         if (((registerValue(master) ^ registerValue(next.master)) & 0xe002) == 0)
                             next.put(DCST, next.get(DCST) | 1);
                     }
-                    JsonObject event = new JsonObject();
-                    event.addProperty("kind", "dma-transfer");
-                    event.addProperty("channel", number);
-                    event.addProperty("source", hex32(source));
-                    event.addProperty("destination", hex32(destination));
-                    event.addProperty("size", size);
-                    event.addProperty("remaining", remaining);
-                    event.addProperty("error", error);
-                    event.addProperty("scheduler_tick", trace.instructions);
-                    event.addProperty("hsb_cycles", hsbCycles);
-                    event.addProperty("evidence", "R01UH0585EJ0120 Section7");
-                    trace.deviceEvents.add(event);
+                    trace.deviceEvents.addDmaTransfer(number, source, destination, size,
+                        remaining, error, trace.instructions, hsbCycles);
                 }
             }
 
@@ -6431,12 +8633,13 @@ public class RunP1MEMachine extends GhidraScript {
             }
 
             Channel channel(RegisterDef register) {
-                if (register.address >= 0xffff8400L && register.address < 0xffff8800L)
-                    return channels[(int) ((register.address - 0xffff8400L) >>> 6)];
+                if (register.address >= CHANNEL_BASE && register.address < CHANNEL_BASE + channels.length * 64L)
+                    return channels[(int) ((register.address - CHANNEL_BASE) >>> 6)];
                 return null;
             }
 
             void reset() {
+                if (dmaWordIndex != null) dmaWordIndex.words.invalidateAll();
                 Arrays.fill(active, null);
                 Arrays.fill(blockOwner, null);
                 for (Channel channel : channels) {
@@ -6450,12 +8653,24 @@ public class RunP1MEMachine extends GhidraScript {
             void schedule(PcodeThread<byte[]> thread) {
                 this.thread = thread;
                 if (nextService != Long.MAX_VALUE) return;
-                for (Channel channel : active) {
-                    if (channel == null) continue;
+                if (active[0] != null || active[1] != null) {
                     nextService = Math.addExact(hsbCycles, 1);
                     return;
                 }
                 if ((registerValue(suspension) & 1) != 0) return;
+                if (dmaWordIndex != null) {
+                    long readiness = dmaWordIndex.readiness(CHANNEL_MASK);
+                    if (readiness >= 0) {
+                        for (Channel owner : blockOwner) {
+                            if (owner == null || (readiness & (1L << (16 + owner.number))) == 0) continue;
+                            nextService = Math.addExact(hsbCycles, 1);
+                            return;
+                        }
+                        if ((readiness & CHANNEL_MASK) != 0)
+                            nextService = Math.addExact(hsbCycles, 1);
+                        return;
+                    }
+                }
                 for (Channel channel : blockOwner) {
                     if (channel == null || !channel.enabled()) continue;
                     nextService = Math.addExact(hsbCycles, 1);
@@ -6472,22 +8687,34 @@ public class RunP1MEMachine extends GhidraScript {
                 return nextService == Long.MAX_VALUE ? Long.MAX_VALUE : nextService - hsbCycles;
             }
 
+            private Channel select(int group) {
+                Channel owner = blockOwner[group];
+                int first = group * 8;
+                if (dmaWordIndex != null) {
+                    int mask = 0xff << first;
+                    long readiness = dmaWordIndex.readiness(mask);
+                    if (readiness >= 0) {
+                        if (owner != null && (readiness & (1L << (16 + owner.number))) != 0)
+                            return owner;
+                        int candidates = (int) readiness & mask;
+                        if (candidates != 0) return channels[Integer.numberOfTrailingZeros(candidates)];
+                        return null;
+                    }
+                }
+                if (owner != null && owner.enabled()) return owner;
+                for (int n = first; n < first + 8; n++) {
+                    if (channels[n].ready()) return channels[n];
+                }
+                return null;
+            }
+
             void advanceClock(PcodeThread<byte[]> thread) {
-                if (nextService > hsbCycles) return;
                 this.thread = thread;
                 nextService = Long.MAX_VALUE;
                 if ((registerValue(suspension) & 1) == 0) {
                     for (int group = 0; group < active.length; group++) {
                         if (active[group] != null) continue;
-                        Channel selected = blockOwner[group];
-                        if (selected != null && !selected.enabled()) selected = null;
-                        if (selected == null) {
-                            for (int n = group * 8; n < group * 8 + 8; n++) {
-                                if (!channels[n].ready()) continue;
-                                selected = channels[n];
-                                break;
-                            }
-                        }
+                        Channel selected = select(group);
                         blockOwner[group] = selected;
                         if (selected != null) {
                             selected.begin();
@@ -6519,22 +8746,39 @@ public class RunP1MEMachine extends GhidraScript {
             }
 
             void request(PcodeThread<byte[]> thread, int source) {
+                if (dmaWordIndex != null) {
+                    int candidates = dmaWordIndex.requesting(source);
+                    if (candidates >= 0) {
+                        if (candidates == 0) return;
+                        do {
+                            int n = Integer.numberOfTrailingZeros(candidates);
+                            candidates ^= 1 << n;
+                            latchRequest(channels[n]);
+                        } while (candidates != 0);
+                        schedule(thread);
+                        return;
+                    }
+                }
                 boolean selected = false;
                 for (Channel channel : channels) {
                     if ((channel.get(DTFR) >>> 1) != source) continue;
-                    // The selector/hold circuit runs even when REQEN or DTE
-                    // is zero (Section7.4.3). A second edge latches OVF.
-                    long request = channel.get(DTFRRQ);
-                    channel.put(DTFRRQ, request | 1 | ((request & 1) != 0 ? 2 : 0));
-                    channel.refreshRequest();
+                    latchRequest(channel);
                     selected = true;
                 }
                 if (selected) schedule(thread);
             }
 
+            private void latchRequest(Channel channel) {
+                // The selector/hold circuit runs even when REQEN or DTE
+                // is zero (Section7.4.3). A second edge latches OVF.
+                long request = channel.get(DTFRRQ);
+                channel.put(DTFRRQ, request | 1 | ((request & 1) != 0 ? 2 : 0));
+                channel.refreshRequest();
+            }
+
             boolean authorizeCpuWrite(PcodeThread<byte[]> thread, RegisterDef register) {
                 if (register.address < 0xffff8000L || register.address >= 0xffff8800L
-                        || (processorRegister(thread, "PSW") & 0x40000000L) == 0) return true;
+                        || !userMode(thread)) return true;
                 Channel channel = channel(register);
                 // Table7.12: only CPU1 supervisor is the special master.
                 // General masters cannot change common configuration.
@@ -6544,7 +8788,7 @@ public class RunP1MEMachine extends GhidraScript {
                 if ((identity & 0xe002) == 0x2002 && channel.spid() == spid) return true;
                 RegisterDef captured = violations[channel.number / 8];
                 if ((registerValue(captured) & 1) == 0)
-                    setRegisterValue(captured.name,
+                    setRegisterValue(captured,
                         0x20020001L | ((long) spid << 18) | ((channel.number & 7L) << 4));
                 latchEcmError(thread, 81);
                 return false;
@@ -6599,20 +8843,21 @@ public class RunP1MEMachine extends GhidraScript {
                     else if (index == DCSTC) {
                         channel.put(DCST, channel.get(DCST) & ~(value | ((value & 0x80) != 0 ? 0x800 : 0)));
                         if ((value & 0x80) != 0)
-                            setRegisterValue(errors.name, registerValue(errors) & ~(1L << channel.number));
+                            setRegisterValue(errors, registerValue(errors) & ~(1L << channel.number));
                     } else if (index == DTFRRQC) channel.put(DTFRRQ, channel.get(DTFRRQ) & ~value);
                     channel.refreshRequest();
                 } else if ("CMVC".equals(register.name)) {
                     for (int n = 0; n < violations.length; n++)
                         if ((value & (1L << n)) != 0)
-                            setRegisterValue(violations[n].name, registerValue(violations[n]) & ~1L);
+                            setRegisterValue(violations[n], registerValue(violations[n]) & ~1L);
                 }
-                if (register.read_value != null) setRegisterValue(register.name, register.read_value);
+                if (register.read_value != null) setRegisterValue(register.nameBinding, register.read_value);
                 schedule(thread);
             }
         }
 
         final class EventSocket implements Closeable {
+
             final ServerSocket server;
             final Socket socket;
             final BufferedReader input;
@@ -6623,6 +8868,20 @@ public class RunP1MEMachine extends GhidraScript {
             final long readyArrivalCount;
             long readyArrivals;
             boolean ready;
+            // An eight-byte classic frame holds the bus for 108 bit times plus the
+            // 3-bit intermission. Classic CAN runs at at most 1 Mbit/s and the model
+            // spends one 80 MHz cycle per instruction, so no completion and no
+            // neighbouring frame can be observed sooner than this many instructions.
+            private static final long CAN_FRAME_INSTRUCTIONS = 8_880;
+            final ArrayDeque<JsonObject> pendingCanTransmits = new ArrayDeque<>();
+            long busFreeAt;
+            record SocketLine(String line, IOException failure) {}
+            final ConcurrentLinkedQueue<SocketLine> inputLines = new ConcurrentLinkedQueue<>();
+            final Thread inputThread;
+            final boolean holdWhenReady;
+            // A requested hold parks the thread at a later foreground arrival, so
+            // the host samples memory at the same instruction as a scenario trial.
+            long holdArrivals = -1;
 
             EventSocket(EventSocketConfig config, PcodeThread<byte[]> thread) throws IOException {
                 this.thread = thread;
@@ -6631,10 +8890,25 @@ public class RunP1MEMachine extends GhidraScript {
                     throw new IllegalArgumentException("event_socket host must be loopback");
                 server = new ServerSocket(config.port, 1, host);
                 socket = server.accept();
-                socket.setSoTimeout(1);
+                socket.setSoTimeout(0);
                 input = new BufferedReader(new InputStreamReader(
                     socket.getInputStream(), StandardCharsets.UTF_8));
                 output = new PrintWriter(socket.getOutputStream(), true, StandardCharsets.UTF_8);
+                holdWhenReady = config.hold_when_ready;
+                inputThread = new Thread(() -> {
+                    try {
+                        while (true) {
+                            String line = input.readLine();
+                            inputLines.add(new SocketLine(line, null));
+                            if (line == null) return;
+                        }
+                    }
+                    catch (IOException exception) {
+                        inputLines.add(new SocketLine(null, exception));
+                    }
+                }, "p1me-event-socket-reader");
+                inputThread.setDaemon(true);
+                inputThread.start();
                 readyAddress = config.ready_address == null
                     ? -1 : parseUnsigned(config.ready_address);
                 readyArrivalAddress = config.ready_after_arrivals == null
@@ -6650,6 +8924,7 @@ public class RunP1MEMachine extends GhidraScript {
             void publishReady() {
                 JsonObject row = new JsonObject();
                 row.addProperty("kind", "machine-ready");
+                row.addProperty("held", holdWhenReady);
                 row.addProperty("instruction", trace.instructions);
                 output.println(new Gson().toJson(row));
                 ready = true;
@@ -6657,54 +8932,149 @@ public class RunP1MEMachine extends GhidraScript {
 
             void poll(PcodeThread<byte[]> thread) {
                 long pc = thread.getCounter().getOffset();
-                if (!ready && pc == readyAddress) publishReady();
-                if (!ready && pc == readyArrivalAddress
-                        && ++readyArrivals == readyArrivalCount) publishReady();
+                if (!ready && (pc == readyAddress || (pc == readyArrivalAddress
+                        && ++readyArrivals == readyArrivalCount))) {
+                    publishReady();
+                    if (holdWhenReady) hold(thread);
+                }
                 else if (ready && pc == readyArrivalAddress) {
                     JsonObject row = new JsonObject();
                     row.addProperty("kind", "instruction-arrival");
                     row.addProperty("address", hex32(pc));
                     row.addProperty("instruction", trace.instructions);
                     output.println(new Gson().toJson(row));
+                    if (holdArrivals > 0 && --holdArrivals == 0) hold(thread);
                 }
-                try {
-                    while (input.ready()) {
-                        String line = input.readLine();
-                        if (line == null) throw new MachineHalt("event-socket-closed");
-                        JsonObject row = GSON.fromJson(line, JsonObject.class);
-                        String kind = row.get("kind").getAsString();
-                        if ("stop".equals(kind)) throw new MachineHalt("event-socket-stop");
-                        if (!Set.of("can-rx", "clock", "interrupt").contains(kind))
-                            throw new IllegalArgumentException(
-                                "event_socket accepts can-rx, clock, interrupt, or stop");
-                        ExternalEvent event = GSON.fromJson(row, ExternalEvent.class);
-                        if (event.evidence == null || event.evidence.isBlank())
-                            event.evidence = "loopback event socket";
-                        applyExternalEvent(thread, event);
-                    }
+                SocketLine next;
+                while ((next = inputLines.poll()) != null) serve(socketLine(next), thread);
+            }
+
+            String socketLine(SocketLine next) {
+                if (next.failure() != null)
+                    throw new IllegalStateException("event socket read failed", next.failure());
+                return next.line();
+            }
+
+            void hold(PcodeThread<byte[]> thread) {
+                JsonObject held = new JsonObject();
+                held.addProperty("kind", "machine-held");
+                held.addProperty("instruction", trace.instructions);
+                output.println(new Gson().toJson(held));
+                while (true) {
+                    SocketLine next = inputLines.poll();
+                    if (next != null && !serve(socketLine(next), thread)) return;
+                    java.util.concurrent.locks.LockSupport.parkNanos(100_000L);
                 }
-                catch (SocketTimeoutException ignored) {
-                    // No complete line is available at this instruction boundary.
+            }
+
+            /** Handles one host line; returns false when a resume ends a hold. */
+            boolean serve(String line, PcodeThread<byte[]> thread) {
+                if (line == null) throw new MachineHalt("event-socket-closed");
+                JsonObject row = GSON.fromJson(line, JsonObject.class);
+                String kind = row.get("kind").getAsString();
+                if ("stop".equals(kind)) throw new MachineHalt("event-socket-stop");
+                if ("memory-read".equals(kind)) {
+                    long address = parseUnsigned(row.get("address").getAsString());
+                    int size = row.get("size").getAsInt();
+                    if (size <= 0 || size > 0x10000)
+                        throw new IllegalArgumentException("event_socket memory-read size must be 1..65536");
+                    JsonObject response = new JsonObject();
+                    response.addProperty("kind", "memory-read");
+                    response.addProperty("request_id", row.get("request_id").getAsString());
+                    response.addProperty("address", hex32(address));
+                    response.addProperty("size", size);
+                    response.addProperty("data_hex", byteHex(memory(thread, address, size)));
+                    response.addProperty("instruction", trace.instructions);
+                    output.println(new Gson().toJson(response));
+                    return true;
                 }
-                catch (IOException exception) {
-                    throw new IllegalStateException("event socket read failed", exception);
+                if ("resume".equals(kind)) {
+                    JsonObject response = new JsonObject();
+                    response.addProperty("kind", "resumed");
+                    response.addProperty("request_id", row.get("request_id").getAsString());
+                    output.println(new Gson().toJson(response));
+                    return false;
                 }
+                if ("hold-at-arrival".equals(kind)) {
+                    long arrivals = row.get("arrivals").getAsLong();
+                    if (arrivals < 1)
+                        throw new IllegalArgumentException("event_socket hold-at-arrival count must be positive");
+                    holdArrivals = arrivals;
+                    JsonObject response = new JsonObject();
+                    response.addProperty("kind", "hold-armed");
+                    response.addProperty("request_id", row.get("request_id").getAsString());
+                    response.addProperty("instruction", trace.instructions);
+                    output.println(new Gson().toJson(response));
+                    return true;
+                }
+                if ("reset-assert".equals(kind)) {
+                    ready = false;
+                    readyArrivals = 0;
+                    holdArrivals = -1;
+                    pendingCanTransmits.clear();
+                    busFreeAt = 0;
+                    ExternalEvent event = GSON.fromJson(row, ExternalEvent.class);
+                    if (event.evidence == null || event.evidence.isBlank())
+                        event.evidence = "loopback event socket";
+                    applyExternalEvent(thread, event);
+                    JsonObject response = new JsonObject();
+                    response.addProperty("kind", "reset-asserted");
+                    response.addProperty("request_id", row.get("request_id").getAsString());
+                    response.addProperty("reset_class", event.reset_class);
+                    response.addProperty("instruction", trace.instructions);
+                    output.println(new Gson().toJson(response));
+                    return true;
+                }
+                if (!Set.of("can-rx", "clock", "interrupt").contains(kind))
+                    throw new IllegalArgumentException(
+                        "event_socket accepts can-rx, clock, interrupt, memory-read, hold-at-arrival, resume, reset-assert, or stop");
+                ExternalEvent event = GSON.fromJson(row, ExternalEvent.class);
+                if (event.evidence == null || event.evidence.isBlank())
+                    event.evidence = "loopback event socket";
+                if ("can-rx".equals(kind)) {
+                    event.socket_poll_instruction = trace.instructions;
+                    busFreeAt = Math.max(trace.instructions, busFreeAt) + CAN_FRAME_INSTRUCTIONS;
+                    long arrival = busFreeAt;
+                    externalEvents.add(new ScheduledEvent(
+                        arrival, nextEventOrdinal++, () -> applyExternalEvent(thread, event)));
+                    return true;
+                }
+                applyExternalEvent(thread, event);
+                return true;
             }
 
             void publish(JsonObject row) {
                 String kind = row.get("kind").getAsString();
-                if ("interrupt-return".equals(kind)) {
+                if ("can-rx".equals(kind) || "can-rx-discard".equals(kind)
+                        || "can-rx-pop".equals(kind)) {
                     output.println(new Gson().toJson(row));
                     return;
                 }
+                if ("interrupt-return".equals(kind)) {
+                    output.println(new Gson().toJson(row));
+                    if (row.has("channel") && row.get("channel").getAsInt() == 188) {
+                        while (!pendingCanTransmits.isEmpty())
+                            output.println(new Gson().toJson(pendingCanTransmits.remove()));
+                    }
+                    return;
+                }
                 if (!"can-tx".equals(kind)) return;
-                output.println(new Gson().toJson(row));
-                ExternalEvent completion = new ExternalEvent();
-                completion.kind = "can-tx-complete";
-                completion.buffer = row.get("buffer").getAsInt();
-                completion.firmware_control = "0x8048";
-                completion.evidence = "loopback event socket transmit completion";
-                completeRscfdTransmit(thread, completion);
+                int buffer = row.get("buffer").getAsInt();
+                busFreeAt = Math.max(trace.instructions, busFreeAt) + CAN_FRAME_INSTRUCTIONS;
+                long completion = busFreeAt;
+                scheduleAt(completion, () -> {
+                    ExternalEvent event = new ExternalEvent();
+                    event.kind = "can-tx-complete";
+                    event.buffer = buffer;
+                    event.firmware_control = "0x8048";
+                    event.evidence = "loopback event socket: eight-byte classic frame off the bus";
+                    boolean interrupt = (registerValue(rscfdTransmitInterruptEnable(buffer))
+                        & (1L << (buffer & 31))) != 0;
+                    completeRscfdTransmit(thread, event);
+                    row.addProperty("completed_instruction", trace.instructions);
+                    if (interrupt) pendingCanTransmits.add(row);
+                    else output.println(new Gson().toJson(row));
+                });
             }
 
             @Override
@@ -6793,8 +9163,9 @@ public class RunP1MEMachine extends GhidraScript {
         void dispatchExternalEvents() {
             ScheduledEvent next = externalEvents.peek();
             if (next == null || next.tick > trace.instructions) return;
+            invalidateBatchProof();
             // Wire-relative CSIH completions also enter here, not via applyExternalEvent.
-            prepareClockMutation(executionThread);
+            invalidateClockHorizon();
             do {
                 externalEvents.remove().action.run();
                 next = externalEvents.peek();
@@ -6802,7 +9173,8 @@ public class RunP1MEMachine extends GhidraScript {
         }
 
         void applyExternalEvent(PcodeThread<byte[]> thread, ExternalEvent input) {
-            prepareClockMutation(thread);
+            invalidateBatchProof();
+            invalidateClockHorizon();
             switch (input.kind) {
                 case "clock": advanceClock(thread, input.p_bus_cycles, false); break;
                 case "adc-sample": adc.input(input); break;
@@ -6906,13 +9278,13 @@ public class RunP1MEMachine extends GhidraScript {
             return offset;
         }
 
-        void validateFaciWrite(PcodeThread<byte[]> thread, RegisterDef register, byte[] value) {
-            int command = value[0] & 0xff;
+        void validateFaciWrite(PcodeThread<byte[]> thread, RegisterDef register, int size, long value) {
             boolean program = faciPendingCommand == 0xe8;
             boolean data = program && (faciProgramStage == 1 || faciProgramStage == 2);
-            if (value.length != (data ? 2 : 1))
-                throw fault("unsupported-faci-width", thread, register.address, value.length,
+            if (size != (data ? 2 : 1))
+                throw fault("unsupported-faci-width", thread, register.address, size,
                     "write", register.evidence, "FACI commands/count require byte writes; each program word requires a halfword");
+            int command = (int) (value >>> (bigEndian ? (size - 1) * 8 : 0)) & 0xff;
             if (!data) {
                 boolean valid = program && faciProgramStage == 0 ? command == 2
                     : faciPendingCommand != 0 ? command == 0xd0
@@ -6920,7 +9292,7 @@ public class RunP1MEMachine extends GhidraScript {
                         || command == 0x20 || command == 0xe8;
                 if (!valid)
                     throw fault(faciPendingCommand == 0 ? "unsupported-faci-command" : "unsupported-faci-sequence",
-                        thread, register.address, value.length, "write", register.evidence,
+                        thread, register.address, size, "write", register.evidence,
                         "supported sequences: 50; B3; 71,D0; 20,D0; E8,02,two halfwords,D0");
             }
             boolean stop = !data && command == 0xb3;
@@ -6930,7 +9302,7 @@ public class RunP1MEMachine extends GhidraScript {
                 && (statusValue & FSTATR_FRDY) == 0
                 && (registerValue(requiredRegister(register.name, "control", register.control_register)) & 0x81) == 0x80;
             if (!stop && !prematureClear && (statusValue & FSTATR_FRDY) == 0 && !program)
-                throw fault("faci-not-ready", thread, register.address, value.length, "write",
+                throw fault("faci-not-ready", thread, register.address, size, "write",
                     register.evidence, "new FACI commands require FSTATR.FRDY=1");
             RegisterDef access = requiredRegister(register.name, "access-status", register.access_register);
             RegisterDef history = requiredRegister(register.name, "history", register.history_register);
@@ -6940,12 +9312,12 @@ public class RunP1MEMachine extends GhidraScript {
             long controlValue = unsigned(memory(thread, control.address, control.size)) & 0x81;
             if (!data && (command == 0x50 || stop)) {
                 if (controlValue != 1 && controlValue != 0x80)
-                    throw fault("unsupported-faci-mode", thread, register.address, value.length,
+                    throw fault("unsupported-faci-mode", thread, register.address, size,
                         "write", register.evidence, "status clear/forced stop requires CodeFlash or DataFlash P/E mode");
                 if (stop) {
                     RegisterDef emulation = requiredRegister(register.name, "emulation", register.emulation_register);
                     if (unsigned(memory(thread, emulation.address, emulation.size)) != 0)
-                        throw fault("unsupported-faci-emulation", thread, register.address, value.length,
+                        throw fault("unsupported-faci-emulation", thread, register.address, size,
                             "write", register.evidence, "forced stop is bounded to normal FLEMU mode");
                 }
                 return;
@@ -6959,14 +9331,14 @@ public class RunP1MEMachine extends GhidraScript {
                     || unsigned(memory(thread, emulation.address, emulation.size)) != 0
                     || unsigned(memory(thread, enable.address, enable.size)) != 1
                     || unsigned(memory(thread, secondaryEnable.address, secondaryEnable.size)) != 1)
-                throw fault("unsupported-faci-mode", thread, register.address, value.length, "write",
+                throw fault("unsupported-faci-mode", thread, register.address, size, "write",
                     register.evidence, "submission requires both FHVE enables, unlocked DataFlash P/E and normal mode");
             if (program || command == 0xe8) {
                 RegisterDef ecc = requiredRegister(register.name, "ECC mode", "FECCTMD");
                 RegisterDef clock = requiredRegister(register.name, "clock", "FPCKAR");
                 if ((unsigned(memory(thread, ecc.address, ecc.size)) & 0xff) != 0x30
                         || unsigned(memory(thread, clock.address, clock.size)) != 40)
-                    throw fault("unsupported-faci-mode", thread, register.address, value.length, "write",
+                    throw fault("unsupported-faci-mode", thread, register.address, size, "write",
                         register.evidence, "programming requires normal ECC encoding/verification and FPCKAR=40MHz");
                 if (!data && (command == 0xe8 || command == 0xd0)) faciTarget(register, thread, 0xe8);
                 faciCycles(1700);
@@ -6976,7 +9348,7 @@ public class RunP1MEMachine extends GhidraScript {
                 faciTarget(register, thread, 0x20); // FEADDR is not used for block erase (Table4.6).
                 RegisterDef clock = requiredRegister(register.name, "clock", "FPCKAR");
                 if (unsigned(memory(thread, clock.address, clock.size)) != 40)
-                    throw fault("unsupported-faci-mode", thread, register.address, value.length, "write",
+                    throw fault("unsupported-faci-mode", thread, register.address, size, "write",
                         register.evidence, "erase timing requires FPCKAR=40MHz");
                 faciCycles(10000);
                 return;
@@ -6991,7 +9363,7 @@ public class RunP1MEMachine extends GhidraScript {
             long[] result = new long[4];
             P1MEFaci.blankCheck(dataFlashCells, first, last, dataFlash.size, decrement, result);
             if (result[0] == 1)
-                throw fault("unsupported-faci-range", thread, register.address, value.length, "write",
+                throw fault("unsupported-faci-range", thread, register.address, size, "write",
                     register.evidence, "blank-check range must be ordered and contained in the registered DataFlash region");
             faciBlankFirst = result[1];
             if (result[0] == 2)
@@ -7068,8 +9440,8 @@ public class RunP1MEMachine extends GhidraScript {
             Arrays.fill(faciProgramData, (byte)0);
         }
 
-        void handleFaciWrite(PcodeThread<byte[]> thread, RegisterDef register, byte[] value) {
-            int command = value[0] & 0xff;
+        void handleFaciWrite(PcodeThread<byte[]> thread, RegisterDef register, int size, long value) {
+            int command = (int) (value >>> (bigEndian ? (size - 1) * 8 : 0)) & 0xff;
             JsonArray sequence = new JsonArray();
             if (faciPendingCommand == 0xe8) {
                 if (faciProgramStage == 0) {
@@ -7080,9 +9452,9 @@ public class RunP1MEMachine extends GhidraScript {
                     return;
                 }
                 if (faciProgramStage <= 2) {
-                    System.arraycopy(value, 0, faciProgramData, (faciProgramStage - 1) * 2, 2);
+                    P1MEJitMachine.writeNumber(faciProgramData, (faciProgramStage - 1) * 2, 2, bigEndian, value);
                     faciProgramStage++;
-                    sequence.add(unsigned(value));
+                    sequence.add(value);
                     faciTransition(thread, register, command, "program-data-buffered", sequence);
                     return;
                 }
@@ -7095,9 +9467,9 @@ public class RunP1MEMachine extends GhidraScript {
             if (command == 0x50 && faciOperation == 0xb3 && (status & FSTATR_FRDY) == 0) {
                 // Tables6.4/8.1: premature status clear locks, but neither
                 // completes nor restarts forced stop. Keep its original deadline.
-                setRegisterValue(statusRegister.name, status | 0x4000);
-                setRegisterValue(accessRegister.name, registerValue(accessRegister) | FASTAT_CMDLK);
-                setRegisterValue(historyRegister.name, (command << 8) | ((history >>> 8) & 0xff));
+                setRegisterValue(statusRegister.nameBinding, status | 0x4000);
+                setRegisterValue(accessRegister.nameBinding, registerValue(accessRegister) | FASTAT_CMDLK);
+                setRegisterValue(historyRegister.nameBinding, (command << 8) | ((history >>> 8) & 0xff));
                 sequence.add(command);
                 faciTransition(thread, register, command, "status-clear-rejected-busy", sequence);
                 return;
@@ -7110,8 +9482,8 @@ public class RunP1MEMachine extends GhidraScript {
                     faciTargetSize = 4;
                     Arrays.fill(faciProgramData, (byte)0);
                     // Table4.7: Program clears FRDY at the FIRST access, unlike erase/blank check.
-                    setRegisterValue(statusRegister.name, status & ~FSTATR_FRDY);
-                    setRegisterValue(historyRegister.name, (command << 8) | ((history >>> 8) & 0xff));
+                    setRegisterValue(statusRegister.nameBinding, status & ~FSTATR_FRDY);
+                    setRegisterValue(historyRegister.nameBinding, (command << 8) | ((history >>> 8) & 0xff));
                 }
                 sequence.add(command);
                 faciTransition(thread, register, command, command == 0xe8 ? "program-buffer-started"
@@ -7127,13 +9499,13 @@ public class RunP1MEMachine extends GhidraScript {
                     sequence.add((faciProgramData[0] & 0xff) | ((faciProgramData[1] & 0xff) << 8));
                     sequence.add((faciProgramData[2] & 0xff) | ((faciProgramData[3] & 0xff) << 8));
                 } else {
-                    setRegisterValue(historyRegister.name, 0xd000 | faciPendingCommand);
+                    setRegisterValue(historyRegister.nameBinding, 0xd000 | faciPendingCommand);
                 }
                 if (faciOperation == 0x20) {
                     faciTargetOffset = faciTarget(register, thread, 0x20);
                     faciTargetSize = 64;
                 }
-                setRegisterValue(statusRegister.name, status & ~FSTATR_FRDY);
+                setRegisterValue(statusRegister.nameBinding, status & ~FSTATR_FRDY);
                 faciDeadline = Math.addExact(hsbCycles, faciOperation == 0x20 ? faciCycles(10000)
                     : faciOperation == 0xe8 ? faciCycles(1700) : faciBlankCycles);
                 transition = faciOperation == 0x20 ? "erase-started"
@@ -7159,9 +9531,9 @@ public class RunP1MEMachine extends GhidraScript {
                     transition = "status-cleared";
                 }
                 if ((status & FSTATR_CORRECTION_MASK) != 0) nextAccessStatus &= ~1L;
-                setRegisterValue(historyRegister.name, (command << 8) | ((history >>> 8) & 0xff));
-                setRegisterValue(statusRegister.name, nextStatus);
-                setRegisterValue(accessRegister.name, nextAccessStatus);
+                setRegisterValue(historyRegister.nameBinding, (command << 8) | ((history >>> 8) & 0xff));
+                setRegisterValue(statusRegister.nameBinding, nextStatus);
+                setRegisterValue(accessRegister.nameBinding, nextAccessStatus);
             }
             sequence.add(command);
             faciTransition(thread, register, command, transition, sequence);
@@ -7311,8 +9683,7 @@ public class RunP1MEMachine extends GhidraScript {
             }
         }
 
-        void handleIcusWrite(PcodeThread<byte[]> thread, RegisterDef register, byte[] value) {
-            long word = unsigned(value);
+        void handleIcusWrite(PcodeThread<byte[]> thread, RegisterDef register, long word) {
             if (icusStartupStub != null && icusStartupStub.handles(word)) {
                 icusStartupStub.start();
                 return;
@@ -7331,30 +9702,30 @@ public class RunP1MEMachine extends GhidraScript {
             RegisterDef status = requiredRegister(register.name, "status", register.status_register);
             RegisterDef secondary = requiredRegister(
                 register.name, "secondary-status", register.secondary_status_register);
-            setRegisterValue(status.name, 0);
-            setRegisterValue(secondary.name, 0);
+            setRegisterValue(status.nameBinding, 0);
+            setRegisterValue(secondary.nameBinding, 0);
         }
 
-        void handleDcraInput(RegisterDef register, byte[] value) {
+        void handleDcraInput(RegisterDef register, long value) {
             RegisterDef output = requiredRegister(register.name, "status", register.status_register);
             RegisterDef control = requiredRegister(register.name, "mode", register.mode_register);
             if (registerValue(control) == 0x22) {
                 // Tables33.8-33.9: raw CRC8 XOR FF on read, MSB-first 0x1D.
                 long previous = registerValue(output);
-                int crc = (int) ((previous ^ 0xFF) ^ unsigned(value)) & 0xFF;
+                int crc = (int) ((previous ^ 0xFF) ^ value) & 0xFF;
                 for (int bit = 0; bit < 8; bit++)
                     crc = ((crc << 1) ^ ((crc & 0x80) != 0 ? 0x1D : 0)) & 0xFF;
                 // Only low8 are defined in this mode; high lanes keep explicit seed data.
-                setRegisterValue(output.name, (previous & 0xFFFFFF00L) | (crc ^ 0xFF));
+                setRegisterValue(output.nameBinding, (previous & 0xFFFFFF00L) | (crc ^ 0xFF));
                 return;
             }
             // R01UH0585EJ0120 pp2845–2846,2850–2851: LSB first, reflected
             // 04C11DB7 polynomial; COUT reads expose internal state XOR FFFFFFFF.
-            int crc = ~(int) registerValue(output) ^ (int) unsigned(value);
+            int crc = ~(int) registerValue(output) ^ (int) value;
             for (int bit = 0; bit < 32; bit++) {
                 crc = (crc >>> 1) ^ ((crc & 1) != 0 ? 0xedb88320 : 0);
             }
-            setRegisterValue(output.name, Integer.toUnsignedLong(~crc));
+            setRegisterValue(output.nameBinding, Integer.toUnsignedLong(~crc));
         }
 
         int ecmDomain(RegisterDef register) {
@@ -7363,63 +9734,113 @@ public class RunP1MEMachine extends GhidraScript {
             return 2;
         }
 
-        void bindPortAliases() {
-            for (RegisterDef alias : registers) {
-                if (!"port-pin-alias".equals(alias.trigger)) continue;
-                int separator = alias.name.indexOf('_');
-                String prefix = alias.name.startsWith("J") ? "J" : "";
-                String group = alias.name.substring(separator - 1, separator);
-                long pin = 1L << Integer.parseInt(alias.name.substring(separator + 1));
-                List<PortAliasField> fields = new ArrayList<>();
-                for (int index = 0; index < PORT_PIN_BITS.length; index++) {
-                    RegisterDef source = registersByName.get(prefix + PORT_PIN_REGISTERS[index] + group);
-                    if (source == null) continue; // Table2.42 omits several JP group functions.
-                    long effective = "port-input".equals(source.behavior)
-                        ? source.active_mask : source.writable_mask;
-                    if ((effective & pin) == 0) continue;
-                    fields.add(new PortAliasField(source, 1L << PORT_PIN_BITS[index], pin));
-                    portAliasDependents.computeIfAbsent(source, ignored -> new ArrayList<>()).add(alias);
+        PortBindings bindPortAliases() {
+            int count = registers.size();
+            PortPinAlias[] pinAliases = new PortPinAlias[count];
+            PortPinAlias[][] dependents = new PortPinAlias[count][];
+            RegisterDef[] maskedTargets = new RegisterDef[count];
+            Map<String, PortPinField[]> groups = new HashMap<>();
+            Map<RegisterDef, List<PortPinAlias>> dependentsBySource = new HashMap<>();
+            // Retain the catalog's original alias write order, not the address lookup order.
+            for (List<RegisterDef> definitions : List.of(spec.manual.registers,
+                    spec.target_derived.registers)) {
+                for (RegisterDef alias : definitions) {
+                    if (alias.writeTrigger == WriteTrigger.PORT_MASKED_ALIAS) {
+                        if (alias.control_register != null)
+                            maskedTargets[alias.bindingIndex] = registersByName.get(alias.control_register);
+                    }
+                    if (!"port-pin-alias".equals(alias.trigger)) continue;
+                    int separator = alias.name.indexOf('_');
+                    String prefix = alias.name.startsWith("J") ? "J" : "";
+                    String group = alias.name.substring(separator - 1, separator);
+                    long pin = 1L << Integer.parseInt(alias.name.substring(separator + 1));
+                    PortPinField[] columns = groups.computeIfAbsent(prefix + group,
+                        ignored -> bindPortColumns(prefix, group));
+                    List<PortPinField> fields = new ArrayList<>();
+                    int overwrittenColumns = 0;
+                    for (PortPinField field : columns) {
+                        if ((field.pins & pin) != 0) fields.add(field);
+                        RegisterDef source = field.source;
+                        if (alias.address < source.address + source.size
+                                && source.address < alias.address + alias.size)
+                            overwrittenColumns |= field.aliasMask;
+                    }
+                    PortPinAlias plan = new PortPinAlias(alias, pin,
+                        fields.toArray(PortPinField[]::new), overwrittenColumns);
+                    pinAliases[alias.bindingIndex] = plan;
+                    for (PortPinField field : plan.fields)
+                        dependentsBySource.computeIfAbsent(field.source, ignored -> new ArrayList<>()).add(plan);
                 }
-                portAliasFields.put(alias, fields);
             }
+            dependentsBySource.forEach((source, pins) ->
+                dependents[source.bindingIndex] = pins.toArray(PortPinAlias[]::new));
+            return new PortBindings(pinAliases, dependents, maskedTargets);
         }
 
-        void refreshPortAlias(RegisterDef alias) {
-            long value = alias.reset;
-            for (PortAliasField field : portAliasFields.get(alias)) {
-                value = (value & ~field.aliasMask) | ((registerValue(field.source) & field.pinMask) != 0
-                    ? field.aliasMask : 0);
+        private PortPinField[] bindPortColumns(String prefix, String group) {
+            List<PortPinField> columns = new ArrayList<>();
+            for (int index = 0; index < PORT_PIN_BITS.length; index++) {
+                RegisterDef source = registersByName.get(prefix + PORT_PIN_REGISTERS[index] + group);
+                if (source == null) continue; // Table2.42 omits several JP group functions.
+                long pins = "port-input".equals(source.behavior) ? source.active_mask : source.writable_mask;
+                columns.add(new PortPinField(source, index, 1 << PORT_PIN_BITS[index], pins));
             }
-            setRegisterValue(alias.name, value);
+            return columns.toArray(PortPinField[]::new);
+        }
+
+        private RegisterDef maskedPortTarget(RegisterDef alias) {
+            RegisterDef target = portBindings.maskedTargets[alias.bindingIndex];
+            // Missing control metadata is checked on use, not during model binding.
+            if (target == null)
+                throw new IllegalStateException(alias.name + " lacks control register metadata");
+            return target;
+        }
+
+        private int refreshPortAlias(PortPinAlias alias, int sampled) {
+            long value = alias.register.reset;
+            for (PortPinField field : alias.fields) {
+                int mask = field.aliasMask;
+                if ((sampled & mask) == 0) {
+                    portColumnValues[field.column] = registerValue(field.source);
+                    sampled |= mask;
+                }
+                value = (value & ~mask) | ((portColumnValues[field.column] & alias.pinMask) != 0
+                    ? mask : 0);
+            }
+            setRegisterValue(alias.register, value);
+            return sampled & ~alias.overwrittenColumns;
         }
 
         void refreshPortDependents(RegisterDef source) {
-            List<RegisterDef> dependents = portAliasDependents.get(source);
-            if (dependents != null) {
-                for (RegisterDef alias : dependents) refreshPortAlias(alias);
-            }
+            PortPinAlias[] dependents = portBindings.dependents[source.bindingIndex];
+            if (dependents == null) return;
+            // Sample each column at its first use, and publish one alias at a time.
+            // Undefined inputs can fault after earlier aliases have already been written.
+            int sampled = 0;
+            for (PortPinAlias alias : dependents) sampled = refreshPortAlias(alias, sampled);
         }
 
         void handlePortWrite(RegisterDef register, long value) {
-            if ("port-pin-alias".equals(register.trigger)) {
-                for (PortAliasField field : portAliasFields.get(register)) {
+            PortPinAlias alias = portBindings.pinAliases[register.bindingIndex];
+            if (alias != null) {
+                for (PortPinField field : alias.fields) {
                     if ((register.writable_mask & field.aliasMask) == 0) continue;
-                    long bit = (value & field.aliasMask) != 0 ? field.pinMask : 0;
-                    setRegisterValue(field.source.name,
-                        (registerValue(field.source) & ~field.pinMask) | bit);
+                    long bit = (value & field.aliasMask) != 0 ? alias.pinMask : 0;
+                    setRegisterValue(field.source,
+                        (registerValue(field.source) & ~alias.pinMask) | bit);
                 }
-                refreshPortAlias(register);
+                refreshPortAlias(alias, 0);
             }
-            else if ("port-masked-alias".equals(register.trigger)) {
-                RegisterDef target = requiredRegister(register.name, "control", register.control_register);
+            else if (register.writeTrigger == WriteTrigger.PORT_MASKED_ALIAS) {
+                RegisterDef target = maskedPortTarget(register);
                 long enabled = (value >>> 16) & target.writable_mask;
                 long next = (registerValue(target) & ~enabled) | (value & enabled);
-                setRegisterValue(target.name, next);
-                setRegisterValue(register.name, next);
+                setRegisterValue(target, next);
+                setRegisterValue(register, next);
                 refreshPortDependents(target);
             }
             else {
-                setRegisterValue(register.name,
+                setRegisterValue(register,
                     (register.reset & ~register.writable_mask) | (value & register.writable_mask));
                 refreshPortDependents(register);
             }
@@ -7427,9 +9848,9 @@ public class RunP1MEMachine extends GhidraScript {
 
         boolean ecmHasUnmaskedErrors(int domain) {
             for (int index = 0; index < 3; index++) {
-                RegisterDef status = registersByName.get(ECM_STATUS_REGISTERS[domain][index]);
+                RegisterDef status = ecmStatus[domain][index];
                 long errors = ecmLatchedStatus(status);
-                long mask = registerValue(registersByName.get(ECM_ERROR_MASK_REGISTERS[index]));
+                long mask = registerValue(ecmErrorMask[index]);
                 if ((errors & ~mask & (index == 2 ? 0x7fffffffL : 0xffffffffL)) != 0)
                     return true;
             }
@@ -7439,14 +9860,14 @@ public class RunP1MEMachine extends GhidraScript {
         boolean checkerOutputLoopback() {
             // P3_11, fifth alternative output: PFCAE/PFCE/PFC = 1/0/0.
             // R01UH0585EJ0120 Tables2.18,2.46 and section2.3.4.3.
-            return (registerValue(registersByName.get("PMC3")) & 0x800) != 0
-                && (registerValue(registersByName.get("PM3")) & 0x800) == 0
-                && (registerValue(registersByName.get("PIPC3")) & 0x800) == 0
-                && (registerValue(registersByName.get("PFCAE3")) & 0x800) != 0
-                && (registerValue(registersByName.get("PFCE3")) & 0x800) == 0
-                && (registerValue(registersByName.get("PFC3")) & 0x800) == 0
-                && (registerValue(registersByName.get("PBDC3")) & 0x800) != 0
-                && (registerValue(registersByName.get("PIBC3")) & 0x800) == 0;
+            return (registerValue(checkerPmc) & 0x800) != 0
+                && (registerValue(checkerPm) & 0x800) == 0
+                && (registerValue(checkerPipc) & 0x800) == 0
+                && (registerValue(checkerPfcae) & 0x800) != 0
+                && (registerValue(checkerPfce) & 0x800) == 0
+                && (registerValue(checkerPfc) & 0x800) == 0
+                && (registerValue(checkerPbdc) & 0x800) != 0
+                && (registerValue(checkerPibc) & 0x800) == 0;
         }
 
         void refreshEcmFeedback() {
@@ -7461,18 +9882,17 @@ public class RunP1MEMachine extends GhidraScript {
                 // explicitly supplied sample rather than invent a Hi-Z level.
                 if (domain == 1 && !checkerOutputLoopback() && !"low".equals(drive))
                     continue;
-                RegisterDef status = registersByName.get(
-                    domain == 0 ? "ECMMESSTR2" : "ECMCESSTR2");
+                RegisterDef status = ecmStatus[domain][2];
                 long latched = ecmLatchedStatus(status);
-                if (fieldBistExecuted && missingResetInputs.contains(status.name))
+                if (fieldBistExecuted && missingResetInput(status))
                     latched |= 1L << 27;
                 // PINV applies to alternate outputs before their pin-level
                 // loopback (Table2.24). Camry inverts P3_11 during boot.
                 boolean outputHigh = !ecmOutputLow[domain];
-                if (domain == 1 && (registerValue(registersByName.get("PINV3")) & 0x800) != 0)
+                if (domain == 1 && (registerValue(checkerPinv) & 0x800) != 0)
                     outputHigh = !outputHigh;
                 boolean high = !"low".equals(drive) && outputHigh;
-                setRegisterValue(status.name,
+                setRegisterValue(status,
                     (latched & 0x7fffffffL) | (high ? 0x80000000L : 0));
             }
         }
@@ -7517,20 +9937,21 @@ public class RunP1MEMachine extends GhidraScript {
 
         void handlePdmaComparatorWrite(PcodeThread<byte[]> thread, RegisterDef register, long value) {
             if ((value & register.protection_mask) != register.protection_value) {
-                setRegisterValue(register.name, registerBeforeWrite);
+                setRegisterValue(register.nameBinding, registerBeforeWrite);
                 return;
             }
             long selection = value & register.writable_mask;
-            setRegisterValue(register.name, selection);
+            setRegisterValue(register.nameBinding, selection);
             if (selection == 0) return; // Removing injection does not clear latched error status.
-            long master = registerValue(registersByName.get("ECMMESSTR0"));
-            long checker = registerValue(registersByName.get("ECMCESSTR0"));
-            setRegisterValue("ECMMESSTR0", master | 4);
-            setRegisterValue("ECMCESSTR0", checker | 4);
+            RegisterDef masterStatus = ecmStatus[0][0], checkerStatus = ecmStatus[1][0];
+            long master = registerValue(masterStatus);
+            long checker = registerValue(checkerStatus);
+            setRegisterValue(masterStatus, master | 4);
+            setRegisterValue(checkerStatus, checker | 4);
             refreshEcmFeedback();
             // Table32.5 emits a pulse when enabled error-source status is set.
             if ((master & checker & 4) == 0
-                    && (registerValue(registersByName.get("ECMMICFG0")) & 4) != 0)
+                    && (registerValue(ecmNotification[0][0]) & 4) != 0)
                 requestInterrupt(thread, 8);
             JsonObject event = new JsonObject();
             event.addProperty("kind", "pdma-comparison-error");
@@ -7546,12 +9967,15 @@ public class RunP1MEMachine extends GhidraScript {
                 long clear = value & (index == 2 ? 0x7fffffffL : 0xffffffffL);
                 // Read both before mutating either, so missing external pin state
                 // stays an explicit prerequisite rather than a fabricated value.
-                RegisterDef master = registersByName.get("ECMMESSTR" + index);
-                RegisterDef checker = registersByName.get("ECMCESSTR" + index);
+                boolean knownIndex = index >= 0 && index < ecmStatus[0].length;
+                RegisterDef master = knownIndex ? ecmStatus[0][index]
+                    : registersByName.get("ECMMESSTR" + index);
+                RegisterDef checker = knownIndex ? ecmStatus[1][index]
+                    : registersByName.get("ECMCESSTR" + index);
                 long masterValue = registerValue(master);
                 long checkerValue = registerValue(checker);
-                setRegisterValue(master.name, masterValue & ~clear);
-                setRegisterValue(checker.name, checkerValue & ~clear);
+                setRegisterValue(master.nameBinding, masterValue & ~clear);
+                setRegisterValue(checker.nameBinding, checkerValue & ~clear);
                 return;
             }
             if ("ecm-pseudo-error".equals(register.trigger) && value != 0) {
@@ -7569,12 +9993,11 @@ public class RunP1MEMachine extends GhidraScript {
             if ("ecm-output-set".equals(register.trigger)
                     || "ecm-output-clear".equals(register.trigger)) {
                 if ((value & 1) == 0) return;
-                String prefix = ecmDomain(register) == 0 ? "ECMMESSTR" : "ECMCESSTR";
-                RegisterDef status = registersByName.get(prefix + "2");
+                RegisterDef status = ecmStatus[ecmDomain(register) == 0 ? 0 : 1][2];
                 long status2 = registerValue(status);
                 boolean set = "ecm-output-set".equals(register.trigger);
                 if (set) {
-                    setRegisterValue(status.name, status2 | 0x40000000L);
+                    setRegisterValue(status, status2 | 0x40000000L);
                 }
                 else {
                     if (registerValue(registersByName.get("ECMEOCCFG")) != 0) {
@@ -7590,7 +10013,7 @@ public class RunP1MEMachine extends GhidraScript {
                     "internal output updated; only declared external drives resolve pin feedback");
                 return;
             }
-            if (register.access.contains("r")) setRegisterValue(register.name, value);
+            if (register.access.contains("r")) setRegisterValue(register.nameBinding, value);
             if (register.name.startsWith("ECMEMK")) refreshEcmFeedback();
         }
 
@@ -7601,7 +10024,7 @@ public class RunP1MEMachine extends GhidraScript {
                 || register.name.equals("ECMEPCTL");
             // The p-code store already occurred. Neither an intermediate
             // protocol word nor a failed write may change the effective register.
-            if (!command) setRegisterValue(register.name, registerBeforeWrite);
+            if (!command) setRegisterValue(register.nameBinding, registerBeforeWrite);
             if (command) {
                 if (ecmStage != 0) failEcmProtection(thread, register, value);
                 if (value != 0xa5) {
@@ -7615,7 +10038,7 @@ public class RunP1MEMachine extends GhidraScript {
             }
             if (unprotected) {
                 if (ecmStage != 0) failEcmProtection(thread, register, value);
-                setRegisterValue(register.name, value & register.writable_mask);
+                setRegisterValue(register.nameBinding, value & register.writable_mask);
                 return;
             }
             int stage = ecmCommandDomain == domain ? ecmStage : 0;
@@ -7647,20 +10070,20 @@ public class RunP1MEMachine extends GhidraScript {
             if ("cvm-enable-once".equals(register.trigger)) {
                 if (!cvmEnableWritten) {
                     RegisterDef enable = requiredRegister(register.name, "status", register.status_register);
-                    setRegisterValue(enable.name,
+                    setRegisterValue(enable.nameBinding,
                         (registerValue(enable) & ~register.writable_mask)
                             | (value & register.writable_mask));
                     cvmEnableWritten = true;
                 }
-                setRegisterValue(register.name, 0);
+                setRegisterValue(register.nameBinding, 0);
             }
             else if ("cvm-factor-clear".equals(register.trigger)) {
                 RegisterDef factors = requiredRegister(register.name, "status", register.status_register);
-                setRegisterValue(factors.name, registerValue(factors) & ~(value & register.writable_mask));
-                setRegisterValue(register.name, 0);
+                setRegisterValue(factors.nameBinding, registerValue(factors) & ~(value & register.writable_mask));
+                setRegisterValue(register.nameBinding, 0);
             }
             else {
-                setRegisterValue(register.name,
+                setRegisterValue(register.nameBinding,
                     (registerBeforeWrite & ~register.writable_mask) | (value & register.writable_mask));
             }
         }
@@ -7671,15 +10094,14 @@ public class RunP1MEMachine extends GhidraScript {
             // assertion that ECEMF is zero or retained across reset.
             setMemory(register.address, bytes(register.reset & register.reset_mask,
                 register.size, language.isBigEndian()));
-            initializedDeviceRegisters.remove(register.name);
-            missingResetInputs.add(register.name);
+            updateRegisterState(register, DEVICE_REGISTER_INITIALIZED, MISSING_RESET_INPUT);
         }
 
         void handlePeripheralEccWrite(RegisterDef register, long value) {
             if ("peripheral-ecc-test".equals(register.trigger)) {
                 // Validation excludes effective ECTMCE=1. Table31.80 clears
                 // all test-control bits in normal mode; ETMA always reads zero.
-                setRegisterValue(register.name, 0);
+                setRegisterValue(register.nameBinding, 0);
                 return;
             }
             long next = (registerBeforeWrite & ~0x38L) | (value & 0x38L);
@@ -7693,8 +10115,8 @@ public class RunP1MEMachine extends GhidraScript {
                 next &= ~0x30800L;
             }
             next &= ~0xc600L;
-            if (initializedDeviceRegisters.contains(register.name)) {
-                setRegisterValue(register.name, next);
+            if (deviceRegisterInitialized(register)) {
+                setRegisterValue(register.nameBinding, next);
             }
             else {
                 // Clearing latched flags cannot resolve the live ECEMF input.
@@ -7703,7 +10125,7 @@ public class RunP1MEMachine extends GhidraScript {
         }
 
         void handleBankedEccClear(RegisterDef command, long selected) {
-            setRegisterValue(command.name, 0);
+            setRegisterValue(command.nameBinding, 0);
             if (selected == 0) return;
             RegisterDef status = requiredRegister(command.name, "status", command.status_register);
             RegisterDef overflow = command.secondary_status_register == null ? null
@@ -7713,7 +10135,7 @@ public class RunP1MEMachine extends GhidraScript {
             // reset bits (ITOVFSTR bit 4, Table31.71). Keep the whole-word input
             // prerequisite until a scenario supplies those bits.
             boolean unknownOverflow = overflow != null && overflow.reset_mask != null
-                && !initializedDeviceRegisters.contains(overflow.name);
+                && !deviceRegisterInitialized(overflow);
             long overflowValue = overflow == null ? 0 : unknownOverflow
                 ? overflow.reset & overflow.reset_mask : registerValue(overflow);
             for (int bank = 0; bank < command.status_masks.size(); bank++) {
@@ -7724,16 +10146,16 @@ public class RunP1MEMachine extends GhidraScript {
                 if (command.capture_registers != null) {
                     String captureName = command.capture_registers.get(bank);
                     RegisterDef capture = requiredRegister(command.name, "capture", captureName);
-                    setRegisterValue(capture.name, 0);
+                    setRegisterValue(capture.nameBinding, 0);
                 }
             }
-            setRegisterValue(status.name, statusValue);
+            setRegisterValue(status.nameBinding, statusValue);
             if (unknownOverflow) {
                 setMemory(overflow.address, bytes(overflowValue, overflow.size, language.isBigEndian()));
-                missingResetInputs.add(overflow.name);
+                updateRegisterState(overflow, 0, MISSING_RESET_INPUT);
             }
             else if (overflow != null) {
-                setRegisterValue(overflow.name, overflowValue);
+                setRegisterValue(overflow.nameBinding, overflowValue);
             }
         }
 
@@ -7806,11 +10228,15 @@ public class RunP1MEMachine extends GhidraScript {
 
         void clearResetQueues() {
             scheduledEvents.clear();
+            nextScheduledTick = Long.MAX_VALUE;
             pendingRscfdTransmits.clear();
             for (ReceiveFifo fifo : receiveFifos.values()) fifo.messages.clear();
             pendingInterrupts.clear();
             Arrays.fill(pendingPriorities, (byte) -1);
             for (BitSet channels : channelsByPriority) channels.clear();
+            activeInterruptChannels.clear();
+            for (Csih controller : csihControllers.values()) controller.relativeInputs.clear();
+            for (Rsent.Unit receiver : rsent.units) receiver.relativeInputs.clear();
             pendingPriorityMask = 0;
         }
 
@@ -7842,186 +10268,168 @@ public class RunP1MEMachine extends GhidraScript {
             trace.deviceEvents.add(event);
         }
 
-        void handleRegisterWrite(PcodeThread<byte[]> thread, long address, int size, byte[] value) {
-            RegisterDef register = register(address, size);
-            if (register == null) return;
-            registerWriteEvent(thread, register, value);
-            if ("tauj".equals(register.behavior)) {
-                tauj.write(thread, register, unsigned(value)); return;
+        void handleRegisterWrite(PcodeThread<byte[]> thread, RegisterDef register,
+                long address, int size, long value) {
+            WriteDevice device = register.writeDevice;
+            WriteTrigger trigger = register.writeTrigger;
+            switch (device) {
+                case TAUJ -> { tauj.write(thread, register, value); return; }
+                case TAUD, PIC_TAUD -> {
+                    tsg.deferPicRouting();
+                    taud.write(thread, register, value);
+                    finishPicRouting(thread);
+                    return;
+                }
+                case TSG, PIC_TSG -> { tsg.write(thread, register, value); return; }
+                case PIC1_START -> {
+                    tsg.deferPicRouting();
+                    pic1.write(thread, register, value);
+                    finishPicRouting(thread);
+                    return;
+                }
+                case PDMA -> { dma.write(thread, register, value); return; }
+                case ADC -> { adc.handleWrite(thread, register, value); return; }
+                case RSENT -> { rsent.handleWrite(thread, register, value); return; }
+                default -> { }
             }
-            if ("taud".equals(register.behavior) || "pic-taud".equals(register.behavior)) {
-                tsg.deferPicRouting();
-                taud.write(thread, register, unsigned(value));
-                finishPicRouting(thread);
-                return;
+            // These triggers take precedence over the remaining device handlers.
+            switch (trigger) {
+                case GUARD_ERROR_CLEAR -> {
+                    RegisterDef status = requiredRegister(register.name, "error status", register.status_register);
+                    long clear = value << (8 * (address - register.address));
+                    setRegisterValue(status, registerValue(status) & ~clear);
+                    setRegisterValue(register.nameBinding, 0);
+                    return;
+                }
+                case PDMA_COMPARATOR -> { handlePdmaComparatorWrite(thread, register, value); return; }
+                case RESET_FACTOR_CLEAR -> { clearResetFactors(value); return; }
+                default -> { }
             }
-            if ("tsg".equals(register.behavior) || "pic-tsg".equals(register.behavior)) {
-                tsg.write(thread, register, unsigned(value)); return;
-            }
-            if ("pic1-start".equals(register.behavior)) {
-                tsg.deferPicRouting();
-                pic1.write(thread, register, unsigned(value));
-                finishPicRouting(thread);
-                return;
-            }
-            if ("pdma".equals(register.behavior)) {
-                dma.write(thread, register, unsigned(value));
-                return;
-            }
-            if ("adc".equals(register.behavior) || "adc-clock".equals(register.behavior)) {
-                adc.handleWrite(thread, register, unsigned(value));
-                return;
-            }
-            if ("rsent".equals(register.behavior)) {
-                rsent.handleWrite(thread, register, unsigned(value));
-                return;
-            }
-            if ("guard-error-clear".equals(register.trigger)) {
-                RegisterDef status = requiredRegister(register.name, "error status", register.status_register);
-                long clear = unsigned(value) << (8 * (address - register.address));
-                setRegisterValue(status.name, registerValue(status) & ~clear);
-                setRegisterValue(register.name, 0);
-                return;
-            }
-            if ("pdma-comparator".equals(register.trigger)) {
-                handlePdmaComparatorWrite(thread, register, unsigned(value));
-                return;
-            }
-            if ("reset-factor-clear".equals(register.trigger)) {
-                clearResetFactors(unsigned(value));
-                return;
-            }
-            if ("csih".equals(register.behavior)) {
-                if (!"dma-select".equals(register.trigger)) csih(register).write(thread, register, unsigned(value));
-                return;
-            }
-            if ("seg".equals(register.behavior)) {
-                if ("SEGFLAG".equals(register.name)) {
-                    if (initializedDeviceRegisters.contains("SEGFLAG")) {
-                        setRegisterValue("SEGFLAG",
-                            (registerBeforeWrite & ~0x354L) | (unsigned(value) & 0x354L));
+            switch (device) {
+                case CSIH -> {
+                    if (trigger != WriteTrigger.DMA_SELECT) csih(register).write(thread, register, value);
+                    return;
+                }
+                case SEG -> {
+                    if ("SEGFLAG".equals(register.name)) {
+                        if (deviceRegisterInitialized(segFlagRegister)) {
+                            setRegisterValue(segFlagRegister,
+                                (registerBeforeWrite & ~0x354L) | (value & 0x354L));
+                        }
+                        setSegFlags(value);
+                        if ((registerBeforeWrite & ~value & 0x354L) != 0)
+                            segNotificationPending = enabledSegFlags() != 0;
                     }
-                    setSegFlags(unsigned(value));
-                    if ((registerBeforeWrite & ~unsigned(value) & 0x354L) != 0)
+                    else if ("SEGCONT".equals(register.name)) {
                         segNotificationPending = enabledSegFlags() != 0;
+                    }
+                    return;
                 }
-                else if ("SEGCONT".equals(register.name)) {
-                    segNotificationPending = enabledSegFlags() != 0;
+                case PEG, BUS_GUARD, GRAM_GUARD -> {
+                    if (guardWriteIgnored) {
+                        setRegisterValue(register.nameBinding, registerBeforeWrite);
+                    }
+                    else {
+                        setRegisterValue(register.nameBinding,
+                            (registerBeforeWrite & ~register.writable_mask)
+                                | (registerValue(register) & register.writable_mask));
+                        if (trigger == WriteTrigger.PEG_MASK) {
+                            RegisterDef base = guardLock(register);
+                            setRegisterValue(base.nameBinding, registerValue(base) & ~1L);
+                        }
+                    }
+                    return;
                 }
-                return;
-            }
-            if (isGuard(register)) {
-                if (guardWriteIgnored) {
-                    setRegisterValue(register.name, registerBeforeWrite);
+                case PERIPHERAL_ECC -> { handlePeripheralEccWrite(register, value); return; }
+                case CVM -> { handleCvmWrite(register, value); return; }
+                case ECM -> { handleEcmWrite(thread, register, value); return; }
+                case PORT_CONFIG -> {
+                    handlePortWrite(register, value);
+                    refreshEcmFeedback();
+                    return;
                 }
-                else {
-                    setRegisterValue(register.name,
-                        (registerBeforeWrite & ~register.writable_mask)
-                            | (registerValue(register) & register.writable_mask));
-                    if ("peg-mask".equals(register.trigger)) {
-                        RegisterDef base = guardLock(register);
-                        setRegisterValue(base.name, registerValue(base) & ~1L);
+                case NOISE_FILTER -> {
+                    if (trigger == WriteTrigger.NOISE_CLOCK_SELECTOR && value != registerBeforeWrite) {
+                        RegisterDef status = requiredRegister(register.name, "status", register.status_register);
+                        // Do not turn a requested source into an asserted CLKACT.
+                        // Its actual activity must be supplied as a new external input.
+                        setRegisterValue(status, value);
+                        updateRegisterState(status, 0, MISSING_RESET_INPUT);
+                    }
+                    return;
+                }
+                case INTC_EIC -> {
+                    if (register.reset != null) {
+                        boolean level = (register.reset & 0x8000) != 0;
+                        long writable = level ? 0xcfL : 0x10cfL;
+                        // Table6.4: EICT and reserved bits read their reset value.
+                        // Level EIRF follows its source, not the software write.
+                        setRegisterValue(register.nameBinding, (register.reset & 0x8000L)
+                            | (level ? registerBeforeWrite & 0x1000L : 0)
+                            | (registerValue(register) & writable));
+                    } else {
+                        // Firmware-only EICs can be reprogrammed before or after an explicit
+                        // request. A CPU store to these words is not itself a request source.
+                        refreshPendingInterrupts(address, size, false);
                     }
                 }
-                return;
+                default -> { }
             }
-            if ("peripheral-ecc".equals(register.behavior)) {
-                handlePeripheralEccWrite(register, unsigned(value));
-                return;
-            }
-            if ("cvm".equals(register.behavior)) {
-                handleCvmWrite(register, unsigned(value));
-                return;
-            }
-            if ("ecm".equals(register.behavior)) {
-                handleEcmWrite(thread, register, unsigned(value));
-                return;
-            }
-            if ("port-config".equals(register.behavior)) {
-                handlePortWrite(register, unsigned(value));
-                refreshEcmFeedback();
-                return;
-            }
-            if ("noise-filter".equals(register.behavior)) {
-                if ("noise-clock-selector".equals(register.trigger)
-                        && unsigned(value) != registerBeforeWrite) {
-                    RegisterDef status = requiredRegister(register.name, "status", register.status_register);
-                    // Do not turn a requested source into an asserted CLKACT.
-                    // Its actual activity must be supplied as a new external input.
-                    setRegisterValue(status.name, unsigned(value));
-                    missingResetInputs.add(status.name);
-                }
-                return;
-            }
-            if ("intc_eic".equals(register.behavior) && register.reset != null) {
-                boolean level = (register.reset & 0x8000) != 0;
-                long writable = level ? 0xcfL : 0x10cfL;
-                // Table6.4: EICT and reserved bits read their reset value.
-                // Level EIRF follows its source, not the software write.
-                setRegisterValue(register.name, (register.reset & 0x8000L)
-                    | (level ? registerBeforeWrite & 0x1000L : 0)
-                    | (registerValue(register) & writable));
-            }
-            else if ("intc_eic".equals(register.behavior)) {
-                // Firmware-only EICs can be reprogrammed before or after an explicit
-                // request. A CPU store to these words is not itself a request source.
-                refreshPendingInterrupts(address, size, false);
-            }
-            handleReceiveWrite(thread, register, value);
-            if (register.trigger == null) return;
-            switch (register.trigger) {
-                case "clock-divider": {
+            if (register.fifoBusWrite) handleReceiveWrite(thread, register, size, value);
+            switch (trigger) {
+                case NONE: break;
+                case CLOCK_DIVIDER: {
                     RegisterDef status = requiredRegister(register.name, "status", register.status_register);
                     // Functional completion at the write boundary, not oscillator startup,
                     // waveform frequency qualification, or cycle-accurate synchronization.
-                    setRegisterValue(status.name, register.completion_value
-                        | (unsigned(value) == 0 ? 0 : register.active_mask));
+                    setRegisterValue(status, register.completion_value
+                        | (value == 0 ? 0 : register.active_mask));
                     break;
                 }
-                case "clock-selector": {
-                    if (registerBeforeWrite != unsigned(value)) {
+                case CLOCK_SELECTOR: {
+                    if (registerBeforeWrite != value) {
                         RegisterDef status = requiredRegister(register.name, "status", register.status_register);
-                        setRegisterValue(status.name, unsigned(value));
+                        setRegisterValue(status, value);
                     }
                     break;
                 }
-                case "flmd-command":
+                case FLMD_COMMAND:
                     flmdStage = 1;
                     break;
-                case "flmd-control":
+                case FLMD_CONTROL:
                     if (flmdStage == 3) {
                         flmdStage = 0;
                         RegisterDef status = requiredRegister(register.name, "status", register.status_register);
-                        setRegisterValue(status.name, 0);
+                        setRegisterValue(status, 0);
                     }
                     else {
-                        if (flmdStage == 1) flmdDesired = unsigned(value);
+                        if (flmdStage == 1) flmdDesired = value;
                         flmdStage++;
-                        setRegisterValue(register.name, registerBeforeWrite);
+                        setRegisterValue(register.nameBinding, registerBeforeWrite);
                     }
                     break;
-                case "bist-control":
+                case BIST_CONTROL:
                     break; // Validated HWBISTEXE storage affects the next applicable reset only.
-                case "dcra-control":
-                    if (registerBeforeWrite != unsigned(value)) dcraSeeded.remove(register.name);
+                case DCRA_CONTROL:
+                    if (registerBeforeWrite != value) dcraSeeded.remove(register.name);
                     break;
-                case "dcra-seed":
+                case DCRA_SEED:
                     // Writes initialize raw state; reads apply the hardware's final XOR.
                     RegisterDef crcControl = requiredRegister(register.name, "mode", register.mode_register);
-                    setRegisterValue(register.name, unsigned(value)
+                    setRegisterValue(register.nameBinding, value
                         ^ (registerValue(crcControl) == 0x22 ? 0xFF : 0xFFFFFFFFL));
                     dcraSeeded.add(crcControl.name);
                     break;
-                case "dcra-input": handleDcraInput(register, value); break;
-                case "rscfd-transmit":
+                case DCRA_INPUT: handleDcraInput(register, value); break;
+                case RSCFD_TRANSMIT:
                     handleRscfdWrite(thread, register, value, registerBeforeWrite);
                     break;
-                case "rscfd-transmit-status": handleRscfdTransmitStatusWrite(register); break;
-                case "rscfd-global-control":
-                case "rscfd-channel-control":
+                case RSCFD_TRANSMIT_STATUS: handleRscfdTransmitStatusWrite(register); break;
+                case RSCFD_GLOBAL_CONTROL:
+                case RSCFD_CHANNEL_CONTROL:
                     handleRscfdModeWrite(register, registerValue(register));
                     break;
-                case "rscfd-fd-counter-clear": {
+                case RSCFD_FD_COUNTER_CLEAR: {
                     // Section17.2.2: classical mode maps this address to a rule word.
                     if ((registerValue(registersByName.get("GRMCFG")) & 1) == 0) break;
                     // Table17.103: requests clear only their counter and always read zero.
@@ -8029,29 +10437,29 @@ public class RunP1MEMachine extends GhidraScript {
                     RegisterDef status = requiredRegister(register.name, "status", register.status_register);
                     long clear = ((request & 2) != 0 ? 0xff000000L : 0)
                         | ((request & 1) != 0 ? 0x00ff0000L : 0);
-                    setRegisterValue(status.name, registerValue(status) & ~clear);
-                    setRegisterValue(register.name, 0);
+                    setRegisterValue(status, registerValue(status) & ~clear);
+                    setRegisterValue(register.nameBinding, 0);
                     break;
                 }
-                case "rscfd-fd-status":
+                case RSCFD_FD_STATUS:
                     if ((registerValue(registersByName.get("GRMCFG")) & 1) == 0) break;
                     // Table17.104: only flags9:7 are W0C; counters/result are read-only.
-                    setRegisterValue(register.name, registerBeforeWrite
+                    setRegisterValue(register.nameBinding, registerBeforeWrite
                         & ~(register.writable_mask & ~registerValue(register)));
                     break;
-                case "faci-command": handleFaciWrite(thread, register, value); break;
-                case "faci-access-status": {
+                case FACI_COMMAND: handleFaciWrite(thread, register, size, value); break;
+                case FACI_ACCESS_STATUS: {
                     long next = registerBeforeWrite
-                        & ~(faciReadErrors & ~unsigned(value) & FASTAT_ACCESS_ERROR_MASK);
-                    setRegisterValue(register.name, next);
+                        & ~(faciReadErrors & ~value & FASTAT_ACCESS_ERROR_MASK);
+                    setRegisterValue(register.nameBinding, next);
                     faciReadErrors &= next;
                     break;
                 }
-                case "faci-setup-initialize":
-                case "faci-area-selector":
-                case "faci-clock-notify": {
-                    boolean setup = "faci-setup-initialize".equals(register.trigger);
-                    long incoming = unsigned(value);
+                case FACI_SETUP_INITIALIZE:
+                case FACI_AREA_SELECTOR:
+                case FACI_CLOCK_NOTIFY: {
+                    boolean setup = trigger == WriteTrigger.FACI_SETUP_INITIALIZE;
+                    long incoming = value;
                     long next = registerBeforeWrite;
                     if ((registerValue(registersByName.get("FSTATR")) & FSTATR_FRDY) != 0
                             && (incoming & register.protection_mask) == register.protection_value) {
@@ -8061,42 +10469,42 @@ public class RunP1MEMachine extends GhidraScript {
                                 setRegisterValue(name, 0);
                         }
                     }
-                    setRegisterValue(register.name, next);
+                    setRegisterValue(register.nameBinding, next);
                     break;
                 }
-                case "faci-address":
+                case FACI_ADDRESS:
                     RegisterDef addressStatus = requiredRegister(register.name, "status", register.status_register);
-                    setRegisterValue(register.name, (registerValue(addressStatus) & FSTATR_FRDY) != 0
-                        ? unsigned(value) & ~3L : registerBeforeWrite);
+                    setRegisterValue(register.nameBinding, (registerValue(addressStatus) & FSTATR_FRDY) != 0
+                        ? value & ~3L : registerBeforeWrite);
                     break;
-                case "faci-dataflash-mode": {
+                case FACI_DATAFLASH_MODE: {
                     RegisterDef modeStatus = requiredRegister(register.name, "status", register.status_register);
-                    long incoming = unsigned(value);
+                    long incoming = value;
                     long next = registerBeforeWrite;
                     if ((registerValue(modeStatus) & FSTATR_FRDY) != 0) {
                         next = (incoming >>> 8) == 0xaa && registerBeforeWrite == 0
                             ? incoming & 0x80 : 0;
                     }
-                    setRegisterValue(register.name, next);
+                    setRegisterValue(register.nameBinding, next);
                     break;
                 }
-                case "faci-normal-emulation":
+                case FACI_NORMAL_EMULATION:
                     break; // Validated zero-to-zero write; no OCD-mode behavior is inferred.
-                case "faci-enable":
-                    setRegisterValue(register.name, unsigned(value) & 1);
+                case FACI_ENABLE:
+                    setRegisterValue(register.nameBinding, value & 1);
                     break;
-                case "banked-ecc-clear":
+                case BANKED_ECC_CLEAR:
                     handleBankedEccClear(register,
-                        unsigned(value) << (8 * (address - register.address)));
+                        value << (8 * (address - register.address)));
                     break;
-                case "ecc-notification":
+                case ECC_NOTIFICATION:
                     // The validated byte lanes already updated the ordinary enable latches.
                     break;
-                case "dataflash-read-cycle":
-                    setRegisterValue(register.name, unsigned(value) & 0xf);
+                case DATAFLASH_READ_CYCLE:
+                    setRegisterValue(register.nameBinding, value & 0xf);
                     break;
-                case "ecc-protected-control": {
-                    long incoming = unsigned(value);
+                case ECC_PROTECTED_CONTROL: {
+                    long incoming = value;
                     long writable = register.writable_mask;
                     long protectionMask = register.protection_mask == null
                         ? 0xc000L : register.protection_mask;
@@ -8106,11 +10514,11 @@ public class RunP1MEMachine extends GhidraScript {
                     long next = address == register.address
                             && (incoming & protectionMask) == protectionValue
                         ? incoming & writable : registerBeforeWrite;
-                    setRegisterValue(register.name, next & writable);
+                    setRegisterValue(register.nameBinding, next & writable);
                     break;
                 }
-                case "icus-command": handleIcusWrite(thread, register, value); break;
-                case "icus-control":
+                case ICUS_COMMAND: handleIcusWrite(thread, register, value); break;
+                case ICUS_CONTROL:
                     if (icusStartupStub != null) icusStartupStub.acknowledge();
                     break;
                 default: throw new IllegalStateException(
@@ -8118,28 +10526,55 @@ public class RunP1MEMachine extends GhidraScript {
             }
         }
 
-        void afterWrite(PcodeThread<byte[]> thread, long address, int size, byte[] value) {
+        boolean storeBus(PcodeThread<byte[]> thread, long address, int size, long number, byte[] raw, boolean cpu) {
+            RegionDef region = region(address, size);
+            if (raw != null && (size <= Long.BYTES || region == null || !region.directPageWrites))
+                number = Utils.bytesToLong(raw, size, bigEndian);
+            long word = number & Utils.calc_mask(Math.min(size, Integer.BYTES));
+            RegisterDef register = beforeWrite(thread, address, size, word, cpu, region);
             if (discardBusStore) {
                 discardBusStore = false;
-                return;
+                return false;
             }
-            RegionDef region = region(address, size);
+            writeBusBacking(register, address, size, number, raw);
+            if (!cpu) refreshPendingInterrupts(address, size, true);
             if (region != null && region.alias_group != null) {
-                long delta = address - region.start;
                 List<RegionDef> group = aliases.get(region.alias_group);
                 if (group != null) {
                     for (RegionDef alias : group) {
                         if (alias == region) continue;
-                        setMemory(alias.start + delta, value);
-                        trace.aliasWrite(address, alias.start + delta, size);
+                        long other = alias.start + (address - region.start);
+                        writeBusBacking(null, other, size, number, raw);
+                        refreshPendingInterrupts(other, size, true);
+                        trace.aliasWrite(address, other, size);
                     }
                 }
             }
             if (peripheralFile) refreshPendingInterrupts(address, size, true);
-            else handleRegisterWrite(thread, address, size, value);
+            else if (region == null || !region.directPageWrites) {
+                // Region overlays keep their original post-write SFR lookup.
+                RegisterDef target = region == null ? register : register(address, size);
+                if (target != null) {
+                    registerWriteEvent(thread, target, word);
+                    if (target.completesBusWrite) handleRegisterWrite(thread, target, address, size, word);
+                }
+            }
+            return true;
         }
 
+        private void writeBusBacking(RegisterDef register, long address, int size, long number, byte[] raw) {
+            if (deviceState != null && size > 0 && size <= Long.BYTES) {
+                if (register != null && register.address == address && register.size == size
+                        && deviceState.writeDevice(register, number, bigEndian)) return;
+                if (deviceState.writeMemoryNumberIfInitialized(address, size, number, bigEndian)) return;
+            }
+            emulator.getSharedState().setVar(memorySpace, address, size, true,
+                raw != null ? raw : bytes(number, size, bigEndian));
+        }
+
+
         void initializeResetRegisters() {
+            invalidateClockHorizon();
             dcraSeeded.clear();
             segFlags = 0;
             segNotificationPending = false;
@@ -8147,7 +10582,8 @@ public class RunP1MEMachine extends GhidraScript {
             cvmEnableWritten = false;
             resetFaci();
             // Table10.3: no reset defines the CVMOUT pin level.
-            if (registersByName.containsKey("CVMMON")) missingResetInputs.add("CVMMON");
+            RegisterDef cvmMonitor = registersByName.get("CVMMON");
+            if (cvmMonitor != null) updateRegisterState(cvmMonitor, 0, MISSING_RESET_INPUT);
             for (RegisterDef register : registers) {
                 if ("peripheral-ecc-control".equals(register.trigger)) {
                     resetPeripheralEccControl(register);
@@ -8155,7 +10591,7 @@ public class RunP1MEMachine extends GhidraScript {
                 }
                 // Partial reset values do not determine a readable whole word.
                 if (register.reset_mask != null) {
-                    missingResetInputs.add(register.name);
+                    updateRegisterState(register, 0, MISSING_RESET_INPUT);
                     if ("reset-factors".equals(register.trigger)
                             || "ecm-bist-status".equals(register.trigger)) {
                         // Backing bits for controller-side RMW only. The
@@ -8172,7 +10608,7 @@ public class RunP1MEMachine extends GhidraScript {
                     continue;
                 }
                 if (register.reset == null) continue;
-                setRegisterValue(register.name, register.reset);
+                setRegisterValue(register.nameBinding, register.reset);
             }
             taud.reset();
             tauj.reset();
@@ -8236,23 +10672,26 @@ public class RunP1MEMachine extends GhidraScript {
                 RegisterDef eic = interruptRegistersByAddress[index];
                 if (eic.address >= end) break;
                 if (!indexRequests && !pendingInterrupts.get(index)) continue;
-                long control = unsigned(memory(eic.address, eic.size));
-                int previous = pendingPriorities[index];
-                int priority = (control & 0x1080) == 0x1000 ? (int) control & 15 : -1;
-                if (previous != priority) {
-                    int channel = eic.interrupt_channel;
-                    if (previous >= 0) {
-                        channelsByPriority[previous].clear(channel);
-                        if (channelsByPriority[previous].isEmpty()) pendingPriorityMask &= ~(1 << previous);
-                    }
-                    if (priority >= 0) {
-                        channelsByPriority[priority].set(channel);
-                        pendingPriorityMask |= 1 << priority;
-                    }
-                    pendingPriorities[index] = (byte) priority;
-                }
-                if (indexRequests) pendingInterrupts.set(index, (control & 0x1000) != 0);
+                updatePendingInterrupt(index, eic, registerValue(eic), indexRequests);
             }
+        }
+
+        private void updatePendingInterrupt(int index, RegisterDef eic, long control, boolean indexRequests) {
+            int previous = pendingPriorities[index];
+            int priority = (control & 0x1080) == 0x1000 ? (int) control & 15 : -1;
+            if (previous != priority) {
+                int channel = eic.interrupt_channel;
+                if (previous >= 0) {
+                    channelsByPriority[previous].clear(channel);
+                    if (channelsByPriority[previous].isEmpty()) pendingPriorityMask &= ~(1 << previous);
+                }
+                if (priority >= 0) {
+                    channelsByPriority[priority].set(channel);
+                    pendingPriorityMask |= 1 << priority;
+                }
+                pendingPriorities[index] = (byte) priority;
+            }
+            if (indexRequests) pendingInterrupts.set(index, (control & 0x1000) != 0);
         }
 
         void setMemory(long address, byte[] value) {
@@ -8376,13 +10815,16 @@ public class RunP1MEMachine extends GhidraScript {
                 throw new IllegalArgumentException(
                     "SEGFLAG input may resolve undefined bits, not inject hardware error flags");
             }
-            if ("RESF".equals(register.name)) validateResetFactorInput(value);
+            if ("RESF".equals(register.name)) {
+                if (input.replayedAfterReset) resolveReplayedResetFactors(value);
+                else validateResetFactorInput(value);
+            }
             if (register.read_input) {
                 if (readInputResponses == null) readInputResponses = new HashMap<>();
                 readInputResponses.put(register.name, value);
             }
             else {
-                setRegisterValue(register.name, value);
+                setRegisterValue(register.nameBinding, value);
                 if ("ecm".equals(register.behavior)) refreshEcmFeedback();
             }
             JsonObject event = new JsonObject();
@@ -8451,8 +10893,7 @@ public class RunP1MEMachine extends GhidraScript {
             if (register != null && "tsg".equals(register.behavior))
                 declaredTsgRegisters.add(register.name);
             if (register != null && register.address == address && register.size == value.length) {
-                if (register.reset_mask != null) initializedDeviceRegisters.add(register.name);
-                missingResetInputs.remove(register.name);
+                resolveRegisterInput(register);
                 if ("port-config".equals(register.behavior))
                     handlePortWrite(register, unsigned(value));
             }
@@ -8510,6 +10951,7 @@ public class RunP1MEMachine extends GhidraScript {
         boolean protectedIsprWrite;
         boolean icctrlWrite;
         long isprBeforeInstruction;
+        Integer interruptReturnChannel;
 
         Callbacks(SleighLanguage language, Model model) {
             this.language = language;
@@ -8534,6 +10976,7 @@ public class RunP1MEMachine extends GhidraScript {
             final boolean readsIcctrl;
             final boolean writesIcctrl;
             final boolean writesIspr;
+            final boolean returnFromInterrupt, ordinaryRetirement;
             final int compareWidth;
             final OperandValue penultimateValue;
             final OperandValue lastValue;
@@ -8610,6 +11053,12 @@ public class RunP1MEMachine extends GhidraScript {
                 Register system = mnemonic.equals("ldsr") ? instruction.getRegister(1) : null;
                 writesIcctrl = !peripheralFile && system != null && "ICCTRL".equals(system.getName());
                 writesIspr = system != null && "ISPR".equals(system.getName());
+                returnFromInterrupt = mnemonic.equals("eiret");
+                ordinaryRetirement = !writesIcctrl && !writesIspr && !returnFromInterrupt &&
+                    switch (mnemonic) {
+                        case "synce", "syncm", "syncp", "synci", "prepare", "jarl" -> false;
+                        default -> true;
+                    };
                 penultimateValue = left;
                 lastValue = right;
                 compareWidth = !compare || left == null || right == null ? 0
@@ -8802,12 +11251,13 @@ public class RunP1MEMachine extends GhidraScript {
                 effective, width, access);
         }
 
-        void noteIndex(long effective, int width, String access) {
+        private void noteIndex(long effective, int size, String access) {
+            if (activeDerivations == 0) return;
             InstructionObservation observation = currentObservation;
-            if (observation == null || activeDerivations == 0) return;
+            if (observation == null) return;
             for (AddressDerivation derivation : observation.addressDerivations) {
                 if (derivation == null || !derivation.matches(effective)) continue;
-                recordIndex(observation.pc, derivation, effective, width, access);
+                recordIndex(observation.pc, derivation, effective, size * 8, access);
                 return;
             }
         }
@@ -8861,15 +11311,24 @@ public class RunP1MEMachine extends GhidraScript {
             if (jit == null || !jit.hasVerifiedInstructionBytes(instruction)) {
                 thread.getState().getVar(model.memorySpace, pc, size, true, Reason.EXECUTE_READ);
             }
+            // Authorization and bytes for this boundary were observed normally.
+            // A clock or scheduler action later in the instruction sets the barrier again.
+            model.idleBatchBarrier = false;
             InstructionObservation observation = jit == null ? null : jit.currentObservation(instruction);
             if (observation == null) observation = decodeObservation(instruction, null);
             currentObservation = observation;
-            consumeCompare(observation);
-            noteIndirectBranch(thread, observation);
-            boolean compared = noteCompare(thread, observation);
-            if (model.inputDerivedTableIndices) updateAddressDerivations(thread, observation, compared);
+            if (model.trace.recordsInstructionMetadata()
+                    && (model.compareOperands || model.inputDerivedTableIndices)) {
+                consumeCompare(observation);
+                noteIndirectBranch(thread, observation);
+                boolean compared = noteCompare(thread, observation);
+                if (model.inputDerivedTableIndices)
+                    updateAddressDerivations(thread, observation, compared);
+            }
             if (observation.readsIcctrl) model.scriptIcctrl(thread);
-            interruptReturn = "eiret".equals(observation.mnemonic);
+            interruptReturn = observation.returnFromInterrupt;
+            interruptReturnChannel = interruptReturn
+                ? model.activeInterruptChannels.peekLast() : null;
             automaticPriorityReturn = interruptReturn
                 && (model.processorRegister(thread, "PSW") & 0x40) == 0
                 && (model.processorRegister(thread, "INTCFG") & 1) == 0;
@@ -8883,48 +11342,99 @@ public class RunP1MEMachine extends GhidraScript {
 
         // CPU data transactions only. Concrete-offset access is the backing path for
         // fetch, inspection, device updates, and the transfer after authorization.
+        private RegisterDef beginBusRead(PcodeThread<byte[]> thread, long address, int size) {
+            noteIndex(address, size, "load");
+            return model.beforeRead(thread, address, size);
+        }
+
+        private void endBusRead(PcodeThread<byte[]> thread, RegisterDef register, long address, int size) {
+            model.completeBusRead(thread, register, address, size);
+            // EIC request bits change on modeled edges or writes. A completed byte
+            // test can be repeated only before the next such boundary.
+            if (register != null && size == 1 && register.plainEicRead
+                    && currentObservation != null && "tst1".equals(currentObservation.mnemonic)) {
+                model.pollTest = currentObservation.instruction;
+                model.pollReadTick = model.trace.instructions;
+                model.pollReadAddress = address;
+            }
+        }
+
+        long readBusNumber(long address, int size) {
+            PcodeThread<byte[]> thread = model.executionThread;
+            RegisterDef register = beginBusRead(thread, address, size);
+            boolean bigEndian = model.bigEndian;
+            long value = register != null && register.read_input
+                ? model.readInputNumber(register, address, size)
+                : model.deviceState.readBusBacking(register, address, size, bigEndian, Reason.EXECUTE_READ);
+            endBusRead(thread, register, address, size);
+            return value;
+        }
+
         byte[] readBus(long address, int size) {
             PcodeThread<byte[]> thread = model.executionThread;
-            noteIndex(address, size * 8, "load");
-            RegisterDef register = model.beforeRead(thread, address, size);
+            RegisterDef register = beginBusRead(thread, address, size);
             byte[] result = register != null && register.read_input
                 ? model.readInputLanes(register, address, size)
                 : model.emulator.getSharedState().getVar(model.memorySpace, address, size,
                     true, Reason.EXECUTE_READ);
-            model.adc.readCompleted(thread, address, size);
-            model.rsent.readCompleted(thread, address, size);
+            endBusRead(thread, register, address, size);
             return result;
         }
 
+        void writeBusNumber(long address, int size, long value) {
+            noteIndex(address, size, "store");
+            model.storeBus(model.executionThread, address, size, value, null, true);
+        }
+
         void writeBus(long address, byte[] value) {
-            PcodeThread<byte[]> thread = model.executionThread;
-            int size = value.length;
-            noteIndex(address, size * 8, "store");
-            model.beforeWrite(thread, address, size, value);
-            if (!model.discardBusStore) {
-                model.emulator.getSharedState().setVar(model.memorySpace, address, size, true, value);
-            }
-            model.afterWrite(thread, address, size, value);
+            noteIndex(address, value.length, "store");
+            model.storeBus(model.executionThread, address, value.length, 0, value, true);
         }
 
         @Override
         public void afterExecuteInstruction(PcodeThread<byte[]> thread, Instruction instruction) {
+            InstructionObservation observation = currentObservation;
+            boolean sameInstruction = observation != null && observation.instruction == instruction;
+            long pc = sameInstruction ? observation.pc : instruction.getAddress().getOffset();
+            boolean boundedCall = (!sameInstruction || !observation.ordinaryRetirement) &&
+                finishObservedInstruction(thread, instruction, observation, sameInstruction, pc);
+            model.trace.instructions++;
+            model.trace.recordExecutedPc(pc);
+            if (boundedCall) model.noteBoundedCall(thread);
+            model.trace.noteRecentPc(pc);
+            model.lastRetiredPc = pc;
+            model.retireClock(thread);
+            model.dispatchDueEvents();
+            model.deliverSystemError(thread);
+            currentObservation = null;
+        }
+
+        private boolean finishObservedInstruction(PcodeThread<byte[]> thread, Instruction instruction,
+                InstructionObservation observation, boolean sameInstruction, long pc) {
             if (automaticPriorityReturn) {
                 model.processorRegister(thread, "ISPR", isprBeforeInstruction & (isprBeforeInstruction - 1));
             }
             else if (protectedIsprWrite) {
                 model.processorRegister(thread, "ISPR", isprBeforeInstruction);
             }
-            InstructionObservation observation = currentObservation;
-            boolean sameInstruction = observation != null && observation.instruction == instruction;
-            long pc = sameInstruction ? observation.pc : instruction.getAddress().getOffset();
             if (interruptReturn) {
-                JsonObject event = new JsonObject();
-                event.addProperty("kind", "interrupt-return");
-                event.addProperty("pc", hex32(pc));
-                event.addProperty("return_pc", hex32(model.pc(thread)));
-                event.addProperty("scheduler_tick", model.trace.instructions + 1);
-                model.trace.deviceEvents.add(event);
+                if (interruptReturnChannel != null) {
+                    int enteredChannel = model.activeInterruptChannels.removeLast();
+                    if (enteredChannel != interruptReturnChannel) {
+                        throw new IllegalStateException(
+                            "interrupt-return stack changed before eiret retirement");
+                    }
+                }
+                if (!model.trace.deviceEvents.omitsEventPayload("interrupt-return")) {
+                    JsonObject event = new JsonObject();
+                    event.addProperty("kind", "interrupt-return");
+                    event.addProperty("pc", hex32(pc));
+                    if (interruptReturnChannel != null)
+                        event.addProperty("channel", interruptReturnChannel);
+                    event.addProperty("return_pc", hex32(model.pc(thread)));
+                    event.addProperty("scheduler_tick", model.trace.instructions + 1);
+                    model.trace.deviceEvents.add(event);
+                }
             }
             String mnemonic = sameInstruction ? observation.mnemonic : instruction.getMnemonicString();
             switch (mnemonic) {
@@ -8938,14 +11448,7 @@ public class RunP1MEMachine extends GhidraScript {
                 model.clearPreparedFrame(thread, instruction);
             }
             if (icctrlWrite) model.completeInstructionCacheClear(thread);
-            model.trace.instructions++;
-            model.trace.executed.add(pc);
-            if ("jarl".equals(mnemonic)) model.noteBoundedCall(thread);
-            model.trace.noteRecentPc(pc);
-            model.retireClock(thread);
-            model.dispatchDueEvents();
-            model.deliverSystemError(thread);
-            currentObservation = null;
+            return "jarl".equals(mnemonic);
         }
 
         @Override
@@ -9052,7 +11555,7 @@ public class RunP1MEMachine extends GhidraScript {
         if ((text.length() & 1) != 0) throw new IllegalArgumentException("odd-length hex bytes");
         byte[] out = new byte[text.length() / 2];
         for (int i = 0; i < out.length; i++) {
-            out[i] = (byte) Integer.parseInt(text.substring(i * 2, i * 2 + 2), 16);
+            out[i] = (byte) Integer.parseInt(text, i * 2, i * 2 + 2, 16);
         }
         return out;
     }
@@ -9280,15 +11783,14 @@ public class RunP1MEMachine extends GhidraScript {
     private int entryInstructionLength(SleighLanguage language, byte[] codeflash, long imageBase,
             long resolved) throws Exception {
         Address address = language.getDefaultSpace().getAddress(resolved);
-        if (currentProgram != null) {
-            try {
-                Instruction instruction = currentProgram.getListing().getInstructionAt(address);
-                if (instruction != null) return instruction.getLength();
-            }
-            catch (DomainObjectException unavailable) {
-                // Decode from the verified flash image instead.
-            }
+        try {
+            Instruction instruction = currentProgram.getListing().getInstructionAt(address);
+            if (instruction != null) return instruction.getLength();
         }
+        catch (DomainObjectException unavailable) {
+            // Decode from the verified flash image instead.
+        }
+
         int offset = Math.toIntExact(resolved - imageBase);
         int window = Math.min(16, codeflash.length - offset);
         if (window <= 0) {
@@ -9375,9 +11877,12 @@ public class RunP1MEMachine extends GhidraScript {
         }
     }
 
-    private List<JsonObject> evaluateChecks(Model model, PcodeThread<byte[]> thread,
+    private record CheckResults(JsonArray rows, boolean passed) {}
+
+    private CheckResults evaluateChecks(Model model, PcodeThread<byte[]> thread,
                                             SleighLanguage language, List<CheckDef> checks) {
-        List<JsonObject> results = new ArrayList<>();
+        JsonArray results = new JsonArray(checks.size());
+        boolean allPassed = true;
         for (CheckDef check : checks) {
             JsonObject result = new JsonObject();
             result.addProperty("name", check.name);
@@ -9450,8 +11955,9 @@ public class RunP1MEMachine extends GhidraScript {
             result.addProperty("actual", actual);
             result.addProperty("passed", passed);
             results.add(result);
+            allPassed &= passed;
         }
-        return results;
+        return new CheckResults(results, allPassed);
     }
 
     private JsonObject reportBase(
@@ -9477,6 +11983,9 @@ public class RunP1MEMachine extends GhidraScript {
         resolvedContract.addProperty("hsb_cycles_per_instruction", scenario.hsb_cycles_per_instruction);
         resolvedContract.addProperty("expected_termination", scenario.expected_termination);
         resolvedContract.addProperty("reset", scenario.reset);
+        if (scenario.instruction_trace_start_step != null)
+            resolvedContract.addProperty(
+                "instruction_trace_start_step", scenario.instruction_trace_start_step);
         resolvedContract.addProperty("compare_operands", scenario.compare_operands);
         resolvedContract.addProperty(
             "input_derived_table_indices", scenario.input_derived_table_indices);
@@ -9494,9 +12003,10 @@ public class RunP1MEMachine extends GhidraScript {
         report.add("input_derived_table_indices", com.google.gson.JsonNull.INSTANCE);
         if (trace.instructionTraceEnabled) {
             report.addProperty("instruction_trace_semantics",
-                "entered instructions in callback order; instruction is the retired count before "
-                + "entry (terminal fault/halt may not retire); modeled shortcuts do not retire "
-                + "or synthesize instructions and appear separately in instruction_trace_shortcuts");
+                "entered instructions in callback order; instruction is the absolute retired count "
+                + "before entry (terminal fault/halt may not retire); instruction_trace_start_step "
+                + "defers recording through the named step; modeled shortcuts do not retire or "
+                + "synthesize instructions and appear separately in instruction_trace_shortcuts");
         }
         return report;
     }
@@ -9536,6 +12046,53 @@ public class RunP1MEMachine extends GhidraScript {
                 }
             }
             return new MemoryStateSnapshot(snapshots, pages, initialized, ranges);
+        }
+
+        boolean hasSameDefinedBytes(Map<AddressSpace, ? extends BytesPcodeExecutorStateSpace> live) {
+            if (!spaces.keySet().equals(live.keySet())) return false;
+            for (var entry : spaces.entrySet()) {
+                var saved = entry.getValue().getInitialized().spans().iterator();
+                var current = InitializedBytes.backingOf(live.get(entry.getKey()))
+                    .getInitialized().spans().iterator();
+                while (saved.hasNext() && current.hasNext()) {
+                    var a = saved.next();
+                    var b = current.next();
+                    if (a.min() != b.min() || a.max() != b.max()) return false;
+                }
+                if (saved.hasNext() || current.hasNext()) return false;
+            }
+            return true;
+        }
+
+        boolean copyIntoBoundPages(Map<AddressSpace, ? extends BytesPcodeExecutorStateSpace> live,
+                AddressSpace fetchSpace, BitSet decodedPages) {
+            boolean codeChanged = false;
+            int size = SemisparseByteArray.BLOCK_SIZE;
+            long mask = -((long) size);
+            for (var entry : spaces.entrySet()) {
+                var source = entry.getValue();
+                var target = InitializedBytes.backingOf(live.get(entry.getKey()));
+                long copied = -1;
+                for (var span : source.getInitialized().spans()) {
+                    long last = span.max() & mask;
+                    for (long base = span.min() & mask;; base += size) {
+                        if (base != copied) {
+                            byte[] saved = source.getDirect(base);
+                            if (entry.getKey() == fetchSpace && !codeChanged &&
+                                    Long.compareUnsigned(base / size, Integer.MAX_VALUE) <= 0 &&
+                                    decodedPages.get((int) (base / size))) {
+                                var current = target.getDirectPage(base);
+                                codeChanged = !Arrays.equals(current.array(), current.offset(), current.offset() + size,
+                                    saved, 0, size);
+                            }
+                            target.copyDirectPage(base, saved);
+                            copied = base;
+                        }
+                        if (base == last) break;
+                    }
+                }
+            }
+            return codeChanged;
         }
 
         void restore(Map<AddressSpace, ? extends BytesPcodeExecutorStateSpace> liveSpaces,
@@ -9658,12 +12215,15 @@ public class RunP1MEMachine extends GhidraScript {
     static final class ModelGraphCheckpoint {
         private static final Set<String> MODEL_UNCAPTURED = Set.of(
             "language", "spec", "trace", "executionThread", "regions", "registers",
-            "regionCache", "registerCache", "mpu", "mpuHints",
+            "regionCache", "registerPages", "registerPageBase", "mpu", "mpuHints",
             "registersByName", "interruptRegisters", "interruptRegistersByAddress",
-            "portAliasFields", "portAliasDependents", "gramGuards", "peripheralGuards",
-            "aliases", "csihBindings", "emulator", "memorySpace",
-            // The capture boundary commits all ticks. Restore recomputes the budget.
-            "deferredClockCycles", "quietClockBudget"
+            "portBindings", "portColumnValues", "gramGuards", "peripheralGuards",
+            "aliases", "emulator", "memorySpace",
+            "deviceState", "dmaWordIndex", // Derived from backing storage; both restore paths invalidate it.
+            // Capture commits all ticks. Restore only needs to rebase derived timing.
+            "quietUntil", "quietClockEvents",
+            "taudClockTick", "taujClockTick", "rsentClockTick",
+            "taudClockDue", "taujClockDue", "rsentClockDue"
         );
         final List<Runnable> restoreOperations = new ArrayList<>();
         final IdentityHashMap<Object, Boolean> visited = new IdentityHashMap<>();
@@ -9793,7 +12353,8 @@ public class RunP1MEMachine extends GhidraScript {
             if (thread.getFrame() != null)
                 throw new IllegalStateException("checkpoint requires an instruction boundary");
             long started = System.nanoTime();
-            machine.materializeClock(thread);
+            machine.drainDeviceClocks();
+            machine.invalidateClockHorizon();
             model = new ModelGraphCheckpoint(machine);
             CheckpointableBytesState shared =
                 (CheckpointableBytesState) thread.getState().getSharedState();
@@ -9825,10 +12386,16 @@ public class RunP1MEMachine extends GhidraScript {
         long restore(Model machine, Callbacks callbacks, PcodeThread<byte[]> thread) throws IOException {
             long started = System.nanoTime();
             model.restore();
-            machine.deferredClockCycles = 0;
-            machine.quietClockBudget = 0;
-            ((CheckpointableBytesState) thread.getState().getSharedState()).restore(sharedMemory);
-            ((CheckpointableBytesState) thread.getState().getLocalState()).restore(localMemory);
+            machine.invalidateClockHorizon();
+            machine.rebaseDeviceClocks();
+            var shared = (CheckpointableBytesState) thread.getState().getSharedState();
+            var local = (CheckpointableBytesState) thread.getState().getLocalState();
+            if (!(shared instanceof P1MEJitMachine.MachineState jitShared &&
+                    local instanceof P1MEJitMachine.MachineState jitLocal &&
+                    jitShared.restoreBoundPair(sharedMemory, jitLocal, localMemory))) {
+                shared.restore(sharedMemory);
+                local.restore(localMemory);
+            }
             machine.trace.restore(trace);
             callbacks.restoreCompare(pendingCompare);
             callbacks.restoreDerivations(addressDerivations);
@@ -9838,6 +12405,29 @@ public class RunP1MEMachine extends GhidraScript {
             thread.setSuspended(suspended);
             return System.nanoTime() - started;
         }
+    }
+
+
+    private void addSymbolCacheProbe(JsonObject report) {
+        if (!Boolean.getBoolean("p1me.symbolCacheProbe")) return;
+        // Test-only, isolated-process census. A 12.2 JIT compilation creates one
+        // JitDataFlowUseropLibrary per passage. No completed compiler graph may
+        // remain as a global SymbolsCache key, including after scenario failure.
+        System.gc();
+        System.runFinalization();
+        System.gc();
+        int roots = 0;
+        synchronized (PcodeUseropLibrary.SYMBOL_CACHE) {
+            for (PcodeUseropLibrary<?> library : PcodeUseropLibrary.SYMBOL_CACHE.keySet()) {
+                if (library.getClass().getName().equals(
+                        "ghidra.pcode.emu.jit.analysis.JitDataFlowUseropLibrary")) roots++;
+            }
+        }
+        report.addProperty("daemon_jit_dataflow_symbol_cache_roots", roots);
+        var symbolsCacheSource = PcodeUseropLibrary.class.getClassLoader()
+            .getResource("ghidra/pcode/exec/SymbolsCache.class");
+        report.addProperty("daemon_symbols_cache_source",
+            symbolsCacheSource == null ? "" : symbolsCacheSource.toExternalForm());
     }
 
     private JsonObject runScenario(
@@ -9867,22 +12457,40 @@ public class RunP1MEMachine extends GhidraScript {
                 return new Rh850Userops();
             }
         };
+        JsonObject report = null;
         try {
-            return executeScenario(
+            report = executeScenario(
                 contract, language, scenario, codeflash, dataflash, trace,
                 model, callbacks, emulator);
+            return report;
         }
         finally {
-            // Ghidra 12.2 SymbolsCache strongly retains its weak-map library key,
-            // which retains the thread and its entire machine. Remove only ours.
-            synchronized (PcodeUseropLibrary.SYMBOL_CACHE) {
-                PcodeUseropLibrary.SYMBOL_CACHE.remove(emulator.getUseropLibrary());
-                PcodeUseropLibrary.SYMBOL_CACHE.remove(emulator.getStubUseropLibrary());
-                for (PcodeThread<byte[]> thread : emulator.getAllThreads()) {
-                    PcodeUseropLibrary.SYMBOL_CACHE.remove(thread.getUseropLibrary());
-                }
-            }
+            Runtime runtime = Runtime.getRuntime();
+            long heapBeforeRelease = runtime.totalMemory() - runtime.freeMemory();
+            if (report != null)
+                report.addProperty("daemon_heap_bytes_before_release", heapBeforeRelease);
+            if (emulator instanceof P1MEJitMachine jit) jit.release();
+            model.executionThread = null;
+            model.emulator = null;
+            model.deviceState = null;
+            model.eventSocket = null;
         }
+    }
+
+    private void finishHeapRelease(JsonObject report, long heapAtScenarioStart) {
+        Runtime runtime = Runtime.getRuntime();
+        long releasedHeap = runtime.totalMemory() - runtime.freeMemory();
+        long heapBeforeRelease = report.has("daemon_heap_bytes_before_release")
+            ? report.get("daemon_heap_bytes_before_release").getAsLong() : releasedHeap;
+        boolean fullCollection = heapBeforeRelease >= runtime.maxMemory() / 2
+            && heapBeforeRelease - heapAtScenarioStart >= runtime.maxMemory() / 8;
+        if (fullCollection) System.gc();
+        long heapAfterRelease = runtime.totalMemory() - runtime.freeMemory();
+        report.addProperty("daemon_heap_bytes_before_release", heapBeforeRelease);
+        report.addProperty("daemon_heap_bytes_after_release", heapAfterRelease);
+        report.addProperty("daemon_full_collection", fullCollection);
+        report.addProperty("daemon_heap_bytes_reclaimed",
+            Math.max(0, heapBeforeRelease - heapAfterRelease));
     }
 
     static final class ExecutionResult {
@@ -9948,8 +12556,18 @@ public class RunP1MEMachine extends GhidraScript {
             Model model, PcodeThread<byte[]> thread, long instructionLimit,
             Set<Long> stops, ArrivalCounter arrivals) throws Exception {
         ExecutionResult result = new ExecutionResult();
-        long[] stopAddresses = stops.stream().mapToLong(Long::longValue).sorted().toArray();
+        var stopIndex = P1MEJitMachine.StopIndex.of(stops);
         if (arrivals != null && arrivals.addresses.length == 0) arrivals = null;
+        var batchStops = stopIndex;
+        boolean batchArrivals = arrivals != null && model.trace.canDeferNativeBus();
+        if (batchArrivals) {
+            var boundaries = new java.util.HashSet<Long>(stops);
+            for (long address : arrivals.addresses) boundaries.add(address);
+            batchStops = P1MEJitMachine.StopIndex.of(boundaries);
+        }
+        P1MEJitMachine.MachineThread jit =
+            thread instanceof P1MEJitMachine.MachineThread machineThread ? machineThread : null;
+        P1MEJitMachine.PolledBitLoop pollLoop = null;
         try {
             while (true) {
                 long pc = thread.getCounter().getOffset();
@@ -9957,8 +12575,9 @@ public class RunP1MEMachine extends GhidraScript {
                     result.stopAfterArrivals = true;
                     break;
                 }
-                if (model.trace.instructions >= instructionLimit ||
-                        (stopAddresses.length != 0 && Arrays.binarySearch(stopAddresses, pc) >= 0)) break;
+                if (model.trace.instructions >= instructionLimit || stopIndex.contains(pc)) break;
+                if (pollLoop != null && pc != pollLoop.testPc() && pc != pollLoop.branchPc())
+                    pollLoop = null;
                 monitor.checkCancelled();
                 if (model.eventSocket != null) model.eventSocket.poll(thread);
                 if (!model.boundedEdges.isEmpty() && model.returnBoundedCallee(thread)) continue;
@@ -9966,6 +12585,50 @@ public class RunP1MEMachine extends GhidraScript {
                 model.dispatchExternalEvents();
                 model.deliverInterrupt(thread);
                 model.completeCountedDelay(thread);
+                // Count arrivals at the scheduler boundary. Retire just one instruction
+                // at a watched PC so a self-branch counts as another arrival.
+                if (jit != null && (arrivals == null ||
+                        batchArrivals && !batchStops.contains(thread.getCounter().getOffset()))) {
+                    if (model.eventSocket == null) {
+                        if (model.pollTest != null) {
+                            long elapsed = model.trace.instructions - model.pollReadTick;
+                            if (elapsed != 1) {
+                                Instruction test = model.pollTest;
+                                model.pollTest = null;
+                                pollLoop = elapsed == 2 && !model.peripheralFile && model.boundedEdges.isEmpty()
+                                    ? jit.decodedPolledBitLoop(pollLoop, test, model.lastRetiredPc) : null;
+                                if (pollLoop != null &&
+                                        model.repeatPoll(jit, instructionLimit, batchStops, pollLoop)) continue;
+                            }
+                        }
+                        // A clock edge discards the value witness, not the decoded
+                        // pair. Step one real instruction after the scheduler; a
+                        // branch after an edge-ending test still sees that test's Z.
+                        if (pollLoop != null && jit.stepPollBoundary(pollLoop, model.lastRetiredPc)) continue;
+                        pollLoop = null;
+                        if (model.pollTest != null) {
+                            thread.stepInstruction();
+                            continue;
+                        }
+                    }
+                    long batchLimit = model.idleBatchLimit(
+                        instructionLimit, thread.getCounter().getOffset());
+                    if (batchLimit != 0) {
+                        long batchPc = thread.getCounter().getOffset();
+                        long batched = jit.batchIdle(batchLimit);
+                        if (batched != 0) {
+                            if (batched != batchLimit)
+                                throw new IllegalStateException("partial idle batch retirement");
+                            model.retireIdleBatch(batchPc, batched);
+                            continue;
+                        }
+                    }
+                    int instructionBatchLimit = model.instructionBatchLimit(instructionLimit);
+                    if (instructionBatchLimit >= 2) {
+                        jit.stepOrBatch(instructionBatchLimit, batchStops);
+                        continue;
+                    }
+                }
                 thread.stepInstruction();
             }
         }
@@ -9980,7 +12643,8 @@ public class RunP1MEMachine extends GhidraScript {
             }
         }
         finally {
-            model.materializeClock(thread);
+            model.pollTest = null;
+            model.drainDeviceClocks();
         }
         if (arrivals != null) result.arrivalCounts = arrivals.snapshot();
         return result;
@@ -9991,26 +12655,61 @@ public class RunP1MEMachine extends GhidraScript {
         return java.util.HexFormat.of().formatHex(value);
     }
 
-    private JsonArray registerRows(PcodeThread<byte[]> thread) {
-        List<Map.Entry<Register, byte[]>> values =
-            new ArrayList<>(thread.getState().getRegisterValues().entrySet());
-        values.sort(Comparator
-            .comparing((Map.Entry<Register, byte[]> entry) -> entry.getKey().getName())
-            .thenComparingLong(entry -> entry.getKey().getAddress().getOffset()));
-        JsonArray rows = new JsonArray();
-        for (Map.Entry<Register, byte[]> entry : values) {
+    private static final class RegisterRows {
+        private Register[] order;
+        private byte[][] previous;
+        private JsonArray rows;
+        private P1MEJitMachine.MachineThread.RegisterImage image;
+
+        private static JsonObject row(Register reg, byte[] value) {
             JsonObject row = new JsonObject();
-            row.addProperty("name", entry.getKey().getName());
-            row.addProperty("address", hex32(entry.getKey().getAddress().getOffset()));
-            row.addProperty("size", entry.getValue().length);
-            row.addProperty("value_hex", byteHex(entry.getValue()));
-            rows.add(row);
+            row.addProperty("name", reg.getName());
+            row.addProperty("address", hex32(reg.getAddress().getOffset()));
+            row.addProperty("size", value.length);
+            row.addProperty("value_hex", byteHex(value));
+            return row;
         }
-        return rows;
+
+        JsonArray capture(PcodeThread<byte[]> thread) {
+            Map<Register, byte[]> values = null;
+            if (image == null || !image.current()) {
+                values = thread.getState().getRegisterValues();
+                if (order == null || order.length != values.size() ||
+                        !Arrays.stream(order).allMatch(values::containsKey)) {
+                    order = values.keySet().toArray(Register[]::new);
+                    Arrays.sort(order, Comparator.comparing(Register::getName)
+                        .thenComparingLong(reg -> reg.getAddress().getOffset()));
+                    previous = new byte[order.length][];
+                    rows = null;
+                }
+                if (thread instanceof P1MEJitMachine.MachineThread jit) image = jit.bindRegisterImage(order);
+            }
+            JsonArray changed = rows == null ? new JsonArray(order.length) : null;
+            for (int i = 0; i < order.length; i++) {
+                Register reg = order[i];
+                byte[] live = image == null ? values.get(reg) : image.bytes[i];
+                int offset = image == null ? 0 : image.offsets[i];
+                int size = image == null ? live.length : reg.getNumBytes();
+                byte[] old = previous[i];
+                if (old != null && old.length == size && Arrays.equals(old, 0, size, live, offset, offset + size)) continue;
+                if (old == null || old.length != size) previous[i] = old = new byte[size];
+                System.arraycopy(live, offset, old, 0, size);
+                if (rows == null) changed.add(row(reg, old));
+                else {
+                    if (changed == null) {
+                        changed = new JsonArray(order.length);
+                        changed.addAll(rows);
+                    }
+                    changed.set(i, row(reg, old));
+                }
+            }
+            if (changed != null) rows = changed;
+            return rows;
+        }
     }
 
     private static void flushPeripheralSnapshots(Model model) {
-        model.materializeClock(model.executionThread);
+        model.drainDeviceClocks();
         model.taud.flush();
         model.tauj.flush();
         model.tsg.flushSnapshot();
@@ -10020,6 +12719,7 @@ public class RunP1MEMachine extends GhidraScript {
     private StepBatchResult executeSteps(
             Model model, Callbacks callbacks, PcodeThread<byte[]> thread,
             SleighLanguage language, Scenario scenario) throws Exception {
+        var registerRows = new RegisterRows();
         Map<String, MachineCheckpoint> checkpoints = new LinkedHashMap<>();
         JsonArray checkpointRows = new JsonArray();
         JsonArray trialRows = new JsonArray();
@@ -10029,7 +12729,17 @@ public class RunP1MEMachine extends GhidraScript {
         boolean allPassed = true;
         String finalTermination = "incomplete";
 
+        // A capture-disabled suffix below the row cap cannot ask whether a later unrecorded
+        // address was previously written. A restore rechecks the cap from its own snapshot.
+        int lastCapture = -1;
+        for (int i = 0; i < scenario.steps.size(); i++) {
+            var step = scenario.steps.get(i);
+            if (("trial".equals(step.kind) && !Boolean.FALSE.equals(step.capture_rows)) ||
+                    ("checkpoint".equals(step.kind) && step.after_instructions != null)) lastCapture = i;
+        }
+        int stepIndex = -1;
         for (ScenarioStep step : scenario.steps) {
+            stepIndex++;
             switch (step.kind) {
                 case "checkpoint": {
                     if (step.after_instructions != null) {
@@ -10084,15 +12794,21 @@ public class RunP1MEMachine extends GhidraScript {
                 }
                 case "trial": {
                     long startInstruction = model.trace.instructions;
+                    List<String> eventKinds = step.capture_event_kinds;
+                    boolean captureRows = step.capture_rows == null || step.capture_rows;
                     model.configureExternalEvents(thread, step.events, startInstruction, Model.EventOrigin.TRIAL);
                     Set<Long> trialStops = new HashSet<>();
                     for (String value : step.stop_addresses)
                         trialStops.add(parseUnsigned(value));
                     ArrivalCounter arrivals = new ArrivalCounter(step.stop_after_arrivals);
-                    boolean captureRows = step.capture_rows == null || step.capture_rows;
-                    model.trace.beginTrial(captureRows);
+                    if (eventKinds == null) step.capture_rows = captureRows;
+                    model.trace.beginTrial(captureRows, eventKinds);
+                    model.trace.unobservedWrites = stepIndex > lastCapture && !captureRows && eventKinds == null &&
+                        model.trace.memoryAccesses.size() < Trace.MAX_MEMORY_ROWS && model.eventSocket == null;
                     P1MEJitMachine.MachineThread jit = thread instanceof P1MEJitMachine.MachineThread t ? t : null;
                     long compiledAtStart = jit == null ? 0 : jit.compiledInstructions;
+                    long idleAtStart = jit == null ? 0 : jit.idleInstructions;
+                    long templateAtStart = jit == null ? 0 : jit.templateInstructions;
                     long trialStarted = System.nanoTime();
                     ExecutionResult result = runUntil(
                         model, thread,
@@ -10100,10 +12816,11 @@ public class RunP1MEMachine extends GhidraScript {
                         trialStops, arrivals);
                     if (thread.getFrame() != null) thread.dropInstruction();
                     flushPeripheralSnapshots(model);
-                    List<JsonObject> checks =
+                    CheckResults checks =
                         evaluateChecks(model, thread, language, step.checks);
+                    model.trace.unobservedWrites = false;
+                    JsonObject eventKindCounts = model.trace.endTrial();
                     long trialNanoseconds = System.nanoTime() - trialStarted;
-                    model.trace.endTrial();
                     long finalPc = thread.getCounter().getOffset();
                     boolean atStop = trialStops.contains(finalPc);
                     String termination = result.fault != null ? "unexpected-fault"
@@ -10112,10 +12829,8 @@ public class RunP1MEMachine extends GhidraScript {
                         : atStop ? "stop-address"
                         : model.trace.instructions >= startInstruction + step.max_instructions
                             ? "instruction-budget" : "incomplete";
-                    boolean checksPassed =
-                        checks.stream().allMatch(row -> row.get("passed").getAsBoolean());
                     boolean passed = result.fault == null
-                        && !"incomplete".equals(termination) && checksPassed;
+                        && !"incomplete".equals(termination) && checks.passed;
                     allPassed &= passed;
                     finalTermination = termination;
 
@@ -10125,8 +12840,11 @@ public class RunP1MEMachine extends GhidraScript {
                     row.addProperty("start_instruction", startInstruction);
                     row.addProperty("instruction_count",
                         model.trace.instructions - startInstruction);
-                    if (jit != null) row.addProperty("jit_compiled_instructions",
-                        jit.compiledInstructions - compiledAtStart);
+                    if (jit != null) {
+                        row.addProperty("jit_compiled_instructions", jit.compiledInstructions - compiledAtStart);
+                        row.addProperty("jit_idle_instructions", jit.idleInstructions - idleAtStart);
+                        row.addProperty("jit_template_instructions", jit.templateInstructions - templateAtStart);
+                    }
                     row.addProperty("final_pc", hex32(finalPc));
                     row.addProperty("termination_reason", termination);
                     row.addProperty("restore_nanoseconds", pendingRestoreNanoseconds);
@@ -10137,11 +12855,15 @@ public class RunP1MEMachine extends GhidraScript {
                                 / trialNanoseconds);
                     }
                     row.addProperty("passed", passed);
-                    row.addProperty("capture_rows", captureRows);
+                    if (eventKinds == null) row.addProperty("capture_rows", captureRows);
+                    else {
+                        row.add("capture_event_kinds", GSON.toJsonTree(eventKinds));
+                        row.add("event_kind_counts", eventKindCounts);
+                    }
                     if (result.fault != null) row.add("fault", result.fault.toJson());
                     if (result.halt != null) row.addProperty("halt", result.halt.operation);
-                    row.add("checks", GSON.toJsonTree(checks));
-                    row.add("register_rows", registerRows(thread));
+                    row.add("checks", checks.rows);
+                    row.add("register_rows", registerRows.capture(thread));
                     JsonArray arrivalRows = new JsonArray();
                     for (StopArrival requested : step.stop_after_arrivals) {
                         long address = parseUnsigned(requested.address);
@@ -10160,12 +12882,17 @@ public class RunP1MEMachine extends GhidraScript {
                     trialRows.add(row);
                     restored = false;
                     pendingRestoreNanoseconds = 0;
-                    segmentStarted = System.nanoTime();
+                    long finished = System.nanoTime();
+                    row.addProperty("step_wall_nanoseconds", finished - segmentStarted);
+                    segmentStarted = finished;
                     break;
                 }
                 default:
                     throw new IllegalArgumentException("unsupported scenario step " + step.kind);
             }
+            if (step.name != null
+                    && step.name.equals(scenario.instruction_trace_start_step))
+                model.trace.startInstructionRecording();
         }
 
         JsonObject report = new JsonObject();
@@ -10203,10 +12930,14 @@ public class RunP1MEMachine extends GhidraScript {
             byte[] codeflash, byte[] dataflash, Trace trace, Model model,
             Callbacks callbacks, PcodeMachine<byte[]> emulator) throws Exception {
         model.attach(emulator);
+        if (scenario.instruction_trace_start_step != null)
+            trace.deferInstructionRecording();
         if (scenario.icus_startup_stub != null)
             model.icusStartupStub = model.new IcusStartupStub(scenario.icus_startup_stub);
         model.dma.masterRewriteAssumption = scenario.dma_master_rewrite_assumption;
         model.resetReplay = scenario.reset_replay;
+            if (model.resetReplay != null)
+                for (ExternalEvent input : model.resetReplay.events) input.replayedAfterReset = true;
         PcodeThread<byte[]> thread = emulator.newThread("PE1");
         model.executionThread = thread;
         model.initializeProcessorReset(thread);
@@ -10270,8 +13001,12 @@ public class RunP1MEMachine extends GhidraScript {
         }
 
         JsonObject report = reportBase(contract, scenario, trace, resolved.proof);
-        if (thread instanceof P1MEJitMachine.MachineThread jit)
+        if (thread instanceof P1MEJitMachine.MachineThread jit) {
             report.addProperty("jit_compiled_instructions", jit.compiledInstructions);
+            report.addProperty("jit_idle_instructions", jit.idleInstructions);
+            report.addProperty("jit_template_instructions", jit.templateInstructions);
+            report.addProperty("jit_native_proof", jit.nativeDiagnostic());
+        }
         long finalPc = thread.getCounter().getOffset();
         report.addProperty("final_pc", hex32(finalPc));
         if (fault != null) report.add("fault", fault.toJson());
@@ -10280,9 +13015,8 @@ public class RunP1MEMachine extends GhidraScript {
         if (batch == null) flushPeripheralSnapshots(model);
         report.add("snapshot_outputs", writeSnapshotOutputs(model, thread, scenario));
 
-        List<JsonObject> checks = evaluateChecks(model, thread, language, scenario.checks);
-        report.add("checks", GSON.toJsonTree(checks));
-        boolean checksPassed = checks.stream().allMatch(row -> row.get("passed").getAsBoolean());
+        CheckResults checks = evaluateChecks(model, thread, language, scenario.checks);
+        report.add("checks", checks.rows);
         boolean passed;
         String termination;
         if (scenario.expected_fault != null) {
@@ -10291,7 +13025,7 @@ public class RunP1MEMachine extends GhidraScript {
                 && (expected.kind == null || expected.kind.equals(fault.kind))
                 && (expected.address == null || parseUnsigned(expected.address) == fault.address)
                 && (expected.access == null || expected.access.equals(fault.access));
-            passed = expectedFault && checksPassed;
+            passed = expectedFault && checks.passed;
             termination = expectedFault ? "expected-fault"
                 : fault != null ? "unexpected-fault" : "missing-expected-fault";
         }
@@ -10306,7 +13040,7 @@ public class RunP1MEMachine extends GhidraScript {
                 : "incomplete";
             boolean expectedTermination = scenario.expected_termination == null
                 ? completed : scenario.expected_termination.equals(termination);
-            passed = fault == null && expectedTermination && checksPassed
+            passed = fault == null && expectedTermination && checks.passed
                 && (batch == null || batch.passed);
         }
         report.addProperty("termination_reason", termination);
@@ -10330,7 +13064,8 @@ public class RunP1MEMachine extends GhidraScript {
             "bounded_entries", "bounded_edges", "hsb_cycles_per_instruction", "dataflash_cells",
             "icus_startup_stub", "dma_master_rewrite_assumption", "source", "steps",
             "compare_operands", "input_derived_table_indices", "reset_replay",
-            "event_socket", "snapshot_outputs", "engine"), "scenario");
+            "event_socket", "snapshot_outputs", "engine", "instruction_trace_start_step"),
+            "scenario");
         if (scenarioJson.has("engine") &&
                 !Set.of("plain", "jit").contains(scenarioJson.get("engine").getAsString()))
             throw new IllegalArgumentException("scenario engine must be plain or jit");
@@ -10338,15 +13073,26 @@ public class RunP1MEMachine extends GhidraScript {
         if (source != null && !source.isJsonObject())
             throw new IllegalArgumentException("scenario source must be an object");
         JsonArray steps = scenarioJson.getAsJsonArray("steps");
+        JsonElement traceStart = scenarioJson.get("instruction_trace_start_step");
+        String traceStartStep = null;
+        if (traceStart != null) {
+            if (traceStart.isJsonNull() || !traceStart.isJsonPrimitive()
+                    || !traceStart.getAsJsonPrimitive().isString()
+                    || traceStart.getAsString().isBlank())
+                throw new IllegalArgumentException(
+                    "scenario instruction_trace_start_step must be a nonempty step name");
+            traceStartStep = traceStart.getAsString();
+        }
         JsonElement eventSocket = scenarioJson.get("event_socket");
         if (eventSocket != null && !eventSocket.isJsonNull()) {
             requireKeys(
                 eventSocket.getAsJsonObject(),
-                Set.of("host", "port", "ready_address", "ready_after_arrivals"),
+                Set.of("host", "port", "ready_address", "ready_after_arrivals", "hold_when_ready"),
                 "event_socket");
             if (steps.size() != 0)
                 throw new IllegalArgumentException("event_socket does not compose with steps");
         }
+        int traceStartMatches = 0;
         for (JsonElement element : steps) {
             JsonObject step = element.getAsJsonObject();
             String kind = step.get("kind").getAsString();
@@ -10358,15 +13104,40 @@ public class RunP1MEMachine extends GhidraScript {
                 case "restore":
                     requireKeys(step, Set.of("kind", "checkpoint"), "restore step");
                     break;
-                case "trial":
+                case "trial": {
                     requireKeys(step, Set.of("kind", "name", "max_instructions",
                         "stop_addresses", "stop_after_arrivals", "events", "checks",
-                        "capture_rows"), "trial step");
+                        "capture_rows", "capture_event_kinds"), "trial step");
+                    JsonElement eventKinds = step.get("capture_event_kinds");
+                    if (eventKinds != null) {
+                        if (step.has("capture_rows"))
+                            throw new IllegalArgumentException(
+                                "trial capture_event_kinds and capture_rows are mutually exclusive");
+                        if (!eventKinds.isJsonArray())
+                            throw new IllegalArgumentException(
+                                "trial capture_event_kinds must be a list");
+                        Set<String> seen = new HashSet<>();
+                        for (JsonElement selected : eventKinds.getAsJsonArray()) {
+                            if (!selected.isJsonPrimitive()
+                                    || !selected.getAsJsonPrimitive().isString()
+                                    || selected.getAsString().isEmpty()
+                                    || !seen.add(selected.getAsString()))
+                                throw new IllegalArgumentException(
+                                    "trial capture_event_kinds must contain unique nonempty strings");
+                        }
+                    }
                     break;
+                }
                 default:
                     throw new IllegalArgumentException("unsupported scenario step: " + kind);
             }
+            if (traceStartStep != null && step.has("name")
+                    && traceStartStep.equals(step.get("name").getAsString()))
+                traceStartMatches++;
         }
+        if (traceStartStep != null && traceStartMatches != 1)
+            throw new IllegalArgumentException(
+                "scenario instruction_trace_start_step must name exactly one checkpoint or trial step");
         JsonElement stub = scenarioJson.get("icus_startup_stub");
         if (stub != null && !stub.isJsonNull()) {
             JsonObject config = stub.getAsJsonObject();
@@ -10501,19 +13272,15 @@ public class RunP1MEMachine extends GhidraScript {
 
     private void writeInstructionSpool(Path path, Trace trace) throws IOException {
         // Feed Python's drcov writer without decoding the JSON instruction trace.
-        try (DataOutputStream stream = new DataOutputStream(
-                new BufferedOutputStream(Files.newOutputStream(path), 65536))) {
-            for (int index = 0; index < trace.instructionTraceSize; index++) {
-                stream.writeInt((int) trace.instructionPc(index));
-                stream.writeByte(trace.instructionSize(index));
-            }
-        }
+        trace.instructionRows.writeCompact(path);
     }
 
-    private void writeVerdict(JsonWriter writer, JsonObject report, boolean passed)
-            throws IOException {
+    private void writeVerdict(JsonWriter writer, JsonObject report, boolean passed,
+            ScenarioReportOutput paths) throws IOException {
         writer.beginObject();
         writer.name("passed").value(passed);
+        writer.name("report_path").value(paths.report);
+        if (paths.drcov_path != null) writer.name("drcov_path").value(paths.drcov_path);
         if (!passed) {
             for (String key : List.of("scenario", "termination_reason", "error", "fault", "recent_pcs")) {
                 if (report.has(key)) GSON.toJson(report.get(key), writer.name(key));
@@ -10595,15 +13362,17 @@ public class RunP1MEMachine extends GhidraScript {
             throw new IllegalArgumentException("machine model does not describe MCU " + contract.target.mcu);
         }
 
-        SleighLanguage language = (SleighLanguage) (currentProgram == null
-            ? DefaultLanguageService.getLanguageService().getLanguage(new LanguageID(contract.target.processor))
-            : currentProgram.getLanguage());
+        if (currentProgram == null) {
+            throw new IllegalStateException("P1M-E machine requires the target program");
+        }
+        SleighLanguage language = (SleighLanguage) currentProgram.getLanguage();
         if (!language.getLanguageID().getIdAsString().equals(contract.target.processor)) {
             throw new IllegalArgumentException("processor mismatch: " + language.getLanguageID());
         }
         byte[] codeflash = loadImage(contract.target.codeflash, "CodeFlash");
         byte[] dataflash = contract.target.dataflash == null
             ? null : loadImage(contract.target.dataflash, "DataFlash");
+        Runtime runtime = Runtime.getRuntime();
 
         boolean passed = true;
         Files.createDirectories(reportPath.getParent());
@@ -10624,6 +13393,8 @@ public class RunP1MEMachine extends GhidraScript {
                     monitor.checkCancelled();
                     try (Trace trace = new Trace(instructionTraceEnabled, reportPath.getParent())) {
                         JsonObject report;
+                        long heapAtScenarioStart =
+                            runtime.totalMemory() - runtime.freeMemory();
                         try {
                             report = runScenario(
                                 contract, machineSpec, language, scenario, codeflash, dataflash, trace);
@@ -10645,6 +13416,8 @@ public class RunP1MEMachine extends GhidraScript {
                             error.addProperty("detail", exc.getMessage());
                             report.add("error", error);
                         }
+                        finishHeapRelease(report, heapAtScenarioStart);
+                        addSymbolCacheProbe(report);
                         boolean scenarioPassed = report.get("passed").getAsBoolean();
                         passed &= scenarioPassed;
                         if (reportOutputs == null) {
@@ -10652,16 +13425,33 @@ public class RunP1MEMachine extends GhidraScript {
                         }
                         else {
                             ScenarioReportOutput paths = reportOutputs[index];
-                            try (ReportFile staged = new ReportFile(Path.of(paths.report))) {
-                                writeScenarioReport(staged.writer, staged.channel, report, scenario, trace,
-                                    paths.drcov_path);
-                                staged.finish();
+                            Path finalReport = Path.of(paths.report);
+                            Path reportParent = finalReport.toAbsolutePath().getParent();
+                            Files.createDirectories(reportParent);
+                            Path stagedPath = Files.createTempFile(
+                                reportParent, ".p1me-trial-", ".json");
+                            try {
+                                try (ReportFile staged = new ReportFile(stagedPath)) {
+                                    writeScenarioReport(staged.writer, staged.channel, report,
+                                        scenario, trace, paths.drcov_path);
+                                    staged.finish();
+                                }
+                                Files.move(stagedPath, finalReport,
+                                    java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                            } finally {
+                                Files.deleteIfExists(stagedPath);
                             }
-                            if (paths.instruction_spool != null && !isRunnerError(report))
+                            if (paths.instruction_spool != null) {
                                 writeInstructionSpool(Path.of(paths.instruction_spool), trace);
-                            writeVerdict(writer, report, scenarioPassed);
+                            }
+                            writeVerdict(writer, report, scenarioPassed, paths);
                         }
                     }
+                    // Report serialization can allocate after finishHeapRelease, and the trace
+                    // itself remains reachable until this point. Collect only under real pressure,
+                    // after both the emulator and every per-scenario spool have been released.
+                    if (runtime.totalMemory() - runtime.freeMemory() >= runtime.maxMemory() / 2)
+                        System.gc();
                 }
                 writer.endArray();
                 writer.name("passed").value(passed);

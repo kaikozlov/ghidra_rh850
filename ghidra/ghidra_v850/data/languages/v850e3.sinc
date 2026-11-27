@@ -150,7 +150,7 @@ attach variables [ SR0004_d SR1115_d ] [
 #{ "loop",	two (0x06e0, 0x0001),	two (0xffe0, 0x0001), 	{R1, D16_LOOP}, 	0, PROCESSOR_V850E3V5_UP },
 :loop r0004, addr16loop		is op0515=0x037 & r0004 ; op1616=1 & addr16loop {
     local cnt:4 = r0004 - 1;
-    flags_add(r0004, -1);	# Carry follows ADD with -1, not subtraction.
+    flags_add(r0004, -1, cnt);	# Carry follows ADD with -1, not subtraction.
     r0004 = cnt;
     if (cnt == 0) goto inst_next;
     goto addr16loop;

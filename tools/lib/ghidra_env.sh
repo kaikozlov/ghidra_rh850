@@ -6,6 +6,8 @@ _GHIDRA_ENV_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 ROOT="$_GHIDRA_ENV_ROOT"
 # shellcheck disable=SC1091
 source "$ROOT/tools/lib/build_paths.sh"
+# shellcheck disable=SC1091
+source "$ROOT/tools/lib/ghidra_p1me_runtime.sh"
 _GHIDRA_ENV_CANONICAL=1
 if [[ -n "${GHIDRA_PROCESSOR_ENV_FILE+x}" ]]; then
   _GHIDRA_ENV_CANONICAL=0
@@ -47,6 +49,28 @@ _cached_env_is_current() {
     [[ "${V850_EXT_DIR:-}" == "$BUILD_CACHE/ghidra-home/Library/ghidra/ghidra_12.2_PUBLIC/Extensions/Renesas_v850" ]] || return 1
     [[ "${V850_BUILD_DIR:-}" == "$BUILD_CACHE/processor-extension-src/Renesas_v850" ]] || return 1
     [[ "${PROCESSOR_MANIFEST:-}" == "$BUILD_OUT/processor_manifest.json" ]] || return 1
+    [[ "${GHIDRA_EMULATION_PATCH:-}" == "$BUILD_CACHE/ghidra-runtime-patches/EmulationSymbolsCache" ]] || return 1
+    [[ -f "$GHIDRA_EMULATION_PATCH/Module.manifest" ]] || return 1
+    _GHIDRA_PATCH_CLASS="$GHIDRA_EMULATION_PATCH/bin/main/ghidra/pcode/exec/SymbolsCache.class"
+    [[ -f "$_GHIDRA_PATCH_CLASS" ]] || return 1
+    _GHIDRA_PATCH_SHA256=$(shasum -a 256 \
+      "$_GHIDRA_ENV_ROOT/ghidra/runtime-patches/src/ghidra/pcode/exec/SymbolsCache.java" |
+      awk '{print $1}')
+    [[ "${GHIDRA_EMULATION_PATCH_SOURCE_SHA256:-}" == "$_GHIDRA_PATCH_SHA256" ]] || return 1
+    [[ "${GHIDRA_EMULATION_PATCH_SHA256:-}" == \
+      "$(shasum -a 256 "$_GHIDRA_PATCH_CLASS" | awk '{print $1}')" ]] || return 1
+    local slab_build
+    slab_build=$(cd "$BUILD_CACHE/ghidra-runtime-patches" && pwd -P) || return 1
+    [[ "${GHIDRA_P1ME_SLAB_MODULE:-}" == "$slab_build"/coherent-slab.*/EmulationCoherentSlab ]] || return 1
+    [[ -f "$GHIDRA_P1ME_SLAB_MODULE/Module.manifest" ]] || return 1
+    _GHIDRA_SLAB_CLASS="$GHIDRA_P1ME_SLAB_MODULE/bin/main/ghidra/generic/util/datastruct/SemisparseByteArray.class"
+    [[ -f "$_GHIDRA_SLAB_CLASS" ]] || return 1
+    [[ "${GHIDRA_P1ME_SLAB_CLASS_SHA256:-}" == \
+      "$(shasum -a 256 "$_GHIDRA_SLAB_CLASS" | awk '{print $1}')" ]] || return 1
+    [[ "${GHIDRA_P1ME_RUNTIME_SOURCE_SHA256:-}" == \
+      "$(_ghidra_p1me_runtime_source_sha "$_GHIDRA_ENV_ROOT")" ]] || return 1
+    [[ -n "${GHIDRA_P1ME_RUNTIME_ID:-}" ]] || return 1
+    [[ -z "${GHIDRA_P1ME_WINDOWGRAPH_RUNNER:-}" || -f "$GHIDRA_P1ME_WINDOWGRAPH_RUNNER" ]] || return 1
   fi
   python3 "$_GHIDRA_FINGERPRINT" \
     --source-only --expect "$PROCESSOR_MANIFEST" >/dev/null 2>&1
@@ -91,6 +115,8 @@ fi
 ROOT="$_GHIDRA_ENV_ROOT"
 export ROOT GHIDRA_HOME GHIDRA_ISOLATED_HOME V850_EXT_DIR V850_BUILD_DIR
 export PROCESSOR_MANIFEST GHIDRA_VERSION GHIDRA_CLI_VERSION
+export GHIDRA_EMULATION_PATCH GHIDRA_EMULATION_PATCH_SHA256
+export GHIDRA_EMULATION_PATCH_SOURCE_SHA256
 export GHIDRA_JAVA_OPTIONS GHIDRA_HEADLESS_JAVA_OPTIONS
 export GHIDRA_ENV_READY=1
 

@@ -53,6 +53,7 @@ The small command surface to remember is:
 | Ghidra / pseudocode | `tools/g`, `tools/pseudo` |
 | Read memory / disassemble instructions | `tools/g memory read ADDR 0x20`, `tools/g disasm ADDR -n 16` (`--count` alone reports a count) |
 | Linear listing of a whole registered CodeFlash image | `tools/rh850 toolchain listing TARGET` — prints a cached objdump file path; use Ghidra for function boundaries |
+| Run P1M-E firmware scenarios or select an engine | `tools/rh850 test firmware TARGET SCENARIO…` — [P-code execution engines](rh850-build-and-sim.md#p-code-execution-engines) |
 | Search a reference PDF | `rg -n 'pattern' "$(tools/manual-text MANUAL.pdf)"` — reuses layout-preserving text with page breaks |
 | GTS+ / Toyota vocabulary / CUW routes | `tools/gts` |
 | Toyota platform capabilities / target workflows | `tools/toyota capabilities`, `tools/toyota target list camry` |

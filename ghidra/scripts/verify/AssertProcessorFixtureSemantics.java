@@ -208,6 +208,50 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
         }
     }
 
+    private void checkArithmeticFlags(long pc, String label, byte[] encoding,
+            long r6, long r10, long flags, long out6, long out10, long outFlags)
+            throws Exception {
+        currentProgram.getMemory().setBytes(toAddr(pc), encoding);
+        EmulatorHelper emu = emulator(pc);
+        try {
+            emu.writeRegister("r6", r6);
+            emu.writeRegister("r10", r10);
+            emu.writeRegister("PSW", flags);
+            step(emu, label);
+            requireRegister(emu, label, "r6", out6);
+            requireRegister(emu, label, "r10", out10);
+            requireRegister(emu, label, "PSW", outFlags);
+        } finally {
+            emu.dispose();
+        }
+    }
+
+    private void verifyArithmeticFlags() throws Exception {
+        long base = 0x1000;
+        currentProgram.getMemory().createInitializedBlock(
+            "arithmetic-flags", toAddr(base), 0x30, (byte) 0, monitor, false);
+        long upper = 0xa5a5a5f0L;
+        checkArithmeticFlags(base, "add aliased", new byte[]{(byte) 0xc6, 0x31},
+            0x7fffffffL, 0x11223344L, upper | 0xf,
+            0xfffffffeL, 0x11223344L, upper | 0x6);
+        checkArithmeticFlags(base + 4, "add immediate carry", new byte[]{0x5f, 0x52},
+            0x11223344L, 1, upper | 0xf,
+            0x11223344L, 0, upper | 0x9);
+        checkArithmeticFlags(base + 8, "addi aliased",
+            new byte[]{0x06, 0x36, 0x01, 0x00},
+            0x7fffffffL, 0x11223344L, upper | 0xf,
+            0x80000000L, 0x11223344L, upper | 0x6);
+        checkArithmeticFlags(base + 12, "sub borrow", new byte[]{(byte) 0xa6, 0x51},
+            1, 0, upper | 0xf,
+            1, 0xffffffffL, upper | 0xa);
+        checkArithmeticFlags(base + 16, "subr overflow", new byte[]{(byte) 0x86, 0x51},
+            0x80000000L, 1, upper | 0xf,
+            0x80000000L, 0x7fffffffL, upper | 0x4);
+        checkArithmeticFlags(base + 20, "cmp borrow", new byte[]{(byte) 0xe6, 0x51},
+            1, 0, upper | 0xf,
+            1, 0, upper | 0xa);
+    }
+
     private void verifyIndexedLoadAlias(java.util.Map<String, Long> addrs) throws Exception {
         for (String width : List.of("b", "bu", "h", "hu", "w")) {
             int size = width.charAt(0) == 'b' ? 1 : width.charAt(0) == 'h' ? 2 : 4;
@@ -305,6 +349,43 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
                         emu.dispose();
                     }
                 }
+            }
+        }
+
+        // Stores that straddle into the linked unit invalidate it. Around the
+        // 32-bit wrap, the adjacent high and low units remain distinct unless
+        // the store actually overlaps the linked unit.
+        String[] boundaryNames = {
+            "link-st.w16", "link-st.dw23",
+            "link-st.b16", "link-st.b16", "link-st.b16",
+            "link-st.w16", "link-st.dw23",
+        };
+        long[][] boundaryCases = {
+            // write address, linked address, expected ll_valid
+            {0x301e, 0x3020, 0},
+            {0x301c, 0x3020, 0},
+            {0xffffffffL, 0, 1},
+            {0, 0xfffffff0L, 1},
+            {0xffffffffL, 0xfffffff0L, 0},
+            {0xfffffffcL, 0, 1},
+            {0xfffffff8L, 0, 1},
+        };
+        for (int index = 0; index < boundaryCases.length; index++) {
+            long address = requireCaseAddr(addrs, boundaryNames[index]);
+            if (address < 0) continue;
+            long[] vector = boundaryCases[index];
+            String label = boundaryNames[index] + " link boundary " + index;
+            EmulatorHelper emu = emulator(address);
+            try {
+                emu.writeRegister("r7", vector[0]);
+                emu.writeRegister("r10", 0x11223344);
+                emu.writeRegister("r11", 0x55667788);
+                emu.writeRegister("ll_addr", vector[1]);
+                emu.writeRegister("ll_valid", 1);
+                step(emu, label);
+                requireRegister(emu, label, "ll_valid", vector[2]);
+            } finally {
+                emu.dispose();
             }
         }
 
@@ -450,6 +531,7 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
         checkFlags(addrs, "satsubi", max, 0, 0, max, max, 0x1c);
         checkFlags(addrs, "satadd-aliased", 1, max, 0, max, max, 0x14);
         checkFlags(addrs, "satsub-aliased", 1, min, 0, min, min, 0x16);
+        verifyArithmeticFlags();
         verifyIndexedLoadAlias(addrs);
 
         a = requireCaseAddr(addrs, "prepare");

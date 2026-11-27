@@ -859,6 +859,17 @@ fn run_with_bridge(cli: Cli) -> anyhow::Result<()> {
                 }
                 BridgeClient::new(port)
             };
+            if let Ok(required) = std::env::var("GHIDRA_CLI_REQUIRED_RUNTIME") {
+                let info = client.bridge_info()?;
+                if info.get("runtime_id").and_then(serde_json::Value::as_str)
+                    != Some(required.as_str())
+                {
+                    anyhow::bail!(
+                        "The running Ghidra bridge has a different processor runtime. \
+                         Save any pending work and run `tools/gtarget TARGET stop`, then retry."
+                    );
+                }
+            }
 
             // Switch to requested program if it differs from the bridge's current program
             if let Some(requested_program) =

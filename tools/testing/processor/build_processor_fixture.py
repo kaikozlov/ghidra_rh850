@@ -420,7 +420,7 @@ def build() -> tuple[bytes, list[dict]]:
     })
     add("loop", enc_loop(6, 4), {
         "mnemonic_prefix": "loop",
-        "must_pcode_ops": ["INT_ADD", "CBRANCH"],
+        "must_pcode_ops": ["CBRANCH"],
     })
     add("shl-reg", enc_xi(0x0C2, 6, 10, 11), {
         "mnemonic_prefix": "shl",

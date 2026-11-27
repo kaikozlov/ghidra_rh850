@@ -193,11 +193,9 @@ separate processor/project milestone audits.
 
 ## Specification-backed P1M-E machine
 
-`tools/rh850 test firmware` uses Ghidra's p-code JIT by default with the vendored
-RH850G3M SLEIGH language. Set `P1ME_MACHINE_ENGINE=plain` to use the interpreter;
-a scenario's `engine` field takes precedence. Both engines load the registered
-flash images, reject CodeFlash overlays, and enforce the SystemRDL memory and
-register model.
+`tools/rh850 test firmware TARGET SCENARIO…` runs registered flash images under
+the SystemRDL memory and register model. It rejects CodeFlash overlays. See
+[P-code execution engines](#p-code-execution-engines) to select the interpreter.
 
 The canonical device source is `data/devices/p1me.rdl`.
 `tools/rh850 model update` compiles it into:
@@ -220,91 +218,180 @@ undifferentiated part.
 
 ### Architecture
 
-The machine has one owner for each layer:
+- `ghidra/ghidra_v850/data/languages/` defines RH850G3M instruction and
+  system-register semantics. The machine records `SYNCE`, `SYNCM`, `SYNCP`,
+  and `SYNCI` separately.
+- `data/devices/p1me.rdl` defines memory regions, register access and reset
+  rules, and peripheral triggers. The runner reads the generated machine JSON.
+- `data/analysis_targets.json` identifies the MCU, language, and flash images.
+  [`RunP1MEMachine.java`](../../ghidra/scripts/emulate/RunP1MEMachine.java)
+  loads the images once per batch and starts each scenario with fresh
+  processor and device state.
+- The scenario selects an entry by structural match or resolved address. It
+  supplies external inputs, stop conditions, and checks. `gpr_fill` sets the
+  general-register baseline. `registers` supplies overrides and system
+  registers. `pre_reset_memory` seeds memory before reset.
 
-1. `ghidra/ghidra_v850/data/languages/` defines RH850G3M instruction and
-   system-register semantics. Synchronization opcodes share the processor
-   language's ordering-boundary userop; the machine records `SYNCE`, `SYNCM`,
-   `SYNCP`, and `SYNCI` separately from their decoded instruction mnemonics.
-   MPU and interrupt system registers use the G3M selector map from
-   R01US0123EJ0140.
-2. `data/devices/p1me.rdl` defines the P1M-E address spaces, register widths,
-   access policy, reset rules, evidence class, and peripheral trigger
-   relationships. Generated JSON/CSV files project this authoritative source.
-   Java dispatches generated trigger/reset metadata; it does not select
-   TAUJ, RSCFD, FACI, DataFlash ECC, or ICU-S behavior by register-name tables.
-3. `data/analysis_targets.json` supplies exact MCU, processor language,
-   CodeFlash identity, and optional DataFlash identity. It is not a capability
-   whitelist.
-4. Retained device-model regression scenarios supply external state, a
-   target-independent structural firmware-role selector, stop addresses, checks,
-   optional hash-bound RAM artifacts, and instruction-boundary external events.
-   The maintained request signer does not use target-owned compatibility
-   scenarios: the raw-dump resolver inventories its required roles and state,
-   then materializes the same target-neutral functional scenarios for every
-   registered image. `gpr_fill` states the general-register baseline once;
-   `registers` contains overrides and system-register state.
-   `pre_reset_memory` exercises reset retention/clearing.
-5. `RunP1MEMachine.java` resolves structural roles uniquely or accepts an
-   address already resolved from the exact dump-bound runtime contract. It
-   records the structural or contract-derived exact-byte proof, composes the
-   machine with `PcodeEmulator`, and enforces execute/read/write policy before
-   each operation. One target session loads immutable images and model data
-   once, then runs each scenario with fresh emulator state.
-   On every exit, the runner removes only that emulator's machine/stub/thread
-   libraries from Ghidra's symbol cache. Ghidra 12.2's `SymbolsCache` value
-   strongly references its weak-map key, otherwise retaining completed threads
-   and their entire machines. Cleanup also runs on initialization and execution
-   errors; it never clears another emulator's entries.
-   The concrete byte state uses Ghidra's initialized-range lookup for fully
-   initialized reads, avoiding complement-range allocation. Partial, empty
-   and wrapping reads use Ghidra's normal unknown-state callback path.
-6. Reports embed the resolved run contract, external inputs, explicit termination
-   reason, check results, fault provenance, and a bounded recent-PC window.
-   An output-inspection fault becomes a failed check with a structured `error`
-   and `actual: "unavailable"`; it never replaces the original execution fault.
-   `termination_reason: "expected-fault"` describes execution independently of
-   check success. A failing check still makes the report and CLI fail.
-   Memory/device rows are buffered to disk during execution and streamed into
-   the final JSON report; event-count checks use online per-kind counters.
-   Each scenario's report and optional instruction trace are written before
-   the next scenario starts, then its spools are closed and removed, including
-   runner-error paths. Completed reports and trace objects are not retained
-   for the whole batch. The complete batch file is published only after its
-   writer closes; an interrupted run cannot expose a partial report as complete.
-   Existing memory-access and optional instruction-trace collection limits
-   are unchanged.
-   The Python caller writes contracts and reports with incremental `json.dump`
-   rather than assembling another whole-document string. Its capture API still
-   returns the parsed report, including trace arrays, to existing consumers.
+Reports record the resolved entry and inputs, termination reason, recent PCs,
+and check results. An expected execution fault still requires passing checks.
+If inspection faults, the check records `actual: "unavailable"` and the error.
+An optional `source` object is copied to `resolved_run_contract.source`.
+The CLI prints verdicts and paths to the on-disk reports; Python callers can use
+`capture_many()` to read the parsed reports.
 
-### Implementation plan and tracked status
+Two optional observations are deduplicated within each trial:
 
-The implementation extends Ghidra's `PcodeEmulator`; it does not add a QEMU TCG
-target or a second RH850 decoder. This keeps instruction semantics in the
-repository's existing SLEIGH language and makes exact registered addresses,
-processor contexts, and project inventories directly reusable. GNU `sim/v850`
-remains a separate execution engine for differential checks; it is not the
-device-model runtime.
+- `compare_operands`: operand values and width, compare PC, and consuming branch PC.
+- `input_derived_table_indices`: base, nonzero index, scale, and effective address when a shift/add derivation feeds a load, store, or computed branch.
 
-```mermaid
-flowchart LR
-  Target["analysis_targets.json<br/>exact image + MCU identity"] --> Resolver["raw-dump component resolver"]
-  Resolver --> Scenario["target-neutral scenarios<br/>resolved state + checks"]
-  RDL["p1me.rdl<br/>manual + recovered evidence layers"] --> Projection["generated machine JSON"]
-  SLEIGH["RH850G3M SLEIGH<br/>CPU + system registers"] --> Emulator["PcodeEmulator"]
-  Scenario --> Contract["resolved run contract<br/>exact-image-bound entries"]
-  Contract --> Emulator
-  Projection --> Emulator
-  Emulator --> Policy["memory / alignment / MPU policy"]
-  Emulator --> Scheduler["metadata-driven device events"]
-  Policy --> Report["termination + checks + bounded context"]
-  Scheduler --> Report
+`reset_replay.scenario` names a scenario whose memory and events are reapplied
+after each `reset-assert`. Use `after_reset_instructions` to schedule an individual
+event relative to each subsequent reset.
+
+`snapshot_outputs` writes initialized memory ranges at the end of the run.
+Each row specifies `path`, `address`, `size`, and `evidence`; the report includes
+the resolved path and SHA-256. To resume execution, use an in-JVM checkpoint.
+
+### Checkpointed trial batches
+
+Use `steps` to run a common prefix once and start several trials from the same
+instruction boundary:
+
+```json
+[
+  {"kind":"checkpoint","name":"prefix","after_instructions":2048},
+  {"kind":"trial","name":"first","max_instructions":4096,"stop_addresses":[],"events":[],"checks":[]},
+  {"kind":"restore","checkpoint":"prefix"},
+  {"kind":"trial","name":"second","max_instructions":4096,"stop_addresses":[],"events":[],"checks":[]}
+]
 ```
 
-|Workstream|Design and invariant|Tracked status|
+Omit `after_instructions` to checkpoint the current boundary. Restore reinstates
+processor state, memory and its initialized ranges, peripheral state, and pending
+events. Completed trials remain in the report.
+
+Trial event offsets are relative to trial start. `stop_after_arrivals`, for
+example `[{"address":"0x66066","count":2}]`, stops before the second execution
+at that address; starting there counts as the first arrival.
+
+Each trial reports registers, checks, termination, and instruction count.
+`execution_nanoseconds` includes execution, checks, peripheral snapshots, and
+trace flush. `step_wall_nanoseconds` also includes trial setup and register
+reporting. Checkpoint restore is reported separately as `restore_nanoseconds`;
+neither trial timer includes final JSON serialization.
+
+Memory and device-event rows are captured by default. Set `"capture_rows": false`
+to omit them from both trial and scenario output while retaining checks and any
+requested instruction trace. Alternatively, set `capture_event_kinds` to retain
+all device-event counts, rows for the listed event kinds in execution order, and
+no memory rows. An empty list retains counts only.
+
+Use [`checkpoint_benchmark`](../../tools/emulation/checkpoint_benchmark.py)
+to compare prefix replay plus trial execution with checkpoint restore plus
+trial execution. It requires equivalent passing trials and reports checkpoint
+capture time separately. For sustained period timing, use consecutive trials
+without restores and record wall time, retired instructions, and warmup/cache
+conditions.
+
+### P-code execution engines
+
+[`P1MEJitMachine`](../../ghidra/scripts/emulate/P1MEJitMachine.java) is the
+default (`"engine": "jit"`). Select the reference interpreter with
+`"engine": "plain"`, or set `P1ME_MACHINE_ENGINE=plain` when the scenario does
+not specify an engine. Both engines use the same bus checks, device model,
+instruction-boundary scheduling, checkpoint, and trace contracts.
+
+The JIT interprets cold p-code and compiles hot shapes. For native acceleration
+on supported 64-bit little-endian macOS and Linux hosts, install a C compiler.
+The [processor installer](../../tools/project/install_v850_extension.sh) builds
+the Ghidra 12.2 runtime overlay from `Emulation-src.zip` and
+`SoftwareModeling-src.zip`, and attempts to build the native runner. Java
+execution remains available without that runner. Rerun the installer after
+installing a compiler. Set `P1ME_WINDOWGRAPH_CC` to select the compiler or
+`P1ME_WINDOWGRAPH_CACHE` to override the generated body cache
+(`build/cache/p1me-windowgraph` by default).
+
+The CLI and direct machine script commands share the processor environment.
+After changing it or the JVM settings, save pending work and run
+`tools/gtarget TARGET stop` before rerunning the machine. For a new daemon, the
+CLI adds `-XX:-DontCompileHugeMethods` and `-XX:CICompilerCount=4` for JIT
+scenarios; explicit `GHIDRA_HEADLESS_JAVA_OPTIONS` take precedence. The Camry
+registry sets an `8G` daemon heap through `GHIDRA_HEADLESS_MAXMEM`.
+
+`jit_compiled_instructions` includes generated bus tails and native graph
+instructions (`jit_template_instructions`). `jit_idle_instructions` counts
+batched self-branches and interrupt polls. Polls still retire individually when
+their bus reads must be recorded. `daemon_heap_bytes_before_release` and
+`daemon_heap_bytes_after_release` sample JVM heap usage around scenario cleanup.
+
+Use `tools/test rh850_machine_jit` to compare engines at instruction, device,
+and restore boundaries, and `tools/test rh850_machine_symbol_cache` to check
+the Ghidra symbol-cache fix. The standalone
+[`pcode_jit_benchmark`](../../tools/emulation/pcode_jit_benchmark.py)
+measures stock Ghidra p-code execution without the machine's device scheduler.
+
+### Instruction coverage feedback
+
+`--instruction-trace` records each entered `(pc, size)` in execution order.
+For stepped scenarios, set `instruction_trace_start_step` to a unique
+checkpoint or trial name to start recording after that step. The executed-PC
+set, synchronization counts, compare operands, and table-index observations
+also start at this boundary. Instruction indices and recent-PC diagnostics
+remain scenario-wide, and restoring the named checkpoint does not disable
+recording. The sibling `.drcov` lists unique recorded instruction starts,
+with byte lengths and CodeFlash-relative offsets, in first-execution order.
+
+Merge two or more runs and attribute entered instructions to the tracked
+function inventory with:
+
+```bash
+tools/toyota execution-coverage run-a.drcov run-b.drcov --output build/out/coverage.json
+```
+
+To rank functions that reference a named object by observed instruction count,
+add its half-open address range:
+
+```bash
+tools/toyota execution-coverage run-a.drcov run-b.drcov \
+  --object dcm_shared_response_buffer \
+  --object-range 0xFEBE5A20:0xFEBE5D20 \
+  --output build/out/coverage-dcm-response.json
+```
+
+`object_ranking.functions` lists all corpus referrers, their referenced
+addresses, total and unique instruction counts, and contributing scenarios.
+Executed referrers sort by instruction count; unexecuted referrers remain listed.
+Each `.drcov` needs its sibling `<stem>.report.json` for ordered execution
+counts and transitions. Recurring cross-function jumps into a non-entry after
+ordinary flow are ISR-entry candidates; after `BRANCHIND` they are task-switch
+candidates. Targets inside recovered bodies are reported separately.
+
+`tools/artifact regen camry_8965F3307000_execution_coverage` executes the two
+declared Camry scenarios and regenerates the tracked summary. To review one run
+against the working project without changing the database:
+
+```bash
+tools/gtarget camry-8965F3307000 script run \
+  ghidra/scripts/verify/MarkAndAssertDrcov.java -- /absolute/path/to/run.drcov
+```
+
+The verifier parses the same DynamoRIO text grammar, sets the transient Ghidra
+highlight to the complete unique traced-instruction byte set, and fails if any
+instruction start or decoded size differs.
+
+The [generated Camry coverage report](../../data/generated/camry_8965F3307000_execution_coverage.json)
+owns the retained scheduler traces; the
+[target function seeds](../../data/targets/camry-8965F3307000/function_seeds.csv)
+record the evidence-backed INTBP entries.
+
+### Modeled device behavior
+
+The following table summarizes the functional model. GNU `sim/v850` is an
+independent instruction simulator for differential checks.
+
+|Subsystem|Model|Contract and limits|
 |---|---|---|
-|CPU execution|Use the vendored RH850G3M SLEIGH language; preserve distinct decoded synchronization mnemonics while sharing one ordering-boundary p-code operation.|Implemented for the exact paths and synthetic instruction corpus. The processor fixture covers arithmetic/flags, loads/stores, branches, calls/returns, `CAXI` compare-exchange, `DI`/`EI`, system-register selectors, trap/exception return, MPU registers, and synchronization decode. This is not a claim that every G3M opcode has an independent semantic test.|
+|CPU execution|Use the vendored RH850G3M SLEIGH language, including architectural exception and system-register semantics.|The processor fixture covers arithmetic/flags, loads/stores, control flow, `CAXI`, `DI`/`EI`, system registers, exception return, MPU, and synchronization decode.|
 |Memory subsystem|Load registered CodeFlash/DataFlash by exact hash; map LocalRAM, GlobalRAM, SFR, and alias regions from generated data; use the target language's little-endian byte order; enforce read/write/execute policy, initialized-state provenance, alignment, and per-register access widths before side effects.|Implemented. PE1/self LocalRAM aliases are kept coherent. Unknown MMIO, illegal widths, and uninitialized reads fault.|
 |Reset behavior|Initialize architectural reset registers and the SLEIGH-internal load-link monitor centrally; apply generated P1M-E reset-source rules before deciding which RAM regions to clear.|Implemented for `none`, `power-on`, `system-1-pin`, `system-1-cvm`, `system-2`, and `application-1`. A fresh machine has `ll_valid=0` and initialized `ll_addr`; scenarios need no monitor workaround.|
 |Field BIST and ECM reset state|Invalidate reset-dependent opaque BIST results; distinguish executed, skipped and retained tests; apply documented ECM reset masks.|Power-on and CVM reset force BIST enable. Pin/System-2 reset honor `HWBISTEXE`; Application-1 retains results. Executed references, signatures and result words require explicit inputs; missing results fault rather than becoming successful constants. Skipped tests use documented status/FTAG values. ECM's external ERROROUT status is not synthesized from a zero-filled register.|
@@ -316,14 +403,14 @@ flowchart LR
 |PDMA comparator injection|Authorize `PDMA_COMP_CNTRL` writes with `PROT=10`, return protection bits as zero, and route the documented mismatch pattern to ECM source2.|Original `0x63F5E` executes unchanged, latches both ECM status banks and requests EIC8 when enabled. Bad keys preserve state; removing injection does not clear latched errors. Other checker-output selections and source2 FENMI/reset/delay-timer routing remain explicit boundaries.|
 |DMAC|Model both eight-channel arbiters, independent read/write interfaces, native transfer widths and address modes, single/block transfers, reloads, chaining, zero-count wrap, request acknowledgment and errors.|Clocked checks exercise CSIH→RAM, RSENT→RAM, ADC→RAM, decrement/reload/chaining, zero-count wrap and PEID4 guard rejection. Hardware requests are independent of EIMK. One read and one write can advance per CLK_HSB edge; an accepted block retains arbitration until its boundary. DMA progresses without CPU retirement. Interconnect wait states are not modeled.|
 |Peripheral scheduler|Advance named clocks to the next device deadline; commit ADC results before coincident timer/PIC triggers and peripheral state before DMA reads. Equal-boundary external inputs retain scenario order.|`clock.p_bus_cycles` advances CLK_HSB. Optional `hsb_cycles_per_instruction` declares a functional clock quantum at each retirement; there is no inferred instruction timing. ADC, TAUJ, TAUD, TSG/PIC, RSENT, DMA and FACI sequencer completion share this clock progression.|
-|Interrupts|Arbitrate modeled EIC requests using EIMK, PSW.ID/NP, PMR, ISPR, priority, and channel-number tie-break; save EIPC/EIPSW/EIIC and select direct or INTBP vectors; invalidate the load-link reservation.|Original `0x62E6A` configures the documented startup channels, including CSIH sources. Byte/halfword writes preserve read-only type/reserved fields and source-controlled level requests. Edge acceptance clears EIRF; level requests remain until their source clears. Native `EIRET` releases ISPR under the documented EP/ISPC conditions. Recovered EIC292/293 storage does not establish undocumented source/reset semantics.|
+|Interrupts|Arbitrate modeled EIC requests using EIMK, PSW.ID/NP, PMR, ISPR, priority, and channel-number tie-break; save EIPC/EIPSW/EIIC, select direct or INTBP vectors, and invalidate the load-link reservation.|Edge acceptance clears EIRF; level requests last until the source clears. Byte and halfword writes preserve read-only fields and source-controlled level requests. `EIRET` releases ISPR under the EP/ISPC rules. `interrupt-return` reports the saved nesting-stack channel even if firmware rewrites EIIC. EIC292/293 provide recovered register storage only.|
 |TAUJ|Model both four-channel units, CK0–CK3/BRS divisors, persistent divider phase, next-edge start loading, interval reload and IRQ/DMA requests.|Clocked checks cover start/reload and split CK3/BRS progress. The original profiling helper reads the live TAUJ1 counter. Native BRS accesses are byte-only.|
 |TAUD and PIC1|Model both sixteen-channel units and selected simultaneous-start masks; keep current counters separate from next-reload CDR writes.|Original initialization and simultaneous-start helpers run unchanged. Clocked checks exercise selected-channel start, counting, reload and request delivery without starting unselected units.|
-|TSG and PIC2|Model selected symmetric HT-PWM counters, compare/reload state, phase direction and internal ADC/DMA/interrupt routes.|Original phase initialization runs unchanged; a clocked full-period check observes the first valley and subcounter load. Pin feedback and unimplemented advanced modes are not supplied as successful constants.|
+|TSG and PIC2|Model selected symmetric HT-PWM counters, compare/reload state, phase direction and internal ADC/DMA/interrupt routes.|A clocked full-period check observes the first valley and subcounter load after native phase initialization. While RSF is set, a reload write faults if it changes the pending value. DMA and CPU writes of the same pending value preserve state. Pin feedback and advanced modes outside this subset are not modeled.|
 |ADC|Use the registered MCU's physical channels, explicit sample inputs, native result packing/read clearing, scan deadlines and IRQ/DMA requests.|Original `0x60178` initialization and internal diagnostics return after 15428 instructions without injected results. Synthetic two-channel conversion checks verify packed data, channel identity and masked completion IRQs; a DMA halfword read receives the old value before clearing both packed results. External pin samples remain explicit inputs.|
 |RSENT|Model RSENT0/1 SPC operation, mode transitions, timestamps, pulse decoding/CRC, two receive buffers, status/receive interrupts and DMA read side effects.|Original `0x60C06` returns after 624 instructions without receive inputs. Synthetic pulse checks verify native timestamps/data and CRC rejection; a TAUJ→DMAC→SPCT→receive-DMAC run writes the native 24-byte record. A two-frame check preserves distinct payloads in order and the promoted buffer's DMA request. FND clears only after FRXD data reaches the bus reader. Status IRQs are level-sensitive; receive IRQs are edge-sensitive.|
 |CSIH|Model enabled master transfers, direct/FIFO/dual/transmit buffers, word/halfword data aliases, pointers, EDL frame boundaries, status clearing and documented interrupt routing.|Original initialization helpers execute unchanged, including `0x623C0` with its single recessive-priority CS4 selection. Dominant/recessive arbitration applies only to broadcasts. Explicit `csih-word` inputs complete launched words; absent completions remain pending. The model does not infer serial timing or external ASIC responses. Unsupported job/data-consistency/loopback/handshake/slave-select modes, receive-only operation and FIFO timeout remain explicit boundaries.|
-|RSCFD|Retain the exact registered signer response resources plus the diagnostic transmit buffer; model common receive FIFOs 3 and 5 using generated control/status/window/pointer/interrupt relationships.|Transmit events identify the buffer derived from the modeled message-RAM address. Receive inputs explicitly start **post-filter**. Mode/enable gates, payload capacity, queue depth, overflow, interrupt threshold, sticky flags, oldest-message windows, and native pointer pops are modeled. CAN1's receive level is the OR of modeled FIFO sources. Acceptance-filter execution, global RFIFOs, arbitration, bus timing, and error-state evolution are not modeled.|
+|RSCFD|Model all three channel control/status banks, global control/status/error/test state, acceptance-rule RAM, the 64-word RAM-test page, FIFO configuration and status, transmit queues/history, and common receive FIFOs 3 and 5. Transmit resources cover the registered signer responses and diagnostic buffer.|`GCTR` and `CmCTR` writes update mode status immediately. After an MCU reset, `GRAMINIT` clears after 3794 pclk cycles supplied by explicit `clock.p_bus_cycles` events, per R01UH0585EJ0120 §17.11.1. Instruction retirement does not advance this deadline. Global reset clears modeled queues and transmit state. The transmit event identifies the buffer by message-RAM address. Post-filter receive events exercise mode and enable gates, FIFO capacity and overflow, thresholds, sticky flags, oldest-message windows, and native pointer pops. CAN1 receive interrupts combine the modeled FIFO levels. The model does not execute acceptance rules or simulate arbitration, CAN timing, clock-supply frequency, or error-state evolution.|
 |FACI / DataFlash|Preserve source images; mutate only simulated DataFlash. Model access-error clearing, keyed controls, mode transitions, clocked blank checks, 64-byte erase, 4-byte program and forced stop.|Original `0x78EC6` and `0x78E2A` issue native command sequences. Completion changes physical-cell state and, for programming, payload bytes; FRDY's rising edge requests EIC379. Regressions cover deadlines, neighboring cells, programmed-FF blankness, interruption/re-erase, and reset retention. CodeFlash mutation, suspend/resume, DMA programming, OCD emulation and partial-prefix stop recovery remain unsupported.|
 |DataFlash ECC/read controls|Model error/overflow flag clearing independently; keyed `DFECCCTL`/`DFTSTCTL` fields, masked `DFERRINT`, and `EEPRDCYCL` codes3..F.|Protection keys read zero; rejected keys preserve prior fields. Codes0..2 and non-normal ECC/test-mode payload reads fault. The original `0x880` helper executes with explicit command-read bus responses; those unspecified responses are not reset constants. Read-cycle fields do not add CPU stalls; ECC generation/correction and ECM delivery are not modeled.|
 |ECC protected controls|Apply each register's documented protection mask and authorized key, including DMA address-ECC's key in bits31:30 rather than15:14.|Rejected keys retain prior writable fields; protection bits read zero. This models control-register transactions, not ECC generation or correction.|
@@ -340,26 +427,6 @@ flowchart LR
 |ICU-S|Expose recovered registers without inferring cryptography or hardware reset values. Keep the optional [startup diagnostic stub](#scripted-icu-s-startup) separate from strict command handling.|Original `0x8A4CE` completes its register-pattern initialization in 266 instructions. The opt-in response script also exercises original `0x883E8` through both diagnostic callbacks, including its deliberately negative second check. Reports identify stubbed execution; cryptographic outputs and authentication results are not supplied by this feature.|
 |Integration|Expose model generation through `tools/rh850 model update` and `tools/rh850 model check`, and batched execution through `tools/rh850 test firmware`; bind identity through the existing target registry; retain one JSON report per scenario under `build/out/`.|Implemented. No parallel capability manifest, target whitelist, project lifecycle, backend selector, or legacy CLI alias exists.|
 |Verification|Resolve every signer component from raw bytes and generate one functional scenario set for every registered signer target; retain target-specific fixtures only for device-model regression and negative cases.|`tools/test rh850_firmware` runs all generated signer scenarios on Camry, Crown, and both Corolla images, then the retained machine-boundary fixtures. `make verify-processor` requires this gate after the synthetic instruction fixture. GNU simulation remains an independent backend and raw-image build check.|
-
-Progress:
-
-- [x] Select and integrate the Ghidra p-code execution framework.
-- [x] Establish strict registered-image, memory-map, alias, and fault behavior.
-- [x] Generate the device specification from SystemRDL and bind reset metadata.
-- [x] Implement architectural processor reset state, STAC-controlled RAM reset,
-  alignment, MMIO width, and MPU enforcement.
-- [x] Add deterministic peripheral scheduling and the exact TAUJ, RSCFD, FACI,
-  INTC-register, and recovered ICU-S paths required by retained scenarios.
-- [x] Add exact-firmware and negative regression scenarios and CLI integration.
-- [x] Add manual-backed EIINT arbitration/entry/return, explicit TAUJ clock
-  progression, and dump-resolved request receive-to-foreground execution across
-  every registered signer target.
-- [x] Execute native DataFlash erase/program sequences with clocked completion,
-  payload/cell-state postconditions, and interruption/reset regressions.
-- [ ] Add CodeFlash mutation and coherency only with an exact programming path
-  and byte-level postconditions.
-- [ ] Extend peripherals and instruction tests incrementally from failing exact
-  paths; never fill undocumented behavior with permissive stubs.
 
 The table above defines the implemented functional surface. Unknown MMIO,
 illegal widths, uninitialized state, and unsupported FACI commands are hard
@@ -603,15 +670,12 @@ The `rh850_firmware` suite has a 600-second deadline: the verified boot
 milestone alone executes approximately 29 million original instructions.
 The separately selected `rh850_runtime_soak` suite has a 1,800-second deadline.
 
-If the runner fails before a report, it prints the Ghidra exit status and both
-output streams. A `script_compile_failed` result occurs before scenario
-execution. Run `tools/gtarget TARGET script check ghidra/scripts/emulate/RunP1MEMachine.java`
-to check the same loader without running firmware. In the Nov 19 incident, the
-bridge log recorded `Operation not permitted` for both the Java source and the
-OSGi `parallel.lock` before Ghidra returned an unhelpful null-pointer error.
-For an access error, verify that the bridge process can read the script and list
-its source directory, and can write its OSGi cache. See Ghidra's
-`application.log` for the denied path.
+If execution fails before reporting, the CLI prints Ghidra's exit status and
+both output streams. For `script_compile_failed`, run
+`tools/gtarget TARGET script check ghidra/scripts/emulate/RunP1MEMachine.java`
+to check the loader without executing firmware. For access errors, check
+Ghidra's `application.log` and the bridge's access to the script source
+directory and OSGi cache.
 
 Interrupt arbitration scans an index of asserted EIRF requests rather than
 rereading every EIC on each instruction. Initialization, reset, device requests,
@@ -628,6 +692,8 @@ advances CLK_HSB after each executed instruction; it is a declared functional
 testbench ratio, not a measured CPU-cycle count. Omitting it leaves clock
 progression to explicit `clock` events. CLK_HSB is 80MHz and CLK_LSB is 40MHz
 for this device contract. ADC clock selection supplies its additional divider.
+Tick batching preserves each device edge's instruction boundary and its
+order relative to MMIO, external inputs, and inspection.
 
 `dataflash_cells` supplies physical erased/programmed state separately from the
 registered DataFlash payload. Each row has an aligned absolute `address`, a
@@ -716,15 +782,12 @@ also accept their controller-relative forms below. Supported kinds:
   for one word are rejected. Reset or abort cancels a pending relative
   completion; it cannot complete a later transfer. Absolute and relative inputs
   at the same boundary retain their order in the scenario.
-  Transmit-relative inputs also accept finite positive `repeat` and
-  `stride_words` integers, both defaulting to one. Repetition `i` targets
-  `after_transmit_words + i * stride_words`; normalization preserves source
-  order and rejects overlapping ordinals or signed-64 overflow. This is a
-  compact spelling of explicit inputs, not an automatic or infinite responder.
-  `csih-tx` records outgoing data, chip-select mask, bit order and
-  `transmit_ordinal`; `csih-frame` records a completed EDL frame. These are
-  explicit functional wire transactions, not a clock-derived latency or a
-  peripheral-peer model. For example, this supplies the first received word:
+  Use `repeat` and `stride_words` (default: one each) for a finite sequence.
+  Word `i`, starting at zero, has ordinal `after_transmit_words + i * stride_words`.
+  To repeat for the rest of the run, set `repeat_forever: true` instead of `repeat`.
+  Each completion still requires a transmitted word.
+  `csih-tx` records outgoing data, chip-select mask, bit order, and `transmit_ordinal`;
+  `csih-frame` records a completed EDL frame. Example first-word reply:
 
   ```json
   {"kind":"csih-word","unit":1,"after_transmit_words":1,"delay_instructions":128,

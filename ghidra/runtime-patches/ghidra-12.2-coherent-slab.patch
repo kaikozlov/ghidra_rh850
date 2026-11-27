@@ -1,0 +1,1406 @@
+--- a/ghidra/generic/util/datastruct/SemisparseByteArray.java
++++ b/ghidra/generic/util/datastruct/SemisparseByteArray.java
+@@ -65,8 +65,30 @@
+ 
+ 	private final Map<Long, byte[]> blocks;
+ 	private final MutableULongSpanSet defined;
++	// Slab bindings are opt-in and never relocate. These and blocks are disjoint.
++	private final byte[] slab;
++	private final Map<Long, DirectPage> slabPages;
++	private int slabUsed;
+ 
++	/** The actual backing array and the index of byte zero of a direct page. */
++	public record DirectPage(byte[] array, int offset) {}
++
+ 	public SemisparseByteArray() {
++		this(null);
++	}
++
++	/**
++	 * Give this array a private, initially zeroed block-aligned slab. The first pages
++	 * touched through the offset-aware API use slices of it; once full, new pages use
++	 * ordinary sparse blocks. Clearing this opt-in array zeros its allocated pages without
++	 * dropping bindings already held by generated code.
++	 */
++	public SemisparseByteArray(byte[] slab) {
++		if (slab != null && (slab.length == 0 || slab.length % BLOCK_SIZE != 0)) {
++			throw new IllegalArgumentException("Slab length must be a nonzero block multiple");
++		}
++		this.slab = slab;
++		this.slabPages = slab == null ? null : new HashMap<>();
+ 		this.blocks = new HashMap<>();
+ 		this.defined = new DefaultULongSpanSet();
+ 	}
+@@ -74,6 +96,8 @@
+ 	protected SemisparseByteArray(Map<Long, byte[]> blocks, MutableULongSpanSet defined) {
+ 		this.blocks = blocks;
+ 		this.defined = defined;
++		this.slab = null;
++		this.slabPages = null;
+ 	}
+ 
+ 	static byte[] copyArr(Map.Entry<?, byte[]> ent) {
+@@ -86,6 +110,10 @@
+ 		Map<Long, byte[]> copyBlocks = blocks.entrySet()
+ 				.stream()
+ 				.collect(Collectors.toMap(Entry::getKey, SemisparseByteArray::copyArr));
++		if (slabPages != null) {
++			slabPages.forEach((number, page) -> copyBlocks.put(number,
++				Arrays.copyOfRange(slab, page.offset, page.offset + BLOCK_SIZE)));
++		}
+ 		MutableULongSpanSet copyDefined = new DefaultULongSpanSet();
+ 		copyDefined.addAll(defined);
+ 		return new SemisparseByteArray(copyBlocks, copyDefined);
+@@ -100,7 +128,16 @@
+ 	 */
+ 	public synchronized void clear() {
+ 		defined.clear();
+-		blocks.clear();
++		if (slab == null) {
++			blocks.clear();
++		}
++		else {
++			// Generated code can retain both slab slices and overflow pages.
++			Arrays.fill(slab, 0, slabUsed, (byte) 0);
++			for (byte[] block : blocks.values()) {
++				Arrays.fill(block, (byte) 0);
++			}
++		}
+ 	}
+ 
+ 	/**
+@@ -114,15 +151,89 @@
+ 		getData(loc, data, 0, data.length);
+ 	}
+ 
+-	public synchronized byte[] getDirect(final long loc) {
+-		long blockNum = Long.divideUnsigned(loc, BLOCK_SIZE);
+-		int blockOffset = (int) Long.remainderUnsigned(loc, BLOCK_SIZE);
+-		if (blockOffset != 0) {
++	private static long alignedBlockNumber(long loc) {
++		if (Long.remainderUnsigned(loc, BLOCK_SIZE) != 0) {
+ 			throw new IllegalArgumentException("Offset must be at block boundary");
+ 		}
++		return Long.divideUnsigned(loc, BLOCK_SIZE);
++	}
++
++	public synchronized byte[] getDirect(final long loc) {
++		long blockNum = alignedBlockNumber(loc);
++		if (slabPages != null && slabPages.containsKey(blockNum)) {
++			throw new IllegalStateException("Slab-backed pages require getDirectPage");
++		}
+-		return blocks.computeIfAbsent(blockNum, _ -> new byte[BLOCK_SIZE]);
++		return sparseBlock(blockNum);
+ 	}
+ 
++	/** Bind a live page, including the original sparse-page case at offset zero. */
++	public synchronized DirectPage getDirectPage(long loc) {
++		long blockNum = alignedBlockNumber(loc);
++		DirectPage page = bindSlabPage(blockNum);
++		return page != null ? page : new DirectPage(sparseBlock(blockNum), 0);
++	}
++
++	/** Get just the backing array for generated code, without allocating a page view. */
++	public synchronized byte[] getDirectArray(long loc) {
++		long blockNum = alignedBlockNumber(loc);
++		return bindSlabPage(blockNum) != null ? slab : sparseBlock(blockNum);
++	}
++
++	/** Get the index of byte zero after fetching the array with {@link #getDirectArray(long)}. */
++	public synchronized int getDirectArrayOffset(long loc) {
++		long blockNum = alignedBlockNumber(loc);
++		DirectPage page = slabPages == null ? null : slabPages.get(blockNum);
++		return page == null ? 0 : page.offset;
++	}
++
++	/** Copy raw checkpoint bytes without changing the target's initialized ranges. */
++	public synchronized void copyDirectPage(long loc, byte[] page) {
++		if (page.length != BLOCK_SIZE) {
++			throw new IllegalArgumentException("Expected one standalone page");
++		}
++		writeBlock(alignedBlockNumber(loc), 0, page, 0, BLOCK_SIZE);
++	}
++
++	private DirectPage bindSlabPage(long blockNum) {
++		if (slabPages == null) {
++			return null;
++		}
++		DirectPage page = slabPages.get(blockNum);
++		if (page == null && slabUsed < slab.length && !blocks.containsKey(blockNum)) {
++			page = new DirectPage(slab, slabUsed);
++			slabPages.put(blockNum, page);
++			slabUsed += BLOCK_SIZE;
++		}
++		return page;
++	}
++
++	private byte[] sparseBlock(long blockNum) {
++		return blocks.computeIfAbsent(blockNum, _ -> new byte[BLOCK_SIZE]);
++	}
++
++	private void readBlock(long blockNum, int start, byte[] data, int dest, int length) {
++		DirectPage page = slabPages == null ? null : slabPages.get(blockNum);
++		if (page != null) {
++			System.arraycopy(slab, page.offset + start, data, dest, length);
++		}
++		else {
++			byte[] block = blocks.get(blockNum);
++			if (block != null) {
++				System.arraycopy(block, start, data, dest, length);
++			}
++		}
++	}
++
++	private void writeBlock(long blockNum, int dest, byte[] data, int start, int length) {
++		DirectPage page = bindSlabPage(blockNum);
++		if (page != null) {
++			System.arraycopy(data, start, slab, page.offset + dest, length);
++		}
++		else {
++			System.arraycopy(data, start, sparseBlock(blockNum), dest, length);
++		}
++	}
++
+ 	/**
+ 	 * Copy a range of data from the semisparse array into a portion of the given byte array
+ 	 * 
+@@ -147,11 +258,8 @@
+ 		// Read in portion of first block (could be full block)
+ 		long blockNum = Long.divideUnsigned(loc, BLOCK_SIZE);
+ 		int blockOffset = (int) Long.remainderUnsigned(loc, BLOCK_SIZE);
+-		byte[] block = blocks.get(blockNum);
+ 		int amt = Math.min(length, BLOCK_SIZE - blockOffset);
+-		if (block != null) {
+-			System.arraycopy(block, blockOffset, data, offset, amt);
+-		}
++		readBlock(blockNum, blockOffset, data, offset, amt);
+ 
+ 		// Read in each following block
+ 		int cur = amt;
+@@ -160,11 +268,8 @@
+ 			if (blockNum == 0) {
+ 				throw new BufferUnderflowException();
+ 			}
+-			block = blocks.get(blockNum);
+ 			amt = Math.min(length - cur, BLOCK_SIZE);
+-			if (block != null) {
+-				System.arraycopy(block, 0, data, cur + offset, amt);
+-			}
++			readBlock(blockNum, 0, data, cur + offset, amt);
+ 			cur += amt;
+ 		}
+ 	}
+@@ -272,9 +377,8 @@
+ 		// Write out portion of first block (could be full block)
+ 		long blockNum = Long.divideUnsigned(loc, BLOCK_SIZE);
+ 		int blockOffset = (int) Long.remainderUnsigned(loc, BLOCK_SIZE);
+-		byte[] block = blocks.computeIfAbsent(blockNum, _ -> new byte[BLOCK_SIZE]);
+ 		int amt = Math.min(length, BLOCK_SIZE - blockOffset);
+-		System.arraycopy(data, offset, block, blockOffset, amt);
++		writeBlock(blockNum, blockOffset, data, offset, amt);
+ 
+ 		// Write out each following block
+ 		int cur = amt;
+@@ -283,9 +387,8 @@
+ 			if (blockNum == 0) {
+ 				throw new BufferOverflowException();
+ 			}
+-			block = blocks.computeIfAbsent(blockNum, _ -> new byte[BLOCK_SIZE]);
+ 			amt = Math.min(length - cur, BLOCK_SIZE);
+-			System.arraycopy(data, cur + offset, block, 0, amt);
++			writeBlock(blockNum, 0, data, cur + offset, amt);
+ 			cur += amt;
+ 		}
+ 	}
+--- a/ghidra/pcode/emu/jit/JitBytesPcodeExecutorStatePiece.java
++++ b/ghidra/pcode/emu/jit/JitBytesPcodeExecutorStatePiece.java
+@@ -15,6 +15,7 @@
+  */
+ package ghidra.pcode.emu.jit;
+ 
++import ghidra.generic.util.datastruct.SemisparseByteArray;
+ import ghidra.pcode.emu.jit.JitBytesPcodeExecutorStatePiece.JitBytesPcodeExecutorStateSpace;
+ import ghidra.pcode.exec.*;
+ import ghidra.program.model.address.Address;
+@@ -49,6 +50,22 @@
+ 			super(language, space, piece);
+ 		}
+ 
++		/** Construct a state space with a caller-owned backing array. */
++		protected JitBytesPcodeExecutorStateSpace(Language language, AddressSpace space,
++				AbstractBytesPcodeExecutorStatePiece<?> piece, SemisparseByteArray bytes) {
++			super(language, space, piece, bytes);
++		}
++
++		/** Fetch the backing array for generated direct fields in local spaces. */
++		public byte[] getDirectArray(long offset) {
++			return bytes.getDirectArray(offset);
++		}
++
++		/** Fetch the corresponding index to add to generated direct field accesses. */
++		public int getDirectArrayOffset(long offset) {
++			return bytes.getDirectArrayOffset(offset);
++		}
++
+ 		/**
+ 		 * Pre-fetch the byte array for the block (page) containing the given offset
+ 		 * 
+--- a/ghidra/pcode/emu/jit/gen/FieldForArrDirect.java
++++ b/ghidra/pcode/emu/jit/gen/FieldForArrDirect.java
+@@ -26,6 +26,9 @@
+ import ghidra.pcode.emu.jit.gen.util.Emitter.Ent;
+ import ghidra.pcode.emu.jit.gen.util.Emitter.Next;
+ import ghidra.pcode.emu.jit.gen.util.Methods.Inv;
++import ghidra.pcode.emu.jit.gen.util.Methods.MthDesc;
++import ghidra.pcode.emu.jit.gen.util.Types.TInt;
++import ghidra.pcode.emu.jit.gen.util.Types.TLong;
+ import ghidra.pcode.emu.jit.gen.util.Types.TRef;
+ import ghidra.program.model.address.Address;
+ 
+@@ -39,6 +42,19 @@
+  * @param address the address contained by the page to pre-fetch
+  */
+ public record FieldForArrDirect(Address address) implements InstanceFieldReq<TRef<byte[]>> {
++	private static final MthDesc<TInt, Ent<Emitter.Bot, TLong>> GET_DIRECT_ARRAY_OFFSET =
++		MthDesc.returns(Types.T_INT).param(Types.T_LONG).build();
++
++	// Only local register and unique spaces can opt in to slab backing.
++	private boolean needsIndex() {
++		var space = address.getAddressSpace();
++		return space.isRegisterSpace() || space.isUniqueSpace();
++	}
++
++	private String indexName() {
++		return "idx_" + name();
++	}
++
+ 	@Override
+ 	public String name() {
+ 		return "arrDir_%s_%x".formatted(address.getAddressSpace().getName(),
+@@ -67,17 +83,32 @@
+ 	public <THIS extends JitCompiledPassage, N extends Next> Emitter<N> genInit(Emitter<N> em,
+ 			Local<TRef<THIS>> localThis, JitCodeGenerator<THIS> gen, ClassVisitor cv) {
+ 		Fld.decl(cv, ACC_PRIVATE | ACC_FINAL, Types.T_BYTE_ARR, name());
+-		return em
++		boolean indexed = needsIndex();
++		em = em
+ 				.emit(Op::aload, localThis)
+ 				.emit(gen::genLoadJitStateSpace, localThis, address.getAddressSpace())
+ 				.emit(Op::ldc__l, address.getOffset())
+ 				.emit(Op::invokevirtual, GenConsts.T_JIT_BYTES_PCODE_EXECUTOR_STATE_SPACE,
+-					"getDirect", GenConsts.MDESC_JIT_BYTES_PCODE_EXECUTOR_STATE_SPACE__GET_DIRECT,
+-					false)
++					indexed ? "getDirectArray" : "getDirect",
++					GenConsts.MDESC_JIT_BYTES_PCODE_EXECUTOR_STATE_SPACE__GET_DIRECT, false)
+ 				.step(Inv::takeArg)
+ 				.step(Inv::takeObjRef)
+ 				.step(Inv::ret)
+ 				.emit(Op::putfield, gen.typeThis, name(), Types.T_BYTE_ARR);
++		if (!indexed) {
++			return em;
++		}
++		Fld.decl(cv, ACC_PRIVATE | ACC_FINAL, Types.T_INT, indexName());
++		return em
++				.emit(Op::aload, localThis)
++				.emit(gen::genLoadJitStateSpace, localThis, address.getAddressSpace())
++				.emit(Op::ldc__l, address.getOffset())
++				.emit(Op::invokevirtual, GenConsts.T_JIT_BYTES_PCODE_EXECUTOR_STATE_SPACE,
++					"getDirectArrayOffset", GET_DIRECT_ARRAY_OFFSET, false)
++				.step(Inv::takeArg)
++				.step(Inv::takeObjRef)
++				.step(Inv::ret)
++				.emit(Op::putfield, gen.typeThis, indexName(), Types.T_INT);
+ 	}
+ 
+ 	@Override
+@@ -87,4 +118,16 @@
+ 				.emit(Op::aload, localThis)
+ 				.emit(Op::getfield, gen.typeThis, name(), Types.T_BYTE_ARR);
+ 	}
++
++	/** Emit the real array index for a page-relative offset. */
++	public <THIS extends JitCompiledPassage, N extends Next> Emitter<Ent<N, TInt>>
++			genIndex(Emitter<N> em, Local<TRef<THIS>> localThis, JitCodeGenerator<THIS> gen,
++					int offset) {
++		if (!needsIndex()) {
++			return em.emit(Op::ldc__i, offset);
++		}
++		var indexed = em.emit(Op::aload, localThis)
++				.emit(Op::getfield, gen.typeThis, indexName(), Types.T_INT);
++		return offset == 0 ? indexed : indexed.emit(Op::ldc__i, offset).emit(Op::iadd);
++	}
+ }
+--- a/ghidra/pcode/emu/jit/gen/access/AccessGen.java
++++ b/ghidra/pcode/emu/jit/gen/access/AccessGen.java
+@@ -142,7 +142,7 @@
+ 		if (off + size < BLOCK_SIZE) {
+ 			return em
+ 					.emit(blkField::genLoad, localThis, gen)
+-					.emit(Op::ldc__i, off)
++					.emit(blkField::genIndex, localThis, gen, off)
+ 					.emit(Op::ldc__i, size)
+ 					.emit(Op::invokestatic, T_JIT_COMPILED_PASSAGE, "readBoolN",
+ 						MDESC_JIT_COMPILED_PASSAGE__READ_BOOL_N, true)
+@@ -155,7 +155,7 @@
+ 			gen.requestFieldForArrDirect(space.getAddress(block + BLOCK_SIZE));
+ 		return em
+ 				.emit(blkField::genLoad, localThis, gen)
+-				.emit(Op::ldc__i, off)
++				.emit(blkField::genIndex, localThis, gen, off)
+ 				.emit(Op::ldc__i, BLOCK_SIZE - off)
+ 				.emit(Op::invokestatic, T_JIT_COMPILED_PASSAGE, "readBoolN",
+ 					MDESC_JIT_COMPILED_PASSAGE__READ_BOOL_N, true)
+@@ -164,7 +164,7 @@
+ 				.step(Inv::takeArg)
+ 				.step(Inv::ret)
+ 				.emit(nxtField::genLoad, localThis, gen)
+-				.emit(Op::ldc__i, 0)
++				.emit(nxtField::genIndex, localThis, gen, 0)
+ 				.emit(Op::ldc__i, off + size - BLOCK_SIZE)
+ 				.emit(Op::invokestatic, T_JIT_COMPILED_PASSAGE, "readBoolN",
+ 					MDESC_JIT_COMPILED_PASSAGE__READ_BOOL_N, true)
+--- a/ghidra/pcode/emu/jit/gen/access/IntAccessGen.java
++++ b/ghidra/pcode/emu/jit/gen/access/IntAccessGen.java
+@@ -55,7 +55,7 @@
+ 			if (off + size <= BLOCK_SIZE) {
+ 				return em
+ 						.emit(blkField::genLoad, localThis, gen)
+-						.emit(Op::ldc__i, off)
++						.emit(blkField::genIndex, localThis, gen, off)
+ 						.emit(Op::invokestatic, T_JIT_COMPILED_PASSAGE,
+ 							chooseReadName(size),
+ 							MDESC_JIT_COMPILED_PASSAGE__READ_INTX, true)
+@@ -67,17 +67,17 @@
+ 				gen.requestFieldForArrDirect(space.getAddress(block + BLOCK_SIZE));
+ 			return em
+ 					.emit(blkField::genLoad, localThis, gen)
+-					.emit(Op::ldc__i, off)
++					.emit(blkField::genIndex, localThis, gen, off)
+ 					.emit(Op::invokestatic, T_JIT_COMPILED_PASSAGE,
+ 						chooseReadName(BLOCK_SIZE - off),
+ 						MDESC_JIT_COMPILED_PASSAGE__READ_INTX, true)
+ 					.step(Inv::takeArg)
+ 					.step(Inv::takeArg)
+ 					.step(Inv::ret)
+-					.emit(Op::ldc__i, off + size - BLOCK_SIZE)
++					.emit(Op::ldc__i, Byte.SIZE * (off + size - BLOCK_SIZE))
+ 					.emit(Op::ishl)
+ 					.emit(nxtField::genLoad, localThis, gen)
+-					.emit(Op::ldc__i, 0)
++					.emit(nxtField::genIndex, localThis, gen, 0)
+ 					.emit(Op::invokestatic, T_JIT_COMPILED_PASSAGE,
+ 						chooseReadName(off + size - BLOCK_SIZE),
+ 						MDESC_JIT_COMPILED_PASSAGE__READ_INTX, true)
+@@ -107,7 +107,7 @@
+ 			if (off + size <= BLOCK_SIZE) {
+ 				return em
+ 						.emit(blkField::genLoad, localThis, gen)
+-						.emit(Op::ldc__i, off)
++						.emit(blkField::genIndex, localThis, gen, off)
+ 						.emit(Op::invokestatic, T_JIT_COMPILED_PASSAGE,
+ 							chooseWriteName(size),
+ 							MDESC_JIT_COMPILED_PASSAGE__WRITE_INTX, true)
+@@ -120,10 +120,10 @@
+ 				gen.requestFieldForArrDirect(space.getAddress(block + BLOCK_SIZE));
+ 			return em
+ 					.emit(Op::dup)
+-					.emit(Op::ldc__i, off + size - BLOCK_SIZE)
++					.emit(Op::ldc__i, Byte.SIZE * (off + size - BLOCK_SIZE))
+ 					.emit(Op::iushr)
+ 					.emit(blkField::genLoad, localThis, gen)
+-					.emit(Op::ldc__i, off)
++					.emit(blkField::genIndex, localThis, gen, off)
+ 					.emit(Op::invokestatic, T_JIT_COMPILED_PASSAGE,
+ 						chooseWriteName(BLOCK_SIZE - off),
+ 						MDESC_JIT_COMPILED_PASSAGE__WRITE_INTX, true)
+@@ -132,7 +132,7 @@
+ 					.step(Inv::takeArg)
+ 					.step(Inv::retVoid)
+ 					.emit(nxtField::genLoad, localThis, gen)
+-					.emit(Op::ldc__i, 0)
++					.emit(nxtField::genIndex, localThis, gen, 0)
+ 					.emit(Op::invokestatic, T_JIT_COMPILED_PASSAGE,
+ 						chooseWriteName(off + size - BLOCK_SIZE),
+ 						MDESC_JIT_COMPILED_PASSAGE__WRITE_INTX, true)
+@@ -164,7 +164,7 @@
+ 			if (off + size <= BLOCK_SIZE) {
+ 				return em
+ 						.emit(blkField::genLoad, localThis, gen)
+-						.emit(Op::ldc__i, off)
++						.emit(blkField::genIndex, localThis, gen, off)
+ 						.emit(Op::invokestatic, T_JIT_COMPILED_PASSAGE,
+ 							chooseReadName(size),
+ 							MDESC_JIT_COMPILED_PASSAGE__READ_INTX, true)
+@@ -176,15 +176,17 @@
+ 				gen.requestFieldForArrDirect(space.getAddress(block + BLOCK_SIZE));
+ 			return em
+ 					.emit(nxtField::genLoad, localThis, gen)
+-					.emit(Op::ldc__i, 0)
++					.emit(nxtField::genIndex, localThis, gen, 0)
+ 					.emit(Op::invokestatic, T_JIT_COMPILED_PASSAGE,
+ 						chooseReadName(off + size - BLOCK_SIZE),
+ 						MDESC_JIT_COMPILED_PASSAGE__READ_INTX, true)
+ 					.step(Inv::takeArg)
+ 					.step(Inv::takeArg)
+ 					.step(Inv::ret)
++					.emit(Op::ldc__i, Byte.SIZE * (BLOCK_SIZE - off))
++					.emit(Op::ishl)
+ 					.emit(blkField::genLoad, localThis, gen)
+-					.emit(Op::ldc__i, off)
++					.emit(blkField::genIndex, localThis, gen, off)
+ 					.emit(Op::invokestatic, T_JIT_COMPILED_PASSAGE,
+ 						chooseReadName(BLOCK_SIZE - off),
+ 						MDESC_JIT_COMPILED_PASSAGE__READ_INTX, true)
+@@ -214,7 +216,7 @@
+ 			if (off + size <= BLOCK_SIZE) {
+ 				return em
+ 						.emit(blkField::genLoad, localThis, gen)
+-						.emit(Op::ldc__i, off)
++						.emit(blkField::genIndex, localThis, gen, off)
+ 						.emit(Op::invokestatic, T_JIT_COMPILED_PASSAGE,
+ 							chooseWriteName(size),
+ 							MDESC_JIT_COMPILED_PASSAGE__WRITE_INTX, true)
+@@ -227,10 +229,10 @@
+ 				gen.requestFieldForArrDirect(space.getAddress(block + BLOCK_SIZE));
+ 			return em
+ 					.emit(Op::dup)
+-					.emit(Op::ldc__i, BLOCK_SIZE - off)
++					.emit(Op::ldc__i, Byte.SIZE * (BLOCK_SIZE - off))
+ 					.emit(Op::iushr)
+ 					.emit(nxtField::genLoad, localThis, gen)
+-					.emit(Op::ldc__i, 0)
++					.emit(nxtField::genIndex, localThis, gen, 0)
+ 					.emit(Op::invokestatic, T_JIT_COMPILED_PASSAGE,
+ 						chooseWriteName(off + size - BLOCK_SIZE),
+ 						MDESC_JIT_COMPILED_PASSAGE__WRITE_INTX, true)
+@@ -239,7 +241,7 @@
+ 					.step(Inv::takeArg)
+ 					.step(Inv::retVoid)
+ 					.emit(blkField::genLoad, localThis, gen)
+-					.emit(Op::ldc__i, off)
++					.emit(blkField::genIndex, localThis, gen, off)
+ 					.emit(Op::invokestatic, T_JIT_COMPILED_PASSAGE,
+ 						chooseWriteName(BLOCK_SIZE - off),
+ 						MDESC_JIT_COMPILED_PASSAGE__WRITE_INTX, true)
+--- a/ghidra/pcode/emu/jit/gen/access/LongAccessGen.java
++++ b/ghidra/pcode/emu/jit/gen/access/LongAccessGen.java
+@@ -65,7 +65,7 @@
+ 			if (off + size <= BLOCK_SIZE) {
+ 				return em
+ 						.emit(blkField::genLoad, localThis, gen)
+-						.emit(Op::ldc__i, off)
++						.emit(blkField::genIndex, localThis, gen, off)
+ 						.emit(Op::invokestatic, T_JIT_COMPILED_PASSAGE,
+ 							chooseReadName(size),
+ 							MDESC_JIT_COMPILED_PASSAGE__READ_LONGX, true)
+@@ -77,17 +77,17 @@
+ 				gen.requestFieldForArrDirect(space.getAddress(block + BLOCK_SIZE));
+ 			return em
+ 					.emit(blkField::genLoad, localThis, gen)
+-					.emit(Op::ldc__i, off)
++					.emit(blkField::genIndex, localThis, gen, off)
+ 					.emit(Op::invokestatic, T_JIT_COMPILED_PASSAGE,
+ 						chooseReadName(BLOCK_SIZE - off),
+ 						MDESC_JIT_COMPILED_PASSAGE__READ_LONGX, true)
+ 					.step(Inv::takeArg)
+ 					.step(Inv::takeArg)
+ 					.step(Inv::ret)
+-					.emit(Op::ldc__i, off + size - BLOCK_SIZE)
++					.emit(Op::ldc__i, Byte.SIZE * (off + size - BLOCK_SIZE))
+ 					.emit(Op::lshl)
+ 					.emit(nxtField::genLoad, localThis, gen)
+-					.emit(Op::ldc__i, 0)
++					.emit(nxtField::genIndex, localThis, gen, 0)
+ 					.emit(Op::invokestatic, T_JIT_COMPILED_PASSAGE,
+ 						chooseReadName(off + size - BLOCK_SIZE),
+ 						MDESC_JIT_COMPILED_PASSAGE__READ_LONGX, true)
+@@ -125,7 +125,7 @@
+ 			if (off + size <= BLOCK_SIZE) {
+ 				return em
+ 						.emit(blkField::genLoad, localThis, gen)
+-						.emit(Op::ldc__i, off)
++						.emit(blkField::genIndex, localThis, gen, off)
+ 						.emit(Op::invokestatic, T_JIT_COMPILED_PASSAGE,
+ 							chooseWriteName(size),
+ 							MDESC_JIT_COMPILED_PASSAGE__WRITE_LONGX, true)
+@@ -138,10 +138,10 @@
+ 				gen.requestFieldForArrDirect(space.getAddress(block + BLOCK_SIZE));
+ 			return em
+ 					.emit(Op::dup2__2)
+-					.emit(Op::ldc__i, off + size - BLOCK_SIZE)
++					.emit(Op::ldc__i, Byte.SIZE * (off + size - BLOCK_SIZE))
+ 					.emit(Op::lushr)
+ 					.emit(blkField::genLoad, localThis, gen)
+-					.emit(Op::ldc__i, off)
++					.emit(blkField::genIndex, localThis, gen, off)
+ 					.emit(Op::invokestatic, T_JIT_COMPILED_PASSAGE,
+ 						chooseWriteName(BLOCK_SIZE - off),
+ 						MDESC_JIT_COMPILED_PASSAGE__WRITE_LONGX, true)
+@@ -150,7 +150,7 @@
+ 					.step(Inv::takeArg)
+ 					.step(Inv::retVoid)
+ 					.emit(nxtField::genLoad, localThis, gen)
+-					.emit(Op::ldc__i, 0)
++					.emit(nxtField::genIndex, localThis, gen, 0)
+ 					.emit(Op::invokestatic, T_JIT_COMPILED_PASSAGE,
+ 						chooseWriteName(off + size - BLOCK_SIZE),
+ 						MDESC_JIT_COMPILED_PASSAGE__WRITE_LONGX, true)
+@@ -190,7 +190,7 @@
+ 			if (off + size <= BLOCK_SIZE) {
+ 				return em
+ 						.emit(blkField::genLoad, localThis, gen)
+-						.emit(Op::ldc__i, off)
++						.emit(blkField::genIndex, localThis, gen, off)
+ 						.emit(Op::invokestatic, T_JIT_COMPILED_PASSAGE,
+ 							chooseReadName(size),
+ 							MDESC_JIT_COMPILED_PASSAGE__READ_LONGX, true)
+@@ -202,15 +202,17 @@
+ 				gen.requestFieldForArrDirect(space.getAddress(block + BLOCK_SIZE));
+ 			return em
+ 					.emit(nxtField::genLoad, localThis, gen)
+-					.emit(Op::ldc__i, 0)
++					.emit(nxtField::genIndex, localThis, gen, 0)
+ 					.emit(Op::invokestatic, T_JIT_COMPILED_PASSAGE,
+ 						chooseReadName(off + size - BLOCK_SIZE),
+ 						MDESC_JIT_COMPILED_PASSAGE__READ_LONGX, true)
+ 					.step(Inv::takeArg)
+ 					.step(Inv::takeArg)
+ 					.step(Inv::ret)
++					.emit(Op::ldc__i, Byte.SIZE * (BLOCK_SIZE - off))
++					.emit(Op::lshl)
+ 					.emit(blkField::genLoad, localThis, gen)
+-					.emit(Op::ldc__i, off)
++					.emit(blkField::genIndex, localThis, gen, off)
+ 					.emit(Op::invokestatic, T_JIT_COMPILED_PASSAGE,
+ 						chooseReadName(BLOCK_SIZE - off),
+ 						MDESC_JIT_COMPILED_PASSAGE__READ_LONGX, true)
+@@ -248,7 +250,7 @@
+ 			if (off + size <= BLOCK_SIZE) {
+ 				return em
+ 						.emit(blkField::genLoad, localThis, gen)
+-						.emit(Op::ldc__i, off)
++						.emit(blkField::genIndex, localThis, gen, off)
+ 						.emit(Op::invokestatic, T_JIT_COMPILED_PASSAGE,
+ 							chooseWriteName(size),
+ 							MDESC_JIT_COMPILED_PASSAGE__WRITE_LONGX, true)
+@@ -261,10 +263,10 @@
+ 				gen.requestFieldForArrDirect(space.getAddress(block + BLOCK_SIZE));
+ 			return em
+ 					.emit(Op::dup2__2)
+-					.emit(Op::ldc__i, BLOCK_SIZE - off)
++					.emit(Op::ldc__i, Byte.SIZE * (BLOCK_SIZE - off))
+ 					.emit(Op::lushr)
+ 					.emit(nxtField::genLoad, localThis, gen)
+-					.emit(Op::ldc__i, 0)
++					.emit(nxtField::genIndex, localThis, gen, 0)
+ 					.emit(Op::invokestatic, T_JIT_COMPILED_PASSAGE,
+ 						chooseWriteName(off + size - BLOCK_SIZE),
+ 						MDESC_JIT_COMPILED_PASSAGE__WRITE_LONGX, true)
+@@ -273,7 +275,7 @@
+ 					.step(Inv::takeArg)
+ 					.step(Inv::retVoid)
+ 					.emit(blkField::genLoad, localThis, gen)
+-					.emit(Op::ldc__i, off)
++					.emit(blkField::genIndex, localThis, gen, off)
+ 					.emit(Op::invokestatic, T_JIT_COMPILED_PASSAGE,
+ 						chooseWriteName(BLOCK_SIZE - off),
+ 						MDESC_JIT_COMPILED_PASSAGE__WRITE_LONGX, true)
+--- a/ghidra/pcode/emu/jit/gen/op/IntPredBinOpGen.java
++++ b/ghidra/pcode/emu/jit/gen/op/IntPredBinOpGen.java
+@@ -181,6 +181,6 @@
+ 			case LongJitType t -> em
+-					.emit(gen::genReadToStack, localThis, op.l(), t, Ext.ZERO)
+-					.emit(gen::genReadToStack, localThis, op.r(), t, Ext.ZERO)
++					.emit(gen::genReadToStack, localThis, op.l(), t, ext())
++					.emit(gen::genReadToStack, localThis, op.r(), t, rExt())
+ 					.emit(this::opForLong, t)
+ 					.emit(gen::genWriteFromStack, localThis, op.out(), IntJitType.I4, Ext.ZERO,
+ 						scope);
+--- a/ghidra/app/plugin/processors/sleigh/SleighParserContext.java
++++ b/ghidra/app/plugin/processors/sleigh/SleighParserContext.java
+@@ -40,28 +40,59 @@
+ 	private Address destAddr; // corresponds to inst_dest for call-fixup use
+ 	private SleighInstructionPrototype prototype;
+ 	private AddressSpace constantSpace;
+-	private HashMap<ConstructState, FixedHandle> handleMap;
++	// Canonical constructor trees have fixed slots; snippets and foreign nodes use identity.
++	private ConstructState[] handleNodes;
++	private FixedHandle[] nodeHandles;
++	private IdentityHashMap<ConstructState, FixedHandle> handleMap;
+ 	private ArrayList<ContextSet> contextcommit; // Pending changes to context
+ 	private int[] context; // packed context bits
+ 
+ 	public SleighParserContext(MemBuffer memBuf, SleighInstructionPrototype prototype,
+ 			ProcessorContextView processorContext) {
+-		this.handleMap = new HashMap<>();
+-		this.prototype = prototype;
+-		this.constantSpace = prototype.getLanguage().getAddressFactory().getConstantSpace();
++		this(memBuf, prototype, prototype.getLanguage(), prototype.getContextCache(),
++			processorContext);
++	}
++
++	SleighParserContext(MemBuffer memBuf, SleighLanguage language, ContextCache cache,
++			ProcessorContextView processorContext) {
++		this(memBuf, null, language, cache, processorContext);
++	}
++
++	private SleighParserContext(MemBuffer memBuf, SleighInstructionPrototype prototype,
++			Language language, ContextCache cache, ProcessorContextView processorContext) {
+ 		this.memBuffer = memBuf;
+-		this.addr = memBuf.getAddress();
+-
+-		int contextSize = prototype.getContextCache().getContextSize();
+-		context = new int[contextSize];
+-
++		context = new int[cache.getContextSize()];
+ 		contextcommit = new ArrayList<>();
++		loadInput(prototype, language, cache, processorContext);
++	}
++
++	void bindSelectionPrototype(SleighInstructionPrototype prototype) {
++		this.prototype = prototype;
++	}
++
++	void resetForValidation(SleighInstructionPrototype prototype,
++			ProcessorContextView processorContext) {
++		// Preserve the second input read and discard all selection-local state.
++		next2InstAddr = null;
++		contextcommit.clear();
++		nodeHandles = null;
++		handleMap = null;
++		loadInput(prototype, prototype.getLanguage(), prototype.getContextCache(),
++			processorContext);
++	}
++
++	private void loadInput(SleighInstructionPrototype prototype, Language language,
++			ContextCache cache, ProcessorContextView processorContext) {
++		this.prototype = prototype;
++		handleNodes = prototype == null ? null : prototype.getHandleNodes();
++		constantSpace = language.getAddressFactory().getConstantSpace();
++		addr = memBuffer.getAddress();
+ 		try {
+-			nextInstrAddr = addr.add(prototype.getLength());
++			nextInstrAddr = addr.add(prototype == null ? 0 : prototype.getLength());
+ 		}
+ 		catch (AddressOutOfBoundsException exc) {
+ 			// no next instruction, last instruction in memory.
+ 			nextInstrAddr = null;
+ 		}
+-		prototype.getContextCache().getContext(processorContext, context);
++		cache.getContext(processorContext, context);
+ 	}
+@@ -83,13 +114,13 @@
+ 	public SleighParserContext(Address aAddr, Address nAddr, Address rAddr, Address dAddr) {
+ 		memBuffer = null;
+ 		prototype = null;
++		handleNodes = null;
+ 		context = null;
+ 		contextcommit = null;
+ 		addr = aAddr;
+ 		nextInstrAddr = nAddr;
+ 		refAddr = rAddr;
+ 		destAddr = dAddr;
+-		handleMap = new HashMap<>();
+ 	}
+ 
+ 	/**
+@@ -104,13 +135,15 @@
+ 	public SleighParserContext(SleighParserContext origContext, int delayByteCount) {
+ 		memBuffer = origContext.memBuffer;
+ 		prototype = origContext.prototype;
++		handleNodes = origContext.handleNodes;
++		if (handleNodes != null) nodeHandles = origContext.nodeHandles();
+ 		context = origContext.context;
+ 		contextcommit = origContext.contextcommit;
+ 		addr = origContext.addr;
+ 		refAddr = origContext.refAddr;
+ 		destAddr = origContext.destAddr;
+ 		constantSpace = origContext.constantSpace;
+-		handleMap = origContext.handleMap;
++		handleMap = origContext.getHandleMap();
+ 		try {
+ 			nextInstrAddr = addr.add(prototype.getLength() + delayByteCount);
+ 		}
+@@ -125,6 +158,10 @@
+ 	 */
+ 	Iterator<ContextSet> getContextCommits() {
+ 		return contextcommit != null ? contextcommit.iterator() : null;
++	}
++
++	boolean hasContextCommits() {
++		return contextcommit != null && !contextcommit.isEmpty();
+ 	}
+ 
+ 	public void addCommit(ConstructState point, TripleSymbol sym, int num, int mask) {
+@@ -167,11 +204,32 @@
+ 		contextcommit.clear();
+ 	}
+ 
++	private IdentityHashMap<ConstructState, FixedHandle> getHandleMap() {
++		if (handleMap == null) {
++			handleMap = new IdentityHashMap<>(8);
++		}
++		return handleMap;
++	}
++
++	private FixedHandle[] nodeHandles() {
++		if (nodeHandles == null) nodeHandles = new FixedHandle[handleNodes.length];
++		return nodeHandles;
++	}
++
+ 	public FixedHandle getFixedHandle(ConstructState constructState) {
+-		FixedHandle handle = handleMap.get(constructState);
++		if (handleNodes != null && constructState != null) {
++			int i = constructState.getHandleIndex();
++			if (i < handleNodes.length && handleNodes[i] == constructState) {
++				var slots = nodeHandles();
++				if (slots[i] == null) slots[i] = new FixedHandle();
++				return slots[i];
++			}
++		}
++		var handles = getHandleMap();
++		FixedHandle handle = handles.get(constructState);
+ 		if (handle == null) {
+ 			handle = new FixedHandle();
+-			handleMap.put(constructState, handle);
++			handles.put(constructState, handle);
+ 		}
+ 		return handle;
+ 	}
+--- a/ghidra/app/plugin/processors/sleigh/SleighInstructionPrototype.java
++++ b/ghidra/app/plugin/processors/sleigh/SleighInstructionPrototype.java
+@@ -21,5 +21,5 @@
+ import ghidra.app.plugin.assembler.sleigh.sem.AssemblyResolvedPatterns;
+ import ghidra.app.plugin.processors.sleigh.SleighDebugLogger.SleighDebugMode;
+-import ghidra.app.plugin.processors.sleigh.expression.PatternExpression;
++import ghidra.app.plugin.processors.sleigh.expression.*;
+ import ghidra.app.plugin.processors.sleigh.symbol.*;
+ import ghidra.app.plugin.processors.sleigh.template.*;
+@@ -83,6 +83,8 @@
+ 	private List<FlowRecord> flowStateList; // States of operands which are code addresses
+ 	private int delaySlotByteCnt;
+ 
++	private boolean hasContextChanges;
++	private boolean hasContextCommits;
+ 	private boolean hasCrossBuilds;
+ 	private boolean hasNext2;
+ 	private ArrayList<ArrayList<FlowRecord>> flowStateListNamed;
+@@ -94,6 +96,12 @@
+ 	private ContextCache contextCache;
+ 	private int length;
+ 	private ConstructState rootState;
++	private ConstructState[] handleNodes;
++	private HandleResolution[] handleResolutions;
++
++	ConstructState[] getHandleNodes() {
++		return handleNodes;
++	}
+ 	private ConstructState mnemonicState; // state for print mnemonic
+ 	private int hashcode;
+ 
+@@ -101,17 +109,72 @@
+ 	private Mask[] operandMasks;
+ 
+-	public SleighInstructionPrototype(SleighLanguage lang, MemBuffer buf,
+-			ProcessorContextView context, ContextCache cache, boolean inDelaySlot,
+-			SleighDebugLogger debug) throws UnknownInstructionException, MemoryAccessException {
++	private SleighInstructionPrototype(SleighLanguage lang, ContextCache cache,
++			boolean inDelaySlot) {
+ 		this.language = lang;
+ 		this.contextCache = cache;
+ 		this.isindelayslot = inDelaySlot;
+ 
+ 		rootState = new ConstructState(null);
++	}
+ 
++	public SleighInstructionPrototype(SleighLanguage lang, MemBuffer buf,
++			ProcessorContextView context, ContextCache cache, boolean inDelaySlot,
++			SleighDebugLogger debug) throws UnknownInstructionException, MemoryAccessException {
++		this(lang, cache, inDelaySlot);
+ 		SleighParserContext protoContext = new SleighParserContext(buf, this, context);
+ 
+ 		resolve(lang.getRootDecisionNode(), protoContext, debug);
++		hasContextCommits = protoContext.hasContextCommits();
+ 	}
+ 
++	SleighInstructionPrototype(SleighLanguage lang, ContextCache cache, boolean inDelaySlot,
++			ParserWalker walker, Constructor constructor)
++			throws UnknownInstructionException, MemoryAccessException {
++		this(lang, cache, inDelaySlot);
++		SleighParserContext protoContext = walker.getParserContext();
++		protoContext.bindSelectionPrototype(this);
++		walker.baseState();
++		resolveConstructorTree(walker, constructor, null);
++		hasContextCommits = protoContext.hasContextCommits();
++	}
++
++	/** Whether a selected constructor installs a future processor-context value. */
++	public boolean hasContextCommits() {
++		return hasContextCommits;
++	}
++
++	void cacheFlatLayout() {
++		if (isindelayslot || hasContextChanges) {
++			return;
++		}
++		Constructor ctor = rootState.getConstructor();
++		for (int i = 0; i < ctor.getNumOperands(); ++i) {
++			TripleSymbol symbol = ctor.getOperand(i).getDefiningSymbol();
++			if (symbol instanceof SubtableSymbol) {
++				return;
++			}
++			if (symbol instanceof ValueSymbol value) {
++				// Mapped symbol checks may inspect input but cannot inspect partially built nodes.
++				PatternValue pattern = value.getPatternValue();
++				if (!(pattern instanceof TokenField || pattern instanceof ContextField ||
++					pattern instanceof ConstantValue)) {
++					return;
++				}
++			}
++		}
++		ctor.setFlatPrototype(this);
++	}
++
++	void validateFlatOperands(ParserWalker walker)
++			throws UnknownInstructionException, MemoryAccessException {
++		// The stock selector already chose this root. Its leaf offsets and lengths are structural,
++		// but table-entry validity still depends on this instruction's bytes and context.
++		for (HandleResolution resolution : handleResolutions) {
++			if (resolution.symbol() != null) {
++				walker.positionForHandleResolution(resolution.state(), resolution.depth());
++				resolution.symbol().resolve(walker, null);
++			}
++		}
++	}
++
+ 	@Override
+@@ -393,6 +456,10 @@
+ 	}
+ 
+ 	void cacheInfo(MemBuffer memBuf, ProcessorContextView context, boolean computeMasks) {
++		ArrayList<ConstructState> nodes = new ArrayList<>();
++		rootState.collectHandleNodes(nodes);
++		handleNodes = nodes.toArray(ConstructState[]::new);
++		handleResolutions = buildHandleResolutions();
+ 		length = rootState.getLength();
+ 		cacheTreeInfo();
+ 		cacheMnemonicState();
+@@ -1351,6 +1418,14 @@
+ 		return "UNKNOWN";
+ 	}
+ 
++	private void applyConstructorContext(Constructor constructor, ParserWalker walker,
++			SleighDebugLogger debug) throws MemoryAccessException {
++		if (constructor.hasContextChanges()) {
++			hasContextChanges = true;
++			constructor.applyContext(walker, debug);
++		}
++	}
++
+ 	private void resolve(DecisionNode root, SleighParserContext protoContext,
+ 			SleighDebugLogger debug) throws MemoryAccessException, UnknownInstructionException {
+ 
+@@ -1364,7 +1439,12 @@
+ 		walker.setOffset(0);
+ 		Constructor ct = root.resolve(walker, debug);		// Base constructor
++		resolveConstructorTree(walker, ct, debug);
++	}
++
++	private void resolveConstructorTree(ParserWalker walker, Constructor ct, SleighDebugLogger debug)
++			throws MemoryAccessException, UnknownInstructionException {
+ 		walker.setConstructor(ct);
+-		ct.applyContext(walker, debug);
++		applyConstructorContext(ct, walker, debug);
+ 
+ 		while (walker.isState()) {
+ 			ct = walker.getConstructor();
+@@ -1385,7 +1465,7 @@
+ 					Constructor subct = tsym.resolve(walker, debug);
+ 					if (subct != null) {
+ 						walker.setConstructor(subct);
+-						subct.applyContext(walker, debug);
++						applyConstructorContext(subct, walker, debug);
+ 						if (debug != null) {
+ 							debug.indent();
+ 						}
+@@ -1428,50 +1508,67 @@
+ 		}
+ 	}
+ 
+-	private void resolveHandles(SleighParserContext protoContext) throws MemoryAccessException {
+-		ParserWalker walker = new ParserWalker(protoContext);
+-		walker.baseState();
+-		while (walker.isState()) {
+-			Constructor ct = walker.getConstructor();
+-			int oper = walker.getOperand();
+-			int numoper = ct.getNumOperands();
+-			while (oper < numoper) {
+-				OperandSymbol sym = ct.getOperand(oper);
+-				walker.pushOperand(oper);		// Descend into node
+-				TripleSymbol triple = sym.getDefiningSymbol();
+-				if (triple != null) {
+-					if (triple instanceof SubtableSymbol) {
+-						break;
+-					}
+-					FixedHandle handle = walker.getParentHandle();
+-					triple.getFixedHandle(handle, walker);
+-				}
+-				else { // Must be an expression
+-					PatternExpression patexp = sym.getDefiningExpression();
+-					long res = patexp.getValue(walker);
+-					FixedHandle hand = walker.getParentHandle();
+-					hand.space = protoContext.getConstSpace();
+-					hand.offset_space = null;
+-					hand.offset_offset = res;
+-					hand.size = 0;
+-				}
+-				walker.popOperand();
+-				oper += 1;
+-			}
+-			if (oper >= numoper) {
+-				ConstructTpl templ = ct.getTempl();
+-				if (templ != null) {
+-					HandleTpl res = templ.getResult();
+-					if (res != null) {	// Pop up handle to containing operand
+-						res.fix(walker.getParentHandle(), walker);
+-					}
+-					else {
+-						walker.getParentHandle().setInvalid();
+-					}
+-				}
+-				walker.popOperand();
+-			}
+-		}
+-	}
++	private record HandleResolution(ConstructState state, int depth, TripleSymbol symbol,
++			OperandSymbol expressionOperand, HandleTpl result) {
++		void resolve(ParserWalker walker) throws MemoryAccessException {
++			walker.positionForHandleResolution(state, depth);
++			if (symbol != null) {
++				symbol.getFixedHandle(walker.getParentHandle(), walker);
++			}
++			else if (expressionOperand != null) {
++				long value = expressionOperand.getDefiningExpression().getValue(walker);
++				FixedHandle handle = walker.getParentHandle();
++				handle.space = walker.getConstSpace();
++				handle.offset_space = null;
++				handle.offset_offset = value;
++				handle.size = 0;
++			}
++			else if (result != null) {
++				result.fix(walker.getParentHandle(), walker);
++			}
++			else {
++				walker.getParentHandle().setInvalid();
++			}
++		}
++	}
++
++	private HandleResolution[] buildHandleResolutions() {
++		var resolutions = new ArrayList<HandleResolution>();
++		collectHandleResolutions(rootState, 0, resolutions);
++		return resolutions.toArray(HandleResolution[]::new);
++	}
++
++	// Siblings resolve in operand order. A constructor exports only after its children.
++	private static void collectHandleResolutions(ConstructState state, int depth,
++			ArrayList<HandleResolution> resolutions) {
++		Constructor ct = state.getConstructor();
++		for (int i = 0; i < ct.getNumOperands(); i++) {
++			ConstructState child = state.getSubState(i);
++			OperandSymbol operand = ct.getOperand(i);
++			TripleSymbol symbol = operand.getDefiningSymbol();
++			if (symbol instanceof SubtableSymbol) {
++				collectHandleResolutions(child, depth + 1, resolutions);
++			}
++			else {
++				resolutions.add(new HandleResolution(child, depth + 1, symbol,
++					symbol == null ? operand : null, null));
++			}
++		}
++		ConstructTpl template = ct.getTempl();
++		if (template != null) {
++			resolutions.add(new HandleResolution(state, depth, null, null, template.getResult()));
++		}
++	}
++
++	private void resolveHandles(ParserWalker walker) throws MemoryAccessException {
++		// Directly constructed prototypes need not have gone through cacheInfo.
++		HandleResolution[] resolutions = handleResolutions;
++		if (resolutions == null) {
++			resolutions = buildHandleResolutions();
++		}
++		for (HandleResolution resolution : resolutions) {
++			resolution.resolve(walker);
++		}
++	}
+ 
+ 	/**
+@@ -1478,14 +1575,10 @@
+ 	 * Reconstruct the ParserContext's internal packed context array and its list of global
+ 	 * ContextSet directives by walking a previously resolved ConstructState tree
+ 	 * 
+-	 * @param protoContext is the SleighParserContext containing the tree and holding the context
+-	 *            results
+-	 * @param debug (optional) logger for collecting information about the recovered context
++	 * @param walker walks the tree and holds the context results
+ 	 * @throws MemoryAccessException if memory errors occur trying to recover context
+ 	 */
+-	private void reconstructContext(SleighParserContext protoContext, SleighDebugLogger debug)
+-			throws MemoryAccessException {
+-		ParserWalker walker = new ParserWalker(protoContext);
++	private void reconstructContext(ParserWalker walker) throws MemoryAccessException {
+ 		walker.baseState();
+ 		while (walker.isState()) {
+ 			Constructor ct = walker.getConstructor();
+@@ -1493,7 +1586,7 @@
+ 				int oper = walker.getOperand();
+ 				int numoper = ct.getNumOperands();
+ 				if (oper == 0) {		// Upon first entry to this Constructor
+-					ct.applyContext(walker, debug); // Apply its context changes
++					ct.applyContext(walker, null); // Apply its context changes
+ 				}
+ 				if (oper < numoper) {
+ 					walker.pushOperand(oper);
+@@ -1580,9 +1673,21 @@
+ 	@Override
+ 	public SleighParserContext getParserContext(MemBuffer buf,
+ 			ProcessorContextView processorContext) throws MemoryAccessException {
++		return createResolvedContext(buf, processorContext);
++	}
++
++	private SleighParserContext createResolvedContext(MemBuffer buf,
++			ProcessorContextView processorContext) throws MemoryAccessException {
+ 		SleighParserContext newContext = new SleighParserContext(buf, this, processorContext);
+-		reconstructContext(newContext, null);
+-		resolveHandles(newContext);
++		resolveContext(new ParserWalker(newContext));
++		return newContext;
++	}
++
++	void resolveContext(ParserWalker walker) throws MemoryAccessException {
++		// Only the absence of all context actions makes this walk a no-op.
++		// A constructor can change local context without issuing any commits.
++		if (hasContextChanges) {
++			reconstructContext(walker);
++		}
++		resolveHandles(walker);
+-
+-		return newContext;
+ 	}
+@@ -1599,11 +1704,7 @@
+ 		MemBuffer nearbymem = new WrappedMemBuffer(buffer, offset);
+ 		SleighInstructionPrototype proto =
+ 			(SleighInstructionPrototype) language.parse(nearbymem, roContext, true);
+-		SleighParserContext newContext =
+-			new SleighParserContext(nearbymem, proto, processorContext);
+-		reconstructContext(newContext, null);
+-		resolveHandles(newContext);
+-		return newContext;
++		return proto.createResolvedContext(nearbymem, processorContext);
+ 	}
+ 
+ 	public ConstructState getRootState() {
+--- a/ghidra/app/plugin/processors/sleigh/Constructor.java
++++ b/ghidra/app/plugin/processors/sleigh/Constructor.java
+@@ -54,6 +54,7 @@
+ 
+ 	private int flowthruindex;
+ 	private String sourceFile;
++	private volatile SleighInstructionPrototype flatPrototype;
+ 
+ 	public Constructor() {
+ 		parent = null;
+@@ -106,6 +107,18 @@
+ 
+ 	public ConstructTpl getTempl() {
+ 		return templ;
++	}
++
++	SleighInstructionPrototype getFlatPrototype() {
++		return flatPrototype;
++	}
++
++	void setFlatPrototype(SleighInstructionPrototype prototype) {
++		flatPrototype = prototype;
++	}
++
++	boolean hasContextChanges() {
++		return context.length != 0;
+ 	}
+ 
+ 	public List<ContextChange> getContextChanges() {
+--- a/ghidra/app/plugin/processors/sleigh/SleighLanguage.java
++++ b/ghidra/app/plugin/processors/sleigh/SleighLanguage.java
+@@ -58,6 +58,9 @@
+ public class SleighLanguage implements Language {
+ 
++	// DecisionNode only reads the root offset before a constructor has been selected.
++	private static final ConstructState SELECTION_ROOT = new ConstructState(null);
++
+ 	private Map<CompilerSpecID, SleighCompilerSpecDescription> compilerSpecDescriptions;
+ 	private HashMap<CompilerSpecID, BasicCompilerSpec> compilerSpecs;
+ 	private List<InjectPayloadSleigh> additionalInject = null;
+ 	private AddressFactory addressFactory;
+@@ -388,30 +391,49 @@
+-		SleighInstructionPrototype res = null;
++		SleighInstructionPrototype res;
++		SleighParserContext protoContext;
++		ParserWalker walker;
+ 
+ 		try {
+-			SleighInstructionPrototype newProto =
+-				new SleighInstructionPrototype(this, buf, context, contextcache, inDelaySlot, null);
+-			Integer hashcode = newProto.hashCode();
+-
+-			// get existing proto and use it
+-			// if doesn't exist in map, cache info and store new proto
+-			res = instructProtoMap.computeIfAbsent(hashcode, h -> {
+-				newProto.cacheInfo(buf, context, true);
+-				return newProto;
+-			});
++			ContextCache cache = contextcache;
++			protoContext = new SleighParserContext(buf, this, cache, context);
++			walker = new ParserWalker(protoContext);
++			walker.subTreeState(SELECTION_ROOT);
++			Constructor ctor = root.resolve(walker, null);
++			res = inDelaySlot ? null : ctor.getFlatPrototype();
++			if (res != null) {
++				res.validateFlatOperands(walker);
++			}
++			else {
++				SleighInstructionPrototype newProto =
++					new SleighInstructionPrototype(this, cache, inDelaySlot, walker, ctor);
++				Integer hashcode = newProto.hashCode();
++				res = instructProtoMap.get(hashcode);
++				if (res == null) {
++					res = instructProtoMap.computeIfAbsent(hashcode, h -> {
++						newProto.cacheInfo(buf, context, true);
++						return newProto;
++					});
++					if (res == newProto) {
++						res.cacheFlatLayout();
++					}
++				}
++			}
+ 
+ 			if (inDelaySlot && res.hasDelaySlots()) {
+ 				throw new NestedDelaySlotException();
+ 			}
+ 		}
+ 		catch (MemoryAccessException e) {
+ 			throw new InsufficientBytesException(e.getMessage());
+ 		}
+ 
+ 		try {
+-			SleighParserContext protoContext = res.getParserContext(buf, context);
++			// Reuse the local workspace, but read the processor context again and resolve every
++			// handle even when no context commits are pending. Operand read faults must still fail.
++			protoContext.resetForValidation(res, context);
++			res.resolveContext(walker);
+ 			protoContext.applyCommits(context);
+ 		}
+ 		catch (Exception e) {
+ 			throw new UnknownInstructionException();
+ 		}
+ 		return res;
+--- a/ghidra/app/plugin/processors/sleigh/ConstructState.java
++++ b/ghidra/app/plugin/processors/sleigh/ConstructState.java
+@@ -25,7 +25,22 @@
+ 
+ public class ConstructState {
+ 	private Constructor ct;
+-	private List<ConstructState> resolvedStates = new ArrayList<>();
++	private static final ConstructState[] NO_OPERANDS = {};
++	private ConstructState[] resolvedStates = NO_OPERANDS;
++	private int childCount;
++	private int handleIndex;
++
++	void collectHandleNodes(List<ConstructState> nodes) {
++		handleIndex = nodes.size();
++		nodes.add(this);
++		for (int i = 0; i < childCount; i++) {
++			resolvedStates[i].collectHandleNodes(nodes);
++		}
++	}
++
++	int getHandleIndex() {
++		return handleIndex;
++	}
+ 	private ConstructState parent;
+ 	private int length;		// Length of this instantiation of the constructor
+ 	private int offset;		// Absolute offset (from start of instruction)
+@@ -38,15 +53,19 @@
+ 	}
+ 
+ 	public ConstructState getSubState(int index) {
+-		return resolvedStates.get(index);
++		return resolvedStates[java.util.Objects.checkIndex(index, childCount)];
+ 	}
+ 
+ 	public int getNumSubStates() {
+-		return resolvedStates.size();
++		return childCount;
+ 	}
+ 
+ 	void addSubState(ConstructState opState) {
+-		resolvedStates.add(opState);
++		if (childCount == resolvedStates.length) {
++			int capacity = Math.max(childCount + 1, Math.max(childCount * 2, ct == null ? 0 : ct.getNumOperands()));
++			resolvedStates = java.util.Arrays.copyOf(resolvedStates, capacity);
++		}
++		resolvedStates[childCount++] = opState;
+ 	}
+ 
+ 	public ConstructState getParent() {
+@@ -68,8 +87,8 @@
+ 		hashcode = SimpleCRC32.crc32tab[(hashcode ^ (id >> 8)) & 0xff] ^ (hashcode >> 8);
+ 		hashcode = SimpleCRC32.crc32tab[(hashcode ^ id) & 0xff] ^ (hashcode >> 8);
+ 
+-		for (ConstructState subState : resolvedStates) {
+-			hashcode = subState.computeHashCode(hashcode);
++		for (int i = 0; i < childCount; i++) {
++			hashcode = resolvedStates[i].computeHashCode(hashcode);
+ 		}
+ 
+ 		return hashcode;
+@@ -117,8 +136,8 @@
+ 
+ 		// TODO: This is not the most efficient, but it's diagnostic.
+ 		List<String> subs = new ArrayList<>();
+-		for (ConstructState cs : resolvedStates) {
+-			String s = cs.dumpConstructorTree();
++		for (int i = 0; i < childCount; i++) {
++			String s = resolvedStates[i].dumpConstructorTree();
+ 			if (s != null) {
+ 				subs.add(s);
+ 			}
+--- a/ghidra/app/plugin/processors/sleigh/ParserWalker.java
++++ b/ghidra/app/plugin/processors/sleigh/ParserWalker.java
+@@ -45,7 +45,7 @@
+ 	public ParserWalker(SleighParserContext c) {
+ 		context = c;
+ 		cross_context = null;
+-		breadcrumb = new int[MAX_PARSE_DEPTH + 1];
++		breadcrumb = new int[8];
+ 	}
+ 
+ 	/**
+@@ -97,6 +97,15 @@
+ 	public ConstructState getState() {
+ 		return point;
+ 	}
++
++	/**
++	 * Position the fixed-handle evaluator without traversing from the root. Symbol and template
++	 * evaluation uses the node and its ancestors (for OperandValue), not traversal breadcrumbs.
++	 */
++	void positionForHandleResolution(ConstructState state, int stateDepth) {
++		point = state;
++		depth = stateDepth;
++	}
+ 
+ 	/**
+ 	 * Move down to a particular child of the current node.  Store what would be the next sibling to walk
+@@ -108,6 +117,13 @@
+ 		}
+ 		breadcrumb[depth++] = i + 1;
+ 		point = point.getSubState(i);
++		resetOperand();
++	}
++
++	private void resetOperand() {
++		if (depth == breadcrumb.length) {
++			breadcrumb = java.util.Arrays.copyOf(breadcrumb, MAX_PARSE_DEPTH + 1);
++		}
+ 		breadcrumb[depth] = 0;
+ 	}
+ 
+@@ -118,7 +134,7 @@
+ 		ConstructState opstate = new ConstructState(point);
+ 		breadcrumb[depth++] += 1;
+ 		point = opstate;
+-		breadcrumb[depth] = 0;
++		resetOperand();
+ 	}
+ 
+ 	/**
+--- a/ghidra/pcode/exec/PcodeUseropLibrary.java
++++ b/ghidra/pcode/exec/PcodeUseropLibrary.java
+@@ -53,7 +53,7 @@
+ 			Map<String, UserOpSymbol> byName) {
+ 
+ 		public static PcodeUseropSymbolMap empty(SleighLanguage language) {
+-			return new PcodeUseropSymbolMap(language, Map.of());
++			return new PcodeUseropSymbolMap(language, Map.of(), Map.of());
+ 		}
+ 
+ 		private static Map<String, UserOpSymbol> byName(Map<Integer, UserOpSymbol> byIndex) {
+--- a/ghidra/app/plugin/processors/sleigh/PcodeEmit.java
++++ b/ghidra/app/plugin/processors/sleigh/PcodeEmit.java
+@@ -512,7 +512,9 @@
+ 		// First build all the inputs
+ 		for (int i = 0; i < isize; ++i) {
+ 			vn = opt.getInput()[i];
+-			incache[i] = new VarnodeData();
++			if (incache[i] == null) {
++				incache[i] = new VarnodeData();
++			}
+ 			if (vn.isDynamic(walker)) {
+ 				dyncache = new VarnodeData[3];
+ 				dyncache[0] = new VarnodeData();
+@@ -542,7 +544,9 @@
+ 		}
+ 		outvn = opt.getOutput();
+ 		if (outvn != null) {
+-			outcache = new VarnodeData();
++			if (outcache == null) {
++				outcache = new VarnodeData();
++			}
+ 			if (outvn.isDynamic(walker)) {
+ 				if (dyncache == null) {
+ 					dyncache = new VarnodeData[3];
+--- a/ghidra/app/plugin/processors/sleigh/ContextCache.java
++++ b/ghidra/app/plugin/processors/sleigh/ContextCache.java
+@@ -15,7 +15,10 @@
+  */
+ package ghidra.app.plugin.processors.sleigh;
+ 
++import java.lang.invoke.MethodHandles;
++import java.lang.invoke.VarHandle;
+ import java.math.BigInteger;
++import java.nio.ByteOrder;
+ import java.util.Arrays;
+ 
+ import generic.stl.Pair;
+@@ -23,6 +26,8 @@
+ import ghidra.program.model.lang.*;
+ 
+ public class ContextCache {
++	private static final VarHandle BIG_ENDIAN_WORD =
++		MethodHandles.byteArrayViewVarHandle(int[].class, ByteOrder.BIG_ENDIAN);
+ 	private int context_size = 0;
+ 	private Register contextBaseRegister = null;
+ 
+@@ -48,6 +53,21 @@
+ 		if (contextRegValue == null) {
+ 			Arrays.fill(buf, 0);
+ 			return;
++		}
++		// RegisterValue stores the validity mask followed by big-endian value bytes.
++		// A full-width base register needs no bit extraction or BigInteger conversion.
++		if (contextRegValue.getClass() == RegisterValue.class &&
++			contextRegValue.getRegister() == contextBaseRegister && buf.length == context_size &&
++			contextBaseRegister.getLeastSignificantBitInBaseRegister() == 0 &&
++			contextBaseRegister.getBitLength() == buf.length * Integer.SIZE) {
++			byte[] packed = contextRegValue.toBytes();
++			int offset = buf.length * Integer.BYTES;
++			if (packed.length == 2 * offset) {
++				for (int i = 0; i < buf.length; i++, offset += Integer.BYTES) {
++					buf[i] = (int) BIG_ENDIAN_WORD.get(packed, offset);
++				}
++				return;
++			}
+ 		}
+ 		BigInteger contextValue = contextRegValue.getUnsignedValueIgnoreMask();
+ 		int[] words = getWords(contextValue);

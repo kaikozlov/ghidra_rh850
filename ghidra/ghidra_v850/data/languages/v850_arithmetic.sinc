@@ -82,24 +82,25 @@ macro saturate(value) {
 # SUBR reg1, reg2
 :subr R0004, R1115 is op0510=0x0C & R0004 & R1115 {
 	local res = R0004 - R1115;
-	flags_sub(R0004, R1115);
+	flags_sub(R0004, R1115, res);
 	R1115 = res;
 }
 # SUB reg1, reg2
 :sub R0004, R1115 is op0510=0x0D & R0004 & R1115 {
 	local res = R1115 - R0004;
-	flags_sub(R1115, R0004);
+	flags_sub(R1115, R0004, res);
 	R1115 = res;
 }
 # ADD reg1, reg2
 :add R0004, R1115 is op0510=0x0E & R0004 & R1115 {
 	local res = R1115 + R0004;
-	flags_add(R1115, R0004);
+	flags_add(R1115, R0004, res);
 	R1115 = res;
 }
 # CMP reg1, reg2
 :cmp R0004, R1115 is op0510=0x0F & R0004 & R1115 {
-	flags_sub(R1115, R0004);
+	local res = R1115 - R0004;
+	flags_sub(R1115, R0004, res);
 }
 
 # MOV imm5, reg2
@@ -118,13 +119,14 @@ macro saturate(value) {
 # ADD imm5, reg2
 :add s0004, r1115 is op0510=0x12 & s0004 & r1115 {
 	local res = r1115 + s0004;
-	flags_add (r1115, s0004);
+	flags_add(r1115, s0004, res);
 	r1115 = res;
 }
 
 # CMP imm5, reg2
 :cmp s0004, R1115 is op0510=0x13 & s0004 & R1115 {
-	flags_sub(R1115, s0004);
+	local res = R1115 - s0004;
+	flags_sub(R1115, s0004, res);
 }
 
 # MULH imm5, reg2
@@ -138,10 +140,10 @@ macro saturate(value) {
 
 # ADDI imm16, reg1, reg2
 :addi s1631, R0004, R1115 is op0510=0x30 & R1115 & R0004; s1631 {
-	# flags read the SOURCE value: compute them before the destination
-	# write so an aliased reg2 == reg1 cannot double-add.
-	flags_add(R0004, s1631);
-	R1115 = R0004 + s1631;
+	# Compute before the destination write so reg2 == reg1 keeps the source value.
+	local res = R0004 + s1631;
+	flags_add(R0004, s1631, res);
+	R1115 = res;
 }
 
 # MOV imm32, reg1

@@ -115,7 +115,7 @@ def _verify_cli_reports(root: Path, loop: dict) -> None:
     try:
         with patch.dict(os.environ):
             os.environ.pop("P1ME_MACHINE_ENGINE", None)
-            _run_cli(TARGET, [passed, failed], out, instruction_trace=True, private_headless=False)
+            _run_cli(TARGET, [passed, failed], out, instruction_trace=True)
     except P1MEMachineError:
         pass
     else:
@@ -130,7 +130,9 @@ def _verify_cli_reports(root: Path, loop: dict) -> None:
             [] if path == passed else [("wrong-lp", False)]
         )
         events = report["resolved_run_contract"]["events"]
-        assert [e["after_transmit_words"] for e in events] == [1, 5, 9]
+        ordinals = [e["after_transmit_words"] + i * e.get("stride_words", 1)
+                    for e in events for i in range(e.get("repeat", 1))]
+        assert ordinals == [1, 5, 9], events
         expected = root / "reference.drcov"
         _write_drcov(report, target, expected)
         assert Path(report["drcov_path"]).read_bytes() == expected.read_bytes()
@@ -173,6 +175,140 @@ def _quiet_clock_fixture(schema: str) -> dict:
     }
 
 
+def _verify_interrupt_poll(root: Path, schema: str) -> None:
+    start, branch, done = "0xFEBE0000", "0xFEBE0004", "0xFEBE0006"
+    edge = {"kind": "interrupt", "channel": 136, "after_instructions": 1001,
+            "evidence": "Set the request after the test and before its conditional branch."}
+    poll = {"kind": "trial", "name": "poll", "max_instructions": 1009,
+            "stop_addresses": [done], "capture_rows": False, "events": [edge], "checks": []}
+    paths = []
+    for engine in ("plain", "jit"):
+        path = root / f"interrupt-poll-{engine}.json"
+        path.write_text(json.dumps({
+            "schema": schema, "name": path.stem, "engine": engine,
+            "entry": {"role": "masked-interrupt-poll", "scope": "resolved-address", "address": start},
+            "gpr_fill": "0", "registers": {"PSW": "0"}, "hsb_cycles_per_instruction": 1,
+            "memory": [{"address": start, "hex": "c0e711b1e2fd",
+                        "evidence": "tst1 4,-0x4eef[r0]; be -4"},
+                       {"address": "0xFFFFB110", "hex": "8000", "evidence": "Masked EIC136."}],
+            "max_instructions": 1010, "stop_addresses": [], "checks": [],
+            "steps": [{"kind": "checkpoint", "name": "start", "after_instructions": 0}, poll,
+                      {"kind": "restore", "checkpoint": "start"},
+                      {**poll, "name": "captured", "capture_rows": True},
+                      {"kind": "restore", "checkpoint": "start"},
+                      {**poll, "name": "branch-stop", "stop_addresses": [branch]}],
+        }))
+        paths.append(path)
+    a, b = _execute(TARGET, paths, instruction_trace=False)["reports"]
+    assert a["passed"] and b["passed"], (a.get("fault"), b.get("fault"))
+    for left, right in zip(a["checkpointing"]["trials"], b["checkpointing"]["trials"], strict=True):
+        for key in ("final_pc", "instruction_count", "register_rows", "memory_rows", "event_rows"):
+            assert left[key] == right[key], (right["name"], key)
+    quiet, captured, stopped = b["checkpointing"]["trials"]
+    assert (quiet["final_pc"], quiet["instruction_count"]) == (done, 1004)
+    assert quiet["jit_idle_instructions"] > 0
+    assert captured["jit_idle_instructions"] == 0 and len(captured["memory_rows"]) == 502
+    assert (stopped["final_pc"], stopped["instruction_count"]) == (branch, 1)
+
+
+def _verify_template_fault(root: Path, schema: str) -> None:
+    code, pointer, output = "0xFEBE0000", "0xFEBE6000", "0xFEBE7000"
+    paths = []
+    for engine in ("plain", "jit"):
+        path = root / f"late-ram-fault-{engine}.json"
+        path.write_text(json.dumps({
+            "schema": schema, "name": path.stem, "engine": engine,
+            "entry": {"role": "ram-pointer-loop", "scope": "resolved-address", "address": code},
+            "gpr_fill": "0", "registers": {"r6": pointer, "r7": output, "lp": code},
+            "memory": [
+                {"address": code, "hex": "01522637010067370100263701007f00",
+                 "evidence": "mov 1,r10; ld.w [r6],r6; st.w r6,[r7]; ld.w [r6],r6; jmp [lp]"},
+                {"address": pointer, "hex": "0060befe", "evidence": "Self-referential pointer."},
+                {"address": output, "hex": "00000000", "evidence": "Initialized result word."},
+            ],
+            "events": [{"kind": "memory-write", "address": pointer, "data_hex": "e898bffe",
+                        "after_instructions": 1000, "evidence": "Point to an undefined RAM word."}],
+            "stop_addresses": [], "max_instructions": 1010,
+            "expected_fault": {"kind": "uninitialized-read", "address": "0xFEBF98E8",
+                               "access": "read"},
+            "checks": [{"name": "prefix-store-through-alias", "kind": "memory",
+                        "address": "0xFEDE7000", "size": 4, "equals_hex": "e898bffe"}],
+        }))
+        paths.append(path)
+    plain, jit = _execute(TARGET, paths, instruction_trace=False)["reports"]
+    assert plain["passed"] and jit["passed"], (plain.get("fault"), jit.get("fault"))
+    assert jit["jit_compiled_instructions"] > 0
+    assert jit["fault"]["pc"] == "0xFEBE000A"
+    for key in ("fault", "checks", "final_pc", "instruction_count", "memory_accesses", "device_events"):
+        assert plain[key] == jit[key], key
+
+
+def _verify_hot_divisor_change(root: Path, schema: str) -> None:
+    code = "0xFEBE0000"
+    paths = []
+    for engine in ("plain", "jit"):
+        path = root / f"hot-divisor-change-{engine}.json"
+        path.write_text(json.dumps({
+            "schema": schema, "engine": engine, "name": path.stem,
+            "entry": {"role": "divide-loop", "scope": "resolved-address", "address": code},
+            "gpr_fill": "0", "registers": {"lp": code, "r6": "2", "PSW": "0"},
+            "memory": [{"address": code, "hex": "0752e657fc5a02327f00",
+                        "evidence": "mov 7,r10; divq r6,r10,r11; mov 2,r6; jmp [lp]"}],
+            "events": [{"kind": "memory-write", "address": "0xFEBE0006", "data_hex": "0032",
+                        "after_instructions": 1024, "evidence": "Set up a zero divisor."}],
+            "max_instructions": 1030, "stop_addresses": [], "expected_termination": "instruction-budget",
+            "steps": [
+                {"kind": "checkpoint", "name": "start", "after_instructions": 0},
+                {"kind": "trial", "name": "divide-through-overlay", "capture_rows": False,
+                 "max_instructions": 1030, "stop_addresses": [], "events": [], "checks": []},
+            ],
+            "checks": [{"kind": "register", "register": reg, "name": reg, "equals": value}
+                       for reg, value in (("r10", "7"), ("r11", "1"))],
+        }))
+        paths.append(path)
+    plain, jit = _execute(TARGET, paths, instruction_trace=False)["reports"]
+    assert plain["passed"] and jit["passed"], (plain["checks"], jit["checks"])
+    a, = plain["checkpointing"]["trials"]
+    b, = jit["checkpointing"]["trials"]
+    assert a["register_rows"] == b["register_rows"] and b["instruction_count"] == 1030
+    assert b["memory_rows"] == b["event_rows"] == []
+    for key in ("final_pc", "instruction_count", "checks", "memory_accesses", "device_events"):
+        assert jit[key] == plain[key], key
+
+
+def _verify_event_projection(root: Path, schema: str) -> None:
+    scenario = _hot_bus_fixture(schema)
+    del scenario["expected_fault"]
+    response = "external-register-read-response"
+    trial = {
+        "kind": "trial", "max_instructions": 7, "stop_addresses": [],
+        "events": [{**scenario["events"][0], "after_instructions": 1}],
+        "checks": [{"kind": "event-count", "name": "including-prefix-response",
+                    "operation": response, "equals": "2"}],
+    }
+    restore = {"kind": "restore", "checkpoint": "prefix"}
+    scenario.update({
+        "engine": "jit", "name": "projected-bus", "checks": [],
+        "events": scenario["events"][:1], "expected_termination": "instruction-budget",
+        "steps": [{"kind": "checkpoint", "name": "prefix", "after_instructions": 1},
+                  {**trial, "name": "full"}, restore,
+                  {**trial, "name": "selected", "capture_event_kinds": [response]}, restore,
+                  {**trial, "name": "counts", "capture_event_kinds": []}],
+    })
+    path = root / "projected-bus.json"
+    path.write_text(json.dumps(scenario))
+    report, = _execute(TARGET, [path])["reports"]
+    full, selected, counts = report["checkpointing"]["trials"]
+    assert report["passed"], [t["checks"] for t in (full, selected, counts)]
+    assert report["trace_lost_address"], "unrecorded writes are not retained address evidence"
+    assert full["memory_rows"] and not selected["memory_rows"] and not counts["memory_rows"]
+    assert selected["event_rows"] == [r for r in full["event_rows"] if r["kind"] == response]
+    assert len(selected["event_rows"]) == 1 and not counts["event_rows"]
+    assert selected["event_kind_counts"] == counts["event_kind_counts"] == {
+        "alias-write": 3, response: 1,
+    }
+
+
 def main() -> None:
     trial = {"kind": "trial", "name": "warm", "max_instructions": 4097,
              "stop_addresses": [], "events": [], "checks": []}
@@ -208,13 +344,67 @@ def main() -> None:
         "max_instructions": 1, "stop_addresses": [], "checks": [],
         "expected_fault": {"kind": "mpu-execute", "address": "0xfebe0002", "access": "execute"},
     }
-    fixtures = [loop, byte_extract, split_fetch] + [json.loads((FIXTURES / name).read_text()) for name in (
+    # The first fetch permits the whole block. Its own LDSR revokes that grant.
+    revoke_pc = 0xFEBE0000
+    descriptors = {f"{name}{i}": "0" for i in range(16) for name in ("MPLA", "MPUA", "MPAT")}
+    revoke_fetch = {
+        "schema": loop["schema"], "name": "revoke-live-fetch-grant",
+        "entry": {"role": "mpu-policy-change", "scope": "resolved-address", "address": hex(revoke_pc)},
+        "gpr_fill": "0", "registers": {**descriptors, "MPM": "3", "ASID": "0", "r6": "0",
+                                         "MPLA15": hex(revoke_pc), "MPUA15": hex(revoke_pc + 4), "MPAT15": "0xe0"},
+        "memory": [{"address": hex(revoke_pc), "hex": "0000e6f720380000",
+                    "evidence": "nop; ldsr r6,MPAT15; nop (processor fixture ldsr-mpat15)."}],
+        "stop_addresses": [], "max_instructions": 4,
+        "expected_fault": {"kind": "mpu-execute", "access": "execute", "address": hex(revoke_pc + 6)},
+        "checks": [{"kind": "register", "name": "grant-revoked", "register": "MPAT15", "equals": "0"}],
+    }
+    fixtures = [loop, byte_extract, split_fetch, revoke_fetch] + [json.loads((FIXTURES / name).read_text()) for name in (
         "checkpoint-restore-tauj-identity.json", "intc-csih-edge-acceptance-and-real-eiret.json",
         "reset-factors-undefined-read-bit-needs-input.json",
         "intc-csih-equal-priority-channel-tie.json", "intc-pending-request-delivered-after-native-unmask.json",
         "mpu-region12-write-permitted.json", "mpu-region12-write-denied.json",
     )]
+    for psw, expected in ((0, "16"), (2, "1")):
+        fixtures.append({
+            "schema": loop["schema"], "name": f"conditional-move-psw-{psw}",
+            "entry": {"role": "conditional-move", "scope": "resolved-address",
+                      "address": "0xFEBE0000"},
+            "gpr_fill": "0",
+            "registers": {"lp": "0xFEBE0000", "PSW": str(psw), "r1": "1", "r16": "16"},
+            "memory": [{"address": "0xFEBE0000", "hex": "f00f3c8b7f00",
+                        "evidence": "cmovge r16,r1,r17; jmp [lp]"}],
+            "max_instructions": 32, "stop_addresses": [], "expected_termination": "instruction-budget",
+            "checks": [{"name": "selected-source", "kind": "register", "register": "r17",
+                        "equals": expected}],
+        })
     quiet = _quiet_clock_fixture(loop["schema"])
+    # Warm the divide-by-zero arm, then take the previously unexecuted quotient arm.
+    fixtures.append({
+        "schema": loop["schema"], "name": "divide-changes-path",
+        "entry": {"role": "divide-loop", "scope": "resolved-address", "address": "0xFEBE0000"},
+        "gpr_fill": "0", "registers": {"lp": "0xFEBE0000", "r10": "121", "PSW": "0"},
+        "memory": [{"address": "0xFEBE0000", "hex": "e657fc5a00327f00",
+                    "evidence": "divq r6,r10,r11; mov 0,r6; jmp [lp]"}],
+        "events": [{"kind": "memory-write", "address": "0xFEBE0004", "data_hex": "0232",
+                    "after_instructions": 6, "evidence": "Change divisor setup to mov 2,r6."}],
+        "max_instructions": 10, "expected_termination": "instruction-budget", "stop_addresses": [],
+        "checks": [{"kind": "register", "name": name, "register": reg, "equals": value}
+                   for name, reg, value in (("quotient", "r10", "60"), ("remainder", "r11", "1"),
+                                            ("overflow-cleared", "PSW", "0"))],
+    })
+    fixtures.append({
+        "schema": loop["schema"], "name": "replace-straddling-instruction",
+        "entry": {"role": "load-loop", "scope": "resolved-address", "address": "0xFEBE7FFE"},
+        "gpr_fill": "0", "registers": {"lp": "0xFEBE7FFE", "r6": "0xFEBE0100"},
+        "memory": [{"address": "0xFEBE7FFE", "hex": "265701007f00",
+                    "evidence": "ld.w 0[r6],r10; jmp [lp]"},
+                   {"address": "0xFEBE0100", "hex": "0100000002000000",
+                    "evidence": "Displacements 0 and 4 give distinct load results."}],
+        "events": [{"kind": "memory-write", "address": "0xFEBE8000", "data_hex": "0500",
+                    "after_instructions": 192, "evidence": "Rewrite only the second-page displacement."}],
+        "max_instructions": 256, "expected_termination": "instruction-budget", "stop_addresses": [],
+        "checks": [{"kind": "register", "name": "replacement-load", "register": "r10", "equals": "2"}],
+    })
     fixtures += [
         quiet,
         {**quiet, "name": "quiet-hsb-fault", "steps": [],
@@ -261,8 +451,7 @@ def main() -> None:
         overlay_path = root / "overlay.json"
         overlay_path.write_text(json.dumps(overlay))
         # The portable timer fixture resolves its instruction shape in the analyzed program.
-        reports = _execute(TARGET, [*paths, overlay_path], private_headless=False,
-                           instruction_trace=True)["reports"]
+        reports = _execute(TARGET, [*paths, overlay_path], instruction_trace=True)["reports"]
         for engine in ("plain", "jit"):
             raw = (root / f"quiet-hsb-fault-{engine}.bin").read_bytes()
             assert raw == bytes.fromhex("02000000"), (engine, raw)
@@ -303,6 +492,10 @@ def main() -> None:
             after_prefix = [row for row in report["memory_accesses"]
                             if row["instruction"] >= warm["start_instruction"]]
             assert after_prefix == warm["memory_rows"] + restored["memory_rows"]
+        _verify_interrupt_poll(root, loop["schema"])
+        _verify_template_fault(root, loop["schema"])
+        _verify_hot_divisor_change(root, loop["schema"])
+        _verify_event_projection(root, loop["schema"])
         _verify_cli_reports(root, loop)
         print(f"PASS {len(fixtures)} interpreter/JIT differential cases and hot overlay/restore; "
               f"{jit['jit_compiled_instructions']} loop instructions retired in generated code")

@@ -428,5 +428,15 @@ fi
 
 # --- Dispatch -----------------------------------------------------------------
 source "$ROOT/tools/lib/ghidra_bridge_env.sh"
+if [[ "$SUBCMD" == script && ( "$ACTION" == run || "$ACTION" == check ) &&
+      -n "${GHIDRA_P1ME_RUNTIME_ID:-}" ]]; then
+  for arg in "$@"; do
+    [[ "$arg" != -- ]] || break
+    if [[ "${arg##*/}" == RunP1MEMachine.java ]]; then
+      export GHIDRA_CLI_REQUIRED_RUNTIME="$GHIDRA_P1ME_RUNTIME_ID"
+      break
+    fi
+  done
+fi
 
 exec "$GHIDRA_CLI" "${CLI_ARGS[@]}" "$@"

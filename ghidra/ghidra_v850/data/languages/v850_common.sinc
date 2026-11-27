@@ -72,14 +72,13 @@ define context popspContext
 @endif
 
 # RH850G3M Table 5-3: local writes invalidate reservations in 32-byte units.
-# Check both endpoints so an unaligned write spanning two units hits either.
+# For writes no wider than one unit, modular distance from the linked unit
+# through the final written byte is below 31 + width exactly when they overlap.
 # The legacy V850E2 language has no load-link monitor.
 macro invalidate_link_store(addr, width) {
 @if defined(V850E3)
-	local last:4 = addr + width - 1;
-	local linked_unit:4 = ll_addr & 0xffffffe0;
-	ll_valid = ll_valid & zext((addr & 0xffffffe0) != linked_unit)
-		& zext((last & 0xffffffe0) != linked_unit);
+	local distance:4 = addr + width - 1 - (ll_addr & 0xffffffe0);
+	ll_valid = ll_valid & zext(distance >= (31 + width));
 @endif
 }
 
@@ -524,19 +523,19 @@ macro clrOV() 			{	$(PSW_OV) = 0;		}
 macro set_S_Z(res)		{	setS(res); setZ(res);	}
 macro set_nOV_S_Z(res)	{	clrOV(); set_S_Z(res);	}
 macro set_C(res) 		{	$(PSW_CY) = (res != 0);	}
-macro flags_add(op1,op2) {
-	local A:4 = op1;		local B:4 = op2;		local R = A + B;
-	local sA  = A s< 0;		local sB  = B s< 0;		local sR = R s< 0;
-	$(PSW_OV) = (sA == sB) && (sB != sR);
-	$(PSW_CY) = carry(A, B);
-	set_S_Z (R);
+macro flags_add(op1,op2,result) {
+	local flags:4 = zext(result == 0)
+		| (zext(result s< 0) << 1)
+		| (zext(scarry(op1, op2)) << 2)
+		| (zext(carry(op1, op2)) << 3);
+	PSW = (PSW & 0xfffffff0) | flags;
 }
-macro flags_sub(op1,op2) {
-	local A:4 = op1;		local B:4 = op2;		local R = A - B;
-	local sA  = A s< 0;		local sB  = B s< 0;		local sR = R s< 0;
-	$(PSW_OV) = (sA != sB) && (sB == sR);
-	$(PSW_CY) = (A < B);
-	set_S_Z (R);
+macro flags_sub(op1,op2,result) {
+	local flags:4 = zext(result == 0)
+		| (zext(result s< 0) << 1)
+		| (zext(sborrow(op1, op2)) << 2)
+		| (zext(op1 < op2) << 3);
+	PSW = (PSW & 0xfffffff0) | flags;
 }
 
 # read r0 always return zero

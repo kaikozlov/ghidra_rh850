@@ -1272,6 +1272,7 @@ public class GhidraCliBridge extends GhidraScript {
         JsonObject result = new JsonObject();
         String programName = currentProgramNameSnapshot;
         result.addProperty("protocol_version", 2);
+        result.addProperty("runtime_id", System.getProperty("ghidra.cli.runtime.id"));
         result.addProperty("has_current_program", programName != null);
         if (programName != null) {
             result.addProperty("current_program", programName);
@@ -1288,6 +1289,7 @@ public class GhidraCliBridge extends GhidraScript {
     private JsonObject handleStatus() {
         JsonObject result = new JsonObject();
         result.addProperty("protocol_version", 2);
+        result.addProperty("runtime_id", System.getProperty("ghidra.cli.runtime.id"));
         result.addProperty("uptime_ms", System.currentTimeMillis() - startTime);
         addProgramStatus(result);
         addQueueSummary(result, true);

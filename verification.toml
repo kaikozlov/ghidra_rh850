@@ -315,8 +315,14 @@ tests = ["tests/firmware/verify_p1m_device_profile.py"]
 [suite.rh850_machine_jit]
 tests = ["tests/tooling/verify_p1me_jit.py"]
 
+[suite.rh850_machine_symbol_cache]
+tests = ["tests/tooling/verify_p1me_symbol_cache.py"]
+
 [suite.rh850_firmware]
-tests = ["tests/tooling/verify_rh850_machine.py"]
+tests = [
+  "tests/tooling/verify_rh850_machine.py",
+  "tests/tooling/verify_p1me_batch_spooling.py",
+]
 # The verified boot milestone executes approximately 29 million instructions.
 timeout = 600
 
