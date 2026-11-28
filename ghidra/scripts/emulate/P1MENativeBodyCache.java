@@ -24,7 +24,7 @@ final class P1MENativeBodyCache {
     private static final String FORMAT = "body-v2";
     static final int MAX_SHAPES = 4096;
     private static final int MAX_BATCH = 48;
-    private static final long COALESCE_NS = TimeUnit.MILLISECONDS.toNanos(10);
+    private static final long COALESCE_NS = TimeUnit.MILLISECONDS.toNanos(2);
     private static final long COMPILE_NS = TimeUnit.SECONDS.toNanos(20);
     private static final int MAX_ATTEMPTS_PER_BATCH = 12;
     private static final int MAX_EMPTY_BUILDS = 3;
@@ -170,11 +170,25 @@ final class P1MENativeBodyCache {
             ", first-failures=" + diagnostics;
     }
 
+    synchronized boolean awaitReady(Body body, long timeoutNs) {
+        if (body.function != null) return true;
+        if (compilerDisabled || stopped || closing || !running) return false;
+        long until = System.nanoTime() + timeoutNs;
+        long left;
+        while (body.function == null && running && !compilerDisabled && !stopped && !closing
+                && (left = until - System.nanoTime()) > 0) {
+            try { TimeUnit.NANOSECONDS.timedWait(this, left); }
+            catch (InterruptedException e) { Thread.currentThread().interrupt(); break; }
+        }
+        return body.function != null;
+    }
+
     private synchronized void stop(Throwable error) {
         failure("worker", error.toString());
         stopped = true;
         running = false;
         pending.clear();
+        notifyAll();
     }
 
     private synchronized Job take(long until) throws InterruptedException {
@@ -192,6 +206,7 @@ final class P1MENativeBodyCache {
                     first = pending.pollFirst();
                     if (first == null) {
                         running = false;
+                        notifyAll();
                         return;
                     }
                 }
@@ -212,6 +227,7 @@ final class P1MENativeBodyCache {
                         failure("compiler", "disabled after " + emptyBuilds + " unsuccessful batches");
                         compilerDisabled = true;
                     }
+                    synchronized (this) { notifyAll(); }
                 }
             }
         }
@@ -312,8 +328,8 @@ final class P1MENativeBodyCache {
             }
             Process process;
             try {
-                process = new ProcessBuilder(compiler, "-std=c11", "-O3", "-fPIC", host.sharedFlag,
-                    "-o", artifact.toString(), input.toString()).redirectErrorStream(true)
+                process = new ProcessBuilder(compiler, "-std=c11", "-O2", "-fPIC", host.sharedFlag,
+                    "-o", artifact.toString(), input.toString(), "-lm").redirectErrorStream(true)
                     .redirectOutput(log.toFile()).start();
             }
             catch (IOException | SecurityException e) {

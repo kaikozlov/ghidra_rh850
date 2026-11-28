@@ -11,7 +11,7 @@ import struct
 import subprocess
 import tempfile
 from collections.abc import Iterable, Iterator, Sequence
-from itertools import chain
+from itertools import chain, pairwise
 from pathlib import Path
 from typing import Any
 
@@ -455,7 +455,7 @@ def _validate_dataflash_cells(rows: Any, context: str) -> list[dict[str, Any]]:
         intervals.append((address, address + size))
         row["address"] = hex(address)
     intervals.sort()
-    if any(left[1] > right[0] for left, right in zip(intervals, intervals[1:])):
+    if any(left[1] > right[0] for left, right in pairwise(intervals)):
         raise P1MEMachineError(f"{context}: flash-cell ranges overlap")
     return normalized
 
@@ -762,6 +762,7 @@ def _load_scenario(path: Path, *, expand: bool) -> dict[str, Any]:
         "dma_master_rewrite_assumption", "steps", "compare_operands",
         "input_derived_table_indices", "reset_replay", "event_socket",
         "snapshot_outputs", "engine", "instruction_trace_start_step",
+        "capture_rows", "capture_event_kinds",
     }
     required = {"schema", "name", "entry", "max_instructions", "stop_addresses", "checks"}
     _require_keys(raw, allowed=allowed, required=required, context=str(scenario_path))
@@ -830,6 +831,23 @@ def _load_scenario(path: Path, *, expand: bool) -> dict[str, Any]:
     for option in ("compare_operands", "input_derived_table_indices"):
         if option in raw and type(raw[option]) is not bool:
             raise P1MEMachineError(f"{scenario_path}: {option} must be boolean")
+    if "capture_rows" in raw and type(raw["capture_rows"]) is not bool:
+        raise P1MEMachineError(f"{scenario_path}: capture_rows must be boolean")
+    if "capture_event_kinds" in raw:
+        if "capture_rows" in raw:
+            raise P1MEMachineError(
+                f"{scenario_path}: capture_event_kinds and capture_rows are mutually exclusive",
+            )
+        kinds = _require_list(
+            raw["capture_event_kinds"], f"{scenario_path}.capture_event_kinds",
+        )
+        if (
+            any(not isinstance(kind, str) or not kind.strip() for kind in kinds)
+            or len(set(kinds)) != len(kinds)
+        ):
+            raise P1MEMachineError(
+                f"{scenario_path}: capture_event_kinds must contain unique nonempty strings",
+            )
     steps = _validate_steps(
         raw.get("steps", []), f"{scenario_path}.steps", expand=expand,
     )
@@ -893,6 +911,10 @@ def _load_scenario(path: Path, *, expand: bool) -> dict[str, Any]:
             scenario_path.parent,
         ),
     }
+    if "capture_rows" in raw:
+        normalized["capture_rows"] = raw["capture_rows"]
+    if "capture_event_kinds" in raw:
+        normalized["capture_event_kinds"] = list(raw["capture_event_kinds"])
     if source is None:
         normalized.pop("source")
     if peripheral_file:
@@ -1013,8 +1035,10 @@ def _write_drcov_instructions(
         "DRCOV FLAVOR: drcov",
         "Module Table: version 5, count 1",
         "Columns: id, containing_id, start, end, entry, offset, preferred_base, path",
-        f"{0:3d}, {0:3d}, 0x{base:016x}, 0x{end:016x}, "
-        f"0x{0:016x}, 0x{0:016x}, 0x{base:016x},  {module_name}",
+        (
+            f"{0:3d}, {0:3d}, 0x{base:016x}, 0x{end:016x}, "
+            f"0x{0:016x}, 0x{0:016x}, 0x{base:016x},  {module_name}"
+        ),
         f"BB Table: {len(seen)} bbs",
         "module id, start, size:",
     ]
@@ -1091,11 +1115,12 @@ def _execute(
         environment = os.environ.copy()
         environment.setdefault("GHIDRA_CLI_READ_TIMEOUT", "0")
         if any(scenario["engine"] == "jit" for scenario in scenarios):
-            # A Ghidra passage is a JVM method. Let HotSpot compile large passages;
-            # place explicit caller settings last so they still take precedence.
+            # Extra HotSpot compiler threads for the Java-side paths (interpreted p-code,
+            # row capture, device scheduling); explicit caller settings stay last so they
+            # still take precedence.
             options = environment.get("GHIDRA_HEADLESS_JAVA_OPTIONS", "")
             environment["GHIDRA_HEADLESS_JAVA_OPTIONS"] = (
-                f"-XX:-DontCompileHugeMethods -XX:CICompilerCount=4 {options}".rstrip()
+                f"-XX:CICompilerCount=4 {options}".rstrip()
             )
         if instruction_trace:
             command.append("--instruction-trace")

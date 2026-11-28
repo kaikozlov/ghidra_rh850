@@ -281,10 +281,11 @@ reporting. Checkpoint restore is reported separately as `restore_nanoseconds`;
 neither trial timer includes final JSON serialization.
 
 Memory and device-event rows are captured by default. Set `"capture_rows": false`
-to omit them from both trial and scenario output while retaining checks and any
-requested instruction trace. Alternatively, set `capture_event_kinds` to retain
-all device-event counts, rows for the listed event kinds in execution order, and
-no memory rows. An empty list retains counts only.
+at the scenario top level or on an individual trial to omit row capture while
+retaining checks, fault reporting, and any requested instruction trace.
+Alternatively, set `capture_event_kinds` (top level or per trial) to retain all
+device-event counts, rows for the listed event kinds in execution order, and no
+memory rows. An empty list retains counts only.
 
 Use [`checkpoint_benchmark`](../../tools/emulation/checkpoint_benchmark.py)
 to compare prefix replay plus trial execution with checkpoint restore plus
@@ -301,10 +302,14 @@ default (`"engine": "jit"`). Select the reference interpreter with
 not specify an engine. Both engines use the same bus checks, device model,
 instruction-boundary scheduling, checkpoint, and trace contracts.
 
-The JIT interprets cold p-code and compiles hot shapes. For native acceleration
-on supported 64-bit little-endian macOS and Linux hosts, install a C compiler.
-The [processor installer](../../tools/project/install_v850_extension.sh) builds
-the Ghidra 12.2 runtime overlay from `Emulation-src.zip` and
+The JIT interprets cold p-code (`ScalarOp` / `PcodeEmulator`) and compiles hot
+instruction shapes and fused basic blocks (including self-looping blocks with
+register promotion) to native C via the `windowgraph` runner. Native execution
+stays active under row capture and `--instruction-trace`, with structured C-side
+logging and 64-byte code-line invalidation. For native acceleration on supported
+64-bit little-endian macOS and Linux hosts, install a C compiler. The
+[processor installer](../../tools/project/install_v850_extension.sh) builds the
+Ghidra 12.2 runtime overlay from `Emulation-src.zip` and
 `SoftwareModeling-src.zip`, and attempts to build the native runner. Java
 execution remains available without that runner. Rerun the installer after
 installing a compiler. Set `P1ME_WINDOWGRAPH_CC` to select the compiler or
@@ -314,15 +319,16 @@ installing a compiler. Set `P1ME_WINDOWGRAPH_CC` to select the compiler or
 The CLI and direct machine script commands share the processor environment.
 After changing it or the JVM settings, save pending work and run
 `tools/gtarget TARGET stop` before rerunning the machine. For a new daemon, the
-CLI adds `-XX:-DontCompileHugeMethods` and `-XX:CICompilerCount=4` for JIT
-scenarios; explicit `GHIDRA_HEADLESS_JAVA_OPTIONS` take precedence. The Camry
-registry sets an `8G` daemon heap through `GHIDRA_HEADLESS_MAXMEM`.
+CLI adds `-XX:CICompilerCount=4` for JIT scenarios; explicit
+`GHIDRA_HEADLESS_JAVA_OPTIONS` take precedence. The Camry registry sets an `8G`
+daemon heap through `GHIDRA_HEADLESS_MAXMEM`.
 
-`jit_compiled_instructions` includes generated bus tails and native graph
-instructions (`jit_template_instructions`). `jit_idle_instructions` counts
-batched self-branches and interrupt polls. Polls still retire individually when
-their bus reads must be recorded. `daemon_heap_bytes_before_release` and
-`daemon_heap_bytes_after_release` sample JVM heap usage around scenario cleanup.
+`jit_compiled_instructions` and `jit_template_instructions` count native
+windowgraph retirements (single-instruction sites and fused basic blocks).
+`jit_idle_instructions` counts batched self-branches and interrupt polls. Polls
+still retire individually when their bus reads must be recorded.
+`daemon_heap_bytes_before_release` and `daemon_heap_bytes_after_release` sample
+JVM heap usage around scenario cleanup.
 
 Use `tools/test rh850_machine_jit` to compare engines at instruction, device,
 and restore boundaries, and `tools/test rh850_machine_symbol_cache` to check

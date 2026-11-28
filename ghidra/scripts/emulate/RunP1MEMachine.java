@@ -572,6 +572,8 @@ public class RunP1MEMachine extends GhidraScript {
         List<BoundedEdge> bounded_edges;
         boolean compare_operands;
         boolean input_derived_table_indices;
+        Boolean capture_rows;
+        List<String> capture_event_kinds;
         ResetReplay reset_replay;
         EventSocketConfig event_socket;
         List<SnapshotOutput> snapshot_outputs = new ArrayList<>();
@@ -1559,6 +1561,14 @@ public class RunP1MEMachine extends GhidraScript {
             return spool.position();
         }
 
+        void configureScenarioCapture(boolean capture, List<String> eventKinds) {
+            discard = !capture;
+            if (eventKinds != null) {
+                projectedKinds = Set.copyOf(eventKinds);
+                includesAlias = projectedKinds.contains(ALIAS_WRITE);
+            }
+        }
+
         void beginTrial(boolean capture, List<String> eventKinds) throws IOException {
             if (trialStart != -1 || discard) throw new IllegalStateException("trial already active");
             discard = !capture;
@@ -1641,6 +1651,7 @@ public class RunP1MEMachine extends GhidraScript {
         private int recentNext;
         private int recentSize;
         ExecutedPcs executed = new ExecutedPcs();
+        long executedEpoch;
         final Map<String, Long> syncCounts = new LinkedHashMap<>();
         final JsonRows memoryAccesses;
         final JsonRows deviceEvents;
@@ -1867,6 +1878,7 @@ public class RunP1MEMachine extends GhidraScript {
                 compareKeys = new TupleKeys();
                 indexKeys = new TupleKeys();
                 executed = new ExecutedPcs();
+                executedEpoch++;
                 syncCounts.clear();
                 writtenBytes.clear();
                 Arrays.fill(hexValues, null);
@@ -1886,6 +1898,22 @@ public class RunP1MEMachine extends GhidraScript {
                 throw new IllegalStateException("instruction trace PC outside 32-bit address space");
             }
             instructionRows.add(pc, size, instructions);
+            instructionTraceSize++;
+        }
+
+        void enterNativeInstruction(long pc, int size, long instructionTick) {
+            if (!recordsInstructionTrace()) return;
+            if (instructionTraceSize >= MAX_TRACE_ENTRIES) {
+                throw new IllegalStateException(
+                    "complete instruction trace exceeds " + MAX_TRACE_ENTRIES + " entries");
+            }
+            if (size <= 0 || size > 0xff) {
+                throw new IllegalStateException("instruction trace size outside 1..255");
+            }
+            if ((pc & ~0xffffffffL) != 0) {
+                throw new IllegalStateException("instruction trace PC outside 32-bit address space");
+            }
+            instructionRows.add(pc, size, instructionTick);
             instructionTraceSize++;
         }
 
@@ -2000,22 +2028,34 @@ public class RunP1MEMachine extends GhidraScript {
                 && (!memoryAccesses.discard || memoryAccesses.listener != null);
         }
         boolean canDeferNativeBus(){
-            return !memoryAccesses.wantsRows() && memoryAccesses.listener==null &&
+            return !retainsRead() && memoryAccesses.listener==null &&
                 deviceEvents.listener==null && !deviceEvents.spoolsAlias();
+        }
+        boolean canRunNativeBus() {
+            return memoryAccesses.listener == null && deviceEvents.listener == null;
         }
 
         // ABI flags shared with windowgraph-abi.h. Omitted rows do not imply omitted
         // coverage, and unprojected discarded aliases have no kind count.
         static final int NATIVE_ALIAS = 2, NATIVE_MARK = 4,
-            NATIVE_COVER = 8, NATIVE_SYNC = 16;
+            NATIVE_COVER = 8, NATIVE_SYNC = 16,
+            NATIVE_LOG_READ = 32, NATIVE_LOG_WRITE = 64, NATIVE_LOG_TRACE = 128;
 
         int nativeRetirementFlags() {
             int flags = instructionRecordingActive ? NATIVE_SYNC : 0;
-            boolean projected = deviceEvents.projectedKinds != null;
-            if (projected) flags |= NATIVE_ALIAS;
-            if (unobservedWrites) return flags;
-            if (!projected && memoryAccesses.size() < MAX_MEMORY_ROWS) flags |= NATIVE_MARK;
-            else if (!traceLostAddress) flags |= NATIVE_COVER;
+            boolean logRead = retainsRead();
+            boolean logWrite = (memoryAccesses.wantsRows() && memoryAccesses.size() < MAX_MEMORY_ROWS)
+                || deviceEvents.spoolsAlias();
+            if (logRead) flags |= NATIVE_LOG_READ;
+            if (logWrite) flags |= NATIVE_LOG_WRITE;
+            if (recordsInstructionTrace()) flags |= NATIVE_LOG_TRACE;
+            if (!logWrite) {
+                boolean projected = deviceEvents.projectedKinds != null;
+                if (projected) flags |= NATIVE_ALIAS;
+                if (unobservedWrites) return flags;
+                if (!projected && memoryAccesses.size() < MAX_MEMORY_ROWS) flags |= NATIVE_MARK;
+                else if (!traceLostAddress) flags |= NATIVE_COVER;
+            }
             return flags;
         }
 
@@ -2032,7 +2072,7 @@ public class RunP1MEMachine extends GhidraScript {
             }
         }
 
-        private boolean markBusWrite(long address, int size) {
+        boolean markBusWrite(long address, int size) {
             boolean full = memoryAccesses.size() >= MAX_MEMORY_ROWS;
             if (!unobservedWrites) {
                 if (!full && deviceEvents.projectedKinds == null) {
@@ -2046,7 +2086,11 @@ public class RunP1MEMachine extends GhidraScript {
         }
 
         private void addBusAccess(String kind, long pc, long address, int size, String evidence) {
-            memoryAccesses.addAccess(kind, hexAddress(pc), instructions,
+            addBusAccessAt(kind, pc, instructions, address, size, evidence);
+        }
+
+        void addBusAccessAt(String kind, long pc, long instructionTick, long address, int size, String evidence) {
+            memoryAccesses.addAccess(kind, hexAddress(pc), instructionTick,
                 hexAddress(address), size, evidence, busInitiator);
         }
 
@@ -2519,6 +2563,7 @@ public class RunP1MEMachine extends GhidraScript {
             recentNext = checkpoint.recentNext;
             recentSize = checkpoint.recentSize;
             executed = checkpoint.executed.copy();
+            executedEpoch++;
             syncCounts.clear();
             syncCounts.putAll(checkpoint.syncCounts);
             writtenBytes.restore(checkpoint.writtenCells, checkpoint.writtenWords);
@@ -2737,6 +2782,8 @@ public class RunP1MEMachine extends GhidraScript {
         long registerBeforeWrite;
         boolean guardWriteIgnored;
         final RegisterDef[][] gramGuards = new RegisterDef[8][4];
+        long gramGuardStart = Long.MAX_VALUE, gramGuardEnd = Long.MIN_VALUE;
+        long gramGuardVersion;
         private record BusGuard(String name, RegisterDef read, RegisterDef readSpid,
                 RegisterDef write, RegisterDef writeSpid, GuardCapture capture) {}
         final BusGuard[] peripheralGuards;
@@ -2965,6 +3012,10 @@ public class RunP1MEMachine extends GhidraScript {
                 gramGuards[index][1] = requiredRegister("GRAM guard", "SPID", "MGDGRSPID" + index);
                 gramGuards[index][2] = requiredRegister("GRAM guard", "base", "MGDGRBAD" + index);
                 gramGuards[index][3] = requiredRegister("GRAM guard", "valid", "MGDGRADV" + index);
+                for (RegisterDef guardReg : gramGuards[index]) {
+                    gramGuardStart = Math.min(gramGuardStart, guardReg.address);
+                    gramGuardEnd = Math.max(gramGuardEnd, guardReg.address + guardReg.size);
+                }
             }
             pegCapture = new GuardCapture("PGERRSTAT_PE1", "PGERRINFO_PE1", 64);
             gramDmaCapture = new GuardCapture("MGDGRSSTAT_VCI2GRAM", "MGDGRSTYPE_VCI2GRAM", 65);
@@ -3198,8 +3249,13 @@ public class RunP1MEMachine extends GhidraScript {
         }
 
         private long batchLimit(long instructionLimit, long maximum, boolean freshFetch, boolean retireEdge) {
+            return batchLimit(instructionLimit, maximum, freshFetch, retireEdge, false);
+        }
+
+        private long batchLimit(long instructionLimit, long maximum, boolean freshFetch,
+                boolean retireEdge, boolean allowInstructionTrace) {
             if ((!freshFetch && idleBatchBarrier) || segNotificationPending || eventSocket != null
-                    || trace.recordsInstructionTrace()) return 0;
+                    || (!allowInstructionTrace && trace.recordsInstructionTrace())) return 0;
             long tick = trace.instructions;
             long remaining = instructionLimit - tick;
             if (remaining <= 1) return 0;
@@ -3227,7 +3283,7 @@ public class RunP1MEMachine extends GhidraScript {
             if ((trace.recordsInstructionMetadata()
                         && (compareOperands || inputDerivedTableIndices))
                     || peripheralFile || !boundedEdges.isEmpty()) return 0;
-            return (int) batchLimit(instructionLimit, 256, true, true);
+            return (int) batchLimit(instructionLimit, 65536, true, true, true);
         }
 
         RegionDef templateData(PcodeThread<byte[]> thread, long address, int size,
@@ -5096,6 +5152,8 @@ public class RunP1MEMachine extends GhidraScript {
         }
 
         void setRegisterValue(RegisterDef register, long value) {
+            if (register.address < gramGuardEnd && register.address + register.size > gramGuardStart)
+                gramGuardVersion++;
             if (register.size <= Long.BYTES
                     && deviceState != null && deviceState.writeDevice(register, value, bigEndian)) {
                 int pending = register.pendingBinding;
@@ -10563,6 +10621,7 @@ public class RunP1MEMachine extends GhidraScript {
         }
 
         private void writeBusBacking(RegisterDef register, long address, int size, long number, byte[] raw) {
+            if (address < gramGuardEnd && address + size > gramGuardStart) gramGuardVersion++;
             if (deviceState != null && size > 0 && size <= Long.BYTES) {
                 if (register != null && register.address == address && register.size == size
                         && deviceState.writeDevice(register, number, bigEndian)) return;
@@ -12386,6 +12445,7 @@ public class RunP1MEMachine extends GhidraScript {
         long restore(Model machine, Callbacks callbacks, PcodeThread<byte[]> thread) throws IOException {
             long started = System.nanoTime();
             model.restore();
+            machine.gramGuardVersion++;
             machine.invalidateClockHorizon();
             machine.rebaseDeviceClocks();
             var shared = (CheckpointableBytesState) thread.getState().getSharedState();
@@ -12559,7 +12619,7 @@ public class RunP1MEMachine extends GhidraScript {
         var stopIndex = P1MEJitMachine.StopIndex.of(stops);
         if (arrivals != null && arrivals.addresses.length == 0) arrivals = null;
         var batchStops = stopIndex;
-        boolean batchArrivals = arrivals != null && model.trace.canDeferNativeBus();
+        boolean batchArrivals = arrivals != null && model.trace.canRunNativeBus();
         if (batchArrivals) {
             var boundaries = new java.util.HashSet<Long>(stops);
             for (long address : arrivals.addresses) boundaries.add(address);
@@ -12929,6 +12989,12 @@ public class RunP1MEMachine extends GhidraScript {
             RunContract contract, SleighLanguage language, Scenario scenario,
             byte[] codeflash, byte[] dataflash, Trace trace, Model model,
             Callbacks callbacks, PcodeMachine<byte[]> emulator) throws Exception {
+        if (scenario.capture_rows != null || scenario.capture_event_kinds != null) {
+            boolean captureRows = scenario.capture_rows == null || scenario.capture_rows;
+            trace.memoryAccesses.configureScenarioCapture(
+                captureRows && scenario.capture_event_kinds == null, null);
+            trace.deviceEvents.configureScenarioCapture(captureRows, scenario.capture_event_kinds);
+        }
         model.attach(emulator);
         if (scenario.instruction_trace_start_step != null)
             trace.deferInstructionRecording();
@@ -12987,6 +13053,11 @@ public class RunP1MEMachine extends GhidraScript {
         StepBatchResult batch = null;
         try {
             if (scenario.steps.isEmpty()) {
+                if (scenario.capture_rows != null || scenario.capture_event_kinds != null) {
+                    boolean captureRows = scenario.capture_rows == null || scenario.capture_rows;
+                    trace.unobservedWrites = !captureRows && scenario.capture_event_kinds == null
+                        && model.eventSocket == null;
+                }
                 ExecutionResult result =
                     runUntil(model, thread, scenario.max_instructions, stops);
                 fault = result.fault;
@@ -13064,8 +13135,27 @@ public class RunP1MEMachine extends GhidraScript {
             "bounded_entries", "bounded_edges", "hsb_cycles_per_instruction", "dataflash_cells",
             "icus_startup_stub", "dma_master_rewrite_assumption", "source", "steps",
             "compare_operands", "input_derived_table_indices", "reset_replay",
-            "event_socket", "snapshot_outputs", "engine", "instruction_trace_start_step"),
+            "event_socket", "snapshot_outputs", "engine", "instruction_trace_start_step",
+            "capture_rows", "capture_event_kinds"),
             "scenario");
+        if (scenarioJson.has("capture_event_kinds")) {
+            if (scenarioJson.has("capture_rows"))
+                throw new IllegalArgumentException(
+                    "scenario capture_event_kinds and capture_rows are mutually exclusive");
+            JsonElement eventKinds = scenarioJson.get("capture_event_kinds");
+            if (!eventKinds.isJsonArray())
+                throw new IllegalArgumentException(
+                    "scenario capture_event_kinds must be a list");
+            Set<String> seen = new HashSet<>();
+            for (JsonElement selected : eventKinds.getAsJsonArray()) {
+                if (!selected.isJsonPrimitive()
+                        || !selected.getAsJsonPrimitive().isString()
+                        || selected.getAsString().isEmpty()
+                        || !seen.add(selected.getAsString()))
+                    throw new IllegalArgumentException(
+                        "scenario capture_event_kinds must contain unique nonempty strings");
+            }
+        }
         if (scenarioJson.has("engine") &&
                 !Set.of("plain", "jit").contains(scenarioJson.get("engine").getAsString()))
             throw new IllegalArgumentException("scenario engine must be plain or jit");

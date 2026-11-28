@@ -8,7 +8,12 @@ from unittest.mock import patch
 from tools import REPO_ROOT
 from tools.emulation.checkpoint_benchmark import _require_equivalent_trials
 from tools.emulation.p1me_machine import (
-    P1MEMachineError, _execute, _failure_summary, _run_cli, _target_contract, _write_drcov,
+    P1MEMachineError,
+    _execute,
+    _failure_summary,
+    _run_cli,
+    _target_contract,
+    _write_drcov,
 )
 
 TARGET = "camry-8965F3307000"
@@ -92,12 +97,9 @@ def _verify_hot_bus(report: dict) -> None:
                for r in events if r["kind"] == alias), report["scenario"]
 
     compiled = report["jit_compiled_instructions"]
-    for kind in ("read", "write"):
-        warm_accesses = sum(r["kind"] == kind and r["instruction"] < HOT_BUS_SWITCH
-                            for r in accesses)
-        # If no access of this kind ran in generated code, at most this many
-        # other instructions could have contributed to the compiled count.
-        assert compiled > len(instructions) - warm_accesses, (kind, compiled)
+    # RAM stores (3 per 7-inst round, sharing page 0xFEBE0000 with code) and
+    # indirect jumps (1 per round) retire natively; MMIO reads run via ScalarOp.
+    assert compiled >= 4 * (HOT_BUS_ROUNDS - 4), compiled
 
 
 def _verify_cli_reports(root: Path, loop: dict) -> None:
@@ -309,6 +311,184 @@ def _verify_event_projection(root: Path, schema: str) -> None:
     }
 
 
+def _verify_native_isa_and_blocks(root: Path, schema: str) -> None:
+    """Verify native FPU, bit-RMW/byte-swap, cross-region jumps, and fused block exits."""
+    import struct
+
+    def add_imm5(reg: int, imm: int) -> bytes:
+        return struct.pack("<H", (reg << 11) | 0x0240 | (imm & 0x1F))
+
+    def st_w(reg2: int, reg1: int, disp16: int) -> bytes:
+        return struct.pack("<Hh", (reg2 << 11) | 0x0760 | (reg1 & 0x1F), disp16 | 1)
+
+    def ld_w(reg1: int, disp16: int, reg2: int) -> bytes:
+        return struct.pack("<Hh", (reg2 << 11) | 0x0720 | (reg1 & 0x1F), disp16 | 1)
+
+    def bnz(disp9: int) -> bytes:
+        u = disp9 & 0x1FF
+        return struct.pack("<H", (((u >> 4) & 0x1F) << 11) | (0b1011 << 7) | (((u >> 1) & 0x07) << 4) | 0xA)
+
+    def bz(disp9: int) -> bytes:
+        u = disp9 & 0x1FF
+        return struct.pack("<H", (((u >> 4) & 0x1F) << 11) | (0b1011 << 7) | (((u >> 1) & 0x07) << 4) | 0x2)
+
+    def jmp(reg1: int) -> bytes:
+        return struct.pack("<H", 0x0060 | (reg1 & 0x1F))
+
+    def fp32(r1115: int, r0004: int, r2731: int, op2126: int, op1620: int) -> bytes:
+        return struct.pack("<HH", (r1115 << 11) | (0x3F << 5) | r0004,
+                           (r2731 << 11) | (op2126 << 5) | op1620)
+
+    nop = b"\x00\x00"
+    base = 0xFEDE8000
+
+    # 1. FPU fused loop: addf/subf/mulf/divf/sqrtf/negf/absf/trncf.sw/cmpf.s/trfsr/add/bnz
+    fpu_code = (
+        fp32(7, 6, 8, 0b100011, 0b00000) + fp32(8, 6, 9, 0b100011, 0b00010)
+        + fp32(7, 9, 8, 0b100011, 0b00100) + fp32(8, 6, 7, 0b100011, 0b01110)
+        + fp32(7, 0, 8, 0b100010, 0b01110) + fp32(8, 1, 9, 0b100010, 0b01000)
+        + fp32(9, 0, 8, 0b100010, 0b01000) + fp32(8, 1, 12, 0b100010, 0b00000)
+        + struct.pack("<HH", (8 << 11) | (0x3F << 5) | 6, (0b0010 << 11) | (0b100001 << 5))
+        + struct.pack("<HH", 0x3F << 5, 0b100000 << 5)
+        + add_imm5(10, -1) + bnz(-42) + nop
+    )
+    # 2. Bit-RMW + byte-swap loop: set1/not1/clr1/bsw/bsh/hsw/hsh/add/add/bnz
+    rmw_code = (
+        struct.pack("<Hh", (0 << 14) | (3 << 11) | (0x3E << 5) | 11, 0)
+        + struct.pack("<Hh", (1 << 14) | (3 << 11) | (0x3E << 5) | 11, 0)
+        + struct.pack("<Hh", (2 << 14) | (3 << 11) | (0x3E << 5) | 11, 0)
+        + struct.pack("<HH", (12 << 11) | 0x7E0, (12 << 11) | 0x340)
+        + struct.pack("<HH", (12 << 11) | 0x7E0, (12 << 11) | 0x342)
+        + struct.pack("<HH", (12 << 11) | 0x7E0, (12 << 11) | 0x344)
+        + struct.pack("<HH", (12 << 11) | 0x7E0, (12 << 11) | 0x346)
+        + add_imm5(12, 1) + add_imm5(10, -1) + bnz(-32) + nop
+    )
+    # 3. Cross-region jump: local_ram (0xFEDE8000) <-> local_ram_self (0xFEBE2000)
+    xreg_local = add_imm5(12, 1) + st_w(12, 11, 0) + jmp(13)
+    xreg_self = add_imm5(10, -1) + bz(4) + jmp(14) + nop
+    # 4. Mid-block fault inside a warm fused loop (walks off initialized tail at 0xFEDF8000)
+    midfault_code = (
+        add_imm5(12, 1) + st_w(12, 11, 0) + add_imm5(13, 4)
+        + ld_w(13, 0, 14) + add_imm5(10, -1) + bnz(-14) + nop
+    )
+    # 5. Tight 4-inst loop for mid-block stop & mid-block budget exit parity
+    loop4_code = add_imm5(12, 1) + st_w(12, 11, 0) + add_imm5(10, -1) + bnz(-8) + nop
+
+    cases = [
+        {
+            "schema": schema, "name": "native-fpu-loop", "capture_rows": False,
+            "entry": {"role": "fpu", "scope": "resolved-address", "address": hex(base)},
+            "gpr_fill": "0",
+            "registers": {"r6": "0x3FC00000", "r7": "0x40200000", "r10": "0x100",
+                          "PSW": "0x00010020", "FPSR": "0x00020000"},
+            "memory": [{"address": hex(base), "hex": fpu_code.hex(), "evidence": "fpu loop"}],
+            "max_instructions": 4000, "stop_addresses": [hex(base + len(fpu_code) - 2)],
+            "expected_termination": "stop-address",
+            "checks": [
+                {"name": "r7", "kind": "register", "register": "r7", "equals": "0x7F800000"},
+                {"name": "r8", "kind": "register", "register": "r8", "equals": "0x7F800000"},
+                {"name": "r12", "kind": "register", "register": "r12", "equals": "0xFFFFFFFF"},
+                {"name": "FPSR", "kind": "register", "register": "FPSR", "equals": "0x00020000"},
+            ],
+        },
+        {
+            "schema": schema, "name": "native-rmw-swap-loop", "capture_rows": False,
+            "entry": {"role": "rmw", "scope": "resolved-address", "address": hex(base)},
+            "gpr_fill": "0",
+            "registers": {"r10": "0x100", "r11": "0xFEDE9000", "r12": "0x12345678"},
+            "memory": [
+                {"address": hex(base), "hex": rmw_code.hex(), "evidence": "rmw/swap loop"},
+                {"address": "0xFEDE9000", "hex": "00000000", "evidence": "rmw target"},
+            ],
+            "max_instructions": 4000, "stop_addresses": [hex(base + len(rmw_code) - 2)],
+            "expected_termination": "stop-address",
+            "checks": [
+                {"name": "r12", "kind": "register", "register": "r12", "equals": "0x12345778"},
+                {"name": "mem", "kind": "memory", "address": "0xFEDE9000", "size": 4,
+                 "equals_hex": "00000000"},
+            ],
+        },
+        {
+            "schema": schema, "name": "native-cross-region-jump", "capture_rows": False,
+            "entry": {"role": "xreg", "scope": "resolved-address", "address": hex(base)},
+            "gpr_fill": "0",
+            "registers": {"r10": "0x100", "r11": "0xFEDE9000", "r12": "0",
+                          "r13": "0xFEBE2000", "r14": hex(base)},
+            "memory": [
+                {"address": hex(base), "hex": xreg_local.hex(), "evidence": "local_ram half"},
+                {"address": "0xFEBE2000", "hex": xreg_self.hex(), "evidence": "local_ram_self half"},
+            ],
+            "max_instructions": 4000, "stop_addresses": ["0xFEBE2006"],
+            "expected_termination": "stop-address",
+            "checks": [
+                {"name": "r10", "kind": "register", "register": "r10", "equals": "0"},
+                {"name": "r12", "kind": "register", "register": "r12", "equals": "0x100"},
+            ],
+        },
+        {
+            "schema": schema, "name": "fused-midblock-fault", "capture_rows": False,
+            "entry": {"role": "mf", "scope": "resolved-address", "address": hex(base)},
+            "gpr_fill": "0",
+            "registers": {"r10": "0x500", "r11": "0xFEDE9000", "r12": "0", "r13": "0xFEDF7800"},
+            "memory": [
+                {"address": hex(base), "hex": midfault_code.hex(), "evidence": "warm mid-block fault"},
+                {"address": "0xFEDF7800", "hex": "00" * 0x800, "evidence": "initialized tail"},
+            ],
+            "max_instructions": 10000, "stop_addresses": [hex(base + len(midfault_code) - 2)],
+            "expected_fault": {"kind": "uninitialized-read", "address": "0xFEDF8000", "access": "read"},
+            "checks": [
+                {"name": "r12", "kind": "register", "register": "r12", "equals": "0x200"},
+                {"name": "r13", "kind": "register", "register": "r13", "equals": "0xFEDF8000"},
+                {"name": "mem", "kind": "memory", "address": "0xFEDE9000", "size": 4,
+                 "equals_hex": "00020000"},
+            ],
+        },
+        {
+            "schema": schema, "name": "fused-midblock-budget", "capture_rows": False,
+            "entry": {"role": "budget", "scope": "resolved-address", "address": hex(base)},
+            "gpr_fill": "0",
+            "registers": {"r10": "0x800", "r11": "0xFEDE9000", "r12": "0"},
+            "memory": [{"address": hex(base), "hex": loop4_code.hex(), "evidence": "loop4"}],
+            "max_instructions": 2003, "stop_addresses": [hex(base + 0x0A)],
+            "expected_termination": "instruction-budget",
+            "checks": [
+                {"name": "r10", "kind": "register", "register": "r10", "equals": "0x60B"},
+                {"name": "r12", "kind": "register", "register": "r12", "equals": "0x1F5"},
+            ],
+        },
+        {
+            "schema": schema, "name": "fused-midblock-stop", "capture_rows": False,
+            "entry": {"role": "stop", "scope": "resolved-address", "address": hex(base)},
+            "gpr_fill": "0",
+            "registers": {"r10": "0x100", "r11": "0xFEDE9000", "r12": "0"},
+            "memory": [{"address": hex(base), "hex": loop4_code.hex(), "evidence": "loop4"}],
+            "max_instructions": 2000, "stop_addresses": [hex(base + 0x0A), hex(base + 0x02)],
+            "expected_termination": "stop-address",
+            "checks": [
+                {"name": "r12", "kind": "register", "register": "r12", "equals": "1"},
+            ],
+        },
+    ]
+    paths = []
+    for case in cases:
+        for engine in ("plain", "jit"):
+            path = root / f"{case['name']}-{engine}.json"
+            path.write_text(json.dumps({**case, "name": path.stem, "engine": engine}))
+            paths.append(path)
+    reports = _execute(TARGET, paths)["reports"]
+    failures = [_failure_summary(r) for r in reports if not r["passed"]]
+    assert not failures, "\n".join(failures)
+    for plain, jit in zip(reports[::2], reports[1::2], strict=True):
+        for key in ("final_pc", "termination_reason", "fault", "instruction_count",
+                    "recent_pcs", "unique_instruction_addresses", "checks"):
+            assert plain.get(key) == jit.get(key), (plain["scenario"], key)
+        assert jit["memory_accesses"] == [] and jit["device_events"] == [], jit["scenario"]
+        if plain["instruction_count"] >= 500:
+            assert jit["jit_template_instructions"] >= plain["instruction_count"] // 2, (
+                jit["scenario"], jit["jit_template_instructions"], plain["instruction_count"]
+            )
+
+
 def main() -> None:
     trial = {"kind": "trial", "name": "warm", "max_instructions": 4097,
              "stop_addresses": [], "events": [], "checks": []}
@@ -496,6 +676,7 @@ def main() -> None:
         _verify_template_fault(root, loop["schema"])
         _verify_hot_divisor_change(root, loop["schema"])
         _verify_event_projection(root, loop["schema"])
+        _verify_native_isa_and_blocks(root, loop["schema"])
         _verify_cli_reports(root, loop)
         print(f"PASS {len(fixtures)} interpreter/JIT differential cases and hot overlay/restore; "
               f"{jit['jit_compiled_instructions']} loop instructions retired in generated code")
